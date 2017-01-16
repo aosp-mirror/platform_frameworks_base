@@ -1554,9 +1554,10 @@ public class LocationManager {
 
         @Override
         public void onSvStatusChanged(int svCount, int[] prnWithFlags,
-                float[] cn0s, float[] elevations, float[] azimuths) {
+                float[] cn0s, float[] elevations, float[] azimuths, float[] carrierFreqs) {
             if (mGnssCallback != null) {
-                mGnssStatus = new GnssStatus(svCount, prnWithFlags, cn0s, elevations, azimuths);
+                mGnssStatus = new GnssStatus(svCount, prnWithFlags, cn0s, elevations, azimuths,
+                    carrierFreqs);
 
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;

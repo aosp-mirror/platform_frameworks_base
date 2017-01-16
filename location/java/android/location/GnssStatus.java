@@ -51,6 +51,8 @@ public final class GnssStatus {
     public static final int GNSS_SV_FLAGS_HAS_ALMANAC_DATA = (1 << 1);
     /** @hide */
     public static final int GNSS_SV_FLAGS_USED_IN_FIX = (1 << 2);
+    /** @hide */
+    public static final int GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
 
     /** @hide */
     public static final int SVID_SHIFT_WIDTH = 7;
@@ -101,14 +103,16 @@ public final class GnssStatus {
     /* package */ float[] mElevations;
     /* package */ float[] mAzimuths;
     /* package */ int mSvCount;
+    /* package */ float[] mCarrierFrequencies;
 
     GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths) {
+            float[] azimuths, float[] carrierFrequencies) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
         mCn0DbHz = cn0s;
         mElevations = elevations;
         mAzimuths = azimuths;
+        mCarrierFrequencies = carrierFrequencies;
     }
 
     /**
@@ -212,5 +216,29 @@ public final class GnssStatus {
      */
     public boolean usedInFix(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+    }
+
+    /**
+     * Reports whether {@link #getCarrierFrequencyHz(int satIndex)} is available (i.e. carrier
+     * frequency is available for the satellite at the specified index).
+     *
+     * @param satIndex the index of the satellite in the list.
+     * @hide
+     */
+    public boolean hasCarrierFrequency(int satIndex) {
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
+    }
+
+    /**
+     * Gets the carrier frequency of the signal tracked.
+     *
+     * For example it can be the GPS L1 = 1.57542e9 Hz, or L2, L5, varying GLO channels, etc. If
+     * the field is not set, it is the primary common use frequency, e.g. L1 for GPS.
+     *
+     * <p>The value is only available if {@link #hasCarrierFrequency(int satIndex)} is {@code true}.
+     * @hide
+     */
+    public float getCarrierFrequencyHz(int satIndex) {
+        return mCarrierFrequencies[satIndex];
     }
 }

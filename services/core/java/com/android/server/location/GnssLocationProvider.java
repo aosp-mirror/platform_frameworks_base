@@ -100,7 +100,7 @@ import java.util.HashMap;
 import libcore.io.IoUtils;
 
 /**
- * A GPS implementation of LocationProvider used by LocationManager.
+ * A GNSS implementation of LocationProvider used by LocationManager.
  *
  * {@hide}
  */
@@ -115,23 +115,23 @@ public class GnssLocationProvider implements LocationProviderInterface {
             true, true, false, false, true, true, true,
             Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
 
-    // these need to match GpsPositionMode enum in gps.h
+    // these need to match GnssPositionMode enum in IGnss.hal
     private static final int GPS_POSITION_MODE_STANDALONE = 0;
     private static final int GPS_POSITION_MODE_MS_BASED = 1;
     private static final int GPS_POSITION_MODE_MS_ASSISTED = 2;
 
-    // these need to match GpsPositionRecurrence enum in gps.h
+    // these need to match GnssPositionRecurrence enum in IGnss.hal
     private static final int GPS_POSITION_RECURRENCE_PERIODIC = 0;
     private static final int GPS_POSITION_RECURRENCE_SINGLE = 1;
 
-    // these need to match GpsStatusValue defines in gps.h
+    // these need to match GnssStatusValue enum in IGnssCallback.hal
     private static final int GPS_STATUS_NONE = 0;
     private static final int GPS_STATUS_SESSION_BEGIN = 1;
     private static final int GPS_STATUS_SESSION_END = 2;
     private static final int GPS_STATUS_ENGINE_ON = 3;
     private static final int GPS_STATUS_ENGINE_OFF = 4;
 
-    // these need to match GpsApgsStatusValue defines in gps.h
+    // these need to match AGnssStatusValue enum in IAGnssCallback.hal
     /** AGPS status event values. */
     private static final int GPS_REQUEST_AGPS_DATA_CONN = 1;
     private static final int GPS_RELEASE_AGPS_DATA_CONN = 2;
@@ -139,15 +139,19 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int GPS_AGPS_DATA_CONN_DONE = 4;
     private static final int GPS_AGPS_DATA_CONN_FAILED = 5;
 
-    // these need to match GpsLocationFlags enum in gps.h
+    // these need to match GnssLocationFlags enum in types.hal
     private static final int LOCATION_INVALID = 0;
     private static final int LOCATION_HAS_LAT_LONG = 1;
     private static final int LOCATION_HAS_ALTITUDE = 2;
     private static final int LOCATION_HAS_SPEED = 4;
     private static final int LOCATION_HAS_BEARING = 8;
-    private static final int LOCATION_HAS_ACCURACY = 16;
+    private static final int LOCATION_HAS_HORIZONTAL_ACCURACY = 16;
+    private static final int LOCATION_HAS_VERTICAL_ACCURACY = 32;
+    private static final int LOCATION_HAS_SPEED_ACCURACY = 64;
+    private static final int LOCATION_HAS_BEARING_ACCURACY = 128;
 
-    // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+
+    // IMPORTANT - the GPS_DELETE_* symbols here must match GnssAidingData enum in IGnss.hal
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
     private static final int GPS_DELETE_POSITION = 0x0004;
@@ -162,7 +166,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int GPS_DELETE_CELLDB_INFO = 0x8000;
     private static final int GPS_DELETE_ALL = 0xFFFF;
 
-    // The GPS_CAPABILITY_* flags must match the values in gps.h
+    // The GPS_CAPABILITY_* flags must match Capabilities enum in IGnssCallback.hal
     private static final int GPS_CAPABILITY_SCHEDULING = 0x0000001;
     private static final int GPS_CAPABILITY_MSB = 0x0000002;
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
@@ -176,11 +180,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
-    // these need to match AGpsType enum in gps.h
+    // these need to match AGnssType enum in IAGnssCallback.hal
     private static final int AGPS_TYPE_SUPL = 1;
     private static final int AGPS_TYPE_C2K = 2;
 
-    // these must match the definitions in gps.h
+    // these must match the ApnIpType enum in IAGnss.hal
     private static final int APN_INVALID = 0;
     private static final int APN_IPV4 = 1;
     private static final int APN_IPV6 = 2;
@@ -227,7 +231,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
     private static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
 
-    // GPS Geofence errors. Should match gps.h constants.
+    // GPS Geofence errors. Should match GeofenceStatus enum in IGnssGeofenceCallback.hal.
     private static final int GPS_GEOFENCE_OPERATION_SUCCESS = 0;
     private static final int GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 100;
     private static final int GPS_GEOFENCE_ERROR_ID_EXISTS  = -101;
@@ -1479,7 +1483,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update our position.
      */
     private void reportLocation(int flags, double latitude, double longitude, double altitude,
-            float speedMetersPerSecond, float bearing, float accuracy, long timestamp) {
+            float speedMetersPerSecond, float bearing, float horizontalAccuracyMeters,
+            float verticalAccuracyMeters, float speedAccuracyMetersPerSeconds,
+            float bearingAccuracyDegrees, long timestamp) {
         if ((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
             mItarSpeedLimitExceeded = speedMetersPerSecond > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
         }
@@ -1491,7 +1497,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
 
         if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
-                " timestamp: " + timestamp);
+                " timestamp: " + timestamp + " flags: " + flags);
 
         synchronized (mLocation) {
             mLocationFlags = flags;
@@ -1518,10 +1524,25 @@ public class GnssLocationProvider implements LocationProviderInterface {
             } else {
                 mLocation.removeBearing();
             }
-            if ((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
-                mLocation.setAccuracy(accuracy);
+            if ((flags & LOCATION_HAS_HORIZONTAL_ACCURACY) == LOCATION_HAS_HORIZONTAL_ACCURACY) {
+                mLocation.setAccuracy(horizontalAccuracyMeters);
             } else {
                 mLocation.removeAccuracy();
+            }
+            if ((flags & LOCATION_HAS_VERTICAL_ACCURACY) == LOCATION_HAS_VERTICAL_ACCURACY) {
+              mLocation.setVerticalAccuracyMeters(verticalAccuracyMeters);
+            } else {
+              mLocation.removeVerticalAccuracy();
+            }
+            if((flags & LOCATION_HAS_SPEED_ACCURACY) == LOCATION_HAS_SPEED_ACCURACY) {
+              mLocation.setSpeedAccuracyMetersPerSecond(speedAccuracyMetersPerSeconds);
+            } else {
+              mLocation.removeSpeedAccuracy();
+            }
+            if((flags & LOCATION_HAS_BEARING_ACCURACY) == LOCATION_HAS_BEARING_ACCURACY) {
+              mLocation.setBearingAccuracyDegrees(bearingAccuracyDegrees);
+            } else {
+              mLocation.removeBearingAccuracy();
             }
             mLocation.setExtras(mLocationExtras);
 
@@ -1605,13 +1626,18 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update SV info
      */
     private void reportSvStatus() {
-        int svCount = native_read_sv_status(mSvidWithFlags, mCn0s, mSvElevations, mSvAzimuths);
+        int svCount = native_read_sv_status(mSvidWithFlags,
+            mCn0s,
+            mSvElevations,
+            mSvAzimuths,
+            mSvCarrierFreqs);
         mListenerHelper.onSvStatusChanged(
                 svCount,
                 mSvidWithFlags,
                 mCn0s,
                 mSvElevations,
-                mSvAzimuths);
+                mSvAzimuths,
+                mSvCarrierFreqs);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
@@ -1627,12 +1653,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
                         " cn0: " + mCn0s[i]/10 +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
+                        " carrier frequency: " + mSvCarrierFreqs[i] +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
                                 ? "  " : " E") +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
                                 ? "  " : " A") +
                         ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
-                                ? "" : "U"));
+                                ? "" : "U") +
+                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
+                        ? "" : "F"));
             }
         }
         // return number of sets used in fix instead of total
@@ -1780,7 +1809,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
             double altitude,
             float speed,
             float bearing,
-            float accuracy,
+            float horizontalAccuracy,
+            float verticalAccuracy,
+            float speedAccuracy,
+            float bearingAccuracy,
             long timestamp) {
         Location location = new Location(LocationManager.GPS_PROVIDER);
         if((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
@@ -1798,8 +1830,17 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
             location.setBearing(bearing);
         }
-        if((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
-            location.setAccuracy(accuracy);
+        if((flags & LOCATION_HAS_HORIZONTAL_ACCURACY) == LOCATION_HAS_HORIZONTAL_ACCURACY) {
+            location.setAccuracy(horizontalAccuracy);
+        }
+        if((flags & LOCATION_HAS_VERTICAL_ACCURACY) == LOCATION_HAS_VERTICAL_ACCURACY) {
+          location.setVerticalAccuracyMeters(verticalAccuracy);
+        }
+        if((flags & LOCATION_HAS_SPEED_ACCURACY) == LOCATION_HAS_SPEED_ACCURACY) {
+          location.setSpeedAccuracyMetersPerSecond(speedAccuracy);
+        }
+        if((flags & LOCATION_HAS_BEARING_ACCURACY) == LOCATION_HAS_BEARING_ACCURACY) {
+          location.setBearingAccuracyDegrees(bearingAccuracy);
         }
         return location;
     }
@@ -1831,8 +1872,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * All geofence callbacks are called on the same thread
      */
     private void reportGeofenceTransition(int geofenceId, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float accuracy,
-            long timestamp, int transition, long transitionTimestamp) {
+            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
+            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp,
+            int transition, long transitionTimestamp) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
@@ -1843,7 +1885,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 altitude,
                 speed,
                 bearing,
-                accuracy,
+                horizontalAccuracy,
+                verticalAccuracy,
+                speedAccuracy,
+                bearingAccuracy,
                 timestamp);
         mGeofenceHardwareImpl.reportGeofenceTransition(
                 geofenceId,
@@ -1858,8 +1903,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to report GPS status change.
      */
     private void reportGeofenceStatus(int status, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float accuracy,
-            long timestamp) {
+            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
+            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
@@ -1870,7 +1915,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 altitude,
                 speed,
                 bearing,
-                accuracy,
+                horizontalAccuracy,
+                verticalAccuracy,
+                speedAccuracy,
+                bearingAccuracy,
                 timestamp);
         int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
         if(status == GPS_GEOFENCE_AVAILABLE) {
@@ -2069,10 +2117,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
-        if (Log.isLoggable(TAG, Log.INFO)) {
-            Log.i(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
-                    + ", " + obj + ")");
-        }
+        Log.i(TAG, "WakeLock acquired by sendMessage(" + message + ", " + arg + ", " + obj + ")");
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
@@ -2130,10 +2175,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
-                if (Log.isLoggable(TAG, Log.INFO)) {
-                    Log.i(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
-                            + ", " + msg.arg1 + ", " + msg.obj + ")");
-                }
+                Log.i(TAG, "WakeLock released by handleMessage(" + message + ", " + msg.arg1 + ", "
+                        + msg.obj + ")");
             }
         }
 
@@ -2381,40 +2424,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
-    /**
-     * @return A string representing the given message ID.
-     */
-    private String messageIdAsString(int message) {
-        switch (message) {
-            case ENABLE:
-                return "ENABLE";
-            case SET_REQUEST:
-                return "SET_REQUEST";
-            case UPDATE_NETWORK_STATE:
-                return "UPDATE_NETWORK_STATE";
-            case REQUEST_SUPL_CONNECTION:
-                return "REQUEST_SUPL_CONNECTION";
-            case RELEASE_SUPL_CONNECTION:
-                return "RELEASE_SUPL_CONNECTION";
-            case INJECT_NTP_TIME:
-                return "INJECT_NTP_TIME";
-            case DOWNLOAD_XTRA_DATA:
-                return "DOWNLOAD_XTRA_DATA";
-            case INJECT_NTP_TIME_FINISHED:
-                return "INJECT_NTP_TIME_FINISHED";
-            case DOWNLOAD_XTRA_DATA_FINISHED:
-                return "DOWNLOAD_XTRA_DATA_FINISHED";
-            case UPDATE_LOCATION:
-                return "UPDATE_LOCATION";
-            case SUBSCRIPTION_OR_SIM_CHANGED:
-                return "SUBSCRIPTION_OR_SIM_CHANGED";
-            case INITIALIZE_HANDLER:
-                return "INITIALIZE_HANDLER";
-            default:
-                return "<Unknown>";
-        }
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
@@ -2474,17 +2483,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private float mCn0s[] = new float[MAX_SVS];
     private float mSvElevations[] = new float[MAX_SVS];
     private float mSvAzimuths[] = new float[MAX_SVS];
+    private float mSvCarrierFreqs[] = new float[MAX_SVS];
     private int mSvCount;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
 
-    static {
-        class_init_native();
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "class_init_native()");
-        }
-    }
-
+    static { class_init_native(); }
     private static native void class_init_native();
     private static native boolean native_is_supported();
     private static native boolean native_is_agps_ril_supported();
@@ -2500,7 +2504,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // returns number of SVs
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] prnWithFlags, float[] cn0s, float[] elevations,
-            float[] azimuths);
+            float[] azimuths, float[] carrierFrequencies);
     private native int native_read_nmea(byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 

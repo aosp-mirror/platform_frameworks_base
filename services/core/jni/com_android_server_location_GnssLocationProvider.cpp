@@ -318,7 +318,10 @@ Return<void> GnssCallback::gnssLocationCb(
                         static_cast<jdouble>(location.altitudeMeters),
                         static_cast<jfloat>(location.speedMetersPerSec),
                         static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.accuracyMeters),
+                        static_cast<jfloat>(location.horizontalAccuracyMeters),
+                        static_cast<jfloat>(location.verticalAccuracyMeters),
+                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
+                        static_cast<jfloat>(location.bearingAccuracyDegrees),
                         static_cast<jlong>(location.timestamp));
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -458,7 +461,10 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
                         static_cast<jdouble>(location.altitudeMeters),
                         static_cast<jfloat>(location.speedMetersPerSec),
                         static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.accuracyMeters),
+                        static_cast<jfloat>(location.horizontalAccuracyMeters),
+                        static_cast<jfloat>(location.verticalAccuracyMeters),
+                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
+                        static_cast<jfloat>(location.bearingAccuracyDegrees),
                         static_cast<jlong>(location.timestamp),
                         transition,
                         timestamp);
@@ -480,7 +486,10 @@ Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
                         static_cast<jdouble>(location.altitudeMeters),
                         static_cast<jfloat>(location.speedMetersPerSec),
                         static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.accuracyMeters),
+                        static_cast<jfloat>(location.horizontalAccuracyMeters),
+                        static_cast<jfloat>(location.verticalAccuracyMeters),
+                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
+                        static_cast<jfloat>(location.bearingAccuracyDegrees),
                         static_cast<jlong>(location.timestamp));
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -661,6 +670,10 @@ jobject GnssMeasurementCallback::translateGnssMeasurement(
 
     if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_SNR)) {
         SET(SnrInDb, measurement->snrDb);
+    }
+
+    if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_AUTOMATIC_GAIN_CONTROL)) {
+        SET(AgcLevelDb, measurement->agcLevelDb);
     }
 
     return object.get();
@@ -913,7 +926,7 @@ Return<void> AGnssRilCallback::requestRefLocCb() {
 }
 
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
-    method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFJ)V");
+    method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFFFFJ)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
@@ -927,9 +940,9 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_requestSetID = env->GetMethodID(clazz, "requestSetID", "(I)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
     method_reportGeofenceTransition = env->GetMethodID(clazz, "reportGeofenceTransition",
-            "(IIDDDFFFJIJ)V");
+            "(IIDDDFFFFFFJIJ)V");
     method_reportGeofenceStatus = env->GetMethodID(clazz, "reportGeofenceStatus",
-            "(IIDDDFFFJ)V");
+            "(IIDDDFFFFFFJ)V");
     method_reportGeofenceAddStatus = env->GetMethodID(clazz, "reportGeofenceAddStatus",
             "(II)V");
     method_reportGeofenceRemoveStatus = env->GetMethodID(clazz, "reportGeofenceRemoveStatus",
@@ -1170,7 +1183,7 @@ enum ShiftWidth: uint8_t {
 
 static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jobject /* obj */,
         jintArray svidWithFlagArray, jfloatArray cn0Array, jfloatArray elevArray,
-        jfloatArray azumArray) {
+        jfloatArray azumArray, jfloatArray carrierFreqArray) {
     /*
      * This method should only be called from within a call to reportSvStatus.
      */
@@ -1178,6 +1191,7 @@ static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jo
     jfloat* cn0s = env->GetFloatArrayElements(cn0Array, 0);
     jfloat* elev = env->GetFloatArrayElements(elevArray, 0);
     jfloat* azim = env->GetFloatArrayElements(azumArray, 0);
+    jfloat* carrierFreq = env->GetFloatArrayElements(carrierFreqArray, 0);
 
     /*
      * Read GNSS SV info.
@@ -1190,12 +1204,14 @@ static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jo
         cn0s[i] = info.cN0Dbhz;
         elev[i] = info.elevationDegrees;
         azim[i] = info.azimuthDegrees;
+        carrierFreq[i] = info.carrierFrequencyHz;
     }
 
     env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
     env->ReleaseFloatArrayElements(cn0Array, cn0s, 0);
     env->ReleaseFloatArrayElements(elevArray, elev, 0);
     env->ReleaseFloatArrayElements(azumArray, azim, 0);
+    env->ReleaseFloatArrayElements(carrierFreqArray, carrierFreq, 0);
     return static_cast<jint>(GnssCallback::sGnssSvListSize);
 }
 
@@ -1378,7 +1394,12 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
             internalState << "Gnss Location Data:: LatitudeDegrees: " << data.position.latitudeDegrees
                           << ", LongitudeDegrees: " << data.position.longitudeDegrees
                           << ", altitudeMeters: " << data.position.altitudeMeters
-                          << ", accuracyMeters: " << data.position.accuracyMeters
+                          << ", speedMetersPerSecond: " << data.position.speedMetersPerSec
+                          << ", bearingDegrees: " << data.position.bearingDegrees
+                          << ", horizontalAccuracyMeters: " << data.position.horizontalAccuracyMeters
+                          << ", verticalAccuracyMeters: " << data.position.verticalAccuracyMeters
+                          << ", speedAccuracyMetersPerSecond: " << data.position.speedAccuracyMetersPerSecond
+                          << ", bearingAccuracyDegrees: " << data.position.bearingAccuracyDegrees
                           << ", ageSeconds: " << data.position.ageSeconds << std::endl;
         }
 
@@ -1706,7 +1727,7 @@ static const JNINativeMethod sMethods[] = {
             "(I)V",
             reinterpret_cast<void*>(android_location_GnssLocationProvider_delete_aiding_data)},
     {"native_read_sv_status",
-            "([I[F[F[F)I",
+            "([I[F[F[F[F)I",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_read_sv_status)},
     {"native_read_nmea", "([BI)I", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_read_nmea)},
