@@ -673,7 +673,7 @@ jobject GnssMeasurementCallback::translateGnssMeasurement(
     }
 
     if (flags & static_cast<uint32_t>(GnssMeasurementFlags::HAS_AUTOMATIC_GAIN_CONTROL)) {
-        SET(AgcLevelDb, measurement->agcLevelDb);
+        SET(AutomaticGainControlLevelInDb, measurement->agcLevelDb);
     }
 
     return object.get();

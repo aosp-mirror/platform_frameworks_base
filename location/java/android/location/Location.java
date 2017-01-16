@@ -798,7 +798,6 @@ public class Location implements Parcelable {
 
     /**
      * True if this location has a vertical accuracy.
-     * @hide
      */
     public boolean hasVerticalAccuracy() {
         return (mFieldsMask & HAS_VERTICAL_ACCURACY_MASK) != 0;
@@ -818,7 +817,6 @@ public class Location implements Parcelable {
      * errors do not always follow such a simple distribution.
      *
      * <p>If this location does not have a vertical accuracy, then 0.0 is returned.
-     * @hide
      */
     public float getVerticalAccuracyMeters() {
         return mVerticalAccuracyMeters;
@@ -830,7 +828,6 @@ public class Location implements Parcelable {
      * <p>See {@link #getVerticalAccuracyMeters} for the definition of vertical accuracy.
      *
      * <p>Following this call {@link #hasVerticalAccuracy} will return true.
-     * @hide
      */
     public void setVerticalAccuracyMeters(float verticalAccuracyMeters) {
         mVerticalAccuracyMeters = verticalAccuracyMeters;
@@ -842,7 +839,6 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasVerticalAccuracy} will return false, and
      * {@link #getVerticalAccuracyMeters} will return 0.0.
-     * @hide
      */
     public void removeVerticalAccuracy() {
         mVerticalAccuracyMeters = 0.0f;
@@ -851,7 +847,6 @@ public class Location implements Parcelable {
 
     /**
      * True if this location has a speed accuracy.
-     * @hide
      */
     public boolean hasSpeedAccuracy() {
         return (mFieldsMask & HAS_SPEED_ACCURACY_MASK) != 0;
@@ -866,7 +861,6 @@ public class Location implements Parcelable {
      * inside the circle.
      *
      * <p>If this location does not have a speed accuracy, then 0.0 is returned.
-     * @hide
      */
     public float getSpeedAccuracyMetersPerSecond() {
         return mSpeedAccuracyMetersPerSecond;
@@ -878,7 +872,6 @@ public class Location implements Parcelable {
      * <p>See {@link #getSpeedAccuracyMetersPerSecond} for the definition of speed accuracy.
      *
      * <p>Following this call {@link #hasSpeedAccuracy} will return true.
-     * @hide
      */
     public void setSpeedAccuracyMetersPerSecond(float speedAccuracyMeterPerSecond) {
         mSpeedAccuracyMetersPerSecond = speedAccuracyMeterPerSecond;
@@ -890,7 +883,6 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasSpeedAccuracy} will return false, and
      * {@link #getSpeedAccuracyMetersPerSecond} will return 0.0.
-     * @hide
      */
     public void removeSpeedAccuracy() {
         mSpeedAccuracyMetersPerSecond = 0.0f;
@@ -899,7 +891,6 @@ public class Location implements Parcelable {
 
     /**
      * True if this location has a bearing accuracy.
-     * @hide
      */
     public boolean hasBearingAccuracy() {
         return (mFieldsMask & HAS_BEARING_ACCURACY_MASK) != 0;
@@ -914,7 +905,6 @@ public class Location implements Parcelable {
      * inside the circle.
      *
      * <p>If this location does not have a bearing accuracy, then 0.0 is returned.
-     * @hide
      */
     public float getBearingAccuracyDegrees() {
         return mBearingAccuracyDegrees;
@@ -926,7 +916,6 @@ public class Location implements Parcelable {
      * <p>See {@link #getBearingAccuracyDegrees} for the definition of bearing accuracy.
      *
      * <p>Following this call {@link #hasBearingAccuracy} will return true.
-     * @hide
      */
     public void setBearingAccuracyDegrees(float bearingAccuracyDegrees) {
         mBearingAccuracyDegrees = bearingAccuracyDegrees;
@@ -938,7 +927,6 @@ public class Location implements Parcelable {
      *
      * <p>Following this call {@link #hasBearingAccuracy} will return false, and
      * {@link #getBearingAccuracyDegrees} will return 0.0.
-     * @hide
      */
     public void removeBearingAccuracy() {
         mBearingAccuracyDegrees = 0.0f;
