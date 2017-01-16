@@ -283,10 +283,19 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * FIXME return a player proxy instead, make systemApi
-     * @return
+     * Return a proxy for the player associated with this playback configuration
+     * @return a proxy player
      */
-    public IPlayer getPlayerProxy() {
+    @SystemApi
+    public PlayerProxy getPlayerProxy() {
+        return mIPlayerShell == null ? null : new PlayerProxy(this);
+    }
+
+    /**
+     * @hide
+     * @return the IPlayer interface for the associated player
+     */
+    IPlayer getIPlayer() {
         return mIPlayerShell == null ? null : mIPlayerShell.getIPlayer();
     }
 
