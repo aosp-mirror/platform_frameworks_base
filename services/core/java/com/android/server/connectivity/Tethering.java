@@ -1244,10 +1244,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 return false;
             }
 
-            private boolean isSimCardAbsent(String state) {
-                return IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(state);
-            }
-
             private boolean isSimCardLoaded(String state) {
                 return IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(state);
             }
@@ -1264,9 +1260,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 // used to verify this receiver is still current
                 final private int mGenerationNumber;
 
-                // we're interested in edge-triggered LOADED notifications, so
-                // ignore LOADED unless we saw an ABSENT state first
-                private boolean mSimAbsentSeen = false;
+                // used to check the sim state transition from non-loaded to loaded
+                private boolean mSimNotLoadedSeen = false;
 
                 public SimChangeBroadcastReceiver(int generationNumber) {
                     mGenerationNumber = generationNumber;
@@ -1284,16 +1279,16 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
                     final String state = intent.getStringExtra(
                             IccCardConstants.INTENT_KEY_ICC_STATE);
-                    Log.d(TAG, "got Sim changed to state " + state + ", mSimAbsentSeen=" +
-                            mSimAbsentSeen);
+                    Log.d(TAG, "got Sim changed to state " + state + ", mSimNotLoadedSeen=" +
+                            mSimNotLoadedSeen);
 
-                    if (isSimCardAbsent(state)) {
-                        if (!mSimAbsentSeen) mSimAbsentSeen = true;
+                    if (!isSimCardLoaded(state)) {
+                        if (!mSimNotLoadedSeen) mSimNotLoadedSeen = true;
                         return;
                     }
 
-                    if (isSimCardLoaded(state) && mSimAbsentSeen) {
-                        mSimAbsentSeen = false;
+                    if (isSimCardLoaded(state) && mSimNotLoadedSeen) {
+                        mSimNotLoadedSeen = false;
 
                         if (!hasMobileHotspotProvisionApp()) return;
 
