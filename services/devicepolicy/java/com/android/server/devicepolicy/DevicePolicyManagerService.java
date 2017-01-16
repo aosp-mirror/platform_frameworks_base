@@ -6783,6 +6783,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceManageUsers();
     }
 
+    private void enforceProfileOwnerOrSystemUser(ComponentName admin) {
+        synchronized (this) {
+            if (getActiveAdminWithPolicyForUidLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, mInjector.binderGetCallingUid())
+                            != null) {
+                return;
+            }
+        }
+        Preconditions.checkState(isCallerWithSystemUid(),
+                "Only profile owner, device owner and system may call this method.");
+    }
+
     private void ensureCallerPackage(@Nullable String packageName) {
         if (packageName == null) {
             Preconditions.checkState(isCallerWithSystemUid(),
@@ -8913,8 +8925,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         PackageManager packageManager = mInjector.getPackageManager();
 
         UserHandle user = mInjector.binderGetCallingUserHandle();
+        enforceProfileOwnerOrSystemUser(admin);
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 int granted = mIPackageManager.checkPermission(permission,
