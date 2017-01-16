@@ -57,6 +57,7 @@ import java.util.Map;
  * @attr ref android.R.styleable#InputMethod_settingsActivity
  * @attr ref android.R.styleable#InputMethod_isDefault
  * @attr ref android.R.styleable#InputMethod_supportsSwitchingToNextInputMethod
+ * @attr ref android.R.styleable#InputMethod_supportsDismissingWindow
  */
 public final class InputMethodInfo implements Parcelable {
     static final String TAG = "InputMethodInfo";
@@ -104,6 +105,11 @@ public final class InputMethodInfo implements Parcelable {
     private final boolean mSupportsSwitchingToNextInputMethod;
 
     /**
+     * The flag whether this IME supports ways to dismiss its window (e.g. dismiss button.)
+     */
+    private final boolean mSupportsDismissingWindow;
+
+    /**
      * Constructor.
      *
      * @param context The Context in which we are parsing the input method.
@@ -132,6 +138,7 @@ public final class InputMethodInfo implements Parcelable {
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
         boolean isAuxIme = true;
         boolean supportsSwitchingToNextInputMethod = false; // false as default
+        boolean supportsDismissingWindow = false; // false as default
         mForceDefault = false;
 
         PackageManager pm = context.getPackageManager();
@@ -171,6 +178,8 @@ public final class InputMethodInfo implements Parcelable {
             supportsSwitchingToNextInputMethod = sa.getBoolean(
                     com.android.internal.R.styleable.InputMethod_supportsSwitchingToNextInputMethod,
                     false);
+            supportsDismissingWindow = sa.getBoolean(
+                    com.android.internal.R.styleable.InputMethod_supportsDismissingWindow, false);
             sa.recycle();
 
             final int depth = parser.getDepth();
@@ -242,6 +251,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsDefaultResId = isDefaultResId;
         mIsAuxIme = isAuxIme;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
+        mSupportsDismissingWindow = supportsDismissingWindow;
     }
 
     InputMethodInfo(Parcel source) {
@@ -250,6 +260,7 @@ public final class InputMethodInfo implements Parcelable {
         mIsDefaultResId = source.readInt();
         mIsAuxIme = source.readInt() == 1;
         mSupportsSwitchingToNextInputMethod = source.readInt() == 1;
+        mSupportsDismissingWindow = source.readInt() == 1;
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         mSubtypes = new InputMethodSubtypeArray(source);
         mForceDefault = false;
@@ -260,8 +271,10 @@ public final class InputMethodInfo implements Parcelable {
      */
     public InputMethodInfo(String packageName, String className,
             CharSequence label, String settingsActivity) {
-        this(buildDummyResolveInfo(packageName, className, label), false, settingsActivity, null,
-                0, false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */);
+        this(buildDummyResolveInfo(packageName, className, label), false /* isAuxIme */,
+                settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
+                false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
+                true /* supportsDismissingWindow */);
     }
 
     /**
@@ -271,17 +284,18 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
             String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
             boolean forceDefault) {
-        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId,
-                forceDefault, true /* supportsSwitchingToNextInputMethod */);
+        this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
+                 true /* supportsSwitchingToNextInputMethod */,
+                 true /* supportsDismissingWindow */);
     }
 
     /**
      * Temporary API for creating a built-in input method for test.
      * @hide
      */
-    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme,
-            String settingsActivity, List<InputMethodSubtype> subtypes, int isDefaultResId,
-            boolean forceDefault, boolean supportsSwitchingToNextInputMethod) {
+    public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
+            List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
+            boolean supportsSwitchingToNextInputMethod, boolean supportsDismissingWindow) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
@@ -291,6 +305,7 @@ public final class InputMethodInfo implements Parcelable {
         mSubtypes = new InputMethodSubtypeArray(subtypes);
         mForceDefault = forceDefault;
         mSupportsSwitchingToNextInputMethod = supportsSwitchingToNextInputMethod;
+        mSupportsDismissingWindow = supportsDismissingWindow;
     }
 
     private static ResolveInfo buildDummyResolveInfo(String packageName, String className,
@@ -431,7 +446,8 @@ public final class InputMethodInfo implements Parcelable {
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "mId=" + mId
                 + " mSettingsActivityName=" + mSettingsActivityName
-                + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod);
+                + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod
+                + " mSupportsDismissingWindow=" + mSupportsDismissingWindow);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
@@ -484,6 +500,14 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * @return true if this input method supports ways to dismiss its window.
+     * @hide
+     */
+    public boolean supportsDismissingWindow() {
+        return mSupportsDismissingWindow;
+    }
+
+    /**
      * Used to package this object into a {@link Parcel}.
      *
      * @param dest The {@link Parcel} to be written.
@@ -496,6 +520,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeInt(mIsDefaultResId);
         dest.writeInt(mIsAuxIme ? 1 : 0);
         dest.writeInt(mSupportsSwitchingToNextInputMethod ? 1 : 0);
+        dest.writeInt(mSupportsDismissingWindow ? 1 : 0);
         mService.writeToParcel(dest, flags);
         mSubtypes.writeToParcel(dest);
     }
