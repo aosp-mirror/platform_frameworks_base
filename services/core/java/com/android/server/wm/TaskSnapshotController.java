@@ -96,17 +96,11 @@ class TaskSnapshotController {
         if (top == null) {
             return null;
         }
-        final Bitmap bmp = top.mDisplayContent.screenshotApplications(top.token, -1, -1, false,
-                1.0f, ARGB_8888, false, true, false);
-        if (bmp == null) {
+        final GraphicBuffer buffer = top.mDisplayContent.screenshotApplicationsToBuffer(top.token,
+                -1, -1, false, 1.0f, false, true);
+        if (buffer == null) {
             return null;
         }
-        // TODO: Already use a GraphicBuffer when snapshotting the content.
-        final GraphicBuffer buffer = GraphicBuffer.create(bmp.getWidth(), bmp.getHeight(),
-                RGBA_8888, USAGE_HW_TEXTURE | USAGE_SW_WRITE_NEVER | USAGE_SW_READ_NEVER);
-        final Canvas c = buffer.lockCanvas();
-        c.drawBitmap(bmp, 0, 0, null);
-        buffer.unlockCanvasAndPost(c);
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
                 top.findMainWindow().mStableInsets);
     }

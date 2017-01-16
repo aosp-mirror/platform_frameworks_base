@@ -3862,8 +3862,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
             return screenshotApplications(null /* appToken */, DEFAULT_DISPLAY, -1 /* width */,
                     -1 /* height */, true /* includeFullDisplay */, 1f /* frameScale */,
-                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */, false /* includeDecor */,
-                    true /* toAshmem */);
+                    Bitmap.Config.ARGB_8888, true /* wallpaperOnly */, false /* includeDecor */);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
@@ -3885,7 +3884,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Bitmap bm = screenshotApplications(null /* appToken */, DEFAULT_DISPLAY,
                     -1 /* width */, -1 /* height */, true /* includeFullDisplay */,
                     1f /* frameScale */, Bitmap.Config.ARGB_8888, false /* wallpaperOnly */,
-                    false /* includeDecor */, true /* toAshmem */);
+                    false /* includeDecor */);
             try {
                 receiver.send(bm);
             } catch (RemoteException e) {
@@ -3908,12 +3907,10 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
      * @param includeDecor whether to include window decors, like the status or navigation bar
      *                     background of the window
-     * @param toAshmem whether to convert the resulting bitmap to ashmem; this should be set to
-     *                 true if the Bitmap is sent over binder, and false otherwise
      */
     private Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
             int height, boolean includeFullDisplay, float frameScale, Bitmap.Config config,
-            boolean wallpaperOnly, boolean includeDecor, boolean toAshmem) {
+            boolean wallpaperOnly, boolean includeDecor) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = mRoot.getDisplayContentOrCreate(displayId);
@@ -3924,7 +3921,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return displayContent.screenshotApplications(appToken, width, height,
-                includeFullDisplay, frameScale, config, wallpaperOnly, includeDecor, toAshmem);
+                includeFullDisplay, frameScale, config, wallpaperOnly, includeDecor);
     }
 
     /**

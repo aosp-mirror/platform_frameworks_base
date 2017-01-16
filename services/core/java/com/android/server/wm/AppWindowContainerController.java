@@ -617,7 +617,7 @@ public class AppWindowContainerController
             }
             return dc.screenshotApplications(mToken.asBinder(), width, height,
                     false /* includeFullDisplay */, frameScale, Bitmap.Config.RGB_565,
-                    false /* wallpaperOnly */, false /* includeDecor */, true /* toAshmem */);
+                    false /* wallpaperOnly */, false /* includeDecor */);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
