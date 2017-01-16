@@ -768,6 +768,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called when a new batch of security logs can be retrieved.
      *
+     * <p>If a secondary user or profile is created, this callback won't be received until all users
+     * become affiliated again (even if security logging is enabled).
+     * See {@link DevicePolicyManager#setAffiliationIds}
+     *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
@@ -782,13 +786,18 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * ever be called when network logging is enabled. The logs can only be retrieved while network
      * logging is enabled.
      *
+     * <p>If a secondary user or profile is created, this callback won't be received until all users
+     * become affiliated again (even if network logging is enabled). It will also no longer be
+     * possible to retrieve the network logs batch with the most recent {@code batchToken} provided
+     * by this callback. See {@link DevicePolicyManager#setAffiliationIds}.
+     *
      * <p>This callback is only applicable to device owners.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param batchToken The token representing the current batch of network logs.
      * @param networkLogsCount The total count of events in the current batch of network logs.
-     * @see DevicePolicyManager#retrieveNetworkLogs(ComponentName)
+     * @see DevicePolicyManager#retrieveNetworkLogs
      */
     public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
             int networkLogsCount) {

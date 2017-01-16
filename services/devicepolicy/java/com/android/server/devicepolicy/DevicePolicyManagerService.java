@@ -17,7 +17,6 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
-import static android.app.admin.DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -49,7 +48,6 @@ import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -180,8 +178,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -337,7 +333,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
 
     /**
-     * Strings logged with {@link #PROVISIONING_ENTRY_POINT_ADB}.
+     * Strings logged with {@link
+     * com.android.internal.logging.nano.MetricsProto.MetricsEvent#PROVISIONING_ENTRY_POINT_ADB}.
      */
     private static final String LOG_TAG_PROFILE_OWNER = "profile-owner";
     private static final String LOG_TAG_DEVICE_OWNER = "device-owner";
@@ -552,11 +549,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
                 sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
-                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
+                synchronized (DevicePolicyManagerService.this) {
+                    // It might take a while for the user to become affiliated. Make security
+                    // and network logging unavailable in the meantime.
+                    maybePauseDeviceWideLoggingLocked();
+                }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
-                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
-                removeUserData(userHandle);
+                synchronized (DevicePolicyManagerService.this) {
+                    // Check whether the user is affiliated, *before* removing its data.
+                    boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
+                    removeUserData(userHandle);
+                    if (!isRemovedUserAffiliated) {
+                        // We discard the logs when unaffiliated users are deleted (so that the
+                        // device owner cannot retrieve data about that user after it's gone).
+                        discardDeviceWideLogsLocked();
+                        // Resume logging if all remaining users are affiliated.
+                        maybeResumeDeviceWideLoggingLocked();
+                    }
+                }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
                     // Reset the policy data
@@ -1858,9 +1869,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
                 Slog.i(LOG_TAG, "Set ro.device_owner property to true");
-                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
+
                 if (mInjector.securityLogGetLoggingEnabledProperty()) {
                     mSecurityLogMonitor.start();
+                    maybePauseDeviceWideLoggingLocked();
                 }
             } else {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "false");
@@ -3155,7 +3167,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     // It's temporary solution to clear DISALLOW_ADD_USER after CTS
-    // TODO: b/31952368 when the restriction is moved from system to the device owner,
+    // STOPSHIP(b/31952368) when the restriction is moved from system to the device owner,
     // it can be removed.
     private void clearDeviceOwnerUserRestrictionLocked(UserHandle userHandle) {
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
@@ -5650,34 +5662,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean isDeviceOwnerManagedSingleUserDevice() {
-        synchronized (this) {
-            if (!mOwners.hasDeviceOwner()) {
-                return false;
-            }
-        }
-        final long callingIdentity = mInjector.binderClearCallingIdentity();
-        try {
-            if (mInjector.userManagerIsSplitSystemUser()) {
-                // In split system user mode, only allow the case where the device owner is managing
-                // the only non-system user of the device
-                return (mUserManager.getUserCount() == 2
-                        && mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM);
-            } else  {
-                return mUserManager.getUserCount() == 1;
-            }
-        } finally {
-            mInjector.binderRestoreCallingIdentity(callingIdentity);
-        }
-    }
-
-    private void ensureDeviceOwnerManagingSingleUser(ComponentName who) throws SecurityException {
+    private void ensureDeviceOwnerAndAllUsersAffiliated(ComponentName who) throws SecurityException {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
-        if (!isDeviceOwnerManagedSingleUserDevice()) {
-            throw new SecurityException(
-                    "There should only be one user, managed by Device Owner");
+            if (!areAllUsersAffiliatedWithDeviceLocked()) {
+                throw new SecurityException("Not all users are affiliated.");
+            }
         }
     }
 
@@ -5687,7 +5677,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        ensureDeviceOwnerManagingSingleUser(who);
+
+        // TODO: If an unaffiliated user is removed, the admin will be able to request a bugreport
+        // which could still contain data related to that user. Should we disallow that, e.g. until
+        // next boot? Might not be needed given that this still requires user consent.
+        ensureDeviceOwnerAndAllUsersAffiliated(who);
 
         if (mRemoteBugreportServiceIsActive.get()
                 || (getDeviceOwnerRemoteBugreportUri() != null)) {
@@ -5712,7 +5706,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);
             registerRemoteBugreportReceivers();
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+            mInjector.getNotificationManager().notifyAsUser(LOG_TAG,
+                    RemoteBugreportUtils.NOTIFICATION_ID,
                     RemoteBugreportUtils.buildNotification(mContext,
                             DevicePolicyManager.NOTIFICATION_BUGREPORT_STARTED), UserHandle.ALL);
             mHandler.postDelayed(mRemoteBugreportTimeoutRunnable,
@@ -6259,6 +6254,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.userRestrictions = null;
             admin.defaultEnabledRestrictionsAlreadySet.clear();
             admin.forceEphemeralUsers = false;
+            admin.isNetworkLoggingEnabled = false;
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
             final DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
             policyData.mLastSecurityLogRetrievalTime = -1;
@@ -6271,7 +6267,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
-        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
+
+        mInjector.securityLogSetLoggingEnabledProperty(false);
+        mSecurityLogMonitor.stop();
+        setNetworkLoggingActiveInternal(false);
+
         try {
             if (mInjector.getIBackupManager() != null) {
                 // Reactivate backup service.
@@ -8261,7 +8261,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             final int userHandle = mInjector.userHandleGetCallingUserId();
-            if (isUserAffiliatedWithDevice(userHandle)) {
+            if (isUserAffiliatedWithDeviceLocked(userHandle)) {
                 setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
             } else {
                 throw new SecurityException("Admin " + who +
@@ -9442,6 +9442,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 getUserData(UserHandle.USER_SYSTEM).mAffiliationIds = affiliationIds;
                 saveSettingsLocked(UserHandle.USER_SYSTEM);
             }
+
+            // Affiliation status for any user, not just the calling user, might have changed.
+            // The device owner user will still be affiliated after changing its affiliation ids,
+            // but as a result of that other users might become affiliated or un-affiliated.
+            maybePauseDeviceWideLoggingLocked();
+            maybeResumeDeviceWideLoggingLocked();
         }
     }
 
@@ -9461,84 +9467,78 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isAffiliatedUser() {
-        return isUserAffiliatedWithDevice(mInjector.userHandleGetCallingUserId());
+        if (!mHasFeature) {
+            return false;
+        }
+
+        synchronized (this) {
+            return isUserAffiliatedWithDeviceLocked(mInjector.userHandleGetCallingUserId());
+        }
     }
 
-    private boolean isUserAffiliatedWithDevice(int userId) {
-        synchronized (this) {
-            if (!mOwners.hasDeviceOwner()) {
-                return false;
-            }
-            if (userId == mOwners.getDeviceOwnerUserId()) {
-                // The user that the DO is installed on is always affiliated with the device.
+    private boolean isUserAffiliatedWithDeviceLocked(int userId) {
+        if (!mOwners.hasDeviceOwner()) {
+            return false;
+        }
+        if (userId == mOwners.getDeviceOwnerUserId()) {
+            // The user that the DO is installed on is always affiliated with the device.
+            return true;
+        }
+        if (userId == UserHandle.USER_SYSTEM) {
+            // The system user is always affiliated in a DO device, even if the DO is set on a
+            // different user. This could be the case if the DO is set in the primary user
+            // of a split user device.
+            return true;
+        }
+        final ComponentName profileOwner = getProfileOwner(userId);
+        if (profileOwner == null) {
+            return false;
+        }
+        final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
+        final Set<String> deviceAffiliationIds =
+                getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
+        for (String id : userAffiliationIds) {
+            if (deviceAffiliationIds.contains(id)) {
                 return true;
-            }
-            if (userId == UserHandle.USER_SYSTEM) {
-                // The system user is always affiliated in a DO device, even if the DO is set on a
-                // different user. This could be the case if the DO is set in the primary user
-                // of a split user device.
-                return true;
-            }
-            final ComponentName profileOwner = getProfileOwner(userId);
-            if (profileOwner == null) {
-                return false;
-            }
-            final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
-            final Set<String> deviceAffiliationIds =
-                    getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
-            for (String id : userAffiliationIds) {
-                if (deviceAffiliationIds.contains(id)) {
-                    return true;
-                }
             }
         }
         return false;
     }
 
-    private synchronized void disableDeviceOwnerManagedSingleUserFeaturesIfNeeded() {
-        final boolean isSingleUserManagedDevice = isDeviceOwnerManagedSingleUserDevice();
-
-        // disable security logging if needed
-        if (!isSingleUserManagedDevice) {
-            mInjector.securityLogSetLoggingEnabledProperty(false);
-            Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user managed"
-                    + " device.");
-        }
-
-        // disable backup service if needed
-        // note: when clearing DO, the backup service shouldn't be disabled if it was enabled by
-        // the device owner
-        if (mOwners.hasDeviceOwner() && !isSingleUserManagedDevice) {
-            setBackupServiceEnabledInternal(false);
-            Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
-        }
-
-        // disable network logging if needed
-        if (!isSingleUserManagedDevice) {
-            setNetworkLoggingActiveInternal(false);
-            Slog.w(LOG_TAG, "Network logging turned off as it's no longer a single user managed"
-                    + " device.");
-            // if there still is a device owner, disable logging policy, otherwise the admin
-            // has been nuked
-            if (mOwners.hasDeviceOwner()) {
-                getDeviceOwnerAdminLocked().isNetworkLoggingEnabled = false;
-                saveSettingsLocked(mOwners.getDeviceOwnerUserId());
+    private boolean areAllUsersAffiliatedWithDeviceLocked() {
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            final List<UserInfo> userInfos = mUserManager.getUsers();
+            for (int i = 0; i < userInfos.size(); i++) {
+                int userId = userInfos.get(i).id;
+                if (!isUserAffiliatedWithDeviceLocked(userId)) {
+                    Slog.d(LOG_TAG, "User id " + userId + " not affiliated.");
+                    return false;
+                }
             }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
+
+        return true;
     }
 
     @Override
     public void setSecurityLoggingEnabled(ComponentName admin, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
         Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerManagingSingleUser(admin);
 
         synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
                 return;
             }
             mInjector.securityLogSetLoggingEnabledProperty(enabled);
             if (enabled) {
                 mSecurityLogMonitor.start();
+                maybePauseDeviceWideLoggingLocked();
             } else {
                 mSecurityLogMonitor.stop();
             }
@@ -9547,6 +9547,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isSecurityLoggingEnabled(ComponentName admin) {
+        if (!mHasFeature) {
+            return false;
+        }
+
         Preconditions.checkNotNull(admin);
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -9565,10 +9569,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ParceledListSlice<SecurityEvent> retrievePreRebootSecurityLogs(ComponentName admin) {
-        Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerManagingSingleUser(admin);
+        if (!mHasFeature) {
+            return null;
+        }
 
-        if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)) {
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerAndAllUsersAffiliated(admin);
+
+        if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)
+                || !mInjector.securityLogGetLoggingEnabledProperty()) {
             return null;
         }
 
@@ -9586,8 +9595,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ParceledListSlice<SecurityEvent> retrieveSecurityLogs(ComponentName admin) {
+        if (!mHasFeature) {
+            return null;
+        }
+
         Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerManagingSingleUser(admin);
+        ensureDeviceOwnerAndAllUsersAffiliated(admin);
+
+        if (!mInjector.securityLogGetLoggingEnabledProperty()) {
+            return null;
+        }
 
         recordSecurityLogRetrievalTime();
 
@@ -9794,18 +9811,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    // TODO(b/22388012): When backup is available for secondary users and profiles, consider
+    // whether there are any privacy/security implications of enabling the backup service here
+    // if there are other users or profiles unmanaged or managed by a different entity (i.e. not
+    // affiliated).
     @Override
     public void setBackupServiceEnabled(ComponentName admin, boolean enabled) {
-        Preconditions.checkNotNull(admin);
         if (!mHasFeature) {
             return;
         }
-        ensureDeviceOwnerManagingSingleUser(admin);
-        setBackupServiceEnabledInternal(enabled);
-    }
+        Preconditions.checkNotNull(admin);
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
 
-    private synchronized void setBackupServiceEnabledInternal(boolean enabled) {
-        long ident = mInjector.binderClearCallingIdentity();
+        final long ident = mInjector.binderClearCallingIdentity();
         try {
             IBackupManager ibm = mInjector.getIBackupManager();
             if (ibm != null) {
@@ -9906,7 +9926,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final boolean isCallerDeviceOwner = isDeviceOwner(callingOwner);
             final boolean isCallerManagedProfile = isManagedProfile(callingUserId);
             if ((!isCallerDeviceOwner && !isCallerManagedProfile)
-                    || !isUserAffiliatedWithDevice(callingUserId)) {
+                    || !isUserAffiliatedWithDeviceLocked(callingUserId)) {
                 return targetUsers;
             }
 
@@ -9926,7 +9946,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                         // Both must be the same package and be affiliated in order to bind.
                         if (callingOwnerPackage.equals(targetOwnerPackage)
-                               && isUserAffiliatedWithDevice(userId)) {
+                               && isUserAffiliatedWithDeviceLocked(userId)) {
                             targetUsers.add(UserHandle.of(userId));
                         }
                     }
@@ -10024,7 +10044,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerManagingSingleUser(admin);
+        getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
         if (enabled == isNetworkLoggingEnabledInternalLocked()) {
             // already in the requested state
@@ -10051,10 +10071,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Slog.wtf(LOG_TAG, "Network logging could not be started due to the logging"
                             + " service not being available yet.");
                 }
+                maybePauseDeviceWideLoggingLocked();
                 sendNetworkLoggingNotificationLocked();
             } else {
                 if (mNetworkLogger != null && !mNetworkLogger.stopNetworkLogging()) {
-                    mNetworkLogger = null;
                     Slog.wtf(LOG_TAG, "Network logging could not be stopped due to the logging"
                             + " service not being available yet.");
                 }
@@ -10064,6 +10084,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
         }
+    }
+
+    /** Pauses security and network logging if there are unaffiliated users on the device */
+    private void maybePauseDeviceWideLoggingLocked() {
+        if (!areAllUsersAffiliatedWithDeviceLocked()) {
+            Slog.i(LOG_TAG, "There are unaffiliated users, security and network logging will be "
+                    + "paused if enabled.");
+            mSecurityLogMonitor.pause();
+            if (mNetworkLogger != null) {
+                mNetworkLogger.pause();
+            }
+        }
+    }
+
+    /** Resumes security and network logging (if they are enabled) if all users are affiliated */
+    private void maybeResumeDeviceWideLoggingLocked() {
+        if (areAllUsersAffiliatedWithDeviceLocked()) {
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                mSecurityLogMonitor.resume();
+                if (mNetworkLogger != null) {
+                    mNetworkLogger.resume();
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /** Deletes any security and network logs that might have been collected so far */
+    private void discardDeviceWideLogsLocked() {
+        mSecurityLogMonitor.discardLogs();
+        if (mNetworkLogger != null) {
+            mNetworkLogger.discardLogs();
+        }
+        // TODO: We should discard pre-boot security logs here too, as otherwise those
+        // logs (which might contain data from the user just removed) will be
+        // available after next boot.
     }
 
     @Override
@@ -10090,32 +10148,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @see NetworkLoggingHandler#MAX_EVENTS_PER_BATCH
      */
     @Override
-    public synchronized List<NetworkEvent> retrieveNetworkLogs(ComponentName admin,
-            long batchToken) {
+    public List<NetworkEvent> retrieveNetworkLogs(ComponentName admin, long batchToken) {
         if (!mHasFeature) {
             return null;
         }
         Preconditions.checkNotNull(admin);
-        ensureDeviceOwnerManagingSingleUser(admin);
+        ensureDeviceOwnerAndAllUsersAffiliated(admin);
 
-        if (mNetworkLogger == null) {
-            return null;
-        }
-
-        if (!isNetworkLoggingEnabledInternalLocked()) {
-            return null;
-        }
-
-        final long currentTime = System.currentTimeMillis();
         synchronized (this) {
+            if (mNetworkLogger == null
+                    || !isNetworkLoggingEnabledInternalLocked()) {
+                return null;
+            }
+
+            final long currentTime = System.currentTimeMillis();
             DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
             if (currentTime > policyData.mLastNetworkLogsRetrievalTime) {
                 policyData.mLastNetworkLogsRetrievalTime = currentTime;
                 saveSettingsLocked(UserHandle.USER_SYSTEM);
             }
+            return mNetworkLogger.retrieveLogs(batchToken);
         }
-
-        return mNetworkLogger.retrieveLogs(batchToken);
     }
 
     private void sendNetworkLoggingNotificationLocked() {
