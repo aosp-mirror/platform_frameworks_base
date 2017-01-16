@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.bluetooth.le.ResultStorageDescriptor;
 import android.os.ParcelUuid;
@@ -29,6 +30,7 @@ import android.os.WorkSource;
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothGattServerCallback;
 import android.bluetooth.le.IAdvertiserCallback;
+import android.bluetooth.le.IPeriodicAdvertisingCallback;
 import android.bluetooth.le.IScannerCallback;
 
 /**
@@ -52,6 +54,9 @@ interface IBluetoothGatt {
                                in AdvertiseData scanResponse,
                                in AdvertiseSettings settings);
     void stopMultiAdvertising(in int advertiserId);
+
+    void registerSync(in ScanResult scanResult, in int skip, in int timeout, in IPeriodicAdvertisingCallback callback);
+    void unregisterSync(in IPeriodicAdvertisingCallback callback);
 
     void registerClient(in ParcelUuid appId, in IBluetoothGattCallback callback);
     void unregisterClient(in int clientIf);
