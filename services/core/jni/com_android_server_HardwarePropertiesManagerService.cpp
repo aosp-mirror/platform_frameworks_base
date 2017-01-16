@@ -19,6 +19,7 @@
 #include "JNIHelp.h"
 #include "jni.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 #include <android/hardware/thermal/1.0/IThermal.h>
@@ -56,9 +57,15 @@ static struct {
     jmethodID initMethod;
 } gCpuUsageInfoClassInfo;
 
+jfloat gUndefinedTemperature;
+
 static sp<IThermal> gThermalModule;
 
 // ----------------------------------------------------------------------------
+
+float finalizeTemperature(float temperature) {
+    return isnan(temperature) ? gUndefinedTemperature : temperature;
+}
 
 static void nativeInit(JNIEnv* env, jobject obj) {
     // TODO(b/31632518)
@@ -128,16 +135,16 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
         if (static_cast<int>(list[i].type) == type) {
             switch (source) {
                 case TEMPERATURE_CURRENT:
-                    values[length++] = list[i].currentValue;
+                    values[length++] = finalizeTemperature(list[i].currentValue);
                     break;
                 case TEMPERATURE_THROTTLING:
-                    values[length++] = list[i].throttlingThreshold;
+                    values[length++] = finalizeTemperature(list[i].throttlingThreshold);
                     break;
                 case TEMPERATURE_SHUTDOWN:
-                    values[length++] = list[i].shutdownThreshold;
+                    values[length++] = finalizeTemperature(list[i].shutdownThreshold);
                     break;
                 case TEMPERATURE_THROTTLING_BELOW_VR_MIN:
-                    values[length++] = list[i].vrThrottlingThreshold;
+                    values[length++] = finalizeTemperature(list[i].vrThrottlingThreshold);
                     break;
             }
         }
@@ -204,6 +211,12 @@ int register_android_server_HardwarePropertiesManagerService(JNIEnv* env) {
     gCpuUsageInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gCpuUsageInfoClassInfo.initMethod = GetMethodIDOrDie(env, gCpuUsageInfoClassInfo.clazz,
                                                          "<init>", "(JJ)V");
+
+    clazz = env->FindClass("android/os/HardwarePropertiesManager");
+    jfieldID undefined_temperature_field = GetStaticFieldIDOrDie(env, clazz,
+                                                                 "UNDEFINED_TEMPERATURE", "F");
+    gUndefinedTemperature = env->GetStaticFloatField(clazz, undefined_temperature_field);
+
     return res;
 }
 
