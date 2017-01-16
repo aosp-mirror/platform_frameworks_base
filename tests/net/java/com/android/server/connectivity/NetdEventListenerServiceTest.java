@@ -213,8 +213,8 @@ public class NetdEventListenerServiceTest extends TestCase {
 
         IpConnectivityEvent got = events.get(0);
         String want = String.join("\n",
+                "link_layer: 0",
                 "time_ms: 0",
-                "transport: 0",
                 "connect_statistics <",
                 "  connect_count: 12",
                 "  errnos_counters <",

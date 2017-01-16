@@ -58,8 +58,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  default_network_event <",
                 "    network_id <",
                 "      network_id: 102",
@@ -89,8 +89,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  dhcp_event <",
                 "    duration_ms: 192",
                 "    if_name: \"wlan0\"",
@@ -112,8 +112,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  dhcp_event <",
                 "    duration_ms: 0",
                 "    if_name: \"wlan0\"",
@@ -137,8 +137,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  dns_lookup_batch <",
                 "    event_types: 1",
                 "    event_types: 1",
@@ -185,8 +185,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  ip_provisioning_event <",
                 "    event_type: 1",
                 "    if_name: \"wlan0\"",
@@ -208,8 +208,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  ip_reachability_event <",
                 "    event_type: 512",
                 "    if_name: \"wlan0\"",
@@ -231,8 +231,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  network_event <",
                 "    event_type: 5",
                 "    latency_ms: 20410",
@@ -258,8 +258,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  validation_probe_event <",
                 "    latency_ms: 40730",
                 "    network_id <",
@@ -287,8 +287,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  apf_program_event <",
                 "    current_ras: 9",
                 "    drop_multicast: true",
@@ -319,8 +319,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  apf_statistics <",
                 "    dropped_ras: 2",
                 "    duration_ms: 45000",
@@ -351,8 +351,8 @@ public class IpConnectivityEventBuilderTest extends TestCase {
         String want = joinLines(
                 "dropped_events: 0",
                 "events <",
+                "  link_layer: 0",
                 "  time_ms: 1",
-                "  transport: 0",
                 "  ra_event <",
                 "    dnssl_lifetime: -1",
                 "    prefix_preferred_lifetime: 300",
