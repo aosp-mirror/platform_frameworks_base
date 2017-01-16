@@ -1299,6 +1299,10 @@ public class ResolverActivity extends Activity {
             mResolverListController.updateModel(componentName);
         }
 
+        public void updateChooserCounts(String packageName, int userId, String action) {
+            mResolverListController.updateChooserCounts(packageName, userId, action);
+        }
+
         /**
          * Rebuild the list of resolvers. In some cases some parts will need some asynchronous work
          * to complete.

@@ -188,7 +188,6 @@ class UserUsageStatsService {
                 String[] annotations = event.mContentAnnotations;
                 if (annotations != null) {
                     for (String annotation : annotations) {
-                        // TODO(kanlig): update with confidences of annotations.
                         stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
                     }
                 }

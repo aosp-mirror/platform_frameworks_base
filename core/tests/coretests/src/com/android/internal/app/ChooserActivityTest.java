@@ -124,7 +124,7 @@ public class ChooserActivityTest {
     }
 
     @Test
-    public void updateChooserCountsAfterUserSelection() throws InterruptedException {
+    public void updateChooserCountsAndModelAfterUserSelection() throws InterruptedException {
         Intent sendIntent = createSendImageIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
@@ -142,19 +142,15 @@ public class ChooserActivityTest {
         sOverrides.onSafelyStartCallback = targetInfo -> {
             return true;
         };
-        String action = sendIntent.getAction();
-        String annotation = sendIntent.getType();
         ResolveInfo toChoose = resolvedComponentInfos.get(0).getResolveInfoAt(0);
-        String packageName = toChoose.activityInfo.packageName;
-        long toChooseCount = getCount(usm, packageName, action, annotation);
         onView(withText(toChoose.activityInfo.name))
                 .perform(click());
         waitForIdle();
         verify(sOverrides.resolverListController, times(1))
+                .updateChooserCounts(Mockito.anyString(), Mockito.anyInt(), Mockito.anyString());
+        verify(sOverrides.resolverListController, times(1))
                 .updateModel(toChoose.activityInfo.getComponentName());
         assertThat(activity.getIsSelected(), is(true));
-        long updatedCount = getCount(usm, packageName, action, annotation);
-        assertThat(updatedCount, is(toChooseCount + 1l));
     }
 
     @Test
