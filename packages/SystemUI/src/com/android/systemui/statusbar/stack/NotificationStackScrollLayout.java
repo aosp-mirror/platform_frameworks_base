@@ -184,6 +184,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mTopPaddingNeedsAnimation;
     private boolean mDimmedNeedsAnimation;
     private boolean mHideSensitiveNeedsAnimation;
+    private boolean mHideSensitiveChanged;
     private boolean mDarkNeedsAnimation;
     private int mDarkAnimationOriginIndex;
     private boolean mActivateNeedsAnimation;
@@ -247,6 +248,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateChildren();
             mChildrenUpdateRequested = false;
             getViewTreeObserver().removeOnPreDrawListener(this);
+            if (mHideSensitiveChanged) {
+                mHideSensitiveChanged = false;
+                if (getChildCount() > 0) {
+                    updateContentHeight();
+                    notifyHeightChangeListener((ExpandableView)getChildAt(0));
+                }
+            }
             return true;
         }
     };
@@ -3290,6 +3298,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHideSensitiveNeedsAnimation = true;
                 mNeedsAnimation =  true;
             }
+            mHideSensitiveChanged = true;
             requestChildrenUpdate();
         }
     }

@@ -229,7 +229,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private UserManager mUserManager;
     private int mDensity;
 
-    private KeyguardManager mKeyguardManager;
+    protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
 
     // UI-specific methods
