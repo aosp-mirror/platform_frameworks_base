@@ -950,8 +950,8 @@ public class PackageParser {
         try {
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
             return fromCacheEntry(bytes);
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Error reading package cache: ", ioe);
+        } catch (Exception e) {
+            Slog.w(TAG, "Error reading package cache: ", e);
 
             // If something went wrong while reading the cache entry, delete the cache file
             // so that we regenerate it the next time.
