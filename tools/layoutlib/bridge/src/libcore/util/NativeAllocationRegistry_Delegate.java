@@ -52,9 +52,15 @@ public class NativeAllocationRegistry_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void applyFreeFunction(long freeFunction, long nativePtr) {
-        NativeAllocationRegistry_Delegate delegate = sManager.getDelegate(freeFunction);
-        if (delegate != null) {
-            delegate.mFinalizer.free(nativePtr);
+        // This method MIGHT run in the context of the finalizer thread. If the delegate method
+        // crashes, it could bring down the VM. That's why we catch all the exceptions and ignore
+        // them.
+        try {
+            NativeAllocationRegistry_Delegate delegate = sManager.getDelegate(freeFunction);
+            if (delegate != null) {
+                delegate.mFinalizer.free(nativePtr);
+            }
+        } catch (Throwable ignore) {
         }
     }
 

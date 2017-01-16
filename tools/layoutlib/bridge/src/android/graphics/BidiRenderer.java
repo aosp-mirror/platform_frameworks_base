@@ -30,6 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ import java.util.List;
  */
 @SuppressWarnings("deprecation")
 public class BidiRenderer {
+    private static String JAVA_VENDOR = System.getProperty("java.vendor");
 
     private static class ScriptRun {
         int start;
@@ -221,9 +223,16 @@ public class BidiRenderer {
             frc = mGraphics.getFontRenderContext();
         } else {
             frc = Toolkit.getDefaultToolkit().getFontMetrics(font).getFontRenderContext();
+
             // Metrics obtained this way don't have anti-aliasing set. So,
             // we create a new FontRenderContext with anti-aliasing set.
-            frc = new FontRenderContext(font.getTransform(), mPaint.isAntiAliased(), frc.usesFractionalMetrics());
+            AffineTransform transform = font.getTransform();
+            if (mPaint.isAntiAliased() &&
+                    // Workaround for http://b.android.com/211659
+                    (transform.getScaleX() <= 9.9 ||
+                    !"JetBrains s.r.o".equals(JAVA_VENDOR))) {
+                frc = new FontRenderContext(transform, true, frc.usesFractionalMetrics());
+            }
         }
         GlyphVector gv = font.layoutGlyphVector(frc, mText, start, limit, flag);
         int ng = gv.getNumGlyphs();

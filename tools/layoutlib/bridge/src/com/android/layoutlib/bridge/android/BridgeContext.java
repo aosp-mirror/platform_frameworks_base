@@ -66,7 +66,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -104,6 +103,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_APPLICATION_PACKAGE;
 
 /**
@@ -112,6 +112,28 @@ import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_AP
 @SuppressWarnings("deprecation")  // For use of Pair.
 public final class BridgeContext extends Context {
     private static final String PREFIX_THEME_APPCOMPAT = "Theme.AppCompat";
+
+    private static final Map<String, ResourceValue> FRAMEWORK_PATCHED_VALUES = new HashMap<>(2);
+    private static final Map<String, ResourceValue> FRAMEWORK_REPLACE_VALUES = new HashMap<>(3);
+
+    static {
+        FRAMEWORK_PATCHED_VALUES.put("animateFirstView", new ResourceValue(
+                ResourceType.BOOL, "animateFirstView", "false", false));
+        FRAMEWORK_PATCHED_VALUES.put("animateLayoutChanges",
+                new ResourceValue(ResourceType.BOOL, "animateLayoutChanges", "false", false));
+
+
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionItemLayout",
+                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionItemLayout",
+                        "text_edit_suggestion_item", true));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionContainerLayout",
+                new ResourceValue(ResourceType.LAYOUT, "textEditSuggestionContainerLayout",
+                        "text_edit_suggestion_container", true));
+        FRAMEWORK_REPLACE_VALUES.put("textEditSuggestionHighlightStyle",
+                new ResourceValue(ResourceType.STYLE, "textEditSuggestionHighlightStyle",
+                        "TextAppearance.Holo.SuggestionHighlight", true));
+
+    }
 
     /** The map adds cookies to each view so that IDE can link xml tags to views. */
     private final HashMap<View, Object> mViewKeyMap = new HashMap<>();
@@ -312,7 +334,7 @@ public final class BridgeContext extends Context {
      * Returns the current parser at the top the of the stack.
      * @return a parser or null.
      */
-    public BridgeXmlBlockParser getCurrentParser() {
+    private BridgeXmlBlockParser getCurrentParser() {
         return mParserStack.peek();
     }
 
@@ -406,7 +428,8 @@ public final class BridgeContext extends Context {
     }
 
     public Pair<View, Boolean> inflateView(ResourceReference resource, ViewGroup parent,
-            boolean attachToRoot, boolean skipCallbackParser) {
+            @SuppressWarnings("SameParameterValue") boolean attachToRoot,
+            boolean skipCallbackParser) {
         boolean isPlatformLayout = resource.isFramework();
 
         if (!isPlatformLayout && !skipCallbackParser) {
@@ -711,11 +734,7 @@ public final class BridgeContext extends Context {
 
             Object key = parser.getViewCookie();
             if (key != null) {
-                defaultPropMap = mDefaultPropMaps.get(key);
-                if (defaultPropMap == null) {
-                    defaultPropMap = new PropertiesMap();
-                    mDefaultPropMaps.put(key, defaultPropMap);
-                }
+                defaultPropMap = mDefaultPropMaps.computeIfAbsent(key, k -> new PropertiesMap());
             }
 
         } else if (set instanceof BridgeLayoutParamsMapAttributes) {
@@ -909,6 +928,16 @@ public final class BridgeContext extends Context {
                 // if there's no direct value for this attribute in the XML, we look for default
                 // values in the widget defStyle, and then in the theme.
                 if (value == null) {
+                    if (frameworkAttr) {
+                        // For some framework values, layoutlib patches the actual value in the
+                        // theme when it helps to improve the final preview. In most cases
+                        // we just disable animations.
+                        ResourceValue patchedValue = FRAMEWORK_PATCHED_VALUES.get(attrName);
+                        if (patchedValue != null) {
+                            defaultValue = patchedValue;
+                        }
+                    }
+
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (defaultValue != null) {
@@ -916,16 +945,21 @@ public final class BridgeContext extends Context {
                         // exist, we should log a warning and omit it.
                         String val = defaultValue.getValue();
                         if (val != null && val.startsWith(SdkConstants.PREFIX_THEME_REF)) {
-                            if (!attrName.equals(RTL_ATTRS.get(val)) ||
-                                    getApplicationInfo().targetSdkVersion <
-                                            VERSION_CODES.JELLY_BEAN_MR1) {
+                            // Because we always use the latest framework code, some resources might
+                            // fail to resolve when using old themes (they haven't been backported).
+                            // Since this is an artifact caused by us using always the latest
+                            // code, we check for some of those values and replace them here.
+                            defaultValue = FRAMEWORK_REPLACE_VALUES.get(attrName);
+
+                            if (defaultValue == null &&
+                                    (getApplicationInfo().targetSdkVersion < JELLY_BEAN_MR1 ||
+                                    !attrName.equals(RTL_ATTRS.get(val)))) {
                                 // Only log a warning if the referenced value isn't one of the RTL
                                 // attributes, or the app targets old API.
                                 Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
                                         String.format("Failed to find '%s' in current theme.", val),
                                         val);
                             }
-                            defaultValue = null;
                         }
                     }
 
@@ -1944,7 +1978,7 @@ public final class BridgeContext extends Context {
                 Map<List<StyleResourceValue>,
                         Map<Integer, Pair<BridgeTypedArray, PropertiesMap>>>> mCache;
 
-        public TypedArrayCache() {
+        private TypedArrayCache() {
             mCache = new IdentityHashMap<>();
         }
 
@@ -1965,17 +1999,9 @@ public final class BridgeContext extends Context {
         public void put(int[] attrs, List<StyleResourceValue> themes, int resId,
                 Pair<BridgeTypedArray, PropertiesMap> value) {
             Map<List<StyleResourceValue>, Map<Integer, Pair<BridgeTypedArray, PropertiesMap>>>
-                    cacheFromThemes = mCache.get(attrs);
-            if (cacheFromThemes == null) {
-                cacheFromThemes = new HashMap<>();
-                mCache.put(attrs, cacheFromThemes);
-            }
+                    cacheFromThemes = mCache.computeIfAbsent(attrs, k -> new HashMap<>());
             Map<Integer, Pair<BridgeTypedArray, PropertiesMap>> cacheFromResId =
-                    cacheFromThemes.get(themes);
-            if (cacheFromResId == null) {
-                cacheFromResId = new HashMap<>();
-                cacheFromThemes.put(themes, cacheFromResId);
-            }
+                    cacheFromThemes.computeIfAbsent(themes, k -> new HashMap<>());
             cacheFromResId.put(resId, value);
         }
 
