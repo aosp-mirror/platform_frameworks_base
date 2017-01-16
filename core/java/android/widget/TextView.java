@@ -7722,14 +7722,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             desired = Math.max(desired, dr.mDrawableHeightRight);
         }
 
-        desired += getCompoundPaddingTop() + getCompoundPaddingBottom();
+        int linecount = layout.getLineCount();
+        final int padding = getCompoundPaddingTop() + getCompoundPaddingBottom();
+        desired += padding;
 
         if (mMaxMode != LINES) {
             desired = Math.min(desired, mMaximum);
+        } else if (cap && linecount > mMaximum && layout instanceof DynamicLayout) {
+            desired = layout.getLineTop(mMaximum);
+
+            if (dr != null) {
+                desired = Math.max(desired, dr.mDrawableHeightLeft);
+                desired = Math.max(desired, dr.mDrawableHeightRight);
+            }
+
+            desired += padding;
+            linecount = mMaximum;
         }
 
         if (mMinMode == LINES) {
-            int linecount = layout.getLineCount();
             if (linecount < mMinimum) {
                 desired += getLineHeight() * (mMinimum - linecount);
             }
