@@ -1080,6 +1080,29 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         LOST
     }
 
+    private static class CallbackInfo {
+        public final CallbackState state;
+        public final Network network;
+        public final Object arg;
+        public CallbackInfo(CallbackState s, Network n, Object o) {
+            state = s; network = n; arg = o;
+        }
+        public String toString() {
+            return String.format("%s (%s)", state, network);
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof CallbackInfo)) return false;
+            // Ignore timeMs, since it's unpredictable.
+            CallbackInfo other = (CallbackInfo) o;
+            return (state == other.state) && Objects.equals(network, other.network);
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(state, network);
+        }
+    }
+
     /**
      * Utility NetworkCallback for testing. The caller must explicitly test for all the callbacks
      * this class receives, by calling expectCallback() exactly once each time a callback is
@@ -1091,21 +1114,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         // the linger timeout.
         private final static int TIMEOUT_MS = 50;
 
-        private class CallbackInfo {
-            public final CallbackState state;
-            public final Network network;
-            public Object arg;
-            public CallbackInfo(CallbackState s, Network n, Object o) {
-                state = s; network = n; arg = o;
-            }
-            public String toString() { return String.format("%s (%s)", state, network); }
-            public boolean equals(Object o) {
-                if (!(o instanceof CallbackInfo)) return false;
-                // Ignore timeMs, since it's unpredictable.
-                CallbackInfo other = (CallbackInfo) o;
-                return state == other.state && Objects.equals(network, other.network);
-            }
-        }
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
 
         protected void setLastCallback(CallbackState state, Network network, Object o) {
@@ -1127,17 +1135,24 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             setLastCallback(CallbackState.LOST, network, null);
         }
 
+        CallbackInfo nextCallback(int timeoutMs) {
+            CallbackInfo cb = null;
+            try {
+                cb = mCallbacks.poll(timeoutMs, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+            }
+            if (cb == null) {
+                // LinkedBlockingQueue.poll() returns null if it timeouts.
+                fail("Did not receive callback after " + timeoutMs + "ms");
+            }
+            return cb;
+        }
+
         void expectCallback(CallbackState state, MockNetworkAgent mockAgent, int timeoutMs) {
             CallbackInfo expected = new CallbackInfo(
                     state, (mockAgent != null) ? mockAgent.getNetwork() : null, 0);
-            CallbackInfo actual;
-            try {
-                actual = mCallbacks.poll(timeoutMs, TimeUnit.MILLISECONDS);
-                assertEquals("Unexpected callback:", expected, actual);
-            } catch (InterruptedException e) {
-                fail("Did not receive expected " + expected + " after " + TIMEOUT_MS + "ms");
-                actual = null;  // Or the compiler can't tell it's never used uninitialized.
-            }
+            CallbackInfo actual = nextCallback(timeoutMs);
+            assertEquals("Unexpected callback:", expected, actual);
             if (state == CallbackState.LOSING) {
                 String msg = String.format(
                         "Invalid linger time value %d, must be between %d and %d",
