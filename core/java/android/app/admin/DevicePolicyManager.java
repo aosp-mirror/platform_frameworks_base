@@ -1091,6 +1091,30 @@ public class DevicePolicyManager {
     public static final String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
 
     /**
+     * Constant to indicate the feature of disabling the camera. Used as argument to
+     * {@link #createAdminSupportIntent(String)}.
+     * @see #setCameraDisabled(ComponentName, boolean)
+     */
+    public static final String POLICY_DISABLE_CAMERA = "policy_disable_camera";
+
+    /**
+     * Constant to indicate the feature of disabling screen captures. Used as argument to
+     * {@link #createAdminSupportIntent(String)}.
+     * @see #setScreenCaptureDisabled(ComponentName, boolean)
+     */
+    public static final String POLICY_DISABLE_SCREEN_CAPTURE = "policy_disable_screen_capture";
+
+    /**
+     * A String indicating a specific restricted feature. Can be a user restriction from the
+     * {@link UserManager}, e.g. {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the values
+     * {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     * @see #createAdminSupportIntent(String)
+     * @hide
+     */
+    @TestApi
+    public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
+
+    /**
      * Activity action: have the user enter a new password. This activity should
      * be launched after using {@link #setPasswordQuality(ComponentName, int)},
      * or {@link #setPasswordMinimumLength(ComponentName, int)} to have the user
@@ -5824,6 +5848,33 @@ public class DevicePolicyManager {
             }
         }
         return ret == null ? new Bundle() : ret;
+    }
+
+    /**
+     * Called by any app to display a support dialog when a feature was disabled by an admin.
+     * This returns an intent that can be used with {@link Context#startActivity(Intent)} to
+     * display the dialog. It will tell the user that the feature indicated by {@code restriction}
+     * was disabled by an admin, and include a link for more information. The default content of
+     * the dialog can be changed by the restricting admin via
+     * {@link #setShortSupportMessage(ComponentName, CharSequence)}. If the restriction is not
+     * set (i.e. the feature is available), then the return value will be {@code null}.
+     * @param restriction Indicates for which feature the dialog should be displayed. Can be a
+     *            user restriction from {@link UserManager}, e.g.
+     *            {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the constants
+     *            {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     * @return Intent An intent to be used to start the dialog-activity if the restriction is
+     *            set by an admin, or null if the restriction does not exist or no admin set it.
+     */
+    public Intent createAdminSupportIntent(@NonNull String restriction) {
+        throwIfParentInstance("createAdminSupportIntent");
+        if (mService != null) {
+            try {
+                return mService.createAdminSupportIntent(restriction);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 
     /**
