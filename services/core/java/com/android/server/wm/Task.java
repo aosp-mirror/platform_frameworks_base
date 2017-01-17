@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -104,29 +105,37 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     DisplayContent getDisplayContent() {
-        return mStack.getDisplayContent();
+        return mStack != null ? mStack.getDisplayContent() : null;
+    }
+
+    int getAdjustedAddPosition(int suggestedPosition) {
+        final int size = mChildren.size();
+        if (suggestedPosition >= size) {
+            return Math.min(size, suggestedPosition);
+        }
+
+        for (int pos = 0; pos < size && pos < suggestedPosition; ++pos) {
+            // TODO: Confirm that this is the behavior we want long term.
+            if (mChildren.get(pos).removed) {
+                // suggestedPosition assumes removed tokens are actually gone.
+                ++suggestedPosition;
+            }
+        }
+        return Math.min(size, suggestedPosition);
     }
 
     @Override
-    void addChild(AppWindowToken wtoken, int addPos) {
-        final int lastPos = mChildren.size();
-        if (addPos >= lastPos) {
-            addPos = lastPos;
-        } else {
-            for (int pos = 0; pos < lastPos && pos < addPos; ++pos) {
-                if (mChildren.get(pos).removed) {
-                    // addPos assumes removed tokens are actually gone.
-                    ++addPos;
-                }
-            }
-        }
-
-        final WindowContainer parent = wtoken.getParent();
-        if (parent != null) {
-            parent.removeChild(wtoken);
-        }
-        super.addChild(wtoken, addPos);
+    void addChild(AppWindowToken wtoken, int position) {
+        position = getAdjustedAddPosition(position);
+        super.addChild(wtoken, position);
         wtoken.mTask = this;
+        mDeferRemoval = false;
+    }
+
+    @Override
+    void positionChildAt(int position, AppWindowToken child, boolean includingParents) {
+        position = getAdjustedAddPosition(position);
+        super.positionChildAt(position, child, includingParents);
         mDeferRemoval = false;
     }
 
@@ -139,9 +148,14 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return false;
     }
 
+    @VisibleForTesting
+    boolean shouldDeferRemoval() {
+        return hasWindowsAlive() && mStack.isAnimating();
+    }
+
     @Override
     void removeIfPossible() {
-        if (hasWindowsAlive() && mStack.isAnimating()) {
+        if (shouldDeferRemoval()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
@@ -166,7 +180,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     void reparent(TaskStack stack, int position) {
         if (stack == mStack) {
-            return;
+            throw new IllegalArgumentException(
+                    "task=" + this + " already child of stack=" + mStack);
         }
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
@@ -176,25 +191,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
-    void positionTaskInStack(TaskStack stack, int position, Rect bounds,
-            Configuration overrideConfig) {
-        if (mStack == null) {
-            // There is an assumption that task already has a stack at this point, so lets make
-            // sure we comply with it.
-            throw new IllegalStateException("Trying to position task that has no parent.");
-        }
-        if (stack != mStack) {
-            // Task is already attached to a different stack. First we need to remove it from there
-            // and add to top of the target stack. We will move it proper position afterwards.
-            if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
-                    + " from stack=" + mStack);
-            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "positionTaskInStack");
-            mStack.removeChild(this);
-            stack.addTask(this, position);
-        } else {
-            stack.positionChildAt(position, this, true /* includingParents */);
-        }
-
+    void positionAt(int position, Rect bounds, Configuration overrideConfig) {
+        mStack.positionChildAt(position, this, false /* includingParents */);
         resizeLocked(bounds, overrideConfig, false /* force */);
 
         for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {

@@ -315,7 +315,7 @@ public class WindowContainerTests extends WindowTestsBase {
         gotException = false;
         try {
             // Check response to position that's bigger than child number.
-            root.positionChildAt(2, child1, false /* includingParents */);
+            root.positionChildAt(3, child1, false /* includingParents */);
         } catch (IllegalArgumentException e) {
             gotException = true;
         }

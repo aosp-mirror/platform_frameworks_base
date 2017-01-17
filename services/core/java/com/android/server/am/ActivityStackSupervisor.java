@@ -1933,7 +1933,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
                 if (stackId != currentStack.mStackId) {
                     currentStack = moveTaskToStackUncheckedLocked(task, stackId, ON_TOP,
-                            !FORCE_FOCUS, reason, true /* allowStackOnTop */);
+                            !FORCE_FOCUS, reason);
                     stackId = currentStack.mStackId;
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
@@ -2238,18 +2238,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                     moveTaskToStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
-                            "moveTasksToFullscreenStack - onTop", ANIMATE, DEFER_RESUME,
-                            true /* allowStackOnTop */);
+                            "moveTasksToFullscreenStack - onTop", ANIMATE, DEFER_RESUME);
                 }
 
                 ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
                 resumeFocusedStackTopActivityLocked();
             } else {
                 for (int i = 0; i < size; i++) {
-                    moveTaskToStackLocked(tasks.get(i).taskId, FULLSCREEN_WORKSPACE_STACK_ID,
-                            true /* onTop */, false /* forceFocus */,
-                            "moveTasksToFullscreenStack - NOT_onTop", !ANIMATE, DEFER_RESUME,
-                            false /* allowStackOnTop */);
+                    final TaskRecord task = tasks.get(i);
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, MAX_VALUE,
+                            "moveTasksToFullscreenStack - NOT_onTop");
                 }
             }
         } finally {
@@ -2385,7 +2383,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     final int insertPosition = isFullscreenStackVisible
                             ? Math.max(0, fullscreenStack.getChildCount() - 1)
                             : fullscreenStack.getChildCount();
-                    fullscreenStack.positionChildAt(tasks.get(i).taskId, insertPosition);
+                    final TaskRecord task = tasks.get(i);
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, insertPosition, "removeStack");
                 }
                 ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 resumeFocusedStackTopActivityLocked();
@@ -2605,13 +2604,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param toTop True if the task should be placed at the top of the stack.
      * @param forceFocus if focus should be moved to the new stack
      * @param reason Reason the task is been moved.
-     * @param allowStackOnTop If stack movement should be moved to the top due to the addition of
-     *                        the task to the stack. E.g. Moving the stack to the front because it
-     *                        should be focused because it now contains the focused activity.
      * @return The stack the task was moved to.
      */
     ActivityStack moveTaskToStackUncheckedLocked(TaskRecord task, int stackId, boolean toTop,
-            boolean forceFocus, String reason, boolean allowStackOnTop) {
+            boolean forceFocus, String reason) {
 
         if (StackId.isMultiWindowStack(stackId) && !mService.mSupportsMultiWindow) {
             throw new IllegalStateException("moveTaskToStackUncheckedLocked: Device doesn't "
@@ -2642,15 +2638,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // if a docked stack is created below which will lead to the stack we are moving from and
         // its resizeable tasks being resized.
         task.mTemporarilyUnresizable = true;
-        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop && allowStackOnTop);
+        final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
         task.mTemporarilyUnresizable = false;
-        task.reparentWindowContainer(stack.mStackId, toTop ? MAX_VALUE : MIN_VALUE);
-        stack.addTask(task, toTop, reason, allowStackOnTop);
+        task.reparent(stack.mStackId, toTop ? MAX_VALUE : 0, reason);
 
         // If the task had focus before (or we're requested to move focus),
         // move focus to the new stack by moving the stack to the front.
         stack.moveToFrontAndResumeStateIfNeeded(
-                r, allowStackOnTop && (forceFocus || wasFocused || wasFront), wasResumed, reason);
+                r, forceFocus || wasFocused || wasFront, wasResumed, reason);
 
         return stack;
     }
@@ -2658,11 +2653,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
             String reason, boolean animate) {
         return moveTaskToStackLocked(taskId, stackId, toTop, forceFocus, reason, animate,
-                false /* deferResume */, true /* allowStackOnTop */);
+                false /* deferResume */);
     }
 
     boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
-            String reason, boolean animate, boolean deferResume, boolean allowStackOnTop) {
+            String reason, boolean animate, boolean deferResume) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
@@ -2702,7 +2697,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         boolean kept = true;
         try {
             final ActivityStack stack = moveTaskToStackUncheckedLocked(
-                    task, stackId, toTop, forceFocus, reason + " moveTaskToStack", allowStackOnTop);
+                    task, stackId, toTop, forceFocus, reason + " moveTaskToStack");
             stackId = stack.mStackId;
 
             if (!animate) {
