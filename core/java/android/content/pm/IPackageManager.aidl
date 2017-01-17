@@ -490,6 +490,7 @@ interface IPackageManager {
      */
     boolean performDexOpt(String packageName, boolean checkProfiles,
             int compileReason, boolean force);
+
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
      *
@@ -497,6 +498,16 @@ interface IPackageManager {
      *       definite state.
      */
     boolean performDexOptMode(String packageName, boolean checkProfiles,
+            String targetCompilerFilter, boolean force);
+
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter on the
+     * secondary dex files belonging to the given package.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    boolean performDexOptSecondary(String packageName,
             String targetCompilerFilter, boolean force);
 
     /**
