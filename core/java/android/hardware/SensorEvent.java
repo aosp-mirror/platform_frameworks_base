@@ -438,7 +438,8 @@ public class SensorEvent {
      * Soft iron - These distortions arise due to the interaction with the earth's magnetic
      * field.
      * </p>
-     * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR}:</h4>
+     * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR
+     * Sensor.TYPE_GAME_ROTATION_VECTOR}:</h4>
      * Identical to {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR} except that it
      * doesn't use the geomagnetic field. Therefore the Y axis doesn't
      * point north, but instead to some other reference, that reference is
@@ -481,22 +482,6 @@ public class SensorEvent {
      * </p>
      * <p><b>Pro Tip:</b> Always use the length of the values array while performing operations
      * on it. In earlier versions, this used to be always 3 which has changed now. </p>
-     *
-     * @see GeomagneticField
-     *
-     * <h4> {@link android.hardware.Sensor#TYPE_DEVICE_ORIENTATION
-     * Sensor.TYPE_DEVICE_ORIENTATION}:</h4>
-     * The current device orientation will be available in values[0]. The only
-     * available values are:
-     * <ul>
-     * <li> 0: device is in default orientation (Y axis is vertical and points up)
-     * <li> 1: device is rotated 90 degrees counter-clockwise from default
-     *         orientation (X axis is vertical and points up)
-     * <li> 2: device is rotated 180 degrees from default orientation (Y axis is
-     *         vertical and points down)
-     * <li> 3: device is rotated 90 degrees clockwise from default orientation (X axis
-     *         is vertical and points down)
-     * </ul>
      *
      *   <h4>{@link android.hardware.Sensor#TYPE_POSE_6DOF
      * Sensor.TYPE_POSE_6DOF}:</h4>
@@ -605,6 +590,8 @@ public class SensorEvent {
      * temperature compensation is allowed).
      * x_bias, y_bias, z_bias are the estimated biases.
      * </p>
+     *
+     * @see GeomagneticField
      */
     public final float[] values;
 
