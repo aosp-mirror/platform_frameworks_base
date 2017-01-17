@@ -3404,6 +3404,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mPointerEventDispatcher.unregisterInputEventListener(listener);
     }
 
+    /** Check if the service is set to dispatch pointer events. */
+    boolean canDispatchPointerEvents() {
+        return mPointerEventDispatcher != null;
+    }
+
     // Called by window manager policy. Not exposed externally.
     @Override
     public int getLidState() {
@@ -4980,7 +4985,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int keyboardPresence = 0;
         int navigationPresence = 0;
         final InputDevice[] devices = mInputManager.getInputDevices();
-        final int len = devices.length;
+        final int len = devices != null ? devices.length : 0;
         for (int i = 0; i < len; i++) {
             InputDevice device = devices[i];
             if (!device.isVirtual()) {

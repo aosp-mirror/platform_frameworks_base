@@ -32,7 +32,7 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
-import static android.app.ActivityManager.StackId.isStaticStack;
+import static android.app.ActivityManager.StackId.isDynamicStack;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -1926,7 +1926,7 @@ class ActivityStarter {
         final boolean canUseFocusedStack = focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 || (focusedStackId == DOCKED_STACK_ID && r.canGoInDockedStack())
                 || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeableOrForced())
-                || !isStaticStack(focusedStackId);
+                || isDynamicStack(focusedStackId);
         if (canUseFocusedStack && (!newTask
                 || mSupervisor.mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
@@ -1938,7 +1938,7 @@ class ActivityStarter {
         final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
         for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             stack = homeDisplayStacks.get(stackNdx);
-            if (!ActivityManager.StackId.isStaticStack(stack.mStackId)) {
+            if (isDynamicStack(stack.mStackId)) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                         "computeStackFocus: Setting focused stack=" + stack);
                 return stack;

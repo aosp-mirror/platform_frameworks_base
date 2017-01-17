@@ -182,7 +182,7 @@ class WindowTestsBase {
         }
     }
 
-    /* Used so we can gain access to some protected members of the {@link AppWindowToken} class */
+    /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken(DisplayContent dc) {
@@ -278,6 +278,38 @@ class WindowTestsBase {
         @Override
         public IBinder asBinder() {
             return mBinder;
+        }
+    }
+
+    /** Used to track resize reports. */
+    class TestWindowState extends WindowState {
+        boolean resizeReported;
+
+        TestWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
+            super(sWm, mMockSession, mIWindow, token, null, OP_NONE, 0, attrs, 0, 0);
+        }
+
+        @Override
+        void reportResized() {
+            super.reportResized();
+            resizeReported = true;
+        }
+
+        @Override
+        public boolean isGoneForLayoutLw() {
+            return false;
+        }
+
+        @Override
+        void updateResizingWindowIfNeeded() {
+            // Used in AppWindowTokenTests#testLandscapeSeascapeRotationRelayout to deceive
+            // the system that it can actually update the window.
+            boolean hadSurface = mHasSurface;
+            mHasSurface = true;
+
+            super.updateResizingWindowIfNeeded();
+
+            mHasSurface = hadSurface;
         }
     }
 }

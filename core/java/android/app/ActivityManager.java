@@ -628,6 +628,10 @@ public class ActivityManager {
             return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
         }
 
+        public static boolean isDynamicStack(int stackId) {
+            return stackId >= FIRST_DYNAMIC_STACK_ID;
+        }
+
         /**
          * Returns true if the activities contained in the input stack display a shadow around
          * their border.
@@ -825,7 +829,7 @@ public class ActivityManager {
         /** Returns true if the input stack and its content can affect the device orientation. */
         public static boolean canSpecifyOrientation(int stackId) {
             return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID
-                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || isDynamicStack(stackId);
         }
     }
 

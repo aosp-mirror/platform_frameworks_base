@@ -228,7 +228,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mService.configureDisplayPolicyLocked(dc);
 
             // TODO(multi-display): Create an input channel for each display with touch capability.
-            if (displayId == DEFAULT_DISPLAY) {
+            if (displayId == DEFAULT_DISPLAY && mService.canDispatchPointerEvents()) {
                 dc.mTapDetector = new TaskTapPointerEventListener(
                         mService, dc);
                 mService.registerPointerEventListener(dc.mTapDetector);
