@@ -120,36 +120,6 @@ public class ContextHubService extends IContextHubService.Stub {
         return mContextHubInfo[contextHubHandle];
     }
 
-    // TODO(b/30808791): Remove this when NanoApp's API is correctly treating
-    // app IDs as 64-bits.
-    private static long parseAppId(NanoApp app) {
-        // NOTE: If this shifting seems odd (since it's actually "ONAN"), note
-        //     that it matches how this is defined in context_hub.h.
-        final int HEADER_MAGIC =
-            (((int)'N' <<  0) |
-             ((int)'A' <<  8) |
-             ((int)'N' << 16) |
-             ((int)'O' << 24));
-        final int HEADER_MAGIC_OFFSET = 4;
-        final int HEADER_APP_ID_OFFSET = 8;
-
-        ByteBuffer header = ByteBuffer.wrap(app.getAppBinary())
-            .order(ByteOrder.LITTLE_ENDIAN);
-
-        try {
-            if (header.getInt(HEADER_MAGIC_OFFSET) == HEADER_MAGIC) {
-                // This is a legitimate nanoapp header.  Let's grab the app ID.
-                return header.getLong(HEADER_APP_ID_OFFSET);
-            }
-        } catch (IndexOutOfBoundsException e) {
-            // The header is undersized.  We'll fall through to our code
-            // path below, which handles being unable to parse the header.
-        }
-        // We failed to parse the header.  Even through it's probably wrong,
-        // let's give NanoApp's idea of our ID.  This is at least consistent.
-        return app.getAppId();
-    }
-
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp app) throws RemoteException {
         checkPermissions();
@@ -169,15 +139,6 @@ public class ContextHubService extends IContextHubService.Stub {
         msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_LOAD_NANO_APP;
 
         long appId = app.getAppId();
-        // TODO(b/30808791): Remove this hack when the NanoApp API is fixed,
-        //     and getAppId() returns a 'long' instead of an 'int'.
-        if ((appId >> 32) != 0) {
-            // We're unlikely to notice this warning, but at least
-            // we can avoid running our hack logic.
-            Log.w(TAG, "Code has not been updated since API fix.");
-        } else {
-            appId = parseAppId(app);
-        }
 
         msgHeader[HEADER_FIELD_LOAD_APP_ID_LO] = (int)(appId & 0xFFFFFFFF);
         msgHeader[HEADER_FIELD_LOAD_APP_ID_HI] = (int)((appId >> 32) & 0xFFFFFFFF);
