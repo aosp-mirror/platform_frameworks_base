@@ -1984,11 +1984,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 if (startIndex != recordNum) {
                     executeOpsTogether(records, isRecordPop, startIndex, recordNum);
                 }
-                // execute all unoptimized together
-                int optimizeEnd;
-                for (optimizeEnd = recordNum + 1; optimizeEnd < numRecords; optimizeEnd++) {
-                    if (records.get(optimizeEnd).mAllowOptimization) {
-                        break;
+                // execute all unoptimized pop operations together or one add operation
+                int optimizeEnd = recordNum + 1;
+                if (isRecordPop.get(recordNum)) {
+                    while (optimizeEnd < numRecords
+                            && isRecordPop.get(optimizeEnd)
+                            && !records.get(optimizeEnd).mAllowOptimization) {
+                        optimizeEnd++;
                     }
                 }
                 executeOpsTogether(records, isRecordPop, recordNum, optimizeEnd);
