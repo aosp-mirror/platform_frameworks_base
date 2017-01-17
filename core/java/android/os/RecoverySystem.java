@@ -491,10 +491,15 @@ public class RecoverySystem {
                 command += securityArg;
             }
 
-            // RECOVERY_SERVICE writes to BCB (bootloader control block) and triggers the reboot.
             RecoverySystem rs = (RecoverySystem) context.getSystemService(
                     Context.RECOVERY_SERVICE);
-            rs.rebootRecoveryWithCommand(command, true /* update */);
+            if (!rs.setupBcb(command)) {
+                throw new IOException("Setup BCB failed");
+            }
+
+            // Having set up the BCB (bootloader control block), go ahead and reboot
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            pm.reboot(PowerManager.REBOOT_RECOVERY_UPDATE);
 
             throw new IOException("Reboot failed (no permissions?)");
         }
@@ -708,7 +713,7 @@ public class RecoverySystem {
         // Write the command into BCB (bootloader control block) and boot from
         // there. Will not return unless failed.
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
-        rs.rebootRecoveryWithCommand(command.toString(), false);
+        rs.rebootRecoveryWithCommand(command.toString());
 
         throw new IOException("Reboot failed (no permissions?)");
     }
@@ -908,9 +913,9 @@ public class RecoverySystem {
      * Talks to RecoverySystemService via Binder to set up the BCB command and
      * reboot into recovery accordingly.
      */
-    private void rebootRecoveryWithCommand(String command, boolean update) {
+    private void rebootRecoveryWithCommand(String command) {
         try {
-            mService.rebootRecoveryWithCommand(command, update);
+            mService.rebootRecoveryWithCommand(command);
         } catch (RemoteException ignored) {
         }
     }
