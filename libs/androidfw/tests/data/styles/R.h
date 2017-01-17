@@ -32,6 +32,7 @@ struct R {
       attr_four = 0x7f010003u,
       attr_five = 0x7f010004u,
       attr_indirect = 0x7f010005u,
+      attr_six = 0x7f010006u,
     };
   };
 
@@ -45,6 +46,7 @@ struct R {
     enum : uint32_t {
       StyleOne = 0x7f020000u,
       StyleTwo = 0x7f020001u,
+      StyleThree = 0x7f020002u,
     };
   };
 };

@@ -205,4 +205,5 @@ TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   EXPECT_EQ(public_flag, values_cursor[STYLE_CHANGING_CONFIGURATIONS]);
 }
 
-}  // namespace android
+} // namespace android
+

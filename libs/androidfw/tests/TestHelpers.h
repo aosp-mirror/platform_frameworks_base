@@ -35,6 +35,8 @@ static inline ::std::ostream& operator<<(::std::ostream& out, const android::Str
 
 namespace android {
 
+void InitializeTest(int* argc, char** argv);
+
 enum { MAY_NOT_BE_BAG = false };
 
 void SetTestDataPath(const std::string& path);
@@ -55,6 +57,8 @@ static inline ::std::ostream& operator<<(::std::ostream& out, const ResTable_con
 
 ::testing::AssertionResult IsStringEqual(const ResTable& table, uint32_t resource_id,
                                          const char* expected_str);
+
+std::string GetStringFromPool(const ResStringPool* pool, uint32_t idx);
 
 }  // namespace android
 
