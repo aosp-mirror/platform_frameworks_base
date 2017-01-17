@@ -21,7 +21,6 @@ import android.system.OsConstants;
 
 /**
  * Callback that handles file system requests from ProxyFileDescriptor.
- * @hide
  */
 public abstract class ProxyFileDescriptorCallback {
     /**

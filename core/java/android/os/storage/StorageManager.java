@@ -1327,6 +1327,7 @@ public class StorageManager {
         }
     }
 
+
     /** {@hide} */
     @VisibleForTesting
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
@@ -1378,7 +1379,19 @@ public class StorageManager {
         throw new IOException("Failed to mount bridge.");
     }
 
-    /** {@hide} */
+    /**
+     * Opens seekable ParcelFileDescriptor that routes file operation requests to
+     * ProxyFileDescriptorCallback.
+     *
+     * @param mode The desired access mode, must be one of
+     *     {@link ParcelFileDescriptor#MODE_READ_ONLY},
+     *     {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
+     *     {@link ParcelFileDescriptor#MODE_READ_WRITE}
+     * @param callback Callback to process file operation requests issued on returned file
+     *     descriptor. The callback is invoked on a thread managed by the framework.
+     * @return Seekable ParcelFileDescriptor.
+     * @throws IOException
+     */
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
             int mode, ProxyFileDescriptorCallback callback)
                     throws IOException {
