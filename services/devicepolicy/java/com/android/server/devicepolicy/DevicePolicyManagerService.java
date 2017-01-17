@@ -2498,13 +2498,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Ignore
         }
 
+        // Generate a list of admins from the admin map
+        policy.mAdminList.addAll(policy.mAdminMap.values());
+
         // Might need to upgrade the file by rewriting it
         if (needsRewrite) {
             saveSettingsLocked(userHandle);
         }
-
-        // Generate a list of admins from the admin map
-        policy.mAdminList.addAll(policy.mAdminMap.values());
 
         validatePasswordOwnerLocked(policy);
         updateMaximumTimeToLockLocked(userHandle);
