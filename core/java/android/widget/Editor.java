@@ -2480,7 +2480,7 @@ public class Editor {
     }
 
     void onDrop(DragEvent event) {
-        StringBuilder content = new StringBuilder("");
+        SpannableStringBuilder content = new SpannableStringBuilder();
 
         final DragAndDropPermissions permissions = DragAndDropPermissions.obtain(event);
         if (permissions != null) {
