@@ -3289,7 +3289,9 @@ public class NotificationManagerService extends SystemService {
     private boolean playSound(final NotificationRecord record, Uri soundUri) {
         boolean looping = (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
         // do not play notifications if there is a user of exclusive audio focus
-        if (!mAudioManager.isAudioFocusExclusive()) {
+        // or the device is in vibrate mode
+        if (!mAudioManager.isAudioFocusExclusive() && mAudioManager.getRingerModeInternal()
+                != AudioManager.RINGER_MODE_VIBRATE) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
