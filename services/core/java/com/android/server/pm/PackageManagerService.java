@@ -10116,12 +10116,30 @@ public class PackageManagerService extends IPackageManager.Stub {
                             int flags = permissionState != null
                                     ? permissionState.getFlags() : 0;
                             if (origPermissions.hasRuntimePermission(bp.name, userId)) {
-                                if (permissionsState.grantRuntimePermission(bp, userId) ==
-                                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                    // If we cannot put the permission as it was, we have to write.
+                                // Don't propagate the permission in a permission review mode if
+                                // the former was revoked, i.e. marked to not propagate on upgrade.
+                                // Note that in a permission review mode install permissions are
+                                // represented as constantly granted runtime ones since we need to
+                                // keep a per user state associated with the permission. Also the
+                                // revoke on upgrade flag is no longer applicable and is reset.
+                                final boolean revokeOnUpgrade = (flags & PackageManager
+                                        .FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0;
+                                if (revokeOnUpgrade) {
+                                    flags &= ~PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                                    // Since we changed the flags, we have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
                                 }
+                                if (!mPermissionReviewRequired || !revokeOnUpgrade) {
+                                    if (permissionsState.grantRuntimePermission(bp, userId) ==
+                                            PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                                        // If we cannot put the permission as it was,
+                                        // we have to write.
+                                        changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                                changedRuntimePermissionUserIds, userId);
+                                    }
+                                }
+
                                 // If the app supports runtime permissions no need for a review.
                                 if ((mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED)
                                         && appSupportsRuntimePermissions
