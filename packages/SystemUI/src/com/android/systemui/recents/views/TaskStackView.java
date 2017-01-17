@@ -1858,7 +1858,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 Interpolators.FAST_OUT_SLOW_IN);
         boolean ignoreTaskOverrides = false;
         if (event.dropTarget instanceof TaskStack.DockState) {
-            mLayoutAlgorithm.getGridState().setDragging(true);
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
@@ -1878,7 +1877,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             updateLayoutAlgorithm(true /* boundScroll */);
             ignoreTaskOverrides = true;
         } else {
-            mLayoutAlgorithm.getGridState().setDragging(false);
             // Restore the pre-drag task stack bounds, but ensure that we don't layout the dragging
             // task view, so add it back to the ignore set after updating the layout
             removeIgnoreTask(event.task);
@@ -1889,7 +1887,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        mLayoutAlgorithm.getGridState().setDragging(false);
         // We don't handle drops on the dock regions
         if (event.dropTarget instanceof TaskStack.DockState) {
             // However, we do need to reset the overrides, since the last state of this task stack
@@ -2081,8 +2078,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.reloadOnConfigurationChange(getContext());
 
         boolean hasDockedTask = Recents.getSystemServices().hasDockedTask();
-        mStableLayoutAlgorithm.getGridState().setHasDockedTasks(hasDockedTask);
-        mLayoutAlgorithm.getGridState().setHasDockedTasks(hasDockedTask);
     }
 
     /**
@@ -2139,7 +2134,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Check whether we should use the grid layout.
      */
     public boolean useGridLayout() {
-        return mLayoutAlgorithm.getGridState().useGridLayout();
+        return mLayoutAlgorithm.useGridLayout();
     }
 
     /**

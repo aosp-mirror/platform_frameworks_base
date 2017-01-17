@@ -204,8 +204,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         Resources res = mContext.getResources();
         reloadResources();
         mDummyStackView.reloadOnConfigurationChange();
-        mDummyStackView.getStackAlgorithm().getGridState().setHasDockedTasks(
-            Recents.getSystemServices().hasDockedTask());
     }
 
     /**
