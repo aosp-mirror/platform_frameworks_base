@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -64,17 +65,21 @@ import android.net.WifiKey;
 import android.net.wifi.WifiConfiguration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Pair;
 
 import com.android.server.devicepolicy.MockUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,6 +94,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link NetworkScoreService}.
@@ -114,6 +121,9 @@ public class NetworkScoreServiceTest {
     private ContentResolver mContentResolver;
     private NetworkScoreService mNetworkScoreService;
     private RecommendationRequest mRecommendationRequest;
+    private RemoteCallback mRemoteCallback;
+    private OnResultListener mOnResultListener;
+    private HandlerThread mHandlerThread;
 
     @Before
     public void setUp() throws Exception {
@@ -123,12 +133,22 @@ public class NetworkScoreServiceTest {
         mContentResolver = InstrumentationRegistry.getContext().getContentResolver();
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getResources()).thenReturn(mResources);
-        mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager);
+        mHandlerThread = new HandlerThread("NetworkScoreServiceTest");
+        mHandlerThread.start();
+        mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager,
+                mHandlerThread.getLooper());
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = "NetworkScoreServiceTest_SSID";
         configuration.BSSID = "NetworkScoreServiceTest_BSSID";
         mRecommendationRequest = new RecommendationRequest.Builder()
             .setCurrentRecommendedWifiConfig(configuration).build();
+        mOnResultListener = new OnResultListener();
+        mRemoteCallback = new RemoteCallback(mOnResultListener);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mHandlerThread.quitSafely();
     }
 
     @Test
@@ -259,6 +279,104 @@ public class NetworkScoreServiceTest {
                 result.getWifiConfiguration().SSID);
         assertEquals(providerResult.getWifiConfiguration().BSSID,
                 result.getWifiConfiguration().BSSID);
+    }
+
+    @Test
+    public void testRequestRecommendationAsync_noPermission() throws Exception {
+        doThrow(new SecurityException()).when(mContext)
+                .enforceCallingOrSelfPermission(eq(permission.BROADCAST_NETWORK_PRIVILEGED),
+                        anyString());
+        try {
+            mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
+                    mRemoteCallback);
+            fail("BROADCAST_NETWORK_PRIVILEGED not enforced.");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testRequestRecommendationAsync_providerNotConnected() throws Exception {
+        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
+                mRemoteCallback);
+        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
+        assertTrue(callbackRan);
+        verifyZeroInteractions(mRecommendationProvider);
+    }
+
+    @Test
+    public void testRequestRecommendationAsync_requestTimesOut() throws Exception {
+        injectProvider();
+        mNetworkScoreService.setRecommendationRequestTimeoutMs(0L);
+        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
+                mRemoteCallback);
+        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
+        assertTrue(callbackRan);
+        verify(mRecommendationProvider).requestRecommendation(eq(mRecommendationRequest),
+                isA(IRemoteCallback.Stub.class), anyInt());
+    }
+
+    @Test
+    public void testRequestRecommendationAsync_requestSucceeds() throws Exception {
+        injectProvider();
+        final Bundle bundle = new Bundle();
+        doAnswer(invocation -> {
+            invocation.getArgumentAt(1, IRemoteCallback.class).sendResult(bundle);
+            return null;
+        }).when(mRecommendationProvider)
+                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
+                        anyInt());
+
+        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
+                mRemoteCallback);
+        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
+        assertTrue(callbackRan);
+        // If it's not the same instance then something else ran the callback.
+        assertSame(bundle, mOnResultListener.receivedBundle);
+    }
+
+    @Test
+    public void testRequestRecommendationAsync_requestThrowsRemoteException() throws Exception {
+        injectProvider();
+        doThrow(new RemoteException()).when(mRecommendationProvider)
+                .requestRecommendation(eq(mRecommendationRequest), isA(IRemoteCallback.class),
+                        anyInt());
+
+        mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
+                mRemoteCallback);
+        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
+        assertTrue(callbackRan);
+    }
+
+    @Test
+    public void oneTimeCallback_multipleCallbacks() throws Exception {
+        NetworkScoreService.OneTimeCallback callback =
+                new NetworkScoreService.OneTimeCallback(mRemoteCallback);
+        callback.sendResult(null);
+        callback.sendResult(null);
+        assertEquals(1, mOnResultListener.resultCount);
+    }
+
+    @Test
+    public void serviceHandler_timeoutMsg() throws Exception {
+        NetworkScoreService.ServiceHandler handler =
+                new NetworkScoreService.ServiceHandler(mHandlerThread.getLooper());
+        NetworkScoreService.OneTimeCallback callback =
+                new NetworkScoreService.OneTimeCallback(mRemoteCallback);
+        final Pair<RecommendationRequest, NetworkScoreService.OneTimeCallback> pair =
+                Pair.create(mRecommendationRequest, callback);
+        handler.obtainMessage(
+                NetworkScoreService.ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT, pair)
+                .sendToTarget();
+
+        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
+        assertTrue(callbackRan);
+        assertTrue(mOnResultListener.receivedBundle.containsKey(EXTRA_RECOMMENDATION_RESULT));
+        RecommendationResult result =
+                mOnResultListener.receivedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT);
+        assertTrue(result.hasRecommendation());
+        assertEquals(mRecommendationRequest.getCurrentSelectedConfig().SSID,
+                result.getWifiConfiguration().SSID);
     }
 
     @Test
@@ -514,5 +632,18 @@ public class NetworkScoreServiceTest {
         when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
                 isA(UserHandle.class))).thenReturn(true);
         mNetworkScoreService.systemRunning();
+    }
+
+    private static class OnResultListener implements RemoteCallback.OnResultListener {
+        private final CountDownLatch countDownLatch = new CountDownLatch(1);
+        private int resultCount;
+        private Bundle receivedBundle;
+
+        @Override
+        public void onResult(Bundle result) {
+            countDownLatch.countDown();
+            resultCount++;
+            receivedBundle = result;
+        }
     }
 }
