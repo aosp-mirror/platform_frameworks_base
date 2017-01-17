@@ -75,6 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -87,7 +88,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private final Context mContext;
     private final NetworkScorerAppManager mNetworkScorerAppManager;
-    private final RequestRecommendationCaller mRequestRecommendationCaller;
+    private final AtomicReference<RequestRecommendationCaller> mReqRecommendationCallerRef;
     @GuardedBy("mScoreCaches")
     private final Map<Integer, RemoteCallbackList<INetworkScoreCache>> mScoreCaches;
     /** Lock used to update mPackageMonitor when scorer package changes occur. */
@@ -249,8 +250,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
                 null /* scheduler */);
-        mRequestRecommendationCaller =
-            new RequestRecommendationCaller(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+        mReqRecommendationCallerRef = new AtomicReference<>(
+                new RequestRecommendationCaller(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS));
         mRecommendationRequestTimeoutMs = TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS;
         mHandler = new ServiceHandler(looper);
         mContentObserver = new DispatchingContentObserver(context, mHandler);
@@ -569,7 +570,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             final INetworkRecommendationProvider provider = getRecommendationProvider();
             if (provider != null) {
                 try {
-                    return mRequestRecommendationCaller.getRecommendationResult(provider, request);
+                    final RequestRecommendationCaller caller = mReqRecommendationCallerRef.get();
+                    return caller.getRecommendationResult(provider, request);
                 } catch (RemoteException | TimeoutException e) {
                     Log.w(TAG, "Failed to request a recommendation.", e);
                     // TODO(jjoslin): 12/15/16 - Keep track of failures.
@@ -748,6 +750,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
         if (DBG) Log.d(TAG, "Updating the recommendation request timeout to " + timeoutMs + " ms");
         mRecommendationRequestTimeoutMs = timeoutMs;
+        mReqRecommendationCallerRef.set(new RequestRecommendationCaller(timeoutMs));
     }
 
     private static class ScoringServiceConnection implements ServiceConnection {
