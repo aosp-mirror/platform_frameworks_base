@@ -1081,10 +1081,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             @Nullable Bundle queryArgs, @Nullable CancellationSignal cancellationSignal) {
         queryArgs = queryArgs != null ? queryArgs : Bundle.EMPTY;
 
+        // if client doesn't supply an SQL sort order argument, attempt to build one from
+        // QUERY_ARG_SORT* arguments.
         String sortClause = queryArgs.getString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER);
-
-        // if client didn't explicitly supply and sql sort order argument, we try to build
-        // one from sort columns if present.
         if (sortClause == null && queryArgs.containsKey(ContentResolver.QUERY_ARG_SORT_COLUMNS)) {
             sortClause = ContentResolver.createSqlSortClause(queryArgs);
         }
