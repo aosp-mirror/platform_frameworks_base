@@ -9632,6 +9632,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod();
         info.setPassword(isPassword);
         info.setText(getTextForAccessibility());
+        info.setHintText(mHint);
+        info.setShowingHintText(isShowingHint());
 
         if (mBufferType == BufferType.EDITABLE) {
             info.setEditable(true);
