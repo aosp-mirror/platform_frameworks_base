@@ -14,6 +14,7 @@
 
 subdirs = [
     "libs/*",
+    "tools/*",
     "native/android",
     "native/graphics/jni",
 ]

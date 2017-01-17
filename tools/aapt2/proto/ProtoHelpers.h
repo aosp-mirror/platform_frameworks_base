@@ -23,7 +23,7 @@
 #include "ResourceTable.h"
 #include "Source.h"
 #include "StringPool.h"
-#include "proto/frameworks/base/tools/aapt2/Format.pb.h"
+#include "Format.pb.h"
 
 namespace aapt {
 
