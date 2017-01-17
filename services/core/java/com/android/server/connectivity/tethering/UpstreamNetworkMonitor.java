@@ -26,6 +26,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.StateMachine;
 
 import java.util.HashMap;
@@ -70,6 +71,12 @@ public class UpstreamNetworkMonitor {
         mContext = ctx;
         mTarget = tgt;
         mWhat = what;
+    }
+
+    @VisibleForTesting
+    public UpstreamNetworkMonitor(StateMachine tgt, int what, ConnectivityManager cm) {
+        this(null, tgt, what);
+        mCM = cm;
     }
 
     public void start() {
