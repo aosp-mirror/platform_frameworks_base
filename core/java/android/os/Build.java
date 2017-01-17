@@ -887,6 +887,21 @@ public class Build {
             "eng".equals(getString("ro.build.type"));
 
     /**
+     * Whether this build is running inside a container.
+     *
+     * We should try to avoid checking this flag if possible to minimize
+     * unnecessarily diverging from non-container Android behavior.
+     * Checking this flag is acceptable when low-level resources being
+     * different, e.g. the availability of certain capabilities, access to
+     * system resources being restricted, and the fact that the host OS might
+     * handle some features for us.
+     * For higher-level behavior differences, other checks should be preferred.
+     * @hide
+     */
+    public static final boolean IS_CONTAINER =
+            SystemProperties.getBoolean("ro.boot.container", false);
+
+    /**
      * Specifies whether the permissions needed by a legacy app should be
      * reviewed before any of its components can run. A legacy app is one
      * with targetSdkVersion < 23, i.e apps using the old permission model.
