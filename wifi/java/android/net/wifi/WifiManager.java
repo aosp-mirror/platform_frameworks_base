@@ -1075,7 +1075,6 @@ public class WifiManager {
         }
     }
 
-    /* Keep this list in sync with wifi_hal.h */
     /** @hide */
     public static final int WIFI_FEATURE_INFRA            = 0x0001;  // Basic infrastructure mode
     /** @hide */
@@ -1089,7 +1088,7 @@ public class WifiManager {
     /** @hide */
     public static final int WIFI_FEATURE_SCANNER          = 0x0020;  // WifiScanner APIs
     /** @hide */
-    public static final int WIFI_FEATURE_AWARE              = 0x0040;  // Wi-Fi AWare networking
+    public static final int WIFI_FEATURE_AWARE            = 0x0040;  // Wi-Fi AWare networking
     /** @hide */
     public static final int WIFI_FEATURE_D2D_RTT          = 0x0080;  // Device-to-device RTT
     /** @hide */
@@ -1107,13 +1106,28 @@ public class WifiManager {
     /** @hide */
     public static final int WIFI_FEATURE_EPR              = 0x4000;  // Enhanced power reporting
     /** @hide */
-    public static final int WIFI_FEATURE_AP_STA            = 0x8000;  // Support for AP STA Concurrency
+    public static final int WIFI_FEATURE_AP_STA           = 0x8000;  // AP STA Concurrency
     /** @hide */
-    public static final int WIFI_FEATURE_LINK_LAYER_STATS  = 0x10000; // Link layer stats collection
+    public static final int WIFI_FEATURE_LINK_LAYER_STATS = 0x10000; // Link layer stats collection
     /** @hide */
-    public static final int WIFI_FEATURE_LOGGER            = 0x20000; // WiFi Logger
+    public static final int WIFI_FEATURE_LOGGER           = 0x20000; // WiFi Logger
     /** @hide */
-    public static final int WIFI_FEATURE_HAL_EPNO          = 0x40000; // WiFi PNO enhanced
+    public static final int WIFI_FEATURE_HAL_EPNO         = 0x40000; // Enhanced PNO
+    /** @hide */
+    public static final int WIFI_FEATURE_RSSI_MONITOR     = 0x80000; // RSSI Monitor
+    /** @hide */
+    public static final int WIFI_FEATURE_MKEEP_ALIVE      = 0x100000; // mkeep_alive
+    /** @hide */
+    public static final int WIFI_FEATURE_CONFIG_NDO       = 0x200000; // ND offload
+    /** @hide */
+    public static final int WIFI_FEATURE_TRANSMIT_POWER   = 0x400000; // Capture transmit power
+    /** @hide */
+    public static final int WIFI_FEATURE_CONTROL_ROAMING  = 0x800000; // Control firmware roaming
+    /** @hide */
+    public static final int WIFI_FEATURE_IE_WHITELIST     = 0x1000000; // Probe IE white listing
+    /** @hide */
+    public static final int WIFI_FEATURE_SCAN_RAND        = 0x2000000; // Random MAC & Probe seq
+
 
     private int getSupportedFeatures() {
         try {
