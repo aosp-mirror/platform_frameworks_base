@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -35,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import dalvik.system.DexFile;
 
@@ -43,6 +45,10 @@ import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_PROFILE_GUIDED;
 import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
+import static com.android.server.pm.Installer.DEXOPT_SECONDARY_DEX;
+import static com.android.server.pm.Installer.DEXOPT_FORCE;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_CE;
+import static com.android.server.pm.Installer.DEXOPT_STORAGE_DE;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -52,13 +58,13 @@ import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 /**
  * Helper class for running dexopt command on packages.
  */
-class PackageDexOptimizer {
+public class PackageDexOptimizer {
     private static final String TAG = "PackageManager.DexOptimizer";
     static final String OAT_DIR_NAME = "oat";
     // TODO b/19550105 Remove error codes and use exceptions
-    static final int DEX_OPT_SKIPPED = 0;
-    static final int DEX_OPT_PERFORMED = 1;
-    static final int DEX_OPT_FAILED = -1;
+    public static final int DEX_OPT_SKIPPED = 0;
+    public static final int DEX_OPT_PERFORMED = 1;
+    public static final int DEX_OPT_FAILED = -1;
 
     private final Installer mInstaller;
     private final Object mInstallLock;
@@ -100,6 +106,9 @@ class PackageDexOptimizer {
             return DEX_OPT_SKIPPED;
         }
         synchronized (mInstallLock) {
+            // During boot the system doesn't need to instantiate and obtain a wake lock.
+            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
+            // dexopt.
             final boolean useLock = mSystemReady;
             if (useLock) {
                 mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
@@ -130,9 +139,11 @@ class PackageDexOptimizer {
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
 
-        final String compilerFilter = getRealCompilerFilter(pkg, targetCompilerFilter);
+        final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
+                targetCompilerFilter, isUsedByOtherApps(pkg));
         final boolean profileUpdated = checkForProfileUpdates &&
                 isProfileUpdated(pkg, sharedGid, compilerFilter);
+
         // TODO(calin,jeffhao): shared library paths should be adjusted to include previous code
         // paths (b/34169257).
         final String sharedLibrariesPath = getSharedLibrariesPath(sharedLibraries);
@@ -201,6 +212,79 @@ class PackageDexOptimizer {
     }
 
     /**
+     * Performs dexopt on the secondary dex {@code path} belonging to the app {@code info}.
+     *
+     * @return
+     *      DEX_OPT_FAILED if there was any exception during dexopt
+     *      DEX_OPT_PERFORMED if dexopt was performed successfully on the given path.
+     * NOTE that DEX_OPT_PERFORMED for secondary dex files includes the case when the dex file
+     * didn't need an update. That's because at the moment we don't get more than success/failure
+     * from installd.
+     *
+     * TODO(calin): Consider adding return codes to installd dexopt invocation (rather than
+     * throwing exceptions). Or maybe make a separate call to installd to get DexOptNeeded, though
+     * that seems wasteful.
+     */
+    public int dexOptSecondaryDexPath(ApplicationInfo info, String path, Set<String> isas,
+            String compilerFilter, boolean isUsedByOtherApps) {
+        synchronized (mInstallLock) {
+            // During boot the system doesn't need to instantiate and obtain a wake lock.
+            // PowerManager might not be ready, but that doesn't mean that we can't proceed with
+            // dexopt.
+            final boolean useLock = mSystemReady;
+            if (useLock) {
+                mDexoptWakeLock.setWorkSource(new WorkSource(info.uid));
+                mDexoptWakeLock.acquire();
+            }
+            try {
+                return dexOptSecondaryDexPathLI(info, path, isas, compilerFilter,
+                        isUsedByOtherApps);
+            } finally {
+                if (useLock) {
+                    mDexoptWakeLock.release();
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path, Set<String> isas,
+            String compilerFilter, boolean isUsedByOtherApps) {
+        int dexoptFlags = getDexFlags(info, compilerFilter) | DEXOPT_SECONDARY_DEX;
+        // Check the app storage and add the appropriate flags.
+        if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+            dexoptFlags |= DEXOPT_STORAGE_DE;
+        } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+            dexoptFlags |= DEXOPT_STORAGE_CE;
+        } else {
+            Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
+            return DEX_OPT_FAILED;
+        }
+        compilerFilter = getRealCompilerFilter(info, compilerFilter, isUsedByOtherApps);
+        Log.d(TAG, "Running dexopt on: " + path
+                + " pkg=" + info.packageName + " isa=" + isas
+                + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
+                + " target-filter=" + compilerFilter);
+
+        try {
+            for (String isa : isas) {
+                // Reuse the same dexopt path as for the primary apks. We don't need all the
+                // arguments as some (dexopNeeded and oatDir) will be computed by installd because
+                // system server cannot read untrusted app content.
+                // TODO(calin): maybe add a separate call.
+                mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
+                        /*oatDir*/ null, dexoptFlags,
+                        compilerFilter, info.volumeUuid, /*sharedLibrariesPath*/ null);
+            }
+
+            return DEX_OPT_PERFORMED;
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to dexopt", e);
+            return DEX_OPT_FAILED;
+        }
+    }
+
+    /**
      * Adjust the given dexopt-needed value. Can be overridden to influence the decision to
      * optimize or not (and in what way).
      */
@@ -246,8 +330,9 @@ class PackageDexOptimizer {
      * The target filter will be updated if the package code is used by other apps
      * or if it has the safe mode flag set.
      */
-    private String getRealCompilerFilter(PackageParser.Package pkg, String targetCompilerFilter) {
-        int flags = pkg.applicationInfo.flags;
+    private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
+            boolean isUsedByOtherApps) {
+        int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         if (vmSafeMode) {
             // For the compilation, it doesn't really matter what we return here because installd
@@ -259,7 +344,7 @@ class PackageDexOptimizer {
             return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
         }
 
-        if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps(pkg)) {
+        if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
             // If the dex files is used by other apps, we cannot use profile-guided compilation.
             return getNonProfileGuidedCompilerFilter(targetCompilerFilter);
         }
@@ -272,12 +357,16 @@ class PackageDexOptimizer {
      * filter.
      */
     private int getDexFlags(PackageParser.Package pkg, String compilerFilter) {
-        int flags = pkg.applicationInfo.flags;
+        return getDexFlags(pkg.applicationInfo, compilerFilter);
+    }
+
+    private int getDexFlags(ApplicationInfo info, String compilerFilter) {
+        int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !pkg.isForwardLocked() && !isProfileGuidedFilter;
+        boolean isPublic = !info.isForwardLocked() && !isProfileGuidedFilter;
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
@@ -437,6 +526,19 @@ class PackageDexOptimizer {
         if ((flags & DEXOPT_SAFEMODE) == DEXOPT_SAFEMODE) {
             flagsList.add("safemode");
         }
+        if ((flags & DEXOPT_SECONDARY_DEX) == DEXOPT_SECONDARY_DEX) {
+            flagsList.add("secondary");
+        }
+        if ((flags & DEXOPT_FORCE) == DEXOPT_FORCE) {
+            flagsList.add("force");
+        }
+        if ((flags & DEXOPT_STORAGE_CE) == DEXOPT_STORAGE_CE) {
+            flagsList.add("storage_ce");
+        }
+        if ((flags & DEXOPT_STORAGE_DE) == DEXOPT_STORAGE_DE) {
+            flagsList.add("storage_de");
+        }
+
         return String.join(",", flagsList);
     }
 
@@ -460,6 +562,13 @@ class PackageDexOptimizer {
             // Ensure compilation, no matter the current state.
             // TODO: The return value is wrong when patchoat is needed.
             return DexFile.DEX2OAT_FROM_SCRATCH;
+        }
+
+        @Override
+        protected int adjustDexoptFlags(int flags) {
+            // Add DEXOPT_FORCE flag to signal installd that it should force compilation
+            // and discard dexoptanalyzer result.
+            return flags | DEXOPT_FORCE;
         }
     }
 }

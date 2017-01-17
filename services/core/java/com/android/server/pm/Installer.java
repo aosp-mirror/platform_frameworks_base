@@ -50,6 +50,14 @@ public class Installer extends SystemService {
     public static final int DEXOPT_BOOTCOMPLETE   = 1 << 4;
     /** Hint that the dexopt type is profile-guided. */
     public static final int DEXOPT_PROFILE_GUIDED = 1 << 5;
+    /** The compilation is for a secondary dex file. */
+    public static final int DEXOPT_SECONDARY_DEX  = 1 << 6;
+    /** Ignore the result of dexoptNeeded and force compilation. */
+    public static final int DEXOPT_FORCE          = 1 << 7;
+    /** Indicates that the dex file passed to dexopt in on CE storage. */
+    public static final int DEXOPT_STORAGE_CE     = 1 << 8;
+    /** Indicates that the dex file passed to dexopt in on DE storage. */
+    public static final int DEXOPT_STORAGE_DE     = 1 << 9;
 
     // NOTE: keep in sync with installd
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;

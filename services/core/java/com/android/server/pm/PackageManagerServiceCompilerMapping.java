@@ -23,7 +23,7 @@ import dalvik.system.DexFile;
 /**
  * Manage (retrieve) mappings from compilation reason to compilation filter.
  */
-class PackageManagerServiceCompilerMapping {
+public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     static final String REASON_STRINGS[] = {
             "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "nsys-library", "shared-apk",

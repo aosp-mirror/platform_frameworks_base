@@ -281,6 +281,7 @@ class PackageManagerShellCommand extends ShellCommand {
         String compilerFilter = null;
         String compilationReason = null;
         String checkProfilesRaw = null;
+        boolean secondaryDex = false;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -307,6 +308,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     forceCompilation = true;
                     clearProfileData = true;
                     compilationReason = "install";
+                    break;
+                case "--secondary-dex":
+                    secondaryDex = true;
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -380,8 +384,11 @@ class PackageManagerShellCommand extends ShellCommand {
                 mInterface.clearApplicationProfileData(packageName);
             }
 
-            boolean result = mInterface.performDexOptMode(packageName,
-                    checkProfiles, targetCompilerFilter, forceCompilation);
+            boolean result = secondaryDex
+                    ? mInterface.performDexOptSecondary(packageName,
+                            targetCompilerFilter, forceCompilation)
+                    : mInterface.performDexOptMode(packageName,
+                            checkProfiles, targetCompilerFilter, forceCompilation);
             if (!result) {
                 failedPackages.add(packageName);
             }
@@ -1441,6 +1448,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         pw.println("      --reset: restore package to its post-install state");
         pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
+        pw.println("      --secondary-dex: copmile app secondary dex files");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");
