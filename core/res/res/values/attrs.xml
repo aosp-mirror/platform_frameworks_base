@@ -4707,7 +4707,8 @@
             screens with limited space for text. -->
             <enum name="full" value="2" />
         </attr>
-        <!-- Specify the type of auto-size. -->
+        <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
+        works only for TextView -->
         <attr name="autoSizeText" format="enum">
             <!-- No auto-sizing (default). -->
             <enum name="none" value="0" />

@@ -42,6 +42,8 @@ import android.view.autofill.AutoFillValue;
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/text.html">Text Fields</a>
  * guide.</p>
  * <p>
+ * This widget does not support auto-sizing text.
+ * <p>
  * <b>XML attributes</b>
  * <p>
  * See {@link android.R.styleable#EditText EditText Attributes},
