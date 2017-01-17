@@ -1905,31 +1905,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDnsServersForNetwork(int netId, String[] servers, String domains) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        Command cmd;
-        if (servers.length > 0) {
-            cmd = new Command("resolver", "setnetdns", netId,
-                    (domains == null ? "" : domains));
-            for (String s : servers) {
-                InetAddress a = NetworkUtils.numericToInetAddress(s);
-                if (a.isAnyLocalAddress() == false) {
-                    cmd.appendArg(a.getHostAddress());
-                }
-            }
-        } else {
-            cmd = new Command("resolver", "clearnetdns", netId);
-        }
-
-        try {
-            mConnector.execute(cmd);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void addVpnUidRanges(int netId, UidRange[] ranges) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Object[] argv = new Object[3 + MAX_UID_RANGES_PER_COMMAND];
