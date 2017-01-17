@@ -2112,6 +2112,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             boolean wallpaperOnly, boolean includeDecor) {
         Bitmap bitmap = screenshotApplications(appToken, width, height, includeFullDisplay,
                 frameScale, wallpaperOnly, includeDecor, SurfaceControl::screenshot);
+        if (bitmap == null) {
+            return null;
+        }
 
         if (DEBUG_SCREENSHOT) {
             // TEST IF IT's ALL BLACK
