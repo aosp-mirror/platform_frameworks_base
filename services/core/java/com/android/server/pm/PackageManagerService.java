@@ -1713,9 +1713,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // Now that we successfully installed the package, grant runtime
-            // permissions if requested before broadcasting the install.
-            if (grantPermissions && res.pkg.applicationInfo.targetSdkVersion
-                    >= Build.VERSION_CODES.M) {
+            // permissions if requested before broadcasting the install. Also
+            // for legacy apps in permission review mode we clear the permission
+            // review flag which is used to emulate runtime permissions for
+            // legacy apps.
+            if (grantPermissions) {
                 grantRequestedRuntimePermissions(res.pkg, res.newUsers, grantedPermissions);
             }
 
@@ -1958,11 +1960,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (int userId : userIds) {
             grantRequestedRuntimePermissionsForUser(pkg, userId, grantedPermissions);
         }
-
-        // We could have touched GID membership, so flush out packages.list
-        synchronized (mPackages) {
-            mSettings.writePackageListLPr();
-        }
     }
 
     private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId,
@@ -1977,6 +1974,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 
+        final boolean supportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
+                >= Build.VERSION_CODES.M;
+
         for (String permission : pkg.requestedPermissions) {
             final BasePermission bp;
             synchronized (mPackages) {
@@ -1986,9 +1986,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     && (grantedPermissions == null
                            || ArrayUtils.contains(grantedPermissions, permission))) {
                 final int flags = permissionsState.getPermissionFlags(permission, userId);
-                // Installer cannot change immutable permissions.
-                if ((flags & immutableFlags) == 0) {
-                    grantRuntimePermission(pkg.packageName, permission, userId);
+                if (supportsRuntimePermissions) {
+                    // Installer cannot change immutable permissions.
+                    if ((flags & immutableFlags) == 0) {
+                        grantRuntimePermission(pkg.packageName, permission, userId);
+                    }
+                } else if (mPermissionReviewRequired) {
+                    // In permission review mode we clear the review flag when we
+                    // are asked to install the app with all permissions granted.
+                    if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                        updatePermissionFlags(permission, pkg.packageName,
+                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED, 0, userId);
+                    }
                 }
             }
         }
