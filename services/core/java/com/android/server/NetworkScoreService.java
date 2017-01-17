@@ -53,6 +53,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -93,12 +94,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     private final Object mPackageMonitorLock = new Object();
     private final Object mServiceConnectionLock = new Object();
     private final Handler mHandler;
+    private final DispatchingContentObserver mContentObserver;
 
     @GuardedBy("mPackageMonitorLock")
     private NetworkScorerPackageMonitor mPackageMonitor;
     @GuardedBy("mServiceConnectionLock")
     private ScoringServiceConnection mServiceConnection;
-    private long mRecommendationRequestTimeoutMs;
+    private volatile long mRecommendationRequestTimeoutMs;
 
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -194,12 +196,25 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     /**
-     * Reevaluates the service binding when the Settings toggle is changed.
+     * Dispatches observed content changes to a handler for further processing.
      */
-    private class SettingsObserver extends ContentObserver {
+    @VisibleForTesting
+    public static class DispatchingContentObserver extends ContentObserver {
+        final private Map<Uri, Integer> mUriEventMap;
+        final private Context mContext;
+        final private Handler mHandler;
 
-        public SettingsObserver() {
-            super(null /*handler*/);
+        public DispatchingContentObserver(Context context, Handler handler) {
+            super(handler);
+            mContext = context;
+            mHandler = handler;
+            mUriEventMap = new ArrayMap<>();
+        }
+
+        void observe(Uri uri, int what) {
+            mUriEventMap.put(uri, what);
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(uri, false /*notifyForDescendants*/, this);
         }
 
         @Override
@@ -210,7 +225,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (DBG) Log.d(TAG, String.format("onChange(%s, %s)", selfChange, uri));
-            bindToScoringServiceIfNeeded();
+            final Integer what = mUriEventMap.get(uri);
+            if (what != null) {
+                mHandler.obtainMessage(what).sendToTarget();
+            } else {
+                Log.w(TAG, "No matching event to send for URI = " + uri);
+            }
         }
     }
 
@@ -229,18 +249,19 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
                 null /* scheduler */);
-        // TODO(jjoslin): 12/15/16 - Make timeout configurable.
         mRequestRecommendationCaller =
             new RequestRecommendationCaller(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
         mRecommendationRequestTimeoutMs = TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS;
         mHandler = new ServiceHandler(looper);
+        mContentObserver = new DispatchingContentObserver(context, mHandler);
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
     void systemReady() {
         if (DBG) Log.d(TAG, "systemReady");
         registerPackageMonitorIfNeeded();
-        registerRecommendationSettingObserverIfNeeded();
+        registerRecommendationSettingsObserver();
+        refreshRecommendationRequestTimeoutMs();
     }
 
     /** Called when the system is ready for us to start third-party code. */
@@ -254,14 +275,18 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         bindToScoringServiceIfNeeded();
     }
 
-    private void registerRecommendationSettingObserverIfNeeded() {
+    private void registerRecommendationSettingsObserver() {
         final List<String> providerPackages =
             mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
         if (!providerPackages.isEmpty()) {
-            final ContentResolver resolver = mContext.getContentResolver();
-            final Uri uri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
-            resolver.registerContentObserver(uri, false, new SettingsObserver());
+            final Uri enabledUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
+            mContentObserver.observe(enabledUri,
+                    ServiceHandler.MSG_RECOMMENDATIONS_ENABLED_CHANGED);
         }
+
+        final Uri timeoutUri = Global.getUriFor(Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS);
+        mContentObserver.observe(timeoutUri,
+                ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED);
     }
 
     private void registerPackageMonitorIfNeeded() {
@@ -714,8 +739,15 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     @VisibleForTesting
-    public void setRecommendationRequestTimeoutMs(long recommendationRequestTimeoutMs) {
-        mRecommendationRequestTimeoutMs = recommendationRequestTimeoutMs;
+    public void refreshRecommendationRequestTimeoutMs() {
+        final ContentResolver cr = mContext.getContentResolver();
+        long timeoutMs = Settings.Global.getLong(cr,
+                Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, -1L /*default*/);
+        if (timeoutMs < 0) {
+            timeoutMs = TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS;
+        }
+        if (DBG) Log.d(TAG, "Updating the recommendation request timeout to " + timeoutMs + " ms");
+        mRecommendationRequestTimeoutMs = timeoutMs;
     }
 
     private static class ScoringServiceConnection implements ServiceConnection {
@@ -865,8 +897,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     @VisibleForTesting
-    public static final class ServiceHandler extends Handler {
+    public final class ServiceHandler extends Handler {
         public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT = 1;
+        public static final int MSG_RECOMMENDATIONS_ENABLED_CHANGED = 2;
+        public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED = 3;
 
         public ServiceHandler(Looper looper) {
             super(looper);
@@ -885,6 +919,14 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     final RecommendationRequest request = pair.first;
                     final OneTimeCallback remoteCallback = pair.second;
                     sendDefaultRecommendationResponse(request, remoteCallback);
+                    break;
+
+                case MSG_RECOMMENDATIONS_ENABLED_CHANGED:
+                    bindToScoringServiceIfNeeded();
+                    break;
+
+                case MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED:
+                    refreshRecommendationRequestTimeoutMs();
                     break;
 
                 default:
