@@ -306,6 +306,10 @@ public class NotificationColorUtil {
         return ColorUtilsFromCompat.LABToColor(high, a, b);
     }
 
+    public static int ensureTextContrastOnBlack(int color) {
+        return findContrastColorAgainstDark(color, Color.BLACK, true /* fg */, 12);
+    }
+
     /**
      * Finds a text color with sufficient contrast over bg that has the same hue as the original
      * color, assuming it is for large text.
@@ -391,6 +395,25 @@ public class NotificationColorUtil {
         ColorUtilsFromCompat.colorToLAB(baseColor, result);
         result[0] = Math.min(100, result[0] + amount);
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
+    }
+
+    public static int resolveAmbientColor(Context context, int notificationColor) {
+        final int resolvedColor = resolveColor(context, notificationColor);
+
+        int color = resolvedColor;
+        color = NotificationColorUtil.ensureTextContrastOnBlack(color);
+
+        if (color != resolvedColor) {
+            if (DEBUG){
+                Log.w(TAG, String.format(
+                        "Ambient contrast of notification for %s is %s (over black)"
+                                + " by changing #%s to #%s",
+                        context.getPackageName(),
+                        NotificationColorUtil.contrastChange(resolvedColor, color, Color.BLACK),
+                        Integer.toHexString(resolvedColor), Integer.toHexString(color)));
+            }
+        }
+        return color;
     }
 
     /**
