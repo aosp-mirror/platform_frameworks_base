@@ -24,7 +24,6 @@
 #include "pipeline/skia/AnimatedDrawables.h"
 
 #include <SkDrawable.h>
-#include <SkDevice.h>
 #include <SkDeque.h>
 #include <SkDrawFilter.h>
 #include <SkGraphics.h>
