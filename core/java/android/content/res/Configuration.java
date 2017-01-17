@@ -766,6 +766,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
     }
 
+    /**
+     * Sets the fields in this object to those in the given Configuration.
+     *
+     * @param o The Configuration object used to set the values of this Configuration's fields.
+     */
     public void setTo(Configuration o) {
         fontScale = o.fontScale;
         mcc = o.mcc;
