@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.os.Trace;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -216,12 +217,26 @@ public final class BroadcastQueue {
 
     public void enqueueParallelBroadcastLocked(BroadcastRecord r) {
         mParallelBroadcasts.add(r);
-        r.enqueueClockTime = System.currentTimeMillis();
+        enqueueBroadcastHelper(r);
     }
 
     public void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
         mOrderedBroadcasts.add(r);
+        enqueueBroadcastHelper(r);
+    }
+
+    /**
+     * Don't call this method directly; call enqueueParallelBroadcastLocked or
+     * enqueueOrderedBroadcastLocked.
+     */
+    private void enqueueBroadcastHelper(BroadcastRecord r) {
         r.enqueueClockTime = System.currentTimeMillis();
+
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_PENDING),
+                System.identityHashCode(r));
+        }
     }
 
     public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {
@@ -751,7 +766,7 @@ public final class BroadcastQueue {
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "processNextBroadcast ["
                     + mQueueName + "]: "
-                    + mParallelBroadcasts.size() + " broadcasts, "
+                    + mParallelBroadcasts.size() + " parallel broadcasts, "
                     + mOrderedBroadcasts.size() + " ordered broadcasts");
 
             mService.updateCpuStats();
@@ -765,6 +780,16 @@ public final class BroadcastQueue {
                 r = mParallelBroadcasts.remove(0);
                 r.dispatchTime = SystemClock.uptimeMillis();
                 r.dispatchClockTime = System.currentTimeMillis();
+
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_PENDING),
+                        System.identityHashCode(r));
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_DELIVERED),
+                        System.identityHashCode(r));
+                }
+
                 final int N = r.receivers.size();
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Processing parallel broadcast ["
                         + mQueueName + "] " + r);
@@ -915,6 +940,14 @@ public final class BroadcastQueue {
             if (recIdx == 0) {
                 r.dispatchTime = r.receiverTime;
                 r.dispatchClockTime = System.currentTimeMillis();
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_PENDING),
+                        System.identityHashCode(r));
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_DELIVERED),
+                        System.identityHashCode(r));
+                }
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Processing ordered broadcast ["
                         + mQueueName + "] " + r);
             }
@@ -1398,6 +1431,12 @@ public final class BroadcastQueue {
         }
         r.finishTime = SystemClock.uptimeMillis();
 
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_DELIVERED),
+                System.identityHashCode(r));
+        }
+
         mBroadcastHistory[mHistoryNext] = r;
         mHistoryNext = ringAdvance(mHistoryNext, 1, MAX_BROADCAST_HISTORY);
 
@@ -1454,6 +1493,14 @@ public final class BroadcastQueue {
                     r.nextReceiver,
                     "NONE");
         }
+    }
+
+    private String createBroadcastTraceTitle(BroadcastRecord record, int state) {
+        return String.format("Broadcast %s from %s (%s) %s",
+                state == BroadcastRecord.DELIVERY_PENDING ? "in queue" : "dispatched",
+                record.callerPackage == null ? "" : record.callerPackage,
+                record.callerApp == null ? "process unknown" : record.callerApp.toShortString(),
+                record.intent == null ? "" : record.intent.getAction());
     }
 
     final boolean dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
