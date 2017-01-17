@@ -3576,7 +3576,8 @@ public class NotificationManagerService extends SystemService {
             NotificationRecord childR = mNotificationList.get(i);
             StatusBarNotification childSbn = childR.sbn;
             if ((childSbn.isGroup() && !childSbn.getNotification().isGroupSummary()) &&
-                    childR.getGroupKey().equals(r.getGroupKey())) {
+                    childR.getGroupKey().equals(r.getGroupKey())
+                    && (childR.getFlags() & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 mNotificationList.remove(i);

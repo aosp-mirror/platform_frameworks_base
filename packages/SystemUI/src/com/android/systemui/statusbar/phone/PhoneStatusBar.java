@@ -1196,8 +1196,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 List<ExpandableNotificationRow> children = row.getNotificationChildren();
                 if (row.areChildrenExpanded() && children != null) {
                     for (ExpandableNotificationRow childRow : children) {
-                        if (childRow.getVisibility() == View.VISIBLE) {
-                            viewsToHide.add(childRow);
+                        if (mStackScroller.canChildBeDismissed(childRow)) {
+                            if (childRow.getVisibility() == View.VISIBLE) {
+                                viewsToHide.add(childRow);
+                            }
                         }
                     }
                 }
@@ -1682,8 +1684,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             List<ExpandableNotificationRow> notificationChildren =
                     entry.row.getNotificationChildren();
-            ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>(notificationChildren);
-            for (int i = 0; i < toRemove.size(); i++) {
+            ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow row = notificationChildren.get(i);
+                if ((row.getStatusBarNotification().getNotification().flags
+                        & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                    // the child is a forground service notification which we can't remove!
+                    continue;
+                }
+                toRemove.add(row);
                 toRemove.get(i).setKeepInParent(true);
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
@@ -1949,8 +1958,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateClearAll() {
         boolean showDismissView =
                 mState != StatusBarState.KEYGUARD &&
-                mNotificationData.hasActiveClearableNotifications();
+               hasActiveClearableNotifications();
         mStackScroller.updateDismissView(showDismissView);
+    }
+
+    /**
+     * Return whether there are any clearable notifications
+     */
+    private boolean hasActiveClearableNotifications() {
+        int childCount = mStackScroller.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = mStackScroller.getChildAt(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            if (((ExpandableNotificationRow) child).canViewBeDismissed()) {
+                    return true;
+            }
+        }
+        return false;
     }
 
     private void updateEmptyShadeView() {
@@ -1999,7 +2025,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (SPEW) {
             final boolean clearable = hasActiveNotifications() &&
-                    mNotificationData.hasActiveClearableNotifications();
+                    hasActiveClearableNotifications();
             Log.d(TAG, "setAreThereNotifications: N=" +
                     mNotificationData.getActiveNotifications().size() + " any=" +
                     hasActiveNotifications() + " clearable=" + clearable);
