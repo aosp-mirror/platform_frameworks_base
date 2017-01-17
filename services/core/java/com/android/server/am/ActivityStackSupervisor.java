@@ -125,6 +125,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
@@ -154,6 +155,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -380,7 +382,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Mapping from displayId to display current state */
     private final SparseArray<ActivityDisplay> mActivityDisplays = new SparseArray<>();
 
-    InputManagerInternal mInputManagerInternal;
+    private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
+
+    private DisplayManagerInternal mDisplayManagerInternal;
+    private InputManagerInternal mInputManagerInternal;
 
     /** The chain of tasks in lockTask mode. The current frontmost task is at the top, and tasks
      * may be finished until there is only one entry left. If this is empty the system is not
@@ -580,6 +585,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mDisplayManager =
                     (DisplayManager)mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mDisplayManager.registerDisplayListener(this, null);
+            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
             Display[] displays = mDisplayManager.getDisplays();
             for (int displayNdx = displays.length - 1; displayNdx >= 0; --displayNdx) {
@@ -1452,7 +1458,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ActivityRecord resultRecord, ActivityStack resultStack, ActivityOptions options) {
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
-        if (startAnyPerm ==  PERMISSION_GRANTED) {
+        if (startAnyPerm == PERMISSION_GRANTED) {
             return true;
         }
         final int componentRestriction = getComponentRestrictionForCallingPackage(
@@ -1519,23 +1525,74 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Check if someone tries to launch an activity on a private display with a different
             // owner.
             final int launchDisplayId = options.getLaunchDisplayId();
-            if (launchDisplayId != INVALID_DISPLAY) {
-                final ActivityDisplay activityDisplay = mActivityDisplays.get(launchDisplayId);
-                if (activityDisplay != null
-                        && (activityDisplay.mDisplay.getFlags() & FLAG_PRIVATE) != 0) {
-                    if (activityDisplay.mDisplay.getOwnerUid() != callingUid) {
-                        final String msg = "Permission Denial: starting " + intent.toString()
-                                + " from " + callerApp + " (pid=" + callingPid
-                                + ", uid=" + callingUid + ") with launchDisplayId="
-                                + launchDisplayId;
-                        Slog.w(TAG, msg);
-                        throw new SecurityException(msg);
-                    }
-                }
+            if (launchDisplayId != INVALID_DISPLAY
+                    && !isCallerAllowedToLaunchOnDisplay(callingPid, callingUid, launchDisplayId)) {
+                final String msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with launchDisplayId="
+                        + launchDisplayId;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
             }
         }
 
         return true;
+    }
+
+    /** Check if caller is allowed to launch activities on specified display. */
+    boolean isCallerAllowedToLaunchOnDisplay(int callingPid, int callingUid, int launchDisplayId) {
+        if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check: displayId=" + launchDisplayId
+                + " callingPid=" + callingPid + " callingUid=" + callingUid);
+
+        final ActivityDisplay activityDisplay = mActivityDisplays.get(launchDisplayId);
+        if (activityDisplay == null) {
+            Slog.w(TAG, "Launch on display check: display not found");
+            return false;
+        }
+
+        if (!activityDisplay.isPrivate()) {
+            // Anyone can launch on a public display.
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " allow launch on public display");
+            return true;
+        }
+
+        // Check if the caller is the owner of the display.
+        if (activityDisplay.mDisplay.getOwnerUid() == callingUid) {
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " allow launch for owner of the display");
+            return true;
+        }
+
+        // Check if caller is present on display
+        if (activityDisplay.isUidPresent(callingUid)) {
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " allow launch for caller present on the display");
+            return true;
+        }
+
+        // Check if the caller can launch anything.
+        final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
+                callingUid);
+        if (startAnyPerm == PERMISSION_GRANTED) {
+            if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
+                    + " allow launch any on display");
+            return true;
+        }
+
+        Slog.w(TAG, "Launch on display check: denied");
+        return false;
+    }
+
+    /** Update lists of UIDs that are present on displays and have access to them. */
+    void updateUIDsPresentOnDisplay() {
+        mDisplayAccessUIDs.clear();
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
+            mDisplayAccessUIDs.append(activityDisplay.mDisplayId, activityDisplay.getPresentUIDs());
+        }
+        // Store updated lists in DisplayManager. Callers from outside of AM should get them there.
+        mDisplayManagerInternal.setDisplayAccessUIDs(mDisplayAccessUIDs);
     }
 
     UserInfo getUserInfo(int userId) {
@@ -4568,6 +4625,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         ActivityRecord mVisibleBehindActivity;
 
+        /** Array of all UIDs that are present on the display. */
+        private IntArray mDisplayAccessUIDs = new IntArray();
+
         ActivityDisplay() {
         }
 
@@ -4629,6 +4689,28 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         @Override
         protected ConfigurationContainer getParent() {
             return ActivityStackSupervisor.this;
+        }
+
+        boolean isPrivate() {
+            return (mDisplay.getFlags() & FLAG_PRIVATE) != 0;
+        }
+
+        boolean isUidPresent(int uid) {
+            for (ActivityStack stack : mStacks) {
+                if (stack.isUidPresent(uid)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** Update and get all UIDs that are present on the display and have access to it. */
+        private IntArray getPresentUIDs() {
+            mDisplayAccessUIDs.clear();
+            for (ActivityStack stack : mStacks) {
+                stack.getPresentUIDs(mDisplayAccessUIDs);
+            }
+            return mDisplayAccessUIDs;
         }
     }
 

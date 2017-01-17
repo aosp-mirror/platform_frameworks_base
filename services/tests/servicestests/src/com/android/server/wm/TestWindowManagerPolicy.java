@@ -321,7 +321,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration overrideConfig) {
+            int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         return null;
     }
 

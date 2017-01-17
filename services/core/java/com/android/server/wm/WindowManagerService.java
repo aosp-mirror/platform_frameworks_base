@@ -1115,7 +1115,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + displayId + ".  Aborting.");
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
-            if (!displayContent.hasAccess(session.mUid)) {
+            if (!displayContent.hasAccess(session.mUid)
+                    && !mDisplayManagerInternal.isUidPresentOnDisplay(session.mUid, displayId)) {
                 Slog.w(TAG_WM, "Attempted to add window to a display for which the application "
                         + "does not have access: " + displayId + ".  Aborting.");
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;

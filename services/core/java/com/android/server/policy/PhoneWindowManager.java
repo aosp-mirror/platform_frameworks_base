@@ -19,6 +19,8 @@ package com.android.server.policy;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.content.Context.DISPLAY_SERVICE;
+import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -140,6 +142,7 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
@@ -2254,8 +2257,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle("PointerLocation");
-            WindowManager wm = (WindowManager)
-                    mContext.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
             wm.addView(mPointerLocationView, lp);
             mWindowManagerFuncs.registerPointerEventListener(mPointerLocationView);
@@ -2265,7 +2267,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void disablePointerLocation() {
         if (mPointerLocationView != null) {
             mWindowManagerFuncs.unregisterPointerEventListener(mPointerLocationView);
-            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
             wm.removeView(mPointerLocationView);
             mPointerLocationView = null;
         }
@@ -2826,7 +2828,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration overrideConfig) {
+            int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         if (!SHOW_SPLASH_SCREENS) {
             return null;
         }
@@ -2927,7 +2929,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             params.setTitle("Splash Screen " + packageName);
 
-            wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+            // Obtain proper context to launch on the right display.
+            final Context displayContext = getDisplayContext(context, displayId);
+            if (displayContext == null) {
+                // Can't show splash screen on requested display, so skip showing at all.
+                return null;
+            }
+            wm = (WindowManager) displayContext.getSystemService(WINDOW_SERVICE);
             view = win.getDecorView();
 
             if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "Adding splash screen window for "
@@ -2955,6 +2963,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return null;
+    }
+
+    /** Obtain proper context for showing splash screen on the provided display. */
+    private Context getDisplayContext(Context context, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            // The default context fits.
+            return context;
+        }
+
+        final DisplayManager dm = (DisplayManager) context.getSystemService(DISPLAY_SERVICE);
+        final Display targetDisplay = dm.getDisplay(displayId);
+        if (targetDisplay == null) {
+            // Failed to obtain the non-default display where splash screen should be shown,
+            // lets not show at all.
+            return null;
+        }
+
+        return context.createDisplayContext(targetDisplay);
     }
 
     /**

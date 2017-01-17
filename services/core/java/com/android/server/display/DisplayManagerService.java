@@ -48,6 +48,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.text.TextUtils;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -230,6 +231,9 @@ public final class DisplayManagerService extends SystemService {
     // intended for use inside of the requestGlobalDisplayStateInternal function.
     private final ArrayList<Runnable> mTempDisplayStateWorkQueue = new ArrayList<Runnable>();
 
+    // Lists of UIDs that are present on the displays. Maps displayId -> array of UIDs.
+    private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
+
     public DisplayManagerService(Context context) {
         super(context);
         mContext = context;
@@ -394,7 +398,8 @@ public final class DisplayManagerService extends SystemService {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null) {
                 DisplayInfo info = display.getDisplayInfoLocked();
-                if (info.hasAccess(callingUid)) {
+                if (info.hasAccess(callingUid)
+                        || isUidPresentOnDisplayInternal(callingUid, displayId)) {
                     return info;
                 }
             }
@@ -934,6 +939,25 @@ public final class DisplayManagerService extends SystemService {
                 display.setDisplayOffsetsLocked(x, y);
                 scheduleTraversalLocked(false);
             }
+        }
+    }
+
+    // Updates the lists of UIDs that are present on displays.
+    private void setDisplayAccessUIDsInternal(SparseArray<IntArray> newDisplayAccessUIDs) {
+        synchronized (mSyncRoot) {
+            mDisplayAccessUIDs.clear();
+            for (int i = newDisplayAccessUIDs.size() - 1; i >= 0; i--) {
+                mDisplayAccessUIDs.append(newDisplayAccessUIDs.keyAt(i),
+                        newDisplayAccessUIDs.valueAt(i));
+            }
+        }
+    }
+
+    // Checks if provided UID's content is present on the display and UID has access to it.
+    private boolean isUidPresentOnDisplayInternal(int uid, int displayId) {
+        synchronized (mSyncRoot) {
+            final IntArray displayUIDs = mDisplayAccessUIDs.get(displayId);
+            return displayUIDs != null && displayUIDs.indexOf(uid) != -1;
         }
     }
 
@@ -1646,6 +1670,16 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void setDisplayOffsets(int displayId, int x, int y) {
             setDisplayOffsetsInternal(displayId, x, y);
+        }
+
+        @Override
+        public void setDisplayAccessUIDs(SparseArray<IntArray> newDisplayAccessUIDs) {
+            setDisplayAccessUIDsInternal(newDisplayAccessUIDs);
+        }
+
+        @Override
+        public boolean isUidPresentOnDisplay(int uid, int displayId) {
+            return isUidPresentOnDisplayInternal(uid, displayId);
         }
     }
 }

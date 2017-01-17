@@ -476,10 +476,10 @@ class ActivityStarter {
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
-        ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-                intent, resolvedType, aInfo, mService.getGlobalConfiguration(), resultRecord,
-                resultWho, requestCode, componentSpecified, voiceSession != null, mSupervisor,
-                container, options, sourceRecord);
+        ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
+                callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
+                resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
+                mSupervisor, container, options, sourceRecord);
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -1896,16 +1896,14 @@ class ActivityStarter {
 
         final ActivityStack currentStack = task != null ? task.getStack() : null;
         if (currentStack != null) {
-            if (currentStack.isOnHomeDisplay()) {
-                if (mSupervisor.mFocusedStack != currentStack) {
-                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                            "computeStackFocus: Setting " + "focused stack to r=" + r
-                                    + " task=" + task);
-                } else {
-                    if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                            "computeStackFocus: Focused stack already="
-                                    + mSupervisor.mFocusedStack);
-                }
+            if (mSupervisor.mFocusedStack != currentStack) {
+                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                        "computeStackFocus: Setting " + "focused stack to r=" + r
+                                + " task=" + task);
+            } else {
+                if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
+                        "computeStackFocus: Focused stack already="
+                                + mSupervisor.mFocusedStack);
             }
             return currentStack;
         }
@@ -1922,13 +1920,7 @@ class ActivityStarter {
         // Same also applies to dynamic stacks, as they behave similar to fullscreen stack.
         // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
         // we can also put it in the focused stack.
-        final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
-        final boolean canUseFocusedStack = focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                || (focusedStackId == DOCKED_STACK_ID && r.canGoInDockedStack())
-                || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeableOrForced())
-                || isDynamicStack(focusedStackId);
-        if (canUseFocusedStack && (!newTask
-                || mSupervisor.mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
+        if (canLaunchIntoFocusedStack(r, newTask)) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                     "computeStackFocus: Have a focused stack=" + mSupervisor.mFocusedStack);
             return mSupervisor.mFocusedStack;
@@ -1953,6 +1945,36 @@ class ActivityStarter {
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                 + r + " stackId=" + stack.mStackId);
         return stack;
+    }
+
+    /** Check if provided activity record can launch in currently focused stack. */
+    private boolean canLaunchIntoFocusedStack(ActivityRecord r, boolean newTask) {
+        // The fullscreen stack can contain any task regardless of if the task is resizeable
+        // or not. So, we let the task go in the fullscreen task if it is the focus stack.
+        // Same also applies to dynamic stacks, as they behave similar to fullscreen stack.
+        // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
+        // we can also put it in the focused stack.
+        final ActivityStack focusedStack = mSupervisor.mFocusedStack;
+        final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
+        final boolean canUseFocusedStack;
+        switch (focusedStackId) {
+            case FULLSCREEN_WORKSPACE_STACK_ID:
+                canUseFocusedStack = true;
+                break;
+            case DOCKED_STACK_ID:
+                canUseFocusedStack = r.canGoInDockedStack();
+                break;
+            case FREEFORM_WORKSPACE_STACK_ID:
+                canUseFocusedStack = r.isResizeableOrForced();
+                break;
+            default:
+                canUseFocusedStack = isDynamicStack(focusedStackId)
+                        && mSupervisor.isCallerAllowedToLaunchOnDisplay(r.launchedFromPid,
+                        r.launchedFromUid, focusedStack.mDisplayId);
+        }
+
+        return canUseFocusedStack
+                && (!newTask || focusedStack.mActivityContainer.isEligibleForNewTasks());
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,

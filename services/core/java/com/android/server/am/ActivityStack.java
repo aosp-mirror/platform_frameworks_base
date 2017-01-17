@@ -105,6 +105,7 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -193,6 +194,12 @@ final class ActivityStack extends ConfigurationContainer {
     @Override
     protected ConfigurationContainer getParent() {
         return mActivityContainer.mActivityDisplay;
+    }
+
+    @Override
+    void onParentChanged() {
+        super.onParentChanged();
+        mStackSupervisor.updateUIDsPresentOnDisplay();
     }
 
     enum ActivityState {
@@ -678,6 +685,27 @@ final class ActivityStack extends ConfigurationContainer {
             return r;
         }
         return null;
+    }
+
+    boolean isInStackLocked(TaskRecord task) {
+        return mTaskHistory.contains(task);
+    }
+
+    /** Checks if there are tasks with specific UID in the stack. */
+    boolean isUidPresent(int uid) {
+        for (TaskRecord task : mTaskHistory) {
+            if (task.effectiveUid == uid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Get all UIDs that are present in the stack. */
+    void getPresentUIDs(IntArray presentUIDs) {
+        for (TaskRecord task : mTaskHistory) {
+            presentUIDs.add(task.effectiveUid);
+        }
     }
 
     final boolean updateLRUListLocked(ActivityRecord r) {
@@ -4904,13 +4932,13 @@ final class ActivityStack extends ConfigurationContainer {
         final boolean toTop = position >= mTaskHistory.size();
         final ActivityStack prevStack = preAddTask(task, reason, toTop);
 
+        mTaskHistory.add(position, task);
         task.setStack(this);
 
         if (toTop) {
             updateTaskReturnToForTopInsertion(task);
         }
 
-        mTaskHistory.add(position, task);
         updateTaskMovement(task, toTop);
 
         postAddTask(task, prevStack);
@@ -4927,8 +4955,8 @@ final class ActivityStack extends ConfigurationContainer {
 
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
         final boolean wasResumed = topRunningActivity == task.getStack().mResumedActivity;
-        task.setStack(this);
         insertTaskAtPosition(task, index);
+        task.setStack(this);
         postAddTask(task, null /* prevStack */);
 
         if (wasResumed) {
