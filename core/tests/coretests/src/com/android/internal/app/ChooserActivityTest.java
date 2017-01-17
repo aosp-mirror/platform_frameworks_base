@@ -222,7 +222,7 @@ public class ChooserActivityTest {
     private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
-            infoList.add(ChooserDataProvider.createResolvedComponentInfo(i));
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
         }
         return infoList;
     }

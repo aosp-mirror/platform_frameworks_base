@@ -22,16 +22,15 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
-import android.service.chooser.ChooserTarget;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Utility class used by chooser tests to create mock data
+ * Utility class used by resolver tests to create mock data
  */
-class ChooserDataProvider {
+class ResolverDataProvider {
 
     static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfo(int i) {
         return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
