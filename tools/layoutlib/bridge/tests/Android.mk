@@ -30,7 +30,8 @@ LOCAL_JAVA_LIBRARIES := layoutlib \
 			layoutlib_api-prebuilt \
 			tools-common-prebuilt \
 			sdk-common \
-			junit-host
+			junit-host \
+			guavalib
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 

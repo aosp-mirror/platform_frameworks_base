@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.intensive;
+package com.android.layoutlib.bridge.intensive.util;
 
 import java.io.IOException;
 import java.util.HashMap;
