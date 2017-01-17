@@ -29,6 +29,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
@@ -48,6 +49,7 @@ public class KeyguardStatusView extends GridLayout {
     private TextClock mDateView;
     private TextClock mClockView;
     private TextView mOwnerInfo;
+    private ViewGroup mClockContainer;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -105,6 +107,7 @@ public class KeyguardStatusView extends GridLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mClockContainer = (ViewGroup) findViewById(R.id.keyguard_clock_container);
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
         mClockView = (TextClock) findViewById(R.id.clock_view);
@@ -258,6 +261,17 @@ public class KeyguardStatusView extends GridLayout {
             clockView12 = clockView12.replace(':', '\uee01');
 
             cacheKey = key;
+        }
+    }
+
+    public void setDark(boolean dark) {
+        final int N = mClockContainer.getChildCount();
+        for (int i = 0; i < N; i++) {
+            View child = mClockContainer.getChildAt(i);
+            if (child == mClockView) {
+                continue;
+            }
+            child.setAlpha(dark ? 0 : 1);
         }
     }
 }

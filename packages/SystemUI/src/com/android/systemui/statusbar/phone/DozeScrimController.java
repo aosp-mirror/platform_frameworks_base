@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -41,7 +42,9 @@ public class DozeScrimController {
     private final Handler mHandler = new Handler();
     private final ScrimController mScrimController;
 
+    private final Context mContext;
     private final View mStackScroller;
+    private final KeyguardStatusView mKeyguardStatusView;
 
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
@@ -52,10 +55,12 @@ public class DozeScrimController {
     private float mBehindTarget;
 
     public DozeScrimController(ScrimController scrimController, Context context,
-            View stackScroller) {
+            View stackScroller, KeyguardStatusView keyguardStatusView) {
+        mContext = context;
         mStackScroller = stackScroller;
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
+        mKeyguardStatusView = keyguardStatusView;
     }
 
     public void setDozing(boolean dozing, boolean animate) {
@@ -65,10 +70,7 @@ public class DozeScrimController {
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
             mScrimController.setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? 0f : 1f);
-            if (mDozeParameters.getAlwaysOn()) {
-                mStackScroller.setAlpha(0f);
-                mHandler.postDelayed(() -> mStackScroller.setAlpha(0f), 30);
-            }
+            mKeyguardStatusView.setDark(true);
         } else {
             cancelPulsing();
             if (animate) {
@@ -83,9 +85,8 @@ public class DozeScrimController {
                 mScrimController.setDozeBehindAlpha(0f);
                 mScrimController.setDozeInFrontAlpha(0f);
             }
-            if (mDozeParameters.getAlwaysOn()) {
-                mStackScroller.setAlpha(1f);
-            }
+            // TODO: animate
+            mKeyguardStatusView.setDark(false);
         }
     }
 
@@ -123,9 +124,6 @@ public class DozeScrimController {
         if (isPulsing()) {
             final boolean pickupOrDoubleTap = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP
                     || mPulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
-            if (mDozeParameters.getAlwaysOn()) {
-                mStackScroller.setAlpha(1f);
-            }
             startScrimAnimation(true /* inFront */, 0f,
                     mDozeParameters.getPulseInDuration(pickupOrDoubleTap),
                     pickupOrDoubleTap ? Interpolators.LINEAR_OUT_SLOW_IN : Interpolators.ALPHA_OUT,
@@ -291,9 +289,6 @@ public class DozeScrimController {
         @Override
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse out finished");
-            if (mDozeParameters.getAlwaysOn()) {
-                mStackScroller.setAlpha(0f);
-            }
             DozeLog.tracePulseFinish();
 
             // Signal that the pulse is all finished so we can turn the screen off now.
