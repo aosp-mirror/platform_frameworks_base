@@ -212,7 +212,7 @@ public class HwParcel {
     public native final HwBlob readBuffer();
 
     public native final HwBlob readEmbeddedBuffer(
-            long parentHandle, long offset);
+            long parentHandle, long offset, boolean nullable);
 
     public native final void writeBuffer(HwBlob blob);
 
