@@ -19,6 +19,7 @@
 #include "android-base/logging.h"
 
 #include "TestHelpers.h"
+#include "androidfw/ResourceUtils.h"
 #include "data/lib_one/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
@@ -215,9 +216,9 @@ TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
   EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
 
   // lib_one is assigned package ID 0x03.
-  EXPECT_EQ(3u, util::get_package_id(value.data));
-  EXPECT_EQ(util::get_type_id(lib_one::R::string::foo), util::get_type_id(value.data));
-  EXPECT_EQ(util::get_entry_id(lib_one::R::string::foo), util::get_entry_id(value.data));
+  EXPECT_EQ(3u, get_package_id(value.data));
+  EXPECT_EQ(get_type_id(lib_one::R::string::foo), get_type_id(value.data));
+  EXPECT_EQ(get_entry_id(lib_one::R::string::foo), get_entry_id(value.data));
 }
 
 TEST_F(ThemeTest, CopyThemeSameAssetManager) {

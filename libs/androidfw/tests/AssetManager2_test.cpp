@@ -20,6 +20,7 @@
 #include "android-base/logging.h"
 
 #include "TestHelpers.h"
+#include "androidfw/ResourceUtils.h"
 #include "data/appaslib/R.h"
 #include "data/basic/R.h"
 #include "data/lib_one/R.h"
@@ -194,11 +195,11 @@ TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
   ResTable_config selected_config;
   uint32_t flags;
   ApkAssetsCookie cookie = assetmanager.GetResource(
-      util::fix_package_id(appaslib::R::integer::number1, 0x02), false /*may_be_bag*/,
+      fix_package_id(appaslib::R::integer::number1, 0x02), false /*may_be_bag*/,
       0u /*density_override*/, &value, &selected_config, &flags);
   ASSERT_NE(kInvalidCookie, cookie);
   EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
-  EXPECT_EQ(util::fix_package_id(appaslib::R::array::integerArray1, 0x02), value.data);
+  EXPECT_EQ(fix_package_id(appaslib::R::array::integerArray1, 0x02), value.data);
 }
 
 TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
@@ -238,9 +239,9 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
 
   // First two attributes come from lib_one.
   EXPECT_EQ(1, bag->entries[0].cookie);
-  EXPECT_EQ(0x03, util::get_package_id(bag->entries[0].key));
+  EXPECT_EQ(0x03, get_package_id(bag->entries[0].key));
   EXPECT_EQ(1, bag->entries[1].cookie);
-  EXPECT_EQ(0x03, util::get_package_id(bag->entries[1].key));
+  EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
 }
 
 TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {

@@ -29,18 +29,6 @@
 namespace aapt {
 namespace ResourceUtils {
 
-/*
- * Extracts the package, type, and name from a string of the format:
- *
- *      [package:]type/name
- *
- * where the package can be empty. Validation must be performed on each
- * individual extracted piece to verify that the pieces are valid.
- * Returns false if there was no package but a ':' was present.
- */
-bool ExtractResourceName(const android::StringPiece& str, android::StringPiece* out_package,
-                         android::StringPiece* out_type, android::StringPiece* out_entry);
-
 /**
  * Returns true if the string was parsed as a resource name
  * ([*][package:]type/name), with

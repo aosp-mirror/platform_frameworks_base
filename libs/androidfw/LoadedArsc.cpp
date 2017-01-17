@@ -34,6 +34,7 @@
 
 #include "androidfw/ByteBucketArray.h"
 #include "androidfw/Chunk.h"
+#include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
 
 using android::base::StringPrintf;
@@ -181,9 +182,9 @@ bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
                            LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
                            uint32_t* out_flags) const {
   ATRACE_CALL();
-  const uint8_t package_id = util::get_package_id(resid);
-  const uint8_t type_id = util::get_type_id(resid);
-  const uint16_t entry_id = util::get_entry_id(resid);
+  const uint8_t package_id = get_package_id(resid);
+  const uint8_t type_id = get_type_id(resid);
+  const uint16_t entry_id = get_entry_id(resid);
 
   if (type_id == 0) {
     LOG(ERROR) << "Invalid ID 0x" << std::hex << resid << std::dec << ".";
@@ -200,7 +201,7 @@ bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
 }
 
 const LoadedPackage* LoadedArsc::GetPackageForId(uint32_t resid) const {
-  const uint8_t package_id = util::get_package_id(resid);
+  const uint8_t package_id = get_package_id(resid);
   for (const auto& loaded_package : packages_) {
     if (loaded_package->package_id_ == package_id) {
       return loaded_package.get();
@@ -370,6 +371,45 @@ void LoadedPackage::CollectLocales(bool canonicalize, std::set<std::string>* out
       }
     }
   }
+}
+
+uint32_t LoadedPackage::FindEntryByName(const std::u16string& type_name,
+                                        const std::u16string& entry_name) const {
+  ssize_t type_idx = type_string_pool_.indexOfString(type_name.data(), type_name.size());
+  if (type_idx < 0) {
+    return 0u;
+  }
+
+  ssize_t key_idx = key_string_pool_.indexOfString(entry_name.data(), entry_name.size());
+  if (key_idx < 0) {
+    return 0u;
+  }
+
+  const TypeSpec* type_spec = type_specs_[type_idx].get();
+  if (type_spec == nullptr) {
+    return 0u;
+  }
+
+  for (size_t ti = 0; ti < type_spec->type_count; ti++) {
+    const Type* type = &type_spec->types[ti];
+    size_t entry_count = dtohl(type->type->entryCount);
+    for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
+      const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
+          reinterpret_cast<const uint8_t*>(type->type) + dtohs(type->type->header.headerSize));
+      const uint32_t offset = dtohl(entry_offsets[entry_idx]);
+      if (offset != ResTable_type::NO_ENTRY) {
+        const ResTable_entry* entry =
+            reinterpret_cast<const ResTable_entry*>(reinterpret_cast<const uint8_t*>(type->type) +
+                                                    dtohl(type->type->entriesStart) + offset);
+        if (dtohl(entry->key.index) == static_cast<uint32_t>(key_idx)) {
+          // The package ID will be overridden by the caller (due to runtime assignment of package
+          // IDs for shared libraries).
+          return make_resid(0x00, type_idx + type_id_offset_ + 1, entry_idx);
+        }
+      }
+    }
+  }
+  return 0u;
 }
 
 std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {

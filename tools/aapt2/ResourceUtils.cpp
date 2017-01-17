@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/ResourceUtils.h"
 
 #include "NameMangler.h"
 #include "SdkConstants.h"
@@ -69,31 +70,6 @@ Maybe<ResourceName> ToResourceName(
   return name_out;
 }
 
-bool ExtractResourceName(const StringPiece& str, StringPiece* out_package,
-                         StringPiece* out_type, StringPiece* out_entry) {
-  bool has_package_separator = false;
-  bool has_type_separator = false;
-  const char* start = str.data();
-  const char* end = start + str.size();
-  const char* current = start;
-  while (current != end) {
-    if (out_type->size() == 0 && *current == '/') {
-      has_type_separator = true;
-      out_type->assign(start, current - start);
-      start = current + 1;
-    } else if (out_package->size() == 0 && *current == ':') {
-      has_package_separator = true;
-      out_package->assign(start, current - start);
-      start = current + 1;
-    }
-    current++;
-  }
-  out_entry->assign(start, end - start);
-
-  return !(has_package_separator && out_package->empty()) &&
-         !(has_type_separator && out_type->empty());
-}
-
 bool ParseResourceName(const StringPiece& str, ResourceNameRef* out_ref,
                        bool* out_private) {
   if (str.empty()) {
@@ -110,8 +86,8 @@ bool ParseResourceName(const StringPiece& str, ResourceNameRef* out_ref,
   StringPiece package;
   StringPiece type;
   StringPiece entry;
-  if (!ExtractResourceName(str.substr(offset, str.size() - offset), &package,
-                           &type, &entry)) {
+  if (!android::ExtractResourceName(str.substr(offset, str.size() - offset), &package, &type,
+                                    &entry)) {
     return false;
   }
 
@@ -197,8 +173,8 @@ bool ParseAttributeReference(const StringPiece& str, ResourceNameRef* out_ref) {
     StringPiece package;
     StringPiece type;
     StringPiece entry;
-    if (!ExtractResourceName(trimmed_str.substr(1, trimmed_str.size() - 1),
-                             &package, &type, &entry)) {
+    if (!android::ExtractResourceName(trimmed_str.substr(1, trimmed_str.size() - 1), &package,
+                                      &type, &entry)) {
       return false;
     }
 
@@ -258,7 +234,7 @@ Maybe<Reference> ParseStyleParentReference(const StringPiece& str,
   ref.type = ResourceType::kStyle;
 
   StringPiece type_str;
-  ExtractResourceName(name, &ref.package, &type_str, &ref.entry);
+  android::ExtractResourceName(name, &ref.package, &type_str, &ref.entry);
   if (!type_str.empty()) {
     // If we have a type, make sure it is a Style.
     const ResourceType* parsed_type = ParseResourceType(type_str);

@@ -36,6 +36,7 @@ cc_library {
         "misc.cpp",
         "ObbFile.cpp",
         "ResourceTypes.cpp",
+        "ResourceUtils.cpp",
         "StreamingZipInflater.cpp",
         "TypeWrappers.cpp",
         "Util.cpp",
