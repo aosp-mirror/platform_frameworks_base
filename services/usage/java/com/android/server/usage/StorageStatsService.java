@@ -31,9 +31,10 @@ import android.os.Environment;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
@@ -66,6 +67,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final UserManager mUser;
     private final PackageManager mPackage;
     private final StorageManager mStorage;
+
     private final Installer mInstaller;
 
     public StorageStatsService(Context context) {
@@ -74,8 +76,28 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         mUser = context.getSystemService(UserManager.class);
         mPackage = context.getSystemService(PackageManager.class);
         mStorage = context.getSystemService(StorageManager.class);
+
         mInstaller = new Installer(context);
         mInstaller.onStart();
+        invalidateMounts();
+
+        mStorage.registerListener(new StorageEventListener() {
+            @Override
+            public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+                if ((vol.type == VolumeInfo.TYPE_PRIVATE)
+                        && (newState == VolumeInfo.STATE_MOUNTED)) {
+                    invalidateMounts();
+                }
+            }
+        });
+    }
+
+    private void invalidateMounts() {
+        try {
+            mInstaller.invalidateMounts();
+        } catch (InstallerException e) {
+            Slog.wtf(TAG, "Failed to invalidate mounts", e);
+        }
     }
 
     private void enforcePermission(int callingUid, String callingPackage) {
@@ -242,7 +264,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     private static void checkEquals(String msg, long expected, long actual) {
         if (expected != actual) {
-            Log.e(TAG, msg + " expected " + expected + " actual " + actual);
+            Slog.e(TAG, msg + " expected " + expected + " actual " + actual);
         }
     }
 

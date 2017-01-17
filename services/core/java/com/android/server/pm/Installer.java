@@ -415,6 +415,15 @@ public class Installer extends SystemService {
         }
     }
 
+    public void invalidateMounts() throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.invalidateMounts();
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     private static void assertValidInstructionSet(String instructionSet)
             throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {
