@@ -928,7 +928,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "double" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeDouble(long fieldId, double val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_DOUBLE);
@@ -945,7 +948,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "double" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedDouble(long fieldId, double val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_DOUBLE);
@@ -960,7 +966,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "double" type field values.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedDouble(long fieldId, double[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_DOUBLE);
@@ -983,7 +992,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "float" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeFloat(long fieldId, float val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FLOAT);
@@ -1000,7 +1012,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "float" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedFloat(long fieldId, float val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FLOAT);
@@ -1015,7 +1030,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "float" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedFloat(long fieldId, float[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FLOAT);
@@ -1061,7 +1079,10 @@ public final class ProtoOutputStream {
      * Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_INT32);
@@ -1082,7 +1103,10 @@ public final class ProtoOutputStream {
      * Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_INT32);
@@ -1101,7 +1125,10 @@ public final class ProtoOutputStream {
      * Note that these are stored in memory as signed values and written as unsigned
      * varints, which if negative, are 10 bytes long. If you know the data is likely
      * to be negative, use "sint32".
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedInt32(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_INT32);
@@ -1130,7 +1157,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "int64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_INT64);
@@ -1147,7 +1177,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "int64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_INT64);
@@ -1162,7 +1195,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "int64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedInt64(long fieldId, long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_INT64);
@@ -1190,7 +1226,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "uint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeUInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_UINT32);
@@ -1207,7 +1246,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "uint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedUInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_UINT32);
@@ -1222,7 +1264,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "uint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedUInt32(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_UINT32);
@@ -1250,7 +1295,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "uint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeUInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_UINT64);
@@ -1267,7 +1315,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "uint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedUInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_UINT64);
@@ -1282,7 +1333,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "uint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedUInt64(long fieldId, long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_UINT64);
@@ -1310,7 +1364,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "sint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeSInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SINT32);
@@ -1327,7 +1384,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "sint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedSInt32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SINT32);
@@ -1342,7 +1402,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "sint32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedSInt32(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SINT32);
@@ -1370,7 +1433,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "sint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeSInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SINT64);
@@ -1387,7 +1453,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "sint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedSInt64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SINT64);
@@ -1402,7 +1471,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "sint64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedSInt64(long fieldId, long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SINT64);
@@ -1429,7 +1501,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "fixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeFixed32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED32);
@@ -1446,7 +1521,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "fixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedFixed32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FIXED32);
@@ -1461,7 +1539,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "fixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedFixed32(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FIXED32);
@@ -1484,7 +1565,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "fixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeFixed64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_FIXED64);
@@ -1501,7 +1585,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "fixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedFixed64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_FIXED64);
@@ -1516,7 +1603,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "fixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedFixed64(long fieldId, long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_FIXED64);
@@ -1538,7 +1628,10 @@ public final class ProtoOutputStream {
     //
     /**
      * Write a single proto "sfixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeSFixed32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED32);
@@ -1555,7 +1648,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "sfixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedSFixed32(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SFIXED32);
@@ -1570,7 +1666,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "sfixed32" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedSFixed32(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SFIXED32);
@@ -1593,7 +1692,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "sfixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeSFixed64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_SFIXED64);
@@ -1610,7 +1712,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "sfixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedSFixed64(long fieldId, long val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_SFIXED64);
@@ -1625,7 +1730,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "sfixed64" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedSFixed64(long fieldId, long[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_SFIXED64);
@@ -1648,7 +1756,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "bool" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeBool(long fieldId, boolean val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_BOOL);
@@ -1666,7 +1777,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "bool" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedBool(long fieldId, boolean val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BOOL);
@@ -1681,7 +1795,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto "bool" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedBool(long fieldId, boolean[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_BOOL);
@@ -1708,7 +1825,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "string" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeString(long fieldId, String val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_STRING);
@@ -1724,7 +1844,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "string" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedString(long fieldId, String val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_STRING);
@@ -1763,7 +1886,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto "bytes" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeBytes(long fieldId, byte[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_BYTES);
@@ -1780,7 +1906,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto "bytes" type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedBytes(long fieldId, byte[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_BYTES);
@@ -1803,7 +1932,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single proto enum type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeEnum(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_ENUM);
@@ -1820,7 +1952,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a single repeated proto enum type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedEnum(long fieldId, int val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_ENUM);
@@ -1835,7 +1970,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write a list of packed proto enum type field value.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writePackedEnum(long fieldId, int[] val) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_PACKED | FIELD_TYPE_ENUM);
@@ -1948,7 +2086,10 @@ public final class ProtoOutputStream {
      *
      * Returns a token which should be passed to endObject.  Calls to endObject must be
      * nested properly.
+     *
+     * @deprecated Use #start() instead.
      */
+    @Deprecated
     public long startObject(long fieldId) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_OBJECT);
@@ -1958,7 +2099,10 @@ public final class ProtoOutputStream {
 
     /**
      * End a child object. Pass in the token from the correspoinding startObject call.
+     *
+     * @deprecated Use #end() instead.
      */
+    @Deprecated
     public void endObject(long token) {
         assertNotCompacted();
 
@@ -1970,7 +2114,10 @@ public final class ProtoOutputStream {
      *
      * Returns a token which should be passed to endObject.  Calls to endObject must be
      * nested properly.
+     *
+     * @deprecated Use #start() instead.
      */
+    @Deprecated
     public long startRepeatedObject(long fieldId) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_OBJECT);
@@ -1980,7 +2127,10 @@ public final class ProtoOutputStream {
 
     /**
      * End a child object. Pass in the token from the correspoinding startRepeatedObject call.
+     *
+     * @deprecated Use #end() instead.
      */
+    @Deprecated
     public void endRepeatedObject(long token) {
         assertNotCompacted();
 
@@ -2062,7 +2212,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write an object that has already been flattend.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeObject(long fieldId, byte[] value) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_OBJECT);
@@ -2070,7 +2223,7 @@ public final class ProtoOutputStream {
         writeObjectImpl(id, value);
     }
 
-    public void writeObjectImpl(int id, byte[] value) {
+    void writeObjectImpl(int id, byte[] value) {
         if (value != null && value.length != 0) {
             writeKnownLengthHeader(id, value.length);
             mBuffer.writeRawBuffer(value);
@@ -2079,7 +2232,10 @@ public final class ProtoOutputStream {
 
     /**
      * Write an object that has already been flattend.
+     *
+     * @deprecated Use #write instead.
      */
+    @Deprecated
     public void writeRepeatedObject(long fieldId, byte[] value) {
         assertNotCompacted();
         final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_OBJECT);
@@ -2087,7 +2243,7 @@ public final class ProtoOutputStream {
         writeRepeatedObjectImpl(id, value);
     }
 
-    public void writeRepeatedObjectImpl(int id, byte[] value) {
+    void writeRepeatedObjectImpl(int id, byte[] value) {
         writeKnownLengthHeader(id, value == null ? 0 : value.length);
         mBuffer.writeRawBuffer(value);
     }
