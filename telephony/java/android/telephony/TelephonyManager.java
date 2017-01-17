@@ -936,8 +936,10 @@ public class TelephonyManager {
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @hide
      */
-    /** {@hide} */
+    @SystemApi
     public String getImei() {
         return getImei(getDefaultSim());
     }
@@ -949,8 +951,10 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
      * @param slotId of which deviceID is returned
+     *
+     * @hide
      */
-    /** {@hide} */
+    @SystemApi
     public String getImei(int slotId) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
