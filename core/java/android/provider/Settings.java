@@ -6746,6 +6746,14 @@ public final class Settings {
         public static final String DEVICE_PAIRED = "device_paired";
 
         /**
+         * Integer state indicating whether package verifier is enabled.
+         * TODO(b/34259924): Remove this setting.
+         *
+         * @hide
+         */
+        public static final String PACKAGE_VERIFIER_STATE = "package_verifier_state";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
