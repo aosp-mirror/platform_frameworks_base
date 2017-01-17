@@ -31,6 +31,7 @@ import android.os.Debug;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -1245,11 +1246,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         dispatchOnFragmentViewDestroyed(f, false);
                         if (f.mView != null && f.mContainer != null) {
                             Animator anim = null;
-                            if (mCurState > Fragment.INITIALIZING && !mDestroyed &&
-                                    f.mView.getVisibility() == View.VISIBLE) {
+                            if (mCurState > Fragment.INITIALIZING && !mDestroyed
+                                    && f.mView.getVisibility() == View.VISIBLE
+                                    && f.mView.getTransitionAlpha() > 0) {
                                 anim = loadAnimator(f, transit, false,
                                         transitionStyle);
                             }
+                            f.mView.setTransitionAlpha(1f);
                             if (anim != null) {
                                 final ViewGroup container = f.mContainer;
                                 final View view = f.mView;
@@ -1439,7 +1442,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             }
             if (f.mIsNewlyAdded && f.mContainer != null) {
                 // Make it visible and run the animations
-                f.mView.setVisibility(View.VISIBLE);
+                f.mView.setTransitionAlpha(1f);
                 f.mIsNewlyAdded = false;
                 // run animations:
                 Animator anim = loadAnimator(f, f.getNextTransition(), true, f.getNextTransitionStyle());
@@ -2038,9 +2041,11 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
         int postponeIndex = endIndex;
         if (allowOptimization) {
-            moveFragmentsToInvisible();
+            ArraySet<Fragment> addedFragments = new ArraySet<>();
+            addAddedFragments(addedFragments);
             postponeIndex = postponePostponableTransactions(records, isRecordPop,
-                    startIndex, endIndex);
+                    startIndex, endIndex, addedFragments);
+            makeRemovedFragmentsInvisible(addedFragments);
         }
 
         if (postponeIndex != startIndex && allowOptimization) {
@@ -2065,6 +2070,24 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     /**
+     * Any fragments that were removed because they have been postponed should have their views
+     * made invisible by setting their transition alpha to 0.
+     *
+     * @param fragments The fragments that were added during operation execution. Only the ones
+     *                  that are no longer added will have their transition alpha changed.
+     */
+    private void makeRemovedFragmentsInvisible(ArraySet<Fragment> fragments) {
+        final int numAdded = fragments.size();
+        for (int i = 0; i < numAdded; i++) {
+            final Fragment fragment = fragments.valueAt(i);
+            if (!fragment.mAdded) {
+                final View view = fragment.getView();
+                view.setTransitionAlpha(0f);
+            }
+        }
+    }
+
+    /**
      * Examine all transactions and determine which ones are marked as postponed. Those will
      * have their operations rolled back and moved to the end of the record list (up to endIndex).
      * It will also add the postponed transaction to the queue.
@@ -2077,7 +2100,8 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
      * postponed.
      */
     private int postponePostponableTransactions(ArrayList<BackStackRecord> records,
-            ArrayList<Boolean> isRecordPop, int startIndex, int endIndex) {
+            ArrayList<Boolean> isRecordPop, int startIndex, int endIndex,
+            ArraySet<Fragment> added) {
         int postponeIndex = endIndex;
         for (int i = endIndex - 1; i >= startIndex; i--) {
             final BackStackRecord record = records.get(i);
@@ -2108,7 +2132,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 }
 
                 // different views may be visible now
-                moveFragmentsToInvisible();
+                addAddedFragments(added);
             }
         }
         return postponeIndex;
@@ -2141,14 +2165,16 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
         if (moveToState) {
             moveToState(mCurState, true);
-        } else if (mActive != null) {
+        }
+
+        if (mActive != null) {
             final int numActive = mActive.size();
             for (int i = 0; i < numActive; i++) {
                 // Allow added fragments to be removed during the pop since we aren't going
                 // to move them to the final state with moveToState(mCurState).
                 Fragment fragment = mActive.get(i);
-                if (fragment.mView != null && fragment.mIsNewlyAdded &&
-                        record.interactsWith(fragment.mContainerId)) {
+                if (fragment != null && fragment.mView != null && fragment.mIsNewlyAdded
+                        && record.interactsWith(fragment.mContainerId)) {
                     fragment.mIsNewlyAdded = false;
                 }
             }
@@ -2213,10 +2239,11 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     /**
      * Ensure that fragments that are added are moved to at least the CREATED state.
-     * Any newly-added Views are made INVISIBLE so that the Transaction can be postponed
-     * with {@link Fragment#postponeEnterTransition()}.
+     * Any newly-added Views are inserted into {@code added} so that the Transaction can be
+     * postponed with {@link Fragment#postponeEnterTransition()}. They will later be made
+     * invisible by changing their transitionAlpha to 0 if they have been removed when postponed.
      */
-    private void moveFragmentsToInvisible() {
+    private void addAddedFragments(ArraySet<Fragment> added) {
         if (mCurState < Fragment.CREATED) {
             return;
         }
@@ -2228,7 +2255,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             if (fragment.mState < state) {
                 moveToState(fragment, state, fragment.getNextAnim(), fragment.getNextTransition(), false);
                 if (fragment.mView != null && !fragment.mHidden && fragment.mIsNewlyAdded) {
-                    fragment.mView.setVisibility(View.INVISIBLE);
+                    added.add(fragment);
                 }
             }
         }
