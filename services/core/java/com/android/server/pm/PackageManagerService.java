@@ -13018,8 +13018,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + " is not installer for " + packageName);
             }
 
-            ps.categoryHint = categoryHint;
-            scheduleWriteSettingsLocked();
+            if (ps.categoryHint != categoryHint) {
+                ps.categoryHint = categoryHint;
+                scheduleWriteSettingsLocked();
+            }
         }
     }
 
