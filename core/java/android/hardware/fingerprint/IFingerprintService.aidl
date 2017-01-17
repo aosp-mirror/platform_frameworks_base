@@ -79,4 +79,7 @@ interface IFingerprintService {
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
+
+    // Enumerate all fingerprints
+    void enumerate(IBinder token, int userId, IFingerprintServiceReceiver receiver);
 }

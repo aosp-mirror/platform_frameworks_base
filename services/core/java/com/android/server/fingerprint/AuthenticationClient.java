@@ -16,17 +16,16 @@
 
 package com.android.server.fingerprint;
 
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.system.ErrnoException;
 import android.util.Slog;
 
 /**
@@ -85,7 +84,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 try {
                     Slog.w(TAG, "Forcing lockout (fp driver code should do this!)");
                     receiver.onError(getHalDeviceId(),
-                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT);
+                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT, 0 /* vendorCode */);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to notify lockout:", e);
                 }
@@ -106,7 +105,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
      */
     @Override
     public int start() {
-        IFingerprintDaemon daemon = getFingerprintDaemon();
+        IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "start authentication: no fingeprintd!");
             return ERROR_ESRCH;
@@ -116,7 +115,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
                 MetricsLogger.histogram(getContext(), "fingeprintd_auth_start_error", result);
-                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
             if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is authenticating...");
@@ -129,13 +128,13 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     @Override
     public int stop(boolean initiatedByClient) {
-        IFingerprintDaemon daemon = getFingerprintDaemon();
+        IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopAuthentication: no fingeprintd!");
             return ERROR_ESRCH;
         }
         try {
-            final int result = daemon.cancelAuthentication();
+            final int result = daemon.cancel();
             if (result != 0) {
                 Slog.w(TAG, "stopAuthentication failed, result=" + result);
                 return result;
@@ -149,19 +148,19 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onEnrollResult(int fingerId, int groupId, int rem) {
+    public boolean onEnrollResult(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onEnrollResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId) {
+    public boolean onRemoved(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onRemoved() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId) {
+    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
         if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }

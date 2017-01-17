@@ -18,8 +18,8 @@ package com.android.server.fingerprint;
 
 import android.Manifest;
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -94,7 +94,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     /**
      * Gets the fingerprint daemon from the cached state in the container class.
      */
-    public abstract IFingerprintDaemon getFingerprintDaemon();
+    public abstract IBiometricsFingerprint getFingerprintDaemon();
 
     // Event callbacks from driver. Inappropriate calls is flagged/logged by the
     // respective client (e.g. enrolling shouldn't get authenticate events).
@@ -102,8 +102,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     // to the next client (e.g. authentication accepts or rejects a fingerprint).
     public abstract boolean onEnrollResult(int fingerId, int groupId, int rem);
     public abstract boolean onAuthenticated(int fingerId, int groupId);
-    public abstract boolean onRemoved(int fingerId, int groupId);
-    public abstract boolean onEnumerationResult(int fingerId, int groupId);
+    public abstract boolean onRemoved(int fingerId, int groupId, int remaining);
+    public abstract boolean onEnumerationResult(int fingerId, int groupId, int remaining);
 
     /**
      * Called when we get notification from fingerprintd that an image has been acquired.
@@ -111,11 +111,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @param acquiredInfo info about the current image acquisition
      * @return true if client should be removed
      */
-    public boolean onAcquired(int acquiredInfo) {
+    public boolean onAcquired(int acquiredInfo, int vendorCode) {
         if (mReceiver == null)
             return true; // client not connected
         try {
-            mReceiver.onAcquired(getHalDeviceId(), acquiredInfo);
+            mReceiver.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
             return false; // acquisition continues...
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendAcquired:", e);
@@ -134,10 +134,10 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @param error
      * @return true if client should be removed
      */
-    public boolean onError(int error) {
+    public boolean onError(int error, int vendorCode) {
         if (mReceiver != null) {
             try {
-                mReceiver.onError(getHalDeviceId(), error);
+                mReceiver.onError(getHalDeviceId(), error, vendorCode);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendError:", e);
             }
@@ -162,7 +162,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public void binderDied() {
         mToken = null;
         mReceiver = null;
-        onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+        onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         try {
             if (mToken != null) {
                 if (DEBUG) Slog.w(TAG, "removing leaked reference: " + mToken);
-                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
+                onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
             }
         } finally {
             super.finalize();

@@ -62,6 +62,7 @@ public class FingerprintManager {
     private static final int MSG_AUTHENTICATION_FAILED = 103;
     private static final int MSG_ERROR = 104;
     private static final int MSG_REMOVED = 105;
+    private static final int MSG_ENUMERATED = 106;
 
     //
     // Error messages from fingerprint hardware during initilization, enrollment, authentication or
@@ -116,6 +117,10 @@ public class FingerprintManager {
      * the above categories. Vendors are responsible for providing error strings for these errors.
      * @hide
      */
+    public static final int FINGERPRINT_ERROR_VENDOR = 8;
+    /**
+     * @hide
+     */
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
     //
@@ -167,6 +172,10 @@ public class FingerprintManager {
      * the above categories. Vendors are responsible for providing error strings for these errors.
      * @hide
      */
+    public static final int FINGERPRINT_ACQUIRED_VENDOR = 6;
+    /**
+     * @hide
+     */
     public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
 
     private IFingerprintService mService;
@@ -175,6 +184,7 @@ public class FingerprintManager {
     private AuthenticationCallback mAuthenticationCallback;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
+    private EnumerateCallback mEnumerateCallback;
     private CryptoObject mCryptoObject;
     private Fingerprint mRemovalFingerprint;
     private Handler mHandler;
@@ -403,6 +413,29 @@ public class FingerprintManager {
     };
 
     /**
+     * Callback structure provided to {@link FingerprintManager#enumerate(int). Users of
+     * {@link #FingerprintManager()} may optionally provide an implementation of this to
+     * {@link FingerprintManager#enumerate(int, int, EnumerateCallback)} for listening to
+     * fingerprint template removal events.
+     *
+     * @hide
+     */
+    public static abstract class EnumerateCallback {
+        /**
+         * Called when the given fingerprint can't be removed.
+         * @param errMsgId An associated error message id
+         * @param errString An error message indicating why the fingerprint id can't be removed
+         */
+        public void onEnumerateError(int errMsgId, CharSequence errString) { }
+
+        /**
+         * Called when a given fingerprint is successfully removed.
+         * @param fingerprint the fingerprint template that was removed.
+         */
+        public void onEnumerate(Fingerprint fingerprint) { }
+    };
+
+    /**
      * @hide
      */
     public static abstract class LockoutResetCallback {
@@ -484,7 +517,7 @@ public class FingerprintManager {
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
                 callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
             }
         }
     }
@@ -534,7 +567,7 @@ public class FingerprintManager {
                 // Though this may not be a hardware issue, it will cause apps to give up or try
                 // again later.
                 callback.onEnrollmentError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
             }
         }
     }
@@ -604,7 +637,29 @@ public class FingerprintManager {
             Log.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
                 callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+            }
+        }
+    }
+
+    /**
+     * Enumerate all fingerprint templates stored in hardware and/or protected storage.
+     * @param userId the user who this fingerprint belongs to
+     * @param callback an optional callback to verify that fingerprint templates have been
+     * successfully removed. May be null of no callback is required.
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void enumerate(int userId, @NonNull EnumerateCallback callback) {
+        if (mService != null) try {
+            mEnumerateCallback = callback;
+            mService.enumerate(mToken, userId, mServiceReceiver);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Remote exception in enumerate: ", e);
+            if (callback != null) {
+                callback.onEnumerateError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
             }
         }
     }
@@ -800,7 +855,8 @@ public class FingerprintManager {
                     sendEnrollResult((Fingerprint) msg.obj, msg.arg1 /* remaining */);
                     break;
                 case MSG_ACQUIRED:
-                    sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */);
+                    sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */,
+                            msg.arg2 /* vendorCode */);
                     break;
                 case MSG_AUTHENTICATION_SUCCEEDED:
                     sendAuthenticatedSucceeded((Fingerprint) msg.obj, msg.arg1 /* userId */);
@@ -809,10 +865,14 @@ public class FingerprintManager {
                     sendAuthenticatedFailed();
                     break;
                 case MSG_ERROR:
-                    sendErrorResult((Long) msg.obj /* deviceId */, msg.arg1 /* errMsgId */);
+                    sendErrorResult((Long) msg.obj /* deviceId */, msg.arg1 /* errMsgId */,
+                            msg.arg2 /* vendorCode */);
                     break;
                 case MSG_REMOVED:
                     sendRemovedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
+                            msg.arg2 /* groupId */);
+                case MSG_ENUMERATED:
+                    sendEnumeratedResult((Long) msg.obj /* deviceId */, msg.arg1 /* fingerId */,
                             msg.arg2 /* groupId */);
             }
         }
@@ -834,14 +894,28 @@ public class FingerprintManager {
             }
         }
 
-        private void sendErrorResult(long deviceId, int errMsgId) {
+        private void sendEnumeratedResult(long deviceId, int fingerId, int groupId) {
+            if (mEnumerateCallback != null) {
+                mEnumerateCallback.onEnumerate(new Fingerprint(null, groupId, fingerId, deviceId));
+            }
+        }
+
+        private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
+            // emulate HAL 2.1 behavior and send real errMsgId
+            final int clientErrMsgId = errMsgId == FINGERPRINT_ERROR_VENDOR
+                    ? (vendorCode + FINGERPRINT_ERROR_VENDOR_BASE) : errMsgId;
             if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentError(errMsgId, getErrorString(errMsgId));
+                mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
+                        getErrorString(errMsgId, vendorCode));
             } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationError(errMsgId, getErrorString(errMsgId));
+                mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
+                        getErrorString(errMsgId, vendorCode));
             } else if (mRemovalCallback != null) {
-                mRemovalCallback.onRemovalError(mRemovalFingerprint, errMsgId,
-                        getErrorString(errMsgId));
+                mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
+                        getErrorString(errMsgId, vendorCode));
+            } else if (mEnumerateCallback != null) {
+                mEnumerateCallback.onEnumerateError(clientErrMsgId,
+                        getErrorString(errMsgId, vendorCode));
             }
         }
 
@@ -865,18 +939,21 @@ public class FingerprintManager {
             }
         }
 
-        private void sendAcquiredResult(long deviceId, int acquireInfo) {
+        private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
             if (mAuthenticationCallback != null) {
                 mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
             }
-            final String msg = getAcquiredString(acquireInfo);
+            final String msg = getAcquiredString(acquireInfo, vendorCode);
             if (msg == null) {
                 return;
             }
+            // emulate HAL 2.1 behavior and send real acquiredInfo
+            final int clientInfo = acquireInfo == FINGERPRINT_ACQUIRED_VENDOR
+                    ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquireInfo;
             if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentHelp(acquireInfo, msg);
+                mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
             } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationHelp(acquireInfo, msg);
+                mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
             }
         }
     };
@@ -917,7 +994,7 @@ public class FingerprintManager {
         }
     }
 
-    private String getErrorString(int errMsg) {
+    private String getErrorString(int errMsg, int vendorCode) {
         switch (errMsg) {
             case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
                 return mContext.getString(
@@ -934,20 +1011,19 @@ public class FingerprintManager {
                 return mContext.getString(com.android.internal.R.string.fingerprint_error_canceled);
             case FINGERPRINT_ERROR_LOCKOUT:
                 return mContext.getString(com.android.internal.R.string.fingerprint_error_lockout);
-            default:
-                if (errMsg >= FINGERPRINT_ERROR_VENDOR_BASE) {
-                    int msgNumber = errMsg - FINGERPRINT_ERROR_VENDOR_BASE;
+            case FINGERPRINT_ERROR_VENDOR: {
                     String[] msgArray = mContext.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);
-                    if (msgNumber < msgArray.length) {
-                        return msgArray[msgNumber];
+                    if (vendorCode < msgArray.length) {
+                        return msgArray[vendorCode];
                     }
                 }
-                return null;
         }
+        Slog.w(TAG, "Invalid error message: " + errMsg + ", " + vendorCode);
+        return null;
     }
 
-    private String getAcquiredString(int acquireInfo) {
+    private String getAcquiredString(int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
             case FINGERPRINT_ACQUIRED_GOOD:
                 return null;
@@ -966,17 +1042,16 @@ public class FingerprintManager {
             case FINGERPRINT_ACQUIRED_TOO_FAST:
                 return mContext.getString(
                     com.android.internal.R.string.fingerprint_acquired_too_fast);
-            default:
-                if (acquireInfo >= FINGERPRINT_ACQUIRED_VENDOR_BASE) {
-                    int msgNumber = acquireInfo - FINGERPRINT_ACQUIRED_VENDOR_BASE;
+            case FINGERPRINT_ACQUIRED_VENDOR: {
                     String[] msgArray = mContext.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_acquired_vendor);
-                    if (msgNumber < msgArray.length) {
-                        return msgArray[msgNumber];
+                    if (vendorCode < msgArray.length) {
+                        return msgArray[vendorCode];
                     }
                 }
-                return null;
         }
+        Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
+        return null;
     }
 
     private IFingerprintServiceReceiver mServiceReceiver = new IFingerprintServiceReceiver.Stub() {
@@ -988,8 +1063,8 @@ public class FingerprintManager {
         }
 
         @Override // binder call
-        public void onAcquired(long deviceId, int acquireInfo) {
-            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, 0, deviceId).sendToTarget();
+        public void onAcquired(long deviceId, int acquireInfo, int vendorCode) {
+            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode, deviceId).sendToTarget();
         }
 
         @Override // binder call
@@ -1003,13 +1078,20 @@ public class FingerprintManager {
         }
 
         @Override // binder call
-        public void onError(long deviceId, int error) {
-            mHandler.obtainMessage(MSG_ERROR, error, 0, deviceId).sendToTarget();
+        public void onError(long deviceId, int error, int vendorCode) {
+            mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
         }
 
         @Override // binder call
-        public void onRemoved(long deviceId, int fingerId, int groupId) {
+        public void onRemoved(long deviceId, int fingerId, int groupId, int remaining) {
+            // TODO: propagate remaining
             mHandler.obtainMessage(MSG_REMOVED, fingerId, groupId, deviceId).sendToTarget();
+        }
+
+        @Override // binder call
+        public void onEnumerated(long deviceId, int fingerId, int groupId, int remaining) {
+            // TODO: propagate remaining
+            mHandler.obtainMessage(MSG_ENUMERATED, fingerId, groupId, deviceId).sendToTarget();
         }
     };
 
