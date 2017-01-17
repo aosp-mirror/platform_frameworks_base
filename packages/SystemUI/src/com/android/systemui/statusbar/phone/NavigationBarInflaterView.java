@@ -70,7 +70,6 @@ public class NavigationBarInflaterView extends FrameLayout
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
-    private int mDensity;
 
     protected FrameLayout mRot0;
     protected FrameLayout mRot90;
@@ -86,7 +85,6 @@ public class NavigationBarInflaterView extends FrameLayout
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDensity = context.getResources().getConfiguration().densityDpi;
         createInflaters();
         Display display = ((WindowManager)
                 context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -100,18 +98,6 @@ public class NavigationBarInflaterView extends FrameLayout
         landscape.setTo(mContext.getResources().getConfiguration());
         landscape.orientation = Configuration.ORIENTATION_LANDSCAPE;
         mLandscapeInflater = LayoutInflater.from(mContext.createConfigurationContext(landscape));
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (mDensity != newConfig.densityDpi) {
-            mDensity = newConfig.densityDpi;
-            createInflaters();
-            inflateChildren();
-            clearViews();
-            inflateLayout(mCurrentLayout);
-        }
     }
 
     @Override

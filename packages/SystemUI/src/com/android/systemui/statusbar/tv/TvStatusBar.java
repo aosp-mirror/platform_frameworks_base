@@ -106,11 +106,6 @@ public class TvStatusBar extends BaseStatusBar {
     protected void updateNotifications() {
     }
 
-    @Override
-    public boolean shouldDisableNavbarGestures() {
-        return true;
-    }
-
     public View getStatusBarView() {
         return null;
     }
@@ -140,10 +135,6 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     protected void createAndAddWindows() {
-    }
-
-    @Override
-    protected void refreshLayout(int layoutDirection) {
     }
 
     @Override

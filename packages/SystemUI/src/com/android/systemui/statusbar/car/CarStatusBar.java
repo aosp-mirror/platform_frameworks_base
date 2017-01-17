@@ -64,6 +64,7 @@ public class CarStatusBar extends PhoneStatusBar implements
 
     private ConnectedDeviceSignalController mConnectedDeviceSignalController;
     private View mSignalsView;
+    private CarNavigationBarView mNavigationBarView;
 
     @Override
     public void start() {
@@ -121,7 +122,17 @@ public class CarStatusBar extends PhoneStatusBar implements
     }
 
     @Override
-    protected void addNavigationBar() {
+    protected void createNavigationBar() {
+        if (mNavigationBarView != null) {
+            return;
+        }
+
+        mCarNavigationBar =
+                (CarNavigationBarView) View.inflate(mContext, R.layout.car_navigation_bar, null);
+        mController = new CarNavigationBarController(mContext, mCarNavigationBar,
+                this /* ActivityStarter*/);
+        mNavigationBarView = mCarNavigationBar;
+        mCarNavigationBar.getBarTransitions().setAlwaysOpaque(true);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
@@ -135,19 +146,6 @@ public class CarStatusBar extends PhoneStatusBar implements
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
         mWindowManager.addView(mNavigationBarView, lp);
-    }
-
-    @Override
-    protected void createNavigationBarView(Context context) {
-        if (mNavigationBarView != null) {
-            return;
-        }
-        mCarNavigationBar =
-                (CarNavigationBarView) View.inflate(context, R.layout.car_navigation_bar, null);
-        mController = new CarNavigationBarController(context, mCarNavigationBar,
-                this /* ActivityStarter*/);
-        mNavigationBarView = mCarNavigationBar;
-        mCarNavigationBar.getBarTransitions().setAlwaysOpaque(true);
     }
 
     @Override
@@ -189,12 +187,6 @@ public class CarStatusBar extends PhoneStatusBar implements
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mPackageChangeReceiver, filter);
-    }
-
-    @Override
-    protected void repositionNavigationBar() {
-        // The navigation bar for a vehicle will not need to be repositioned, as it is always
-        // set at the bottom.
     }
 
     public boolean hasDockedTask() {

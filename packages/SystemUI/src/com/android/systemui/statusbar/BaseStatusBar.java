@@ -185,9 +185,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mLayoutDirection = -1; // invalid
     protected AccessibilityManager mAccessibilityManager;
 
-    // on-screen navigation buttons
-    protected NavigationBarView mNavigationBarView = null;
-
     protected boolean mDeviceInteractive;
 
     protected boolean mVisible;
@@ -237,8 +234,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
-
-    protected abstract void refreshLayout(int layoutDirection);
 
     protected Display mDisplay;
 
@@ -945,24 +940,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        final Locale locale = mContext.getResources().getConfiguration().locale;
-        final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
         final float fontScale = newConfig.fontScale;
         final int density = newConfig.densityDpi;
         if (density != mDensity || mFontScale != fontScale) {
             onDensityOrFontScaleChanged();
             mDensity = density;
             mFontScale = fontScale;
-        }
-        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
-            if (DEBUG) {
-                Log.v(TAG, String.format(
-                        "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,
-                        locale, ld));
-            }
-            mLocale = locale;
-            mLayoutDirection = ld;
-            refreshLayout(ld);
         }
     }
 
@@ -1284,26 +1267,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected abstract View getStatusBarView();
-
-    protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
-        // additional optimization when we have software system buttons - start loading the recent
-        // tasks on touch down
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            int action = event.getAction() & MotionEvent.ACTION_MASK;
-            if (action == MotionEvent.ACTION_DOWN) {
-                preloadRecents();
-            } else if (action == MotionEvent.ACTION_CANCEL) {
-                cancelPreloadingRecents();
-            } else if (action == MotionEvent.ACTION_UP) {
-                if (!v.isPressed()) {
-                    cancelPreloadingRecents();
-                }
-
-            }
-            return false;
-        }
-    };
 
     /**
      * Toggle docking the app window
@@ -2256,7 +2219,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotifications();
-    public abstract boolean shouldDisableNavbarGestures();
 
     public abstract void addNotification(StatusBarNotification notification,
             RankingMap ranking, Entry oldEntry);

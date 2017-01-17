@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.ValueAnimator;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 
@@ -28,6 +29,7 @@ import com.android.systemui.Interpolators;
 public class LightBarTransitionsController {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
+    private static final String EXTRA_DARK_INTENSITY = "dark_intensity";
 
     private final Handler mHandler;
     private final DarkIntensityApplier mApplier;
@@ -40,6 +42,7 @@ public class LightBarTransitionsController {
     private float mPendingDarkIntensity;
     private ValueAnimator mTintAnimator;
     private float mDarkIntensity;
+    private float mNextDarkIntensity;
 
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
         @Override
@@ -51,6 +54,16 @@ public class LightBarTransitionsController {
     public LightBarTransitionsController(DarkIntensityApplier applier) {
         mApplier = applier;
         mHandler = new Handler();
+    }
+
+    public void saveState(Bundle outState) {
+        float intensity = mTintAnimator != null && mTintAnimator.isRunning()
+                ?  mNextDarkIntensity : mDarkIntensity;
+        outState.putFloat(EXTRA_DARK_INTENSITY, intensity);
+    }
+
+    public void restoreState(Bundle savedInstanceState) {
+        setIconTintInternal(savedInstanceState.getFloat(EXTRA_DARK_INTENSITY, 0));
     }
 
     public void appTransitionPending() {
@@ -119,6 +132,7 @@ public class LightBarTransitionsController {
         if (mDarkIntensity == targetDarkIntensity) {
             return;
         }
+        mNextDarkIntensity = targetDarkIntensity;
         mTintAnimator = ValueAnimator.ofFloat(mDarkIntensity, targetDarkIntensity);
         mTintAnimator.addUpdateListener(
                 animation -> setIconTintInternal((Float) animation.getAnimatedValue()));
