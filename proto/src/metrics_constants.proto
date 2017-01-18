@@ -2247,6 +2247,11 @@ message MetricsEvent {
 
     // ---- End N-MR2 Constants, all N-MR2 constants go above this line ----
 
+    // OPEN: QS NFC tile shown
+    // ACTION: QS NFC tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    QS_NFC = 800;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
