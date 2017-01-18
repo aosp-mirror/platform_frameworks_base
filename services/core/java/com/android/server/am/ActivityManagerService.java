@@ -11945,12 +11945,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void startConfirmDeviceCredentialIntent(Intent intent) {
+    public void startConfirmDeviceCredentialIntent(Intent intent, Bundle options) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startConfirmDeviceCredentialIntent");
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                mActivityStarter.startConfirmCredentialIntent(intent);
+                mActivityStarter.startConfirmCredentialIntent(intent, options);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

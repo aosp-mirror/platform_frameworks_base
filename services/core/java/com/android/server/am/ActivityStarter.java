@@ -644,18 +644,18 @@ class ActivityStarter {
                     null);
             credential.putExtra(Intent.EXTRA_INTENT, new IntentSender(target));
             // Show confirm credentials activity.
-            startConfirmCredentialIntent(credential);
+            startConfirmCredentialIntent(credential, null);
         }
     }
 
-    void startConfirmCredentialIntent(Intent intent) {
+    void startConfirmCredentialIntent(Intent intent, Bundle optionsBundle) {
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK |
                 FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
                 FLAG_ACTIVITY_TASK_ON_HOME);
-        final ActivityOptions options = ActivityOptions.makeBasic();
+        ActivityOptions options = (optionsBundle != null ? new ActivityOptions(optionsBundle)
+                        : ActivityOptions.makeBasic());
         options.setLaunchTaskId(mSupervisor.getHomeActivity().task.taskId);
-        mService.mContext.startActivityAsUser(intent, options.toBundle(),
-                UserHandle.CURRENT);
+        mService.mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
