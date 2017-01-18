@@ -15,7 +15,6 @@
  */
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -24,6 +23,10 @@ import android.graphics.Bitmap;
  * @hide Only for use within the system server.
  */
 public abstract class UserManagerInternal {
+    public static final int CAMERA_NOT_DISABLED = 0;
+    public static final int CAMERA_DISABLED_LOCALLY = 1;
+    public static final int CAMERA_DISABLED_GLOBALLY = 2;
+
     public interface UserRestrictionsListener {
         /**
          * Called when a user restriction changes.
@@ -36,18 +39,19 @@ public abstract class UserManagerInternal {
     }
 
     /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
-     * to set per-user as well as global user restrictions.
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
+     * restrictions enforced by the user.
      *
      * @param userId target user id for the local restrictions.
-     * @param localRestrictions per-user restrictions.
-     *     Caller must not change it once passed to this method.
-     * @param globalRestrictions global restrictions set by DO.  Must be null when PO changed user
-     *     restrictions, in which case global restrictions won't change.
-     *     Caller must not change it once passed to this method.
+     * @param restrictions a bundle of user restrictions.
+     * @param isDeviceOwner whether {@code userId} corresponds to device owner user id.
+     * @param cameraRestrictionScope is camera disabled and if so what is the scope of restriction.
+     *        Should be one of {@link #CAMERA_NOT_DISABLED}, {@link #CAMERA_DISABLED_LOCALLY} or
+     *                               {@link #CAMERA_DISABLED_GLOBALLY}
      */
-    public abstract void setDevicePolicyUserRestrictions(int userId,
-            @NonNull Bundle localRestrictions, @Nullable Bundle globalRestrictions);
+    public abstract void setDevicePolicyUserRestrictions(int userId, @Nullable Bundle restrictions,
+            boolean isDeviceOwner, int cameraRestrictionScope);
+
     /**
      * Returns the "base" user restrictions.
      *
