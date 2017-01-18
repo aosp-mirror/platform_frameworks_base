@@ -70,6 +70,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
@@ -93,6 +94,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import com.android.systemui.recents.views.grid.GridTaskView;
+import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -206,6 +208,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private int mLastWidth;
     private int mLastHeight;
 
+    // We keep track of the task view focused by user interaction and draw a frame around it in the
+    // grid layout.
+    private TaskViewFocusFrame mTaskViewFocusFrame;
+
     // A convenience update listener to request updating clipping of tasks
     private ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -264,6 +270,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mDividerSize = ssp.getDockedDividerSize(context);
         mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
         mDisplayRect = ssp.getDisplayRect();
+
+        // Create a frame to draw around the focused task view
+        if (Recents.getConfiguration().isGridEnabled) {
+            mTaskViewFocusFrame = new TaskViewFocusFrame(mContext, this,
+                mLayoutAlgorithm.mTaskGridLayoutAlgorithm);
+            addView(mTaskViewFocusFrame);
+            getViewTreeObserver().addOnGlobalFocusChangeListener(mTaskViewFocusFrame);
+        }
 
         int taskBarDismissDozeDelaySeconds = getResources().getInteger(
                 R.integer.recents_task_bar_dismiss_delay_seconds);
@@ -878,7 +892,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @return whether or not the stack will scroll as a part of this focus change
      */
-    private boolean setFocusedTask(int taskIndex, boolean scrollToTask,
+    public boolean setFocusedTask(int taskIndex, boolean scrollToTask,
             final boolean requestViewFocus) {
         return setFocusedTask(taskIndex, scrollToTask, requestViewFocus, 0);
     }
@@ -888,7 +902,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *
      * @return whether or not the stack will scroll as a part of this focus change
      */
-    private boolean setFocusedTask(int focusTaskIndex, boolean scrollToTask,
+    public boolean setFocusedTask(int focusTaskIndex, boolean scrollToTask,
             boolean requestViewFocus, int timerIndicatorDuration) {
         // Find the next task to focus
         int newFocusedTaskIndex = mStack.getTaskCount() > 0 ?
@@ -939,6 +953,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 if (newFocusedTaskView != null) {
                     newFocusedTaskView.setFocusedState(true, requestViewFocus);
                 }
+            }
+            // Any time a task view gets the focus, we move the focus frame around it.
+            if (mTaskViewFocusFrame != null) {
+                mTaskViewFocusFrame.moveGridTaskViewFocus(getChildViewForTask(newFocusedTask));
             }
         }
         return willScroll;
@@ -1005,20 +1023,28 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             float stackScroll = mStackScroller.getStackScroll();
             ArrayList<Task> tasks = mStack.getStackTasks();
             int taskCount = tasks.size();
-            if (forward) {
-                // Walk backwards and focus the next task smaller than the current stack scroll
-                for (newIndex = taskCount - 1; newIndex >= 0; newIndex--) {
-                    float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
-                    if (Float.compare(taskP, stackScroll) <= 0) {
-                        break;
-                    }
-                }
+            if (useGridLayout()) {
+                // For the grid layout, we directly set focus to the most recently used task
+                // no matter we're moving forwards or backwards.
+                newIndex = taskCount - 1;
             } else {
-                // Walk forwards and focus the next task larger than the current stack scroll
-                for (newIndex = 0; newIndex < taskCount; newIndex++) {
-                    float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
-                    if (Float.compare(taskP, stackScroll) >= 0) {
-                        break;
+                // For the grid layout we pick a proper task to focus, according to the current
+                // stack scroll.
+                if (forward) {
+                    // Walk backwards and focus the next task smaller than the current stack scroll
+                    for (newIndex = taskCount - 1; newIndex >= 0; newIndex--) {
+                        float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
+                        if (Float.compare(taskP, stackScroll) <= 0) {
+                            break;
+                        }
+                    }
+                } else {
+                    // Walk forwards and focus the next task larger than the current stack scroll
+                    for (newIndex = 0; newIndex < taskCount; newIndex++) {
+                        float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
+                        if (Float.compare(taskP, stackScroll) >= 0) {
+                            break;
+                        }
                     }
                 }
             }
@@ -1037,12 +1063,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Resets the focused task.
      */
-    void resetFocusedTask(Task task) {
+    public void resetFocusedTask(Task task) {
         if (task != null) {
             TaskView tv = getChildViewForTask(task);
             if (tv != null) {
                 tv.setFocusedState(false, false /* requestViewFocus */);
             }
+        }
+        if (mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.moveGridTaskViewFocus(null);
         }
         mFocusedTask = null;
     }
@@ -1050,7 +1079,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Returns the focused task.
      */
-    Task getFocusedTask() {
+    public Task getFocusedTask() {
         return mFocusedTask;
     }
 
@@ -1253,6 +1282,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = 0; i < taskViewCount; i++) {
             measureTaskView(mTmpTaskViews.get(i));
         }
+        if (mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.measure();
+        }
 
         setMeasuredDimension(width, height);
         mLastWidth = width;
@@ -1286,6 +1318,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
             layoutTaskView(changed, mTmpTaskViews.get(i));
+        }
+        if (mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.layout();
         }
 
         if (changed) {
@@ -1339,10 +1374,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // until after the enter-animation
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
-        if (focusedTaskIndex != -1) {
-            setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
-                    false /* requestViewFocus */);
+
+        // We set the initial focused task view iff the following conditions are satisfied:
+        // 1. Recents is showing task views in stack layout.
+        // 2. Recents is launched with ALT + TAB.
+        boolean setFocusOnFirstLayout = !useGridLayout() ||
+            Recents.getConfiguration().getLaunchState().launchedWithAltTab;
+        if (setFocusOnFirstLayout) {
+            int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount(),
+                useGridLayout());
+            if (focusedTaskIndex != -1) {
+                setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
+                        false /* requestViewFocus */);
+            }
         }
         updateStackActionButtonVisibility();
     }
@@ -1442,6 +1486,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Remove the task from the ignored set
         removeIgnoreTask(removedTask);
+
+        // Resize the grid layout task view focus frame
+        if (mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.resize();
+        }
 
         // If requested, relayout with the given animation
         if (animation != null) {
@@ -1740,10 +1789,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
         animateFreeformWorkspaceBackgroundAlpha(0, new AnimationProps(taskViewExitToHomeDuration,
                 Interpolators.FAST_OUT_SLOW_IN));
+
+        // Dismiss the grid task view focus frame
+        if (mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.moveGridTaskViewFocus(null);
+        }
     }
 
     public final void onBusEvent(DismissFocusedTaskViewEvent event) {
         if (mFocusedTask != null) {
+            if (mTaskViewFocusFrame != null) {
+                mTaskViewFocusFrame.moveGridTaskViewFocus(null);
+            }
             TaskView tv = getChildViewForTask(mFocusedTask);
             if (tv != null) {
                 tv.dismissTask();
@@ -2071,6 +2128,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(RecentsGrowingEvent event) {
         mResetToInitialStateWhenResized = true;
+    }
+
+    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
+        if (!event.visible && mTaskViewFocusFrame != null) {
+            mTaskViewFocusFrame.moveGridTaskViewFocus(null);
+        }
     }
 
     public void reloadOnConfigurationChange() {
