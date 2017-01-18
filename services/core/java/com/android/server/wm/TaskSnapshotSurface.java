@@ -35,7 +35,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.Display;
 import android.view.IWindowSession;
 import android.view.Surface;
 import android.view.View;
@@ -147,6 +146,7 @@ class TaskSnapshotSurface implements StartingSurface {
         if (reportNextDraw) {
             reportDrawn();
         }
+        mSurface.release();
     }
 
     private void reportDrawn() {
