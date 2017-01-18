@@ -45,7 +45,7 @@ import android.view.Display;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.phone.DozeParameters;
 

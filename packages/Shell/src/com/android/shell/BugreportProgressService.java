@@ -43,7 +43,7 @@ import libcore.io.Streams;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
 
 import android.accounts.Account;

@@ -224,6 +224,13 @@ static void checkNinePatchSerialization(android::Res_png_9patch* inPatch,  void*
     }
 }*/
 
+#ifdef MAX
+#undef MAX
+#endif
+#ifdef ABS
+#undef ABS
+#endif
+
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define ABS(a)   ((a)<0?-(a):(a))
 

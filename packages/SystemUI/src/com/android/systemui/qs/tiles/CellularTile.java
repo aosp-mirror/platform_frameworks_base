@@ -27,7 +27,7 @@ import android.widget.Button;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSIconView;

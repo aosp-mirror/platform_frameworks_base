@@ -19,7 +19,7 @@ import android.content.Context;
 import android.os.Build;
 import android.view.View;
 
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
  * Log all the things.

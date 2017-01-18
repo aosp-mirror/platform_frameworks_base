@@ -29,7 +29,7 @@ import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
 import android.util.Base64;
-import com.android.server.connectivity.metrics.IpConnectivityLogClass;
+import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import com.google.protobuf.nano.MessageNano;
 import java.io.PrintWriter;
 import java.io.StringWriter;

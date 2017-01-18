@@ -30,7 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.qs.QSTile;
 
 import java.util.Arrays;
