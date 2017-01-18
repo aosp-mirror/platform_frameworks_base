@@ -342,8 +342,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                         mSv.invalidate();
                     }
 
-                    // Reset the focused task after the user has scrolled
-                    if (!mSv.mTouchExplorationEnabled) {
+                    // Reset the focused task after the user has scrolled, but we have no scrolling
+                    // in grid layout and therefore we don't want to reset the focus there.
+                    if (!mSv.mTouchExplorationEnabled && !mSv.useGridLayout()) {
                         mSv.resetFocusedTask(mSv.getFocusedTask());
                     }
                 } else if (mActiveTaskView == null) {

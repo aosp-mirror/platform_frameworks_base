@@ -50,7 +50,7 @@ public class RecentsActivityLaunchState {
     /**
      * Returns the task to focus given the current launch state.
      */
-    public int getInitialFocusTaskIndex(int numTasks) {
+    public int getInitialFocusTaskIndex(int numTasks, boolean useGridLayout) {
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (launchedFromApp) {
@@ -63,6 +63,11 @@ public class RecentsActivityLaunchState {
             if (launchState.launchedFromBlacklistedApp) {
                 // If we are launching from a blacklisted app, focus the front most task so that the
                 // next tap will launch the task
+                return numTasks - 1;
+            }
+
+            if (useGridLayout) {
+                // If coming from another app to the grid layout, focus the front most task
                 return numTasks - 1;
             }
 
