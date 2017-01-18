@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
+import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -142,7 +145,11 @@ public class UpstreamNetworkMonitor {
         // message to aid in any subsequent debugging
         if (DBG) Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
 
-        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback);
+        // The following use of the legacy type system cannot be removed until
+        // after upstream selection no longer finds networks by legacy type.
+        // See also b/34364553.
+        final int apnType = mDunRequired ? TYPE_MOBILE_DUN : TYPE_MOBILE_HIPRI;
+        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, apnType);
     }
 
     public void releaseMobileNetworkRequest() {
