@@ -21,17 +21,18 @@ import android.content.Intent;
 import android.telephony.SubscriptionInfo;
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
+import com.android.systemui.DemoMode;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
 
-public interface NetworkController extends CallbackController<SignalCallback> {
+public interface NetworkController extends CallbackController<SignalCallback>, DemoMode {
 
     boolean hasMobileDataFeature();
     void addCallback(SignalCallback cb);
     void removeCallback(SignalCallback cb);
     void setWifiEnabled(boolean enabled);
-    void onUserSwitched(int newUserId);
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();
     DataSaverController getDataSaverController();
@@ -40,6 +41,9 @@ public interface NetworkController extends CallbackController<SignalCallback> {
 
     void addEmergencyListener(EmergencyListener listener);
     void removeEmergencyListener(EmergencyListener listener);
+    void setUserSetupComplete(boolean userSetup);
+    boolean hasEmergencyCryptKeeperText();
+    boolean isRadioOn();
 
     public interface SignalCallback {
         default void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,

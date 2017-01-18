@@ -30,6 +30,7 @@ import android.view.ViewStub;
 import android.widget.FrameLayout;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
@@ -56,10 +57,10 @@ public class KeyguardUserSwitcher {
     private boolean mAnimating;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
-            KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
-            UserSwitcherController userSwitcherController) {
+            KeyguardStatusBarView statusBarView, NotificationPanelView panelView) {
         boolean keyguardUserSwitcherEnabled =
                 context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
+        UserSwitcherController userSwitcherController = Dependency.get(UserSwitcherController.class);
         if (userSwitcherController != null && keyguardUserSwitcherEnabled) {
             mUserSwitcherContainer = (Container) userSwitcher.inflate();
             mBackground = new KeyguardUserSwitcherScrim(context);

@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -42,8 +43,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.DemoMode;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -60,7 +65,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
 /** Platform implementation of the network controller. **/
 public class NetworkControllerImpl extends BroadcastReceiver
-        implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider {
+        implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider,
+        ConfigurationChangedReceiver, Dumpable {
     // debug
     static final String TAG = "NetworkController";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -80,6 +86,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final boolean mHasMobileDataFeature;
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
+    private final CurrentUserTracker mUserTracker;
     private Config mConfig;
 
     // Subcontrollers.
@@ -135,7 +142,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /**
      * Construct this controller object and register for updates.
      */
-    public NetworkControllerImpl(Context context, Looper bgLooper) {
+    public NetworkControllerImpl(Context context, Looper bgLooper,
+            DeviceProvisionedController deviceProvisionedController) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
@@ -143,7 +151,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 new CallbackHandler(),
                 new AccessPointControllerImpl(context, bgLooper),
                 new DataUsageController(context),
-                new SubscriptionDefaults());
+                new SubscriptionDefaults(),
+                deviceProvisionedController);
         mReceiverHandler.post(mRegisterListeners);
     }
 
@@ -154,7 +163,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
             DataUsageController dataUsageController,
-            SubscriptionDefaults defaultsHandler) {
+            SubscriptionDefaults defaultsHandler,
+            DeviceProvisionedController deviceProvisionedController) {
         mContext = context;
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
@@ -191,6 +201,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
+        mUserTracker = new CurrentUserTracker(mContext) {
+            @Override
+            public void onUserSwitched(int newUserId) {
+                NetworkControllerImpl.this.onUserSwitched(newUserId);
+            }
+        };
+        mUserTracker.startTracking();
+        deviceProvisionedController.addCallback(new DeviceProvisionedListener() {
+            @Override
+            public void onUserSetupChanged() {
+                setUserSetupComplete(deviceProvisionedController.isUserSetup(
+                        deviceProvisionedController.getCurrentUser()));
+            }
+        });
     }
 
     public DataSaverController getDataSaverController() {
@@ -358,8 +382,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }.execute();
     }
 
-    @Override
-    public void onUserSwitched(int newUserId) {
+    private void onUserSwitched(int newUserId) {
         mCurrentUserId = newUserId;
         mAccessPoints.onUserSwitched(newUserId);
         updateConnectivity();
@@ -413,7 +436,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
     }
 
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(Configuration newConfig) {
         mConfig = Config.readConfig(mContext);
         mReceiverHandler.post(new Runnable() {
             @Override

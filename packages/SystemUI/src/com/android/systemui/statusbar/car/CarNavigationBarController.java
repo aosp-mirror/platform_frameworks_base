@@ -30,7 +30,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QS.ActivityStarter;
+import com.android.systemui.ActivityStarter;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;

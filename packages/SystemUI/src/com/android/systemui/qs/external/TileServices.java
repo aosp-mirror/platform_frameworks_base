@@ -30,13 +30,13 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
-import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -284,13 +284,13 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public boolean isLocked() {
-        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
         return keyguardMonitor.isShowing();
     }
 
     @Override
     public boolean isSecure() {
-        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        KeyguardMonitor keyguardMonitor = Dependency.get(KeyguardMonitor.class);
         return keyguardMonitor.isSecure() && keyguardMonitor.isShowing();
     }
 

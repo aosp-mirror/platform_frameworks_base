@@ -42,8 +42,7 @@ public class VolumeUI extends SystemUI {
     public void start() {
         mEnabled = mContext.getResources().getBoolean(R.bool.enable_volume_ui);
         if (!mEnabled) return;
-        final ZenModeController zenController = new ZenModeControllerImpl(mContext, mHandler);
-        mVolumeComponent = new VolumeDialogComponent(this, mContext, null, zenController);
+        mVolumeComponent = new VolumeDialogComponent(this, mContext, null);
         putComponent(VolumeComponent.class, getVolumeComponent());
         setDefaultVolumeController();
     }

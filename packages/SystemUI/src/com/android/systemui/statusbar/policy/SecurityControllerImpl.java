@@ -39,12 +39,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.systemui.R;
+import com.android.systemui.settings.CurrentUserTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class SecurityControllerImpl implements SecurityController {
+public class SecurityControllerImpl extends CurrentUserTracker implements SecurityController {
 
     private static final String TAG = "SecurityController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -73,6 +74,7 @@ public class SecurityControllerImpl implements SecurityController {
     private int mVpnUserId;
 
     public SecurityControllerImpl(Context context) {
+        super(context);
         mContext = context;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
@@ -87,6 +89,7 @@ public class SecurityControllerImpl implements SecurityController {
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
         onUserSwitched(ActivityManager.getCurrentUser());
+        startTracking();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

@@ -40,13 +40,14 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.systemui.qs.GlobalSetting;
+import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /** Platform implementation of the zen mode controller. **/
-public class ZenModeControllerImpl implements ZenModeController {
+public class ZenModeControllerImpl extends CurrentUserTracker implements ZenModeController {
     private static final String TAG = "ZenModeController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -66,6 +67,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     private ZenModeConfig mConfig;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
+        super(context);
         mContext = context;
         mModeSetting = new GlobalSetting(mContext, handler, Global.ZEN_MODE) {
             @Override
@@ -87,6 +89,7 @@ public class ZenModeControllerImpl implements ZenModeController {
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
         mUserManager = context.getSystemService(UserManager.class);
+        startTracking();
     }
 
     @Override
@@ -137,7 +140,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     @Override
-    public void setUserId(int userId) {
+    public void onUserSwitched(int userId) {
         mUserId = userId;
         if (mRegistered) {
             mContext.unregisterReceiver(mReceiver);

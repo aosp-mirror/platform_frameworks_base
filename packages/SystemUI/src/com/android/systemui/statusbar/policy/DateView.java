@@ -23,12 +23,11 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.Date;
 import java.util.Locale;
@@ -87,7 +86,7 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         getContext().registerReceiver(mIntentReceiver, filter, null,
-                PhoneStatusBar.getTimeTickHandler(getContext()));
+                Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         updateClock();
     }

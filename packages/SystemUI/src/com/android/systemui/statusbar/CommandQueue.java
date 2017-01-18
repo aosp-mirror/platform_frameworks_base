@@ -185,7 +185,14 @@ public class CommandQueue extends IStatusBar.Stub {
     public void animateCollapsePanels() {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_COLLAPSE_PANELS);
-            mHandler.sendEmptyMessage(MSG_COLLAPSE_PANELS);
+            mHandler.obtainMessage(MSG_COLLAPSE_PANELS, 0, 0).sendToTarget();
+        }
+    }
+
+    public void animateCollapsePanels(int flags) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_COLLAPSE_PANELS);
+            mHandler.obtainMessage(MSG_COLLAPSE_PANELS, flags, 0).sendToTarget();
         }
     }
 
@@ -450,7 +457,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_COLLAPSE_PANELS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).animateCollapsePanels(0);
+                        mCallbacks.get(i).animateCollapsePanels(msg.arg1);
                     }
                     break;
                 case MSG_EXPAND_SETTINGS:

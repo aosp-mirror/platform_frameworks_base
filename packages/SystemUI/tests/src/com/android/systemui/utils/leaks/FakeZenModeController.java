@@ -53,11 +53,6 @@ public class FakeZenModeController extends BaseLeakChecker<Callback> implements 
     }
 
     @Override
-    public void setUserId(int userId) {
-
-    }
-
-    @Override
     public boolean isZenAvailable() {
         return false;
     }

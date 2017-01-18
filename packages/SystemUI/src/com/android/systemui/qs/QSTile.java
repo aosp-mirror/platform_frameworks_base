@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import android.app.ActivityManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -32,22 +31,11 @@ import android.util.SparseArray;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.systemui.Dependency;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
-import com.android.systemui.statusbar.phone.ManagedProfileController;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.FlashlightController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,7 +88,7 @@ public abstract class QSTile<TState extends State> {
     protected QSTile(Host host) {
         mHost = host;
         mContext = host.getContext();
-        mHandler = new H(host.getLooper());
+        mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     }
 
     /**
@@ -242,7 +230,8 @@ public abstract class QSTile<TState extends State> {
 
     protected void handleLongClick() {
         MetricsLogger.action(mContext, MetricsEvent.ACTION_QS_LONG_PRESS, getTileSpec());
-        mHost.startActivityDismissingKeyguard(getLongClickIntent());
+        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                getLongClickIntent(), 0);
     }
 
     public abstract Intent getLongClickIntent();
@@ -381,7 +370,8 @@ public abstract class QSTile<TState extends State> {
                     if (mState.disabledByPolicy) {
                         Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
                                 mContext, mState.enforcedAdmin);
-                        mHost.startActivityDismissingKeyguard(intent);
+                        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                                intent, 0);
                     } else {
                         mAnnounceNextStateChange = true;
                         handleClick();
@@ -436,36 +426,17 @@ public abstract class QSTile<TState extends State> {
     }
 
     public interface Host {
-        void startActivityDismissingKeyguard(Intent intent);
-        void startActivityDismissingKeyguard(PendingIntent intent);
-        void startRunnableDismissingKeyguard(Runnable runnable);
         void warn(String message, Throwable t);
         void collapsePanels();
-        void animateToggleQSExpansion();
         void openPanels();
-        Looper getLooper();
         Context getContext();
         Collection<QSTile<?>> getTiles();
         void addCallback(Callback callback);
         void removeCallback(Callback callback);
-        BluetoothController getBluetoothController();
-        LocationController getLocationController();
-        RotationLockController getRotationLockController();
-        NetworkController getNetworkController();
-        ZenModeController getZenModeController();
-        HotspotController getHotspotController();
-        CastController getCastController();
-        FlashlightController getFlashlightController();
-        KeyguardMonitor getKeyguardMonitor();
-        UserSwitcherController getUserSwitcherController();
-        UserInfoController getUserInfoController();
-        BatteryController getBatteryController();
         TileServices getTileServices();
         void removeTile(String tileSpec);
-        ManagedProfileController getManagedProfileController();
 
-
-        public interface Callback {
+        interface Callback {
             void onTilesChanged();
         }
     }

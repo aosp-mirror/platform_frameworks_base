@@ -17,15 +17,11 @@
 package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -33,8 +29,8 @@ import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
@@ -58,20 +54,6 @@ import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.FlashlightController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.LocationController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.SecurityController;
-import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -80,7 +62,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /** Platform implementation of the quick settings tile host **/
 public class QSTileHost implements QSTile.Host, Tunable {
@@ -93,81 +74,31 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final PhoneStatusBar mStatusBar;
     private final LinkedHashMap<String, QSTile<?>> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
-    private final BluetoothController mBluetooth;
-    private final LocationController mLocation;
-    private final RotationLockController mRotation;
-    private final NetworkController mNetwork;
-    private final ZenModeController mZen;
-    private final HotspotController mHotspot;
-    private final CastController mCast;
-    private final Looper mLooper;
-    private final FlashlightController mFlashlight;
-    private final UserSwitcherController mUserSwitcherController;
-    private final UserInfoController mUserInfoController;
-    private final KeyguardMonitor mKeyguard;
-    private final SecurityController mSecurity;
-    private final BatteryController mBattery;
-    private final StatusBarIconController mIconController;
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private final AutoTileManager mAutoTiles;
-    private final ManagedProfileController mProfileController;
-    private final NextAlarmController mNextAlarmController;
-    private final HandlerThread mHandlerThread;
-    private View mHeader;
+    private final StatusBarIconController mIconController;
     private int mCurrentUser;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
-            BluetoothController bluetooth, LocationController location,
-            RotationLockController rotation, NetworkController network,
-            ZenModeController zen, HotspotController hotspot,
-            CastController cast, FlashlightController flashlight,
-            UserSwitcherController userSwitcher, UserInfoController userInfo,
-            KeyguardMonitor keyguard, SecurityController security,
-            BatteryController battery, StatusBarIconController iconController,
-            NextAlarmController nextAlarmController) {
+            StatusBarIconController iconController) {
+        mIconController = iconController;
         mContext = context;
         mStatusBar = statusBar;
-        mBluetooth = bluetooth;
-        mLocation = location;
-        mRotation = rotation;
-        mNetwork = network;
-        mZen = zen;
-        mHotspot = hotspot;
-        mCast = cast;
-        mFlashlight = flashlight;
-        mUserSwitcherController = userSwitcher;
-        mUserInfoController = userInfo;
-        mKeyguard = keyguard;
-        mSecurity = security;
-        mBattery = battery;
-        mIconController = iconController;
-        mNextAlarmController = nextAlarmController;
-        mProfileController = new ManagedProfileControllerImpl(this);
 
-        mHandlerThread = new HandlerThread(QSTileHost.class.getSimpleName(),
-                Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
-        mLooper = mHandlerThread.getLooper();
-
-        mServices = new TileServices(this, mLooper);
+        mServices = new TileServices(this, Dependency.get(Dependency.BG_LOOPER));
 
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
         mAutoTiles = new AutoTileManager(context, this);
     }
 
-    public NextAlarmController getNextAlarmController() {
-        return mNextAlarmController;
-    }
-
-    public void setHeaderView(View view) {
-        mHeader = view;
+    public StatusBarIconController getIconController() {
+        return mIconController;
     }
 
     public void destroy() {
-        mHandlerThread.quitSafely();
         mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
         TunerService.get(mContext).removeTunable(this);
@@ -190,28 +121,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
-    public void startActivityDismissingKeyguard(final Intent intent) {
-        mStatusBar.postStartActivityDismissingKeyguard(intent, 0);
-    }
-
-    @Override
-    public void startActivityDismissingKeyguard(PendingIntent intent) {
-        mStatusBar.postStartActivityDismissingKeyguard(intent);
-    }
-
-    @Override
-    public void startRunnableDismissingKeyguard(Runnable runnable) {
-        mStatusBar.postQSRunnableDismissingKeyguard(runnable);
-    }
-
-    @Override
     public void warn(String message, Throwable t) {
         // already logged
-    }
-
-    public void animateToggleQSExpansion() {
-        // TODO: Better path to animated panel expansion.
-        mHeader.callOnClick();
     }
 
     @Override
@@ -225,89 +136,13 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
-    public Looper getLooper() {
-        return mLooper;
-    }
-
-    @Override
     public Context getContext() {
         return mContext;
     }
 
-    @Override
-    public BluetoothController getBluetoothController() {
-        return mBluetooth;
-    }
-
-    @Override
-    public LocationController getLocationController() {
-        return mLocation;
-    }
-
-    @Override
-    public RotationLockController getRotationLockController() {
-        return mRotation;
-    }
-
-    @Override
-    public NetworkController getNetworkController() {
-        return mNetwork;
-    }
-
-    @Override
-    public ZenModeController getZenModeController() {
-        return mZen;
-    }
-
-    @Override
-    public HotspotController getHotspotController() {
-        return mHotspot;
-    }
-
-    @Override
-    public CastController getCastController() {
-        return mCast;
-    }
-
-    @Override
-    public FlashlightController getFlashlightController() {
-        return mFlashlight;
-    }
-
-    @Override
-    public KeyguardMonitor getKeyguardMonitor() {
-        return mKeyguard;
-    }
-
-    @Override
-    public UserSwitcherController getUserSwitcherController() {
-        return mUserSwitcherController;
-    }
-
-    @Override
-    public UserInfoController getUserInfoController() {
-        return mUserInfoController;
-    }
-
-    @Override
-    public BatteryController getBatteryController() {
-        return mBattery;
-    }
-
-    public SecurityController getSecurityController() {
-        return mSecurity;
-    }
 
     public TileServices getTileServices() {
         return mServices;
-    }
-
-    public StatusBarIconController getIconController() {
-        return mIconController;
-    }
-
-    public ManagedProfileController getManagedProfileController() {
-        return mProfileController;
     }
 
     @Override

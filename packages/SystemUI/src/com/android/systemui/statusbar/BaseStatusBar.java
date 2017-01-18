@@ -71,7 +71,6 @@ import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -92,6 +91,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -100,11 +100,11 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
-import com.android.systemui.statusbar.NotificationGuts.OnGutsClosedListener;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -223,6 +223,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected KeyguardManager mKeyguardManager;
     private LockPatternUtils mLockPatternUtils;
+    private DeviceProvisionedController mDeviceProvisionedController;
 
     // UI-specific methods
 
@@ -236,8 +237,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IWindowManager mWindowManagerService;
 
     protected Display mDisplay;
-
-    private boolean mDeviceProvisioned = false;
 
     protected RecentsComponent mRecents;
 
@@ -270,7 +269,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
-        return mDeviceProvisioned;
+        return mDeviceProvisionedController.isDeviceProvisioned();
     }
 
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
@@ -284,15 +283,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mVrMode;
     }
 
+    private final DeviceProvisionedListener mDeviceProvisionedListener =
+            new DeviceProvisionedListener() {
+        @Override
+        public void onDeviceProvisionedChanged() {
+            updateNotifications();
+        }
+    };
+
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            final boolean provisioned = 0 != Settings.Global.getInt(
-                    mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0);
-            if (provisioned != mDeviceProvisioned) {
-                mDeviceProvisioned = provisioned;
-                updateNotifications();
-            }
             final int mode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
             setZenMode(mode);
@@ -707,9 +708,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
-                mSettingsObserver);
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
@@ -2470,6 +2470,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } catch (RemoteException e) {
             // Ignore.
         }
+        mDeviceProvisionedController.removeCallback(mDeviceProvisionedListener);
     }
 
     /**

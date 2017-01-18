@@ -18,12 +18,14 @@ package com.android.systemui;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -114,24 +116,14 @@ public class SystemUIFactory {
     }
 
     public QSTileHost createQSTileHost(Context context, PhoneStatusBar statusBar,
-            BluetoothController bluetooth, LocationController location,
-            RotationLockController rotation, NetworkController network,
-            ZenModeController zen, HotspotController hotspot,
-            CastController cast, FlashlightController flashlight,
-            UserSwitcherController userSwitcher, UserInfoController userInfo,
-            KeyguardMonitor keyguard, SecurityController security,
-            BatteryController battery, StatusBarIconController iconController,
-            NextAlarmController nextAlarmController) {
-        return new QSTileHost(context, statusBar, bluetooth, location, rotation, network, zen,
-                hotspot, cast, flashlight, userSwitcher, userInfo, keyguard, security, battery,
-                iconController, nextAlarmController);
+            StatusBarIconController iconController) {
+        return new QSTileHost(context, statusBar, iconController);
     }
 
     public <T> T createInstance(Class<T> classType) {
         return null;
     }
 
-    public AssistManager createAssistManager(BaseStatusBar bar, Context context) {
-        return new AssistManager(bar, context);
-    }
+    public void injectDependencies(ArrayMap<String, DependencyProvider> providers,
+            Context context) { }
 }

@@ -24,8 +24,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -35,15 +33,16 @@ import android.view.ViewStub;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
@@ -105,7 +104,7 @@ public class CarStatusBar extends PhoneStatusBar implements
                         R.dimen.status_bar_connected_device_signal_margin_end));
 
         mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
-                mSignalsView, mBluetoothController);
+                mSignalsView);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
@@ -211,8 +210,11 @@ public class CarStatusBar extends PhoneStatusBar implements
 
     @Override
     protected void createUserSwitcher() {
-        if (mUserSwitcherController.useFullscreenUserSwitcher()) {
-            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
+        UserSwitcherController userSwitcherController =
+                Dependency.get(UserSwitcherController.class);
+        if (userSwitcherController.useFullscreenUserSwitcher()) {
+            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
+                    userSwitcherController,
                     (ViewStub) mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
         } else {
             super.createUserSwitcher();

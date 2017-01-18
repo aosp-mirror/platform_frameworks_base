@@ -27,6 +27,7 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -45,14 +46,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     public FlashlightTile(Host host) {
         super(host);
-        mFlashlightController = host.getFlashlightController();
-        mFlashlightController.addCallback(this);
+        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mFlashlightController.removeCallback(this);
     }
 
     @Override

@@ -14,10 +14,15 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.os.Bundle;
+
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
         implements NetworkController {
@@ -42,6 +47,21 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     }
 
     @Override
+    public void setUserSetupComplete(boolean userSetup) {
+
+    }
+
+    @Override
+    public boolean hasEmergencyCryptKeeperText() {
+        return false;
+    }
+
+    @Override
+    public boolean isRadioOn() {
+        return false;
+    }
+
+    @Override
     public DataSaverController getDataSaverController() {
         return mDataSaverController;
     }
@@ -53,11 +73,6 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
 
     @Override
     public void setWifiEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void onUserSwitched(int newUserId) {
 
     }
 
@@ -74,5 +89,10 @@ public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
     @Override
     public boolean hasVoiceCallingFeature() {
         return false;
+    }
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+
     }
 }

@@ -38,10 +38,12 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.BatteryInfo;
 import com.android.settingslib.graph.UsageView;
 import com.android.systemui.BatteryMeterDrawable;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
@@ -59,7 +61,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
 
     public BatteryTile(Host host) {
         super(host);
-        mBatteryController = host.getBatteryController();
+        mBatteryController = Dependency.get(BatteryController.class);
     }
 
     @Override
@@ -273,7 +275,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
                 mDetailShown = true;
                 v.getContext().registerReceiver(mReceiver,
                         new IntentFilter(Intent.ACTION_TIME_TICK), null,
-                        PhoneStatusBar.getTimeTickHandler(v.getContext()));
+                        Dependency.get(Dependency.TIME_TICK_HANDLER));
             }
         }
 

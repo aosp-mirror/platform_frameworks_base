@@ -38,8 +38,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     private boolean mListening;
     private int mCurrentUser;
 
-    public ManagedProfileControllerImpl(QSTileHost host) {
-        mContext = host.getContext();
+    public ManagedProfileControllerImpl(Context context) {
+        mContext = context;
         mUserManager = UserManager.get(mContext);
         mProfiles = new LinkedList<UserInfo>();
     }

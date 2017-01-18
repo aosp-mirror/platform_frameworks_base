@@ -29,7 +29,9 @@ import android.widget.Button;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTile;
@@ -48,10 +50,12 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final CellularDetailAdapter mDetailAdapter;
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
+    private final ActivityStarter mActivityStarter;
 
     public CellularTile(Host host) {
         super(host);
-        mController = host.getNetworkController();
+        mController = Dependency.get(NetworkController.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
     }
@@ -96,7 +100,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         if (mDataController.isMobileDataSupported()) {
             showDetail(true);
         } else {
-            mHost.startActivityDismissingKeyguard(CELLULAR_SETTINGS);
+            mActivityStarter.postStartActivityDismissingKeyguard(CELLULAR_SETTINGS, 0);
         }
     }
 

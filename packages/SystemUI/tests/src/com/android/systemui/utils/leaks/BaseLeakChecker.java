@@ -14,9 +14,13 @@
 
 package com.android.systemui.utils.leaks;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-public class BaseLeakChecker<T> implements CallbackController<T> {
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+public class BaseLeakChecker<T> implements CallbackController<T>, Dumpable {
 
     private final Tracker mTracker;
 
@@ -36,5 +40,10 @@ public class BaseLeakChecker<T> implements CallbackController<T> {
     @Override
     public void removeCallback(T listener) {
         mTracker.getLeakInfo(listener).clearAllocations();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+
     }
 }

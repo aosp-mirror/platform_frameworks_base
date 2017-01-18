@@ -36,6 +36,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
@@ -99,22 +100,19 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
     private BluetoothController mBluetooth;
 
-    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
-            CastController cast, HotspotController hotspot, UserInfoController userInfoController,
-            BluetoothController bluetooth, RotationLockController rotationLockController,
-            DataSaverController dataSaver, NextAlarmController nextAlarm) {
+    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController) {
         mContext = context;
         mIconController = iconController;
-        mCast = cast;
-        mHotspot = hotspot;
-        mBluetooth = bluetooth;
+        mCast = Dependency.get(CastController.class);
+        mHotspot = Dependency.get(HotspotController.class);
+        mBluetooth = Dependency.get(BluetoothController.class);
         mBluetooth.addCallback(this);
-        mNextAlarm = nextAlarm;
+        mNextAlarm = Dependency.get(NextAlarmController.class);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        mUserInfoController = userInfoController;
+        mUserInfoController = Dependency.get(UserInfoController.class);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mRotationLockController = rotationLockController;
-        mDataSaver = dataSaver;
+        mRotationLockController = Dependency.get(RotationLockController.class);
+        mDataSaver = Dependency.get(DataSaverController.class);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);

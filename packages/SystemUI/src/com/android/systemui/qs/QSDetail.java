@@ -33,11 +33,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.plugins.qs.QS.Callback;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSDetail extends LinearLayout {
@@ -160,7 +164,8 @@ public class QSDetail extends LinearLayout {
             setupDetailHeader(adapter);
             if (toggleQs && !mFullyExpanded) {
                 mTriggeredExpand = true;
-                mHost.animateToggleQSExpansion();
+                SysUiServiceProvider.getComponent(mContext, CommandQueue.class)
+                        .animateExpandSettingsPanel(null);
             } else {
                 mTriggeredExpand = false;
             }
@@ -171,7 +176,8 @@ public class QSDetail extends LinearLayout {
             x = mOpenX;
             y = mOpenY;
             if (toggleQs && mTriggeredExpand) {
-                mHost.animateToggleQSExpansion();
+                SysUiServiceProvider.getComponent(mContext, CommandQueue.class)
+                        .animateCollapsePanels();
                 mTriggeredExpand = false;
             }
         }
@@ -231,12 +237,8 @@ public class QSDetail extends LinearLayout {
     protected void setupDetailFooter(DetailAdapter adapter) {
         final Intent settingsIntent = adapter.getSettingsIntent();
         mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
-        mDetailSettingsButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mHost.startActivityDismissingKeyguard(settingsIntent);
-            }
-        });
+        mDetailSettingsButton.setOnClickListener(v -> Dependency.get(ActivityStarter.class)
+                .postStartActivityDismissingKeyguard(settingsIntent, 0));
     }
 
     protected void setupDetailHeader(final DetailAdapter adapter) {

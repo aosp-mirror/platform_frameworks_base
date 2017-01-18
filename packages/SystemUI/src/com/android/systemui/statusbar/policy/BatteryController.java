@@ -17,12 +17,13 @@
 package com.android.systemui.statusbar.policy;
 
 import com.android.systemui.DemoMode;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public interface BatteryController extends DemoMode,
+public interface BatteryController extends DemoMode, Dumpable,
         CallbackController<BatteryStateChangeCallback> {
     /**
      * Prints the current state of the {@link BatteryController} to the given {@link PrintWriter}.

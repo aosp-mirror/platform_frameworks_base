@@ -21,11 +21,13 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
         DataSaverController.Listener{
@@ -34,7 +36,7 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
 
     public DataSaverTile(Host host) {
         super(host);
-        mDataSaverController = host.getNetworkController().getDataSaverController();
+        mDataSaverController = Dependency.get(NetworkController.class).getDataSaverController();
     }
 
     @Override

@@ -18,14 +18,15 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.os.UserManager;
-
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -47,8 +48,8 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     public LocationTile(Host host) {
         super(host);
-        mController = host.getLocationController();
-        mKeyguard = host.getKeyguardMonitor();
+        mController = Dependency.get(LocationController.class);
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
     }
 
     @Override
@@ -75,18 +76,15 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
-            mHost.startRunnableDismissingKeyguard(new Runnable() {
-                @Override
-                public void run() {
-                    final boolean wasEnabled = (Boolean) mState.value;
-                    mHost.openPanels();
-                    MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
-                    mController.setLocationEnabled(!wasEnabled);
-                }
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                final boolean wasEnabled = mState.value;
+                mHost.openPanels();
+                MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
+                mController.setLocationEnabled(!wasEnabled);
             });
             return;
         }
-        final boolean wasEnabled = (Boolean) mState.value;
+        final boolean wasEnabled = mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
         mController.setLocationEnabled(!wasEnabled);
     }

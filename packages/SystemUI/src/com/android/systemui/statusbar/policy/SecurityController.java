@@ -15,9 +15,11 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
 
-public interface SecurityController extends CallbackController<SecurityControllerCallback> {
+public interface SecurityController extends CallbackController<SecurityControllerCallback>,
+        Dumpable {
     /** Whether the device has device owner, even if not on this user. */
     boolean isDeviceManaged();
     boolean hasProfileOwner();
