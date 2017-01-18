@@ -105,10 +105,10 @@
 
     <!-- Titles for Bluetooth Audio Codec selection preference. [CHAR LIMIT=40] -->
     <string-array name="bluetooth_a2dp_codec_titles">
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>SBC</item>
         <item>aptX</item>
-        <item>aptX-HD</item>
+        <item>aptX HD</item>
         <item>LDAC</item>
     </string-array>
 
@@ -123,16 +123,16 @@
 
     <!-- Summaries for Bluetooth Audio Codec selection preference. [CHAR LIMIT=40]-->
     <string-array name="bluetooth_a2dp_codec_summaries" >
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>SBC</item>
         <item>aptX</item>
-        <item>aptX-HD</item>
+        <item>aptX HD</item>
         <item>LDAC</item>
     </string-array>
 
     <!-- Titles for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=40] -->
     <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>44.1 kHz</item>
         <item>48.0 kHz</item>
         <item>88.2 kHz</item>
@@ -150,7 +150,7 @@
 
     <!-- Summaries for Bluetooth Audio Codec Sample Rate selection preference. [CHAR LIMIT=40]-->
     <string-array name="bluetooth_a2dp_codec_sample_rate_summaries" >
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>44.1 kHz</item>
         <item>48.0 kHz</item>
         <item>88.2 kHz</item>
@@ -159,7 +159,7 @@
 
     <!-- Titles for Bluetooth Audio Codec Bits Per Sample selection preference. [CHAR LIMIT=40] -->
     <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>16 bits/sample</item>
         <item>24 bits/sample</item>
         <item>32 bits/sample</item>
@@ -175,7 +175,7 @@
 
     <!-- Summaries for Bluetooth Audio Codec Bits Per Sample selection preference. [CHAR LIMIT=40]-->
     <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries" >
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>16 bits/sample</item>
         <item>24 bits/sample</item>
         <item>32 bits/sample</item>
@@ -183,7 +183,7 @@
 
     <!-- Titles for Bluetooth Audio Codec Channel Mode selection preference. [CHAR LIMIT=40] -->
     <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>Mono</item>
         <item>Stereo</item>
     </string-array>
@@ -197,16 +197,16 @@
 
     <!-- Summaries for Bluetooth Audio Codec Channel Mode selection preference. [CHAR LIMIT=40]-->
     <string-array name="bluetooth_a2dp_codec_channel_mode_summaries" >
-        <item>Default</item>
+        <item>Use System Selection (Default)</item>
         <item>Mono</item>
         <item>Stereo</item>
     </string-array>
 
-    <!-- Titles for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=40] -->
+    <!-- Titles for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=70] -->
     <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-        <item>Sound quality preferred (990kbps/909kbps)</item>
-        <item>Standard (660kbps/606kbps)</item>
-        <item>Connection preferred (330kbps/303kbps)</item>
+        <item>Optimize for Audio Quality (990kbps/909kbps)</item>
+        <item>Balanced Audio And Connection Quality (660kbps/606kbps)</item>
+        <item>Optimize for Connection Quality (330kbps/303kbps)</item>
     </string-array>
 
     <!-- Values for Bluetooth Audio Codec LDAC Playback Quaility selection preference. -->
@@ -216,11 +216,11 @@
         <item>1002</item>
     </string-array>
 
-    <!-- Summaries for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=40]-->
+    <!-- Summaries for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=70]-->
     <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries" >
-        <item>Sound quality preferred (990kbps/909kbps)</item>
-        <item>Standard (660kbps/606kbps)</item>
-        <item>Connection preferred (330kbps/303kbps)</item>
+        <item>Optimize for Audio Quality</item>
+        <item>Balanced Audio And Connection Quality</item>
+        <item>Optimize for Connection Quality</item>
     </string-array>
 
     <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
