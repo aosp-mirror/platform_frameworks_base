@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.Assert;
 
 public class TestMtpManager extends MtpManager {
     public static final int CREATED_DOCUMENT_HANDLE = 1000;
@@ -151,6 +152,9 @@ public class TestMtpManager extends MtpManager {
     @Override
     int createDocument(int deviceId, MtpObjectInfo objectInfo, ParcelFileDescriptor source)
             throws IOException {
+        Assert.assertNotSame(0, objectInfo.getStorageId());
+        Assert.assertNotSame(-1, objectInfo.getStorageId());
+        Assert.assertNotSame(0, objectInfo.getParent());
         final String key = pack(deviceId, CREATED_DOCUMENT_HANDLE);
         if (mObjectInfos.containsKey(key)) {
             throw new IOException();
