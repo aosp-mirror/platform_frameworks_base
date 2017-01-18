@@ -129,6 +129,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         } else {
             mViewInvertHelper.update(dark);
         }
+        mShelfIcons.setAmbient(dark);
     }
 
     @Override

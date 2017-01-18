@@ -150,4 +150,28 @@ public class VisualStabilityManagerTest {
         mVisualStabilityManager.onReorderingFinished();
         assertEquals(mVisualStabilityManager.canReorderNotification(mRow), false);
     }
+
+    @Test
+    public void testPulsing() {
+        mVisualStabilityManager.setPulsing(true);
+        assertEquals(mVisualStabilityManager.canReorderNotification(mRow), false);
+        mVisualStabilityManager.setPulsing(false);
+        assertEquals(mVisualStabilityManager.canReorderNotification(mRow), true);
+    }
+
+    @Test
+    public void testReorderingAllowedChanges_Pulsing() {
+        mVisualStabilityManager.setPulsing(true);
+        assertEquals(mVisualStabilityManager.isReorderingAllowed(), false);
+        mVisualStabilityManager.setPulsing(false);
+        assertEquals(mVisualStabilityManager.isReorderingAllowed(), true);
+    }
+
+    @Test
+    public void testCallBackCalled_Pulsing() {
+        mVisualStabilityManager.setPulsing(true);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.setPulsing(false);
+        verify(mCallback).onReorderingAllowed();
+    }
 }

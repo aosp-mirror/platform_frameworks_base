@@ -1883,12 +1883,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         float previousIncreasedAmount = 0.0f;
         int numShownItems = 0;
         boolean finish = false;
+        int maxDisplayedNotifications = mAmbientState.isDark()
+                ? (mPulsing ? 1 : 0)
+                : mMaxDisplayedNotifications;
+
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             if (expandableView.getVisibility() != View.GONE
                     && !expandableView.hasNoContentHeight()) {
-                if (mMaxDisplayedNotifications != -1
-                        && numShownItems >= mMaxDisplayedNotifications) {
+                if (maxDisplayedNotifications != -1
+                        && numShownItems >= maxDisplayedNotifications) {
                     expandableView = mShelf;
                     finish = true;
                 }
@@ -3486,6 +3490,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateBackground();
             setWillNotDraw(false);
         }
+        updateContentHeight();
+        notifyHeightChangeListener(mShelf);
     }
 
     private void setBackgroundFadeAmount(float fadeAmount) {
@@ -3921,6 +3927,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
         updateNotificationAnimationStates();
+        updateContentHeight();
+        notifyHeightChangeListener(mShelf);
     }
 
     public void setFadingOut(boolean fadingOut) {

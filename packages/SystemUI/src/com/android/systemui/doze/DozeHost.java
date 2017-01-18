@@ -37,7 +37,7 @@ public interface DozeHost {
 
     interface Callback {
         default void onNewNotifications() {}
-        default void onBuzzBeepBlinked() {}
+        default void onNotificationHeadsUp() {}
         default void onNotificationLight(boolean on) {}
         default void onPowerSaveChanged(boolean active) {}
     }

@@ -75,6 +75,9 @@
     <!-- Height of a large notification in the status bar -->
     <dimen name="notification_max_height">284dp</dimen>
 
+    <!-- Height of an ambient notification on ambient display -->
+    <dimen name="notification_ambient_height">400dp</dimen>
+
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
 

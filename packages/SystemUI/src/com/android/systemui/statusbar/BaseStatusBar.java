@@ -1524,6 +1524,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final RemoteViews bigContentView = entry.cachedBigContentView;
         final RemoteViews headsUpContentView = entry.cachedHeadsUpContentView;
         final RemoteViews publicContentView = entry.cachedPublicContentView;
+        final RemoteViews ambientContentView = entry.cachedAmbientContentView;
 
         if (contentView == null) {
             Log.v(TAG, "no contentView for: " + sbn.getNotification());
@@ -1604,6 +1605,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         View bigContentViewLocal = null;
         View headsUpContentViewLocal = null;
         View publicViewLocal = null;
+        View ambientViewLocal = null;
         try {
             contentViewLocal = contentView.apply(
                     sbn.getPackageContext(mContext),
@@ -1626,6 +1628,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                         sbn.getPackageContext(mContext),
                         contentContainerPublic, mOnClickHandler);
             }
+            if (ambientContentView != null) {
+                ambientViewLocal = ambientContentView.apply(
+                        sbn.getPackageContext(mContext),
+                        contentContainer, mOnClickHandler);
+            }
 
             if (contentViewLocal != null) {
                 contentViewLocal.setIsRootNamespace(true);
@@ -1642,6 +1649,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (publicViewLocal != null) {
                 publicViewLocal.setIsRootNamespace(true);
                 contentContainerPublic.setContractedChild(publicViewLocal);
+            }
+
+            if (ambientViewLocal != null) {
+                ambientViewLocal.setIsRootNamespace(true);
+                contentContainer.setAmbientChild(ambientViewLocal);
             }
         }
         catch (RuntimeException e) {
@@ -2139,6 +2151,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 row.setOnKeyguard(false);
                 row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
             }
+            entry.row.setShowAmbient(isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.row.isRemoved();
@@ -2174,6 +2187,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         mStackScroller.changeViewPosition(mDismissView, mStackScroller.getChildCount() - 1);
         mStackScroller.changeViewPosition(mEmptyShadeView, mStackScroller.getChildCount() - 2);
         mStackScroller.changeViewPosition(mNotificationShelf, mStackScroller.getChildCount() - 3);
+    }
+
+    public boolean isDozing() {
+        return false;
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
@@ -2388,7 +2405,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             Log.d(TAG, "failed to query dream manager", e);
         }
 
-        if (!inUse) {
+        if (!inUse && !isDozing()) {
             if (DEBUG) {
                 Log.d(TAG, "No peeking: not in use: " + sbn.getKey());
             }

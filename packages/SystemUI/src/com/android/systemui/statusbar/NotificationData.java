@@ -67,6 +67,7 @@ public class NotificationData {
         public RemoteViews cachedBigContentView;
         public RemoteViews cachedHeadsUpContentView;
         public RemoteViews cachedPublicContentView;
+        public RemoteViews cachedAmbientContentView;
         public CharSequence remoteInputText;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -126,6 +127,8 @@ public class NotificationData {
                         updatedNotificationBuilder.createHeadsUpContentView();
                 final RemoteViews newPublicNotification
                         = updatedNotificationBuilder.makePublicContentView();
+                final RemoteViews newAmbientNotification
+                        = updatedNotificationBuilder.makeAmbientNotification();
 
                 boolean sameCustomView = Objects.equals(
                         notification.getNotification().extras.getBoolean(
@@ -136,11 +139,13 @@ public class NotificationData {
                         && compareRemoteViews(cachedBigContentView, newBigContentView)
                         && compareRemoteViews(cachedHeadsUpContentView, newHeadsUpContentView)
                         && compareRemoteViews(cachedPublicContentView, newPublicNotification)
+                        && compareRemoteViews(cachedAmbientContentView, newAmbientNotification)
                         && sameCustomView;
                 cachedPublicContentView = newPublicNotification;
                 cachedHeadsUpContentView = newHeadsUpContentView;
                 cachedBigContentView = newBigContentView;
                 cachedContentView = newContentView;
+                cachedAmbientContentView = newAmbientNotification;
             } else {
                 final Notification.Builder builder
                         = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
@@ -149,6 +154,7 @@ public class NotificationData {
                 cachedBigContentView = builder.createBigContentView();
                 cachedHeadsUpContentView = builder.createHeadsUpContentView();
                 cachedPublicContentView = builder.makePublicContentView();
+                cachedAmbientContentView = builder.makeAmbientNotification();
 
                 applyInPlace = false;
             }

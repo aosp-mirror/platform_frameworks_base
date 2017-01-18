@@ -74,6 +74,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mMaxHeadsUpHeight;
     private int mNotificationMinHeight;
     private int mNotificationMaxHeight;
+    private int mNotificationAmbientHeight;
     private int mIncreasedPaddingBetweenElements;
 
     /** Does this row contain layouts that can adapt to row expansion */
@@ -197,6 +198,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private float mContentTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
+    private boolean mShowAmbient;
     private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
 
@@ -326,7 +328,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                         != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
                 : mMaxHeadsUpHeight;
-        layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
+        layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight,
+                mNotificationAmbientHeight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -954,6 +957,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mNotificationMinHeightLegacy = getFontScaledHeight(R.dimen.notification_min_height_legacy);
         mNotificationMinHeight = getFontScaledHeight(R.dimen.notification_min_height);
         mNotificationMaxHeight = getFontScaledHeight(R.dimen.notification_max_height);
+        mNotificationAmbientHeight = getFontScaledHeight(R.dimen.notification_ambient_height);
         mMaxHeadsUpHeightLegacy = getFontScaledHeight(
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
@@ -1353,6 +1357,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return mGuts.getHeight();
         } else if ((isChildInGroup() && !isGroupExpanded())) {
             return mPrivateLayout.getMinHeight();
+        } else if (mShowAmbient) {
+            return getAmbientHeight();
         } else if (mSensitive && mHideSensitiveForIntrinsicHeight) {
             return getMinHeight();
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
@@ -1683,6 +1689,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return showingLayout.getMinHeight();
     }
 
+    private int getAmbientHeight() {
+        NotificationContentView showingLayout = getShowingLayout();
+        return showingLayout.getAmbientChild() != null
+                ? showingLayout.getAmbientChild().getHeight()
+                : getCollapsedHeight();
+    }
+
     @Override
     public int getCollapsedHeight() {
         if (mIsSummaryWithChildren && !mShowingPublic) {
@@ -1877,6 +1890,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public boolean isAboveShelf() {
         return mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf);
+    }
+
+    public void setShowAmbient(boolean showAmbient) {
+        if (showAmbient != mShowAmbient) {
+            mShowAmbient = showAmbient;
+            notifyHeightChanged(false /* needsAnimation */);
+        }
     }
 
     public void setAboveShelf(boolean aboveShelf) {
