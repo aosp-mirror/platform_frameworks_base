@@ -80,10 +80,18 @@ public class InstallerTest extends AndroidTestCase {
     }
 
     public void testGetAppSize() throws Exception {
+        int[] appIds = null;
+
         final PackageManager pm = getContext().getPackageManager();
         for (ApplicationInfo app : pm.getInstalledApplications(0)) {
             final int userId = UserHandle.getUserId(app.uid);
             final int appId = UserHandle.getAppId(app.uid);
+
+            if (ArrayUtils.contains(appIds, appId)) {
+                continue;
+            } else {
+                appIds = ArrayUtils.appendInt(appIds, appId);
+            }
 
             final String[] packageNames = pm.getPackagesForUid(app.uid);
             final long[] ceDataInodes = new long[packageNames.length];
