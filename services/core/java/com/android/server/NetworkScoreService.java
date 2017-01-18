@@ -604,7 +604,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public void requestRecommendationAsync(RecommendationRequest request,
             RemoteCallback remoteCallback) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES, TAG);
 
         final OneTimeCallback oneTimeCallback = new OneTimeCallback(remoteCallback);
         final Pair<RecommendationRequest, OneTimeCallback> pair =
