@@ -1521,7 +1521,7 @@ public class Notification implements Parcelable
             /**
              * Get a hint that this Action should be displayed inline.
              *
-             * @return {@code true} if the Action should be displayed inline, {@code false} 
+             * @return {@code true} if the Action should be displayed inline, {@code false}
              *         otherwise. The default value is {@code false} if this was never set.
              */
             public boolean getHintDisplayActionInline() {
@@ -6971,6 +6971,142 @@ public class Notification implements Parcelable
                 return new UnreadConversation(messages, mRemoteInput, mReplyPendingIntent,
                         mReadPendingIntent, participants, mLatestTimestamp);
             }
+        }
+    }
+
+    /**
+     * <p>Helper class to add Android TV extensions to notifications. To create a notification
+     * with a TV extension:
+     *
+     * <ol>
+     *  <li>Create an {@link Notification.Builder}, setting any desired properties.
+     *  <li>Create a {@link TvExtender}.
+     *  <li>Set TV-specific properties using the {@code set} methods of
+     *  {@link TvExtender}.
+     *  <li>Call {@link Notification.Builder#extend(Notification.Extender)}
+     *  to apply the extension to a notification.
+     * </ol>
+     *
+     * <pre class="prettyprint">
+     * Notification notification = new Notification.Builder(context)
+     *         ...
+     *         .extend(new TvExtender()
+     *                 .set*(...))
+     *         .build();
+     * </pre>
+     *
+     * <p>TV extensions can be accessed on an existing notification by using the
+     * {@code TvExtender(Notification)} constructor, and then using the {@code get} methods
+     * to access values.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class TvExtender implements Extender {
+        private static final String TAG = "TvExtender";
+
+        private static final String EXTRA_TV_EXTENDER = "android.tv.EXTENSIONS";
+        private static final String EXTRA_FLAGS = "flags";
+        private static final String EXTRA_CONTENT_INTENT = "content_intent";
+        private static final String EXTRA_DELETE_INTENT = "delete_intent";
+
+        // Flags bitwise-ored to mFlags
+        private static final int FLAG_AVAILABLE_ON_TV = 0x1;
+
+        private int mFlags;
+        private PendingIntent mContentIntent;
+        private PendingIntent mDeleteIntent;
+
+        /**
+         * Create a {@link TvExtender} with default options.
+         */
+        public TvExtender() {
+            mFlags = FLAG_AVAILABLE_ON_TV;
+        }
+
+        /**
+         * Create a {@link TvExtender} from the TvExtender options of an existing Notification.
+         *
+         * @param notif The notification from which to copy options.
+         */
+        public TvExtender(Notification notif) {
+            Bundle bundle = notif.extras == null ?
+                null : notif.extras.getBundle(EXTRA_TV_EXTENDER);
+            if (bundle != null) {
+                mFlags = bundle.getInt(EXTRA_FLAGS);
+                mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT);
+                mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT);
+            }
+        }
+
+        /**
+         * Apply a TV extension to a notification that is being built. This is typically called by
+         * the {@link Notification.Builder#extend(Notification.Extender)}
+         * method of {@link Notification.Builder}.
+         */
+        @Override
+        public Notification.Builder extend(Notification.Builder builder) {
+            Bundle bundle = new Bundle();
+
+            bundle.putInt(EXTRA_FLAGS, mFlags);
+            if (mContentIntent != null) {
+                bundle.putParcelable(EXTRA_CONTENT_INTENT, mContentIntent);
+            }
+
+            if (mDeleteIntent != null) {
+                bundle.putParcelable(EXTRA_DELETE_INTENT, mDeleteIntent);
+            }
+
+            builder.getExtras().putBundle(EXTRA_TV_EXTENDER, bundle);
+            return builder;
+        }
+
+        /**
+         * Returns true if this notification should be shown on TV. This method return true
+         * if the notification was extended with a TvExtender.
+         */
+        public boolean isAvailableOnTv() {
+            return (mFlags & FLAG_AVAILABLE_ON_TV) != 0;
+        }
+
+        /**
+         * Supplies a {@link PendingIntent} to be sent when the notification is selected on TV.
+         * If provided, it is used instead of the content intent specified
+         * at the level of Notification.
+         */
+        public TvExtender setContentIntent(PendingIntent intent) {
+            mContentIntent = intent;
+            return this;
+        }
+
+        /**
+         * Returns the TV-specific content intent.  If this method returns null, the
+         * main content intent on the notification should be used.
+         *
+         * @see {@link Notification#contentIntent}
+         */
+        public PendingIntent getContentIntent() {
+            return mContentIntent;
+        }
+
+        /**
+         * Supplies a {@link PendingIntent} to send when the notification is cleared explicitly
+         * by the user on TV.  If provided, it is used instead of the delete intent specified
+         * at the level of Notification.
+         */
+        public TvExtender setDeleteIntent(PendingIntent intent) {
+            mDeleteIntent = intent;
+            return this;
+        }
+
+        /**
+         * Returns the TV-specific delete intent.  If this method returns null, the
+         * main delete intent on the notification should be used.
+         *
+         * @see {@link Notification#deleteIntent}
+         */
+        public PendingIntent getDeleteIntent() {
+            return mDeleteIntent;
         }
     }
 
