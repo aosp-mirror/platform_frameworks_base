@@ -1312,6 +1312,68 @@ public class CarrierConfigManager {
     public static final String KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY =
             "call_forwarding_blocks_while_roaming_string_array";
 
+    /**
+     * The day of the month (1-31) on which the data cycle rolls over.
+     * <p>
+     * If the current month does not have this day, the cycle will roll over at the start of the
+     * next month.
+     * <p>
+     * This setting may be still overridden by explicit user choice. By default, the platform value
+     * will be used.
+     */
+    public static final String KEY_MONTHLY_DATA_CYCLE_DAY_INT =
+            "monthly_data_cycle_day_int";
+
+    /**
+     * When {@link #KEY_MONTHLY_DATA_CYCLE_DAY_INT}, {@link #KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG},
+     * or {@link #KEY_DATA_WARNING_THRESHOLD_BYTES_LONG} are set to this value, the platform default
+     * value will be used for that key.
+     *
+     * @hide
+     */
+    public static final int DATA_CYCLE_USE_PLATFORM_DEFAULT = -1;
+
+    /**
+     * Flag indicating that a data cycle threshold should be disabled.
+     * <p>
+     * If {@link #KEY_DATA_WARNING_THRESHOLD_BYTES_LONG} is set to this value, the platform's
+     * default data warning, if one exists, will be disabled. A user selected data warning will not
+     * be overridden.
+     * <p>
+     * If {@link #KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG} is set to this value, the platform's
+     * default data limit, if one exists, will be disabled. A user selected data limit will not be
+     * overridden.
+     */
+    public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2;
+
+    /**
+     * Controls the data usage warning.
+     * <p>
+     * If the user uses more than this amount of data in their billing cycle, as defined by
+     * {@link #KEY_MONTHLY_DATA_CYCLE_DAY_INT}, the user will be alerted about the usage.
+     * If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data usage warning will
+     * be disabled.
+     * <p>
+     * This setting may be overridden by explicit user choice. By default, the platform value
+     * will be used.
+     */
+    public static final String KEY_DATA_WARNING_THRESHOLD_BYTES_LONG =
+            "data_warning_threshold_bytes_long";
+
+    /**
+     * Controls the cellular data limit.
+     * <p>
+     * If the user uses more than this amount of data in their billing cycle, as defined by
+     * {@link #KEY_MONTHLY_DATA_CYCLE_DAY_INT}, cellular data will be turned off by the user's
+     * phone. If the value is set to {@link #DATA_CYCLE_THRESHOLD_DISABLED}, the data limit will be
+     * disabled.
+     * <p>
+     * This setting may be overridden by explicit user choice. By default, the platform value
+     * will be used.
+     */
+    public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
+            "data_limit_threshold_bytes_long";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1514,6 +1576,10 @@ public class CarrierConfigManager {
                         //1: CARRIER_ACTION_SHOW_PORTAL_NOTIFICATION
                 });
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY, null);
+
+        sDefaults.putInt(KEY_MONTHLY_DATA_CYCLE_DAY_INT, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putLong(KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putLong(KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
 
         // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
         // {LTE, LTE_CA}
