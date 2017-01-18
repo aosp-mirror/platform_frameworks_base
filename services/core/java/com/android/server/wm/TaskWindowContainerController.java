@@ -52,7 +52,9 @@ public class TaskWindowContainerController
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case REPORT_SNAPSHOT_CHANGED:
-                    mListener.onSnapshotChanged((TaskSnapshot) msg.obj);
+                    if (mListener != null) {
+                        mListener.onSnapshotChanged((TaskSnapshot) msg.obj);
+                    }
                     break;
             }
         }

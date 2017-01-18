@@ -637,6 +637,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mFillsParent || !StackId.isTaskResizeAllowed(mStack.mStackId);
     }
 
+    @Override
     TaskWindowContainerController getController() {
         return (TaskWindowContainerController) super.getController();
     }
