@@ -18,7 +18,6 @@ package com.android.server;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +30,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
+
+import com.android.internal.util.IntPair;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,10 +61,12 @@ public class AccessibilityManagerTest extends AndroidTestCase {
     private AccessibilityManager createManager(boolean enabled) throws Exception {
         if (enabled) {
             when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
-                    .thenReturn(AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
+                    .thenReturn(
+                            IntPair.of(AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED,
+                                    AccessibilityEvent.TYPES_ALL_MASK));
         } else {
             when(mMockService.addClient(any(IAccessibilityManagerClient.class), anyInt()))
-                    .thenReturn(0);
+                    .thenReturn(IntPair.of(0, AccessibilityEvent.TYPES_ALL_MASK));
         }
 
         AccessibilityManager manager =

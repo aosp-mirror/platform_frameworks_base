@@ -34,6 +34,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import com.android.internal.util.IntPair;
+
 /**
  * This test exercises the
  * {@link com.android.server.accessibility.AccessibilityManagerService} by mocking the
@@ -109,7 +111,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         // invoke the method under test
         final int stateFlagsDisabled =
-                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
+                IntPair.first(mManagerService.addClient(mockClient, UserHandle.USER_CURRENT));
         boolean enabledAccessibilityDisabled =
             (stateFlagsDisabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -122,7 +124,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         // invoke the method under test
         final int stateFlagsEnabled =
-                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
+                IntPair.first(mManagerService.addClient(mockClient, UserHandle.USER_CURRENT));
         boolean enabledAccessibilityEnabled =
             (stateFlagsEnabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -144,7 +146,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         // invoke the method under test
         final int stateFlagsEnabled =
-                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
+                IntPair.first(mManagerService.addClient(mockClient, UserHandle.USER_CURRENT));
         boolean enabledAccessibilityEnabled =
             (stateFlagsEnabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -157,7 +159,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         // invoke the method under test
         final int stateFlagsDisabled =
-                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
+                IntPair.first(mManagerService.addClient(mockClient, UserHandle.USER_CURRENT));
         boolean enabledAccessibilityDisabled =
             (stateFlagsDisabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -572,8 +574,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         public void notifyServicesStateChanged() {}
 
-        public void setTouchExplorationEnabled(boolean enabled) {
-        }
+        public void setRelevantEventTypes(int eventTypes) {}
+
+        public void setTouchExplorationEnabled(boolean enabled) {}
     }
 
     /**
