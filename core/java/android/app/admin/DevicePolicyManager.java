@@ -6317,7 +6317,7 @@ public class DevicePolicyManager {
      * @see #setPermissionGrantState(ComponentName, String, String, int)
      * @see PackageManager#checkPermission(String, String)
      */
-    public int getPermissionGrantState(@NonNull ComponentName admin, String packageName,
+    public int getPermissionGrantState(@Nullable ComponentName admin, String packageName,
             String permission) {
         throwIfParentInstance("getPermissionGrantState");
         try {

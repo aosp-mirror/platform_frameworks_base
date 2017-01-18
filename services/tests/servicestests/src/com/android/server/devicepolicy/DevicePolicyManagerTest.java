@@ -3200,6 +3200,48 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         }
     }
 
+    public void testGetPermissionGrantState() throws Exception {
+        final String permission = "some.permission";
+        final String app1 = "com.example.app1";
+        final String app2 = "com.example.app2";
+
+        when(mContext.ipackageManager.checkPermission(eq(permission), eq(app1), anyInt()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        doReturn(PackageManager.FLAG_PERMISSION_POLICY_FIXED).when(mContext.packageManager)
+                .getPermissionFlags(permission, app1, UserHandle.SYSTEM);
+        when(mContext.packageManager.getPermissionFlags(permission, app1,
+                UserHandle.of(DpmMockContext.CALLER_USER_HANDLE)))
+                .thenReturn(PackageManager.FLAG_PERMISSION_POLICY_FIXED);
+        when(mContext.ipackageManager.checkPermission(eq(permission), eq(app2), anyInt()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doReturn(0).when(mContext.packageManager).getPermissionFlags(permission, app2,
+                UserHandle.SYSTEM);
+        when(mContext.packageManager.getPermissionFlags(permission, app2,
+                UserHandle.of(DpmMockContext.CALLER_USER_HANDLE))).thenReturn(0);
+
+        // System can retrieve permission grant state.
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
+                dpm.getPermissionGrantState(null, app1, permission));
+        assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,
+                dpm.getPermissionGrantState(null, app2, permission));
+
+        // A regular app cannot retrieve permission grant state.
+        mMockContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        try {
+            dpm.getPermissionGrantState(null, app1, permission);
+            fail("Didn't throw IllegalStateException");
+        } catch (IllegalStateException expected) {
+        }
+
+        // Profile owner can retrieve permission grant state.
+        setAsProfileOwner(admin1);
+        assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
+                dpm.getPermissionGrantState(admin1, app1, permission));
+        assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,
+                dpm.getPermissionGrantState(admin1, app2, permission));
+    }
+
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
         when(mContext.settings.settingsSecureGetIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0,
                 userhandle)).thenReturn(isUserSetupComplete ? 1 : 0);
