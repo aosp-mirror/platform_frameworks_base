@@ -51,6 +51,9 @@ public class TaskGridLayoutAlgorithm  {
     private float mAppAspectRatio;
     private Rect mSystemInsets = new Rect();
 
+    /** The thickness of the focused task view frame. */
+    private int mFocusedFrameThickness;
+
     /**
      * When the amount of tasks is determined, the size and position of every task view can be
      * decided. Each instance of TaskGridRectInfo store the task view information for a certain
@@ -137,6 +140,9 @@ public class TaskGridLayoutAlgorithm  {
     public void reloadOnConfigurationChange(Context context) {
         Resources res = context.getResources();
         mPaddingTaskView = res.getDimensionPixelSize(R.dimen.recents_grid_padding_task_view);
+        mFocusedFrameThickness = res.getDimensionPixelSize(
+            R.dimen.recents_grid_task_view_focused_frame_thickness);
+
         mTaskGridRect = new Rect();
         mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_grid_task_view_header_height);
 
@@ -227,7 +233,18 @@ public class TaskGridLayoutAlgorithm  {
         return buttonRect;
     }
 
+    public void updateTaskGridRect(int taskCount) {
+        if (taskCount > 0) {
+            TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
+            mTaskGridRect.set(gridInfo.size);
+        }
+    }
+
     public Rect getTaskGridRect() {
         return mTaskGridRect;
+    }
+
+    public int getFocusFrameThickness() {
+        return mFocusedFrameThickness;
     }
 }
