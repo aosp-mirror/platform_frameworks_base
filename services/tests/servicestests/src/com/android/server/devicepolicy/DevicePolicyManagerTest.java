@@ -2358,6 +2358,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
     }
 
+    private void setup_nonSplitUser_withDo_primaryUser() throws Exception {
+        setDeviceOwner();
+        setup_nonSplitUser_afterDeviceSetup_primaryUser();
+        setUpPackageManagerForFakeAdmin(adminAnotherPackage, DpmMockContext.ANOTHER_UID, admin2);
+    }
+
+    private void setup_nonSplitUser_withDo_primaryUser_ManagedProfile() throws Exception {
+        setup_nonSplitUser_withDo_primaryUser();
+        final int MANAGED_PROFILE_USER_ID = 18;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 1308);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        when(mContext.userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                false /* we can't remove a managed profile */)).thenReturn(false);
+        when(mContext.userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
+                true)).thenReturn(true);
+    }
+
     public void testIsProvisioningAllowed_nonSplitUser_afterDeviceSetup_primaryUser()
             throws Exception {
         setup_nonSplitUser_afterDeviceSetup_primaryUser();
@@ -2387,144 +2404,119 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DevicePolicyManager.CODE_NOT_SYSTEM_USER_SPLIT);
     }
 
-    public void testIsProvisioningAllowed_nonSplitUser_withDo_primaryUser() throws Exception {
-        setDeviceOwner();
-        setup_nonSplitUser_afterDeviceSetup_primaryUser();
-        setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
+    public void testProvisioning_nonSplitUser_withDo_primaryUser() throws Exception {
+        setup_nonSplitUser_withDo_primaryUser();
         mContext.packageName = admin1.getPackageName();
-
-        final ComponentName adminDifferentPackage =
-                new ComponentName("another.package", "whatever.random.class");
-        final int ANOTHER_UID = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, 948);
-        setUpPackageManagerForFakeAdmin(adminDifferentPackage, ANOTHER_UID, admin2);
-
-        // COMP mode is allowed.
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
-
-        when(mContext.userManager.hasUserRestriction(
-                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(true);
-
-        // The DO should be allowed to initiate provisioning if it set the restriction itself.
-        when(mContext.userManager.getUserRestrictionSource(
-                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
-
-        // But another app should not
-        mContext.binder.callingUid = ANOTHER_UID;
-        mContext.packageName = adminDifferentPackage.getPackageName();
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-
-        // The DO should not be allowed to initiate provisioning if the restriction is set by
-        // another entity.
-        when(mContext.userManager.getUserRestrictionSource(
-                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        mContext.packageName = admin1.getPackageName();
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-
-        mContext.binder.callingUid = ANOTHER_UID;
-        mContext.packageName = adminDifferentPackage.getPackageName();
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-    }
-
-    public void testIsProvisioningAllowed_nonSplitUser_comp() throws Exception {
-        setDeviceOwner();
-        setup_nonSplitUser_afterDeviceSetup_primaryUser();
-        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
-
-        final ComponentName adminDifferentPackage =
-                new ComponentName("another.package", "whatever.class");
-        final int ANOTHER_UID = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, 948);
-        setUpPackageManagerForFakeAdmin(adminDifferentPackage, ANOTHER_UID, admin2);
-
-        final int MANAGED_PROFILE_USER_ID = 18;
-        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 1308);
-        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
-
-        when(mContext.userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
-                false /* we can't remove a managed profile */)).thenReturn(false);
-        when(mContext.userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
-                true)).thenReturn(true);
-
-        // We can delete the managed profile to create a new one, so provisioning is allowed.
-        mContext.packageName = admin1.getPackageName();
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
-
-        mContext.packageName = adminDifferentPackage.getPackageName();
-        mContext.binder.callingUid = ANOTHER_UID;
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
-
-        when(mContext.userManager.hasUserRestriction(
-                eq(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE),
-                eq(UserHandle.of(DpmMockContext.CALLER_USER_HANDLE))))
-                .thenReturn(true);
-
-        // Now, we can't remove the profile any more to create a new one.
-        mContext.packageName = admin1.getPackageName();
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-
-        mContext.packageName = adminDifferentPackage.getPackageName();
-        mContext.binder.callingUid = ANOTHER_UID;
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-    }
-
-    public void
-    testCheckProvisioningPreCondition_nonSplitUser_withDo_primaryUser() throws Exception {
-        setDeviceOwner();
-        setup_nonSplitUser_afterDeviceSetup_primaryUser();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE,
                 DevicePolicyManager.CODE_HAS_DEVICE_OWNER);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE, false);
 
         // COMP mode is allowed.
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
 
-        // And other DPCs can also provisioning a managed profile (DO + BYOD case).
+        // And other DPCs can also provision a managed profile (DO + BYOD case).
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                "some.other.dpc.package.name",
+                DpmMockContext.ANOTHER_PACKAGE_NAME,
                 DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true,
+                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
+    }
 
+    public void testProvisioning_nonSplitUser_withDo_primaryUser_restrictedByDo() throws Exception {
+        setup_nonSplitUser_withDo_primaryUser();
+        mContext.packageName = admin1.getPackageName();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        // The DO should be allowed to initiate provisioning if it set the restriction itself, but
+        // other packages should be forbidden.
         when(mContext.userManager.hasUserRestriction(
                 eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
                 eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
                 .thenReturn(true);
-
-        // The DO should be allowed to initiate provisioning if it set the restriction itself, but
-        // other packages should be forbidden.
         when(mContext.userManager.getUserRestrictionSource(
                 eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
                 eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                "some.other.dpc.package.name",
+                DpmMockContext.ANOTHER_PACKAGE_NAME,
                 DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
+                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
+    }
 
+    public void testProvisioning_nonSplitUser_withDo_primaryUser_restrictedBySystem()
+            throws Exception {
+        setup_nonSplitUser_withDo_primaryUser();
+        mContext.packageName = admin1.getPackageName();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         // The DO should not be allowed to initiate provisioning if the restriction is set by
         // another entity.
+        when(mContext.userManager.hasUserRestriction(
+                eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
+                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
+                .thenReturn(true);
         when(mContext.userManager.getUserRestrictionSource(
                 eq(UserManager.DISALLOW_ADD_MANAGED_PROFILE),
                 eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
                 .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
-                assertCheckProvisioningPreCondition(
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
+
+        assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                "some.other.dpc.package.name",
+                DpmMockContext.ANOTHER_PACKAGE_NAME,
                 DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
+                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
+    }
+
+    public void testCheckProvisioningPreCondition_nonSplitUser_comp() throws Exception {
+        setup_nonSplitUser_withDo_primaryUser_ManagedProfile();
+        mContext.packageName = admin1.getPackageName();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        // We can delete the managed profile to create a new one, so provisioning is allowed.
+        assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
+                DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
+        assertCheckProvisioningPreCondition(
+                DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
+                DpmMockContext.ANOTHER_PACKAGE_NAME,
+                DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true,
+                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
+    }
+
+    public void testCheckProvisioningPreCondition_nonSplitUser_comp_cannot_remove_profile()
+            throws Exception {
+        setup_nonSplitUser_withDo_primaryUser_ManagedProfile();
+        mContext.packageName = admin1.getPackageName();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        when(mContext.userManager.hasUserRestriction(
+                eq(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE),
+                eq(UserHandle.SYSTEM)))
+                .thenReturn(true);
+
+        // We can't remove the profile to create a new one.
+        assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
+
+        assertCheckProvisioningPreCondition(
+                DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
+                DpmMockContext.ANOTHER_PACKAGE_NAME,
+                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
+                DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
     }
 
     private void setup_splitUser_firstBoot_systemUser() throws Exception {
@@ -3285,6 +3277,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assertProvisioningAllowed(String action, boolean expected) {
         assertEquals("isProvisioningAllowed(" + action + ") returning unexpected result", expected,
                 dpm.isProvisioningAllowed(action));
+    }
+
+    private void assertProvisioningAllowed(String action, boolean expected, String packageName,
+            int uid) {
+        String previousPackageName = mContext.packageName;
+        int previousUid = mMockContext.binder.callingUid;
+
+        // Call assertProvisioningAllowed with the packageName / uid passed as arguments.
+        mContext.packageName = packageName;
+        mMockContext.binder.callingUid = uid;
+        assertProvisioningAllowed(action, expected);
+
+        // Set the previous package name / calling uid to go back to the initial state.
+        mContext.packageName = previousPackageName;
+        mMockContext.binder.callingUid = previousUid;
     }
 
     private void assertCheckProvisioningPreCondition(String action, int provisioningCondition) {
