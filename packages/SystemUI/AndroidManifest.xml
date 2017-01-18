@@ -496,7 +496,6 @@
                   android:label="@string/accessibility_desc_work_lock"
                   android:permission="android.permission.MANAGE_USERS"
                   android:exported="false"
-                  android:launchMode="singleTop"
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"

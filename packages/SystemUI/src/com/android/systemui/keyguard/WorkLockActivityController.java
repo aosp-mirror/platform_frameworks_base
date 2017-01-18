@@ -42,9 +42,8 @@ public class WorkLockActivityController {
         Intent intent = new Intent(KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER)
                 .setComponent(new ComponentName(mContext, WorkLockActivity.class))
                 .putExtra(Intent.EXTRA_USER_ID, userId)
-                .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                        | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                        | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchTaskId(taskId);
