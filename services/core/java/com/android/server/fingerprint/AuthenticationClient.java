@@ -17,7 +17,7 @@
 package com.android.server.fingerprint;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
