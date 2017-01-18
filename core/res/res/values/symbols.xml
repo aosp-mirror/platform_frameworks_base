@@ -2797,4 +2797,5 @@
 
   <java-symbol type="raw" name="fallback_categories" />
 
+  <java-symbol type="attr" name="primaryContentAlpha" />
 </resources>
