@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.FontListParser;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -106,8 +107,17 @@ public final class FontConfig implements Parcelable {
         private final float mStyleValue;
 
         public Axis(int tag, float styleValue) {
-            this.mTag = tag;
-            this.mStyleValue = styleValue;
+            mTag = tag;
+            mStyleValue = styleValue;
+        }
+
+        /** @hide */
+        public Axis(@NonNull String tagString, float styleValue) {
+            if (!FontListParser.isValidTag(tagString)) {
+                throw new IllegalArgumentException("Invalid tag pattern: " + tagString);
+            }
+            mTag = FontListParser.makeTag(tagString);
+            mStyleValue = styleValue;
         }
 
         /**

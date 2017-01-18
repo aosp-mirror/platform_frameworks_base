@@ -21,11 +21,15 @@ import static android.content.res.FontResourcesParser.FontFileResourceEntry;
 import static android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry;
 import static android.content.res.FontResourcesParser.FamilyResourceEntry;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.FontListParser;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
 import android.os.Bundle;
@@ -40,12 +44,14 @@ import android.util.LruCache;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,9 +61,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
@@ -148,13 +157,16 @@ public class Typeface {
     public static Typeface createFromResources(AssetManager mgr, String path, int cookie) {
         if (sFallbackFonts != null) {
             synchronized (sDynamicTypefaceCache) {
-                final String key = createAssetUid(mgr, path);
+                final String key = Builder.createAssetUid(
+                        mgr, path, 0 /* ttcIndex */, null /* axes */);
                 Typeface typeface = sDynamicTypefaceCache.get(key);
                 if (typeface != null) return typeface;
 
                 FontFamily fontFamily = new FontFamily();
+                // TODO: introduce ttc index and variation settings to resource type font.
                 if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */,
-                        0 /* use OS/2 table to determine weight and italic */, false)) {
+                        0 /* ttcIndex */, Builder.RESOLVE_BY_FONT_TABLE /* weight */,
+                        Builder.RESOLVE_BY_FONT_TABLE /* italic */, null /* axes */)) {
                     fontFamily.freeze();
                     FontFamily[] families = {fontFamily};
                     typeface = createFromFamiliesWithDefault(families);
@@ -198,8 +210,10 @@ public class Typeface {
             FontFamily fontFamily = new FontFamily();
             for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
                 if (!fontFamily.addFontFromAssetManager(mgr, fontFile.getFileName(),
-                        0 /* resourceCookie */, false /* isAsset */, fontFile.getWeight(),
-                      fontFile.isItalic())) {
+                        0 /* resourceCookie */, false /* isAsset */, 0 /* ttcIndex */,
+                        fontFile.getWeight(),
+                        fontFile.isItalic() ? Builder.ITALIC : Builder.NORMAL,
+                        null /* axes */)) {
                     return null;
                 }
             }
@@ -207,7 +221,8 @@ public class Typeface {
             FontFamily[] familyChain = { fontFamily };
             typeface = createFromFamiliesWithDefault(familyChain);
             synchronized (sDynamicTypefaceCache) {
-                final String key = createAssetUid(mgr, path);
+                final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */,
+                        null /* axes */);
                 sDynamicTypefaceCache.put(key, typeface);
             }
             return typeface;
@@ -221,7 +236,7 @@ public class Typeface {
      */
     public static Typeface findFromCache(AssetManager mgr, String path) {
         synchronized (sDynamicTypefaceCache) {
-            final String key = createAssetUid(mgr, path);
+            final String key = Builder.createAssetUid(mgr, path, 0 /* ttcIndex */, null /* axes */);
             Typeface typeface = sDynamicTypefaceCache.get(key);
             if (typeface != null) {
                 return typeface;
@@ -332,8 +347,9 @@ public class Typeface {
                 int weight = (style & BOLD) != 0 ? 700 : 400;
                 // TODO: this method should be
                 // create(fd, ttcIndex, fontVariationSettings, style).
-                if (!fontFamily.addFontWeightStyle(fontBuffer, result.getTtcIndex(),
-                                null, weight, (style & ITALIC) != 0)) {
+                if (!fontFamily.addFontFromBuffer(fontBuffer, result.getTtcIndex(),
+                                null, weight,
+                                (style & ITALIC) == 0 ? Builder.NORMAL : Builder.ITALIC)) {
                     Log.e(TAG, "Error creating font " + request.getQuery());
                     callback.onTypefaceRequestFailed(
                             FontRequestCallback.FAIL_REASON_FONT_LOAD_ERROR);
@@ -432,6 +448,347 @@ public class Typeface {
     };
 
     /**
+     * A builder class for creating new Typeface instance.
+     *
+     * Examples,
+     * 1) Create Typeface from ttf file.
+     * <pre>
+     * <code>
+     * Typeface.Builder buidler = new Typeface.Builder.obtain();
+     * builder.setSourceFromFilePath("your_font_file.ttf");
+     * Typeface typeface = builder.build();
+     * builder.recycle();
+     * </code>
+     * </pre>
+     *
+     * 2) Create Typeface from ttc file in assets directory.
+     * <pre>
+     * <code>
+     * Typeface.Builder buidler = new Typeface.Builder.obtain();
+     * builder.setSourceFromAsset(getAssets(), "your_font_file.ttc");
+     * builder.setTtcIndex(2);  // set index of font collection.
+     * Typeface typeface = builder.build();
+     * builder.recycle();
+     * </code>
+     * </pre>
+     *
+     * 3) Create Typeface from existing Typeface with variation settings.
+     * <pre>
+     *
+     * <p>Note that only one source can be specified for the single Typeface.</p>
+     */
+    /** @hide TODO: Make this API public. */
+    public static final class Builder {
+        /**
+         * Value for weight and italic.
+         *
+         * Indicates the value is resolved by font metadata.
+         */
+        // Must be same with C++ constant in core/jni/android/graphics/FontFamily.cpp
+        public static final int RESOLVE_BY_FONT_TABLE = -1;
+
+        /**
+         * Value for italic.
+         *
+         * Indicates the font style is not italic.
+         */
+        public static final int NORMAL = 0;
+
+        /**
+         * Value for italic.
+         *
+         * Indicates the font style is italic.
+         */
+        public static final int ITALIC = 1;
+
+        private int mTtcIndex;
+        private FontConfig.Axis[] mAxes;
+
+        private AssetManager mAssetManager;
+        private String mPath;
+        private FileDescriptor mFd;
+        private @IntRange(from = -1) int mWeight = RESOLVE_BY_FONT_TABLE;
+
+        /** @hide */
+        @Retention(SOURCE)
+        @IntDef({RESOLVE_BY_FONT_TABLE, NORMAL, ITALIC})
+        public @interface Italic {}
+        private @Italic int mItalic = RESOLVE_BY_FONT_TABLE;
+
+        private boolean mHasSourceSet = false;
+        private boolean mRecycled = false;
+
+        /** Use Builder.obtain() instead */
+        private void Builder() {}
+
+        private static AtomicReference<Builder> mCache = new AtomicReference<>();
+
+        /**
+         * Returns Typeface.Builder from pool.
+         */
+        public static Builder obtain() {
+            final Builder builder = mCache.getAndSet(null);
+            if (builder != null) {
+                builder.mRecycled = false;
+                return builder;
+            }
+            return new Builder();
+        }
+
+        /**
+         * Resets the internal states.
+         */
+        public void reset() {
+            checkNotRecycled();
+            mTtcIndex = 0;
+            mAxes = null;
+
+            mAssetManager = null;
+            mPath = null;
+            mFd = null;
+
+            mWeight = RESOLVE_BY_FONT_TABLE;
+            mItalic = RESOLVE_BY_FONT_TABLE;
+
+            mHasSourceSet = false;
+        }
+
+        /**
+         * Returns the instance to the pool.
+         */
+        public void recycle() {
+            reset();
+            mRecycled = true;
+
+            mCache.compareAndSet(null, this);
+        }
+
+        private void checkNotRecycled() {
+            if (mRecycled) {
+                throw new IllegalStateException("Don't use Builder after calling recycle()");
+            }
+        }
+
+        private void checkSingleFontSource() {
+            if (mHasSourceSet) {
+                throw new IllegalStateException("Typeface can only built with single font source.");
+            }
+        }
+
+        /**
+         * Sets a font file as a source of Typeface.
+         *
+         * @param path The file object refers to the font file.
+         */
+        public Builder setSourceFromFile(@NonNull File path) {
+            return setSourceFromFilePath(path.getAbsolutePath());
+        }
+
+        /**
+         * Sets a font file as a source of Typeface.
+         *
+         * @param fd The file descriptor. The passed fd must be mmap-able.
+         */
+        public Builder setSourceFromFile(@NonNull FileDescriptor fd) {
+            checkNotRecycled();
+            checkSingleFontSource();
+            mFd = fd;
+            mHasSourceSet = true;
+            return this;
+        }
+
+        /**
+         * Sets a font file as a source of Typeface.
+         *
+         * @param path The full path to the font file.
+         */
+        public Builder setSourceFromFilePath(@NonNull String path) {
+            checkNotRecycled();
+            checkSingleFontSource();
+            mPath = path;
+            mHasSourceSet = true;
+            return this;
+        }
+
+        /**
+         * Sets an asset entry as a source of Typeface.
+         *
+         * @param assetManager The application's asset manager
+         * @param path The file name of the font data in the asset directory
+         */
+        public Builder setSourceFromAsset(@NonNull AssetManager assetManager,
+                @NonNull String path) {
+            checkNotRecycled();
+            checkSingleFontSource();
+            mAssetManager = Preconditions.checkNotNull(assetManager);
+            mPath = Preconditions.checkStringNotEmpty(path);
+            mHasSourceSet = true;
+            return this;
+        }
+
+        /**
+         * Sets weight of the font.
+         *
+         * By passing {@link #RESOLVE_BY_FONT_TABLE}, weight value is resolved by OS/2 table in
+         * font file if possible.
+         * @param weight a weight value or {@link #RESOLVE_BY_FONT_TABLE}
+         */
+        public Builder setWeight(@IntRange(from = -1) int weight) {
+            checkNotRecycled();
+            mWeight = weight;
+            return this;
+        }
+
+        /**
+         * Sets italic information of the font.
+         *
+         * By passing {@link #RESOLVE_BY_FONT_TABLE}, italic or normal is determined by OS/2 table
+         * in font file if possible.
+         * @param italic One of {@link #NORMAL}, {@link #ITALIC}, {@link #RESOLVE_BY_FONT_TABLE}.
+         *                 will be used.
+         */
+        public Builder setItalic(@Italic int italic) {
+            checkNotRecycled();
+            mItalic = italic;
+            return this;
+        }
+
+        /**
+         * Sets an idex of the font collection.
+         *
+         * Can not be used for Typeface source. build() method will return null for invalid index.
+         * @param ttcIndex An index of the font collection. If the font source is not font
+         *                 collection, do not call this method or specify 0.
+         */
+        public Builder setTtcIndex(@IntRange(from = 0) int ttcIndex) {
+            checkNotRecycled();
+            mTtcIndex = ttcIndex;
+            return this;
+        }
+
+        /**
+         * Sets a font variation settings.
+         *
+         * @param variationSettings See {@link android.widget.TextView#setFontVariationSettings}.
+         */
+        public Builder setFontVariationSettings(@Nullable String variationSettings) {
+            checkNotRecycled();
+            if (mAxes != null) {
+                throw new IllegalStateException("Font variation settings are already set.");
+            }
+            final List<FontConfig.Axis> axesList = FontListParser.parseFontVariationSettings(
+                    variationSettings);
+            mAxes = axesList.toArray(new FontConfig.Axis[axesList.size()]);
+            return this;
+        }
+
+        /**
+         * Sets a font variation settings.
+         *
+         * @param axes An array of font variation axis tag-value pairs.
+         */
+        public Builder setFontVariationSettings(@Nullable FontConfig.Axis[] axes) {
+            checkNotRecycled();
+            if (mAxes != null) {
+                throw new IllegalStateException("Font variation settings are already set.");
+            }
+            mAxes = axes;
+            return this;
+        }
+
+        /**
+         * Creates a unique id for a given AssetManager and asset path.
+         *
+         * @param mgr  AssetManager instance
+         * @param path The path for the asset.
+         * @param ttcIndex The TTC index for the font.
+         * @param axes The font variation settings.
+         * @return Unique id for a given AssetManager and asset path.
+         */
+        private static String createAssetUid(final AssetManager mgr, String path, int ttcIndex,
+                @Nullable FontConfig.Axis[] axes) {
+            final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
+            final StringBuilder builder = new StringBuilder();
+            final int size = pkgs.size();
+            for (int i = 0; i < size; i++) {
+                builder.append(pkgs.valueAt(i));
+                builder.append("-");
+            }
+            builder.append(path);
+            builder.append("-");
+            builder.append(Integer.toString(ttcIndex));
+            builder.append("-");
+            if (axes != null) {
+                for (FontConfig.Axis axis : axes) {
+                    builder.append(Integer.toHexString(axis.getTag()));
+                    builder.append("-");
+                    builder.append(Float.toString(axis.getStyleValue()));
+                }
+            }
+            return builder.toString();
+        }
+
+        /**
+         * Generates new Typeface from specified configuration.
+         *
+         * @return Newly created Typeface. May return null if some parameters are invalid.
+         */
+        public Typeface build() {
+            checkNotRecycled();
+            if (!mHasSourceSet) {
+                return null;
+            }
+
+            if (mFd != null) {  // set source by setSourceFromFile(FileDescriptor)
+                try (FileInputStream fis = new FileInputStream(mFd)) {
+                    FileChannel channel = fis.getChannel();
+                    long size = channel.size();
+                    ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, size);
+
+                    final FontFamily fontFamily = new FontFamily();
+                    if (!fontFamily.addFontFromBuffer(buffer, mTtcIndex, mAxes, mWeight, mItalic)) {
+                        fontFamily.abortCreation();
+                        return null;
+                    }
+                    fontFamily.freeze();
+                    FontFamily[] families = { fontFamily };
+                    return createFromFamiliesWithDefault(families);
+                } catch (IOException e) {
+                    return null;
+                }
+            } else if (mAssetManager != null) {  // set source by setSourceFromAsset()
+                final String key = createAssetUid(mAssetManager, mPath, mTtcIndex, mAxes);
+                synchronized (sDynamicTypefaceCache) {
+                    Typeface typeface = sDynamicTypefaceCache.get(key);
+                    if (typeface != null) return typeface;
+                    final FontFamily fontFamily = new FontFamily();
+                    if (!fontFamily.addFontFromAssetManager(mAssetManager, mPath, mTtcIndex,
+                            true /* isAsset */, mTtcIndex, mWeight, mItalic, mAxes)) {
+                        fontFamily.abortCreation();
+                        return null;
+                    }
+                    fontFamily.freeze();
+                    FontFamily[] families = { fontFamily };
+                    typeface = createFromFamiliesWithDefault(families);
+                    sDynamicTypefaceCache.put(key, typeface);
+                    return typeface;
+                }
+            } else if (mPath != null) {  // set source by setSourceFromFile(File)
+                final FontFamily fontFamily = new FontFamily();
+                if (!fontFamily.addFont(mPath, mTtcIndex, mAxes, mWeight, mItalic)) {
+                    fontFamily.abortCreation();
+                    return null;
+                }
+                fontFamily.freeze();
+                FontFamily[] families = { fontFamily };
+                return createFromFamiliesWithDefault(families);
+            } else {
+                throw new IllegalArgumentException("No source was set.");
+            }
+        }
+    }
+
+    /**
      * Create a typeface object given a family name, and option style information.
      * If null is passed for the name, then the "default" font will be chosen.
      * The resulting typeface object can be queried (getStyle()) to discover what
@@ -518,46 +875,23 @@ public class Typeface {
      * @return The new typeface.
      */
     public static Typeface createFromAsset(AssetManager mgr, String path) {
+        if (path == null) {
+            throw new NullPointerException();  // for backward compatibility
+        }
         if (sFallbackFonts != null) {
-            synchronized (sDynamicTypefaceCache) {
-                final String key = createAssetUid(mgr, path);
-                Typeface typeface = sDynamicTypefaceCache.get(key);
-                if (typeface != null) return typeface;
-
-                FontFamily fontFamily = new FontFamily();
-                if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */,
-                        0 /* use OS/2 table to determine weight and italic */, false)) {
-                    fontFamily.freeze();
-                    FontFamily[] families = { fontFamily };
-                    typeface = createFromFamiliesWithDefault(families);
-                    sDynamicTypefaceCache.put(key, typeface);
+            final Builder builder = Builder.obtain();
+            try {
+                builder.setSourceFromAsset(mgr, path);
+                Typeface typeface = builder.build();
+                if (typeface != null) {
                     return typeface;
-                } else {
-                    fontFamily.abortCreation();
                 }
+            } finally {
+                builder.recycle();
             }
         }
+        // For the compatibility reasons, throw runtime exception if failed to create Typeface.
         throw new RuntimeException("Font asset not found " + path);
-    }
-
-    /**
-     * Creates a unique id for a given AssetManager and asset path.
-     *
-     * @param mgr  AssetManager instance
-     * @param path The path for the asset.
-     * @return Unique id for a given AssetManager and asset path.
-     */
-    private static String createAssetUid(final AssetManager mgr, String path) {
-        final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
-        final StringBuilder builder = new StringBuilder();
-        builder.append("asset:");
-        final int size = pkgs.size();
-        for (int i = 0; i < size; i++) {
-            builder.append(pkgs.valueAt(i));
-            builder.append("-");
-        }
-        builder.append(path);
-        return builder.toString();
     }
 
     /**
@@ -578,7 +912,9 @@ public class Typeface {
      * @param path The path to the font data.
      * @return The new typeface.
      */
-    public static Typeface createFromFile(File path) {
+    public static Typeface createFromFile(@Nullable File path) {
+        // For the compatibility reasons, leaving possible NPE here.
+        // See android.graphics.cts.TypefaceTest#testCreateFromFileByFileReferenceNull
         return createFromFile(path.getAbsolutePath());
     }
 
@@ -588,15 +924,24 @@ public class Typeface {
      * @param path The full path to the font data.
      * @return The new typeface.
      */
-    public static Typeface createFromFile(String path) {
+    public static Typeface createFromFile(@Nullable String path) {
+        if (path == null) {
+            // For the compatibility reasons, need to throw NPE if the argument is null.
+            // See android.graphics.cts.TypefaceTest#testCreateFromFileByFileNameNull
+            throw new NullPointerException();
+        }
         if (sFallbackFonts != null) {
-            FontFamily fontFamily = new FontFamily();
-            if (fontFamily.addFont(path, 0 /* ttcIndex */)) {
-                fontFamily.freeze();
-                FontFamily[] families = { fontFamily };
-                return createFromFamiliesWithDefault(families);
-            } else {
-                fontFamily.abortCreation();
+            final Builder builder = Builder.obtain();
+            try {
+                builder.setSourceFromFilePath(path);
+                Typeface typeface = builder.build();
+                if (typeface != null) {
+                    // For the compatibility reasons, throw runtime exception if failed to create
+                    // Typeface.
+                    return typeface;
+                }
+            } finally {
+                builder.recycle();
             }
         }
         throw new RuntimeException("Font not found " + path);
@@ -606,9 +951,8 @@ public class Typeface {
      * Create a new typeface from an array of font families.
      *
      * @param families array of font families
-     * @hide
      */
-    public static Typeface createFromFamilies(FontFamily[] families) {
+    private static Typeface createFromFamilies(FontFamily[] families) {
         long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
@@ -621,9 +965,8 @@ public class Typeface {
      * also the font families in the fallback list.
      *
      * @param families array of font families
-     * @hide
      */
-    public static Typeface createFromFamiliesWithDefault(FontFamily[] families) {
+    private static Typeface createFromFamiliesWithDefault(FontFamily[] families) {
         long[] ptrArray = new long[families.length + sFallbackFonts.length];
         for (int i = 0; i < families.length; i++) {
             ptrArray[i] = families[i].mNativePtr;
@@ -660,8 +1003,8 @@ public class Typeface {
                     continue;
                 }
             }
-            if (!fontFamily.addFontWeightStyle(fontBuffer, font.getTtcIndex(), font.getAxes(),
-                    font.getWeight(), font.isItalic())) {
+            if (!fontFamily.addFontFromBuffer(fontBuffer, font.getTtcIndex(), font.getAxes(),
+                    font.getWeight(), font.isItalic() ? Builder.ITALIC : Builder.NORMAL)) {
                 Log.e(TAG, "Error creating font " + font.getFontName() + "#" + font.getTtcIndex());
             }
         }
@@ -806,6 +1149,7 @@ public class Typeface {
     }
 
     private static native long nativeCreateFromTypeface(long native_instance, int style);
+    // TODO: clean up: change List<FontConfig.Axis> to FontConfig.Axis[]
     private static native long nativeCreateFromTypefaceWithVariation(
             long native_instance, List<FontConfig.Axis> axes);
     private static native long nativeCreateWeightAlias(long native_instance, int weight);

@@ -34,11 +34,15 @@
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
+#include <utils/FatVector.h>
 #include <minikin/FontFamily.h>
 
 #include <memory>
 
 namespace android {
+
+// Must be same with Java constant in Typeface.Builder. See Typeface.java
+constexpr jint RESOLVE_BY_FONT_TABLE = -1;
 
 struct NativeFamilyBuilder {
     uint32_t langId;
@@ -81,24 +85,53 @@ static void FontFamily_unref(jlong familyPtr) {
     delete family;
 }
 
-static void addSkTypeface(jlong builderPtr, sk_sp<SkTypeface> face, const void* fontData,
-        size_t fontSize, int ttcIndex, jint givenWeight, jboolean givenItalic) {
+static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
+        jint givenWeight, jint givenItalic) {
+    uirenderer::FatVector<SkFontMgr::FontParameters::Axis, 2> skiaAxes;
+    for (const auto& axis : builder->axes) {
+        skiaAxes.emplace_back(SkFontMgr::FontParameters::Axis{axis.axisTag, axis.value});
+    }
+
+    const size_t fontSize = data->size();
+    const void* fontPtr = data->data();
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
+
+    SkFontMgr::FontParameters params;
+    params.setCollectionIndex(ttcIndex);
+    params.setAxes(skiaAxes.data(), skiaAxes.size());
+
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
+    if (face == NULL) {
+        ALOGE("addFont failed to create font, invalid request");
+        builder->axes.clear();
+        return false;
+    }
     std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontData, fontSize, ttcIndex,
-                    std::vector<minikin::FontVariation>());
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
+                    builder->axes);
+
     int weight = givenWeight / 100;
-    bool italic = givenItalic;
-    if (weight == 0) {
-        if (!minikin::FontFamily::analyzeStyle(minikinFont, &weight, &italic)) {
+    bool italic = givenItalic == 1;
+    if (givenWeight == RESOLVE_BY_FONT_TABLE || givenItalic == RESOLVE_BY_FONT_TABLE) {
+        int os2Weight;
+        bool os2Italic;
+        if (!minikin::FontFamily::analyzeStyle(minikinFont, &os2Weight, &os2Italic)) {
             ALOGE("analyzeStyle failed. Using default style");
-            weight = 4;
-            italic = false;
+            os2Weight = 4;
+            os2Italic = false;
+        }
+        if (givenWeight == RESOLVE_BY_FONT_TABLE) {
+            weight = os2Weight;
+        }
+        if (givenItalic == RESOLVE_BY_FONT_TABLE) {
+            italic = os2Italic;
         }
     }
 
-    builder->fonts.push_back(minikin::Font(
-            std::move(minikinFont), minikin::FontStyle(weight, italic)));
+    builder->fonts.push_back(minikin::Font(minikinFont, minikin::FontStyle(weight, italic)));
+    builder->axes.clear();
+    return true;
 }
 
 static void release_global_ref(const void* /*data*/, void* context) {
@@ -125,80 +158,47 @@ static void release_global_ref(const void* /*data*/, void* context) {
 }
 
 static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong builderPtr, jobject bytebuf,
-        jint ttcIndex) {
+        jint ttcIndex, jint weight, jint isItalic) {
     NPE_CHECK_RETURN_ZERO(env, bytebuf);
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     const void* fontPtr = env->GetDirectBufferAddress(bytebuf);
     if (fontPtr == NULL) {
         ALOGE("addFont failed to create font, buffer invalid");
+        builder->axes.clear();
         return false;
     }
     jlong fontSize = env->GetDirectBufferCapacity(bytebuf);
     if (fontSize < 0) {
         ALOGE("addFont failed to create font, buffer size invalid");
+        builder->axes.clear();
         return false;
     }
     jobject fontRef = MakeGlobalRefOrDie(env, bytebuf);
     sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
-
-    SkFontMgr::FontParameters params;
-    params.setCollectionIndex(ttcIndex);
-
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
-    if (face == NULL) {
-        ALOGE("addFont failed to create font");
-        return false;
-    }
-    addSkTypeface(builderPtr, std::move(face), fontPtr, (size_t)fontSize, ttcIndex, 0, false);
-    return true;
+    return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
 }
 
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong builderPtr,
-        jobject font, jint ttcIndex, jint weight, jboolean isItalic) {
+        jobject font, jint ttcIndex, jint weight, jint isItalic) {
     NPE_CHECK_RETURN_ZERO(env, font);
-
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-
-    // Declare axis native type.
-    std::vector<SkFontMgr::FontParameters::Axis> skiaAxes;
-    skiaAxes.reserve(builder->axes.size());
-    for (const minikin::FontVariation& minikinAxis : builder->axes) {
-        skiaAxes.push_back({minikinAxis.axisTag, minikinAxis.value});
-    }
-
     const void* fontPtr = env->GetDirectBufferAddress(font);
     if (fontPtr == NULL) {
         ALOGE("addFont failed to create font, buffer invalid");
+        builder->axes.clear();
         return false;
     }
     jlong fontSize = env->GetDirectBufferCapacity(font);
     if (fontSize < 0) {
         ALOGE("addFont failed to create font, buffer size invalid");
+        builder->axes.clear();
         return false;
     }
     jobject fontRef = MakeGlobalRefOrDie(env, font);
     sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
-
-    SkFontMgr::FontParameters params;
-    params.setCollectionIndex(ttcIndex);
-    params.setAxes(skiaAxes.data(), skiaAxes.size());
-
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
-    if (face == NULL) {
-        ALOGE("addFont failed to create font, invalid request");
-        return false;
-    }
-    std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
-                    std::vector<minikin::FontVariation>());
-    builder->fonts.push_back(minikin::Font(std::move(minikinFont),
-            minikin::FontStyle(weight / 100, isItalic)));
-    return true;
+    return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
 }
 
 static void releaseAsset(const void* ptr, void* context) {
@@ -206,18 +206,21 @@ static void releaseAsset(const void* ptr, void* context) {
 }
 
 static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong builderPtr,
-        jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset, jint weight,
-        jboolean isItalic) {
+        jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset, jint ttcIndex,
+        jint weight, jint isItalic) {
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     AssetManager* mgr = assetManagerForJavaObject(env, jassetMgr);
     if (NULL == mgr) {
+        builder->axes.clear();
         return false;
     }
 
     ScopedUtfChars str(env, jpath);
     if (str.c_str() == nullptr) {
+        builder->axes.clear();
         return false;
     }
 
@@ -230,27 +233,19 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     }
 
     if (NULL == asset) {
+        builder->axes.clear();
         return false;
     }
 
     const void* buf = asset->getBuffer(false);
     if (NULL == buf) {
         delete asset;
+        builder->axes.clear();
         return false;
     }
 
-    size_t bufSize = asset->getLength();
     sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
-
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), SkFontMgr::FontParameters()));
-    if (face == NULL) {
-        ALOGE("addFontFromAsset failed to create font %s", str.c_str());
-        return false;
-    }
-
-    addSkTypeface(builderPtr, std::move(face), buf, bufSize, 0 /* ttc index */, weight, isItalic);
+    addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
     return true;
 }
 
@@ -266,10 +261,10 @@ static const JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",         "(J)J", (void*)FontFamily_create },
     { "nAbort",                "(J)V", (void*)FontFamily_abort },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
-    { "nAddFont",              "(JLjava/nio/ByteBuffer;I)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;IIZ)Z",
+    { "nAddFont",              "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },
+    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;III)Z",
             (void*)FontFamily_addFontWeightStyle },
-    { "nAddFontFromAssetManager",    "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZIZ)Z",
+    { "nAddFontFromAssetManager",    "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZIII)Z",
             (void*)FontFamily_addFontFromAssetManager },
     { "nAddAxisValue",         "(JIF)V", (void*)FontFamily_addAxisValue },
 };
