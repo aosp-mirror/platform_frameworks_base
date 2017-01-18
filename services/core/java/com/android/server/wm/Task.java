@@ -186,8 +186,18 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
+        final DisplayContent prevDisplayContent = getDisplayContent();
+
         getParent().removeChild(this);
         stack.addTask(this, position, showForAllUsers(), false /* moveParents */);
+
+        // Relayout display(s).
+        final DisplayContent displayContent = stack.getDisplayContent();
+        displayContent.setLayoutNeeded();
+        if (prevDisplayContent != displayContent) {
+            onDisplayChanged(displayContent);
+            prevDisplayContent.setLayoutNeeded();
+        }
     }
 
     /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */

@@ -210,6 +210,7 @@ class WindowTestsBase {
     class TestTask extends Task {
 
         boolean mShouldDeferRemoval = false;
+        boolean mOnDisplayChangedCalled = false;
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
                 Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
@@ -224,6 +225,12 @@ class WindowTestsBase {
 
         int positionInParent() {
             return getParent().mChildren.indexOf(this);
+        }
+
+        @Override
+        void onDisplayChanged(DisplayContent dc) {
+            super.onDisplayChanged(dc);
+            mOnDisplayChangedCalled = true;
         }
     }
 
