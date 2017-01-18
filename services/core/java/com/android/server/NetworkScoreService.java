@@ -582,9 +582,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 Log.d(TAG, "Returning the default network recommendation.");
             }
 
-            if (request != null && request.getCurrentSelectedConfig() != null) {
+            if (request != null && request.getDefaultWifiConfig() != null) {
                 return RecommendationResult.createConnectRecommendation(
-                        request.getCurrentSelectedConfig());
+                        request.getDefaultWifiConfig());
             }
             return RecommendationResult.createDoNotConnectRecommendation();
         } finally {
@@ -887,9 +887,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
 
         final RecommendationResult result;
-        if (request != null && request.getCurrentSelectedConfig() != null) {
+        if (request != null && request.getDefaultWifiConfig() != null) {
             result = RecommendationResult.createConnectRecommendation(
-                    request.getCurrentSelectedConfig());
+                    request.getDefaultWifiConfig());
         } else {
             result = RecommendationResult.createDoNotConnectRecommendation();
         }
