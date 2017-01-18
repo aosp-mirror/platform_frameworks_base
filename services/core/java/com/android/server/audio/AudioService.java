@@ -144,7 +144,8 @@ import java.util.Objects;
  */
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
-            AccessibilityManager.AccessibilityStateChangeListener{
+            AccessibilityManager.AccessibilityStateChangeListener,
+            AccessibilityManager.AccessibilityServicesStateChangeListener {
 
     private static final String TAG = "AudioService";
 
@@ -780,7 +781,7 @@ public class AudioService extends IAudioService.Stub
                 TAG,
                 SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
-        initA11yMonitoring(mContext);
+        initA11yMonitoring();
         onIndicateSystemReady();
     }
 
@@ -5925,13 +5926,25 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     // Accessibility
 
-    private void initA11yMonitoring(Context ctxt) {
-        AccessibilityManager accessibilityManager =
-                (AccessibilityManager) ctxt.getSystemService(Context.ACCESSIBILITY_SERVICE);
+    /**
+     * Compile-time constant to enable the use of an independent a11y volume:
+     * - set to true to listen to a11y services state changes and read
+     *   the whether any exposes the FLAG_ENABLE_ACCESSIBILITY_VOLUME flag
+     * - set to false to listen to when accessibility services are started (e.g. "TalkBack started")
+     */
+    private static final boolean USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME = true;
+
+    private void initA11yMonitoring() {
+        final AccessibilityManager accessibilityManager =
+                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
         updateA11yVolumeAlias(accessibilityManager.isEnabled());
         accessibilityManager.addTouchExplorationStateChangeListener(this);
-        accessibilityManager.addAccessibilityStateChangeListener(this);
+        if (USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME) {
+            accessibilityManager.addAccessibilityServicesStateChangeListener(this);
+        } else {
+            accessibilityManager.addAccessibilityStateChangeListener(this);
+        }
     }
 
     //---------------------------------------------------------------------------------
@@ -5969,21 +5982,31 @@ public class AudioService extends IAudioService.Stub
 
     private static boolean sIndependentA11yVolume = false;
 
+    // implementation of AccessibilityStateChangeListener
     @Override
     public void onAccessibilityStateChanged(boolean enabled) {
         updateA11yVolumeAlias(enabled);
     }
 
-    private void updateA11yVolumeAlias(boolean a11Enabled) {
-        if (DEBUG_VOL) Log.d(TAG, "Accessibility mode changed to " + a11Enabled);
-        // a11y has its own volume stream when a11y service is enabled
-        sIndependentA11yVolume = a11Enabled;
-        // update the volume mapping scheme
-        updateStreamVolumeAlias(true /*updateVolumes*/, TAG);
-        // update the volume controller behavior
-        mVolumeController.setA11yMode(sIndependentA11yVolume ?
-                VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
-                    VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
+    // implementation of AccessibilityServicesStateChangeListener
+    @Override
+    public void onAccessibilityServicesStateChanged() {
+        final AccessibilityManager accessibilityManager =
+                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
+    }
+
+    private void updateA11yVolumeAlias(boolean a11VolEnabled) {
+        if (DEBUG_VOL) Log.d(TAG, "Accessibility volume enabled = " + a11VolEnabled);
+        if (sIndependentA11yVolume != a11VolEnabled) {
+            sIndependentA11yVolume = a11VolEnabled;
+            // update the volume mapping scheme
+            updateStreamVolumeAlias(true /*updateVolumes*/, TAG);
+            // update the volume controller behavior
+            mVolumeController.setA11yMode(sIndependentA11yVolume ?
+                    VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME :
+                        VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME);
+        }
     }
 
     //==========================================================================================
