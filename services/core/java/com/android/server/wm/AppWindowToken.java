@@ -445,6 +445,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         mService.mOpeningApps.remove(this);
         mService.mUnknownAppVisibilityController.appRemoved(this);
+        mService.mTaskSnapshotController.onAppRemoved(this);
         waitingToShow = false;
         if (mService.mClosingApps.contains(this)) {
             delayed = true;

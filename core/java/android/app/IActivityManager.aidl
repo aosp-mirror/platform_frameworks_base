@@ -31,7 +31,6 @@ import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
-
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
 import android.app.PendingIntent;

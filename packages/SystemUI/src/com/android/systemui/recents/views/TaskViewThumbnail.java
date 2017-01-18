@@ -35,6 +35,9 @@ import android.view.View;
 import android.view.ViewDebug;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.EventBus.Event;
+import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.ThumbnailData;
@@ -347,6 +350,7 @@ public class TaskViewThumbnail extends View {
             mBgFillPaint.setColor(t.colorBackground);
         }
         mLockedPaint.setColor(t.colorPrimary);
+        EventBus.getDefault().register(this);
     }
 
     /**
@@ -361,6 +365,14 @@ public class TaskViewThumbnail extends View {
     void unbindFromTask() {
         mTask = null;
         setThumbnail(null);
+        EventBus.getDefault().unregister(this);
+    }
+
+    public final void onBusEvent(TaskSnapshotChangedEvent event) {
+        if (mTask == null || event.taskId != mTask.key.id || event.taskSnapshot == null) {
+            return;
+        }
+        setThumbnail(ThumbnailData.createFromTaskSnapshot(event.taskSnapshot));
     }
 
     public void dump(String prefix, PrintWriter writer) {

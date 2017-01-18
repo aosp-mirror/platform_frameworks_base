@@ -2176,6 +2176,12 @@ public class ActivityManager {
             dest.writeParcelable(mContentInsets, 0);
         }
 
+        @Override
+        public String toString() {
+            return "TaskSnapshot{mSnapshot=" + mSnapshot + " mOrientation=" + mOrientation
+                    + " mContentInsets=" + mContentInsets.toShortString();
+        }
+
         public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
             public TaskSnapshot createFromParcel(Parcel source) {
                 return new TaskSnapshot(source);

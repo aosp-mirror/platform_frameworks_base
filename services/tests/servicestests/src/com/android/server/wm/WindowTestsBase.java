@@ -23,6 +23,8 @@ import android.view.IApplicationToken;
 import org.junit.Assert;
 import org.junit.Before;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.Context;
 import android.os.IBinder;
 import android.support.test.InstrumentationRegistry;
@@ -238,7 +240,7 @@ class WindowTestsBase {
         }
 
         TestTaskWindowContainerController(int stackId) {
-            super(sNextTaskId++, stackId, 0 /* userId */, null /* bounds */,
+            super(sNextTaskId++, snapshot -> {}, stackId, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE, false /* homeTask*/,
                     false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */);
         }

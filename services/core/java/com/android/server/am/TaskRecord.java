@@ -52,6 +52,8 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
 import com.android.server.wm.TaskWindowContainerController;
+import com.android.server.wm.TaskWindowContainerListener;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -105,7 +107,7 @@ import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
-final class TaskRecord extends ConfigurationContainer {
+final class TaskRecord extends ConfigurationContainer implements TaskWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -412,8 +414,8 @@ final class TaskRecord extends ConfigurationContainer {
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
         final Configuration overrideConfig = getOverrideConfiguration();
-        mWindowContainerController = new TaskWindowContainerController(taskId, getStackId(), userId,
-                bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
+        mWindowContainerController = new TaskWindowContainerController(taskId, this, getStackId(),
+                userId, bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
                 showForAllUsers);
     }
 
@@ -427,6 +429,11 @@ final class TaskRecord extends ConfigurationContainer {
         }
         mService.mTaskChangeNotificationController.notifyTaskRemoved(taskId);
         mWindowContainerController = null;
+    }
+
+    @Override
+    public void onSnapshotChanged(TaskSnapshot snapshot) {
+        mService.mTaskChangeNotificationController.notifyTaskSnapshotChanged(taskId, snapshot);
     }
 
     void setResizeMode(int resizeMode) {

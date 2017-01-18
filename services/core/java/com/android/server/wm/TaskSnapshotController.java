@@ -17,22 +17,17 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
-import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
-import static android.graphics.GraphicBuffer.USAGE_SW_READ_NEVER;
-import static android.graphics.GraphicBuffer.USAGE_SW_WRITE_NEVER;
-import static android.graphics.PixelFormat.RGBA_8888;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.util.ArraySet;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.PrintWriter;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -74,6 +69,9 @@ class TaskSnapshotController {
             final TaskSnapshot snapshot = snapshotTask(task);
             if (snapshot != null) {
                 mCache.putSnapshot(task, snapshot);
+                if (task.getController() != null) {
+                    task.getController().reportSnapshotChanged(snapshot);
+                }
             }
         }
     }
@@ -92,7 +90,7 @@ class TaskSnapshotController {
     }
 
     private TaskSnapshot snapshotTask(Task task) {
-        final AppWindowToken top = (AppWindowToken) task.getTop();
+        final AppWindowToken top = task.getTopChild();
         if (top == null) {
             return null;
         }
@@ -124,5 +122,26 @@ class TaskSnapshotController {
 
     private boolean canSnapshotTask(Task task) {
         return !StackId.isHomeOrRecentsStack(task.mStack.mStackId);
+    }
+
+    /**
+     * Called when an {@link AppWindowToken} has been removed.
+     */
+    void onAppRemoved(AppWindowToken wtoken) {
+        // TODO: Clean from both recents and running cache.
+        mCache.cleanCache(wtoken);
+    }
+
+    /**
+     * Called when the process of an {@link AppWindowToken} has died.
+     */
+    void onAppDied(AppWindowToken wtoken) {
+
+        // TODO: Only clean from running cache.
+        mCache.cleanCache(wtoken);
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        mCache.dump(pw, prefix);
     }
 }

@@ -2304,6 +2304,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
+                        if (win.mAppToken != null && win.mAppToken.findMainWindow() == win) {
+                            mService.mTaskSnapshotController.onAppDied(win.mAppToken);
+                        }
                         win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
                         if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
                             // The owner of the docked divider died :( We reset the docked stack,

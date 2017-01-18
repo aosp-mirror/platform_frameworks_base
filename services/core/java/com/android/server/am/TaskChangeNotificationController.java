@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ITaskStackListener;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ComponentName;
@@ -43,6 +45,7 @@ class TaskChangeNotificationController {
     static final int NOTIFY_ACTIVITY_REQUESTED_ORIENTATION_CHANGED_LISTENERS = 12;
     static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
     static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
+    static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
 
     // Delay in notifying task stack change listeners (in millis)
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -113,6 +116,10 @@ class TaskChangeNotificationController {
         l.onTaskProfileLocked(m.arg1, m.arg2);
     };
 
+    private final TaskStackConsumer mNotifyTaskSnapshotChanged = (l, m) -> {
+        l.onTaskSnapshotChanged(m.arg1, (TaskSnapshot) m.obj);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -170,7 +177,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyTaskProfileLocked, msg);
-
+                    break;
+                case NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyTaskSnapshotChanged, msg);
                     break;
             }
         }
@@ -346,6 +355,16 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG, taskId,
                 userId);
         forAllLocalListeners(mNotifyTaskProfileLocked, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that the snapshot of a task has changed.
+     */
+    void notifyTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG,
+                taskId, 0, snapshot);
+        forAllLocalListeners(mNotifyTaskSnapshotChanged, msg);
         msg.sendToTarget();
     }
 }

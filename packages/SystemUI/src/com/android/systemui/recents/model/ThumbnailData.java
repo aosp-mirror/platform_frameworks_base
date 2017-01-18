@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.model;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
@@ -23,7 +24,17 @@ import android.graphics.Rect;
  * Data for a single thumbnail.
  */
 public class ThumbnailData {
+
+    // TODO: Make these final once the non-snapshot path is removed.
     public Bitmap thumbnail;
     public int orientation;
     public final Rect insets = new Rect();
+
+    public static ThumbnailData createFromTaskSnapshot(TaskSnapshot snapshot) {
+        ThumbnailData out = new ThumbnailData();
+        out.thumbnail = Bitmap.createHardwareBitmap(snapshot.getSnapshot());
+        out.insets.set(snapshot.getContentInsets());
+        out.orientation = snapshot.getOrientation();
+        return out;
+    }
 }

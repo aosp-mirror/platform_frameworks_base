@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
 import android.os.RemoteException;
 
@@ -77,5 +78,10 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     public void onTaskProfileLocked(int taskId, int userId) {
+    }
+
+    @Override
+    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot)
+            throws RemoteException {
     }
 }
