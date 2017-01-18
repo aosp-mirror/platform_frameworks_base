@@ -58,7 +58,8 @@ public class NfcCommand extends Svc.Command {
                 IPackageManager pm = IPackageManager.Stub.asInterface(
                         ServiceManager.getService("package"));
                 try {
-                    if (pm.hasSystemFeature(PackageManager.FEATURE_NFC, 0)) {
+                    if (pm.hasSystemFeature(PackageManager.FEATURE_NFC, 0) ||
+			pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION, 0)) {
                         INfcAdapter nfc = INfcAdapter.Stub
                                 .asInterface(ServiceManager.getService(Context.NFC_SERVICE));
                         try {
