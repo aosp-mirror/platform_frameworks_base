@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.IUidObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
@@ -38,9 +39,9 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
@@ -49,6 +50,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
@@ -80,6 +82,7 @@ import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +105,8 @@ public class UsageStatsService extends SystemService implements
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = COMPRESS_TIME ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
+
+    private static final File KERNEL_COUNTER_FILE = new File("/proc/uid_procstat/set");
 
     long mAppIdleScreenThresholdMillis;
     long mCheckIdleIntervalMillis;
@@ -134,6 +139,7 @@ public class UsageStatsService extends SystemService implements
     private IBatteryStats mBatteryStats;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
+    private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
     private File mUsageStatsDir;
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
@@ -235,6 +241,19 @@ public class UsageStatsService extends SystemService implements
                 postOneTimeCheckIdleStates();
             }
 
+            if (KERNEL_COUNTER_FILE.exists()) {
+                try {
+                    ActivityManager.getService().registerUidObserver(mUidObserver,
+                            ActivityManager.UID_OBSERVER_PROCSTATE
+                                    | ActivityManager.UID_OBSERVER_GONE,
+                            ActivityManager.PROCESS_STATE_UNKNOWN, null);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Slog.w(TAG, "Missing procfs interface: " + KERNEL_COUNTER_FILE);
+            }
+
             mSystemServicesReady = true;
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setChargingState(getContext().getSystemService(BatteryManager.class).isCharging());
@@ -308,6 +327,39 @@ public class UsageStatsService extends SystemService implements
                     mAppIdleHistory.updateDisplayLocked(displayOn, SystemClock.elapsedRealtime());
                 }
             }
+        }
+    };
+
+    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override
+        public void onUidStateChanged(int uid, int procState) {
+            final int newCounter = (procState <= ActivityManager.PROCESS_STATE_TOP) ? 0 : 1;
+            synchronized (mUidToKernelCounter) {
+                final int oldCounter = mUidToKernelCounter.get(uid, 0);
+                if (newCounter != oldCounter) {
+                    mUidToKernelCounter.put(uid, newCounter);
+                    try {
+                        FileUtils.stringToFile(KERNEL_COUNTER_FILE, uid + " " + newCounter);
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Failed to update counter set: " + e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+            // Ignored
+        }
+
+        @Override
+        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+            onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
+        }
+
+        @Override
+        public void onUidActive(int uid) throws RemoteException {
+            // Ignored
         }
     };
 
