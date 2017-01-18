@@ -247,6 +247,9 @@ public class TaskStack {
      */
     public static class DockState implements DropTarget {
 
+        public static final int DOCK_AREA_BG_COLOR = 0xFFffffff;
+        public static final int DOCK_AREA_GRID_BG_COLOR = 0xFF000000;
+
         // The rotation to apply to the hint text
         @Retention(RetentionPolicy.SOURCE)
         @IntDef({HORIZONTAL, VERTICAL})
@@ -319,7 +322,8 @@ public class TaskStack {
             private ViewState(int areaAlpha, int hintAlpha, @TextOrientation int hintOrientation,
                     int hintTextResId) {
                 dockAreaAlpha = areaAlpha;
-                dockAreaOverlay = new ColorDrawable(0xFFffffff);
+                dockAreaOverlay = new ColorDrawable(Recents.getConfiguration().isGridEnabled
+                        ? DOCK_AREA_GRID_BG_COLOR : DOCK_AREA_BG_COLOR);
                 dockAreaOverlay.setAlpha(0);
                 hintTextAlpha = hintAlpha;
                 hintTextOrientation = hintOrientation;
@@ -435,7 +439,7 @@ public class TaskStack {
          * @param createMode used to pass to ActivityManager to dock the task
          * @param touchArea the area in which touch will initiate this dock state
          * @param dockArea the visible dock area
-         * @param expandedTouchDockArea the areain which touch will continue to dock after entering
+         * @param expandedTouchDockArea the area in which touch will continue to dock after entering
          *                              the initial touch area.  This is also the new dock area to
          *                              draw.
          */
