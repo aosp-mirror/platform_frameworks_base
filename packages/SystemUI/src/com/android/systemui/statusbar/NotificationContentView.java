@@ -31,6 +31,7 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
@@ -693,6 +694,9 @@ public class NotificationContentView extends FrameLayout {
         forceUpdateVisibility(VISIBLE_TYPE_HEADSUP, mHeadsUpChild, mHeadsUpWrapper);
         forceUpdateVisibility(VISIBLE_TYPE_SINGLELINE, mSingleLineView, mSingleLineView);
         forceUpdateVisibility(VISIBLE_TYPE_AMBIENT, mAmbientChild, mAmbientWrapper);
+        // forceUpdateVisibilities cancels outstanding animations without updating the
+        // mAnimationStartVisibleType. Do so here instead.
+        mAnimationStartVisibleType = UNDEFINED;
     }
 
     private void forceUpdateVisibility(int type, View view, TransformableView wrapper) {
@@ -748,6 +752,9 @@ public class NotificationContentView extends FrameLayout {
                 mSingleLineView, mSingleLineView);
         updateViewVisibility(visibleType, VISIBLE_TYPE_AMBIENT,
                 mAmbientChild, mAmbientWrapper);
+        // updateViewVisibilities cancels outstanding animations without updating the
+        // mAnimationStartVisibleType. Do so here instead.
+        mAnimationStartVisibleType = UNDEFINED;
     }
 
     private void updateViewVisibility(int visibleType, int type, View view,
@@ -1234,6 +1241,11 @@ public class NotificationContentView extends FrameLayout {
         if (!animating) {
             mContentHeightAtAnimationStart = UNDEFINED;
         }
+    }
+
+    @VisibleForTesting
+    boolean isAnimatingVisibleType() {
+        return mAnimationStartVisibleType != UNDEFINED;
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
