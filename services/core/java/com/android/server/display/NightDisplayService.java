@@ -75,6 +75,11 @@ public final class NightDisplayService extends SystemService
     };
 
     /**
+     * The transition time, in milliseconds, for Night Display to turn on/off.
+     */
+    private static final long TRANSITION_DURATION = 3000L;
+
+    /**
      * The identity matrix, used if one of the given matrices is {@code null}.
      */
     private static final float[] MATRIX_IDENTITY = new float[16];
@@ -285,8 +290,7 @@ public final class NightDisplayService extends SystemService
 
             mColorMatrixAnimator = ValueAnimator.ofObject(COLOR_MATRIX_EVALUATOR,
                     from == null ? MATRIX_IDENTITY : from, to == null ? MATRIX_IDENTITY : to);
-            mColorMatrixAnimator.setDuration(getContext().getResources()
-                    .getInteger(android.R.integer.config_longAnimTime));
+            mColorMatrixAnimator.setDuration(TRANSITION_DURATION);
             mColorMatrixAnimator.setInterpolator(AnimationUtils.loadInterpolator(
                     getContext(), android.R.interpolator.fast_out_slow_in));
             mColorMatrixAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
