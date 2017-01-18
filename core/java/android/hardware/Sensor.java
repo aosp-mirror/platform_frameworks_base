@@ -729,11 +729,11 @@ public final class Sensor {
     private static final int DATA_INJECTION_MASK = 0x10;
     private static final int DATA_INJECTION_SHIFT = 4;
 
-    // MASK for dynamic sensor (sensor that added during runtime), bit 6.
+    // MASK for dynamic sensor (sensor that added during runtime), bit 5.
     private static final int DYNAMIC_SENSOR_MASK = 0x20;
     private static final int DYNAMIC_SENSOR_SHIFT = 5;
 
-    // MASK for indication bit of sensor additional information support (bit 7).
+    // MASK for indication bit of sensor additional information support, bit 6.
     private static final int ADDITIONAL_INFO_MASK = 0x40;
     private static final int ADDITIONAL_INFO_SHIFT = 6;
 
@@ -794,6 +794,33 @@ public final class Sensor {
      */
     public int getReportingMode() {
         return ((mFlags & REPORTING_MODE_MASK) >> REPORTING_MODE_SHIFT);
+    }
+
+    /**
+     * Get the highest supported direct report mode rate level of the sensor.
+     *
+     * @return Highest direct report rate level of this sensor. If the sensor does not support
+     * direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
+     * @see SensorDirectChannel#RATE_STOP
+     * @see SensorDirectChannel#RATE_NORMAL
+     * @see SensorDirectChannel#RATE_FAST
+     * @see SensorDirectChannel#RATE_VERY_FAST
+     */
+    @SensorDirectChannel.RateLevel
+    public int getHighestDirectReportRateLevel() {
+        return SensorDirectChannel.RATE_STOP;
+    }
+
+    /**
+     * Test if sensor support direct channel backed by a specific type of shared memory.
+     *
+     * @param sharedMemType type of shared memory used by direct channel.
+     * @return <code>true</code> if the shared memory type is supported.
+     * @see SensorDirectChannel#TYPE_ASHMEM
+     * @see SensorDirectChannel#TYPE_HARDWARE_BUFFER
+     */
+    public boolean isDirectChannelTypeSupported(@SensorDirectChannel.MemoryType int sharedMemType) {
+        return false;
     }
 
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
