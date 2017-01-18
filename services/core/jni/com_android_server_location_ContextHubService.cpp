@@ -25,11 +25,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/endian.h>
 
 #include <chrono>
 #include <mutex>
 #include <queue>
 #include <unordered_map>
+#include <utility>
 
 #include <android-base/macros.h>
 #include <android/hardware/contexthub/1.0/IContexthub.h>
@@ -44,6 +46,7 @@ using android::hardware::contexthub::V1_0::ContextHubMsg;
 using android::hardware::contexthub::V1_0::HubAppInfo;
 using android::hardware::contexthub::V1_0::IContexthub;
 using android::hardware::contexthub::V1_0::IContexthubCallback;
+using android::hardware::contexthub::V1_0::NanoAppBinary;
 using android::hardware::contexthub::V1_0::Result;
 using android::hardware::contexthub::V1_0::TransactionResult;
 
@@ -60,6 +63,22 @@ using std::chrono::steady_clock;
 constexpr auto kMinTransactionCancelTime = std::chrono::seconds(29);
 
 namespace android {
+
+constexpr uint32_t kNanoAppBinaryHeaderVersion = 1;
+
+// Important: this header is explicitly defined as little endian byte order, and
+// therefore may not match host endianness
+struct NanoAppBinaryHeader {
+    uint32_t headerVersion;        // 0x1 for this version
+    uint32_t magic;                // "NANO" (see NANOAPP_MAGIC in context_hub.h)
+    uint64_t appId;                // App Id, contains vendor id
+    uint32_t appVersion;           // Version of the app
+    uint32_t flags;                // Signed, encrypted
+    uint64_t hwHubType;            // Which hub type is this compiled for
+    uint8_t targetChreApiMajorVersion; // Which CHRE API version this is compiled for
+    uint8_t targetChreApiMinorVersion;
+    uint8_t reserved[6];
+} __attribute__((packed));
 
 enum HubMessageType {
     CONTEXT_HUB_APPS_ENABLE  = 1, // Enables loaded nano-app(s)
@@ -989,6 +1008,45 @@ jobjectArray nativeInitialize(JNIEnv *env, jobject instance) {
     return retArray;
 }
 
+Result sendLoadNanoAppRequest(uint32_t hubId,
+                              jbyte *data,
+                              size_t dataBufferLength) {
+    auto header = reinterpret_cast<const NanoAppBinaryHeader *>(data);
+    Result result;
+
+    if (dataBufferLength < sizeof(NanoAppBinaryHeader)) {
+        ALOGE("Got short NanoApp, length %zu", dataBufferLength);
+        result = Result::BAD_PARAMS;
+    } else if (header->headerVersion != htole32(kNanoAppBinaryHeaderVersion)) {
+        ALOGE("Got unexpected NanoApp header version %" PRIu32,
+              letoh32(header->headerVersion));
+        result = Result::BAD_PARAMS;
+    } else {
+        NanoAppBinary nanoapp;
+
+        // Data from the common nanoapp header goes into explicit fields
+        nanoapp.appId      = letoh64(header->appId);
+        nanoapp.appVersion = letoh32(header->appVersion);
+        nanoapp.flags      = letoh32(header->flags);
+        nanoapp.targetChreApiMajorVersion = header->targetChreApiMajorVersion;
+        nanoapp.targetChreApiMinorVersion = header->targetChreApiMinorVersion;
+
+        // Everything past the header goes in customBinary
+        auto dataBytes = reinterpret_cast<const uint8_t *>(data);
+        std::vector<uint8_t> customBinary(
+            dataBytes + sizeof(NanoAppBinaryHeader),
+            dataBytes + dataBufferLength);
+        nanoapp.customBinary = std::move(customBinary);
+
+        ALOGW("Calling Load NanoApp on hub %d", hubId);
+        result = db.hubInfo.contextHub->loadNanoApp(hubId,
+                                                    nanoapp,
+                                                    CONTEXT_HUB_LOAD_APP);
+    }
+
+    return result;
+}
+
 jint nativeSendMessage(JNIEnv *env,
                        jobject instance,
                        jintArray header_,
@@ -1068,12 +1126,7 @@ jint nativeSendMessage(JNIEnv *env,
     } else {
         if (appInstanceHandle == OS_APP_ID) {
             if (msgType == CONTEXT_HUB_LOAD_APP) {
-                std::vector<uint8_t> dataVector(reinterpret_cast<uint8_t *>(data),
-                                                reinterpret_cast<uint8_t *>(data + dataBufferLength));
-                ALOGW("Calling Load NanoApp on hub %d", hubId);
-                result = db.hubInfo.contextHub->loadNanoApp(hubId,
-                                                            dataVector,
-                                                            CONTEXT_HUB_LOAD_APP);
+                result = sendLoadNanoAppRequest(hubId, data, dataBufferLength);
             } else {
                 ALOGD("Dropping OS addresses message of type - %" PRIu32, msgType);
                 result = Result::BAD_PARAMS;
