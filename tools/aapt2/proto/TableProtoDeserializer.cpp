@@ -479,7 +479,7 @@ CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size) 
 const pb::CompiledFile* CompiledFileInputStream::CompiledFile() {
     if (!mPbFile) {
         std::unique_ptr<pb::CompiledFile> pbFile = util::make_unique<pb::CompiledFile>();
-        google::protobuf::uint64 pbSize = 0u;
+        uint64_t pbSize = 0u;
         if (!mIn.ReadLittleEndian64(&pbSize)) {
             return nullptr;
         }

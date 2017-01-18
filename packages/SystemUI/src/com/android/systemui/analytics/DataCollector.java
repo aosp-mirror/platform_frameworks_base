@@ -35,8 +35,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
+import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session;
+import static com.android.systemui.statusbar.phone.TouchAnalyticsProto.Session.PhoneEvent;
 
 /**
  * Tracks touch, sensor and phone events when the lockscreen is on. If the phone is unlocked

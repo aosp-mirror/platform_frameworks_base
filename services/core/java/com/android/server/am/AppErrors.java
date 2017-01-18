@@ -18,7 +18,7 @@ package com.android.server.am;
 
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.MetricsProto;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.Watchdog;
 

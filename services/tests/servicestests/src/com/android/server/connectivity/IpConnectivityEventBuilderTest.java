@@ -32,7 +32,7 @@ import com.google.protobuf.nano.MessageNano;
 import java.util.Arrays;
 import junit.framework.TestCase;
 
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
+import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityLog;
 import static com.android.server.connectivity.MetricsTestUtil.aBool;
 import static com.android.server.connectivity.MetricsTestUtil.aByteArray;
 import static com.android.server.connectivity.MetricsTestUtil.aLong;

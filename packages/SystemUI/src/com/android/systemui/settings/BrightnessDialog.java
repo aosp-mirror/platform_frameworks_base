@@ -25,7 +25,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
 /** A dialog that provides controls for adjusting the screen brightness. */

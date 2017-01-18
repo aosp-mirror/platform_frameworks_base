@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
+import static com.android.server.connectivity.metrics.IpConnectivityLogClass.IpConnectivityEvent;
 
 /** {@hide} */
 final public class IpConnectivityMetrics extends SystemService {

@@ -31,7 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
@@ -87,7 +87,7 @@ public abstract class QSTile<TState extends State> {
     /**
      * Declare the category of this tile.
      *
-     * Categories are defined in {@link com.android.internal.logging.nano.MetricsProto.MetricsEvent}
+     * Categories are defined in {@link com.android.internal.logging.MetricsProto.MetricsEvent}
      * by editing frameworks/base/proto/src/metrics_constants.proto.
      */
     abstract public int getMetricsCategory();
