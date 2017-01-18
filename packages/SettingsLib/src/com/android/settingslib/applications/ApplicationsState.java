@@ -143,20 +143,20 @@ public class ApplicationsState {
                 PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
                 PackageManager.GET_META_DATA;
 
-        /**
-         * This is a trick to prevent the foreground thread from being delayed.
-         * The problem is that Dalvik monitors are initially spin locks, to keep
-         * them lightweight.  This leads to unfair contention -- Even though the
-         * background thread only holds the lock for a short amount of time, if
-         * it keeps running and locking again it can prevent the main thread from
-         * acquiring its lock for a long time...  sometimes even > 5 seconds
-         * (leading to an ANR).
-         *
-         * Dalvik will promote a monitor to a "real" lock if it detects enough
-         * contention on it.  It doesn't figure this out fast enough for us
-         * here, though, so this little trick will force it to turn into a real
-         * lock immediately.
-         */
+        //
+        //This is a trick to prevent the foreground thread from being delayed.
+        //The problem is that Dalvik monitors are initially spin locks, to keep
+        //them lightweight.  This leads to unfair contention -- Even though the
+        //background thread only holds the lock for a short amount of time, if
+        //it keeps running and locking again it can prevent the main thread from
+        //acquiring its lock for a long time...  sometimes even > 5 seconds
+        //(leading to an ANR).
+        //
+        //Dalvik will promote a monitor to a "real" lock if it detects enough
+        //contention on it.  It doesn't figure this out fast enough for us
+        //here, though, so this little trick will force it to turn into a real
+        //lock immediately.
+        //
         synchronized (mEntriesMap) {
             try {
                 mEntriesMap.wait(1);
@@ -651,7 +651,11 @@ public class ApplicationsState {
             }
 
             if (comparator != null) {
-                Collections.sort(filteredApps, comparator);
+                synchronized (mEntriesMap) {
+                    // Locking to ensure that the background handler does not mutate
+                    // the size of AppEntries used for ordering while sorting.
+                    Collections.sort(filteredApps, comparator);
+                }
             }
 
             synchronized (mRebuildSync) {
@@ -1242,12 +1246,12 @@ public class ApplicationsState {
             }
             if (object1.info != null && object2.info != null) {
                 compareResult =
-                    sCollator.compare(object1.info.packageName, object2.info.packageName);
+                        sCollator.compare(object1.info.packageName, object2.info.packageName);
                 if (compareResult != 0) {
                     return compareResult;
                 }
             }
-            return object1.info.uid - object2.info.uid;
+            return (object1.info != null ? object1.info.uid : 0) - (object2.info != null ? object2.info.uid : 0);
         }
     };
 
@@ -1431,7 +1435,7 @@ public class ApplicationsState {
 
         public void init(Context context) {
             mHidePackageNames = context.getResources()
-                .getStringArray(R.array.config_hideWhenDisabled_packageNames);
+                    .getStringArray(R.array.config_hideWhenDisabled_packageNames);
         }
 
         @Override
@@ -1444,7 +1448,7 @@ public class ApplicationsState {
                 if (!entry.info.enabled) {
                     return false;
                 } else if (entry.info.enabledSetting ==
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                     return false;
                 }
             }
