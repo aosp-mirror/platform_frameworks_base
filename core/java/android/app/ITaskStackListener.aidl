@@ -31,8 +31,10 @@ oneway interface ITaskStackListener {
      * Called whenever IActivityManager.startActivity is called on an activity that is already
      * running in the pinned stack and the activity is not actually started, but the task is either
      * brought to the front or a new Intent is delivered to it.
+     *
+     * @param sourceComponent the component name of the activity that initiated the restart attempt
      */
-    void onPinnedActivityRestartAttempt();
+    void onPinnedActivityRestartAttempt(in ComponentName sourceComponent);
 
     /**
      * Called whenever the pinned stack is done animating a resize.
