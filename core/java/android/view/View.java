@@ -6934,8 +6934,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 & (View.AUTO_FILL_FLAG_TYPE_FILL
                         | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
         final int id = mID;
-        if (id > 0 && (id&0xff000000) != 0 && (id&0x00ff0000) != 0
-                && (id&0x0000ffff) != 0) {
+        if (id != NO_ID && !isViewIdGenerated(id)) {
             String pkg, type, entry;
             try {
                 final Resources res = getResources();
@@ -22638,6 +22637,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return result;
             }
         }
+    }
+
+    private static boolean isViewIdGenerated(int id) {
+        return (id & 0xFF000000) == 0 && (id & 0x00FFFFFF) != 0;
     }
 
     /**
