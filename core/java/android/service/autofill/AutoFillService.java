@@ -61,6 +61,19 @@ public abstract class AutoFillService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.service.autofill.AutoFillService";
 
+    /**
+     * Name under which a AutoFillService component publishes information about itself.
+     * This meta-data should reference an XML resource containing a
+     * <code>&lt;{@link
+     * android.R.styleable#AutoFillService autofill-service}&gt;</code> tag.
+     * This is a a sample XML file configuring an AutoFillService:
+     * <pre> &lt;autofill-service
+     *     android:settingsActivity="foo.bar.SettingsActivity"
+     *     . . .
+     * /&gt;</pre>
+     */
+    public static final String SERVICE_META_DATA = "android.autofill";
+
     // Internal bundle keys.
     /** @hide */ public static final String KEY_CALLBACK = "callback";
     /** @hide */ public static final String KEY_SAVABLE_IDS = "savable_ids";

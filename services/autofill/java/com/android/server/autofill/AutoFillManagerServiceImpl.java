@@ -202,7 +202,7 @@ final class AutoFillManagerServiceImpl {
 
         final AutoFillServiceInfo info;
         try {
-            info = new AutoFillServiceInfo(component, mUserId);
+            info = new AutoFillServiceInfo(context.getPackageManager(), component, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Auto-fill service not found: " + component, e);
             mInfo = null;
