@@ -3254,6 +3254,27 @@ message MetricsEvent {
     // ACTION: Deny "Usage access" for an app
     APP_SPECIAL_PERMISSION_USAGE_VIEW_DENY = 784;
 
+    // OPEN: Settings > Apps > Default Apps > Default browser
+    DEFAULT_BROWSER_PICKER = 785;
+
+    // OPEN: Settings > Apps > Default Apps > Default emergency app
+    DEFAULT_EMERGENCY_APP_PICKER = 786;
+
+    // OPEN: Settings > Apps > Default Apps > Default home
+    DEFAULT_HOME_PICKER = 787;
+
+    // OPEN: Settings > Apps > Default Apps > Default phone
+    DEFAULT_PHONE_PICKER = 788;
+
+    // OPEN: Settings > Apps > Default Apps > Default sms
+    DEFAULT_SMS_PICKER = 789;
+
+    // OPEN: Settings > Apps > Default Apps > Default notification assistant
+    DEFAULT_NOTIFICATION_ASSISTANT = 790;
+
+    // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
+    DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // OPEN: QS NFC tile shown
