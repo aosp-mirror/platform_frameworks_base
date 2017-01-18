@@ -105,6 +105,7 @@ public class TaskStackAnimationHelper {
     private static final Interpolator ENTER_WHILE_DOCKING_INTERPOLATOR =
             Interpolators.LINEAR_OUT_SLOW_IN;
 
+    private final int mEnterAndExitFromHomeTranslationOffset;
     private TaskStackView mStackView;
 
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
@@ -113,6 +114,8 @@ public class TaskStackAnimationHelper {
 
     public TaskStackAnimationHelper(Context context, TaskStackView stackView) {
         mStackView = stackView;
+        mEnterAndExitFromHomeTranslationOffset = Recents.getConfiguration().isGridEnabled
+                ? 0 : DOUBLE_FRAME_OFFSET_MS;
     }
 
     /**
@@ -260,7 +263,7 @@ public class TaskStackAnimationHelper {
                 AnimationProps taskAnimation = new AnimationProps()
                         .setInitialPlayTime(AnimationProps.BOUNDS,
                                 Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
-                                        DOUBLE_FRAME_OFFSET_MS)
+                                        mEnterAndExitFromHomeTranslationOffset)
                         .setStartDelay(AnimationProps.ALPHA,
                                 Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS, taskIndexFromFront) *
                                         FRAME_OFFSET_MS)
@@ -321,7 +324,7 @@ public class TaskStackAnimationHelper {
             AnimationProps taskAnimation;
             if (animated) {
                 int delay = Math.min(ENTER_EXIT_NUM_ANIMATING_TASKS , taskIndexFromFront) *
-                        DOUBLE_FRAME_OFFSET_MS;
+                        mEnterAndExitFromHomeTranslationOffset;
                 taskAnimation = new AnimationProps()
                         .setStartDelay(AnimationProps.BOUNDS, delay)
                         .setDuration(AnimationProps.BOUNDS, EXIT_TO_HOME_TRANSLATION_DURATION)
