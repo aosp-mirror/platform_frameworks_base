@@ -2896,9 +2896,7 @@
              See {@link android.view.View#setKeyboardNavigationCluster(boolean)}. -->
         <attr name="keyboardNavigationCluster" format="boolean" />
 
-        <!-- Whether this view is a root of a keyboard navigation section.
-             See {@link android.view.View#setKeyboardNavigationSection(boolean)}. -->
-        <attr name="keyboardNavigationSection" format="boolean" />
+        <attr name="__removed0" format="boolean" />
 
         <!-- Defines the next keyboard navigation cluster.
 
@@ -2907,12 +2905,7 @@
              will result when the reference is accessed.-->
         <attr name="nextClusterForward" format="reference"/>
 
-        <!-- Defines the next keyboard navigation section.
-
-             If the reference refers to a view that does not exist or is part
-             of a hierarchy that is invisible, a {@link java.lang.RuntimeException}
-             will result when the reference is accessed.-->
-        <attr name="nextSectionForward" format="reference"/>
+        <attr name="__removed1" format="reference"/>
 
         <!-- Whether this view is a default-focus view.
              Only one view per keyboard navigation cluster can have this attribute set to true.
