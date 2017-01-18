@@ -533,6 +533,8 @@ public class RetailDemoModeService extends SystemService {
 
         SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
         mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+
+        registerBroadcastReceiver();
     }
 
     @Override
@@ -568,7 +570,6 @@ public class RetailDemoModeService extends SystemService {
             case PHASE_BOOT_COMPLETED:
                 if (UserManager.isDeviceInDemoMode(getContext())) {
                     putDeviceInDemoMode();
-                    registerBroadcastReceiver();
                 }
                 break;
         }
