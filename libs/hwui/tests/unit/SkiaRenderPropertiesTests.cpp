@@ -73,7 +73,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
 
 }
 
-RENDERTHREAD_TEST(RenderNodeDrawable, renderPropClipping) {
+TEST(RenderNodeDrawable, renderPropClipping) {
     testProperty([](RenderProperties& properties) {
         properties.setClipToBounds(true);
         properties.setClipBounds(android::uirenderer::Rect(10, 20, 300, 400));
@@ -83,7 +83,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, renderPropClipping) {
     });
 }
 
-RENDERTHREAD_TEST(RenderNodeDrawable, renderPropRevealClip) {
+TEST(RenderNodeDrawable, renderPropRevealClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableRevealClip().set(true, 50, 50, 25);
     }, [](const SkCanvas& canvas) {
@@ -98,7 +98,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, renderPropRevealClip) {
     });
 }
 
-RENDERTHREAD_TEST(RenderNodeDrawable, renderPropOutlineClip) {
+TEST(RenderNodeDrawable, renderPropOutlineClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableOutline().setShouldClip(true);
         properties.mutableOutline().setRoundRect(10, 20, 30, 40, 5.0f, 0.5f);
@@ -114,7 +114,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, renderPropOutlineClip) {
     });
 }
 
-RENDERTHREAD_TEST(RenderNodeDrawable, renderPropTransform) {
+TEST(RenderNodeDrawable, renderPropTransform) {
     testProperty([](RenderProperties& properties) {
         properties.setLeftTopRightBottom(10, 10, 110, 110);
 

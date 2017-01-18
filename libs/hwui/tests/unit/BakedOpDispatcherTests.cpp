@@ -80,7 +80,7 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
             << "Glop(s) expected";
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
     SkPaint strokePaint;
     strokePaint.setStyle(SkPaint::kStroke_Style);
     strokePaint.setStrokeWidth(4);
@@ -113,7 +113,7 @@ RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
     testUnmergedGlopDispatch(renderThread, &ovalOp, textureGlopVerifier);
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     SkPaint layerPaint;
     layerPaint.setAlpha(128);
     OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
@@ -131,7 +131,7 @@ static int getGlopTransformFlags(renderthread::RenderThread& renderThread, Recor
     return result;
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, offsetFlags) {
     Rect bounds(10, 15, 20, 25);
     SkPaint paint;
     SkPaint aaPaint;
@@ -157,7 +157,7 @@ RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
             << "Expect an offset for non-AA lines.";
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, renderTextWithShadow) {
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
 
@@ -232,7 +232,7 @@ static FloatColor makeFloatColor(uint32_t color) {
     return c;
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, layerUpdateProperties) {
     for (bool debugOverdraw : { false, true }) {
         for (bool debugLayersUpdates : { false, true }) {
             ScopedProperty<bool> ovdProp(Properties::debugOverdraw, debugOverdraw);
@@ -273,7 +273,7 @@ RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
     }
 }
 
-RENDERTHREAD_TEST(BakedOpDispatcher, pathTextureSnapping) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(BakedOpDispatcher, pathTextureSnapping) {
     Rect bounds(10, 15, 20, 25);
     SkPaint paint;
     SkPath path;

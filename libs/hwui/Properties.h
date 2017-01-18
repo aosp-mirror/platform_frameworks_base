@@ -318,11 +318,15 @@ public:
     // any overhead they add
     static bool filterOutTestOverhead;
 
+    // Used for testing only to change the render pipeline.
+#ifdef HWUI_GLES_WRAP_ENABLED
+    static void overrideRenderPipelineType(RenderPipelineType);
+#endif
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
     static RenderPipelineType sRenderPipelineType;
-
 }; // class Caches
 
 }; // namespace uirenderer

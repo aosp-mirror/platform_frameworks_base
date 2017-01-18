@@ -118,7 +118,7 @@ public:
     }
 };
 
-RENDERTHREAD_TEST(SkiaDisplayList, prepareListAndChildren) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(

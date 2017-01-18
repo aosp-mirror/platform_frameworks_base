@@ -36,7 +36,7 @@ using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::skiapipeline;
 
-RENDERTHREAD_TEST(SkiaPipeline, renderFrame) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     auto redNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
             redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -55,7 +55,7 @@ RENDERTHREAD_TEST(SkiaPipeline, renderFrame) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckOpaque) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto halfGreenNode = TestUtils::createSkiaNode(0, 0, 2, 2,
         [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
             SkPaint greenPaint;
@@ -80,7 +80,7 @@ RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     auto redNode = TestUtils::createSkiaNode(0, 0, 2, 2,
         [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
             redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -101,7 +101,7 @@ RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     ASSERT_EQ(TestUtils::getColor(surface, 1, 1), SK_ColorRED);
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, renderLayer) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
     auto redNode = TestUtils::createSkiaNode(0, 0, 1, 1,
         [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
             redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -144,7 +144,7 @@ RENDERTHREAD_TEST(SkiaPipeline, renderLayer) {
     blueNode->setLayerSurface(sk_sp<SkSurface>());
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, renderOverdraw) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     ScopedProperty<bool> prop(Properties::debugOverdraw, true);
 
     auto whiteNode = TestUtils::createSkiaNode(0, 0, 1, 1,
@@ -218,7 +218,7 @@ public:
 };
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, deferRenderNodeScene) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     class DeferTestCanvas : public SkCanvas {
     public:
         DeferTestCanvas() : SkCanvas(800, 600) {}
@@ -284,7 +284,7 @@ RENDERTHREAD_TEST(SkiaPipeline, deferRenderNodeScene) {
     EXPECT_EQ(4, surface->canvas()->mDrawCounter);
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, clipped) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
     static const int CANVAS_WIDTH = 200;
     static const int CANVAS_HEIGHT = 200;
     class ClippedTestCanvas : public SkCanvas {
@@ -315,7 +315,7 @@ RENDERTHREAD_TEST(SkiaPipeline, clipped) {
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
-RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     static const int CANVAS_WIDTH = 50;
     static const int CANVAS_HEIGHT = 50;
     class ClipReplaceTestCanvas : public SkCanvas {

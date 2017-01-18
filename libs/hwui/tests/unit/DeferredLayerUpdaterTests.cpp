@@ -16,8 +16,8 @@
 
 #include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
+#include "Properties.h"
 
-#include "renderthread/OpenGLPipeline.h"
 #include "tests/common/TestUtils.h"
 
 #include <gtest/gtest.h>
@@ -26,11 +26,9 @@ using namespace android;
 using namespace android::uirenderer;
 
 RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
-    renderthread::OpenGLPipeline pipeline(renderThread);
-    sp<DeferredLayerUpdater> layerUpdater = pipeline.createTextureLayer();
+    sp<DeferredLayerUpdater> layerUpdater = TestUtils::createTextureLayerUpdater(renderThread);
     layerUpdater->setSize(100, 100);
     layerUpdater->setBlend(true);
-
 
     // updates are deferred so the backing layer should still be in its default state
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {

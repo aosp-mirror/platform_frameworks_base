@@ -114,7 +114,6 @@ private:
 
     void doUpdateTexImage();
     void doUpdateVkTexImage();
-    void updateLayer(bool forceFilter, const float* textureTransform);
 };
 
 } /* namespace uirenderer */

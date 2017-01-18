@@ -116,7 +116,7 @@ static std::unique_ptr<Glop> blackUnitQuadGlop(RenderState& renderState) {
     return glop;
 }
 
-RENDERTHREAD_TEST(GlopBuilder, rectSnapTest) {
+RENDERTHREAD_OPENGL_PIPELINE_TEST(GlopBuilder, rectSnapTest) {
     RenderState& renderState = renderThread.renderState();
     Caches& caches = Caches::getInstance();
     SkPaint paint;
