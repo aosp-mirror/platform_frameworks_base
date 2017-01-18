@@ -111,7 +111,7 @@ import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_AP
  * Custom implementation of Context/Activity to handle non compiled resources.
  */
 @SuppressWarnings("deprecation")  // For use of Pair.
-public final class BridgeContext extends Context {
+public class BridgeContext extends Context {
     private static final String PREFIX_THEME_APPCOMPAT = "Theme.AppCompat";
 
     private static final Map<String, ResourceValue> FRAMEWORK_PATCHED_VALUES = new HashMap<>(2);

@@ -31,7 +31,8 @@ LOCAL_JAVA_LIBRARIES := layoutlib \
 			tools-common-prebuilt \
 			sdk-common \
 			junit-host \
-			guavalib
+			guavalib \
+			mockito-host
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
