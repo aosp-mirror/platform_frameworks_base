@@ -1385,7 +1385,14 @@ class ContextImpl extends Context {
     @Override
     public ComponentName startService(Intent service) {
         warnIfCallingFromSystemProcess();
-        return startServiceCommon(service, mUser);
+        return startServiceCommon(service, -1, null, mUser);
+    }
+
+    @Override
+    public ComponentName startServiceInForeground(Intent service,
+            int id, Notification notification) {
+        warnIfCallingFromSystemProcess();
+        return startServiceCommon(service, id, notification, mUser);
     }
 
     @Override
@@ -1396,16 +1403,24 @@ class ContextImpl extends Context {
 
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
-        return startServiceCommon(service, user);
+        return startServiceCommon(service, -1, null, user);
     }
 
-    private ComponentName startServiceCommon(Intent service, UserHandle user) {
+    @Override
+    public ComponentName startServiceInForegroundAsUser(Intent service,
+            int id, Notification notification, UserHandle user) {
+        return startServiceCommon(service, id, notification, user);
+    }
+
+    private ComponentName startServiceCommon(Intent service, int id, Notification notification,
+            UserHandle user) {
         try {
             validateServiceIntent(service);
             service.prepareToLeaveProcess(this);
             ComponentName cn = ActivityManager.getService().startService(
                 mMainThread.getApplicationThread(), service, service.resolveTypeIfNeeded(
-                            getContentResolver()), getOpPackageName(), user.getIdentifier());
+                            getContentResolver()), id, notification, getOpPackageName(),
+                            user.getIdentifier());
             if (cn != null) {
                 if (cn.getPackageName().equals("!")) {
                     throw new SecurityException(

@@ -556,7 +556,9 @@ public class UsbPortManager {
 
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(
+                Intent.FLAG_RECEIVER_FOREGROUND |
+                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(UsbManager.EXTRA_PORT, portInfo.mUsbPort);
         intent.putExtra(UsbManager.EXTRA_PORT_STATUS, portInfo.mUsbPortStatus);
 

@@ -305,6 +305,7 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
+            int id, Notification notification,
             int callingPid, int callingUid, String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
@@ -324,7 +325,6 @@ public final class ActiveServices {
             callerFg = true;
         }
 
-
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType, callingPackage,
                     callingPid, callingUid, userId, true, callerFg, false);
@@ -343,10 +343,11 @@ public final class ActiveServices {
             return null;
         }
 
-        if (!r.startRequested) {
+        // Non-null notification means this is a start directly into the foreground
+        if (!r.startRequested && notification == null) {
             final long token = Binder.clearCallingIdentity();
             try {
-                // Before going further -- if this app is not allowed to run in the
+                // Before going further -- if this app is not allowed to start services in the
                 // background, then at this point we aren't going to let it period.
                 final int allowed = mAm.checkAllowBackgroundLocked(
                         r.appInfo.uid, r.packageName, callingPid, false);
@@ -450,7 +451,11 @@ public final class ActiveServices {
             }
         }
 
-        return startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+        ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+        if (notification != null) {
+            setServiceForegroundInnerLocked(r, callingUid, notification, 0);
+        }
+        return cmp;
     }
 
     private boolean requestStartTargetPermissionsReviewIfNeededLocked(ServiceRecord r,
@@ -595,9 +600,8 @@ public final class ActiveServices {
             for (int i=services.mServicesByName.size()-1; i>=0; i--) {
                 ServiceRecord service = services.mServicesByName.valueAt(i);
                 if (service.appInfo.uid == uid && service.startRequested) {
-                    if (service.appInfo.isEphemeralApp() ||
-                            mAm.mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
-                            uid, service.packageName) != AppOpsManager.MODE_ALLOWED) {
+                    if (mAm.checkAllowBackgroundLocked(service.appInfo.uid, service.packageName,
+                            -1, false) != ActivityManager.APP_START_MODE_NORMAL) {
                         if (stopping == null) {
                             stopping = new ArrayList<>();
                             stopping.add(service);
@@ -696,47 +700,52 @@ public final class ActiveServices {
         try {
             ServiceRecord r = findServiceLocked(className, token, userId);
             if (r != null) {
-                if (id != 0) {
-                    if (notification == null) {
-                        throw new IllegalArgumentException("null notification");
-                    }
-                    if (r.foregroundId != id) {
-                        cancelForegroudNotificationLocked(r);
-                        r.foregroundId = id;
-                    }
-                    notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-                    r.foregroundNoti = notification;
-                    r.isForeground = true;
-                    r.postNotification();
-                    if (r.app != null) {
-                        updateServiceForegroundLocked(r.app, true);
-                    }
-                    getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
-                    mAm.notifyPackageUse(r.serviceInfo.packageName,
-                                         PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
-                } else {
-                    if (r.isForeground) {
-                        r.isForeground = false;
-                        if (r.app != null) {
-                            mAm.updateLruProcessLocked(r.app, false, null);
-                            updateServiceForegroundLocked(r.app, true);
-                        }
-                    }
-                    if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
-                        cancelForegroudNotificationLocked(r);
-                        r.foregroundId = 0;
-                        r.foregroundNoti = null;
-                    } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
-                        r.stripForegroundServiceFlagFromNotification();
-                        if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
-                            r.foregroundId = 0;
-                            r.foregroundNoti = null;
-                        }
-                    }
-                }
+                setServiceForegroundInnerLocked(r, userId, notification, flags);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void setServiceForegroundInnerLocked(ServiceRecord r, int id,
+            Notification notification, int flags) {
+        if (id != 0) {
+            if (notification == null) {
+                throw new IllegalArgumentException("null notification");
+            }
+            if (r.foregroundId != id) {
+                cancelForegroudNotificationLocked(r);
+                r.foregroundId = id;
+            }
+            notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+            r.foregroundNoti = notification;
+            r.isForeground = true;
+            r.postNotification();
+            if (r.app != null) {
+                updateServiceForegroundLocked(r.app, true);
+            }
+            getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
+            mAm.notifyPackageUse(r.serviceInfo.packageName,
+                                 PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
+        } else {
+            if (r.isForeground) {
+                r.isForeground = false;
+                if (r.app != null) {
+                    mAm.updateLruProcessLocked(r.app, false, null);
+                    updateServiceForegroundLocked(r.app, true);
+                }
+            }
+            if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
+                cancelForegroudNotificationLocked(r);
+                r.foregroundId = 0;
+                r.foregroundNoti = null;
+            } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                r.stripForegroundServiceFlagFromNotification();
+                if ((flags & Service.STOP_FOREGROUND_DETACH) != 0) {
+                    r.foregroundId = 0;
+                    r.foregroundNoti = null;
+                }
+            }
         }
     }
 

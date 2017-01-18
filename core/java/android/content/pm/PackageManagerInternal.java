@@ -138,9 +138,8 @@ public abstract class PackageManagerInternal {
      * @param userId The user under which to check.
      *
      * @return An {@link ApplicationInfo} containing information about the
-     *         package.
-     * @throws NameNotFoundException if a package with the given name cannot be
-     *             found on the system.
+     *         package, or {@code null} if no application exists with that
+     *         package name.
      */
     public abstract ApplicationInfo getApplicationInfo(String packageName, int userId);
 
