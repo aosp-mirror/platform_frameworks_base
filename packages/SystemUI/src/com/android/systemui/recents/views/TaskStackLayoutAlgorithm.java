@@ -292,6 +292,9 @@ public class TaskStackLayoutAlgorithm {
     @ViewDebug.ExportedProperty(category="recents")
     private int mStackBottomOffset;
 
+    /** The height, in pixels, of each task view's title bar. */
+    private int mTitleBarHeight;
+
     // The paths defining the motion of the tasks when the stack is focused and unfocused
     private Path mUnfocusedCurve;
     private Path mFocusedCurve;
@@ -404,6 +407,14 @@ public class TaskStackLayoutAlgorithm {
         mBaseBottomMargin = res.getDimensionPixelSize(R.dimen.recents_layout_bottom_margin);
         mFreeformStackGap =
                 res.getDimensionPixelSize(R.dimen.recents_freeform_layout_bottom_margin);
+        mTitleBarHeight = getDimensionForDevice(mContext,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_task_view_header_height,
+                R.dimen.recents_task_view_header_height_tablet_land,
+                R.dimen.recents_grid_task_view_header_height);
     }
 
     /**
@@ -904,12 +915,17 @@ public class TaskStackLayoutAlgorithm {
      * Transforms the given {@param transformOut} to the screen coordinates, overriding the current
      * window rectangle with {@param windowOverrideRect} if non-null.
      */
-    public TaskViewTransform transformToScreenCoordinates(TaskViewTransform transformOut,
+    TaskViewTransform transformToScreenCoordinates(TaskViewTransform transformOut,
             Rect windowOverrideRect) {
         Rect windowRect = windowOverrideRect != null
                 ? windowOverrideRect
                 : Recents.getSystemServices().getWindowRect();
         transformOut.rect.offset(windowRect.left, windowRect.top);
+        if (useGridLayout()) {
+            // Draw the thumbnail a little lower to perfectly coincide with the view we are
+            // transitioning to, where the header bar has already been drawn.
+            transformOut.rect.offset(0, mTitleBarHeight);
+        }
         return transformOut;
     }
 
