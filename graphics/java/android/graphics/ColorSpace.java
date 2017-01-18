@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.AnyThread;
 import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -126,7 +127,8 @@ import java.util.function.DoubleUnaryOperator;
  *
  * <p>To visualize and debug color spaces, you can call {@link #createRenderer()}.
  * The {@link Renderer} created by calling this method can be used to compare
- * color spaces and locate specific colors on a CIE 1931 chromaticity diagram.</p>
+ * color spaces and locate specific colors on a CIE 1931 or CIE 1976 UCS
+ * chromaticity diagram.</p>
  *
  * <p>The following code snippet shows how to render a bitmap that compares
  * the color gamuts and white points of {@link Named#DCI_P3} and
@@ -155,6 +157,7 @@ import java.util.function.DoubleUnaryOperator;
  * @see Adaptation
  * @see Renderer
  */
+@AnyThread
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public abstract class ColorSpace {
     /**
@@ -216,7 +219,7 @@ public abstract class ColorSpace {
      *
      * @see #getId()
      */
-    public static final int MAX_ID = 64; // Do not change, used to encode in longs
+    public static final int MAX_ID = 63; // Do not change, used to encode in longs
 
     private static final float[] SRGB_PRIMARIES = { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f };
     private static final float[] NTSC_1953_PRIMARIES = { 0.67f, 0.33f, 0.21f, 0.71f, 0.14f, 0.08f };
@@ -341,11 +344,11 @@ public abstract class ColorSpace {
          *             \end{equation}\)
          *         </td>
          *     </tr>
-         *     <tr><td>Range</td><td colspan="4">\([-0.5..7.5[\)</td></tr>
+         *     <tr><td>Range</td><td colspan="4">\([-0.799..2.399[\)</td></tr>
          * </table>
          * <p>
          *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
-         *     <figcaption style="text-align: center;">Extended RGB (orange) vs sRGB (white)</figcaption>
+         *     <figcaption style="text-align: center;">Extended sRGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
         EXTENDED_SRGB,
@@ -368,11 +371,11 @@ public abstract class ColorSpace {
          *         <td>Electro-optical transfer function</td>
          *         <td colspan="4">\(C_{linear} = C_{scRGB}\)</td>
          *     </tr>
-         *     <tr><td>Range</td><td colspan="4">\([-0.5..7.5[\)</td></tr>
+         *     <tr><td>Range</td><td colspan="4">\([-0.5..7.499[\)</td></tr>
          * </table>
          * <p>
          *     <img src="{@docRoot}reference/android/images/graphics/colorspace_scrgb.png" />
-         *     <figcaption style="text-align: center;">Extended RGB (orange) vs sRGB (white)</figcaption>
+         *     <figcaption style="text-align: center;">Extended sRGB (orange) vs sRGB (white)</figcaption>
          * </p>
          */
         LINEAR_EXTENDED_SRGB,
@@ -1090,7 +1093,7 @@ public abstract class ColorSpace {
      * space's color model. The resulting value is passed back in the specified
      * array.</p>
      *
-     * <p class="note>The specified array's length  must be at least equal to
+     * <p class="note">The specified array's length  must be at least equal to
      * to the number of color components as returned by
      * {@link Model#getComponentCount()}, and its first 3 values must
      * be the XYZ components to convert from.</p>
@@ -1125,6 +1128,7 @@ public abstract class ColorSpace {
      * @return A string representation of the object
      */
     @Override
+    @NonNull
     public String toString() {
         return mName + " (id=" + mId + ", model=" + mModel + ")";
     }
@@ -1403,7 +1407,7 @@ public abstract class ColorSpace {
                 ILLUMINANT_D65,
                 x -> absRcpResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
                 x -> absResponse(x, 2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045),
-                -0.5f, 7.5f,
+                -0.799f, 2.399f,
                 Named.EXTENDED_SRGB.ordinal()
         );
         sNamedColorSpaces[Named.LINEAR_EXTENDED_SRGB.ordinal()] = new ColorSpace.Rgb(
@@ -1412,7 +1416,7 @@ public abstract class ColorSpace {
                 ILLUMINANT_D65,
                 DoubleUnaryOperator.identity(),
                 DoubleUnaryOperator.identity(),
-                -0.5f, 7.5f,
+                -0.5f, 7.499f,
                 Named.LINEAR_EXTENDED_SRGB.ordinal()
         );
         sNamedColorSpaces[Named.BT709.ordinal()] = new ColorSpace.Rgb(
@@ -1437,8 +1441,8 @@ public abstract class ColorSpace {
                 "SMPTE RP 431-2-2007 DCI (P3)",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
                 new float[] { 0.314f, 0.351f },
-                x -> Math.pow(x, 1 / 2.6),
-                x -> Math.pow(x, 2.6),
+                x -> Math.pow(x < 0.0f ? 0.0f : x, 1 / 2.6),
+                x -> Math.pow(x < 0.0f ? 0.0f : x, 2.6),
                 0.0f, 1.0f,
                 Named.DCI_P3.ordinal()
         );
@@ -1473,8 +1477,8 @@ public abstract class ColorSpace {
                 "Adobe RGB (1998)",
                 new float[] { 0.64f, 0.33f, 0.21f, 0.71f, 0.15f, 0.06f },
                 ILLUMINANT_D65,
-                x -> Math.pow(x, 1 / 2.2),
-                x -> Math.pow(x, 2.2),
+                x -> Math.pow(x < 0.0f ? 0.0f : x, 1 / 2.2),
+                x -> Math.pow(x < 0.0f ? 0.0f : x, 2.2),
                 0.0f, 1.0f,
                 Named.ADOBE_RGB.ordinal()
         );
@@ -1720,6 +1724,7 @@ public abstract class ColorSpace {
     /**
      * Implementation of the CIE XYZ color space. Assumes the white point is D50.
      */
+    @AnyThread
     private static final class Xyz extends ColorSpace {
         private Xyz(@NonNull String name, @IntRange(from = MIN_ID, to = MAX_ID) int id) {
             super(name, Model.XYZ, id);
@@ -1765,6 +1770,7 @@ public abstract class ColorSpace {
      * Implementation of the CIE L*a*b* color space. Its PCS is CIE XYZ
      * with a white point of D50.
      */
+    @AnyThread
     private static final class Lab extends ColorSpace {
         private static final float A = 216.0f / 24389.0f;
         private static final float B = 841.0f / 108.0f;
@@ -1949,6 +1955,7 @@ public abstract class ColorSpace {
      * <p>To learn more about the white point adaptation process, refer to the
      * documentation of {@link Adaptation}.</p>
      */
+    @AnyThread
     public static class Rgb extends ColorSpace {
         @NonNull private final float[] mWhitePoint;
         @NonNull private final float[] mPrimaries;
@@ -2337,7 +2344,7 @@ public abstract class ColorSpace {
          * to "gamma space" (gamma encoded). The terms gamma space and gamma encoded
          * are frequently used because many OETFs can be closely approximated using
          * a simple power function of the form \(x^{\frac{1}{\gamma}}\) (the
-         * approximation of the {@link Named#SRGB sRGB} EOTF uses \(\gamma=2.2\)
+         * approximation of the {@link Named#SRGB sRGB} OETF uses \(\gamma=2.2\)
          * for instance).</p>
          *
          * @return A transfer function that converts from linear space to "gamma space"
@@ -2346,7 +2353,7 @@ public abstract class ColorSpace {
          */
         @NonNull
         public DoubleUnaryOperator getOetf() {
-            return mOetf;
+            return mClampedOetf;
         }
 
         /**
@@ -2369,7 +2376,7 @@ public abstract class ColorSpace {
          */
         @NonNull
         public DoubleUnaryOperator getEotf() {
-            return mEotf;
+            return mClampedEotf;
         }
 
         @Override
@@ -2924,6 +2931,7 @@ public abstract class ColorSpace {
      * @see ColorSpace#connect(ColorSpace, RenderIntent)
      * @see ColorSpace#connect(ColorSpace)
      */
+    @AnyThread
     public static class Connector {
         @NonNull private final ColorSpace mSource;
         @NonNull private final ColorSpace mDestination;
