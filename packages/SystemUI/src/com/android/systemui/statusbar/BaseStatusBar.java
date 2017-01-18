@@ -1132,6 +1132,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 // Post to ensure the the guts are properly laid out.
                 guts.post(new Runnable() {
                     public void run() {
+                        if (row.getWindowToken() == null) {
+                            Log.e(TAG, "Trying to show notification guts, but not attached to "
+                                    + "window");
+                            return;
+                        }
                         dismissPopups(-1 /* x */, -1 /* y */, false /* resetGear */,
                                 false /* animate */);
                         guts.setVisibility(View.VISIBLE);
