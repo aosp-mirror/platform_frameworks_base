@@ -1802,6 +1802,9 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch) {
+        if (mWindowContainerController == null) {
+            return;
+        }
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);
         final boolean shown = mWindowContainerController.addStartingWindow(packageName, theme,
