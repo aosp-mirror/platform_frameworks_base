@@ -33,7 +33,7 @@
 #include <string>
 
 #include <android-base/stringprintf.h>
-#include <cutils/debugger.h>
+#include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
