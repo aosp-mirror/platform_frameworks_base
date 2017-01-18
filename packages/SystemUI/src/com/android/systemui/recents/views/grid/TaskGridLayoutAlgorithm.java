@@ -159,6 +159,10 @@ public class TaskGridLayoutAlgorithm  {
      */
     public TaskViewTransform getTransform(int taskIndex, int taskCount,
         TaskViewTransform transformOut, TaskStackLayoutAlgorithm stackLayout) {
+        if (taskCount == 0) {
+            transformOut.reset();
+            return transformOut;
+        }
 
         TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
         mTaskGridRect.set(gridInfo.size);
@@ -174,7 +178,7 @@ public class TaskGridLayoutAlgorithm  {
 
         // We also need to invert the index in order to display the most recent tasks first.
         int taskLayoutIndex = taskCount - taskIndex - 1;
-        boolean isTaskViewVisible = (taskLayoutIndex < MAX_LAYOUT_TASK_COUNT);
+        boolean isTaskViewVisible = taskLayoutIndex < MAX_LAYOUT_TASK_COUNT;
 
         // Fill out the transform
         transformOut.scale = 1f;
