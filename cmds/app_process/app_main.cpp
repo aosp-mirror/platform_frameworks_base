@@ -184,10 +184,6 @@ static const char ZYGOTE_NICE_NAME[] = "zygote";
 
 int main(int argc, char* const argv[])
 {
-    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
-        LOG_ALWAYS_FATAL("PR_SET_NO_NEW_PRIVS failed: %s", strerror(errno));
-    }
-
     if (!LOG_NDEBUG) {
       String8 argv_String;
       for (int i = 0; i < argc; ++i) {
