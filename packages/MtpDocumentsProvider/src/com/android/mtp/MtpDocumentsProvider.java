@@ -442,6 +442,24 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
     }
 
+    @Override
+    public boolean isChildDocument(String parentDocumentId, String documentId) {
+        try {
+            Identifier identifier = mDatabase.createIdentifier(documentId);
+            while (true) {
+                if (parentDocumentId.equals(identifier.mDocumentId)) {
+                    return true;
+                }
+                if (identifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
+                    return false;
+                }
+                identifier = mDatabase.getParentIdentifier(identifier.mDocumentId);
+            }
+        } catch (FileNotFoundException error) {
+            return false;
+        }
+    }
+
     void openDevice(int deviceId) throws IOException {
         synchronized (mDeviceListLock) {
             if (mDeviceToolkits.containsKey(deviceId)) {
