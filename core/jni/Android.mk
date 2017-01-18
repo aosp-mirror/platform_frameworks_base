@@ -223,6 +223,7 @@ LOCAL_SHARED_LIBRARIES := \
     libnativehelper \
     liblog \
     libcutils \
+    libdebuggerd_client \
     libutils \
     libbinder \
     libnetutils \
