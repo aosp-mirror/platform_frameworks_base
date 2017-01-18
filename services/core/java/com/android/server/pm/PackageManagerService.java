@@ -12217,6 +12217,67 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
+
+    /**
+     * Ensure that the install reason matches what we know about the package installer (e.g. whether
+     * it is acting on behalf on an enterprise or the user).
+     *
+     * Note that the ordering of the conditionals in this method is important. The checks we perform
+     * are as follows, in this order:
+     *
+     * 1) If the install is being performed by a system app, we can trust the app to have set the
+     *    install reason correctly. Thus, we pass through the install reason unchanged, no matter
+     *    what it is.
+     * 2) If the install is being performed by a device or profile owner app, the install reason
+     *    should be enterprise policy. However, we cannot be sure that the device or profile owner
+     *    set the install reason correctly. If the app targets an older SDK version where install
+     *    reasons did not exist yet, or if the app author simply forgot, the install reason may be
+     *    unset or wrong. Thus, we force the install reason to be enterprise policy.
+     * 3) In all other cases, the install is being performed by a regular app that is neither part
+     *    of the system nor a device or profile owner. We have no reason to believe that this app is
+     *    acting on behalf of the enterprise admin. Thus, we check whether the install reason was
+     *    set to enterprise policy and if so, change it to unknown instead.
+     */
+    private int fixUpInstallReason(String installerPackageName, int installerUid,
+            int installReason) {
+        if (checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES, installerUid)
+                == PERMISSION_GRANTED) {
+            // If the install is being performed by a system app, we trust that app to have set the
+            // install reason correctly.
+            return installReason;
+        }
+
+        final IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
+            ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        if (dpm != null) {
+            ComponentName owner = null;
+            try {
+                owner = dpm.getDeviceOwnerComponent(true /* callingUserOnly */);
+                if (owner == null) {
+                    owner = dpm.getProfileOwner(UserHandle.getUserId(installerUid));
+                }
+            } catch (RemoteException e) {
+            }
+            if (owner != null && owner.getPackageName().equals(installerPackageName)) {
+                // If the install is being performed by a device or profile owner, the install
+                // reason should be enterprise policy.
+                return PackageManager.INSTALL_REASON_POLICY;
+            }
+        }
+
+        if (installReason == PackageManager.INSTALL_REASON_POLICY) {
+            // If the install is being performed by a regular app (i.e. neither system app nor
+            // device or profile owner), we have no reason to believe that the app is acting on
+            // behalf of an enterprise. If the app set the install reason to enterprise policy,
+            // change it to unknown instead.
+            return PackageManager.INSTALL_REASON_UNKNOWN;
+        }
+
+        // If the install is being performed by a regular app and the install reason was set to any
+        // value but enterprise policy, leave the install reason unchanged.
+        return installReason;
+    }
+
     void installStage(String packageName, File stagedDir, String stagedCid,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
@@ -12238,10 +12299,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
+        final int installReason = fixUpInstallReason(installerPackageName, installerUid,
+                sessionParams.installReason);
         final InstallParams params = new InstallParams(origin, null, observer,
                 sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
                 verificationInfo, user, sessionParams.abiOverride,
-                sessionParams.grantedRuntimePermissions, certificates, sessionParams.installReason);
+                sessionParams.grantedRuntimePermissions, certificates, installReason);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
