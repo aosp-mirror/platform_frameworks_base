@@ -3519,6 +3519,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mSecurityController != null) {
             mSecurityController.onUserSwitched(mCurrentUserId);
         }
+        if (mNetworkController != null) {
+            mNetworkController.onUserSwitched(mCurrentUserId);
+        }
     }
 
     private void resetUserSetupObserver() {
