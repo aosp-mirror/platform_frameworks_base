@@ -91,10 +91,6 @@ public class WorkLockActivity extends Activity {
         // Draw captions overlaid on the content view, so the whole window is one solid color.
         setOverlayWithDecorCaptionEnabled(true);
 
-        // Match task description to the task stack we are replacing so it's still recognizably the
-        // original task stack with the same icon and title text.
-        setTaskDescription(new TaskDescription(null, null, color));
-
         // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
         // redaction switched on.
         final View blankView = new View(this);
@@ -125,6 +121,11 @@ public class WorkLockActivity extends Activity {
     public void onBackPressed() {
         // Ignore back presses.
         return;
+    }
+
+    @Override
+    public void setTaskDescription(TaskDescription taskDescription) {
+        // Use the previous activity's task description.
     }
 
     private final BroadcastReceiver mLockEventReceiver = new BroadcastReceiver() {
