@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
+import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -114,6 +116,9 @@ public class UpstreamNetworkMonitorTest {
         mUNM.registerMobileNetworkRequest();
         assertTrue(mUNM.mobileNetworkRequested());
         assertEquals(1, mCM.requested.size());
+        assertEquals(1, mCM.legacyTypeMap.size());
+        assertEquals(Integer.valueOf(TYPE_MOBILE_HIPRI),
+                mCM.legacyTypeMap.values().iterator().next());
         assertFalse(mCM.isDunRequested());
 
         mUNM.stop();
@@ -137,6 +142,9 @@ public class UpstreamNetworkMonitorTest {
         mUNM.registerMobileNetworkRequest();
         assertTrue(mUNM.mobileNetworkRequested());
         assertEquals(1, mCM.requested.size());
+        assertEquals(1, mCM.legacyTypeMap.size());
+        assertEquals(Integer.valueOf(TYPE_MOBILE_DUN),
+                mCM.legacyTypeMap.values().iterator().next());
         assertTrue(mCM.isDunRequested());
 
         mUNM.stop();
@@ -148,6 +156,7 @@ public class UpstreamNetworkMonitorTest {
         public Set<NetworkCallback> trackingDefault = new HashSet<>();
         public Map<NetworkCallback, NetworkRequest> listening = new HashMap<>();
         public Map<NetworkCallback, NetworkRequest> requested = new HashMap<>();
+        public Map<NetworkCallback, Integer> legacyTypeMap = new HashMap<>();
 
         public TestConnectivityManager(Context ctx, IConnectivityManager svc) {
             super(ctx, svc);
@@ -156,7 +165,8 @@ public class UpstreamNetworkMonitorTest {
         boolean isEmpty() {
             return trackingDefault.isEmpty() &&
                    listening.isEmpty() &&
-                   requested.isEmpty();
+                   requested.isEmpty() &&
+                   legacyTypeMap.isEmpty();
         }
 
         boolean isListeningForDun() {
@@ -184,6 +194,17 @@ public class UpstreamNetworkMonitorTest {
         }
 
         @Override
+        public void requestNetwork(NetworkRequest req, NetworkCallback cb,
+                int timeoutMs, int legacyType) {
+            assertFalse(requested.containsKey(cb));
+            requested.put(cb, req);
+            assertFalse(legacyTypeMap.containsKey(cb));
+            if (legacyType != ConnectivityManager.TYPE_NONE) {
+                legacyTypeMap.put(cb, legacyType);
+            }
+        }
+
+        @Override
         public void registerNetworkCallback(NetworkRequest req, NetworkCallback cb) {
             assertFalse(listening.containsKey(cb));
             listening.put(cb, req);
@@ -203,6 +224,7 @@ public class UpstreamNetworkMonitorTest {
                 listening.remove(cb);
             } else if (requested.containsKey(cb)) {
                 requested.remove(cb);
+                legacyTypeMap.remove(cb);
             }
 
             assertFalse(trackingDefault.contains(cb));
