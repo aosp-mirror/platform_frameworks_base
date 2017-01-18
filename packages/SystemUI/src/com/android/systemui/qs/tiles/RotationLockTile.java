@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -106,6 +107,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         state.contentDescription = getAccessibilityString(rotationLocked);
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     public static boolean isCurrentOrientationLockPortrait(RotationLockController controller,

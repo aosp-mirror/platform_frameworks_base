@@ -56,7 +56,7 @@ public class QuickQSPanel extends QSPanel {
         }
         mTileLayout = new HeaderTileLayout(context);
         mTileLayout.setListening(mListening);
-        addView((View) mTileLayout, 1 /* Between brightness and footer */);
+        addView((View) mTileLayout, 0 /* Between brightness and footer */);
     }
 
     @Override
@@ -110,11 +110,6 @@ public class QuickQSPanel extends QSPanel {
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
-    }
-
-    @Override
-    protected void onTileClick(QSTile<?> tile) {
-        tile.secondaryClick();
     }
 
     @Override

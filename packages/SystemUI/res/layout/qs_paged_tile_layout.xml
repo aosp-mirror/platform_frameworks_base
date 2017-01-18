@@ -28,15 +28,6 @@
         android:layout_height="48dp"
         android:layout_gravity="bottom">
 
-        <com.android.systemui.qs.PageIndicator
-            android:id="@+id/page_indicator"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:importantForAccessibility="yes"
-            android:focusable="true" />
-
     </FrameLayout>
 
 </com.android.systemui.qs.PagedTileLayout>

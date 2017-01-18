@@ -23,30 +23,35 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height"
     android:layout_gravity="@integer/notification_panel_layout_gravity"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     android:baselineAligned="false"
     android:clickable="false"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingTop="0dp"
+    android:paddingEnd="0dp"
+    android:paddingStart="0dp"
     >
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:gravity="center"
+        android:layout_alignParentEnd="true"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp">
+        android:gravity="center"
+        android:paddingEnd="4dp"
+        android:orientation="horizontal">
 
-        <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+        <com.android.systemui.statusbar.phone.MultiUserSwitch
+            android:id="@+id/multi_user_switch"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
-            android:focusable="true"
-            android:background="@drawable/ripple_drawable" >
-            <ImageView android:id="@+id/multi_user_avatar"
+            android:background="@drawable/ripple_drawable"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/multi_user_avatar"
                 android:layout_width="@dimen/multi_user_avatar_expanded_size"
                 android:layout_height="@dimen/multi_user_avatar_expanded_size"
                 android:layout_gravity="center"
@@ -57,13 +62,42 @@
             android:id="@android:id/edit"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:clipToPadding="false"
-            android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/ic_mode_edit"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:clipToPadding="false"
             android:contentDescription="@string/accessibility_quick_settings_edit"
-            android:padding="14dp" />
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/ic_mode_edit"
+            android:tint="?android:attr/colorForeground"/>
+
+        <LinearLayout
+            android:id="@+id/system_icons_super_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/status_bar_header_height"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toStartOf="@id/multi_user_switch"
+            android:background="@drawable/ripple_drawable">
+
+            <FrameLayout
+                android:id="@+id/system_icons_container"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical">
+
+                <include layout="@layout/system_icons" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/battery_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/header_battery_margin_expanded"
+                android:importantForAccessibility="noHideDescendants"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/battery_level_text_size"/>
+        </LinearLayout>
 
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/settings_button_container"
@@ -78,16 +112,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_drawable"
+                android:contentDescription="@string/accessibility_quick_settings_settings"
                 android:src="@drawable/ic_settings_20dp"
-                android:contentDescription="@string/accessibility_quick_settings_settings" />
+                android:tint="?android:attr/colorForeground"/>
+
             <com.android.systemui.statusbar.AlphaOptimizedImageView
                 android:id="@+id/tuner_icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingStart="36dp"
-                android:alpha="0.3"
-                android:visibility="invisible"
-                android:src="@drawable/tuner" />
+                android:src="@drawable/tuner"
+                android:tint="?android:attr/textColorTertiary"
+                android:visibility="invisible"/>
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
@@ -106,23 +142,26 @@
 
     <TextView
         android:id="@+id/header_emergency_calls_only"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:paddingStart="16dp"
+        android:focusable="true"
+        android:gravity="center_vertical"
         android:paddingEnd="16dp"
         android:paddingTop="6dp"
-        android:visibility="gone"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
-        android:text="@*android:string/emergency_calls_only"
         android:singleLine="true"
-        android:gravity="center_vertical"
-        android:focusable="true" />
+        android:text="@*android:string/emergency_calls_only"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+        android:visibility="gone"/>
 
     <include
         android:id="@+id/date_time_alarm_group"
         layout="@layout/status_bar_alarm_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
@@ -130,38 +169,41 @@
         android:id="@+id/quick_qs_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
         android:layout_alignParentEnd="true"
+        android:layout_marginTop="54dp"
+        android:layout_marginBottom="24dp"
+        android:layout_alignParentTop="true"
+        android:accessibilityTraversalAfter="@+id/date_time_group"
+        android:accessibilityTraversalBefore="@id/expand_indicator"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:importantForAccessibility="yes"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:focusable="true"
-        android:accessibilityTraversalAfter="@+id/date_time_group"
-        android:accessibilityTraversalBefore="@id/expand_indicator" />
+        android:importantForAccessibility="yes"
+        android:paddingTop="0dp"/>
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
-        android:src="@drawable/indeterminate_anim"
-        android:alpha="0"
-        android:background="@color/qs_detail_progress_track"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:src="@drawable/indeterminate_anim"
         />
 
     <TextView
         android:id="@+id/header_debug_info"
-        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:fontFamily="sans-serif-condensed"
+        android:padding="2dp"
+        android:textColor="#00A040"
         android:textSize="11dp"
         android:textStyle="bold"
-        android:textColor="#00A040"
-        android:padding="2dp"
+        android:visibility="invisible"
         />
 
 </com.android.systemui.statusbar.phone.QuickStatusBarHeader>

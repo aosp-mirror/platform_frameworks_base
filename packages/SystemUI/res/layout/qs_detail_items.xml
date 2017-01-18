@@ -43,7 +43,8 @@
         <ImageView
             android:id="@android:id/icon"
             android:layout_width="56dp"
-            android:layout_height="56dp"/>
+            android:layout_height="56dp"
+            android:tint="?android:attr/textColorSecondary" />
 
         <TextView
             android:id="@android:id/title"

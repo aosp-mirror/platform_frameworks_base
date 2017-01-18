@@ -17,9 +17,7 @@ Copyright (C) 2015 The Android Open Source Project
     android:height="64dp"
     android:viewportHeight="24.0"
     android:viewportWidth="24.0"
-    android:alpha=".3"
-    android:width="64dp"
-    android:tint="?android:attr/colorControlNormal" >
+    android:width="64dp" >
 
     <path
         android:fillColor="#FFFFFFFF"

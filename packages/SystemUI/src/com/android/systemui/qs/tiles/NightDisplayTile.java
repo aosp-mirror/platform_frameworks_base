@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.app.NightDisplayController;
@@ -81,6 +82,7 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
                 : R.drawable.ic_qs_night_display_off);
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName =
                 Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

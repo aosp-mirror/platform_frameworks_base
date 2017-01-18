@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.service.quicksettings.Tile;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
+        mDataController.setMobileDataEnabled(!mDataController.isMobileDataEnabled());
+    }
+
+    @Override
+    protected void handleSecondaryClick() {
         MetricsLogger.action(mContext, getMetricsCategory());
         if (mDataController.isMobileDataSupported()) {
             showDetail(true);
@@ -111,10 +117,13 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 : !cb.enabled || cb.airplaneModeEnabled ? R.drawable.ic_qs_signal_disabled
                 : cb.mobileSignalIconId > 0 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
-        state.icon = ResourceIcon.get(iconId);
+        if (cb.dataTypeIconId != 0) {
+            state.icon = ResourceIcon.get(cb.dataTypeIconId);
+        } else {
+            state.icon = ResourceIcon.get(iconId);
+        }
         state.isOverlayIconWide = cb.isDataTypeIconWide;
         state.autoMirrorDrawable = !cb.noSim;
-        state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) ? cb.dataTypeIconId : 0;
         state.filter = iconId != R.drawable.ic_qs_no_sim;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
@@ -148,6 +157,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 = Button.class.getName();
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

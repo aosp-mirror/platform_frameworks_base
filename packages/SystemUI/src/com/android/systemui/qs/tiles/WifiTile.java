@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,7 +105,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
@@ -112,7 +113,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleSecondaryClick() {
         if (!mWifiController.canConfigWifi()) {
             mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;
@@ -191,6 +192,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         state.dualLabelContentDescription = wifiName;
         state.expandedAccessibilityClassName = Button.class.getName();
         state.minimalAccessibilityClassName = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

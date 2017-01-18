@@ -32,7 +32,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
@@ -126,11 +125,6 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         boolean wasAirplane = state.isAirplaneMode;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
         if (state.isAirplaneMode) {
-            final int disabledColor = TileColorPicker.getInstance(mContext)
-                    .getColor(Tile.STATE_UNAVAILABLE);
-            state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(disabledColor),
-                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
             state.icon = mUnavailable;
         } else if (wasAirplane) {
             state.icon = mDisableNoAnimation;
@@ -138,6 +132,8 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
         state.contentDescription = state.label;
+        state.state = state.isAirplaneMode ? Tile.STATE_UNAVAILABLE
+                : state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

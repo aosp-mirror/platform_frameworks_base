@@ -164,7 +164,7 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">104dp</dimen>
+    <dimen name="status_bar_header_height">126dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">116dp</dimen>
@@ -204,8 +204,8 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
-    <dimen name="qs_tile_height">88dp</dimen>
-    <dimen name="qs_tile_margin">16dp</dimen>
+    <dimen name="qs_tile_height">80dp</dimen>
+    <dimen name="qs_tile_margin">36dp</dimen>
     <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
@@ -421,7 +421,7 @@
     <dimen name="qs_time_collapsed_size">14sp</dimen>
 
     <!-- The font size of the time when expanded in QS -->
-    <dimen name="qs_time_expanded_size">20sp</dimen>
+    <dimen name="qs_time_expanded_size">14sp</dimen>
 
     <!-- The font size of the "emergency calls only" label in QS -->
     <dimen name="qs_emergency_calls_only_text_size">12sp</dimen>

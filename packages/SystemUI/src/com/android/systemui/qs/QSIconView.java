@@ -16,14 +16,20 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.QSTile.getColorForState;
+
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -34,6 +40,8 @@ public class QSIconView extends ViewGroup {
     protected final int mIconSizePx;
     protected final int mTilePaddingBelowIconPx;
     private boolean mAnimationEnabled = true;
+    private int mState = -1;
+    private int mTint;
 
     public QSIconView(Context context) {
         super(context);
@@ -65,7 +73,6 @@ public class QSIconView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
-        final int h = getMeasuredHeight();
         int top = 0;
         final int iconLeft = (w - mIcon.getMeasuredWidth()) / 2;
         layout(mIcon, iconLeft, top);
@@ -100,7 +107,42 @@ public class QSIconView extends ViewGroup {
         } else {
             iv.clearColorFilter();
         }
+        if (state.state != mState) {
+            int color = getColorForState(getContext(), state.state);
+            mState = state.state;
+            if (iv.isShown()) {
+                animateGrayScale(mTint, color, iv);
+                mTint = color;
+            } else {
+                setTint(iv, color);
+                mTint = color;
+            }
+        }
     }
+
+    public static void animateGrayScale(int fromColor, int toColor, ImageView iv) {
+        final float fromAlpha = Color.alpha(fromColor);
+        final float toAlpha = Color.alpha(toColor);
+        final float fromChannel = Color.red(fromColor);
+        final float toChannel = Color.red(toColor);
+
+        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+        anim.setDuration(350);
+
+        anim.addUpdateListener(animation -> {
+            float fraction = animation.getAnimatedFraction();
+            int alpha = (int) (fromAlpha + (toAlpha - fromAlpha) * fraction);
+            int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
+
+            setTint(iv, Color.argb(alpha, channel, channel, channel));
+        });
+        anim.start();
+    }
+
+    public static void setTint(ImageView iv, int color) {
+        iv.setImageTintList(ColorStateList.valueOf(color));
+    }
+
 
     protected int getIconMeasureMode() {
         return MeasureSpec.EXACTLY;

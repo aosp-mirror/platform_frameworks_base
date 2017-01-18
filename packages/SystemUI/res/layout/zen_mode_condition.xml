@@ -63,6 +63,7 @@
         android:scaleType="center"
         android:layout_toStartOf="@android:id/button2"
         android:contentDescription="@string/accessibility_quick_settings_less_time"
+        android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_qs_minus" />
 
     <ImageView
@@ -75,6 +76,7 @@
         android:scaleType="center"
         android:layout_centerVertical="true"
         android:contentDescription="@string/accessibility_quick_settings_more_time"
+        android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_qs_plus" />
 
 </RelativeLayout>

@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.service.quicksettings.Tile;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -52,7 +53,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.android.settingslib.Utils;
+
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+
+import com.android.systemui.R;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
@@ -79,7 +84,9 @@ public abstract class QSTile<TState extends State> {
     private String mTileSpec;
 
     public abstract TState newTileState();
+
     abstract protected void handleClick();
+
     abstract protected void handleUpdateState(TState state, Object arg);
 
     /**
@@ -134,7 +141,9 @@ public abstract class QSTile<TState extends State> {
         return null; // optional
     }
 
-    protected DetailAdapter createDetailAdapter() { throw new UnsupportedOperationException(); }
+    protected DetailAdapter createDetailAdapter() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Is a startup check whether this device currently supports this tile.
@@ -318,6 +327,21 @@ public abstract class QSTile<TState extends State> {
     }
 
     public abstract CharSequence getTileLabel();
+
+    public static int getColorForState(Context context, int state) {
+        switch (state) {
+            case Tile.STATE_UNAVAILABLE:
+                return Utils.getDisabled(context,
+                        Utils.getColorAttr(context, android.R.attr.textColorTertiary));
+            case Tile.STATE_INACTIVE:
+                return Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+            case Tile.STATE_ACTIVE:
+                return Utils.getColorAttr(context, android.R.attr.colorPrimary);
+            default:
+                Log.e("QSTile", "Invalid state " + state);
+                return 0;
+        }
+    }
 
     protected final class H extends Handler {
         private static final int ADD_CALLBACK = 1;
@@ -546,6 +570,7 @@ public abstract class QSTile<TState extends State> {
 
     public static class State {
         public Icon icon;
+        public int state = Tile.STATE_ACTIVE;
         public CharSequence label;
         public CharSequence contentDescription;
         public CharSequence dualLabelContentDescription;
@@ -572,6 +597,7 @@ public abstract class QSTile<TState extends State> {
                     || !Objects.equals(other.expandedAccessibilityClassName,
                     expandedAccessibilityClassName)
                     || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
+                    || !Objects.equals(other.state, state)
                     || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
             other.icon = icon;
             other.label = label;
@@ -582,6 +608,7 @@ public abstract class QSTile<TState extends State> {
             other.expandedAccessibilityClassName = expandedAccessibilityClassName;
             other.autoMirrorDrawable = autoMirrorDrawable;
             other.disabledByPolicy = disabledByPolicy;
+            other.state = state;
             if (enforcedAdmin == null) {
                 other.enforcedAdmin = null;
             } else if (other.enforcedAdmin == null) {
@@ -609,6 +636,7 @@ public abstract class QSTile<TState extends State> {
             sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",enforcedAdmin=").append(enforcedAdmin);
+            sb.append(",state=").append(state);
             return sb.append(']');
         }
     }
@@ -648,7 +676,6 @@ public abstract class QSTile<TState extends State> {
         public boolean connected;
         public boolean activityIn;
         public boolean activityOut;
-        public int overlayIconId;
         public boolean filter;
         public boolean isOverlayIconWide;
 
@@ -657,12 +684,10 @@ public abstract class QSTile<TState extends State> {
             final SignalState o = (SignalState) other;
             final boolean changed = o.connected != connected || o.activityIn != activityIn
                     || o.activityOut != activityOut
-                    || o.overlayIconId != overlayIconId
                     || o.isOverlayIconWide != isOverlayIconWide;
             o.connected = connected;
             o.activityIn = activityIn;
             o.activityOut = activityOut;
-            o.overlayIconId = overlayIconId;
             o.filter = filter;
             o.isOverlayIconWide = isOverlayIconWide;
             return super.copyTo(other) || changed;
@@ -674,7 +699,6 @@ public abstract class QSTile<TState extends State> {
             rt.insert(rt.length() - 1, ",connected=" + connected);
             rt.insert(rt.length() - 1, ",activityIn=" + activityIn);
             rt.insert(rt.length() - 1, ",activityOut=" + activityOut);
-            rt.insert(rt.length() - 1, ",overlayIconId=" + overlayIconId);
             rt.insert(rt.length() - 1, ",filter=" + filter);
             rt.insert(rt.length() - 1, ",wideOverlayIcon=" + isOverlayIconWide);
             return rt;

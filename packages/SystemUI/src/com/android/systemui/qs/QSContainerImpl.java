@@ -18,18 +18,12 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QS.HeightListener;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.statusbar.phone.QuickStatusBarHeader;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -95,7 +89,7 @@ public class QSContainerImpl extends FrameLayout {
         updateBottom();
     }
 
-    void updateBottom() {
+    public void updateBottom() {
         int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);

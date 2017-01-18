@@ -292,12 +292,16 @@ public class BatteryMeterDrawable extends Drawable implements
         }
         int backgroundColor = getBackgroundColor(darkIntensity);
         int fillColor = getFillColor(darkIntensity);
+        setColors(fillColor, backgroundColor);
+        mOldDarkIntensity = darkIntensity;
+    }
+
+    public void setColors(int fillColor, int backgroundColor) {
         mIconTint = fillColor;
         mFramePaint.setColor(backgroundColor);
         mBoltPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidateSelf();
-        mOldDarkIntensity = darkIntensity;
     }
 
     private int getBackgroundColor(float darkIntensity) {

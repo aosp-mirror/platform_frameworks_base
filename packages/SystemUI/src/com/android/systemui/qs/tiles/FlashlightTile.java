@@ -29,7 +29,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
 /** Quick settings tile: Control flashlight **/
@@ -47,11 +46,13 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     public FlashlightTile(Host host) {
         super(host);
         mFlashlightController = host.getFlashlightController();
+        mFlashlightController.addCallback(this);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
+        mFlashlightController.removeCallback(this);
     }
 
     @Override
@@ -107,17 +108,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (!mFlashlightController.isAvailable()) {
-            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable)
+            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_enable)
                     .mutate();
-            final int disabledColor = TileColorPicker.getInstance(mContext)
-                    .getColor(Tile.STATE_UNAVAILABLE);
-            icon.setTint(disabledColor);
             state.icon = new DrawableIcon(icon);
-            state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(disabledColor),
-                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_flashlight_unavailable);
+            state.state = Tile.STATE_UNAVAILABLE;
             return;
         }
         if (arg instanceof Boolean) {
@@ -134,6 +130,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         state.contentDescription = mContext.getString(R.string.quick_settings_flashlight_label);
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }
 
     @Override

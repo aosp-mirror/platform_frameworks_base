@@ -19,10 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -44,7 +41,6 @@ import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.external.TileColorPicker;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 
@@ -105,6 +101,11 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
 
     @Override
     protected void handleClick() {
+        mBatteryController.setPowerSaveMode(!mPowerSave);
+    }
+
+    @Override
+    protected void handleSecondaryClick() {
         showDetail(true);
     }
 
@@ -118,26 +119,10 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         int level = (arg != null) ? (Integer) arg : mLevel;
         String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
 
-        state.icon = new Icon() {
-            @Override
-            public Drawable getDrawable(Context context) {
-                BatteryMeterDrawable drawable =
-                        new BatteryMeterDrawable(context,
-                        context.getColor(R.color.batterymeter_frame_color));
-                drawable.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
-                drawable.onPowerSaveChanged(mPowerSave);
-                final int color = TileColorPicker.getInstance(context).getColor(Tile.STATE_ACTIVE);
-                drawable.setColorFilter(new PorterDuffColorFilter(color, Mode.SRC_IN));
-                return drawable;
-            }
-
-            @Override
-            public int getPadding() {
-                return mHost.getContext().getResources().getDimensionPixelSize(
-                        R.dimen.qs_battery_padding);
-            }
-        };
-        state.label = percentage;
+        state.state = mCharging ? Tile.STATE_UNAVAILABLE
+                : mPowerSave ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.icon = ResourceIcon.get(R.drawable.ic_qs_battery_saver);
+        state.label = mContext.getString(R.string.battery_detail_switch_title);
         state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_battery,
                 percentage) + "," +
                 (mPowerSave ? mContext.getString(R.string.battery_saver_notification_title)
@@ -153,7 +138,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         mLevel = level;
         mPluggedIn = pluggedIn;
         mCharging = charging;
-        refreshState((Integer) level);
+        refreshState(level);
         if (mDetailShown) {
             mBatteryDetail.postBindView();
         }
@@ -213,11 +198,6 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             mDrawable.onBatteryLevelChanged(100, false, false);
             mDrawable.onPowerSaveChanged(true);
             mDrawable.disableShowPercent();
-
-            final int color = TileColorPicker.getInstance(mCurrentView.getContext())
-                    .getColor(Tile.STATE_ACTIVE);
-            mDrawable.setColorFilter(new PorterDuffColorFilter(color, Mode.SRC_IN));
-
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);
