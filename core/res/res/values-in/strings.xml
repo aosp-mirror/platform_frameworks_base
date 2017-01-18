@@ -1671,4 +1671,20 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> dinonaktifkan"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferensi Telepon"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Keterangan alat"</string>
+    <!-- no translation found for app_category_game (5431836943981492993) -->
+    <skip />
+    <!-- no translation found for app_category_audio (1659853108734301647) -->
+    <skip />
+    <!-- no translation found for app_category_video (2728726078629384196) -->
+    <skip />
+    <!-- no translation found for app_category_image (4867854544519846048) -->
+    <skip />
+    <!-- no translation found for app_category_social (5842783057834965912) -->
+    <skip />
+    <!-- no translation found for app_category_news (7496506240743986873) -->
+    <skip />
+    <!-- no translation found for app_category_maps (5878491404538024367) -->
+    <skip />
+    <!-- no translation found for app_category_productivity (3742083261781538852) -->
+    <skip />
 </resources>
