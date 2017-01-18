@@ -2091,11 +2091,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                         final View child =
                                 getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                        final PointF point = getLocalPoint();
-                        if (isTransformedTouchPointInView(x, y, child, point)) {
-                            if (dispatchTooltipHoverEvent(event, child)) {
-                                newTarget = child;
-                            }
+                        if (!canViewReceivePointerEvents(child)
+                                || !isTransformedTouchPointInView(x, y, child, null)) {
+                            continue;
+                        }
+                        if (dispatchTooltipHoverEvent(event, child)) {
+                            newTarget = child;
                             break;
                         }
                     }
