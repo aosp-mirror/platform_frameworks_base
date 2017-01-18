@@ -1788,15 +1788,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = childrenCount - 1; i >= 0; i--) {
                 final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                 final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
-                final PointF point = getLocalPoint();
-                if (isTransformedTouchPointInView(x, y, child, point)) {
-                    final PointerIcon pointerIcon =
-                            dispatchResolvePointerIcon(event, pointerIndex, child);
-                    if (pointerIcon != null) {
-                        if (preorderedList != null) preorderedList.clear();
-                        return pointerIcon;
-                    }
-                    break;
+                if (!canViewReceivePointerEvents(child)
+                        || !isTransformedTouchPointInView(x, y, child, null)) {
+                    continue;
+                }
+                final PointerIcon pointerIcon =
+                        dispatchResolvePointerIcon(event, pointerIndex, child);
+                if (pointerIcon != null) {
+                    if (preorderedList != null) preorderedList.clear();
+                    return pointerIcon;
                 }
             }
             if (preorderedList != null) preorderedList.clear();
