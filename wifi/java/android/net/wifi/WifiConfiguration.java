@@ -22,6 +22,7 @@ import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -1812,14 +1813,48 @@ public class WifiConfiguration implements Parcelable {
         mIpConfiguration.proxySettings = proxySettings;
     }
 
-    /** @hide */
+    /**
+     * Returns the HTTP proxy used by this object.
+     * @return a {@link ProxyInfo httpProxy} representing the proxy specified by this
+     *                  WifiConfiguration, or {@code null} if no proxy is specified.
+     */
     public ProxyInfo getHttpProxy() {
-        return mIpConfiguration.httpProxy;
+        if (mIpConfiguration.proxySettings == IpConfiguration.ProxySettings.NONE) {
+            return null;
+        }
+        return new ProxyInfo(mIpConfiguration.httpProxy);
     }
 
-    /** @hide */
+    /**
+     * Set the {@link ProxyInfo} for this WifiConfiguration.
+     * @param httpProxy {@link ProxyInfo} representing the httpProxy to be used by this
+     *                  WifiConfiguration. Setting this {@code null} will explicitly set no proxy,
+     *                  removing any proxy that was previously set.
+     * @exception throw IllegalArgumentException for invalid httpProxy
+     */
     public void setHttpProxy(ProxyInfo httpProxy) {
-        mIpConfiguration.httpProxy = httpProxy;
+        if (httpProxy == null) {
+            mIpConfiguration.setProxySettings(IpConfiguration.ProxySettings.NONE);
+            mIpConfiguration.setHttpProxy(null);
+            return;
+        }
+        ProxyInfo httpProxyCopy;
+        ProxySettings proxySettingCopy;
+        if (!Uri.EMPTY.equals(httpProxy.getPacFileUrl())) {
+            proxySettingCopy = IpConfiguration.ProxySettings.PAC;
+            // Construct a new PAC URL Proxy
+            httpProxyCopy = new ProxyInfo(httpProxy.getPacFileUrl(), httpProxy.getPort());
+        } else {
+            proxySettingCopy = IpConfiguration.ProxySettings.STATIC;
+            // Construct a new HTTP Proxy
+            httpProxyCopy = new ProxyInfo(httpProxy.getHost(), httpProxy.getPort(),
+                    httpProxy.getExclusionListAsString());
+        }
+        if (!httpProxyCopy.isValid()) {
+            throw new IllegalArgumentException("Invalid ProxyInfo: " + httpProxyCopy.toString());
+        }
+        mIpConfiguration.setProxySettings(proxySettingCopy);
+        mIpConfiguration.setHttpProxy(httpProxyCopy);
     }
 
     /** @hide */

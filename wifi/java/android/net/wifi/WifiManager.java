@@ -791,6 +791,8 @@ public class WifiManager {
      *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.
+     *            If the {@link WifiConfiguration} has an Http Proxy set
+     *            the calling app must be System, or be provisioned as the Profile or Device Owner.
      * @return the ID of the newly created network description. This is used in
      *         other operations to specified the network to be acted upon.
      *         Returns {@code -1} on failure.
@@ -811,6 +813,8 @@ public class WifiManager {
      *            be sparse, so that only the items that are being changed
      *            are non-<code>null</code>. The {@code networkId} field
      *            must be set to the ID of the existing network being updated.
+     *            If the {@link WifiConfiguration} has an Http Proxy set
+     *            the calling app must be System, or be provisioned as the Profile or Device Owner.
      * @return Returns the {@code networkId} of the supplied
      *         {@code WifiConfiguration} on success.
      *         <br/>
