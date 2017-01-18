@@ -1462,7 +1462,11 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     PointerIcon pointerIcon;
-    android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
+    status_t result = android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
+    if (result) {
+        jniThrowRuntimeException(env, "Failed to load custom pointer icon.");
+        return;
+    }
 
     SpriteIcon spriteIcon;
     pointerIcon.bitmap.copyTo(&spriteIcon.bitmap, kN32_SkColorType);
