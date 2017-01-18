@@ -25,8 +25,8 @@ LOCAL_JAVA_LIBRARIES := \
     android.hardware.tv.cec@1.0-java
 
 LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update2 \
-    android.hidl.base@1.0-java \
-    android.hardware.biometrics.fingerprint@2.1-java \
+    android.hidl.base@1.0-java-static \
+    android.hardware.biometrics.fingerprint@2.1-java-static \
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
