@@ -2018,21 +2018,32 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 writer.println("  time since enabled: " + onDurationString + "\n");
             }
 
-            writer.println("Enable log:");
-            for (ActiveLog log : mActiveLogs) {
-                writer.println(log);
+            if (mActiveLogs.size() == 0) {
+                writer.println("Bluetooth never enabled!");
+            } else {
+                writer.println("Enable log:");
+                for (ActiveLog log : mActiveLogs) {
+                    writer.println("  " + log);
+                }
             }
 
-            writer.println("\n" + mBleApps.size() + " BLE Apps registered:");
+            String bleAppString = "No BLE Apps registered.";
+            if (mBleApps.size() == 1) {
+                bleAppString = "1 BLE App registered:";
+            } else if (mBleApps.size() > 1) {
+                bleAppString = mBleApps.size() + " BLE Apps registered:";
+            }
+            writer.println("\n" + bleAppString);
             for (ClientDeathRecipient app : mBleApps.values()) {
-                writer.println(app.getPackageName());
+                writer.println("  " + app.getPackageName());
             }
 
+            writer.println("");
             writer.flush();
             if (args.length == 0) {
-              // Add arg to produce output
-              args = new String[1];
-              args[0] = "--print";
+                // Add arg to produce output
+                args = new String[1];
+                args[0] = "--print";
             }
         }
 
