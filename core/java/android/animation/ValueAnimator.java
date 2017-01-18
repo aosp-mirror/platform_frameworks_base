@@ -24,6 +24,7 @@ import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 
@@ -67,7 +68,7 @@ import java.util.HashMap;
  * </div>
  */
 @SuppressWarnings("unchecked")
-public class ValueAnimator extends Animator implements AnimationHandler.AnimationFrameCallback {
+public class ValueAnimator extends Animator {
     private static final String TAG = "ValueAnimator";
     private static final boolean DEBUG = false;
 
@@ -90,7 +91,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      *
      * Whenever mStartTime is set, you must also update mStartTimeCommitted.
      */
-    long mStartTime;
+    long mStartTime = -1;
 
     /**
      * When true, the start time has been firmly committed as a chosen reference point in
@@ -152,7 +153,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * Tracks the time (in milliseconds) when the last frame arrived.
      */
-    private long mLastFrameTime = 0;
+    private long mLastFrameTime = -1;
+
+    /**
+     * Tracks the time (in milliseconds) when the first frame arrived. Note the frame may arrive
+     * during the start delay.
+     */
+    private long mFirstFrameTime = -1;
 
     /**
      * Additional playing state to indicate whether an animator has been start()'d. There is
@@ -210,6 +217,12 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * will reverse directions on each iteration.
      */
     private int mRepeatMode = RESTART;
+
+    /**
+     * Whether or not the animator should register for its own animation callback to receive
+     * animation pulse.
+     */
+    private boolean mSelfPulse = true;
 
     /**
      * The time interpolator to be used. The elapsed fraction of the animation will be passed
@@ -628,7 +641,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             mSeekFraction = fraction;
         }
         mOverallFraction = fraction;
-        final float currentIterationFraction = getCurrentIterationFraction(fraction);
+        final float currentIterationFraction = getCurrentIterationFraction(fraction, mReversing);
         animateValue(currentIterationFraction);
     }
 
@@ -654,11 +667,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * should be played backwards. E.g. When the animation is played backwards in an iteration,
      * the fraction for that iteration will go from 1f to 0f.
      */
-    private float getCurrentIterationFraction(float fraction) {
+    private float getCurrentIterationFraction(float fraction, boolean inReverse) {
         fraction = clampFraction(fraction);
         int iteration = getCurrentIteration(fraction);
         float currentFraction = fraction - iteration;
-        return shouldPlayBackward(iteration) ? 1f - currentFraction : currentFraction;
+        return shouldPlayBackward(iteration, inReverse) ? 1f - currentFraction : currentFraction;
     }
 
     /**
@@ -682,18 +695,18 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * whether the entire animation is being reversed, 2) repeat mode applied to the current
      * iteration.
      */
-    private boolean shouldPlayBackward(int iteration) {
+    private boolean shouldPlayBackward(int iteration, boolean inReverse) {
         if (iteration > 0 && mRepeatMode == REVERSE &&
                 (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
             // if we were seeked to some other iteration in a reversing animator,
             // figure out the correct direction to start playing based on the iteration
-            if (mReversing) {
+            if (inReverse) {
                 return (iteration % 2) == 0;
             } else {
                 return (iteration % 2) != 0;
             }
         } else {
-            return mReversing;
+            return inReverse;
         }
     }
 
@@ -965,7 +978,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this);
+                tmpListeners.get(i).onAnimationStart(this, mReversing);
             }
         }
         mStartListenersCalled = true;
@@ -984,11 +997,12 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      *
      * @param playBackwards Whether the ValueAnimator should start playing in reverse.
      */
-    private void start(boolean playBackwards) {
+    private void start(boolean playBackwards, boolean selfPulse) {
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         mReversing = playBackwards;
+        mSelfPulse = selfPulse;
         // Special case: reversing from seek-to-0 should act as if not seeked at all.
         if (playBackwards && mSeekFraction != -1 && mSeekFraction != 0) {
             if (mRepeatCount == INFINITE) {
@@ -1006,11 +1020,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         // Resets mLastFrameTime when start() is called, so that if the animation was running,
         // calling start() would put the animation in the
         // started-but-not-yet-reached-the-first-frame phase.
-        mLastFrameTime = 0;
-        AnimationHandler animationHandler = AnimationHandler.getInstance();
-        animationHandler.addAnimationFrameCallback(this, (long) (mStartDelay * sDurationScale));
+        mLastFrameTime = -1;
+        mFirstFrameTime = -1;
+        addAnimationCallback((long) (mStartDelay * sDurationScale));
 
-        if (mStartDelay == 0 || mSeekFraction >= 0) {
+        if (mStartDelay == 0 || mSeekFraction >= 0 || mReversing) {
             // If there's no start delay, init the animation and notify start listeners right away
             // to be consistent with the previous behavior. Otherwise, postpone this until the first
             // frame after the start delay.
@@ -1026,9 +1040,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
     }
 
+    void startWithoutPulsing(boolean inReverse) {
+        start(inReverse, false);
+    }
+
     @Override
     public void start() {
-        start(false);
+        start(false, true);
     }
 
     @Override
@@ -1073,7 +1091,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         } else if (!mInitialized) {
             initAnimation();
         }
-        animateValue(shouldPlayBackward(mRepeatCount) ? 0f : 1f);
+        animateValue(shouldPlayBackward(mRepeatCount, mReversing) ? 0f : 1f);
         endAnimation();
     }
 
@@ -1086,8 +1104,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mPaused && !mResumed) {
             mResumed = true;
             if (mPauseTime > 0) {
-                AnimationHandler handler = AnimationHandler.getInstance();
-                handler.addAnimationFrameCallback(this, 0);
+                addAnimationCallback(0);
             }
         }
         super.resume();
@@ -1133,7 +1150,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             mReversing = !mReversing;
             end();
         } else {
-            start(true);
+            start(true, true);
         }
     }
 
@@ -1153,8 +1170,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mAnimationEndRequested) {
             return;
         }
-        AnimationHandler handler = AnimationHandler.getInstance();
-        handler.removeCallback(this);
+        removeAnimationCallback();
 
         mAnimationEndRequested = true;
         mPaused = false;
@@ -1166,16 +1182,18 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mRunning = false;
         mStarted = false;
         mStartListenersCalled = false;
+        mLastFrameTime = -1;
+        mFirstFrameTime = -1;
         mReversing = false;
-        mLastFrameTime = 0;
         if (notify && mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationEnd(this);
+                tmpListeners.get(i).onAnimationEnd(this, mReversing);
             }
         }
+        mReversing = false;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
@@ -1211,7 +1229,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * is called (or after start delay if any), which may be before the animation loop starts.
      */
     private boolean isPulsingInternal() {
-        return mLastFrameTime > 0;
+        return mLastFrameTime >= 0;
     }
 
     /**
@@ -1276,10 +1294,74 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 done = true;
             }
             mOverallFraction = clampFraction(fraction);
-            float currentIterationFraction = getCurrentIterationFraction(mOverallFraction);
+            float currentIterationFraction = getCurrentIterationFraction(
+                    mOverallFraction, mReversing);
             animateValue(currentIterationFraction);
         }
         return done;
+    }
+
+    /**
+     * Internal use only.
+     *
+     * This method does not modify any fields of the animation. It should be called when seeking
+     * in an AnimatorSet. When the last play time and current play time are of different repeat
+     * iterations,
+     * {@link android.view.animation.Animation.AnimationListener#onAnimationRepeat(Animation)}
+     * will be called.
+     */
+    @Override
+    void animateBasedOnPlayTime(long currentPlayTime, long lastPlayTime, boolean inReverse) {
+        if (currentPlayTime < 0 || lastPlayTime < 0) {
+            throw new UnsupportedOperationException("Error: Play time should never be negative.");
+        }
+
+        initAnimation();
+        // Check whether repeat callback is needed only when repeat count is non-zero
+        if (mRepeatCount > 0) {
+            int iteration = (int) (currentPlayTime / mDuration);
+            int lastIteration = (int) (lastPlayTime / mDuration);
+
+            // Clamp iteration to [0, mRepeatCount]
+            iteration = Math.min(iteration, mRepeatCount);
+            lastIteration = Math.min(lastIteration, mRepeatCount);
+
+            if (iteration != lastIteration) {
+                if (mListeners != null) {
+                    int numListeners = mListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        mListeners.get(i).onAnimationRepeat(this);
+                    }
+                }
+            }
+        }
+
+        if (mRepeatCount != INFINITE && currentPlayTime >= (mRepeatCount + 1) * mDuration) {
+            skipToEndValue(inReverse);
+        } else {
+            // Find the current fraction:
+            float fraction = currentPlayTime / (float) mDuration;
+            fraction = getCurrentIterationFraction(fraction, inReverse);
+            animateValue(fraction);
+        }
+    }
+
+    /**
+     * Internal use only.
+     * Skips the animation value to end/start, depending on whether the play direction is forward
+     * or backward.
+     *
+     * @param inReverse whether the end value is based on a reverse direction. If yes, this is
+     *                  equivalent to skip to start value in a forward playing direction.
+     */
+    void skipToEndValue(boolean inReverse) {
+        initAnimation();
+        float endFraction = inReverse ? 0f : 1f;
+        if (mRepeatCount % 2 == 1 && mRepeatMode == REVERSE) {
+            // This would end on fraction = 0
+            endFraction = 0f;
+        }
+        animateValue(endFraction);
     }
 
     /**
@@ -1289,11 +1371,39 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * @return true if the animation has ended.
      * @hide
      */
-    public final void doAnimationFrame(long frameTime) {
-        AnimationHandler handler = AnimationHandler.getInstance();
-        if (mLastFrameTime == 0) {
+    public final boolean doAnimationFrame(long frameTime) {
+        if (!mRunning && mStartTime < 0) {
+            // First frame during delay
+            mStartTime = frameTime + mStartDelay;
+        }
+
+        // Handle pause/resume
+        if (mPaused) {
+            mPauseTime = frameTime;
+            removeAnimationCallback();
+            return false;
+        } else if (mResumed) {
+            mResumed = false;
+            if (mPauseTime > 0) {
+                // Offset by the duration that the animation was paused
+                mStartTime += (frameTime - mPauseTime);
+            }
+        }
+
+        if (!mRunning) {
+            // If not running, that means the animation is in the start delay phase. In the case of
+            // reversing, we want to run start delay in the end.
+            if (mStartTime > frameTime) {
+                // During start delay
+                return false;
+            } else {
+                // Start delay has passed.
+                mRunning = true;
+            }
+        }
+
+        if (mLastFrameTime < 0) {
             // First frame
-            handler.addOneShotCommitCallback(this);
             if (mStartDelay > 0) {
                 startAnimation();
             }
@@ -1307,19 +1417,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             mStartTimeCommitted = false; // allow start time to be compensated for jank
         }
         mLastFrameTime = frameTime;
-        if (mPaused) {
-            mPauseTime = frameTime;
-            handler.removeCallback(this);
-            return;
-        } else if (mResumed) {
-            mResumed = false;
-            if (mPauseTime > 0) {
-                // Offset by the duration that the animation was paused
-                mStartTime += (frameTime - mPauseTime);
-                mStartTimeCommitted = false; // allow start time to be compensated for jank
-            }
-            handler.addOneShotCommitCallback(this);
-        }
         // The frame time might be before the start time during the first frame of
         // an animation.  The "current time" must always be on or after the start
         // time to avoid animating frames at negative time intervals.  In practice, this
@@ -1330,6 +1427,31 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (finished) {
             endAnimation();
         }
+        return finished;
+    }
+
+    private void addOneShotCommitCallback() {
+        if (!mSelfPulse) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.addOneShotCommitCallback(this);
+    }
+
+    private void removeAnimationCallback() {
+        if (!mSelfPulse) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.removeCallback(this);
+    }
+
+    private void addAnimationCallback(long delay) {
+        if (!mSelfPulse) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.addAnimationFrameCallback(this, delay);
     }
 
     /**
@@ -1384,11 +1506,12 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         anim.mPaused = false;
         anim.mResumed = false;
         anim.mStartListenersCalled = false;
-        anim.mStartTime = 0;
+        anim.mStartTime = -1;
         anim.mStartTimeCommitted = false;
         anim.mAnimationEndRequested = false;
-        anim.mPauseTime = 0;
-        anim.mLastFrameTime = 0;
+        anim.mPauseTime = -1;
+        anim.mLastFrameTime = -1;
+        anim.mFirstFrameTime = -1;
         anim.mOverallFraction = 0;
         anim.mCurrentFraction = 0;
 
