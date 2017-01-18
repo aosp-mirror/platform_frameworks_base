@@ -27,25 +27,30 @@ import android.os.Looper;
  * @hide
  */
 public final class ConnectivityThread extends HandlerThread {
-    private static ConnectivityThread sInstance;
+
+    // A class implementing the lazy holder idiom: the unique static instance
+    // of ConnectivityThread is instantiated in a thread-safe way (guaranteed by
+    // the language specs) the first time that Singleton is referenced in get()
+    // or getInstanceLooper().
+    private static class Singleton {
+        private static final ConnectivityThread INSTANCE = createInstance();
+    }
 
     private ConnectivityThread() {
         super("ConnectivityThread");
     }
 
-    private static synchronized ConnectivityThread getInstance() {
-        if (sInstance == null) {
-            sInstance = new ConnectivityThread();
-            sInstance.start();
-        }
-        return sInstance;
+    private static ConnectivityThread createInstance() {
+        ConnectivityThread t = new ConnectivityThread();
+        t.start();
+        return t;
     }
 
     public static ConnectivityThread get() {
-        return getInstance();
+        return Singleton.INSTANCE;
     }
 
     public static Looper getInstanceLooper() {
-        return getInstance().getLooper();
+        return Singleton.INSTANCE.getLooper();
     }
 }
