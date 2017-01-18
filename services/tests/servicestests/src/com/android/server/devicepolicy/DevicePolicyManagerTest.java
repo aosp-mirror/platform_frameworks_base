@@ -61,9 +61,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -2124,8 +2126,37 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupDeviceOwner();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
-        final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
-        final long ONE_MINUTE = 60 * 1000;
+        final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = TimeUnit.HOURS.toMillis(1);
+        final long ONE_MINUTE = TimeUnit.MINUTES.toMillis(1);
+        final long MIN_PLUS_ONE_MINUTE = MINIMUM_STRONG_AUTH_TIMEOUT_MS + ONE_MINUTE;
+        final long MAX_MINUS_ONE_MINUTE = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS
+                - ONE_MINUTE;
+
+        // verify that the minimum timeout cannot be modified on user builds (system property is
+        // not being read)
+        mContext.buildMock.isDebuggable = false;
+
+        dpm.setRequiredStrongAuthTimeout(admin1, MAX_MINUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MAX_MINUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MAX_MINUS_ONE_MINUTE);
+
+        verify(mContext.systemProperties, never()).getLong(anyString(), anyLong());
+
+        // restore to the debuggable build state
+        mContext.buildMock.isDebuggable = true;
+
+        // Always return the default (second arg) when getting system property for long type
+        when(mContext.systemProperties.getLong(anyString(), anyLong())).thenAnswer(
+                new Answer<Long>() {
+                    @Override
+                    public Long answer(InvocationOnMock invocation) throws Throwable {
+                        return (Long) invocation.getArguments()[1];
+                    }
+                }
+        );
+
+        // reset to default (0 means the admin is not participating, so default should be returned)
+        dpm.setRequiredStrongAuthTimeout(admin1, 0);
 
         // aggregation should be the default if unset by any admin
         assertEquals(dpm.getRequiredStrongAuthTimeout(null),
@@ -2142,7 +2173,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(dpm.getRequiredStrongAuthTimeout(null),
                 DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS);
 
-        // 0 means default
+        // 0 means the admin is not participating, so default should be returned
         dpm.setRequiredStrongAuthTimeout(admin1, 0);
         assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), 0);
         assertEquals(dpm.getRequiredStrongAuthTimeout(null),
@@ -2153,12 +2184,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MINIMUM_STRONG_AUTH_TIMEOUT_MS);
         assertEquals(dpm.getRequiredStrongAuthTimeout(null), MINIMUM_STRONG_AUTH_TIMEOUT_MS);
 
-        // value within range
-        dpm.setRequiredStrongAuthTimeout(admin1, MINIMUM_STRONG_AUTH_TIMEOUT_MS + ONE_MINUTE);
-        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MINIMUM_STRONG_AUTH_TIMEOUT_MS
-                + ONE_MINUTE);
-        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MINIMUM_STRONG_AUTH_TIMEOUT_MS
-                + ONE_MINUTE);
+        // values within range
+        dpm.setRequiredStrongAuthTimeout(admin1, MIN_PLUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MIN_PLUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MIN_PLUS_ONE_MINUTE);
+
+        dpm.setRequiredStrongAuthTimeout(admin1, MAX_MINUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(admin1), MAX_MINUS_ONE_MINUTE);
+        assertEquals(dpm.getRequiredStrongAuthTimeout(null), MAX_MINUS_ONE_MINUTE);
 
         // reset to default
         dpm.setRequiredStrongAuthTimeout(admin1, 0);
