@@ -4730,6 +4730,32 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
     return NO_ERROR;
 }
 
+const String16 kTransitionElements[] = {
+    String16("fade"),
+    String16("changeBounds"),
+    String16("slide"),
+    String16("explode"),
+    String16("changeImageTransform"),
+    String16("changeTransform"),
+    String16("changeClipBounds"),
+    String16("autoTransition"),
+    String16("recolor"),
+    String16("changeScroll"),
+    String16("transitionSet"),
+    String16("transition"),
+    String16("transitionManager"),
+};
+
+static bool IsTransitionElement(const String16& name) {
+    for (int i = 0, size = sizeof(kTransitionElements) / sizeof(kTransitionElements[0]);
+         i < size; ++i) {
+        if (name == kTransitionElements[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                                         const String16& resourceName,
                                         const sp<AaptFile>& target,
@@ -4763,6 +4789,11 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         if (bundle->getNoVersionVectors() && (node->getElementName() == vector16 ||
                     node->getElementName() == animatedVector16)) {
             // We were told not to version vector tags, so skip the children here.
+            continue;
+        }
+
+        if (bundle->getNoVersionTransitions() && (IsTransitionElement(node->getElementName()))) {
+            // We were told not to version transition tags, so skip the children here.
             continue;
         }
 
