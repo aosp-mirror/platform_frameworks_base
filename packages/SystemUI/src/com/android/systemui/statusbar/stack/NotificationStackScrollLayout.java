@@ -359,6 +359,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mInHeadsUpPinnedMode;
     private boolean mHeadsUpAnimatingAway;
     private int mStatusBarState;
+    private int mCachedBackgroundColor;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -445,8 +446,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                         + alphaInv * Color.green(scrimColor)),
                 (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
                         + alphaInv * Color.blue(scrimColor)));
-        mBackgroundPaint.setColor(color);
-        invalidate();
+        if (mCachedBackgroundColor != color) {
+            mCachedBackgroundColor = color;
+            mBackgroundPaint.setColor(color);
+            invalidate();
+        }
     }
 
     private void initView(Context context) {
@@ -2092,9 +2096,14 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Update the background bounds to the new desired bounds
      */
     private void updateBackgroundBounds() {
-        getLocationInWindow(mTempInt2);
-        mBackgroundBounds.left = mTempInt2[0];
-        mBackgroundBounds.right = mTempInt2[0] + getWidth();
+        if (mAmbientState.isPanelFullWidth()) {
+            mBackgroundBounds.left = 0;
+            mBackgroundBounds.right = getWidth();
+        } else {
+            getLocationInWindow(mTempInt2);
+            mBackgroundBounds.left = mTempInt2[0];
+            mBackgroundBounds.right = mTempInt2[0] + getWidth();
+        }
         if (!mIsExpanded) {
             mBackgroundBounds.top = 0;
             mBackgroundBounds.bottom = 0;

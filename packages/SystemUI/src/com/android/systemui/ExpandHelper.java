@@ -326,7 +326,7 @@ public class ExpandHelper implements Gefingerpoken {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 if (DEBUG) Log.d(TAG, "up/cancel");
-                finishExpanding(ev.getActionMasked() == MotionEvent.ACTION_CANCEL,
+                finishExpanding(ev.getActionMasked() == MotionEvent.ACTION_CANCEL /* forceAbort */,
                         getCurrentVelocity());
                 clearView();
                 break;
@@ -587,6 +587,9 @@ public class ExpandHelper implements Gefingerpoken {
             mFlingAnimationUtils.apply(mScaleAnimation, currentHeight, targetHeight, velocity);
             mScaleAnimation.start();
         } else {
+            if (targetHeight != currentHeight) {
+                mScaler.setHeight(targetHeight);
+            }
             mCallback.setUserExpandedChild(mResizedView, nowExpanded);
             mCallback.setUserLockedChild(mResizedView, false);
         }

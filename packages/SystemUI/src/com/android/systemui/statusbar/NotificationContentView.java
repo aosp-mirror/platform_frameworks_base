@@ -293,10 +293,6 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void reset() {
-        if (mContractedChild != null) {
-            mContractedChild.animate().cancel();
-            removeView(mContractedChild);
-        }
         mPreviousExpandedRemoteInputIntent = null;
         if (mExpandedRemoteInput != null) {
             mExpandedRemoteInput.onNotificationUpdateOrReset();
@@ -327,7 +323,6 @@ public class NotificationContentView extends FrameLayout {
             removeView(mHeadsUpChild);
             mHeadsUpRemoteInput = null;
         }
-        mContractedChild = null;
         mExpandedChild = null;
         mHeadsUpChild = null;
     }

@@ -182,6 +182,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mStartTint;
     private int mOverrideTint;
     private float mOverrideAmount;
+    private boolean mShadowHidden;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -210,6 +211,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.onFinishInflate();
         mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
         mFakeShadow = (FakeShadowView) findViewById(R.id.fake_shadow);
+        mShadowHidden = mFakeShadow.getVisibility() != VISIBLE;
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
@@ -249,7 +251,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (mDimmed && !isTouchExplorationEnabled()) {
+        if (mDimmed && !isTouchExplorationEnabled() && isInteractive()) {
             boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
             if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
@@ -259,6 +261,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             result = super.onTouchEvent(event);
         }
         return result;
+    }
+
+    /**
+     * @return whether this view is interactive and can be double tapped
+     */
+    protected boolean isInteractive() {
+        return true;
     }
 
     @Override
@@ -1020,9 +1029,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     @Override
     public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
             int outlineTranslation) {
-        mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
-                + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
-                outlineTranslation);
+        boolean hiddenBefore = mShadowHidden;
+        mShadowHidden = shadowIntensity == 0.0f;
+        if (!mShadowHidden || !hiddenBefore) {
+            mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
+                            + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
+                    outlineTranslation);
+        }
     }
 
     public int getBackgroundColorWithoutTint() {

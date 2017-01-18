@@ -221,6 +221,8 @@ public class StatusBarIconView extends AnimatedImageView {
         setContentDescription(icon.contentDescription);
         if (!iconEquals) {
             if (!updateDrawable(false /* no clear */)) return false;
+            // we have to clear the grayscale tag since it may have changed
+            setTag(R.id.icon_is_grayscale, null);
         }
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);

@@ -43,7 +43,18 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean mDockedLight;
     private int mLastStatusBarMode;
     private int mLastNavigationBarMode;
+
+    /**
+     * Whether the navigation bar should be light factoring in already how much alpha the scrim has
+     */
     private boolean mNavigationLight;
+
+    /**
+     * Whether the flags indicate that a light status bar is requested. This doesn't factor in the
+     * scrim alpha yet.
+     */
+    private boolean mHasLightNavigationBar;
+    private boolean mScrimAlphaBelowThreshold;
     private float mScrimAlpha;
 
     private final Rect mLastFullscreenBounds = new Rect();
@@ -101,7 +112,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         if ((diffVis & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0
                 || nbModeChanged) {
             boolean last = mNavigationLight;
-            mNavigationLight = isNavigationLight(newVis, navigationBarMode);
+            mHasLightNavigationBar = isLight(vis, navigationBarMode,
+                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            mNavigationLight = mHasLightNavigationBar && mScrimAlphaBelowThreshold;
             if (mNavigationLight != last) {
                 updateNavigation();
             }
@@ -120,12 +133,11 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     public void setScrimAlpha(float alpha) {
         mScrimAlpha = alpha;
-        reevaluate();
-    }
-
-    private boolean isNavigationLight(int vis, int barMode) {
-        return isLight(vis, barMode, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-                && mScrimAlpha < NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
+        boolean belowThresholdBefore = mScrimAlphaBelowThreshold;
+        mScrimAlphaBelowThreshold = mScrimAlpha < NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
+        if (mHasLightNavigationBar && belowThresholdBefore != mScrimAlphaBelowThreshold) {
+            reevaluate();
+        }
     }
 
     private boolean isLight(int vis, int barMode, int flag) {
