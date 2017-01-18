@@ -501,7 +501,7 @@ public class CameraDeviceImpl extends CameraDevice
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
-            Log.d(TAG, "createCaptureSessionByOutputConfiguration");
+            Log.d(TAG, "createCaptureSessionByOutputConfigurations");
         }
 
         // OutputConfiguration objects are immutable, but need to have our own array
@@ -621,19 +621,15 @@ public class CameraDeviceImpl extends CameraDevice
                 }
             }
 
-            List<Surface> outSurfaces = new ArrayList<>(outputConfigurations.size());
-            for (OutputConfiguration config : outputConfigurations) {
-                outSurfaces.add(config.getSurface());
-            }
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
             CameraCaptureSessionCore newSession = null;
             if (isConstrainedHighSpeed) {
                 newSession = new CameraConstrainedHighSpeedCaptureSessionImpl(mNextSessionId++,
-                        outSurfaces, callback, handler, this, mDeviceHandler, configureSuccess,
+                        callback, handler, this, mDeviceHandler, configureSuccess,
                         mCharacteristics);
             } else {
                 newSession = new CameraCaptureSessionImpl(mNextSessionId++, input,
-                        outSurfaces, callback, handler, this, mDeviceHandler,
+                        callback, handler, this, mDeviceHandler,
                         configureSuccess);
             }
 
@@ -1946,24 +1942,33 @@ public class CameraDeviceImpl extends CameraDevice
 
             Runnable failureDispatch = null;
             if (errorCode == ERROR_CAMERA_BUFFER) {
-                final Surface outputSurface =
-                        mConfiguredOutputs.get(resultExtras.getErrorStreamId()).getSurface();
-                if (DEBUG) {
-                    Log.v(TAG, String.format("Lost output buffer reported for frame %d, target %s",
-                            frameNumber, outputSurface));
-                }
-                failureDispatch = new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!CameraDeviceImpl.this.isClosed()){
-                            holder.getCallback().onCaptureBufferLost(
-                                CameraDeviceImpl.this,
-                                request,
-                                outputSurface,
-                                frameNumber);
-                        }
+                // Because 1 stream id could map to multiple surfaces, we need to specify both
+                // streamId and surfaceId.
+                List<Surface> surfaces =
+                        mConfiguredOutputs.get(resultExtras.getErrorStreamId()).getSurfaces();
+                for (Surface surface : surfaces) {
+                    if (!request.containsTarget(surface)) {
+                        continue;
                     }
-                };
+                    if (DEBUG) {
+                        Log.v(TAG, String.format("Lost output buffer reported for frame %d, target %s",
+                                frameNumber, surface));
+                    }
+                    failureDispatch = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!CameraDeviceImpl.this.isClosed()){
+                                holder.getCallback().onCaptureBufferLost(
+                                    CameraDeviceImpl.this,
+                                    request,
+                                    surface,
+                                    frameNumber);
+                            }
+                        }
+                    };
+                    // Dispatch the failure callback
+                    holder.getHandler().post(failureDispatch);
+                }
             } else {
                 boolean mayHaveBuffers = (errorCode == ERROR_CAMERA_RESULT);
 
@@ -2000,10 +2005,11 @@ public class CameraDeviceImpl extends CameraDevice
                 }
                 mFrameNumberTracker.updateTracker(frameNumber, /*error*/true, request.isReprocess());
                 checkAndFireSequenceComplete();
+
+                // Dispatch the failure callback
+                holder.getHandler().post(failureDispatch);
             }
 
-            // Dispatch the failure callback
-            holder.getHandler().post(failureDispatch);
         }
 
     } // public class CameraDeviceCallbacks
