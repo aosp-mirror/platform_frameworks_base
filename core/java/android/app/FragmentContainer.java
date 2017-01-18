@@ -18,6 +18,8 @@ package android.app;
 
 import android.annotation.IdRes;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 
 /**
@@ -35,4 +37,13 @@ public abstract class FragmentContainer {
      * Return {@code true} if the container holds any view.
      */
     public abstract boolean onHasView();
+
+    /**
+     * Creates an instance of the specified fragment, can be overridden to construct fragments
+     * with dependencies, or change the fragment being constructed. By default just calls
+     * {@link Fragment#instantiate(Context, String, Bundle)}.
+     */
+    public Fragment instantiate(Context context, String className, Bundle arguments) {
+        return Fragment.instantiate(context, className, arguments);
+    }
 }

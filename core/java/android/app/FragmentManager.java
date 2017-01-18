@@ -2653,7 +2653,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 if (childNonConfigs != null && i < childNonConfigs.size()) {
                     childNonConfig = childNonConfigs.get(i);
                 }
-                Fragment f = fs.instantiate(mHost, mParent, childNonConfig);
+                Fragment f = fs.instantiate(mHost, mContainer, mParent, childNonConfig);
                 if (DEBUG) Log.v(TAG, "restoreAllState: active #" + i + ": " + f);
                 mActive.add(f);
                 // Now that the fragment is instantiated (or came from being
@@ -3272,7 +3272,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 + Integer.toHexString(id) + " fname=" + fname
                 + " existing=" + fragment);
         if (fragment == null) {
-            fragment = Fragment.instantiate(context, fname);
+            fragment = mContainer.instantiate(context, fname, null);
             fragment.mFromLayout = true;
             fragment.mFragmentId = id != 0 ? id : containerId;
             fragment.mContainerId = containerId;
