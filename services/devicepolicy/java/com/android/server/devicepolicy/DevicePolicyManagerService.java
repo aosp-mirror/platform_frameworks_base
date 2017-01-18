@@ -191,6 +191,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -235,7 +236,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
-    private static final long MS_PER_DAY = 86400 * 1000;
+    private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
 
     private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * MS_PER_DAY; // 5 days, in ms
 
@@ -330,7 +331,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Minimum timeout in milliseconds after which unlocking with weak auth times out,
      * i.e. the user has to use a strong authentication method like password, PIN or pattern.
      */
-    private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
+    private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = TimeUnit.HOURS.toMillis(1);
 
     /**
      * Strings logged with {@link
