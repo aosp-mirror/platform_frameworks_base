@@ -865,13 +865,7 @@ public class IpManager extends StateMachine {
         for (RouteInfo route : netlinkLinkProperties.getRoutes()) {
             newLp.addRoute(route);
         }
-        for (InetAddress dns : netlinkLinkProperties.getDnsServers()) {
-            // Only add likely reachable DNS servers.
-            // TODO: investigate deleting this.
-            if (newLp.isReachable(dns)) {
-                newLp.addDnsServer(dns);
-            }
-        }
+        addAllReachableDnsServers(newLp, netlinkLinkProperties.getDnsServers());
 
         // [3] Add in data from DHCPv4, if available.
         //
@@ -881,13 +875,7 @@ public class IpManager extends StateMachine {
             for (RouteInfo route : mDhcpResults.getRoutes(mInterfaceName)) {
                 newLp.addRoute(route);
             }
-            for (InetAddress dns : mDhcpResults.dnsServers) {
-                // Only add likely reachable DNS servers.
-                // TODO: investigate deleting this.
-                if (newLp.isReachable(dns)) {
-                    newLp.addDnsServer(dns);
-                }
-            }
+            addAllReachableDnsServers(newLp, mDhcpResults.dnsServers);
             newLp.setDomains(mDhcpResults.domains);
 
             if (mDhcpResults.mtu != 0) {
@@ -907,6 +895,18 @@ public class IpManager extends StateMachine {
             Log.d(mTag, "newLp{" + newLp + "}");
         }
         return newLp;
+    }
+
+    private static void addAllReachableDnsServers(
+            LinkProperties lp, Iterable<InetAddress> dnses) {
+        // TODO: Investigate deleting this reachability check.  We should be
+        // able to pass everything down to netd and let netd do evaluation
+        // and RFC6724-style sorting.
+        for (InetAddress dns : dnses) {
+            if (!dns.isAnyLocalAddress() && lp.isReachable(dns)) {
+                lp.addDnsServer(dns);
+            }
+        }
     }
 
     // Returns false if we have lost provisioning, true otherwise.
