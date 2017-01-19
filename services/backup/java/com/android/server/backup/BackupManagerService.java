@@ -577,15 +577,18 @@ public class BackupManagerService {
         public ArrayList<String> fullPackages;
         public IBackupObserver observer;
         public boolean userInitiated;
+        public boolean nonIncrementalBackup;
 
         BackupParams(IBackupTransport transport, String dirName, ArrayList<String> kvPackages,
-                ArrayList<String> fullPackages, IBackupObserver observer, boolean userInitiated) {
+                ArrayList<String> fullPackages, IBackupObserver observer, boolean userInitiated,
+                boolean nonIncrementalBackup) {
             this.transport = transport;
             this.dirName = dirName;
             this.kvPackages = kvPackages;
             this.fullPackages = fullPackages;
             this.observer = observer;
             this.userInitiated = userInitiated;
+            this.nonIncrementalBackup = nonIncrementalBackup;
         }
     }
 
@@ -794,7 +797,7 @@ public class BackupManagerService {
                     try {
                         String dirName = transport.transportDirName();
                         PerformBackupTask pbt = new PerformBackupTask(transport, dirName,
-                                queue, oldJournal, null, null, false);
+                                queue, oldJournal, null, null, false, false /* nonIncremental */);
                         Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                         sendMessage(pbtMessage);
                     } catch (Exception e) {
@@ -1033,7 +1036,8 @@ public class BackupManagerService {
                 mWakelock.acquire();
 
                 PerformBackupTask pbt = new PerformBackupTask(params.transport, params.dirName,
-                    kvQueue, null, params.observer, params.fullPackages, true);
+                        kvQueue, null, params.observer, params.fullPackages, true,
+                        params.nonIncrementalBackup);
                 Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                 sendMessage(pbtMessage);
                 break;
@@ -2492,7 +2496,7 @@ public class BackupManagerService {
         return token;
     }
 
-    public int requestBackup(String[] packages, IBackupObserver observer) {
+    public int requestBackup(String[] packages, IBackupObserver observer, int flags) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
@@ -2510,6 +2514,10 @@ public class BackupManagerService {
         ArrayList<String> fullBackupList = new ArrayList<>();
         ArrayList<String> kvBackupList = new ArrayList<>();
         for (String packageName : packages) {
+            if (PACKAGE_MANAGER_SENTINEL.equals(packageName)) {
+                kvBackupList.add(packageName);
+                continue;
+            }
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
@@ -2543,9 +2551,12 @@ public class BackupManagerService {
             sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
+
+        boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
+
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
         msg.obj = new BackupParams(transport, dirName, kvBackupList, fullBackupList, observer,
-                true);
+                true, nonIncrementalBackup);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
     }
@@ -2673,17 +2684,20 @@ public class BackupManagerService {
         ParcelFileDescriptor mNewState;
         int mStatus;
         boolean mFinished;
-        boolean mUserInitiated;
+        final boolean mUserInitiated;
+        final boolean mNonIncremental;
 
         public PerformBackupTask(IBackupTransport transport, String dirName,
                 ArrayList<BackupRequest> queue, File journal, IBackupObserver observer,
-                ArrayList<String> pendingFullBackups, boolean userInitiated) {
+                ArrayList<String> pendingFullBackups, boolean userInitiated,
+                boolean nonIncremental) {
             mTransport = transport;
             mOriginalQueue = queue;
             mJournal = journal;
             mObserver = observer;
             mPendingFullBackups = pendingFullBackups;
             mUserInitiated = userInitiated;
+            mNonIncremental = nonIncremental;
 
             mStateDir = new File(mBaseStateDir, dirName);
 
@@ -2748,6 +2762,10 @@ public class BackupManagerService {
             // the way.
             mQueue = (ArrayList<BackupRequest>) mOriginalQueue.clone();
 
+            // When the transport is forcing non-incremental key/value payloads, we send the
+            // metadata only if it explicitly asks for it.
+            boolean skipPm = mNonIncremental;
+
             // The app metadata pseudopackage might also be represented in the
             // backup queue if apps have been added/removed since the last time
             // we performed a backup.  Drop it from the working queue now that
@@ -2758,6 +2776,7 @@ public class BackupManagerService {
                         Slog.i(TAG, "Metadata in queue; eliding");
                     }
                     mQueue.remove(i);
+                    skipPm = false;
                     break;
                 }
             }
@@ -2785,22 +2804,27 @@ public class BackupManagerService {
                     }
                 }
 
-                // The package manager doesn't have a proper <application> etc, but since
-                // it's running here in the system process we can just set up its agent
-                // directly and use a synthetic BackupRequest.  We always run this pass
-                // because it's cheap and this way we guarantee that we don't get out of
-                // step even if we're selecting among various transports at run time.
-                if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                            mPackageManager);
-                    mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
-                            IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
-                    addBackupTrace("PMBA invoke: " + mStatus);
+                if (skipPm) {
+                    Slog.d(TAG, "Skipping backup of package metadata.");
+                    executeNextState(BackupState.RUNNING_QUEUE);
+                } else {
+                    // The package manager doesn't have a proper <application> etc, but since
+                    // it's running here in the system process we can just set up its agent
+                    // directly and use a synthetic BackupRequest.  We always run this pass
+                    // because it's cheap and this way we guarantee that we don't get out of
+                    // step even if we're selecting among various transports at run time.
+                    if (mStatus == BackupTransport.TRANSPORT_OK) {
+                        PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                                mPackageManager);
+                        mStatus = invokeAgentForBackup(PACKAGE_MANAGER_SENTINEL,
+                                IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
+                        addBackupTrace("PMBA invoke: " + mStatus);
 
-                    // Because the PMBA is a local instance, it has already executed its
-                    // backup callback and returned.  Blow away the lingering (spurious)
-                    // pending timeout message for it.
-                    mBackupHandler.removeMessages(MSG_TIMEOUT);
+                        // Because the PMBA is a local instance, it has already executed its
+                        // backup callback and returned.  Blow away the lingering (spurious)
+                        // pending timeout message for it.
+                        mBackupHandler.removeMessages(MSG_TIMEOUT);
+                    }
                 }
 
                 if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
@@ -3066,6 +3090,7 @@ public class BackupManagerService {
             if (DEBUG) Slog.d(TAG, "invokeAgentForBackup on " + packageName);
             addBackupTrace("invoking " + packageName);
 
+            File blankStateName = new File(mStateDir, "blank_state");
             mSavedStateName = new File(mStateDir, packageName);
             mBackupDataName = new File(mDataDir, packageName + ".data");
             mNewStateName = new File(mStateDir, packageName + ".new");
@@ -3088,9 +3113,10 @@ public class BackupManagerService {
                 }
 
                 // In a full backup, we pass a null ParcelFileDescriptor as
-                // the saved-state "file". This is by definition an incremental,
-                // so we build a saved state file to pass.
-                mSavedState = ParcelFileDescriptor.open(mSavedStateName,
+                // the saved-state "file". For key/value backups we pass the old state if
+                // an incremental backup is required, and a blank state otherwise.
+                mSavedState = ParcelFileDescriptor.open(
+                        mNonIncremental ? blankStateName : mSavedStateName,
                         ParcelFileDescriptor.MODE_READ_ONLY |
                         ParcelFileDescriptor.MODE_CREATE);  // Make an empty file if necessary
 
@@ -3120,6 +3146,10 @@ public class BackupManagerService {
                         e.toString());
                 agentErrorCleanup();
                 return BackupTransport.AGENT_ERROR;
+            } finally {
+                if (mNonIncremental) {
+                    blankStateName.delete();
+                }
             }
 
             // At this point the agent is off and running.  The next thing to happen will

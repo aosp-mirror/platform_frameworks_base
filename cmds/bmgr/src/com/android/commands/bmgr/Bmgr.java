@@ -270,7 +270,7 @@ public final class Bmgr {
         }
     }
 
-    private void backupNowAllPackages() {
+    private void backupNowAllPackages(boolean nonIncrementalBackup) {
         int userId = UserHandle.USER_SYSTEM;
         IPackageManager mPm =
                 IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
@@ -297,14 +297,19 @@ public final class Bmgr {
                     System.err.println(BMGR_NOT_RUNNING_ERR);
                 }
             }
-            backupNowPackages(packages);
+            backupNowPackages(packages, nonIncrementalBackup);
         }
     }
 
-    private void backupNowPackages(List<String> packages) {
+    private void backupNowPackages(List<String> packages, boolean nonIncrementalBackup) {
+        int flags = 0;
+        if (nonIncrementalBackup) {
+            flags |= BackupManager.FLAG_NON_INCREMENTAL_BACKUP;
+        }
         try {
             BackupObserver observer = new BackupObserver();
-            int err = mBmgr.requestBackup(packages.toArray(new String[packages.size()]), observer);
+            int err = mBmgr.requestBackup(packages.toArray(new String[packages.size()]), observer,
+                    flags);
             if (err == 0) {
                 // Off and running -- wait for the backup to complete
                 observer.waitForCompletion();
@@ -320,24 +325,31 @@ public final class Bmgr {
     private void doBackupNow() {
         String pkg;
         boolean backupAll = false;
+        boolean nonIncrementalBackup = false;
         ArrayList<String> allPkgs = new ArrayList<String>();
         while ((pkg = nextArg()) != null) {
             if (pkg.equals("--all")) {
                 backupAll = true;
+            } else if (pkg.equals("--non-incremental")) {
+                nonIncrementalBackup = true;
+            } else if (pkg.equals("--incremental")) {
+                nonIncrementalBackup = false;
             } else {
                 allPkgs.add(pkg);
             }
         }
         if (backupAll) {
             if (allPkgs.size() == 0) {
-                System.out.println("Running backup for all packages.");
-                backupNowAllPackages();
+                System.out.println("Running " + (nonIncrementalBackup ? "non-" : "") +
+                        "incremental backup for all packages.");
+                backupNowAllPackages(nonIncrementalBackup);
             } else {
                 System.err.println("Provide only '--all' flag or list of packages.");
             }
         } else if (allPkgs.size() > 0) {
-            System.out.println("Running backup for " + allPkgs.size() +" requested packages.");
-            backupNowPackages(allPkgs);
+            System.out.println("Running " + (nonIncrementalBackup ? "non-" : "") +
+                    "incremental backup for " + allPkgs.size() +" requested packages.");
+            backupNowPackages(allPkgs, nonIncrementalBackup);
         } else {
             System.err.println("Provide '--all' flag or list of packages.");
         }
