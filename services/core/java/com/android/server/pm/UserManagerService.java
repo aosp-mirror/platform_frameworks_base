@@ -1567,7 +1567,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         synchronized(mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
-            if (!userInfo.canHaveProfile()) {
+            if (userInfo == null || !userInfo.canHaveProfile()) {
                 return false;
             }
             int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
