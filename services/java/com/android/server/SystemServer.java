@@ -840,7 +840,11 @@ public final class SystemServer {
                 } else {
                     Slog.i(TAG, "No Wi-Fi Aware Service (Aware support Not Present)");
                 }
-                mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
+
+                if (context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_WIFI_DIRECT)) {
+                    mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
+                }
                 mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                 mSystemServiceManager.startService(
                             "com.android.server.wifi.scanner.WifiScanningService");
