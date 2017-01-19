@@ -18,6 +18,7 @@
 
 #include "BakedOpRenderer.h"
 #include "Caches.h"
+#include "DeferredLayerUpdater.h"
 #include "Glop.h"
 #include "GlopBuilder.h"
 #include "Patch.h"
@@ -762,15 +763,19 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
 }
 
 void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const TextureLayerOp& op, const BakedOpState& state) {
-    const bool tryToSnap = !op.layer->getForceFilter();
-    float alpha = (op.layer->getAlpha() / 255.0f) * state.alpha;
+    GlLayer* layer = static_cast<GlLayer*>(op.layerHandle->backingLayer());
+    if (!layer) {
+        return;
+    }
+    const bool tryToSnap = layer->getForceFilter();
+    float alpha = (layer->getAlpha() / 255.0f) * state.alpha;
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
-            .setFillTextureLayer(*(op.layer), alpha)
+            .setFillTextureLayer(*(layer), alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, Rect(op.layer->getWidth(), op.layer->getHeight()))
+            .setModelViewMapUnitToRectOptionalSnap(tryToSnap, Rect(layer->getWidth(), layer->getHeight()))
             .build();
     renderer.renderGlop(state, glop);
 }

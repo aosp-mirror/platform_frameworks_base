@@ -60,6 +60,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         pipeline = new skiapipeline::SkiaVulkanPipeline(renderThread);
     }
     sp<DeferredLayerUpdater> layerUpdater = pipeline->createTextureLayer();
+    layerUpdater->apply();
     delete pipeline;
     return layerUpdater;
 }

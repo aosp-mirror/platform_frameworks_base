@@ -125,13 +125,18 @@ bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap
             static_cast<GlLayer&>(*layer->backingLayer()), bitmap);
 }
 
-DeferredLayerUpdater* OpenGLPipeline::createTextureLayer() {
-    mEglManager.initialize();
-    GlLayer* layer = new GlLayer(mRenderThread.renderState(), 0, 0);
+static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
+        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+    GlLayer* layer = new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha,
+            mode, blend);
     Caches::getInstance().textureState().activateTexture(0);
     layer->generateTexture();
+    return layer;
+}
 
-    return new DeferredLayerUpdater(layer);
+DeferredLayerUpdater* OpenGLPipeline::createTextureLayer() {
+    mEglManager.initialize();
+    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::OpenGL);
 }
 
 void OpenGLPipeline::onStop() {

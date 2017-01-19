@@ -606,14 +606,13 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting semantics.
     mDisplayList->ref(layerHandle);
 
-    LOG_ALWAYS_FATAL_IF(layerHandle->backingLayer()->getApi() != Layer::Api::OpenGL);
+    LOG_ALWAYS_FATAL_IF(layerHandle->getBackingLayerApi() != Layer::Api::OpenGL);
     // Note that the backing layer has *not* yet been updated, so don't trust
     // its width, height, transform, etc...!
     addOp(alloc().create_trivial<TextureLayerOp>(
             Rect(layerHandle->getWidth(), layerHandle->getHeight()),
             *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            static_cast<GlLayer*>(layerHandle->backingLayer())));
+            getRecordedClip(), layerHandle));
 }
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor,

@@ -16,6 +16,7 @@
 
 #include "FrameBuilder.h"
 
+#include "DeferredLayerUpdater.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
@@ -784,14 +785,15 @@ void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
-    if (CC_UNLIKELY(!op.layer->isRenderable())) return;
+    GlLayer* layer = static_cast<GlLayer*>(op.layerHandle->backingLayer());
+    if (CC_UNLIKELY(!layer || !layer->isRenderable())) return;
 
     const TextureLayerOp* textureLayerOp = &op;
     // Now safe to access transform (which was potentially unready at record time)
-    if (!op.layer->getTransform().isIdentity()) {
+    if (!layer->getTransform().isIdentity()) {
         // non-identity transform present, so 'inject it' into op by copying + replacing matrix
         Matrix4 combinedMatrix(op.localMatrix);
-        combinedMatrix.multiply(op.layer->getTransform());
+        combinedMatrix.multiply(layer->getTransform());
         textureLayerOp = mAllocator.create<TextureLayerOp>(op, combinedMatrix);
     }
     BakedOpState* bakedState = tryBakeOpState(*textureLayerOp);

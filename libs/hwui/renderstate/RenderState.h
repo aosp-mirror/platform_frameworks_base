@@ -42,6 +42,7 @@ namespace uirenderer {
 
 class Caches;
 class Layer;
+class DeferredLayerUpdater;
 
 namespace renderthread {
 class CanvasContext;
@@ -90,6 +91,16 @@ public:
         mRegisteredContexts.erase(context);
     }
 
+    void registerDeferredLayerUpdater(DeferredLayerUpdater* layerUpdater) {
+        mActiveLayerUpdaters.insert(layerUpdater);
+    }
+
+    void unregisterDeferredLayerUpdater(DeferredLayerUpdater* layerUpdater) {
+        mActiveLayerUpdaters.erase(layerUpdater);
+    }
+
+    void destroyLayersInUpdater();
+
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
@@ -126,6 +137,7 @@ private:
     OffscreenBufferPool mLayerPool;
 
     std::set<Layer*> mActiveLayers;
+    std::set<DeferredLayerUpdater*> mActiveLayerUpdaters;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;
 
     GLsizei mViewportWidth;

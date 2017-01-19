@@ -23,10 +23,14 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(RenderState& renderState, Api api)
+Layer::Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
+        SkBlendMode mode)
         : GpuMemoryTracker(GpuObjectType::Layer)
         , mRenderState(renderState)
-        , mApi(api) {
+        , mApi(api)
+        , colorFilter(nullptr)
+        , alpha(alpha)
+        , mode(mode) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);

@@ -135,11 +135,17 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
     return LayerDrawable::DrawLayer(mRenderThread.getGrContext(), &canvas, layer);
 }
 
+static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
+        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+    GlLayer* layer = new GlLayer(renderState, layerWidth, layerHeight, colorFilter, alpha,
+            mode, blend);
+    layer->generateTexture();
+    return layer;
+}
+
 DeferredLayerUpdater* SkiaOpenGLPipeline::createTextureLayer() {
     mEglManager.initialize();
-    GlLayer* layer = new GlLayer(mRenderThread.renderState(), 0, 0);
-    layer->generateTexture();
-    return new DeferredLayerUpdater(layer);
+    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::OpenGL);
 }
 
 void SkiaOpenGLPipeline::onStop() {

@@ -32,12 +32,14 @@
 namespace android {
 namespace uirenderer {
 
-GlLayer::GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
-        : Layer(renderState, Api::OpenGL)
+GlLayer::GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
+        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend)
+        : Layer(renderState, Api::OpenGL, colorFilter, alpha, mode)
         , caches(Caches::getInstance())
         , texture(caches) {
     texture.mWidth = layerWidth;
     texture.mHeight = layerHeight;
+    texture.blend = blend;
 }
 
 GlLayer::~GlLayer() {

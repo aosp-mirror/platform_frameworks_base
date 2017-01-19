@@ -32,13 +32,20 @@
 namespace android {
 namespace uirenderer {
 
+class RenderState;
+
 // Container to hold the properties a layer should be set to at the start
 // of a render pass
 class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API explicit DeferredLayerUpdater(Layer* layer);
+    typedef std::function<Layer*(RenderState& renderState, uint32_t layerWidth,
+            uint32_t layerHeight, SkColorFilter* colorFilter, int alpha,
+            SkBlendMode mode, bool blend)> CreateLayerFn;
+    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState,
+            CreateLayerFn createLayerFn, Layer::Api layerApi);
+
     ANDROID_API ~DeferredLayerUpdater();
 
     ANDROID_API bool setSize(int width, int height) {
@@ -97,20 +104,30 @@ public:
 
     void updateLayer(bool forceFilter, GLenum renderTarget, const float* textureTransform);
 
+    void destroyLayer();
+
+    Layer::Api getBackingLayerApi() {
+        return mLayerApi;
+    }
+
 private:
+    RenderState& mRenderState;
+
     // Generic properties
-    int mWidth;
-    int mHeight;
-    bool mBlend;
-    SkColorFilter* mColorFilter;
-    int mAlpha;
-    SkBlendMode mMode;
+    int mWidth = 0;
+    int mHeight = 0;
+    bool mBlend = false;
+    SkColorFilter* mColorFilter = nullptr;
+    int mAlpha = 255;
+    SkBlendMode mMode = SkBlendMode::kSrcOver;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
     bool mNeedsGLContextAttach;
     bool mUpdateTexImage;
 
     Layer* mLayer;
+    Layer::Api mLayerApi;
+    CreateLayerFn mCreateLayerFn;
 
     void doUpdateTexImage();
     void doUpdateVkTexImage();

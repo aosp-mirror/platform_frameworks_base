@@ -118,11 +118,15 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
     return false;
 }
 
+static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
+        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+    return new VkLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
+}
+
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
     mVkManager.initialize();
 
-    VkLayer* layer = new VkLayer(mRenderThread.renderState(), 0, 0);
-    return new DeferredLayerUpdater(layer);
+    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::Vulkan);
 }
 
 void SkiaVulkanPipeline::onStop() {
