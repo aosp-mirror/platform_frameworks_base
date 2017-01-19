@@ -95,9 +95,7 @@ public class DiskStatsService extends Binder {
             pw.println("File-based Encryption: true");
         }
 
-        if (isCheckin(args)) {
-            reportCachedValues(pw);
-        }
+        reportCachedValues(pw);
 
         // TODO: Read /proc/yaffs and report interesting values;
         // add configurable (through args) performance test parameters.
@@ -128,15 +126,6 @@ public class DiskStatsService extends Binder {
             pw.println(e.toString());
             return;
         }
-    }
-
-    private boolean isCheckin(String[] args) {
-        for (String opt : args) {
-            if ("--checkin".equals(opt)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void reportCachedValues(PrintWriter pw) {
