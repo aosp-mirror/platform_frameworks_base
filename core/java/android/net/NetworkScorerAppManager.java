@@ -226,16 +226,6 @@ public class NetworkScorerAppManager {
         return false;
     }
 
-    /** Determine whether the application with the given UID is the enabled scorer. */
-    @Deprecated // Use NetworkScoreManager.isCallerActiveScorer()
-    public boolean isCallerActiveScorer(int callingUid) {
-        NetworkScorerAppData defaultApp = getActiveScorer();
-        if (defaultApp == null) {
-            return false;
-        }
-        return callingUid == defaultApp.packageUid;
-    }
-
     private boolean isNetworkRecommendationsDisabled() {
         final ContentResolver cr = mContext.getContentResolver();
         // A value of 1 indicates enabled.

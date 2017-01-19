@@ -169,25 +169,6 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertNull(activeScorer);
     }
 
-    public void testIsCallerActiveScorer_providerNotAvailable() throws Exception {
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
-
-        assertFalse(mNetworkScorerAppManager.isCallerActiveScorer(924));
-    }
-
-    public void testIsCallerActiveScorer_providerAvailable() throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
-
-        ContentResolver cr = mTargetContext.getContentResolver();
-        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
-
-        assertTrue(mNetworkScorerAppManager.isCallerActiveScorer(924));
-        assertFalse(mNetworkScorerAppManager.isCallerActiveScorer(925));
-    }
-
     private void setNetworkRecommendationPackageNames(String... names) {
         if (names == null) {
             names = new String[0];
