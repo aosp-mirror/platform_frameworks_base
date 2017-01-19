@@ -29,6 +29,7 @@
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
 
     <application>
         <uses-library android:name="android.test.runner" />
