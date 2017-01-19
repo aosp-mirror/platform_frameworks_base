@@ -170,7 +170,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi роумингін іздеулерге әрқашан рұқсат ету"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Ұялы деректер әрқашан белсенді"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұны кодегі"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұн кодегі"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Таңдаулы Bluetooth A2DP кодегін таңдау"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудиомазмұны бойынша үлгі жиілігі"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Таңдаулы Bluetooth A2DP кодегі бойынша үлгі жиілігі"</string>

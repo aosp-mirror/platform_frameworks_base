@@ -88,15 +88,15 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
     <item msgid="6694044160540313386">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</item>
-    <item msgid="5618929009984956469">"16 ਬਿੱਟ/ਨਮੂਨਾ"</item>
-    <item msgid="3412640499234627248">"24 ਬਿੱਟ/ਨਮੂਨਾ"</item>
-    <item msgid="121583001492929387">"32 ਬਿੱਟ/ਨਮੂਨਾ"</item>
+    <item msgid="5618929009984956469">"16 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
+    <item msgid="3412640499234627248">"24 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
+    <item msgid="121583001492929387">"32 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
     <item msgid="5091076677792306320">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</item>
-    <item msgid="4726688794884191540">"16 ਬਿੱਟ/ਨਮੂਨਾ"</item>
-    <item msgid="305344756485516870">"24 ਬਿੱਟ/ਨਮੂਨਾ"</item>
-    <item msgid="244568657919675099">"32 ਬਿੱਟ/ਨਮੂਨਾ"</item>
+    <item msgid="4726688794884191540">"16 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
+    <item msgid="305344756485516870">"24 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
+    <item msgid="244568657919675099">"32 ਬਿਟਾਂ/ਨਮੂਨਾ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
     <item msgid="13423709606339855">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</item>

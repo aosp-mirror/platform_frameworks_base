@@ -109,12 +109,12 @@
     <item msgid="8883739882299884241">"Âm thanh nổi"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"C.lượng â.thanh ưu tiên (990kbps/909kbps)"</item>
+    <item msgid="2944889121850394020">"Ưu tiên chất lượng (990kbps/909kbps)"</item>
     <item msgid="138837449700903545">"Tiêu chuẩn (660kb/giây/606kb/giây)"</item>
     <item msgid="4777177307869441982">"Kết nối được ưu tiên (330kb/giây/303kb/giây)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"C.lượng â.thanh ưu tiên (990kbps/909kbps)"</item>
+    <item msgid="172302906231378902">"Ưu tiên chất lượng (990kbps/909kbps)"</item>
     <item msgid="9091111147684472529">"Tiêu chuẩn (660kb/giây/606kb/giây)"</item>
     <item msgid="3367904477834831032">"Kết nối được ưu tiên (330kb/giây/303kb/giây)"</item>
   </string-array>

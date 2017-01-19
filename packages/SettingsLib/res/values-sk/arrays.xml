@@ -109,14 +109,14 @@
     <item msgid="8883739882299884241">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"Preferovanie kvality zvuku (990/909 kb/s)"</item>
+    <item msgid="2944889121850394020">"Preferovaná kvalita zvuku (990/909 kb/s)"</item>
     <item msgid="138837449700903545">"Štandardné (660/606 kb/s)"</item>
-    <item msgid="4777177307869441982">"Preferovanie pripojenia (330/303 kb/s)"</item>
+    <item msgid="4777177307869441982">"Preferované pripojenie (330/303 kb/s)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"Preferovanie kvality zvuku (990/909 kb/s)"</item>
+    <item msgid="172302906231378902">"Preferovaná kvalita zvuku (990/909 kb/s)"</item>
     <item msgid="9091111147684472529">"Štandardné (660/606 kb/s)"</item>
-    <item msgid="3367904477834831032">"Preferovanie pripojenia (330/303 kb/s)"</item>
+    <item msgid="3367904477834831032">"Preferované pripojenie (330/303 kb/s)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Vypnuté"</item>
