@@ -21,6 +21,7 @@ import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -103,6 +104,12 @@ public class TileUtils {
      * <li>com.android.settings.category.system</li>
      */
     private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
+
+    /**
+     * The key used to get the package name of the icon resource for the preference.
+     */
+    private static final String EXTRA_PREFERENCE_ICON_PACKAGE =
+        "com.android.settings.icon_package";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -342,6 +349,7 @@ public class TileUtils {
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
             int icon = 0;
+            Pair<String, Integer> iconFromUri = null;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
@@ -358,10 +366,10 @@ public class TileUtils {
 
                 if (res != null && metaData != null) {
                     if (metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                        icon = getIconFromUri(context,
+                        iconFromUri = getIconFromUri(context, activityInfo.packageName,
                                 metaData.getString(META_DATA_PREFERENCE_ICON_URI), providerMap);
                     }
-                    if ((icon == 0) && metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
+                    if (iconFromUri == null && metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
                     if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
@@ -401,12 +409,18 @@ public class TileUtils {
             if (TextUtils.isEmpty(title)) {
                 title = activityInfo.loadLabel(pm).toString();
             }
-            if (icon == 0) {
-                icon = activityInfo.icon;
+
+            // Set the icon
+            if (iconFromUri != null) {
+                tile.icon = Icon.createWithResource(iconFromUri.first, iconFromUri.second);
+            } else {
+                if (icon == 0) {
+                    icon = activityInfo.icon;
+                }
+                tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
             }
 
-            // Set icon, title and summary for the preference
-            tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
+            // Set title and summary for the preference
             tile.title = title;
             tile.summary = summary;
             // Replace the intent with this specific activity
@@ -422,16 +436,33 @@ public class TileUtils {
     }
 
     /**
-     * Gets the icon resource id from content provider.
+     * Gets the icon package name and resource id from content provider.
      * @param Context context
+     * @param packageName package name of the target activity
      * @param uriString URI for the content provider
      * @param providerMap Maps URI authorities to providers
-     * @return Resource id if returned by the content provider, otherwise 0
+     * @return package name and resource id of the icon specified
      */
-    public static int getIconFromUri(Context context, String uriString,
-            Map<String, IContentProvider> providerMap) {
+    public static Pair<String, Integer> getIconFromUri(Context context, String packageName,
+            String uriString, Map<String, IContentProvider> providerMap) {
         Bundle bundle = getBundleFromUri(context, uriString, providerMap);
-        return (bundle != null) ? bundle.getInt(META_DATA_PREFERENCE_ICON, 0) : 0;
+        if (bundle == null) {
+            return null;
+        }
+        String iconPackageName = bundle.getString(EXTRA_PREFERENCE_ICON_PACKAGE);
+        if (TextUtils.isEmpty(iconPackageName)) {
+            return null;
+        }
+        int resId = bundle.getInt(META_DATA_PREFERENCE_ICON, 0);
+        if (resId == 0) {
+            return null;
+        }
+        // Icon can either come from the target package or from the Settings app.
+        if (iconPackageName.equals(packageName)
+                || iconPackageName.equals(context.getPackageName())) {
+            return Pair.create(iconPackageName, bundle.getInt(META_DATA_PREFERENCE_ICON, 0));
+        }
+        return null;
     }
 
     /**
