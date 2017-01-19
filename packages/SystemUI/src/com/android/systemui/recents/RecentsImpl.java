@@ -733,8 +733,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             Task toTask = new Task();
             TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask,
                     windowOverrideRect);
-            Bitmap thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform,
-                    mThumbTransitionBitmapCache);
+            // When using a grid layout, the header is already visible on screen at the target
+            // location, making it unnecessary to draw it in the transition thumbnail.
+            Bitmap thumbnail = stackView.useGridLayout()
+                    ? mThumbTransitionBitmapCache.createAshmemBitmap()
+                    : drawThumbnailTransitionBitmap(toTask, toTransform,
+                            mThumbTransitionBitmapCache);
             if (thumbnail != null) {
                 RectF toTaskRect = toTransform.rect;
                 return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
@@ -765,7 +769,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Get the transform for the running task
         stackView.updateLayoutAlgorithm(true /* boundScroll */);
         stackView.updateToInitialState();
-        boolean isInSplitScreen = Recents.getSystemServices().hasDockedTask();
         stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null, windowOverrideRect);
         return mTmpTransform;
