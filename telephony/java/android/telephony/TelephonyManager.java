@@ -5056,6 +5056,20 @@ public class TelephonyManager {
         }
     }
 
+   /*
+    * @return true, if the device is currently on a technology (e.g. UMTS or LTE) which can support
+    * voice and data simultaneously. This can change based on location or network condition.
+    */
+    public boolean isConcurrentVoiceAndDataAllowed() {
+        try {
+            ITelephony telephony = getITelephony();
+            return (telephony == null ? false : telephony.isConcurrentVoiceAndDataAllowed(mSubId));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isConcurrentVoiceAndDataAllowed", e);
+        }
+        return false;
+    }
+
     /** @hide */
     @SystemApi
     public boolean handlePinMmi(String dialString) {

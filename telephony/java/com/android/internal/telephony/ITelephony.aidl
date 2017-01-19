@@ -491,6 +491,12 @@ interface ITelephony {
      */
     int getVoiceMessageCountForSubscriber(int subId);
 
+    /**
+      * Returns true if current state supports both voice and data
+      * simultaneously. This can change based on location or network condition.
+      */
+    boolean isConcurrentVoiceAndDataAllowed(int subId);
+
     oneway void setVisualVoicemailEnabled(String callingPackage,
             in PhoneAccountHandle accountHandle, boolean enabled);
 
