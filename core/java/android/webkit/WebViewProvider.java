@@ -269,6 +269,12 @@ public interface WebViewProvider {
 
     public View findHierarchyView(String className, int hashCode);
 
+    public void setRendererPriorityPolicy(int rendererRequestedPriority, boolean waivedWhenNotVisible);
+
+    public int getRendererRequestedPriority();
+
+    public boolean getRendererPriorityWaivedWhenNotVisible();
+
     //-------------------------------------------------------------------------
     // Provider internal methods
     //-------------------------------------------------------------------------
