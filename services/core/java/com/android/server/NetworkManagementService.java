@@ -45,6 +45,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsListResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -374,21 +375,30 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mObservers.unregister(observer);
     }
 
-    /**
-     * Notify our observers of an interface status change
-     */
-    private void notifyInterfaceStatusChanged(String iface, boolean up) {
+    @FunctionalInterface
+    private interface NetworkManagementEventCallback {
+        public void sendCallback(INetworkManagementEventObserver o) throws RemoteException;
+    }
+
+    private void invokeForAllObservers(NetworkManagementEventCallback eventCallback) {
         final int length = mObservers.beginBroadcast();
         try {
             for (int i = 0; i < length; i++) {
                 try {
-                    mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
+                    eventCallback.sendCallback(mObservers.getBroadcastItem(i));
                 } catch (RemoteException | RuntimeException e) {
                 }
             }
         } finally {
             mObservers.finishBroadcast();
         }
+    }
+
+    /**
+     * Notify our observers of an interface status change
+     */
+    private void notifyInterfaceStatusChanged(String iface, boolean up) {
+        invokeForAllObservers(o -> o.interfaceStatusChanged(iface, up));
     }
 
     /**
@@ -396,34 +406,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * (typically, an Ethernet cable has been plugged-in or unplugged).
      */
     private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.interfaceLinkStateChanged(iface, up));
     }
 
     /**
      * Notify our observers of an interface addition.
      */
     private void notifyInterfaceAdded(String iface) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).interfaceAdded(iface);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.interfaceAdded(iface));
     }
 
     /**
@@ -435,34 +425,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mActiveAlerts.remove(iface);
         mActiveQuotas.remove(iface);
 
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).interfaceRemoved(iface);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.interfaceRemoved(iface));
     }
 
     /**
      * Notify our observers of a limit reached.
      */
     private void notifyLimitReached(String limitName, String iface) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).limitReached(limitName, iface);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.limitReached(limitName, iface));
     }
 
     /**
@@ -509,18 +479,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // on the mobile network, that is not coming from the radio itself, and we
             // have previously seen change reports from the radio.  In that case only
             // the radio is the authority for the current state.
-            final int length = mObservers.beginBroadcast();
-            try {
-                for (int i = 0; i < length; i++) {
-                    try {
-                        mObservers.getBroadcastItem(i).interfaceClassDataActivityChanged(
-                                Integer.toString(type), isActive, tsNanos);
-                    } catch (RemoteException | RuntimeException e) {
-                    }
-                }
-            } finally {
-                mObservers.finishBroadcast();
-            }
+            final boolean active = isActive;
+            invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
+                    Integer.toString(type), active, tsNanos));
         }
 
         boolean report = false;
@@ -692,72 +653,31 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * Notify our observers of a new or updated interface address.
      */
     private void notifyAddressUpdated(String iface, LinkAddress address) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).addressUpdated(iface, address);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.addressUpdated(iface, address));
     }
 
     /**
      * Notify our observers of a deleted interface address.
      */
     private void notifyAddressRemoved(String iface, LinkAddress address) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).addressRemoved(iface, address);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.addressRemoved(iface, address));
     }
 
     /**
      * Notify our observers of DNS server information received.
      */
     private void notifyInterfaceDnsServerInfo(String iface, long lifetime, String[] addresses) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    mObservers.getBroadcastItem(i).interfaceDnsServerInfo(iface, lifetime,
-                        addresses);
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
-        }
+        invokeForAllObservers(o -> o.interfaceDnsServerInfo(iface, lifetime, addresses));
     }
 
     /**
      * Notify our observers of a route change.
      */
     private void notifyRouteChange(String action, RouteInfo route) {
-        final int length = mObservers.beginBroadcast();
-        try {
-            for (int i = 0; i < length; i++) {
-                try {
-                    if (action.equals("updated")) {
-                        mObservers.getBroadcastItem(i).routeUpdated(route);
-                    } else {
-                        mObservers.getBroadcastItem(i).routeRemoved(route);
-                    }
-                } catch (RemoteException | RuntimeException e) {
-                }
-            }
-        } finally {
-            mObservers.finishBroadcast();
+        if (action.equals("updated")) {
+            invokeForAllObservers(o -> o.routeUpdated(route));
+        } else {
+            invokeForAllObservers(o -> o.routeRemoved(route));
         }
     }
 
