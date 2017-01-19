@@ -1285,7 +1285,7 @@ public class Notification implements Parcelable
                 ArrayList<RemoteInput> dataOnlyInputs = new ArrayList<>();
                 RemoteInput[] previousDataInputs =
                     (RemoteInput[]) mExtras.getParcelableArray(EXTRA_DATA_ONLY_INPUTS);
-                if (previousDataInputs == null) {
+                if (previousDataInputs != null) {
                     for (RemoteInput input : previousDataInputs) {
                         dataOnlyInputs.add(input);
                     }
