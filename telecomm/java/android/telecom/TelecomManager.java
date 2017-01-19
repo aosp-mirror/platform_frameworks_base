@@ -1202,17 +1202,25 @@ public class TelecomManager {
 
     /**
      * Registers a new incoming call. A {@link ConnectionService} should invoke this method when it
-     * has an incoming call. The specified {@link PhoneAccountHandle} must have been registered
-     * with {@link #registerPhoneAccount} and the user must have enabled the corresponding
-     * {@link PhoneAccount}. This can be checked using {@link #getPhoneAccount}. Once invoked, this
-     * method will cause the system to bind to the {@link ConnectionService} associated with the
-     * {@link PhoneAccountHandle} and request additional information about the call
-     * (See {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming
+     * has an incoming call. For managed {@link ConnectionService}s, the specified
+     * {@link PhoneAccountHandle} must have been registered with {@link #registerPhoneAccount} and
+     * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
+     * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
+     * <p>
+     * Once invoked, this method will cause the system to bind to the {@link ConnectionService}
+     * associated with the {@link PhoneAccountHandle} and request additional information about the
+     * call (See {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming
      * call UI.
      * <p>
-     * A {@link SecurityException} will be thrown if either the {@link PhoneAccountHandle} does not
-     * correspond to a registered {@link PhoneAccount} or the associated {@link PhoneAccount} is not
-     * currently enabled by the user.
+     * For a managed {@link ConnectionService}, a {@link SecurityException} will be thrown if either
+     * the {@link PhoneAccountHandle} does not correspond to a registered {@link PhoneAccount} or
+     * the associated {@link PhoneAccount} is not currently enabled by the user.
+     * <p>
+     * For a self-managed {@link ConnectionService}, a {@link SecurityException} will be thrown if
+     * the {@link PhoneAccount} has {@link PhoneAccount#CAPABILITY_SELF_MANAGED} and the calling app
+     * does not have {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
+     *
      * @param phoneAccount A {@link PhoneAccountHandle} registered with
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
@@ -1379,7 +1387,8 @@ public class TelecomManager {
      * method-caller is either the user selected default dialer app or preloaded system dialer
      * app, then emergency calls will also be allowed.
      *
-     * Requires permission: {@link android.Manifest.permission#CALL_PHONE}
+     * Placing a call via a managed {@link ConnectionService} requires permission:
+     * {@link android.Manifest.permission#CALL_PHONE}
      *
      * Usage example:
      * <pre>
@@ -1396,11 +1405,20 @@ public class TelecomManager {
      *   <li>{@link #EXTRA_START_CALL_WITH_SPEAKERPHONE}</li>
      *   <li>{@link #EXTRA_START_CALL_WITH_VIDEO_STATE}</li>
      * </ul>
+     * <p>
+     * An app which implements the self-managed {@link ConnectionService} API uses
+     * {@link #placeCall(Uri, Bundle)} to inform Telecom of a new outgoing call.  A self-managed
+     * {@link ConnectionService} must include {@link #EXTRA_PHONE_ACCOUNT_HANDLE} to specify its
+     * associated {@link android.telecom.PhoneAccountHandle}.
+     *
+     * Self-managed {@link ConnectionService}s require permission
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
      *
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */
-    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
+    @RequiresPermission(anyOf = {android.Manifest.permission.CALL_PHONE,
+            android.Manifest.permission.MANAGE_OWN_CALLS})
     public void placeCall(Uri address, Bundle extras) {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1475,6 +1493,71 @@ public class TelecomManager {
         }
         return result;
     }
+
+    /**
+     * Determines whether Telecom would permit an incoming call to be added via the
+     * {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} API for the specified
+     * {@link PhoneAccountHandle}.
+     * <p>
+     * A {@link ConnectionService} may not add a call for the specified {@link PhoneAccountHandle}
+     * in the following situations:
+     * <ul>
+     *     <li>{@link PhoneAccount} does not have property
+     *     {@link PhoneAccount#CAPABILITY_SELF_MANAGED} set (i.e. it is a managed
+     *     {@link ConnectionService}), and the active or held call limit has
+     *     been reached.</li>
+     *     <li>There is an ongoing emergency call.</li>
+     * </ul>
+     *
+     * @param phoneAccountHandle The {@link PhoneAccountHandle} the call will be added for.
+     * @return {@code true} if telecom will permit an incoming call to be added, {@code false}
+     *      otherwise.
+     */
+    public boolean isIncomingCallPermitted(PhoneAccountHandle phoneAccountHandle) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.isIncomingCallPermitted(phoneAccountHandle);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error isIncomingCallPermitted", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines whether Telecom would permit an outgoing call to be placed via the
+     * {@link #placeCall(Uri, Bundle)} API for the specified {@link PhoneAccountHandle}.
+     * <p>
+     * A {@link ConnectionService} may not place a call for the specified {@link PhoneAccountHandle}
+     * in the following situations:
+     * <ul>
+     *     <li>{@link PhoneAccount} does not have property
+     *     {@link PhoneAccount#CAPABILITY_SELF_MANAGED} set (i.e. it is a managed
+     *     {@link ConnectionService}), and the active, held or ringing call limit has
+     *     been reached.</li>
+     *     <li>{@link PhoneAccount} has property {@link PhoneAccount#CAPABILITY_SELF_MANAGED} set
+     *     (i.e. it is a self-managed {@link ConnectionService} and there is an ongoing call in
+     *     another {@link ConnectionService}.</li>
+     *     <li>There is an ongoing emergency call.</li>
+     * </ul>
+     *
+     * @param phoneAccountHandle The {@link PhoneAccountHandle} the call will be added for.
+     * @return {@code true} if telecom will permit an outgoing call to be placed, {@code false}
+     *      otherwise.
+     */
+    public boolean isOutgoingCallPermitted(PhoneAccountHandle phoneAccountHandle) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.isOutgoingCallPermitted(phoneAccountHandle);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error isOutgoingCallPermitted", e);
+            }
+        }
+        return false;
+    }
+
 
     private ITelecomService getTelecomService() {
         if (mTelecomServiceOverride != null) {

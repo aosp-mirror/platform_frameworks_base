@@ -1019,6 +1019,14 @@
       phone number and device IDs, whether a call is active, and the remote number
       connected by a call.</string>
 
+    <!-- Title of an application permission.  When granted the user is giving access to a third
+         party app to route its calls through the system. -->
+    <string name="permlab_manageOwnCalls">route calls through the system</string>
+    <!-- Description of an application permission.  When granted the user is giving access to a
+         third party app to route its calls through the system. -->
+    <string name="permdesc_manageOwnCalls">Allows the app to route its calls through the system in
+        order to improve the calling experience.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readPhoneNumber">read phone number</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

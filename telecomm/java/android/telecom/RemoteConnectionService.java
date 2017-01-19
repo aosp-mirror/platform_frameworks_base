@@ -389,6 +389,15 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void setAudioRoute(String callId, int audioRoute, Session.Info sessionInfo) {
+            if (hasConnection(callId)) {
+                // TODO(3pcalls): handle this for remote connections.
+                // Likely we don't want to do anything since it doesn't make sense for self-managed
+                // connections to go through a connection mgr.
+            }
+        }
+
+        @Override
         public void onConnectionEvent(String callId, String event, Bundle extras,
                 Session.Info sessionInfo) {
             if (mConnectionById.containsKey(callId)) {

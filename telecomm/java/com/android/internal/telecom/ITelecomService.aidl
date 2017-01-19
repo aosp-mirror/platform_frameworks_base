@@ -249,4 +249,14 @@ interface ITelecomService {
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
     Intent createManageBlockedNumbersIntent();
+
+    /**
+     * @see TelecomServiceImpl#isIncomingCallPermitted
+     */
+    boolean isIncomingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
+
+    /**
+     * @see TelecomServiceImpl#isOutgoingCallPermitted
+     */
+    boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
 }
