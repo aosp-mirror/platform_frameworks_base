@@ -18,6 +18,7 @@ package android.provider;
 
 import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_CREATE_WEB_LINK_INTENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
 import static android.provider.DocumentsContract.METHOD_FIND_DOCUMENT_PATH;
@@ -43,6 +44,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.UriMatcher;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
@@ -360,6 +362,33 @@ public abstract class DocumentsProvider extends ContentProvider {
     public Path findDocumentPath(String childDocumentId, @Nullable String parentDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("findDocumentPath not supported.");
+    }
+
+    /**
+     * Creates an intent sender for a web link, if the document is web linkable.
+     * <p>
+     * Before any new permissions are granted for the linked document, a visible
+     * UI must be shown, so the user can explicitly confirm whether the permission
+     * grants are expected. The user must be able to cancel the operation.
+     * <p>
+     * Options passed as an argument may include a list of recipients, such
+     * as email addresses. The provider should reflect these options if possible,
+     * but it's acceptable to ignore them. In either case, confirmation UI must
+     * be shown before any new permission grants are granted.
+     * <p>
+     * It is all right to generate a web link without granting new permissions,
+     * if opening the link would result in a page for requesting permission
+     * access. If it's impossible then the operation must fail by throwing an exception.
+     *
+     * @param documentId the document to create a web link intent for.
+     * @param options additional information, such as list of recipients. Optional.
+     *
+     * @see DocumentsContract.Document#FLAG_WEB_LINKABLE
+     * @see android.app.PendingIntent#getIntentSender
+     */
+    public IntentSender createWebLinkIntent(String documentId, @Nullable Bundle options)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("createWebLink is not supported.");
     }
 
     /**
@@ -899,6 +928,14 @@ public abstract class DocumentsProvider extends ContentProvider {
             final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
                     newDocumentId);
             out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
+
+        } else if (METHOD_CREATE_WEB_LINK_INTENT.equals(method)) {
+            enforceWritePermissionInner(documentUri, getCallingPackage(), null);
+
+            final Bundle options = extras.getBundle(DocumentsContract.EXTRA_OPTIONS);
+            final IntentSender intentSender = createWebLinkIntent(documentId, options);
+
+            out.putParcelable(DocumentsContract.EXTRA_RESULT, intentSender);
 
         } else if (METHOD_RENAME_DOCUMENT.equals(method)) {
             enforceWritePermissionInner(documentUri, getCallingPackage(), null);
