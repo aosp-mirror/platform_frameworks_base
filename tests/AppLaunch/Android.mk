@@ -11,7 +11,7 @@ LOCAL_PACKAGE_NAME := AppLaunch
 LOCAL_CERTIFICATE := platform
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test legacy-android-test
 
 include $(BUILD_PACKAGE)
 
