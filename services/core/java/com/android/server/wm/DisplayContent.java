@@ -1437,6 +1437,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return "Display " + mDisplayId + " name=\"" + mDisplayInfo.name + "\"";
     }
 
+    /** Checks if stack with provided id is visible on this display. */
+    boolean isStackVisible(int stackId) {
+        final TaskStack stack = getStackById(stackId);
+        return (stack != null && stack.isVisible());
+    }
+
     /**
      * @return The docked stack, but only if it is visible, and {@code null} otherwise.
      */
@@ -2565,9 +2571,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     : requestedPosition >= topChildPosition;
             int targetPosition = requestedPosition;
 
-            if (toTop
-                    && mService.isStackVisibleLocked(PINNED_STACK_ID)
-                    && stack.mStackId != PINNED_STACK_ID) {
+            if (toTop && isStackVisible(PINNED_STACK_ID) && stack.mStackId != PINNED_STACK_ID) {
                 // The pinned stack is always the top most stack (always-on-top) when it is visible.
                 TaskStack topStack = mChildren.get(topChildPosition);
                 if (topStack.mStackId != PINNED_STACK_ID) {
@@ -2577,8 +2581,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // So, stack is moved just below the pinned stack.
                 // When we're adding a new stack the target is the current pinned stack position.
                 // When we're positioning an existing stack the target is the position below pinned
-                // stack, because WindowContainer#positionAt() first removes element and then adds it
-                // to specified place.
+                // stack, because WindowContainer#positionAt() first removes element and then adds
+                // it to specified place.
                 targetPosition = adding ? topChildPosition : topChildPosition - 1;
             }
 

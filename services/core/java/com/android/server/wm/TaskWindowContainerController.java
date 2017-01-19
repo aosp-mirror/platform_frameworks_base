@@ -136,8 +136,6 @@ public class TaskWindowContainerController
                 throw new IllegalArgumentException("reparent: could not find stackId=" + stackId);
             }
             mContainer.reparent(stack, position);
-            final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.setLayoutNeeded();
             mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }

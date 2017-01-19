@@ -17,13 +17,17 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,6 +90,33 @@ public class TaskStackContainersTests extends WindowTestsBase {
         taskStackContainer.positionChildAt(taskStackContainer.mChildren.size() - 1, stack1, false);
         assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
         assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), pinnedStack);
+    }
+
+    @Test
+    public void testReparentBetweenDisplays() throws Exception {
+        // Create first stack on primary display.
+        final TaskStack stack1 = createTaskStackOnDisplay(sDisplayContent);
+        final TestTaskWindowContainerController taskController =
+                new TestTaskWindowContainerController(stack1.mStackId);
+        final TestTask task1 = (TestTask) taskController.mContainer;
+        task1.mOnDisplayChangedCalled = false;
+
+        // Create second display and put second stack on it.
+        final Display display = new Display(DisplayManagerGlobal.getInstance(),
+                sDisplayContent.getDisplayId() + 1, new DisplayInfo(),
+                DEFAULT_DISPLAY_ADJUSTMENTS);
+        final DisplayContent dc = new DisplayContent(display, sWm, sLayersController,
+                new WallpaperController(sWm));
+        sWm.mRoot.addChild(dc, 1);
+        final TaskStack stack2 = createTaskStackOnDisplay(dc);
+
+        // Reparent and check state.DisplayContent.java:2572
+        sWm.moveStackToDisplay(stack1.mStackId, dc.getDisplayId());
+        assertEquals(dc, stack1.getDisplayContent());
+        final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
+        final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
+        assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
+        assertTrue(task1.mOnDisplayChangedCalled);
     }
 
     private TaskStack addPinnedStack() {
