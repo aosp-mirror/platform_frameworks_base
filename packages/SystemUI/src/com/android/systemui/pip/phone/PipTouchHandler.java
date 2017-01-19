@@ -87,6 +87,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     // Allow the PIP to be "docked" slightly offscreen
     private boolean mEnableMinimizing = true;
 
+    private final Rect mStableInsets = new Rect();
     private final Rect mPinnedStackBounds = new Rect();
     private final Rect mBoundedPinnedStackBounds = new Rect();
     private ValueAnimator mPinnedStackBoundsAnimator = null;
@@ -421,7 +422,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         mContext.getDisplay().getRealSize(displaySize);
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
                 mPinnedStackBounds);
-        mSnapAlgorithm.applyMinimizedOffset(toBounds, mBoundedPinnedStackBounds, displaySize);
+        mSnapAlgorithm.applyMinimizedOffset(toBounds, mBoundedPinnedStackBounds, displaySize,
+                mStableInsets);
         mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
                 toBounds, MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN,
                 mUpdatePinnedStackBoundsListener);
@@ -528,6 +530,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 if (updatePinnedStackBounds) {
                     mPinnedStackBounds.set(info.bounds);
                 }
+                mWindowManager.getStableInsets(info.displayId, mStableInsets);
                 mBoundedPinnedStackBounds.set(mWindowManager.getPictureInPictureMovementBounds(
                         info.displayId));
             }

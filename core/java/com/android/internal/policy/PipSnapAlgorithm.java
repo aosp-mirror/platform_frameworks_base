@@ -128,11 +128,14 @@ public class PipSnapAlgorithm {
     /**
      * Applies the offset to the {@param stackBounds} to adjust it to a minimized state.
      */
-    public void applyMinimizedOffset(Rect stackBounds, Rect movementBounds, Point displaySize) {
+    public void applyMinimizedOffset(Rect stackBounds, Rect movementBounds, Point displaySize,
+            Rect stableInsets) {
         if (stackBounds.left <= movementBounds.centerX()) {
-            stackBounds.offsetTo(-stackBounds.width() + mMinimizedVisibleSize, stackBounds.top);
+            stackBounds.offsetTo(stableInsets.left + mMinimizedVisibleSize - stackBounds.width(),
+                    stackBounds.top);
         } else {
-            stackBounds.offsetTo(displaySize.x - mMinimizedVisibleSize, stackBounds.top);
+            stackBounds.offsetTo(displaySize.x - stableInsets.right - mMinimizedVisibleSize,
+                    stackBounds.top);
         }
     }
 
