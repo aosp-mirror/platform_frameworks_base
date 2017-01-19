@@ -328,22 +328,10 @@ public class ViewOverlay {
             }
         }
 
-        /**
-         * @hide
-         */
         @Override
-        public void damageChild(View child, final Rect dirty) {
-            if (mHostView != null) {
-                // Note: This is not a "fast" invalidation. Would be nice to instead invalidate
-                // using DisplayList properties and a dirty rect instead of causing a real
-                // invalidation of the host view
-                int left = child.mLeft;
-                int top = child.mTop;
-                if (!child.getMatrix().isIdentity()) {
-                    child.transformRect(dirty);
-                }
-                dirty.offset(left, top);
-                mHostView.invalidate(dirty);
+        public void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
+            if (mHostView != null && mHostView.getParent() != null) {
+                mHostView.getParent().onDescendantInvalidated(mHostView, target);
             }
         }
 

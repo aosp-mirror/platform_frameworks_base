@@ -219,7 +219,27 @@ public class ViewInvalidateTest {
     public void testInvalidateChild_childHardwareLayer() throws Throwable {
         WidgetTestUtils.runOnMainAndDrawSync(mActivityRule, mParent, () -> {
             // do in runnable, so tree won't be dirty
-            mChild.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        });
+
+        mActivityRule.runOnUiThread(() -> {
+            validateInvalFlags(mParent,
+                    View.PFLAG_DRAWING_CACHE_VALID,
+                    View.PFLAG_DRAWN);
+
+            mParent.invalidateChild(mChild, new Rect(0, 0, 1, 1));
+
+            validateInvalFlags(mParent,
+                    View.PFLAG_DIRTY,
+                    View.PFLAG_DRAWN); // Note: note invalidated, since HW damage handled in native
+        });
+    }
+
+    @Test
+    public void testInvalidateChild_childSoftwareLayer() throws Throwable {
+        WidgetTestUtils.runOnMainAndDrawSync(mActivityRule, mParent, () -> {
+            // do in runnable, so tree won't be dirty
+            mParent.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         });
 
         mActivityRule.runOnUiThread(() -> {
@@ -232,7 +252,7 @@ public class ViewInvalidateTest {
             validateInvalFlags(mParent,
                     View.PFLAG_DIRTY,
                     View.PFLAG_DRAWN,
-                    View.PFLAG_INVALIDATED);
+                    View.PFLAG_INVALIDATED); // Note: invalidated, since SW damage handled here
         });
     }
 

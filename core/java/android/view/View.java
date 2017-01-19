@@ -14334,16 +14334,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void damageInParent() {
-        final AttachInfo ai = mAttachInfo;
-        final ViewParent p = mParent;
-        if (p != null && ai != null) {
-            final Rect r = ai.mTmpInvalRect;
-            r.set(0, 0, mRight - mLeft, mBottom - mTop);
-            if (mParent instanceof ViewGroup) {
-                ((ViewGroup) mParent).damageChild(this, r);
-            } else {
-                mParent.invalidateChild(this, r);
-            }
+        if (mParent != null && mAttachInfo != null) {
+            mParent.onDescendantInvalidated(this, this);
         }
     }
 
