@@ -297,4 +297,11 @@
          If < 0, uses the value from HardwarePropertiesManager#getDeviceTemperatures. -->
     <integer name="config_warningTemperature">-1</integer>
 
+    <!-- Accessibility actions -->
+    <item type="id" name="action_split_task_to_left" />
+    <item type="id" name="action_split_task_to_right" />
+    <item type="id" name="action_split_task_to_top" />
+    <item type="id" name="action_open" />
+    <item type="id" name="action_dimiss" />
+
 </resources>

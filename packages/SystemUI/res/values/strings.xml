@@ -786,6 +786,16 @@
     <string name="recents_multistack_add_stack_dialog_split_vertical">Split Vertical</string>
     <!-- Recents: MultiStack add stack split custom radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_custom">Split Custom</string>
+    <!-- Recents: Accessibility dismiss label -->
+    <string name="recents_accessibility_dismissed">Dismiss</string>
+    <!-- Recents: Accessibility open label -->
+    <string name="recents_accessibility_open">Open</string>
+    <!-- Recents: Accessibility split to the top -->
+    <string name="recents_accessibility_split_screen_top">Split screen to the top</string>
+    <!-- Recents: Accessibility split to the left -->
+    <string name="recents_accessibility_split_screen_left">Split screen to the left</string>
+    <!-- Recents: Accessibility split to the right -->
+    <string name="recents_accessibility_split_screen_right">Split screen to the right</string>
 
     <!-- Fully qualified activity class names to be blacklisted in Recents, add package names into overlay as needed -->
     <string-array name="recents_blacklist_array">
