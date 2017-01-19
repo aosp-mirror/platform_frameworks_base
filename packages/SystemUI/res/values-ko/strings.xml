@@ -187,8 +187,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"화면을 잠급니다."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"설정"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"최근 사용"</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"업무용 잠금 화면"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"닫기"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi가 사용 중지되었습니다."</string>
@@ -442,10 +441,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"펼치기"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"접기"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 최근 사용을 길게 터치하세요."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"확인"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"거부"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>을(를) 숨기시겠습니까?"</string>
@@ -512,28 +509,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"사용"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"사용 안함"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"알림"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"더 이상 다음의 알림을 받지 않습니다."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"다음 채널의 <xliff:g id="APP">%s</xliff:g> 알림"</string>
+    <string name="min_importance" msgid="7559703098688382595">"낮음"</string>
+    <string name="low_importance" msgid="6891335321576225228">"중간"</string>
+    <string name="default_importance" msgid="6400766013567512061">"높음"</string>
+    <string name="high_importance" msgid="730741630855788381">"긴급"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"소리나 시각적인 방해 없음"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"조용히 표시"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"소리로 알림"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"소리 및 화면 표시로 알림"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 관리"</string>

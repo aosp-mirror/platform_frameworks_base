@@ -185,8 +185,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"লক স্ক্রীন।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"সেটিংস"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"এক নজরে৷"</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"কর্মস্থলের স্ক্রীন লক"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"বন্ধ করুন"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi বন্ধ হয়েছে।"</string>
@@ -440,10 +439,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"প্রসারিত করুন"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"সঙ্কুচিত করুন"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্রীন পিন করা হয়েছে"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"বুঝেছি"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"না থাক"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> লুকাবেন?"</string>
@@ -510,28 +507,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"চালু আছে"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"বন্ধ আছে"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"পাওয়ার বিজ্ঞপ্তির নিয়ন্ত্রণগুলি ব্যহবার করে, আপনি কোনো অ্যাপ্লিকেশানের বিজ্ঞপ্তির জন্য ০ থেকে ৫ পর্যন্ত একটি গুরুত্বের লেভেলকে সেট করতে পারবেন৷ \n\n"<b>"লেভেল ৫"</b>" \n- বিজ্ঞপ্তি তালিকার শীর্ষে দেখায় \n- পূর্ণ স্ক্রীনের বাধাকে অনুমতি দেয় \n- সর্বদা স্ক্রীনে উপস্থিত হয় \n\n"<b>"লেভেল ৪"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- সর্বদা স্ক্রীনে উপস্থিত হয় \n\n"<b>"লেভেল ৩"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n\n"<b>"লেভেল ২"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n- কখনই শব্দ এবং কম্পন করে না \n\n"<b>"লেভেল ১"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n- কখনই শব্দ এবং কম্পন করে না \n- লক স্ক্রীন এবং স্থিতি দন্ড থেকে লুকায় \n- বিজ্ঞপ্তি তালিকার নীচের দিকে দেখায় \n\n"<b>"লেভেল ০"</b>" \n- অ্যাপ্লিকেশান থেকে সমস্ত বিজ্ঞপ্তিকে অবরূদ্ধ করে"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"বিজ্ঞপ্তি"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"আপনি আর এই বিজ্ঞপ্তিগুলি পাবেন না।"</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"এর জন্য <xliff:g id="APP">%s</xliff:g> বিজ্ঞপ্তি"</string>
+    <string name="min_importance" msgid="7559703098688382595">"নিম্ন"</string>
+    <string name="low_importance" msgid="6891335321576225228">"মাঝারি"</string>
+    <string name="default_importance" msgid="6400766013567512061">"উচ্চ"</string>
+    <string name="high_importance" msgid="730741630855788381">"জরুরি"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"কোনো শব্দ বা ভিজ্যুয়াল বাধা নেই"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"নিঃশব্দে দেখান"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"শব্দ করে"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"শব্দ করে ও স্ক্রীনে ভেসে ওঠে"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> বিজ্ঞপ্তির নিয়ন্ত্রণগুলি"</string>

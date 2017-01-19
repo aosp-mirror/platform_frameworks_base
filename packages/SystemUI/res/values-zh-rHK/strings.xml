@@ -187,8 +187,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"上鎖畫面。"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"設定"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"概覽"</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"工作螢幕鎖定"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"關閉"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi 已關閉。"</string>
@@ -442,8 +441,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
-    <string name="screen_pinning_description" msgid="8909878447196419623">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description" msgid="8909878447196419623">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏 <xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
@@ -511,7 +510,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"關閉"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"通知控制項讓您設定應用程式通知的重要性 (0 至 5 級)。\n\n"<b>"第 5 級"</b>" \n- 在通知清單頂部顯示 \n- 允許全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 4 級"</b>" \n- 阻止全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 3 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n\n"<b>"第 2 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n\n"<b>"第 1 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n- 從上鎖畫面和狀態列中隱藏 \n- 在通知清單底部顯示 \n\n"<b>"第 0 級"</b>" \n- 封鎖所有應用程式通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
-    <string name="notification_channel_disabled" msgid="5805874247999578073">"你不會再收到這類通知。"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"您不會再收到這些通知。"</string>
     <string name="notification_importance_header_app" msgid="3572576545406258751">"以下頻道的「<xliff:g id="APP">%s</xliff:g>」通知："</string>
     <string name="min_importance" msgid="7559703098688382595">"低"</string>
     <string name="low_importance" msgid="6891335321576225228">"中"</string>
@@ -520,7 +519,7 @@
     <string name="notification_importance_min" msgid="3237794091374404537">"不發出音效或顯示通知"</string>
     <string name="notification_importance_low" msgid="8929105501798019743">"顯示通知但不發出音效"</string>
     <string name="notification_importance_default" msgid="9025125660733917469">"發出音效"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"發出音效並在畫面上彈出通知"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"發出音效並在螢幕上彈出通知"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」通知控制項"</string>

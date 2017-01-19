@@ -185,8 +185,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Khiya isikrini."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Izilungiselelo"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Buka konke."</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Ukukhiya isikrini somsebenzi"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Vala"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"I-Wifi ivaliwe."</string>
@@ -440,10 +439,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Nweba"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Goqa"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Isikrini siphiniwe"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Lokhu kuyigcina ibukeka uze ususe ukuphina. Thinta uphinde ubambe okuthi Emuva Nokubuka konke ukuze ususe ukuphina."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Lokhu kuyigcina ibukeka uze ususe ukuphina. Thinta uphinde ubambe Ukubuka konke ukuze ususe ukuphina."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ngiyitholile"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Cha ngiyabonga"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Fihla i-<xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -510,28 +507,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Vuliwe"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Valiwe"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ngezilawuli zesaziso zamandla, ungasetha ileveli ebalulekile kusuka ku-0 kuya ku-5 kusuka kuzaziso zohlelo lokusebenza. \n\n"<b>"Ileveli 5"</b>" \n- Ibonisa phezulu kuhlu lwesaziso \n- Vumela ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 4"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 3"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n\n"<b>"Ileveli 2"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo nokudlidliza \n\n"<b>"Ileveli 1"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo noma ukudlidliza \n- Fihla kusuka kusikrini sokukhiya nebha yesimo \n- Bonisa phansi kohlu lwesaziso \n\n"<b>"Ileveli 0"</b>" \n- Vimbela zonke izaziso kusuka kuhlelo lokusebenza"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Izaziso"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"Ngeke usathola lezi zaziso."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> izaziso ze-"</string>
+    <string name="min_importance" msgid="7559703098688382595">"Phansi"</string>
+    <string name="low_importance" msgid="6891335321576225228">"Okulingene"</string>
+    <string name="default_importance" msgid="6400766013567512061">"Okuphezulu"</string>
+    <string name="high_importance" msgid="730741630855788381">"Okuphuthumayo"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"Awukho umsindo noma ukuphazamiseka okubukwayo"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"Bonisa ngokuthulile"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"Yenza umsindo"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"Yenza umsindo ne-pop kusikrini"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Izilungiselelo eziningi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Kwenziwe"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> izilawuli zasaziso"</string>

@@ -186,8 +186,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Zaključan ekran."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Postavke"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Pregled."</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Zaključan ekran radnog profila"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Zatvori"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi je isključen."</string>
@@ -442,10 +441,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je prikačen"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Nazad."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran ostaje prikzan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Pregled."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Jasno mi je"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -514,28 +511,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Uključeno"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Isključeno"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Obavještenja"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"Nećete više primati ova obavještenja."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"Obavještenje aplikacije <xliff:g id="APP">%s</xliff:g> za"</string>
+    <string name="min_importance" msgid="7559703098688382595">"Niska"</string>
+    <string name="low_importance" msgid="6891335321576225228">"Srednja"</string>
+    <string name="default_importance" msgid="6400766013567512061">"Visoka"</string>
+    <string name="high_importance" msgid="730741630855788381">"Hitno"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"Bez ometanja zvukom ili prikazivanjem"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"Prikaži bez zvuka"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"Pusti zvuk"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"Pusti zvuk i prikaži na ekranu"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole <xliff:g id="APP_NAME">%1$s</xliff:g> obavještenja"</string>

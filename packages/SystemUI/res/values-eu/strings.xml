@@ -187,8 +187,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantaila blokeatzeko aukera."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Ezarpenak"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Ikuspegi orokorra."</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Laneko pantaila blokeatua"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Itxi"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi konexioa desaktibatu egin da."</string>
@@ -442,10 +441,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Zabaldu"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Tolestu"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantaila ainguratuta dago"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Ikuspegi orokorra\" botoia."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ados"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ez, eskerrik asko"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ezkutatu nahi duzu?"</string>
@@ -512,28 +509,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Aktibatuta"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desaktibatuta"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Jakinarazpenak"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> aplikazioaren jakinarazpenak"</string>
+    <string name="min_importance" msgid="7559703098688382595">"Txikia"</string>
+    <string name="low_importance" msgid="6891335321576225228">"Ertaina"</string>
+    <string name="default_importance" msgid="6400766013567512061">"Handia"</string>
+    <string name="high_importance" msgid="730741630855788381">"Premiazkoa"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"Ez egin soinurik eta ez erakutsi"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"Erakutsi soinurik egin gabe"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"Egin soinua"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"Egin soinua eta erakutsi pantailan"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>

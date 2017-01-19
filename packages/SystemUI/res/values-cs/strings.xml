@@ -189,8 +189,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Obrazovka uzamčení"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Nastavení"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Přehled"</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Obrazovka uzamčení pracovního profilu"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Zavřít"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Připojení Wi-Fi je vypnuto."</string>
@@ -446,10 +445,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozbalit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sbalit"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, děkuji"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skrýt <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -516,28 +513,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Zapnuto"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Vypnuto"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"Tato oznámení již nebudete dostávat."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"Oznámení aplikace <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="min_importance" msgid="7559703098688382595">"Nízká"</string>
+    <string name="low_importance" msgid="6891335321576225228">"Střední"</string>
+    <string name="default_importance" msgid="6400766013567512061">"Vysoká"</string>
+    <string name="high_importance" msgid="730741630855788381">"Naléhavá"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"Bez zvukového a vizuálního vyrušení"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"Zobrazovat tiše"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"Vydat zvukový signál"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"Vydat zvukový signál a vyskočit na obrazovku"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Další nastavení"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Nastavení oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
