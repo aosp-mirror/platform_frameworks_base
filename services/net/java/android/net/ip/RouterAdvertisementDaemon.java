@@ -22,6 +22,7 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructGroupReq;
@@ -563,6 +564,7 @@ public class RouterAdvertisementDaemon {
     private boolean createSocket() {
         final int SEND_TIMEOUT_MS = 300;
 
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_NEIGHBOR);
         try {
             mSocket = Os.socket(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6);
             // Setting SNDTIMEO is purely for defensive purposes.
@@ -574,6 +576,8 @@ public class RouterAdvertisementDaemon {
         } catch (ErrnoException | IOException e) {
             Log.e(TAG, "Failed to create RA daemon socket: " + e);
             return false;
+        } finally {
+            TrafficStats.setThreadStatsTag(oldTag);
         }
 
         return true;

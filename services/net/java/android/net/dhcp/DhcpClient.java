@@ -30,6 +30,7 @@ import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
@@ -303,6 +304,7 @@ public class DhcpClient extends StateMachine {
     }
 
     private boolean initUdpSocket() {
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_DHCP);
         try {
             mUdpSock = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_REUSEADDR, 1);
@@ -314,6 +316,8 @@ public class DhcpClient extends StateMachine {
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating UDP socket", e);
             return false;
+        } finally {
+            TrafficStats.setThreadStatsTag(oldTag);
         }
         return true;
     }
