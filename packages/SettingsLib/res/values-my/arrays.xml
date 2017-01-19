@@ -109,14 +109,14 @@
     <item msgid="8883739882299884241">"စတီရီယို"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"ပိုမိုနှစ်သက်သည့် အသံအရည်အသွေး (၉၉၀kbps/၉၀၉kbps)"</item>
+    <item msgid="2944889121850394020">"လိုလားသည့်အသံအရည်အသွေး (၉၉၀kbps/၉၀၉kbps)"</item>
     <item msgid="138837449700903545">"ပုံမှန် (၆၆၀kbps/၆၀၆kbps)"</item>
-    <item msgid="4777177307869441982">"ပိုမိုနှစ်သက်သည့် မြန်နှုန်း (၃၃၀kbps/၃၀၃kbps)"</item>
+    <item msgid="4777177307869441982">"လိုလားသည့် မြန်နှုန်း (၃၃၀kbps/၃၀၃kbps)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"ပိုမိုနှစ်သက်သည့် အသံအရည်အသွေး (၉၉၀kbps/၉၀၉kbps)"</item>
+    <item msgid="172302906231378902">"လိုလားသည့်အသံအရည်အသွေး (၉၉၀kbps/၉၀၉kbps)"</item>
     <item msgid="9091111147684472529">"ပုံမှန် (၆၆၀kbps/၆၀၆kbps)"</item>
-    <item msgid="3367904477834831032">"ပိုမိုနှစ်သက်သည့် ချိတ်ဆက်မှု (၃၃၀kbps/၃၀၃kbps)"</item>
+    <item msgid="3367904477834831032">"လိုလားသည့် ချိတ်ဆက်မှု (၃၃၀kbps/၃၀၃kbps)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ပိတ်ပါ"</item>

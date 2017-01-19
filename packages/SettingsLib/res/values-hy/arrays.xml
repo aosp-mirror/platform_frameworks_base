@@ -109,14 +109,14 @@
     <item msgid="8883739882299884241">"Ստերեո"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"Նախընտրելի է ձայնի որակը (990 կբ/վ / 909 կբ/վ)"</item>
+    <item msgid="2944889121850394020">"Նախընտրած ձայնի որակ (990 կբ/վ / 909 կբ/վ)"</item>
     <item msgid="138837449700903545">"Ստանդարտ (660 կբ/վ / 606 կբ/վ)"</item>
-    <item msgid="4777177307869441982">"Նախընտրելի է կապը (330 կբ/վ / 303 կբ/վ)"</item>
+    <item msgid="4777177307869441982">"Նախընտրած կապ (330 կբ/վ / 303 կբ/վ)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"Նախընտրելի է ձայնի որակը (990 կբ/վ / 909 կբ/վ)"</item>
+    <item msgid="172302906231378902">"Նախընտրած ձայնի որակ (990 կբ/վ / 909 կբ/վ)"</item>
     <item msgid="9091111147684472529">"Ստանդարտ (660 կբ/վ / 606 կբ/վ)"</item>
-    <item msgid="3367904477834831032">"Նախընտրելի է կապը (330 կբ/վ / 303 կբ/վ)"</item>
+    <item msgid="3367904477834831032">"Նախընտրած կապ (330 կբ/վ / 303 կբ/վ)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Անջատված է"</item>

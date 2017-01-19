@@ -109,12 +109,12 @@
     <item msgid="8883739882299884241">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"Calidad son. pref. (990 kbps / 909 kbps)"</item>
+    <item msgid="2944889121850394020">"Calidad sonido pref. (990 kbps/909 kbps)"</item>
     <item msgid="138837449700903545">"Estándar (660 kbps / 606 kbps)"</item>
     <item msgid="4777177307869441982">"Conexión preferida (330 kbps / 303 kbps)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"Calidad son. pref. (990 kbps / 909 kbps)"</item>
+    <item msgid="172302906231378902">"Calidad sonido pref. (990 kbps/909 kbps)"</item>
     <item msgid="9091111147684472529">"Estándar (660 kbps / 606 kbps)"</item>
     <item msgid="3367904477834831032">"Conexión preferida (330 kbps / 303 kbps)"</item>
   </string-array>

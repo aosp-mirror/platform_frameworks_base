@@ -88,15 +88,15 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
     <item msgid="6694044160540313386">"Стандардно"</item>
-    <item msgid="5618929009984956469">"16 бита/примерок"</item>
-    <item msgid="3412640499234627248">"24 бита/примерок"</item>
-    <item msgid="121583001492929387">"32 бита/примерок"</item>
+    <item msgid="5618929009984956469">"16 бита/семпл"</item>
+    <item msgid="3412640499234627248">"24 бита/семпл"</item>
+    <item msgid="121583001492929387">"32 бита/семпл"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
     <item msgid="5091076677792306320">"Стандардно"</item>
-    <item msgid="4726688794884191540">"16 бита/примерок"</item>
-    <item msgid="305344756485516870">"24 бита/примерок"</item>
-    <item msgid="244568657919675099">"32 бита/примерок"</item>
+    <item msgid="4726688794884191540">"16 бита/семпл"</item>
+    <item msgid="305344756485516870">"24 бита/семпл"</item>
+    <item msgid="244568657919675099">"32 бита/семпл"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
     <item msgid="13423709606339855">"Стандардно"</item>
@@ -109,12 +109,12 @@
     <item msgid="8883739882299884241">"Стерео"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"Прет. квалитет на звук (990kbps/909kbps)"</item>
+    <item msgid="2944889121850394020">"Претпочитан квалитет (990kbps/909kbps)"</item>
     <item msgid="138837449700903545">"Стандардно (660kbps/606kbps)"</item>
     <item msgid="4777177307869441982">"Претпочитана врска (330kbps/303kbps)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"Прет. квалитет на звук (990kbps/909kbps)"</item>
+    <item msgid="172302906231378902">"Претпочитан квалитет (990kbps/909kbps)"</item>
     <item msgid="9091111147684472529">"Стандардно (660kbps/606kbps)"</item>
     <item msgid="3367904477834831032">"Претпочитана врска (330kbps/303kbps)"</item>
   </string-array>

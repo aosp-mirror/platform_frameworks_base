@@ -172,8 +172,8 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec de áudio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Selecionar Codec A2DP Bluetooth preferido"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frequência de amostragem de áudio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Selecionar Frequência de amostragem de codec A2DP Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Taxa de amostragem de áudio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Selecionar Taxa de amostragem de codec A2DP Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits por amostra de áudio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"Selecionar Bits por amostra de codec A2DP Bluetooth preferido"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modo de canal áudio Bluetooth"</string>

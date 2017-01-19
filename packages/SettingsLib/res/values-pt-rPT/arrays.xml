@@ -100,12 +100,12 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
     <item msgid="13423709606339855">"Predefinição"</item>
-    <item msgid="4106832974775067314">"Monocromático"</item>
+    <item msgid="4106832974775067314">"Mono"</item>
     <item msgid="5571632958424639155">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
     <item msgid="8128478683963250130">"Predefinição"</item>
-    <item msgid="8900559293912978337">"Monocromático"</item>
+    <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
