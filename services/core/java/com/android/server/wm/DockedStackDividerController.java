@@ -835,6 +835,11 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     @Override
+    public boolean isAttachedToDisplay() {
+        return mDisplayContent != null;
+    }
+
+    @Override
     public void getDimBounds(Rect outBounds) {
         // This dim layer user doesn't need this.
     }
