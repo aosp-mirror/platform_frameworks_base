@@ -1544,9 +1544,6 @@ public class Vpn {
         public void exit() {
             // We assume that everything is reset after stopping the daemons.
             interrupt();
-            for (LocalSocket socket : mSockets) {
-                IoUtils.closeQuietly(socket);
-            }
             agentDisconnect();
             try {
                 mContext.unregisterReceiver(mBroadcastReceiver);
@@ -1559,8 +1556,26 @@ public class Vpn {
             Log.v(TAG, "Waiting");
             synchronized (TAG) {
                 Log.v(TAG, "Executing");
-                execute();
-                monitorDaemons();
+                try {
+                    execute();
+                    monitorDaemons();
+                    interrupted(); // Clear interrupt flag if execute called exit.
+                } catch (InterruptedException e) {
+                } finally {
+                    for (LocalSocket socket : mSockets) {
+                        IoUtils.closeQuietly(socket);
+                    }
+                    // This sleep is necessary for racoon to successfully complete sending delete
+                    // message to server.
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                    }
+                    for (String daemon : mDaemons) {
+                        SystemService.stop(daemon);
+                    }
+                }
+                agentDisconnect();
             }
         }
 
@@ -1759,18 +1774,6 @@ public class Vpn {
                 Log.i(TAG, "Aborting", e);
                 updateState(DetailedState.FAILED, e.getMessage());
                 exit();
-            } finally {
-                // Kill the daemons if they fail to stop.
-                if (!initFinished) {
-                    for (String daemon : mDaemons) {
-                        SystemService.stop(daemon);
-                    }
-                }
-
-                // Do not leave an unstable state.
-                if (!initFinished || mNetworkInfo.getDetailedState() == DetailedState.CONNECTING) {
-                    agentDisconnect();
-                }
             }
         }
 
@@ -1778,28 +1781,17 @@ public class Vpn {
          * Monitor the daemons we started, moving to disconnected state if the
          * underlying services fail.
          */
-        private void monitorDaemons() {
+        private void monitorDaemons() throws InterruptedException{
             if (!mNetworkInfo.isConnected()) {
                 return;
             }
-
-            try {
-                while (true) {
-                    Thread.sleep(2000);
-                    for (int i = 0; i < mDaemons.length; i++) {
-                        if (mArguments[i] != null && SystemService.isStopped(mDaemons[i])) {
-                            return;
-                        }
+            while (true) {
+                Thread.sleep(2000);
+                for (int i = 0; i < mDaemons.length; i++) {
+                    if (mArguments[i] != null && SystemService.isStopped(mDaemons[i])) {
+                        return;
                     }
                 }
-            } catch (InterruptedException e) {
-                Log.d(TAG, "interrupted during monitorDaemons(); stopping services");
-            } finally {
-                for (String daemon : mDaemons) {
-                    SystemService.stop(daemon);
-                }
-
-                agentDisconnect();
             }
         }
     }
