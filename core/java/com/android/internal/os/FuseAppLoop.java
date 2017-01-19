@@ -18,33 +18,37 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.IProxyFileDescriptorCallback;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.ThreadFactory;
 
 public class FuseAppLoop {
     private static final String TAG = "FuseAppLoop";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final int ROOT_INODE = 1;
     private static final int MIN_INODE = 2;
+    private static final ThreadFactory sDefaultThreadFactory = new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, TAG);
+        }
+    };
 
     private final Object mLock = new Object();
-    private final File mParent;
+    private final int mMountPointId;
+    private final Thread mThread;
 
     @GuardedBy("mLock")
     private final SparseArray<CallbackEntry> mCallbackMap = new SparseArray<>();
-
-    @GuardedBy("mLock")
-    private boolean mActive = true;
 
     /**
      * Sequential number can be used as file name and inode in AppFuse.
@@ -53,35 +57,40 @@ public class FuseAppLoop {
     @GuardedBy("mLock")
     private int mNextInode = MIN_INODE;
 
-    private FuseAppLoop(@NonNull File parent) {
-        mParent = parent;
-    }
-
-    public static @NonNull FuseAppLoop open(
-            @NonNull File parent, @NonNull ParcelFileDescriptor fd) {
-        Preconditions.checkNotNull(parent);
-        Preconditions.checkNotNull(fd);
-        final FuseAppLoop bridge = new FuseAppLoop(parent);
+    private FuseAppLoop(
+            int mountPointId, @NonNull ParcelFileDescriptor fd, @Nullable ThreadFactory factory) {
+        mMountPointId = mountPointId;
         final int rawFd = fd.detachFd();
-        new Thread(new Runnable() {
+        if (factory == null) {
+            factory = sDefaultThreadFactory;
+        }
+        mThread = factory.newThread(new Runnable() {
             @Override
             public void run() {
-                bridge.native_start_loop(rawFd);
+                // rawFd is closed by native_start_loop. Java code does not need to close it.
+                native_start_loop(rawFd);
             }
-        }, TAG).start();
-        return bridge;
+        });
     }
 
-    public @NonNull ParcelFileDescriptor openFile(int mode, IProxyFileDescriptorCallback callback)
+    public static @NonNull FuseAppLoop open(int mountPointId, @NonNull ParcelFileDescriptor fd,
+            @Nullable ThreadFactory factory) {
+        Preconditions.checkNotNull(fd);
+        final FuseAppLoop loop = new FuseAppLoop(mountPointId, fd, factory);
+        loop.mThread.start();
+        return loop;
+    }
+
+    public int registerCallback(@NonNull ProxyFileDescriptorCallback callback)
             throws UnmountedException, IOException {
-        int id;
+        if (mThread.getState() == Thread.State.TERMINATED) {
+            throw new UnmountedException();
+        }
         synchronized (mLock) {
-            if (!mActive) {
-                throw new UnmountedException();
-            }
             if (mCallbackMap.size() >= Integer.MAX_VALUE - MIN_INODE) {
                 throw new IOException("Too many opened files.");
             }
+            int id;
             while (true) {
                 id = mNextInode;
                 mNextInode++;
@@ -92,24 +101,17 @@ public class FuseAppLoop {
                     break;
                 }
             }
-
-            // Register callback after we succeed to create pfd.
             mCallbackMap.put(id, new CallbackEntry(callback));
-        }
-        try {
-            return ParcelFileDescriptor.open(new File(mParent, String.valueOf(id)), mode);
-        } catch (FileNotFoundException error) {
-            synchronized (mLock) {
-                mCallbackMap.remove(id);
-            }
-            throw error;
+            return id;
         }
     }
 
-    public @Nullable File getMountPoint() {
-        synchronized (mLock) {
-            return mActive ? mParent : null;
-        }
+    public void unregisterCallback(int id) {
+        mCallbackMap.remove(id);
+    }
+
+    public int getMountPointId() {
+        return mMountPointId;
     }
 
     private CallbackEntry getCallbackEntryOrThrowLocked(long inode) throws ErrnoException {
@@ -128,7 +130,7 @@ public class FuseAppLoop {
             try {
                 return getCallbackEntryOrThrowLocked(inode).callback.onGetSize();
             } catch (ErrnoException exp) {
-                return -exp.errno;
+                return getError(exp);
             }
         }
     }
@@ -147,7 +149,7 @@ public class FuseAppLoop {
                 // file twice.
                 return (int) inode;
             } catch (ErrnoException exp) {
-                return -exp.errno;
+                return getError(exp);
             }
         }
     }
@@ -160,7 +162,7 @@ public class FuseAppLoop {
                 getCallbackEntryOrThrowLocked(inode).callback.onFsync();
                 return 0;
             } catch (ErrnoException exp) {
-                return -exp.errno;
+                return getError(exp);
             }
         }
     }
@@ -169,12 +171,14 @@ public class FuseAppLoop {
     @SuppressWarnings("unused")
     private int onRelease(long inode) {
         synchronized(mLock) {
-            mCallbackMap.remove(checkInode(inode));
-            if (mCallbackMap.size() == 0) {
-                mActive = false;
-                return -1;
+            try {
+                getCallbackEntryOrThrowLocked(inode).callback.onRelease();
+                return 0;
+            } catch (ErrnoException exp) {
+                return getError(exp);
+            } finally {
+                mCallbackMap.remove(checkInode(inode));
             }
-            return 0;
         }
     }
 
@@ -185,7 +189,7 @@ public class FuseAppLoop {
             try {
                 return getCallbackEntryOrThrowLocked(inode).callback.onRead(offset, size, bytes);
             } catch (ErrnoException exp) {
-                return -exp.errno;
+                return getError(exp);
             }
         }
     }
@@ -197,9 +201,15 @@ public class FuseAppLoop {
             try {
                 return getCallbackEntryOrThrowLocked(inode).callback.onWrite(offset, size, bytes);
             } catch (ErrnoException exp) {
-                return -exp.errno;
+                return getError(exp);
             }
         }
+    }
+
+    private static int getError(@NonNull ErrnoException exp) {
+        // Should not return ENOSYS because the kernel stops
+        // dispatching the FUSE action once FUSE implementation returns ENOSYS for the action.
+        return exp.errno != OsConstants.ENOSYS ? -exp.errno : -OsConstants.EIO;
     }
 
     native boolean native_start_loop(int fd);
@@ -212,9 +222,9 @@ public class FuseAppLoop {
     public static class UnmountedException extends Exception {}
 
     private static class CallbackEntry {
-        final IProxyFileDescriptorCallback callback;
+        final ProxyFileDescriptorCallback callback;
         boolean opened;
-        CallbackEntry(IProxyFileDescriptorCallback callback) {
+        CallbackEntry(ProxyFileDescriptorCallback callback) {
             Preconditions.checkNotNull(callback);
             this.callback = callback;
         }

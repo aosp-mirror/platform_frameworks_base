@@ -30,6 +30,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -44,7 +45,10 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.AppFuseMount;
+import com.android.internal.os.FuseAppLoop;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
@@ -62,6 +66,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -1321,6 +1326,90 @@ public class StorageManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+
+    /** {@hide} */
+    @VisibleForTesting
+    public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
+            int mode, ProxyFileDescriptorCallback callback, ThreadFactory factory)
+                    throws IOException {
+        // Retry is needed because the mount point mFuseAppLoop is using may be unmounted before
+        // invoking StorageManagerService#openProxyFileDescriptor. In this case, we need to re-mount
+        // the bridge by calling mountProxyFileDescriptorBridge.
+        int retry = 3;
+        while (retry-- > 0) {
+            try {
+                synchronized (mFuseAppLoopLock) {
+                    if (mFuseAppLoop == null) {
+                        final AppFuseMount mount = mStorageManager.mountProxyFileDescriptorBridge();
+                        if (mount == null) {
+                            Log.e(TAG, "Failed to open proxy file bridge.");
+                            throw new IOException("Failed to open proxy file bridge.");
+                        }
+                        mFuseAppLoop = FuseAppLoop.open(mount.mountPointId, mount.fd, factory);
+                    }
+
+                    try {
+                        final int fileId = mFuseAppLoop.registerCallback(callback);
+                        final ParcelFileDescriptor pfd =
+                                mStorageManager.openProxyFileDescriptor(
+                                        mFuseAppLoop.getMountPointId(), fileId, mode);
+                        if (pfd != null) {
+                            return pfd;
+                        }
+                        // Probably the bridge is being unmounted but mFuseAppLoop has not been
+                        // noticed it yet.
+                        mFuseAppLoop.unregisterCallback(fileId);
+                    } catch (FuseAppLoop.UnmountedException error) {
+                        Log.d(TAG, "mFuseAppLoop has been already unmounted.");
+                        mFuseAppLoop = null;
+                        continue;
+                    }
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        throw new IOException("Failed to mount bridge.");
+    }
+
+    /**
+     * Opens seekable ParcelFileDescriptor that routes file operation requests to
+     * ProxyFileDescriptorCallback.
+     *
+     * @param mode The desired access mode, must be one of
+     *     {@link ParcelFileDescriptor#MODE_READ_ONLY},
+     *     {@link ParcelFileDescriptor#MODE_WRITE_ONLY}, or
+     *     {@link ParcelFileDescriptor#MODE_READ_WRITE}
+     * @param callback Callback to process file operation requests issued on returned file
+     *     descriptor. The callback is invoked on a thread managed by the framework.
+     * @return Seekable ParcelFileDescriptor.
+     * @throws IOException
+     */
+    public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
+            int mode, ProxyFileDescriptorCallback callback)
+                    throws IOException {
+        return openProxyFileDescriptor(mode, callback, null);
+    }
+
+    /** {@hide} */
+    @VisibleForTesting
+    public int getProxyFileDescriptorMountPointId() {
+        synchronized (mFuseAppLoopLock) {
+            return mFuseAppLoop != null ? mFuseAppLoop.getMountPointId() : -1;
+        }
+    }
+
+    private final Object mFuseAppLoopLock = new Object();
+
+    @GuardedBy("mFuseAppLoopLock")
+    private @Nullable FuseAppLoop mFuseAppLoop = null;
 
     /// Consts to match the password types in cryptfs.h
     /** @hide */

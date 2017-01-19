@@ -19,14 +19,26 @@ package com.android.internal.os;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import java.io.File;
+import android.os.storage.IStorageManager;
+import com.android.internal.util.Preconditions;
 
+/**
+ * Parcelable class representing AppFuse mount.
+ * This conveys the result for IStorageManager#openProxyFileDescriptor.
+ * @see IStorageManager#openProxyFileDescriptor
+ */
 public class AppFuseMount implements Parcelable {
-    final public File mountPoint;
+    final public int mountPointId;
     final public ParcelFileDescriptor fd;
 
-    public AppFuseMount(File mountPoint, ParcelFileDescriptor fd) {
-        this.mountPoint = mountPoint;
+    /**
+     * @param mountPointId Integer number for mount point that is unique in the lifetime of
+     *     StorageManagerService.
+     * @param fd File descriptor pointing /dev/fuse and tagged with the mount point.
+     */
+    public AppFuseMount(int mountPointId, ParcelFileDescriptor fd) {
+        Preconditions.checkNotNull(fd);
+        this.mountPointId = mountPointId;
         this.fd = fd;
     }
 
@@ -37,7 +49,7 @@ public class AppFuseMount implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mountPoint.getPath());
+        dest.writeInt(this.mountPointId);
         dest.writeParcelable(fd, flags);
     }
 
@@ -45,7 +57,7 @@ public class AppFuseMount implements Parcelable {
             new Parcelable.Creator<AppFuseMount>() {
         @Override
         public AppFuseMount createFromParcel(Parcel in) {
-            return new AppFuseMount(new File(in.readString()), in.readParcelable(null));
+            return new AppFuseMount(in.readInt(), in.readParcelable(null));
         }
 
         @Override

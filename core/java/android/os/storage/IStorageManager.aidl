@@ -25,6 +25,7 @@ import android.os.storage.IObbActionListener;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import com.android.internal.os.AppFuseMount;
 
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
@@ -289,4 +290,6 @@ interface IStorageManager {
     void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
     void fstrim(int flags) = 72;
+    AppFuseMount mountProxyFileDescriptorBridge() = 73;
+    ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode) = 74;
 }

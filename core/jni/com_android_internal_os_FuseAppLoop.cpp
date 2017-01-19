@@ -51,7 +51,6 @@ private:
     JNIEnv* const mEnv;
     jobject const mSelf;
     ScopedLocalRef<jbyteArray> mJniBuffer;
-    bool mActive;
 
     template <typename T>
     T checkException(T result) const {
@@ -67,8 +66,7 @@ public:
     Callback(JNIEnv* env, jobject self) :
         mEnv(env),
         mSelf(self),
-        mJniBuffer(env, nullptr),
-        mActive(true) {}
+        mJniBuffer(env, nullptr) {}
 
     bool Init() {
         mJniBuffer.reset(mEnv->NewByteArray(kBufferSize));
@@ -76,7 +74,7 @@ public:
     }
 
     bool IsActive() override {
-        return mActive;
+        return true;
     }
 
     int64_t OnGetSize(uint64_t inode) override {
@@ -92,10 +90,7 @@ public:
     }
 
     int32_t OnRelease(uint64_t inode) override {
-        if (checkException(mEnv->CallIntMethod(mSelf, gOnReleaseMethod, inode)) == -1) {
-            mActive = false;
-        }
-        return fuse::kFuseSuccess;
+        return checkException(mEnv->CallIntMethod(mSelf, gOnReleaseMethod, inode));
     }
 
     int32_t OnRead(uint64_t inode, uint64_t offset, uint32_t size, void* buffer) override {

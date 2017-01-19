@@ -16,79 +16,95 @@
 
 package com.android.server.storage;
 
-import android.annotation.CallSuper;
-import android.annotation.WorkerThread;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.OsConstants;
-import android.util.Log;
-import com.android.internal.os.AppFuseMount;
+import com.android.internal.util.Preconditions;
 import libcore.io.IoUtils;
-
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
 
-public class AppFuseBridge implements Runnable {
-    private static final String TAG = AppFuseBridge.class.getSimpleName();
-
-    private final FileDescriptor mDeviceFd;
-    private final FileDescriptor mProxyFd;
-    private final CountDownLatch mMountLatch = new CountDownLatch(1);
+/**
+ * Runnable that delegates FUSE command from the kernel to application.
+ * run() blocks until all opened files on the FUSE mount point are closed. So this should be run in
+ * a separated thread.
+ */
+public class AppFuseBridge implements Runnable, AutoCloseable {
+    public static final String TAG = "AppFuseBridge";
 
     /**
-     * @param deviceFd FD of /dev/fuse. Ownership of fd is taken by AppFuseBridge.
-     * @param proxyFd FD of socket pair. Ownership of fd is taken by AppFuseBridge.
+     * The path AppFuse is mounted to.
+     * The first number is UID who is mounting the FUSE.
+     * THe second number is mount ID.
+     * The path must be sync with vold.
      */
-    private AppFuseBridge(FileDescriptor deviceFd, FileDescriptor proxyFd) {
-        mDeviceFd = deviceFd;
+    private static final String APPFUSE_MOUNT_NAME_TEMPLATE = "/mnt/appfuse/%d_%d";
+
+    private final IMountScope mMountScope;
+    private final ParcelFileDescriptor mProxyFd;
+    private final BlockingQueue<Boolean> mChannel;
+
+    /**
+     * @param mountScope Listener to unmount mount point.
+     * @param proxyFd FD of socket pair. Ownership of FD is taken by AppFuseBridge.
+     * @param channel Channel that the runnable send mount result to.
+     */
+    public AppFuseBridge(
+            IMountScope mountScope, ParcelFileDescriptor proxyFd, BlockingQueue<Boolean> channel) {
+        Preconditions.checkNotNull(mountScope);
+        Preconditions.checkNotNull(proxyFd);
+        Preconditions.checkNotNull(channel);
+        mMountScope = mountScope;
         mProxyFd = proxyFd;
-    }
-
-    public static AppFuseMount startMessageLoop(
-            int uid,
-            String name,
-            FileDescriptor deviceFd,
-            Handler handler,
-            ParcelFileDescriptor.OnCloseListener listener)
-                    throws IOException, ErrnoException, InterruptedException {
-        final FileDescriptor localFd = new FileDescriptor();
-        final FileDescriptor remoteFd = new FileDescriptor();
-        // Needs to specify OsConstants.SOCK_SEQPACKET to keep message boundaries.
-        Os.socketpair(OsConstants.AF_UNIX, OsConstants.SOCK_SEQPACKET, 0, remoteFd, localFd);
-
-        // Caller must invoke #start() after instantiate AppFuseBridge.
-        // Otherwise FDs will be leaked.
-        final AppFuseBridge bridge = new AppFuseBridge(deviceFd, localFd);
-        final Thread thread = new Thread(bridge, TAG);
-        thread.start();
-        try {
-            bridge.mMountLatch.await();
-        } catch (InterruptedException error) {
-            throw error;
-        }
-        return new AppFuseMount(
-                new File("/mnt/appfuse/" + uid + "_" + name),
-                ParcelFileDescriptor.fromFd(remoteFd, handler, listener));
+        mChannel = channel;
     }
 
     @Override
     public void run() {
-        // deviceFd and proxyFd must be closed in native_start_loop.
-        final int deviceFd = mDeviceFd.getInt$();
-        final int proxyFd = mProxyFd.getInt$();
-        mDeviceFd.setInt$(-1);
-        mProxyFd.setInt$(-1);
-        native_start_loop(deviceFd, proxyFd);
+        try {
+            // deviceFd and proxyFd must be closed in native_start_loop.
+            native_start_loop(
+                    mMountScope.getDeviceFileDescriptor().detachFd(),
+                    mProxyFd.detachFd());
+        } finally {
+            close();
+        }
+    }
+
+    public static ParcelFileDescriptor openFile(int uid, int mountId, int fileId, int mode)
+            throws FileNotFoundException {
+        final File mountPoint = getMountPoint(uid, mountId);
+        try {
+            if (Os.stat(mountPoint.getPath()).st_ino != 1) {
+                throw new FileNotFoundException("Could not find bridge mount point.");
+            }
+        } catch (ErrnoException e) {
+            throw new FileNotFoundException(
+                    "Failed to stat mount point: " + mountPoint.getParent());
+        }
+        return ParcelFileDescriptor.open(new File(mountPoint, String.valueOf(fileId)), mode);
+    }
+
+    private static File getMountPoint(int uid, int mountId) {
+        return new File(String.format(APPFUSE_MOUNT_NAME_TEMPLATE,  uid, mountId));
+    }
+
+    @Override
+    public void close() {
+        IoUtils.closeQuietly(mMountScope);
+        IoUtils.closeQuietly(mProxyFd);
+        // Invoke countDown here in case where close is invoked before mount.
+        mChannel.offer(false);
     }
 
     // Used by com_android_server_storage_AppFuse.cpp.
     private void onMount() {
-        mMountLatch.countDown();
+        mChannel.offer(true);
+    }
+
+    public static interface IMountScope extends AutoCloseable {
+        ParcelFileDescriptor getDeviceFileDescriptor();
     }
 
     private native boolean native_start_loop(int deviceFd, int proxyFd);
