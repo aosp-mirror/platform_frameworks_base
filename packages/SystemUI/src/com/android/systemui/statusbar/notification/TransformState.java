@@ -402,11 +402,6 @@ public class TransformState {
             result.initFrom(view);
             return result;
         }
-        if (view instanceof NotificationHeaderView) {
-            HeaderTransformState result = HeaderTransformState.obtain();
-            result.initFrom(view);
-            return result;
-        }
         if (view instanceof ImageView) {
             ImageTransformState result = ImageTransformState.obtain();
             result.initFrom(view);

@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -51,6 +52,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -201,6 +203,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mShowAmbient;
     private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
+    private boolean mIsLowPriority;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -309,6 +312,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout.updateExpandButtons(true);
         updateLimits();
         updateIconVisibilities();
+        updateShelfIconColor();
+    }
+
+    private void updateShelfIconColor() {
+        StatusBarIconView expandedIcon = mEntry.expandedIcon;
+        boolean isPreL = Boolean.TRUE.equals(expandedIcon.getTag(R.id.icon_is_pre_L));
+        boolean colorize = !isPreL || NotificationUtils.isGrayscale(expandedIcon,
+                NotificationColorUtil.getInstance(mContext));
+        if (colorize) {
+            int color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded());
+            expandedIcon.setImageTintList(ColorStateList.valueOf(color));
+        }
     }
 
     private void updateLimits() {
@@ -943,6 +958,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mPrivateLayout.getTranslationY();
     }
 
+    public void setIsLowPriority(boolean isLowPriority) {
+        mIsLowPriority = isLowPriority;
+        mPrivateLayout.setIsLowPriority(isLowPriority);
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setIsLowPriority(isLowPriority);
+        }
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1043,6 +1066,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             @Override
             public void onInflate(ViewStub stub, View inflated) {
                 mChildrenContainer = (NotificationChildrenContainer) inflated;
+                mChildrenContainer.setIsLowPriority(mIsLowPriority);
                 mChildrenContainer.setNotificationParent(ExpandableNotificationRow.this);
                 mChildrenContainer.onNotificationUpdated();
                 mTranslateableViews.add(mChildrenContainer);
@@ -1242,6 +1266,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setUserExpanded(boolean userExpanded) {
         setUserExpanded(userExpanded, false /* allowChildExpansion */);
+        updateShelfIconColor();
     }
 
     /**
@@ -1301,6 +1326,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (expand != mIsSystemExpanded) {
             final boolean wasExpanded = isExpanded();
             mIsSystemExpanded = expand;
+            updateShelfIconColor();
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
             if (mIsSummaryWithChildren) {

@@ -80,9 +80,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     /**
      * Notifies this wrapper that the content of the view might have changed.
-     * @param notification
+     * @param notification the notification this is wrapped around
+     * @param isLowPriority is this notification low priority
      */
-    public void notifyContentUpdated(StatusBarNotification notification) {
+    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
         mDarkInitialized = false;
     };
 

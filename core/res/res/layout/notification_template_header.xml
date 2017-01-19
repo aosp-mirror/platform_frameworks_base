@@ -20,10 +20,11 @@
     android:id="@+id/notification_header"
     android:orientation="horizontal"
     android:layout_width="wrap_content"
-    android:layout_height="53dp"
+    android:layout_height="48dp"
     android:clipChildren="false"
     android:paddingTop="10dp"
-    android:paddingBottom="16dp"
+    android:paddingBottom="11dp"
+    android:layout_marginBottom="5dp"
     android:paddingStart="@dimen/notification_content_margin_start"
     android:paddingEnd="16dp">
     <com.android.internal.widget.CachingIconView

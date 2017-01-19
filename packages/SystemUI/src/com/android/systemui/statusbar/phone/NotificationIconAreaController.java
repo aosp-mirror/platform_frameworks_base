@@ -154,18 +154,6 @@ public class NotificationIconAreaController {
                 NotificationShelf.SHOW_AMBIENT_ICONS);
 
         applyNotificationIconsTint();
-        ArrayList<NotificationData.Entry> activeNotifications
-                = notificationData.getActiveNotifications();
-        for (int i = 0; i < activeNotifications.size(); i++) {
-            NotificationData.Entry entry = activeNotifications.get(i);
-            boolean isPreL = Boolean.TRUE.equals(entry.expandedIcon.getTag(R.id.icon_is_pre_L));
-            boolean colorize = !isPreL
-                    || NotificationUtils.isGrayscale(entry.expandedIcon, mNotificationColorUtil);
-            if (colorize) {
-                int color = entry.getContrastedColor(mContext);
-                entry.expandedIcon.setImageTintList(ColorStateList.valueOf(color));
-            }
-        }
     }
 
     /**

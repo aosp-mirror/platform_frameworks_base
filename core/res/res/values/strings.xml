@@ -578,6 +578,9 @@
     <!-- The divider symbol between different parts of the notification header. not translatable [CHAR LIMIT=1] -->
     <string name="notification_header_divider_symbol" translatable="false">•</string>
 
+    <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
+    <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
+
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
 

@@ -2783,6 +2783,7 @@
   <java-symbol type="drawable" name="lockscreen_notselected" />
   <java-symbol type="drawable" name="lockscreen_selected" />
 
+  <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
   <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
 
   <java-symbol type="string" name="app_category_game" />

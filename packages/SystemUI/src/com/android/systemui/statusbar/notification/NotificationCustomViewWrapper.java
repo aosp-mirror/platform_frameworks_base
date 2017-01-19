@@ -106,8 +106,8 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void notifyContentUpdated(StatusBarNotification notification) {
-        super.notifyContentUpdated(notification);
+    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
+        super.notifyContentUpdated(notification, isLowPriority);
         Drawable background = mView.getBackground();
         mBackgroundColor = 0;
         if (background instanceof ColorDrawable) {

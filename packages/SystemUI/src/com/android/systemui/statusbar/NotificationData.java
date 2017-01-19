@@ -115,14 +115,16 @@ public class NotificationData {
             return row.getPublicLayout().getContractedChild();
         }
 
-        public boolean cacheContentViews(Context ctx, Notification updatedNotification) {
+        public boolean cacheContentViews(Context ctx, Notification updatedNotification,
+                boolean isLowPriority) {
             boolean applyInPlace = false;
             if (updatedNotification != null) {
                 final Notification.Builder updatedNotificationBuilder
                         = Notification.Builder.recoverBuilder(ctx, updatedNotification);
-                final RemoteViews newContentView = updatedNotificationBuilder.createContentView();
-                final RemoteViews newBigContentView =
-                        updatedNotificationBuilder.createBigContentView();
+                final RemoteViews newContentView = createContentView(updatedNotificationBuilder,
+                        isLowPriority);
+                final RemoteViews newBigContentView = createBigContentView(
+                        updatedNotificationBuilder, isLowPriority);
                 final RemoteViews newHeadsUpContentView =
                         updatedNotificationBuilder.createHeadsUpContentView();
                 final RemoteViews newPublicNotification
@@ -150,8 +152,8 @@ public class NotificationData {
                 final Notification.Builder builder
                         = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
 
-                cachedContentView = builder.createContentView();
-                cachedBigContentView = builder.createBigContentView();
+                cachedContentView = createContentView(builder, isLowPriority);
+                cachedBigContentView = createBigContentView(builder, isLowPriority);
                 cachedHeadsUpContentView = builder.createHeadsUpContentView();
                 cachedPublicContentView = builder.makePublicContentView();
                 cachedAmbientContentView = builder.makeAmbientNotification();
@@ -159,6 +161,28 @@ public class NotificationData {
                 applyInPlace = false;
             }
             return applyInPlace;
+        }
+
+        private RemoteViews createBigContentView(Notification.Builder builder,
+                boolean isLowPriority) {
+            RemoteViews bigContentView = builder.createBigContentView();
+            if (bigContentView != null) {
+                return bigContentView;
+            }
+            if (isLowPriority) {
+                RemoteViews contentView = builder.createContentView();
+                Notification.Builder.makeHeaderExpanded(contentView);
+                return contentView;
+            }
+            return null;
+        }
+
+        private RemoteViews createContentView(Notification.Builder builder,
+                boolean isAmbient) {
+            if (isAmbient) {
+                return builder.makeLowPriorityContentView(false /* useRegularSubtext */);
+            }
+            return builder.createContentView();
         }
 
         // Returns true if the RemoteViews are the same.
@@ -254,8 +278,9 @@ public class NotificationData {
             }
         }
 
-        public int getContrastedColor(Context context) {
-            int rawColor = notification.getNotification().color;
+        public int getContrastedColor(Context context, boolean ambient) {
+            int rawColor = ambient ? Notification.COLOR_DEFAULT :
+                    notification.getNotification().color;
             if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
                 return mCachedContrastColor;
             }
