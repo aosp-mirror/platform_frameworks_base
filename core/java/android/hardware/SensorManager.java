@@ -492,7 +492,7 @@ public abstract class SensorManager {
         if (type == Sensor.TYPE_PROXIMITY || type == Sensor.TYPE_SIGNIFICANT_MOTION ||
                 type == Sensor.TYPE_TILT_DETECTOR || type == Sensor.TYPE_WAKE_GESTURE ||
                 type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE ||
-                type == Sensor.TYPE_WRIST_TILT_GESTURE) {
+                type == Sensor.TYPE_WRIST_TILT_GESTURE || type == Sensor.TYPE_DYNAMIC_SENSOR_META) {
             wakeUpSensor = true;
         }
 
