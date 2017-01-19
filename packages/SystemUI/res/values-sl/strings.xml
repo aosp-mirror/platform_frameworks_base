@@ -443,10 +443,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Razširi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Strni"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je pripet"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za pregled."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Razumem"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite skriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>

@@ -331,7 +331,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> konnte nicht gestartet werden."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ist im abgesicherten Modus deaktiviert."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Alle löschen"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Alle schließen"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Hierher ziehen, um den Bildschirm zu teilen"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Geteilte Schaltfläche – horizontal"</string>
@@ -439,10 +439,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Maximieren"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Minimieren"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Bildschirm ist fixiert"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nein danke"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
