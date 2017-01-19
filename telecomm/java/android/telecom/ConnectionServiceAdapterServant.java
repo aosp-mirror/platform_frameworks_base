@@ -67,6 +67,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_ON_CONNECTION_EVENT = 26;
     private static final int MSG_SET_CONNECTION_PROPERTIES = 27;
     private static final int MSG_SET_PULLING = 28;
+    private static final int MSG_SET_AUDIO_ROUTE = 29;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -289,6 +290,16 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
+                case MSG_SET_AUDIO_ROUTE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setAudioRoute((String) args.arg1, args.argi1,
+                                (Session.Info) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
             }
         }
     };
@@ -504,6 +515,17 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = connectionId;
             args.arg2 = keys;
             mHandler.obtainMessage(MSG_REMOVE_EXTRAS, args).sendToTarget();
+        }
+
+        @Override
+        public final void setAudioRoute(String connectionId, int audioRoute,
+                Session.Info sessionInfo) {
+
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.argi1 = audioRoute;
+            args.arg2 = sessionInfo;
+            mHandler.obtainMessage(MSG_SET_AUDIO_ROUTE, args).sendToTarget();
         }
 
         @Override

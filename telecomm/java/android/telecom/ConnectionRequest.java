@@ -33,6 +33,7 @@ public final class ConnectionRequest implements Parcelable {
     private final Bundle mExtras;
     private final int mVideoState;
     private final String mTelecomCallId;
+    private final boolean mShouldShowIncomingCallUi;
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
@@ -43,7 +44,7 @@ public final class ConnectionRequest implements Parcelable {
             PhoneAccountHandle accountHandle,
             Uri handle,
             Bundle extras) {
-        this(accountHandle, handle, extras, VideoProfile.STATE_AUDIO_ONLY, null);
+        this(accountHandle, handle, extras, VideoProfile.STATE_AUDIO_ONLY, null, false);
     }
 
     /**
@@ -57,7 +58,7 @@ public final class ConnectionRequest implements Parcelable {
             Uri handle,
             Bundle extras,
             int videoState) {
-        this(accountHandle, handle, extras, videoState, null);
+        this(accountHandle, handle, extras, videoState, null, false);
     }
 
     /**
@@ -66,6 +67,10 @@ public final class ConnectionRequest implements Parcelable {
      * @param extras Application-specific extra data.
      * @param videoState Determines the video state for the connection.
      * @param telecomCallId The telecom call ID.
+     * @param shouldShowIncomingCallUi For a self-managed {@link ConnectionService}, will be
+     *                                 {@code true} if the {@link ConnectionService} should show its
+     *                                 own incoming call UI for an incoming call.  When
+     *                                 {@code false}, Telecom shows the incoming call UI.
      * @hide
      */
     public ConnectionRequest(
@@ -73,12 +78,14 @@ public final class ConnectionRequest implements Parcelable {
             Uri handle,
             Bundle extras,
             int videoState,
-            String telecomCallId) {
+            String telecomCallId,
+            boolean shouldShowIncomingCallUi) {
         mAccountHandle = accountHandle;
         mAddress = handle;
         mExtras = extras;
         mVideoState = videoState;
         mTelecomCallId = telecomCallId;
+        mShouldShowIncomingCallUi = shouldShowIncomingCallUi;
     }
 
     private ConnectionRequest(Parcel in) {
@@ -87,6 +94,7 @@ public final class ConnectionRequest implements Parcelable {
         mExtras = in.readParcelable(getClass().getClassLoader());
         mVideoState = in.readInt();
         mTelecomCallId = in.readString();
+        mShouldShowIncomingCallUi = in.readInt() == 1;
     }
 
     /**
@@ -129,6 +137,18 @@ public final class ConnectionRequest implements Parcelable {
         return mTelecomCallId;
     }
 
+    /**
+     * For a self-managed {@link ConnectionService}, indicates for an incoming call whether the
+     * {@link ConnectionService} should show its own incoming call UI for an incoming call.
+     *
+     * @return {@code true} if the {@link ConnectionService} should show its own incoming call UI.
+     * When {@code false}, Telecom shows the incoming call UI for the call.
+     * @hide
+     */
+    public boolean shouldShowIncomingCallUi() {
+        return mShouldShowIncomingCallUi;
+    }
+
     @Override
     public String toString() {
         return String.format("ConnectionRequest %s %s",
@@ -165,5 +185,6 @@ public final class ConnectionRequest implements Parcelable {
         destination.writeParcelable(mExtras, 0);
         destination.writeInt(mVideoState);
         destination.writeString(mTelecomCallId);
+        destination.writeInt(mShouldShowIncomingCallUi ? 1 : 0);
     }
 }

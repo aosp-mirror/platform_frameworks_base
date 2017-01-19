@@ -189,6 +189,21 @@ public final class PhoneAccount implements Parcelable {
     public static final int CAPABILITY_SUPPORTS_VIDEO_CALLING = 0x400;
 
     /**
+     * Flag indicating that this {@link PhoneAccount} is responsible for managing its own
+     * {@link Connection}s.  This type of {@link PhoneAccount} is ideal for use with standalone
+     * calling apps which do not wish to use the default phone app for {@link Connection} UX,
+     * but which want to leverage the call and audio routing capabilities of the Telecom framework.
+     * <p>
+     * When set, {@link Connection}s created by the self-managed {@link ConnectionService} will not
+     * be surfaced to implementations of the {@link InCallService} API.  Thus it is the
+     * responsibility of a self-managed {@link ConnectionService} to provide a user interface for
+     * its {@link Connection}s.
+     * <p>
+     * Self-managed {@link Connection}s will, however, be displayed on connected Bluetooth devices.
+     */
+    public static final int CAPABILITY_SELF_MANAGED = 0x800;
+
+    /**
      * URI scheme for telephone number URIs.
      */
     public static final String SCHEME_TEL = "tel";
@@ -692,6 +707,14 @@ public final class PhoneAccount implements Parcelable {
         mIsEnabled = isEnabled;
     }
 
+    /**
+     * @return {@code true} if the {@link PhoneAccount} is self-managed, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isSelfManaged() {
+        return (mCapabilities & CAPABILITY_SELF_MANAGED) == CAPABILITY_SELF_MANAGED;
+    }
+
     //
     // Parcelable implementation
     //
@@ -815,6 +838,9 @@ public final class PhoneAccount implements Parcelable {
      */
     private String capabilitiesToString() {
         StringBuilder sb = new StringBuilder();
+        if (hasCapabilities(CAPABILITY_SELF_MANAGED)) {
+            sb.append("SelfManaged ");
+        }
         if (hasCapabilities(CAPABILITY_SUPPORTS_VIDEO_CALLING)) {
             sb.append("SuppVideo ");
         }
