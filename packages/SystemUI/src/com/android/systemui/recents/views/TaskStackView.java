@@ -87,6 +87,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropT
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
+import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -1867,6 +1868,26 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller.stopBoundScrollAnimation();
 
         setRelativeFocusedTask(false, false /* stackTasksOnly */, true /* animated */);
+    }
+
+    public final void onBusEvent(NavigateTaskViewEvent event) {
+        if (useGridLayout()) {
+            final int taskCount = mStack.getTaskCount();
+            final int currentIndex = mStack.indexOfStackTask(getFocusedTask());
+            final int nextIndex = mLayoutAlgorithm.mTaskGridLayoutAlgorithm.navigateFocus(taskCount,
+                    currentIndex, event.direction);
+            setFocusedTask(nextIndex, false, true);
+        } else {
+            switch (event.direction) {
+                case UP:
+                    EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
+                    break;
+                case DOWN:
+                    EventBus.getDefault().send(
+                        new FocusNextTaskViewEvent(0 /* timerIndicatorDuration */));
+                    break;
+            }
+        }
     }
 
     public final void onBusEvent(UserInteractionEvent event) {
