@@ -24,19 +24,18 @@ import android.view.WindowManagerPolicy.StartingSurface;
 public abstract class StartingData {
 
     protected final WindowManagerService mService;
-    protected final AppWindowToken mAppWindowToken;
 
-    protected StartingData(WindowManagerService service, AppWindowToken appWindowToken) {
+    protected StartingData(WindowManagerService service) {
         mService = service;
-        mAppWindowToken = appWindowToken;
     }
 
     /**
      * Creates the actual starting window surface. DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING
      * THIS METHOD.
      *
+     * @param atoken the app to add the starting window to
      * @return a class implementing {@link StartingSurface} for easy removal with
      *         {@link StartingSurface#remove}
      */
-    abstract StartingSurface createStartingSurface();
+    abstract StartingSurface createStartingSurface(AppWindowToken atoken);
 }
