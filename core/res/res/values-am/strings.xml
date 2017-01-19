@@ -1551,7 +1551,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2ኛ ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3ኛ ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላ እይታን ተጭነው ይያዙ።"</string>
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላይ እይታን ተጭነው ይያዙ።"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"መተግበሪያ ተሰክቷል፦ በዚህ መሣሪያ ላይ ማላቀቅ አይፈቀድም።"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ማያ ገጽ ተሰክቷል"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ማያ ገጽ ተነቅሏል"</string>
@@ -1671,4 +1671,20 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ተሰናክሏል"</string>
     <string name="conference_call" msgid="3751093130790472426">"የስብሰባ ጥሪ"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"የመሣሪያ ጥቆማ"</string>
+    <!-- no translation found for app_category_game (5431836943981492993) -->
+    <skip />
+    <!-- no translation found for app_category_audio (1659853108734301647) -->
+    <skip />
+    <!-- no translation found for app_category_video (2728726078629384196) -->
+    <skip />
+    <!-- no translation found for app_category_image (4867854544519846048) -->
+    <skip />
+    <!-- no translation found for app_category_social (5842783057834965912) -->
+    <skip />
+    <!-- no translation found for app_category_news (7496506240743986873) -->
+    <skip />
+    <!-- no translation found for app_category_maps (5878491404538024367) -->
+    <skip />
+    <!-- no translation found for app_category_productivity (3742083261781538852) -->
+    <skip />
 </resources>
