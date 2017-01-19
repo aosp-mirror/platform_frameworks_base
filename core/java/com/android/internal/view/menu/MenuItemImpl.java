@@ -94,7 +94,7 @@ public final class MenuItemImpl implements MenuItem {
     private ContextMenuInfo mMenuInfo;
 
     private CharSequence mContentDescription;
-    private CharSequence mTooltip;
+    private CharSequence mTooltipText;
 
     private static String sLanguage;
     private static String sPrependShortcutLabel;
@@ -689,8 +689,8 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     @Override
-    public MenuItem setTooltip(CharSequence tooltip) {
-        mTooltip = tooltip;
+    public MenuItem setTooltipText(CharSequence tooltipText) {
+        mTooltipText = tooltipText;
 
         mMenu.onItemsChanged(false);
 
@@ -698,7 +698,7 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     @Override
-    public CharSequence getTooltip() {
-        return mTooltip;
+    public CharSequence getTooltipText() {
+        return mTooltipText;
     }
 }

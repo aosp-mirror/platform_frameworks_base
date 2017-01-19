@@ -3718,7 +3718,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Text to be displayed in a tooltip popup.
          */
         @Nullable
-        CharSequence mTooltip;
+        CharSequence mTooltipText;
 
         /**
          * View-relative position of the tooltip anchor point.
@@ -4761,8 +4761,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         forceHasOverlappingRendering(a.getBoolean(attr, true));
                     }
                     break;
-                case R.styleable.View_tooltip:
-                    setTooltip(a.getText(attr));
+                case R.styleable.View_tooltipText:
+                    setTooltipText(a.getText(attr));
                     break;
                 case R.styleable.View_keyboardNavigationCluster:
                     if (a.peekValue(attr) != null) {
@@ -24638,10 +24638,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * menu). </li>
      * <li>On hover, after a brief delay since the pointer has stopped moving </li>
      *
-     * @param tooltip the tooltip text, or null if no tooltip is required
+     * @param tooltipText the tooltip text, or null if no tooltip is required
      */
-    public final void setTooltip(@Nullable CharSequence tooltip) {
-        if (TextUtils.isEmpty(tooltip)) {
+    public final void setTooltipText(@Nullable CharSequence tooltipText) {
+        if (TextUtils.isEmpty(tooltipText)) {
             setFlags(0, TOOLTIP);
             hideTooltip();
             mTooltipInfo = null;
@@ -24652,11 +24652,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mTooltipInfo.mShowTooltipRunnable = this::showHoverTooltip;
                 mTooltipInfo.mHideTooltipRunnable = this::hideTooltip;
             }
-            mTooltipInfo.mTooltip = tooltip;
+            mTooltipInfo.mTooltipText = tooltipText;
             if (mTooltipInfo.mTooltipPopup != null && mTooltipInfo.mTooltipPopup.isShowing()) {
-                mTooltipInfo.mTooltipPopup.updateContent(mTooltipInfo.mTooltip);
+                mTooltipInfo.mTooltipPopup.updateContent(mTooltipInfo.mTooltipText);
             }
         }
+    }
+
+    /**
+     * To be removed once the support library has stopped using it.
+     *
+     * @deprecated use {@link #setTooltipText} instead
+     */
+    @Deprecated
+    public final void setTooltip(@Nullable CharSequence tooltipText) {
+        setTooltipText(tooltipText);
     }
 
     /**
@@ -24665,8 +24675,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the tooltip text
      */
     @Nullable
+    public final CharSequence getTooltipText() {
+        return mTooltipInfo != null ? mTooltipInfo.mTooltipText : null;
+    }
+
+    /**
+     * To be removed once the support library has stopped using it.
+     *
+     * @deprecated use {@link #getTooltipText} instead
+     */
+    @Deprecated
+    @Nullable
     public final CharSequence getTooltip() {
-        return mTooltipInfo != null ? mTooltipInfo.mTooltip : null;
+        return getTooltipText();
     }
 
     private boolean showTooltip(int x, int y, boolean fromLongClick) {
@@ -24676,7 +24697,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mViewFlags & ENABLED_MASK) != ENABLED) {
             return false;
         }
-        final CharSequence tooltipText = getTooltip();
+        final CharSequence tooltipText = getTooltipText();
         if (TextUtils.isEmpty(tooltipText)) {
             return false;
         }

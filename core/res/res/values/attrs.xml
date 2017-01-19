@@ -2890,7 +2890,7 @@
         <attr name="forceHasOverlappingRendering" format="boolean" />
 
         <!-- Defines text displayed in a small popup window on hover or long press. -->
-        <attr name="tooltip" format="string" localization="suggested" />
+        <attr name="tooltipText" format="string" localization="suggested" />
 
         <!-- Whether this view is a root of a keyboard navigation cluster.
              See {@link android.view.View#setKeyboardNavigationCluster(boolean)}. -->
@@ -7029,7 +7029,7 @@
         <attr name="contentDescription" format="string" />
 
         <!-- The tooltip text associated with the item. -->
-        <attr name="tooltip" format="string" />
+        <attr name="tooltipText" format="string" />
 
     </declare-styleable>
 

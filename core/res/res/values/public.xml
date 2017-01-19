@@ -2764,7 +2764,7 @@
         <public name="fontStyle" />
         <public name="font" />
         <public name="fontWeight" />
-        <public name="tooltip" />
+        <public name="tooltipText" />
         <public name="autoSizeText" />
         <public name="autoSizeStepGranularity" />
         <public name="autoSizeStepSizeSet" />
