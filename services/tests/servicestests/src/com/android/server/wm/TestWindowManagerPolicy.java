@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
@@ -74,6 +75,7 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.os.PowerManagerInternal;
@@ -91,6 +93,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static WindowManagerService sWm = null;
 
     int rotationToReport = 0;
+
+    private Runnable mRunnableWhenAddingSplashScreen;
 
     static synchronized WindowManagerService getWindowManagerService(Context context) {
         if (sWm == null) {
@@ -318,11 +322,36 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         return false;
     }
 
+    /**
+     * Sets a runnable to run when adding a splash screen which gets executed after the window has
+     * been added but before returning the surface.
+     */
+    void setRunnableWhenAddingSplashScreen(Runnable r) {
+        mRunnableWhenAddingSplashScreen = r;
+    }
+
     @Override
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
             int logo, int windowFlags, Configuration overrideConfig, int displayId) {
-        return null;
+        final com.android.server.wm.WindowState window;
+        final AppWindowToken atoken;
+        synchronized (sWm.mWindowMap) {
+            atoken = WindowTestsBase.sDisplayContent.getAppWindowToken(appToken);
+            window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
+                    "Starting window");
+            atoken.startingWindow = window;
+        }
+        if (mRunnableWhenAddingSplashScreen != null) {
+            mRunnableWhenAddingSplashScreen.run();
+            mRunnableWhenAddingSplashScreen = null;
+        }
+        return () -> {
+            synchronized (sWm.mWindowMap) {
+                atoken.removeChild(window);
+                atoken.startingWindow = null;
+            }
+        };
     }
 
     @Override
@@ -482,7 +511,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isScreenOn() {
-        return false;
+        return true;
     }
 
     @Override
