@@ -16,17 +16,24 @@
 
 package android.net;
 
+import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RESULT;
+
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -355,5 +362,54 @@ public class NetworkScoreManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Request a recommendation for which network to connect to.
+     *
+     * <p>The callback will be run on the thread associated with provided {@link Handler}.
+     *
+     * @param request a {@link RecommendationRequest} instance containing additional
+     *                request details
+     * @param callback a {@link RecommendationCallback} instance that will be invoked when
+     *                 the {@link RecommendationResult} is available
+     * @param handler a {@link Handler} instance representing the thread to run the callback on.
+     * @throws SecurityException
+     * @hide
+     */
+    public void requestRecommendation(
+            final @NonNull RecommendationRequest request,
+            final @NonNull RecommendationCallback callback,
+            final @NonNull Handler handler) {
+        Preconditions.checkNotNull(request, "RecommendationRequest cannot be null.");
+        Preconditions.checkNotNull(callback, "RecommendationCallback cannot be null.");
+        Preconditions.checkNotNull(handler, "Handler cannot be null.");
+
+        RemoteCallback remoteCallback = new RemoteCallback(new RemoteCallback.OnResultListener() {
+            @Override
+            public void onResult(Bundle data) {
+                RecommendationResult result = data.getParcelable(EXTRA_RECOMMENDATION_RESULT);
+                callback.onRecommendationAvailable(result);
+            }
+        }, handler);
+
+        try {
+            mService.requestRecommendationAsync(request, remoteCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callers of {@link #requestRecommendation(RecommendationRequest, RecommendationCallback, Handler)}
+     * must pass in an implementation of this class.
+     * @hide
+     */
+    public abstract static class RecommendationCallback {
+        /**
+         * Invoked when a {@link RecommendationResult} is available.
+         * @param result a {@link RecommendationResult} instance.
+         */
+        public abstract void onRecommendationAvailable(RecommendationResult result);
     }
 }
