@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -55,6 +56,7 @@ public class NotificationData {
         private static final int COLOR_INVALID = 1;
         public String key;
         public StatusBarNotification notification;
+        public NotificationChannel channel;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
         public ExpandableNotificationRow row; // the outer expanded view
@@ -429,6 +431,14 @@ public class NotificationData {
          return null;
     }
 
+    public NotificationChannel getChannel(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getChannel();
+        }
+        return null;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
@@ -442,6 +452,7 @@ public class NotificationData {
                         entry.notification.setOverrideGroupKey(overrideGroupKey);
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
+                    entry.channel = getChannel(entry.key);
                 }
             }
         }

@@ -43,21 +43,18 @@ public class StatusBarNotification implements Parcelable {
     private final Notification notification;
     private final UserHandle user;
     private final long postTime;
-    private final NotificationChannel channel;
 
     private Context mContext; // used for inflation & icon expansion
 
     /** @hide */
-    public StatusBarNotification(String pkg, String opPkg, NotificationChannel channel, int id,
+    public StatusBarNotification(String pkg, String opPkg, int id,
             String tag, int uid, int initialPid, Notification notification, UserHandle user,
             String overrideGroupKey, long postTime) {
         if (pkg == null) throw new NullPointerException();
         if (notification == null) throw new NullPointerException();
-        if (channel == null) throw new IllegalArgumentException();
 
         this.pkg = pkg;
         this.opPkg = opPkg;
-        this.channel = channel;
         this.id = id;
         this.tag = tag;
         this.uid = uid;
@@ -88,7 +85,6 @@ public class StatusBarNotification implements Parcelable {
         this.postTime = postTime;
         this.key = key();
         this.groupKey = groupKey();
-        this.channel = null;
     }
 
     public StatusBarNotification(Parcel in) {
@@ -112,7 +108,6 @@ public class StatusBarNotification implements Parcelable {
         }
         this.key = key();
         this.groupKey = groupKey();
-        this.channel = NotificationChannel.CREATOR.createFromParcel(in);
     }
 
     private String key() {
@@ -182,7 +177,6 @@ public class StatusBarNotification implements Parcelable {
         } else {
             out.writeInt(0);
         }
-        this.channel.writeToParcel(out, flags);
     }
 
     public int describeContents() {
@@ -209,14 +203,14 @@ public class StatusBarNotification implements Parcelable {
     public StatusBarNotification cloneLight() {
         final Notification no = new Notification();
         this.notification.cloneInto(no, false); // light copy
-        return new StatusBarNotification(this.pkg, this.opPkg, this.channel,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 no, this.user, this.overrideGroupKey, this.postTime);
     }
 
     @Override
     public StatusBarNotification clone() {
-        return new StatusBarNotification(this.pkg, this.opPkg, this.channel,
+        return new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 this.notification.clone(), this.user, this.overrideGroupKey, this.postTime);
     }
@@ -333,13 +327,6 @@ public class StatusBarNotification implements Parcelable {
      */
     public String getOverrideGroupKey() {
         return overrideGroupKey;
-    }
-
-    /**
-     * Returns the channel this notification was posted to.
-     */
-    public NotificationChannel getNotificationChannel() {
-        return channel;
     }
 
     /**

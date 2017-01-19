@@ -105,8 +105,8 @@ public class NotificationComparatorTest {
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordMinCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
-                callPkg, getDefaultChannel(), 1, "minCall", callUid, callUid, n1,
-                new UserHandle(userId), "", 2000));
+                callPkg, 1, "minCall", callUid, callUid, n1,
+                new UserHandle(userId), "", 2000), getDefaultChannel());
         mRecordMinCall.setUserImportance(NotificationManager.IMPORTANCE_MIN);
 
         Notification n2 = new Notification.Builder(mContext)
@@ -114,8 +114,8 @@ public class NotificationComparatorTest {
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordHighCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
-                callPkg, getDefaultChannel(), 1, "highcall", callUid, callUid, n2,
-                new UserHandle(userId), "", 1999));
+                callPkg, 1, "highcall", callUid, callUid, n2,
+                new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordHighCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n3 = new Notification.Builder(mContext)
@@ -124,43 +124,43 @@ public class NotificationComparatorTest {
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "media", uid2, uid2, n3, new UserHandle(userId),
-                "", 1499));
+                pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
+                "", 1499), getDefaultChannel());
         mRecordDefaultMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n4 = new Notification.Builder(mContext)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
         mRecordInlineReply = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "inlinereply", uid2, uid2, n4, new UserHandle(userId),
-                "", 1599));
+                pkg2, 1, "inlinereply", uid2, uid2, n4, new UserHandle(userId),
+                "", 1599), getDefaultChannel());
         mRecordInlineReply.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
         mRecordInlineReply.setPackagePriority(Notification.PRIORITY_MAX);
 
         Notification n5 = new Notification.Builder(mContext)
                 .setCategory(Notification.CATEGORY_MESSAGE).build();
         mRecordSms = new NotificationRecord(mContext, new StatusBarNotification(smsPkg,
-                smsPkg, getDefaultChannel(), 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
-                "", 1299));
+                smsPkg, 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
+                "", 1299), getDefaultChannel());
         mRecordSms.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n6 = new Notification.Builder(mContext).build();
         mRecordStarredContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "starred", uid2, uid2, n6, new UserHandle(userId),
-                "", 1259));
+                pkg2, 1, "starred", uid2, uid2, n6, new UserHandle(userId),
+                "", 1259), getDefaultChannel());
         mRecordStarredContact.setContactAffinity(ValidateNotificationPeople.STARRED_CONTACT);
         mRecordStarredContact.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n7 = new Notification.Builder(mContext).build();
         mRecordContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "contact", uid2, uid2, n7, new UserHandle(userId),
-                "", 1259));
+                pkg2, 1, "contact", uid2, uid2, n7, new UserHandle(userId),
+                "", 1259), getDefaultChannel());
         mRecordContact.setContactAffinity(ValidateNotificationPeople.VALID_CONTACT);
         mRecordContact.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n8 = new Notification.Builder(mContext).build();
         mRecordUrgent = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "urgent", uid2, uid2, n8, new UserHandle(userId),
-                "", 1258));
+                pkg2, 1, "urgent", uid2, uid2, n8, new UserHandle(userId),
+                "", 1258), getDefaultChannel());
         mRecordUrgent.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n9 = new Notification.Builder(mContext)
@@ -169,15 +169,15 @@ public class NotificationComparatorTest {
                         |Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
         mRecordCheater = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "cheater", uid2, uid2, n9, new UserHandle(userId),
-                "", 9258));
+                pkg2, 1, "cheater", uid2, uid2, n9, new UserHandle(userId),
+                "", 9258), getDefaultChannel());
         mRecordCheater.setUserImportance(NotificationManager.IMPORTANCE_LOW);
 
         Notification n10 = new Notification.Builder(mContext)
                 .setStyle(new Notification.InboxStyle().setSummaryText("message!")).build();
         mRecordEmail = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, getDefaultChannel(), 1, "email", uid2, uid2, n10, new UserHandle(userId),
-                "", 1599));
+                pkg2, 1, "email", uid2, uid2, n10, new UserHandle(userId),
+                "", 1599), getDefaultChannel());
         mRecordEmail.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
     }
 

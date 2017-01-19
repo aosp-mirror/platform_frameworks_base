@@ -105,8 +105,8 @@ public class RankingHelperTest {
                 .setWhen(1205)
                 .build();
         mRecordGroupGSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiGroupGSortA, user,
-                null, System.currentTimeMillis()));
+                "package", "package", 1, null, 0, 0, mNotiGroupGSortA, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
 
         mNotiGroupGSortB = new Notification.Builder(getContext())
                 .setContentTitle("B")
@@ -115,24 +115,24 @@ public class RankingHelperTest {
                 .setWhen(1200)
                 .build();
         mRecordGroupGSortB = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiGroupGSortB, user,
-                null, System.currentTimeMillis()));
+                "package", "package", 1, null, 0, 0, mNotiGroupGSortB, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
 
         mNotiNoGroup = new Notification.Builder(getContext())
                 .setContentTitle("C")
                 .setWhen(1201)
                 .build();
         mRecordNoGroup = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroup, user,
-                null, System.currentTimeMillis()));
+                "package", "package", 1, null, 0, 0, mNotiNoGroup, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
 
         mNotiNoGroup2 = new Notification.Builder(getContext())
                 .setContentTitle("D")
                 .setWhen(1202)
                 .build();
         mRecordNoGroup2 = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroup2, user,
-                null, System.currentTimeMillis()));
+                "package", "package", 1, null, 0, 0, mNotiNoGroup2, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
 
         mNotiNoGroupSortA = new Notification.Builder(getContext())
                 .setContentTitle("E")
@@ -140,8 +140,8 @@ public class RankingHelperTest {
                 .setSortKey("A")
                 .build();
         mRecordNoGroupSortA = new NotificationRecord(getContext(), new StatusBarNotification(
-                "package", "package", getDefaultChannel(), 1, null, 0, 0, mNotiNoGroupSortA, user,
-                null, System.currentTimeMillis()));
+                "package", "package", 1, null, 0, 0, mNotiNoGroupSortA, user,
+                null, System.currentTimeMillis()), getDefaultChannel());
 
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -254,8 +254,12 @@ public class RankingHelperTest {
         mHelper.createNotificationChannel(pkg, uid, channel1, true);
         mHelper.createNotificationChannel(pkg, uid, channel2, false);
 
+        mHelper.setShowBadge(pkg, uid, true);
+        mHelper.setShowBadge(pkg2, uid2, false);
+
         ByteArrayOutputStream baos = writeXmlAndPurge(pkg, uid, channel1.getId(), channel2.getId(),
                 NotificationChannel.DEFAULT_CHANNEL_ID);
+        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{pkg}, new int[]{uid});
 
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
@@ -263,6 +267,8 @@ public class RankingHelperTest {
         parser.nextTag();
         mHelper.readXml(parser, false);
 
+        assertFalse(mHelper.canShowBadge(pkg2, uid2));
+        assertTrue(mHelper.canShowBadge(pkg, uid));
         assertEquals(channel1, mHelper.getNotificationChannel(pkg, uid, channel1.getId(), false));
         compareChannels(channel2,
                 mHelper.getNotificationChannel(pkg, uid, channel2.getId(), false));
@@ -757,5 +763,12 @@ public class RankingHelperTest {
 
         mHelper.onPackagesChanged(false, UserHandle.USER_SYSTEM, new String[]{pkg}, new int[]{uid});
         assertEquals(2, mHelper.getNotificationChannels(pkg, uid, false).getList().size());
+    }
+
+    @Test
+    public void testRecordDefaults() throws Exception {
+        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(pkg, uid));
+        assertEquals(true, mHelper.canShowBadge(pkg, uid));
+        assertEquals(1, mHelper.getNotificationChannels(pkg, uid, false).getList().size());
     }
 }

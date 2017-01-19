@@ -72,11 +72,7 @@ public class NotificationGuts extends LinearLayout {
     private INotificationManager mINotificationManager;
     private int mStartingUserImportance;
     private StatusBarNotification mStatusBarNotification;
-
-    private ImageView mAutoButton;
-    private TextView mImportanceSummary;
-    private TextView mImportanceTitle;
-    private boolean mAuto;
+    private NotificationChannel mNotificationChannel;
 
     private View mImportanceGroup;
     private View mChannelDisabled;
@@ -170,11 +166,12 @@ public class NotificationGuts extends LinearLayout {
     }
 
     void bindNotification(final PackageManager pm, final INotificationManager iNotificationManager,
-            final StatusBarNotification sbn, OnSettingsClickListener onSettingsClick,
+            final StatusBarNotification sbn, final NotificationChannel channel,
+            OnSettingsClickListener onSettingsClick,
             OnClickListener onDoneClick, final Set<String> nonBlockablePkgs) {
         mINotificationManager = iNotificationManager;
+        mNotificationChannel = channel;
         mStatusBarNotification = sbn;
-        final NotificationChannel channel = sbn.getNotificationChannel();
         mStartingUserImportance = channel.getImportance();
 
         final String pkg = sbn.getPackageName();
@@ -288,14 +285,13 @@ public class NotificationGuts extends LinearLayout {
         if (selectedImportance == mStartingUserImportance) {
             return;
         }
-        final NotificationChannel channel = mStatusBarNotification.getNotificationChannel();
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 selectedImportance - mStartingUserImportance);
-        channel.setImportance(selectedImportance);
+        mNotificationChannel.setImportance(selectedImportance);
         try {
             mINotificationManager.updateNotificationChannelForPackage(
                     mStatusBarNotification.getPackageName(), mStatusBarNotification.getUid(),
-                    channel);
+                    mNotificationChannel);
         } catch (RemoteException e) {
             // :(
         }

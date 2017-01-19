@@ -122,6 +122,7 @@ public final class NotificationChannel implements Parcelable {
     private static final int DEFAULT_IMPORTANCE =
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
+    private static final boolean DEFAULT_SHOW_BADGE = true;
 
     private final String mId;
     private CharSequence mName;
@@ -133,7 +134,7 @@ public final class NotificationChannel implements Parcelable {
     private long[] mVibration;
     private int mUserLockedFields;
     private boolean mVibrationEnabled;
-    private boolean mShowBadge;
+    private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
 
     /**
@@ -368,6 +369,8 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Returns whether notifications posted to this channel can appear as badges in a Launcher
      * application.
+     *
+     * Note that badging may be disabled for other reasons.
      */
     public boolean canShowBadge() {
         return mShowBadge;
