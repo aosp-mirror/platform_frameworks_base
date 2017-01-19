@@ -327,7 +327,7 @@ JTvInputHal::~JTvInputHal() {
 
 JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper) {
     // TODO(b/31632518)
-    sp<ITvInput> tvInput = ITvInput::getService("tv.input");
+    sp<ITvInput> tvInput = ITvInput::getService();
     if (tvInput == nullptr) {
         ALOGE("Couldn't get tv.input service.");
         return nullptr;
