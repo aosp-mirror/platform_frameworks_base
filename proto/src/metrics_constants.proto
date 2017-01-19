@@ -3275,6 +3275,9 @@ message MetricsEvent {
     // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
     DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
 
+    // OPEN: Settings > Apps > Default Apps > Default auto-fill app
+    DEFAULT_AUTO_FILL_PICKER = 792;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // OPEN: QS NFC tile shown
