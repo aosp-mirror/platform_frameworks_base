@@ -22,12 +22,12 @@
 #include <vector>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 #include "utils/FileMap.h"
 
 #include "Diagnostics.h"
 #include "Maybe.h"
 #include "Source.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 namespace file {
@@ -50,51 +50,49 @@ enum class FileType {
   kSocket,
 };
 
-FileType GetFileType(const StringPiece& path);
+FileType GetFileType(const android::StringPiece& path);
 
 /*
  * Appends a path to `base`, separated by the directory separator.
  */
-void AppendPath(std::string* base, StringPiece part);
+void AppendPath(std::string* base, android::StringPiece part);
 
 /*
  * Makes all the directories in `path`. The last element in the path
  * is interpreted as a directory.
  */
-bool mkdirs(const StringPiece& path);
+bool mkdirs(const android::StringPiece& path);
 
 /**
  * Returns all but the last part of the path.
  */
-StringPiece GetStem(const StringPiece& path);
+android::StringPiece GetStem(const android::StringPiece& path);
 
 /**
  * Returns the last part of the path with extension.
  */
-StringPiece GetFilename(const StringPiece& path);
+android::StringPiece GetFilename(const android::StringPiece& path);
 
 /**
  * Returns the extension of the path. This is the entire string after
  * the first '.' of the last part of the path.
  */
-StringPiece GetExtension(const StringPiece& path);
+android::StringPiece GetExtension(const android::StringPiece& path);
 
 /**
  * Converts a package name (com.android.app) to a path: com/android/app
  */
-std::string PackageToPath(const StringPiece& package);
+std::string PackageToPath(const android::StringPiece& package);
 
 /**
  * Creates a FileMap for the file at path.
  */
-Maybe<android::FileMap> MmapPath(const StringPiece& path,
-                                 std::string* out_error);
+Maybe<android::FileMap> MmapPath(const android::StringPiece& path, std::string* out_error);
 
 /**
  * Reads the file at path and appends each line to the outArgList vector.
  */
-bool AppendArgsFromFile(const StringPiece& path,
-                        std::vector<std::string>* out_arglist,
+bool AppendArgsFromFile(const android::StringPiece& path, std::vector<std::string>* out_arglist,
                         std::string* out_error);
 
 /*
@@ -120,7 +118,7 @@ class FileFilter {
    * - Otherwise the full string is matched.
    * - match is not case-sensitive.
    */
-  bool SetPattern(const StringPiece& pattern);
+  bool SetPattern(const android::StringPiece& pattern);
 
   /**
    * Applies the filter, returning true for pass, false for fail.

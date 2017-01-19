@@ -56,7 +56,7 @@ class Png {
  */
 class PngChunkFilter : public io::InputStream {
  public:
-  explicit PngChunkFilter(const StringPiece& data);
+  explicit PngChunkFilter(const android::StringPiece& data);
 
   bool Next(const void** buffer, int* len) override;
   void BackUp(int count) override;
@@ -71,7 +71,7 @@ class PngChunkFilter : public io::InputStream {
  private:
   bool ConsumeWindow(const void** buffer, int* len);
 
-  StringPiece data_;
+  android::StringPiece data_;
   size_t window_start_ = 0;
   size_t window_end_ = 0;
   bool error_ = false;

@@ -34,6 +34,7 @@ testFiles := \
     LoadedArsc_test.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
+    StringPiece_test.cpp \
     TestHelpers.cpp \
     TestMain.cpp \
     Theme_test.cpp \

@@ -154,7 +154,7 @@ class AssetManagerSymbolSource : public ISymbolSource {
  public:
   AssetManagerSymbolSource() = default;
 
-  bool AddAssetPath(const StringPiece& path);
+  bool AddAssetPath(const android::StringPiece& path);
 
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;

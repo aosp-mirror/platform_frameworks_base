@@ -110,7 +110,7 @@ class IFileCollection {
  public:
   virtual ~IFileCollection() = default;
 
-  virtual IFile* FindFile(const StringPiece& path) = 0;
+  virtual IFile* FindFile(const android::StringPiece& path) = 0;
   virtual std::unique_ptr<IFileCollectionIterator> Iterator() = 0;
 };
 

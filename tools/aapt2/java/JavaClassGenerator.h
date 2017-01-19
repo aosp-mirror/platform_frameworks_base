@@ -20,10 +20,11 @@
 #include <ostream>
 #include <string>
 
+#include "androidfw/StringPiece.h"
+
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
@@ -69,22 +70,20 @@ class JavaClassGenerator {
    * We need to generate these symbols in a separate file.
    * Returns true on success.
    */
-  bool Generate(const StringPiece& packageNameToGenerate, std::ostream* out);
+  bool Generate(const android::StringPiece& packageNameToGenerate, std::ostream* out);
 
-  bool Generate(const StringPiece& packageNameToGenerate,
-                const StringPiece& outputPackageName, std::ostream* out);
+  bool Generate(const android::StringPiece& packageNameToGenerate,
+                const android::StringPiece& outputPackageName, std::ostream* out);
 
   const std::string& getError() const;
 
  private:
-  bool AddMembersToTypeClass(const StringPiece& packageNameToGenerate,
-                             const ResourceTablePackage* package,
-                             const ResourceTableType* type,
+  bool AddMembersToTypeClass(const android::StringPiece& packageNameToGenerate,
+                             const ResourceTablePackage* package, const ResourceTableType* type,
                              ClassDefinition* outTypeClassDef);
 
-  void AddMembersToStyleableClass(const StringPiece& packageNameToGenerate,
-                                  const std::string& entryName,
-                                  const Styleable* styleable,
+  void AddMembersToStyleableClass(const android::StringPiece& packageNameToGenerate,
+                                  const std::string& entryName, const Styleable* styleable,
                                   ClassDefinition* outStyleableClassDef);
 
   bool SkipSymbol(SymbolState state);

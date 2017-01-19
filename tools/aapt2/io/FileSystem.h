@@ -59,8 +59,8 @@ class FileCollection : public IFileCollection {
   /**
    * Adds a file located at path. Returns the IFile representation of that file.
    */
-  IFile* InsertFile(const StringPiece& path);
-  IFile* FindFile(const StringPiece& path) override;
+  IFile* InsertFile(const android::StringPiece& path);
+  IFile* FindFile(const android::StringPiece& path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
 
  private:

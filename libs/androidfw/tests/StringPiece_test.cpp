@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
-#include "test/Test.h"
+#include "TestHelpers.h"
 
-namespace aapt {
+namespace android {
 
 TEST(StringPieceTest, CompareNonNullTerminatedPiece) {
   StringPiece a("hello world", 5);
@@ -92,4 +92,4 @@ TEST(StringPieceTest, ContainsOtherStringPiece) {
   EXPECT_FALSE(text16.contains(long_needle16));
 }
 
-}  // namespace aapt
+}  // namespace android

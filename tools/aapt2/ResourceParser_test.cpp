@@ -25,6 +25,8 @@
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 constexpr const char* kXmlPreamble =

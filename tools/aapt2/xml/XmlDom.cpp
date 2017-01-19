@@ -29,6 +29,9 @@
 #include "XmlPullParser.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+using android::StringPiece16;
+
 namespace aapt {
 namespace xml {
 
@@ -52,10 +55,10 @@ static void SplitName(const char* name, std::string* out_ns,
 
   if (*p == 0) {
     out_ns->clear();
-    *out_name = StringPiece(name).ToString();
+    out_name->assign(name);
   } else {
-    *out_ns = StringPiece(name, (p - name)).ToString();
-    *out_name = StringPiece(p + 1).ToString();
+    out_ns->assign(name, (p - name));
+    out_name->assign(p + 1);
   }
 }
 
@@ -83,11 +86,11 @@ static void XMLCALL StartNamespaceHandler(void* user_data, const char* prefix,
 
   std::unique_ptr<Namespace> ns = util::make_unique<Namespace>();
   if (prefix) {
-    ns->namespace_prefix = StringPiece(prefix).ToString();
+    ns->namespace_prefix = prefix;
   }
 
   if (uri) {
-    ns->namespace_uri = StringPiece(uri).ToString();
+    ns->namespace_uri = uri;
   }
 
   AddToStack(stack, parser, std::move(ns));
@@ -117,7 +120,7 @@ static void XMLCALL StartElementHandler(void* user_data, const char* name,
   while (*attrs) {
     Attribute attribute;
     SplitName(*attrs++, &attribute.namespace_uri, &attribute.name);
-    attribute.value = StringPiece(*attrs++).ToString();
+    attribute.value = *attrs++;
 
     // Insert in sorted order.
     auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(),
@@ -153,14 +156,14 @@ static void XMLCALL CharacterDataHandler(void* user_data, const char* s,
     if (!currentParent->children.empty()) {
       Node* last_child = currentParent->children.back().get();
       if (Text* text = NodeCast<Text>(last_child)) {
-        text->text += StringPiece(s, len).ToString();
+        text->text.append(s, len);
         return;
       }
     }
   }
 
   std::unique_ptr<Text> text = util::make_unique<Text>();
-  text->text = StringPiece(s, len).ToString();
+  text->text.assign(s, len);
   AddToStack(stack, parser, std::move(text));
 }
 
@@ -495,15 +498,14 @@ void PackageAwareVisitor::Visit(Namespace* ns) {
 Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
     const StringPiece& alias, const StringPiece& local_package) const {
   if (alias.empty()) {
-    return ExtractedPackage{local_package.ToString(), false /* private */};
+    return ExtractedPackage{local_package.to_string(), false /* private */};
   }
 
   const auto rend = package_decls_.rend();
   for (auto iter = package_decls_.rbegin(); iter != rend; ++iter) {
     if (alias == iter->prefix) {
       if (iter->package.package.empty()) {
-        return ExtractedPackage{local_package.ToString(),
-                                iter->package.private_namespace};
+        return ExtractedPackage{local_package.to_string(), iter->package.private_namespace};
       }
       return iter->package;
     }

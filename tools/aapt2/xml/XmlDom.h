@@ -22,10 +22,11 @@
 #include <string>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
@@ -100,13 +101,13 @@ class Element : public BaseNode<Element> {
   std::string name;
   std::vector<Attribute> attributes;
 
-  Attribute* FindAttribute(const StringPiece& ns, const StringPiece& name);
-  xml::Element* FindChild(const StringPiece& ns, const StringPiece& name);
-  xml::Element* FindChildWithAttribute(const StringPiece& ns,
-                                       const StringPiece& name,
-                                       const StringPiece& attr_ns,
-                                       const StringPiece& attr_name,
-                                       const StringPiece& attr_value);
+  Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
+  xml::Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
+  xml::Element* FindChildWithAttribute(const android::StringPiece& ns,
+                                       const android::StringPiece& name,
+                                       const android::StringPiece& attr_ns,
+                                       const android::StringPiece& attr_name,
+                                       const android::StringPiece& attr_value);
   std::vector<xml::Element*> GetChildElements();
   std::unique_ptr<Node> Clone() override;
 };
@@ -190,8 +191,7 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
 
   void Visit(Namespace* ns) override;
   Maybe<ExtractedPackage> TransformPackageAlias(
-      const StringPiece& alias,
-      const StringPiece& local_package) const override;
+      const android::StringPiece& alias, const android::StringPiece& local_package) const override;
 
  private:
   struct PackageDecl {

@@ -96,8 +96,8 @@ class TableMerger {
    * An io::IFileCollection is needed in order to find the referenced Files and
    * process them.
    */
-  bool MergeAndMangle(const Source& src, const StringPiece& package,
-                      ResourceTable* table, io::IFileCollection* collection);
+  bool MergeAndMangle(const Source& src, const android::StringPiece& package, ResourceTable* table,
+                      io::IFileCollection* collection);
 
   /**
    * Merges a compiled file that belongs to this same or empty package. This is

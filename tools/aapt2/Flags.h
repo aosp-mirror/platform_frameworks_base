@@ -23,32 +23,30 @@
 #include <unordered_set>
 #include <vector>
 
+#include "androidfw/StringPiece.h"
+
 #include "util/Maybe.h"
-#include "util/StringPiece.h"
 
 namespace aapt {
 
 class Flags {
  public:
-  Flags& RequiredFlag(const StringPiece& name, const StringPiece& description,
+  Flags& RequiredFlag(const android::StringPiece& name, const android::StringPiece& description,
                       std::string* value);
-  Flags& RequiredFlagList(const StringPiece& name,
-                          const StringPiece& description,
+  Flags& RequiredFlagList(const android::StringPiece& name, const android::StringPiece& description,
                           std::vector<std::string>* value);
-  Flags& OptionalFlag(const StringPiece& name, const StringPiece& description,
+  Flags& OptionalFlag(const android::StringPiece& name, const android::StringPiece& description,
                       Maybe<std::string>* value);
-  Flags& OptionalFlagList(const StringPiece& name,
-                          const StringPiece& description,
+  Flags& OptionalFlagList(const android::StringPiece& name, const android::StringPiece& description,
                           std::vector<std::string>* value);
-  Flags& OptionalFlagList(const StringPiece& name,
-                          const StringPiece& description,
+  Flags& OptionalFlagList(const android::StringPiece& name, const android::StringPiece& description,
                           std::unordered_set<std::string>* value);
-  Flags& OptionalSwitch(const StringPiece& name, const StringPiece& description,
+  Flags& OptionalSwitch(const android::StringPiece& name, const android::StringPiece& description,
                         bool* value);
 
-  void Usage(const StringPiece& command, std::ostream* out);
+  void Usage(const android::StringPiece& command, std::ostream* out);
 
-  bool Parse(const StringPiece& command, const std::vector<StringPiece>& args,
+  bool Parse(const android::StringPiece& command, const std::vector<android::StringPiece>& args,
              std::ostream* outError);
 
   const std::vector<std::string>& GetArgs();
@@ -57,7 +55,7 @@ class Flags {
   struct Flag {
     std::string name;
     std::string description;
-    std::function<bool(const StringPiece& value)> action;
+    std::function<bool(const android::StringPiece& value)> action;
     bool required;
     size_t num_args;
 

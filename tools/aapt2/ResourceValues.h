@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
 #include "Resource.h"
@@ -73,7 +74,7 @@ struct Value {
    */
   const std::string& GetComment() const { return comment_; }
 
-  void SetComment(const StringPiece& str) { comment_ = str.ToString(); }
+  void SetComment(const android::StringPiece& str) { comment_ = str.to_string(); }
 
   void SetComment(std::string&& str) { comment_ = std::move(str); }
 

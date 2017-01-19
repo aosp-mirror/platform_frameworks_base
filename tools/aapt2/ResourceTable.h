@@ -25,7 +25,9 @@
 #include "StringPool.h"
 #include "io/File.h"
 
-#include <android-base/macros.h>
+#include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
+
 #include <functional>
 #include <map>
 #include <memory>
@@ -68,9 +70,8 @@ class ResourceConfigValue {
    */
   std::unique_ptr<Value> value;
 
-  ResourceConfigValue(const ConfigDescription& config,
-                      const StringPiece& product)
-      : config(config), product(product.ToString()) {}
+  ResourceConfigValue(const ConfigDescription& config, const android::StringPiece& product)
+      : config(config), product(product.to_string()) {}
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
@@ -105,13 +106,13 @@ class ResourceEntry {
    */
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-  explicit ResourceEntry(const StringPiece& name) : name(name.ToString()) {}
+  explicit ResourceEntry(const android::StringPiece& name) : name(name.to_string()) {}
 
   ResourceConfigValue* FindValue(const ConfigDescription& config);
   ResourceConfigValue* FindValue(const ConfigDescription& config,
-                                 const StringPiece& product);
+                                 const android::StringPiece& product);
   ResourceConfigValue* FindOrCreateValue(const ConfigDescription& config,
-                                         const StringPiece& product);
+                                         const android::StringPiece& product);
   std::vector<ResourceConfigValue*> findAllValues(
       const ConfigDescription& config);
   std::vector<ResourceConfigValue*> FindValuesIf(
@@ -150,8 +151,8 @@ class ResourceTableType {
 
   explicit ResourceTableType(const ResourceType type) : type(type) {}
 
-  ResourceEntry* FindEntry(const StringPiece& name);
-  ResourceEntry* FindOrCreateEntry(const StringPiece& name);
+  ResourceEntry* FindEntry(const android::StringPiece& name);
+  ResourceEntry* FindOrCreateEntry(const android::StringPiece& name);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -195,22 +196,19 @@ class ResourceTable {
                                                Value* incoming);
 
   bool AddResource(const ResourceNameRef& name, const ConfigDescription& config,
-                   const StringPiece& product, std::unique_ptr<Value> value,
+                   const android::StringPiece& product, std::unique_ptr<Value> value,
                    IDiagnostics* diag);
 
   bool AddResource(const ResourceNameRef& name, const ResourceId& res_id,
-                   const ConfigDescription& config, const StringPiece& product,
+                   const ConfigDescription& config, const android::StringPiece& product,
                    std::unique_ptr<Value> value, IDiagnostics* diag);
 
-  bool AddFileReference(const ResourceNameRef& name,
-                        const ConfigDescription& config, const Source& source,
-                        const StringPiece& path, IDiagnostics* diag);
+  bool AddFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+                        const Source& source, const android::StringPiece& path, IDiagnostics* diag);
 
-  bool AddFileReferenceAllowMangled(const ResourceNameRef& name,
-                                    const ConfigDescription& config,
-                                    const Source& source,
-                                    const StringPiece& path, io::IFile* file,
-                                    IDiagnostics* diag);
+  bool AddFileReferenceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
+                                    const Source& source, const android::StringPiece& path,
+                                    io::IFile* file, IDiagnostics* diag);
 
   /**
    * Same as AddResource, but doesn't verify the validity of the name. This is
@@ -219,18 +217,13 @@ class ResourceTable {
    * mangled
    * names.
    */
-  bool AddResourceAllowMangled(const ResourceNameRef& name,
-                               const ConfigDescription& config,
-                               const StringPiece& product,
-                               std::unique_ptr<Value> value,
+  bool AddResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
+                               const android::StringPiece& product, std::unique_ptr<Value> value,
                                IDiagnostics* diag);
 
-  bool AddResourceAllowMangled(const ResourceNameRef& name,
-                               const ResourceId& id,
-                               const ConfigDescription& config,
-                               const StringPiece& product,
-                               std::unique_ptr<Value> value,
-                               IDiagnostics* diag);
+  bool AddResourceAllowMangled(const ResourceNameRef& name, const ResourceId& id,
+                               const ConfigDescription& config, const android::StringPiece& product,
+                               std::unique_ptr<Value> value, IDiagnostics* diag);
 
   bool SetSymbolState(const ResourceNameRef& name, const ResourceId& res_id,
                       const Symbol& symbol, IDiagnostics* diag);
@@ -273,28 +266,23 @@ class ResourceTable {
    * represent the
    * 'current' package before it is known to the ResourceTable.
    */
-  ResourceTablePackage* FindPackage(const StringPiece& name);
+  ResourceTablePackage* FindPackage(const android::StringPiece& name);
 
   ResourceTablePackage* FindPackageById(uint8_t id);
 
-  ResourceTablePackage* CreatePackage(const StringPiece& name,
-                                      Maybe<uint8_t> id = {});
+  ResourceTablePackage* CreatePackage(const android::StringPiece& name, Maybe<uint8_t> id = {});
 
  private:
-  ResourceTablePackage* FindOrCreatePackage(const StringPiece& name);
+  ResourceTablePackage* FindOrCreatePackage(const android::StringPiece& name);
 
   bool AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                       const ConfigDescription& config,
-                       const StringPiece& product, std::unique_ptr<Value> value,
-                       const char* valid_chars,
-                       const CollisionResolverFunc& conflict_resolver,
-                       IDiagnostics* diag);
+                       const ConfigDescription& config, const android::StringPiece& product,
+                       std::unique_ptr<Value> value, const char* valid_chars,
+                       const CollisionResolverFunc& conflict_resolver, IDiagnostics* diag);
 
-  bool AddFileReferenceImpl(const ResourceNameRef& name,
-                            const ConfigDescription& config,
-                            const Source& source, const StringPiece& path,
-                            io::IFile* file, const char* valid_chars,
-                            IDiagnostics* diag);
+  bool AddFileReferenceImpl(const ResourceNameRef& name, const ConfigDescription& config,
+                            const Source& source, const android::StringPiece& path, io::IFile* file,
+                            const char* valid_chars, IDiagnostics* diag);
 
   bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
                           const Symbol& symbol, const char* valid_chars,

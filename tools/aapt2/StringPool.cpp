@@ -22,10 +22,12 @@
 
 #include "android-base/logging.h"
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 
 #include "util/BigBuffer.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
@@ -140,7 +142,7 @@ StringPool::Ref StringPool::MakeRefImpl(const StringPiece& str,
   }
 
   Entry* entry = new Entry();
-  entry->value = str.ToString();
+  entry->value = str.to_string();
   entry->context = context;
   entry->index = strings_.size();
   entry->ref_ = 0;

@@ -23,6 +23,7 @@
 #include <tuple>
 
 #include "android-base/logging.h"
+#include "androidfw/StringPiece.h"
 
 #include "NameMangler.h"
 #include "Resource.h"
@@ -32,7 +33,8 @@
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
 #include "process/SymbolTable.h"
-#include "util/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 
@@ -58,7 +60,7 @@ static bool IsValidSymbol(const StringPiece& symbol) {
  * Replace those with '_'.
  */
 static std::string Transform(const StringPiece& symbol) {
-  std::string output = symbol.ToString();
+  std::string output = symbol.to_string();
   for (char& c : output) {
     if (c == '.' || c == '-') {
       c = '_';

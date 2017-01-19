@@ -21,9 +21,11 @@
 #include <vector>
 
 #include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
 
-#include "util/StringPiece.h"
 #include "util/Util.h"
+
+using android::StringPiece;
 
 namespace aapt {
 

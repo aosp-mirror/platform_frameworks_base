@@ -19,6 +19,8 @@
 
 #include <utility>
 
+#include "androidfw/StringPiece.h"
+
 #include "Resource.h"
 
 namespace aapt {
@@ -52,7 +54,7 @@ enum {
 
 size_t FindAttributeSdkLevel(const ResourceId& id);
 size_t FindAttributeSdkLevel(const ResourceName& name);
-std::pair<StringPiece, int> GetDevelopmentSdkCodeNameAndVersion();
+std::pair<android::StringPiece, int> GetDevelopmentSdkCodeNameAndVersion();
 
 }  // namespace aapt
 

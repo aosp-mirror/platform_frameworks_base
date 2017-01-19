@@ -22,9 +22,9 @@
 #include <string>
 
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 
 #include "Source.h"
-#include "util/StringPiece.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -38,7 +38,7 @@ struct DiagMessage {
  public:
   DiagMessage() = default;
 
-  explicit DiagMessage(const StringPiece& src) : source_(src) {}
+  explicit DiagMessage(const android::StringPiece& src) : source_(src) {}
 
   explicit DiagMessage(const Source& src) : source_(src) {}
 
@@ -58,6 +58,12 @@ struct DiagMessage {
   Source source_;
   std::stringstream message_;
 };
+
+template <>
+inline DiagMessage& DiagMessage::operator<<(const ::std::u16string& value) {
+  message_ << android::StringPiece16(value);
+  return *this;
+}
 
 struct IDiagnostics {
   virtual ~IDiagnostics() = default;

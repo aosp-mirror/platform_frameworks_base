@@ -16,8 +16,11 @@
 
 #include "compile/Png.h"
 
+#include "androidfw/StringPiece.h"
+
 #include "io/Io.h"
-#include "util/StringPiece.h"
+
+using android::StringPiece;
 
 namespace aapt {
 

@@ -23,6 +23,8 @@
 #include "ValueVisitor.h"
 #include "compile/Pseudolocalizer.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 std::unique_ptr<StyledString> PseudolocalizeStyledString(

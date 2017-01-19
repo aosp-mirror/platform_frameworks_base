@@ -20,7 +20,7 @@
 #include <sstream>
 #include <string>
 
-#include "util/StringPiece.h"
+#include "androidfw/StringPiece.h"
 
 namespace aapt {
 
@@ -58,7 +58,7 @@ class AnnotationProcessor {
    * configurations,
    * we need to collect all the comments.
    */
-  void AppendComment(const StringPiece& comment);
+  void AppendComment(const android::StringPiece& comment);
 
   void AppendNewLine();
 
@@ -66,7 +66,7 @@ class AnnotationProcessor {
    * Writes the comments and annotations to the stream, with the given prefix
    * before each line.
    */
-  void WriteToStream(std::ostream* out, const StringPiece& prefix) const;
+  void WriteToStream(std::ostream* out, const android::StringPiece& prefix) const;
 
  private:
   enum : uint32_t {

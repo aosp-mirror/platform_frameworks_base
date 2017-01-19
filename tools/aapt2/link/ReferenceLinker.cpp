@@ -30,6 +30,8 @@
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 namespace {
@@ -192,8 +194,7 @@ class EmptyDeclStack : public xml::IPackageDeclStack {
       const StringPiece& alias,
       const StringPiece& local_package) const override {
     if (alias.empty()) {
-      return xml::ExtractedPackage{local_package.ToString(),
-                                   true /* private */};
+      return xml::ExtractedPackage{local_package.to_string(), true /* private */};
     }
     return {};
   }

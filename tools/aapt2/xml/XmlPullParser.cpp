@@ -22,6 +22,8 @@
 #include "xml/XmlPullParser.h"
 #include "xml/XmlUtil.h"
 
+using android::StringPiece;
+
 namespace aapt {
 namespace xml {
 
@@ -136,15 +138,14 @@ const std::string& XmlPullParser::namespace_uri() const {
 Maybe<ExtractedPackage> XmlPullParser::TransformPackageAlias(
     const StringPiece& alias, const StringPiece& local_package) const {
   if (alias.empty()) {
-    return ExtractedPackage{local_package.ToString(), false /* private */};
+    return ExtractedPackage{local_package.to_string(), false /* private */};
   }
 
   const auto end_iter = package_aliases_.rend();
   for (auto iter = package_aliases_.rbegin(); iter != end_iter; ++iter) {
     if (alias == iter->prefix) {
       if (iter->package.package.empty()) {
-        return ExtractedPackage{local_package.ToString(),
-                                iter->package.private_namespace};
+        return ExtractedPackage{local_package.to_string(), iter->package.private_namespace};
       }
       return iter->package;
     }
@@ -188,19 +189,18 @@ size_t XmlPullParser::attribute_count() const {
 /**
  * Extracts the namespace and name of an expanded element or attribute name.
  */
-static void SplitName(const char* name, std::string& out_ns,
-                      std::string& out_name) {
+static void SplitName(const char* name, std::string* out_ns, std::string* out_name) {
   const char* p = name;
   while (*p != 0 && *p != kXmlNamespaceSep) {
     p++;
   }
 
   if (*p == 0) {
-    out_ns = std::string();
-    out_name = name;
+    out_ns->clear();
+    out_name->assign(name);
   } else {
-    out_ns = StringPiece(name, (p - name)).ToString();
-    out_name = p + 1;
+    out_ns->assign(name, (p - name));
+    out_name->assign(p + 1);
   }
 }
 
@@ -224,11 +224,11 @@ void XMLCALL XmlPullParser::StartElementHandler(void* user_data,
   EventData data = {Event::kStartElement,
                     XML_GetCurrentLineNumber(parser->parser_),
                     parser->depth_++};
-  SplitName(name, data.data1, data.data2);
+  SplitName(name, &data.data1, &data.data2);
 
   while (*attrs) {
     Attribute attribute;
-    SplitName(*attrs++, attribute.namespace_uri, attribute.name);
+    SplitName(*attrs++, &attribute.namespace_uri, &attribute.name);
     attribute.value = *attrs++;
 
     // Insert in sorted order.
@@ -245,9 +245,8 @@ void XMLCALL XmlPullParser::CharacterDataHandler(void* user_data, const char* s,
                                                  int len) {
   XmlPullParser* parser = reinterpret_cast<XmlPullParser*>(user_data);
 
-  parser->event_queue_.push(
-      EventData{Event::kText, XML_GetCurrentLineNumber(parser->parser_),
-                parser->depth_, StringPiece(s, len).ToString()});
+  parser->event_queue_.push(EventData{Event::kText, XML_GetCurrentLineNumber(parser->parser_),
+                                      parser->depth_, std::string(s, len)});
 }
 
 void XMLCALL XmlPullParser::EndElementHandler(void* user_data,
@@ -257,7 +256,7 @@ void XMLCALL XmlPullParser::EndElementHandler(void* user_data,
   EventData data = {Event::kEndElement,
                     XML_GetCurrentLineNumber(parser->parser_),
                     --(parser->depth_)};
-  SplitName(name, data.data1, data.data2);
+  SplitName(name, &data.data1, &data.data2);
 
   // Move the data into the queue (no copy).
   parser->event_queue_.push(std::move(data));

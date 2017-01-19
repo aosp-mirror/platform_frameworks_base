@@ -35,6 +35,8 @@
 #include <direct.h>
 #endif
 
+using android::StringPiece;
+
 namespace aapt {
 namespace file {
 
@@ -72,10 +74,9 @@ FileType GetFileType(const StringPiece& path) {
 
 inline static int MkdirImpl(const StringPiece& path) {
 #ifdef _WIN32
-  return _mkdir(path.ToString().c_str());
+  return _mkdir(path.to_string().c_str());
 #else
-  return mkdir(path.ToString().c_str(),
-               S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP);
+  return mkdir(path.to_string().c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP);
 #endif
 }
 
@@ -184,7 +185,7 @@ bool AppendArgsFromFile(const StringPiece& path,
                         std::vector<std::string>* out_arglist,
                         std::string* out_error) {
   std::string contents;
-  if (!android::base::ReadFileToString(path.ToString(), &contents)) {
+  if (!android::base::ReadFileToString(path.to_string(), &contents)) {
     if (out_error) *out_error = "failed to read argument-list file";
     return false;
   }
@@ -192,7 +193,7 @@ bool AppendArgsFromFile(const StringPiece& path,
   for (StringPiece line : util::Tokenize(contents, ' ')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      out_arglist->push_back(line.ToString());
+      out_arglist->push_back(line.to_string());
     }
   }
   return true;

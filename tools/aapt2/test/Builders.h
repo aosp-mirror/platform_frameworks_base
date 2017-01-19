@@ -37,95 +37,86 @@ class ResourceTableBuilder {
 
   StringPool* string_pool() { return &table_->string_pool; }
 
-  ResourceTableBuilder& SetPackageId(const StringPiece& package_name,
-                                     uint8_t id) {
+  ResourceTableBuilder& SetPackageId(const android::StringPiece& package_name, uint8_t id) {
     ResourceTablePackage* package = table_->CreatePackage(package_name, id);
     CHECK(package != nullptr);
     return *this;
   }
 
-  ResourceTableBuilder& AddSimple(const StringPiece& name,
-                                  const ResourceId& id = {}) {
+  ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ResourceId& id = {}) {
     return AddValue(name, id, util::make_unique<Id>());
   }
 
-  ResourceTableBuilder& AddSimple(const StringPiece& name,
-                                  const ConfigDescription& config,
+  ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ConfigDescription& config,
                                   const ResourceId& id = {}) {
     return AddValue(name, config, id, util::make_unique<Id>());
   }
 
-  ResourceTableBuilder& AddReference(const StringPiece& name,
-                                     const StringPiece& ref) {
+  ResourceTableBuilder& AddReference(const android::StringPiece& name,
+                                     const android::StringPiece& ref) {
     return AddReference(name, {}, ref);
   }
 
-  ResourceTableBuilder& AddReference(const StringPiece& name,
-                                     const ResourceId& id,
-                                     const StringPiece& ref) {
+  ResourceTableBuilder& AddReference(const android::StringPiece& name, const ResourceId& id,
+                                     const android::StringPiece& ref) {
     return AddValue(name, id,
                     util::make_unique<Reference>(ParseNameOrDie(ref)));
   }
 
-  ResourceTableBuilder& AddString(const StringPiece& name,
-                                  const StringPiece& str) {
+  ResourceTableBuilder& AddString(const android::StringPiece& name,
+                                  const android::StringPiece& str) {
     return AddString(name, {}, str);
   }
 
-  ResourceTableBuilder& AddString(const StringPiece& name, const ResourceId& id,
-                                  const StringPiece& str) {
+  ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
+                                  const android::StringPiece& str) {
     return AddValue(
         name, id, util::make_unique<String>(table_->string_pool.MakeRef(str)));
   }
 
-  ResourceTableBuilder& AddString(const StringPiece& name, const ResourceId& id,
+  ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
                                   const ConfigDescription& config,
-                                  const StringPiece& str) {
+                                  const android::StringPiece& str) {
     return AddValue(name, config, id, util::make_unique<String>(
                                           table_->string_pool.MakeRef(str)));
   }
 
-  ResourceTableBuilder& AddFileReference(const StringPiece& name,
-                                         const StringPiece& path) {
+  ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
+                                         const android::StringPiece& path) {
     return AddFileReference(name, {}, path);
   }
 
-  ResourceTableBuilder& AddFileReference(const StringPiece& name,
-                                         const ResourceId& id,
-                                         const StringPiece& path) {
+  ResourceTableBuilder& AddFileReference(const android::StringPiece& name, const ResourceId& id,
+                                         const android::StringPiece& path) {
     return AddValue(name, id, util::make_unique<FileReference>(
                                   table_->string_pool.MakeRef(path)));
   }
 
-  ResourceTableBuilder& AddFileReference(const StringPiece& name,
-                                         const StringPiece& path,
+  ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
+                                         const android::StringPiece& path,
                                          const ConfigDescription& config) {
     return AddValue(name, config, {}, util::make_unique<FileReference>(
                                           table_->string_pool.MakeRef(path)));
   }
 
-  ResourceTableBuilder& AddValue(const StringPiece& name,
-                                 std::unique_ptr<Value> value) {
+  ResourceTableBuilder& AddValue(const android::StringPiece& name, std::unique_ptr<Value> value) {
     return AddValue(name, {}, std::move(value));
   }
 
-  ResourceTableBuilder& AddValue(const StringPiece& name, const ResourceId& id,
+  ResourceTableBuilder& AddValue(const android::StringPiece& name, const ResourceId& id,
                                  std::unique_ptr<Value> value) {
     return AddValue(name, {}, id, std::move(value));
   }
 
-  ResourceTableBuilder& AddValue(const StringPiece& name,
-                                 const ConfigDescription& config,
-                                 const ResourceId& id,
-                                 std::unique_ptr<Value> value) {
+  ResourceTableBuilder& AddValue(const android::StringPiece& name, const ConfigDescription& config,
+                                 const ResourceId& id, std::unique_ptr<Value> value) {
     ResourceName res_name = ParseNameOrDie(name);
     CHECK(table_->AddResourceAllowMangled(res_name, id, config, {},
                                           std::move(value), &diagnostics_));
     return *this;
   }
 
-  ResourceTableBuilder& SetSymbolState(const StringPiece& name,
-                                       const ResourceId& id,
+  ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
                                        SymbolState state) {
     ResourceName res_name = ParseNameOrDie(name);
     Symbol symbol;
@@ -144,8 +135,8 @@ class ResourceTableBuilder {
   std::unique_ptr<ResourceTable> table_ = util::make_unique<ResourceTable>();
 };
 
-inline std::unique_ptr<Reference> BuildReference(
-    const StringPiece& ref, const Maybe<ResourceId>& id = {}) {
+inline std::unique_ptr<Reference> BuildReference(const android::StringPiece& ref,
+                                                 const Maybe<ResourceId>& id = {}) {
   std::unique_ptr<Reference> reference =
       util::make_unique<Reference>(ParseNameOrDie(ref));
   reference->id = id;
@@ -174,7 +165,7 @@ class ValueBuilder {
     return *this;
   }
 
-  ValueBuilder& SetComment(const StringPiece& str) {
+  ValueBuilder& SetComment(const android::StringPiece& str) {
     value_->SetComment(str);
     return *this;
   }
@@ -199,7 +190,7 @@ class AttributeBuilder {
     return *this;
   }
 
-  AttributeBuilder& AddItem(const StringPiece& name, uint32_t value) {
+  AttributeBuilder& AddItem(const android::StringPiece& name, uint32_t value) {
     attr_->symbols.push_back(Attribute::Symbol{
         Reference(ResourceName({}, ResourceType::kId, name)), value});
     return *this;
@@ -217,18 +208,18 @@ class StyleBuilder {
  public:
   StyleBuilder() = default;
 
-  StyleBuilder& SetParent(const StringPiece& str) {
+  StyleBuilder& SetParent(const android::StringPiece& str) {
     style_->parent = Reference(ParseNameOrDie(str));
     return *this;
   }
 
-  StyleBuilder& AddItem(const StringPiece& str, std::unique_ptr<Item> value) {
+  StyleBuilder& AddItem(const android::StringPiece& str, std::unique_ptr<Item> value) {
     style_->entries.push_back(
         Style::Entry{Reference(ParseNameOrDie(str)), std::move(value)});
     return *this;
   }
 
-  StyleBuilder& AddItem(const StringPiece& str, const ResourceId& id,
+  StyleBuilder& AddItem(const android::StringPiece& str, const ResourceId& id,
                         std::unique_ptr<Item> value) {
     AddItem(str, std::move(value));
     style_->entries.back().key.id = id;
@@ -247,8 +238,7 @@ class StyleableBuilder {
  public:
   StyleableBuilder() = default;
 
-  StyleableBuilder& AddItem(const StringPiece& str,
-                            const Maybe<ResourceId>& id = {}) {
+  StyleableBuilder& AddItem(const android::StringPiece& str, const Maybe<ResourceId>& id = {}) {
     styleable_->entries.push_back(Reference(ParseNameOrDie(str)));
     styleable_->entries.back().id = id;
     return *this;
@@ -262,7 +252,7 @@ class StyleableBuilder {
   std::unique_ptr<Styleable> styleable_ = util::make_unique<Styleable>();
 };
 
-inline std::unique_ptr<xml::XmlResource> BuildXmlDom(const StringPiece& str) {
+inline std::unique_ptr<xml::XmlResource> BuildXmlDom(const android::StringPiece& str) {
   std::stringstream in;
   in << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" << str;
   StdErrDiagnostics diag;
@@ -273,7 +263,7 @@ inline std::unique_ptr<xml::XmlResource> BuildXmlDom(const StringPiece& str) {
 }
 
 inline std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(
-    IAaptContext* context, const StringPiece& str) {
+    IAaptContext* context, const android::StringPiece& str) {
   std::unique_ptr<xml::XmlResource> doc = BuildXmlDom(str);
   doc->file.name.package = context->GetCompilationPackage();
   return doc;

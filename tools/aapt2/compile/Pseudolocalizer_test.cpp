@@ -19,6 +19,8 @@
 #include "test/Test.h"
 #include "util/Util.h"
 
+using android::StringPiece;
+
 namespace aapt {
 
 // In this context, 'Axis' represents a particular field in the configuration,

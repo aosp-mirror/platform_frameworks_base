@@ -19,10 +19,10 @@
 
 #include <unordered_map>
 
+#include "android-base/macros.h"
+
 #include "Resource.h"
 #include "process/IResourceTableConsumer.h"
-
-#include "android-base/macros.h"
 
 namespace aapt {
 
@@ -40,8 +40,7 @@ class IdAssigner : public IResourceTableConsumer {
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 
  private:
-  const std::unordered_map<ResourceName, ResourceId>* assigned_id_map_ =
-      nullptr;
+  const std::unordered_map<ResourceName, ResourceId>* assigned_id_map_ = nullptr;
 };
 
 }  // namespace aapt

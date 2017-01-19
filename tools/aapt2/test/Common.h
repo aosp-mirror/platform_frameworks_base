@@ -21,6 +21,7 @@
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "androidfw/StringPiece.h"
 #include "gtest/gtest.h"
 
 #include "ConfigDescription.h"
@@ -30,7 +31,6 @@
 #include "ValueVisitor.h"
 #include "io/File.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/StringPiece.h"
 
 //
 // GTEST 1.7 doesn't explicitly cast to bool, which causes explicit operators to
@@ -68,23 +68,22 @@ inline IDiagnostics* GetDiagnostics() {
   return &diag;
 }
 
-inline ResourceName ParseNameOrDie(const StringPiece& str) {
+inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   ResourceNameRef ref;
   CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name";
   return ref.ToResourceName();
 }
 
-inline ConfigDescription ParseConfigOrDie(const StringPiece& str) {
+inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
   ConfigDescription config;
   CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration";
   return config;
 }
 
 template <typename T>
-T* GetValueForConfigAndProduct(ResourceTable* table,
-                               const StringPiece& res_name,
+T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
                                const ConfigDescription& config,
-                               const StringPiece& product) {
+                               const android::StringPiece& product) {
   Maybe<ResourceTable::SearchResult> result =
       table->FindResource(ParseNameOrDie(res_name));
   if (result) {
@@ -98,19 +97,19 @@ T* GetValueForConfigAndProduct(ResourceTable* table,
 }
 
 template <typename T>
-T* GetValueForConfig(ResourceTable* table, const StringPiece& res_name,
+T* GetValueForConfig(ResourceTable* table, const android::StringPiece& res_name,
                      const ConfigDescription& config) {
   return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
 template <typename T>
-T* GetValue(ResourceTable* table, const StringPiece& res_name) {
+T* GetValue(ResourceTable* table, const android::StringPiece& res_name) {
   return GetValueForConfig<T>(table, res_name, {});
 }
 
 class TestFile : public io::IFile {
  public:
-  explicit TestFile(const StringPiece& path) : source_(path) {}
+  explicit TestFile(const android::StringPiece& path) : source_(path) {}
 
   std::unique_ptr<io::IData> OpenAsData() override { return {}; }
 
