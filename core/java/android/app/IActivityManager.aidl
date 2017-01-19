@@ -210,6 +210,7 @@ interface IActivityManager {
     boolean killPids(in int[] pids, in String reason, boolean secure);
     List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags);
     ActivityManager.TaskThumbnail getTaskThumbnail(int taskId);
+    ActivityManager.TaskDescription getTaskDescription(int taskId);
     // Retrieve running application processes in the system
     List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses();
     // Get device configuration

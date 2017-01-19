@@ -31,17 +31,21 @@ import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
 public class WorkLockActivityController {
     private final Context mContext;
+    final SystemServicesProxy mSsp;
 
     public WorkLockActivityController(Context context) {
         mContext = context;
+        mSsp = SystemServicesProxy.getInstance(context);
+
         EventBus.getDefault().register(this);
-        SystemServicesProxy.getInstance(context).registerTaskStackListener(mLockListener);
+        mSsp.registerTaskStackListener(mLockListener);
     }
 
     private void startWorkChallengeInTask(int taskId, int userId) {
         Intent intent = new Intent(KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER)
                 .setComponent(new ComponentName(mContext, WorkLockActivity.class))
                 .putExtra(Intent.EXTRA_USER_ID, userId)
+                .putExtra(WorkLockActivity.EXTRA_TASK_DESCRIPTION, mSsp.getTaskDescription(taskId))
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 

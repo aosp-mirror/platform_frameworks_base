@@ -9580,6 +9580,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public ActivityManager.TaskDescription getTaskDescription(int id) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                    "getTaskDescription()");
+            final TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(
+                    id, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
+            if (tr != null) {
+                return tr.lastTaskDescription;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public int addAppTask(IBinder activityToken, Intent intent,
             ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException {
         final int callingUid = Binder.getCallingUid();
