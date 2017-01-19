@@ -487,9 +487,22 @@ CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
 
 void RenderProxy::setProcessStatsBuffer(int fd) {
     SETUP_TASK(setProcessStatsBuffer);
-    args->thread = &mRenderThread;
+    auto& rt = RenderThread::getInstance();
+    args->thread = &rt;
     args->fd = dup(fd);
-    post(task);
+    rt.queue(task);
+}
+
+CREATE_BRIDGE1(rotateProcessStatsBuffer, RenderThread* thread) {
+    args->thread->jankTracker().rotateStorage();
+    return nullptr;
+}
+
+void RenderProxy::rotateProcessStatsBuffer() {
+    SETUP_TASK(rotateProcessStatsBuffer);
+    auto& rt = RenderThread::getInstance();
+    args->thread = &rt;
+    rt.queue(task);
 }
 
 int RenderProxy::getRenderThreadTid() {

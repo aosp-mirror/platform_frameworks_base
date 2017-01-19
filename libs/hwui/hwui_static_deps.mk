@@ -22,11 +22,12 @@ LOCAL_SHARED_LIBRARIES += \
     libskia \
     libui \
     libgui \
-    libprotobuf-cpp-lite \
+    libprotobuf-cpp-full \
     libharfbuzz_ng \
     libft2 \
     libminikin \
-    libandroidfw
+    libandroidfw \
+    libRScpp
 
-# enable RENDERSCRIPT
-LOCAL_SHARED_LIBRARIES += libRScpp
+LOCAL_STATIC_LIBRARIES += \
+    libplatformprotos

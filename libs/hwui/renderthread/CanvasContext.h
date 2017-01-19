@@ -155,8 +155,7 @@ public:
     void dumpFrames(int fd);
     void resetFrameStats();
 
-    void setName(const std::string&& name) { mName = name; }
-    const std::string& name() { return mName; }
+    void setName(const std::string&& name);
 
     void serializeDisplayListTree();
 

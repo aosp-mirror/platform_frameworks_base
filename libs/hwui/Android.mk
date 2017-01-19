@@ -47,6 +47,7 @@ hwui_src_files := \
     renderthread/RenderThread.cpp \
     renderthread/TimeLord.cpp \
     renderthread/Frame.cpp \
+    service/GraphicsStatsService.cpp \
     thread/TaskManager.cpp \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
@@ -293,6 +294,7 @@ LOCAL_SRC_FILES += \
     tests/unit/GlopBuilderTests.cpp \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/GradientCacheTests.cpp \
+    tests/unit/GraphicsStatsServiceTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LeakCheckTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \

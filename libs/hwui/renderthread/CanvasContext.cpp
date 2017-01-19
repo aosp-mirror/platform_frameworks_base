@@ -590,6 +590,7 @@ DeferredLayerUpdater* CanvasContext::createTextureLayer() {
 }
 
 void CanvasContext::dumpFrames(int fd) {
+    mJankTracker.dump(fd);
     FILE* file = fdopen(fd, "a");
     fprintf(file, "\n\n---PROFILEDATA---\n");
     for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
@@ -613,6 +614,10 @@ void CanvasContext::dumpFrames(int fd) {
 void CanvasContext::resetFrameStats() {
     mFrames.clear();
     mRenderThread.jankTracker().reset();
+}
+
+void CanvasContext::setName(const std::string&& name) {
+    mJankTracker.setDescription(JankTrackerType::Window, std::move(name));
 }
 
 void CanvasContext::serializeDisplayListTree() {

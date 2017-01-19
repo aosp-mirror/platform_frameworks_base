@@ -110,7 +110,7 @@ static uint32_t frameCountIndexForFrameTime(nsecs_t frameTime) {
 }
 
 // Only called when dumping stats, less performance sensitive
-static uint32_t frameTimeForFrameCountIndex(uint32_t index) {
+int32_t JankTracker::frameTimeForFrameCountIndex(uint32_t index) {
     index = index + kBucketMinThreshold;
     if (index > kBucket2msIntervals) {
         index += (index - kBucket2msIntervals);
@@ -121,6 +121,10 @@ static uint32_t frameTimeForFrameCountIndex(uint32_t index) {
         index += (index - kBucket4msIntervals) + 1;
     }
     return index;
+}
+
+int32_t JankTracker::frameTimeForSlowFrameCountIndex(uint32_t index) {
+    return (index * kSlowFrameBucketIntervalMs) + kSlowFrameBucketStartMs;
 }
 
 JankTracker::JankTracker(const DisplayInfo& displayInfo) {
@@ -161,8 +165,25 @@ void JankTracker::freeData() {
     mData = nullptr;
 }
 
+void JankTracker::rotateStorage() {
+    // If we are mapped we want to stop using the ashmem backend and switch to malloc
+    // We are expecting a switchStorageToAshmem call to follow this, but it's not guaranteed
+    // If we aren't sitting on top of ashmem then just do a reset() as it's functionally
+    // equivalent do a free, malloc, reset.
+    if (mIsMapped) {
+        freeData();
+        mData = new ProfileData;
+    }
+    reset();
+}
+
 void JankTracker::switchStorageToAshmem(int ashmemfd) {
     int regionSize = ashmem_get_size_region(ashmemfd);
+    if (regionSize < 0) {
+        int err = errno;
+        ALOGW("Failed to get ashmem region size from fd %d, err %d %s", ashmemfd, err, strerror(err));
+        return;
+    }
     if (regionSize < static_cast<int>(sizeof(ProfileData))) {
         ALOGW("Ashmem region is too small! Received %d, required %u",
                 regionSize, static_cast<unsigned int>(sizeof(ProfileData)));
@@ -279,15 +300,19 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     }
 }
 
-void JankTracker::dumpBuffer(const void* buffer, size_t bufsize, int fd) {
-    if (bufsize < sizeof(ProfileData)) {
-        return;
+void JankTracker::dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data) {
+    if (description) {
+        switch (description->type) {
+            case JankTrackerType::Generic:
+                break;
+            case JankTrackerType::Package:
+                dprintf(fd, "\nPackage: %s", description->name.c_str());
+                break;
+            case JankTrackerType::Window:
+                dprintf(fd, "\nWindow: %s", description->name.c_str());
+                break;
+        }
     }
-    const ProfileData* data = reinterpret_cast<const ProfileData*>(buffer);
-    dumpData(data, fd);
-}
-
-void JankTracker::dumpData(const ProfileData* data, int fd) {
     if (sFrameStart != FrameInfoIndex::IntendedVsync) {
         dprintf(fd, "\nNote: Data has been filtered!");
     }
@@ -308,7 +333,7 @@ void JankTracker::dumpData(const ProfileData* data, int fd) {
                 data->frameCounts[i]);
     }
     for (size_t i = 0; i < data->slowFrameCounts.size(); i++) {
-        dprintf(fd, " %zums=%u", (i * kSlowFrameBucketIntervalMs) + kSlowFrameBucketStartMs,
+        dprintf(fd, " %ums=%u", frameTimeForSlowFrameCountIndex(i),
                 data->slowFrameCounts[i]);
     }
     dprintf(fd, "\n");

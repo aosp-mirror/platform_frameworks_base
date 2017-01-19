@@ -43,7 +43,6 @@
 #include <FrameInfo.h>
 #include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
-#include <JankTracker.h>
 #include <PropertyValuesAnimatorSet.h>
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
@@ -587,10 +586,13 @@ static jboolean android_view_ThreadedRenderer_supportsOpenGL(JNIEnv* env, jobjec
     return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
 }
 
+static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
+    RenderProxy::rotateProcessStatsBuffer();
+}
+
 static void android_view_ThreadedRenderer_setProcessStatsBuffer(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jint fd) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setProcessStatsBuffer(fd);
+        jint fd) {
+    RenderProxy::setProcessStatsBuffer(fd);
 }
 
 static jint android_view_ThreadedRenderer_getRenderThreadTid(JNIEnv* env, jobject clazz,
@@ -817,15 +819,6 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
     proxy->dumpProfileInfo(fd, dumpFlags);
 }
 
-static void android_view_ThreadedRenderer_dumpProfileData(JNIEnv* env, jobject clazz,
-        jbyteArray jdata, jobject javaFileDescriptor) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    ScopedByteArrayRO buffer(env, jdata);
-    if (buffer.get()) {
-        JankTracker::dumpBuffer(buffer.get(), buffer.size(), fd);
-    }
-}
-
 static void android_view_ThreadedRenderer_addRenderNode(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong renderNodePtr, jboolean placeFront) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -910,7 +903,8 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static const JNINativeMethod gMethods[] = {
     { "nSupportsOpenGL", "()Z", (void*) android_view_ThreadedRenderer_supportsOpenGL },
-    { "nSetProcessStatsBuffer", "(JI)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
+    { "nRotateProcessStatsBuffer", "()V", (void*) android_view_ThreadedRenderer_rotateProcessStatsBuffer },
+    { "nSetProcessStatsBuffer", "(I)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
@@ -943,7 +937,6 @@ static const JNINativeMethod gMethods[] = {
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nSerializeDisplayListTree", "(J)V", (void*) android_view_ThreadedRenderer_serializeDisplayListTree },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
-    { "nDumpProfileData", "([BLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileData },
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
     { "nAddRenderNode", "(JJZ)V", (void*) android_view_ThreadedRenderer_addRenderNode},

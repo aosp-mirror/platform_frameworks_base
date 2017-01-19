@@ -887,9 +887,9 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean hasSurfaceInsets = insets.left != 0 || insets.right != 0
                         || insets.top != 0 || insets.bottom != 0;
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
-                mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent);
+                mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent,
+                        attrs.getTitle().toString());
                 if (mAttachInfo.mThreadedRenderer != null) {
-                    mAttachInfo.mThreadedRenderer.setName(attrs.getTitle().toString());
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
                 }

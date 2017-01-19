@@ -322,6 +322,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl \
 	core/java/android/view/IDockedStackListener.aidl \
 	core/java/android/view/IGraphicsStats.aidl \
+	core/java/android/view/IGraphicsStatsCallback.aidl \
 	core/java/android/view/IInputFilter.aidl \
 	core/java/android/view/IInputFilterHost.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
@@ -1420,6 +1421,24 @@ ifneq ($(INCREMENTAL_BUILDS),)
 endif
 
 include $(BUILD_JAVA_LIBRARY)
+
+# ====  c++ proto device library  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := libplatformprotos
+# b/34740546, work around clang-tidy segmentation fault.
+LOCAL_TIDY_CHECKS := -modernize*
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_FLAGS := \
+    --include_source_info \
+    -Iexternal/protobuf/src
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto)
+LOCAL_C_INCLUDES := \
+    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
+LOCAL_EXPORT_C_INCLUDES := \
+    $(call generated-sources-dir-for,STATIC_LIBRARIES,libplatformprotos,)/proto
+include $(BUILD_STATIC_LIBRARY)
 
 # ====  c++ proto host library  ==============================
 include $(CLEAR_VARS)
