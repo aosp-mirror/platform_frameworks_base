@@ -8,6 +8,10 @@
       </Type>
     </RTProperties>
     <Node>
+      <NodeName>UpdateIdentifier</NodeName>
+      <Value>12</Value>
+    </Node>
+    <Node>
       <NodeName>i001</NodeName>
       <Node>
         <NodeName>HomeSP</NodeName>
@@ -295,6 +299,99 @@
         <Node>
           <NodeName>MaximumBSSLoadValue</NodeName>
           <Value>23</Value>
+        </Node>
+      </Node>
+      <Node>
+        <NodeName>CredentialPriority</NodeName>
+        <Value>99</Value>
+      </Node>
+      <Node>
+        <NodeName>AAAServerTrustRoot</NodeName>
+        <Node>
+          <NodeName>a001</NodeName>
+          <Node>
+            <NodeName>CertURL</NodeName>
+            <Value>server1.trust.root.com</Value>
+          </Node>
+          <Node>
+            <NodeName>CertSHA256Fingerprint</NodeName>
+            <Value>1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f</Value>
+          </Node>
+        </Node>
+      </Node>
+      <Node>
+        <NodeName>SubscriptionUpdate</NodeName>
+        <Node>
+          <NodeName>UpdateInterval</NodeName>
+          <Value>120</Value>
+        </Node>
+        <Node>
+          <NodeName>UpdateMethod</NodeName>
+          <Value>SSP-ClientInitiated</Value>
+        </Node>
+        <Node>
+          <NodeName>Restriction</NodeName>
+          <Value>RoamingPartner</Value>
+        </Node>
+        <Node>
+          <NodeName>URI</NodeName>
+          <Value>subscription.update.com</Value>
+        </Node>
+        <Node>
+          <NodeName>UsernamePassword</NodeName>
+          <Node>
+            <NodeName>Username</NodeName>
+            <Value>subscriptionUser</Value>
+          </Node>
+          <Node>
+            <NodeName>Password</NodeName>
+            <Value>subscriptionPass</Value>
+          </Node>
+        </Node>
+        <Node>
+          <NodeName>TrustRoot</NodeName>
+          <Node>
+            <NodeName>CertURL</NodeName>
+            <Value>subscription.update.cert.com</Value>
+          </Node>
+          <Node>
+            <NodeName>CertSHA256Fingerprint</NodeName>
+            <Value>1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f</Value>
+          </Node>
+        </Node>
+      </Node>
+      <Node>
+        <NodeName>SubscriptionParameter</NodeName>
+        <Node>
+          <NodeName>CreationDate</NodeName>
+          <Value>2016-02-01T10:00:00Z</Value>
+        </Node>
+        <Node>
+          <NodeName>ExpirationDate</NodeName>
+          <Value>2016-03-01T10:00:00Z</Value>
+        </Node>
+        <Node>
+          <NodeName>TypeOfSubscription</NodeName>
+          <Value>Gold</Value>
+        </Node>
+        <Node>
+          <NodeName>UsageLimits</NodeName>
+          <Node>
+            <NodeName>DataLimit</NodeName>
+            <Value>921890</Value>
+          </Node>
+          <Node>
+            <NodeName>StartDate</NodeName>
+            <Value>2016-12-01T10:00:00Z</Value>
+          </Node>
+          <Node>
+            <NodeName>TimeLimit</NodeName>
+            <Value>120</Value>
+          </Node>
+          <Node>
+            <NodeName>UsageTimePeriod</NodeName>
+            <Value>99910</Value>
+          </Node>
         </Node>
       </Node>
     </Node>
