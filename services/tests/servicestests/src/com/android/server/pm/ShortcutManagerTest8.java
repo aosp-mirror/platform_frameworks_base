@@ -1421,6 +1421,35 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
         });
     }
 
+    public void testRequestPinShortcut_wrongLauncherCannotAccept() {
+        setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            ShortcutInfo s1 = makeShortcut("s1");
+            assertTrue(mManager.requestPinShortcut(s1, null));
+            verify(mServiceContext, times(0)).sendIntentSender(any(IntentSender.class));
+        });
+
+        final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
+        verify(mServiceContext).startActivityAsUser(intent.capture(), eq(HANDLE_USER_0));
+        final PinItemRequest request = mLauncherApps.getPinItemRequest(intent.getValue());
+
+        // Verify that other launcher can't use this request
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            // Set some random caller UID.
+            mInjectedCallingUid = 12345;
+
+            assertFalse(request.isValid());
+            assertExpectException(SecurityException.class, "Calling uid mismatch", request::accept);
+        });
+
+        // The default launcher can still use this request
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            assertTrue(request.isValid());
+            assertTrue(request.accept());
+        });
+    }
+
     // TODO More tests:
 
     // Cancel previous pending request and release memory?

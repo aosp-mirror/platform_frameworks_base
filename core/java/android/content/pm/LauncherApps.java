@@ -27,6 +27,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -384,25 +385,11 @@ public class LauncherApps {
      * @return List of launchable activities. Can be an empty list but will not be null.
      */
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
-        ParceledListSlice<ResolveInfo> activities = null;
         try {
-            activities = mService.getLauncherActivities(packageName, user);
+            return convertToActivityList(mService.getLauncherActivities(packageName, user), user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        if (activities == null) {
-            return Collections.EMPTY_LIST;
-        }
-        ArrayList<LauncherActivityInfo> lais = new ArrayList<LauncherActivityInfo>();
-        for (ResolveInfo ri : activities.getList()) {
-            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri.activityInfo, user);
-            if (DEBUG) {
-                Log.v(TAG, "Returning activity for profile " + user + " : "
-                        + lai.getComponentName());
-            }
-            lais.add(lai);
-        }
-        return lais;
     }
 
     /**
@@ -459,6 +446,73 @@ public class LauncherApps {
             Rect sourceBounds, Bundle opts) {
         try {
             mService.showAppDetailsAsUser(component, sourceBounds, opts, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves a list of config activities for creating {@link ShortcutInfo}.
+     *
+     * @param packageName The specific package to query. If null, it checks all installed packages
+     *            in the profile.
+     * @param user The UserHandle of the profile.
+     * @return List of config activities. Can be an empty list but will not be null.
+     *
+     * @see Intent#ACTION_CREATE_SHORTCUT
+     * @see #getShortcutConfigActivityIntent(LauncherActivityInfo)
+     */
+    public List<LauncherActivityInfo> getShortcutConfigActivityList(@Nullable String packageName,
+            @NonNull UserHandle user) {
+        try {
+            return convertToActivityList(mService.getShortcutConfigActivities(packageName, user),
+                    user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    private List<LauncherActivityInfo> convertToActivityList(
+            @Nullable ParceledListSlice<ResolveInfo> activities, UserHandle user) {
+        if (activities == null) {
+            return Collections.EMPTY_LIST;
+        }
+        ArrayList<LauncherActivityInfo> lais = new ArrayList<>();
+        for (ResolveInfo ri : activities.getList()) {
+            LauncherActivityInfo lai = new LauncherActivityInfo(mContext, ri.activityInfo, user);
+            if (DEBUG) {
+                Log.v(TAG, "Returning activity for profile " + user + " : "
+                        + lai.getComponentName());
+            }
+            lais.add(lai);
+        }
+        return lais;
+    }
+
+    /**
+     * Returns an intent sender which can be used to start the configure activity for creating
+     * custom shortcuts. Use this method if the provider is in another profile as you are not
+     * allowed to start an activity in another profile.
+     *
+     * <p>The caller should receive {@link PinItemRequest} in onActivityResult on
+     * {@link android.app.Activity#RESULT_OK}.
+     *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
+     * @param info a configuration activity returned by {@link #getShortcutConfigActivityList}
+     *
+     * @throws IllegalStateException when the user is locked or not running.
+     * @throws SecurityException if {@link #hasShortcutHostPermission()} is false.
+     *
+     * @see #getPinItemRequest(Intent)
+     * @see Intent#ACTION_CREATE_SHORTCUT
+     * @see android.app.Activity#startIntentSenderForResult
+     */
+    public IntentSender getShortcutConfigActivityIntent(@NonNull LauncherActivityInfo info) {
+        try {
+            return mService.getShortcutConfigActivityIntent(
+                    mContext.getPackageName(), info.getComponentName(), info.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

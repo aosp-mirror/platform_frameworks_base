@@ -138,6 +138,12 @@
             android:enabled="true" android:exported="true">
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcut_1"/>
         </activity-alias>
+        <activity-alias android:name="a.ShortcutConfigActivity"
+                        android:targetActivity="com.android.server.pm.ShortcutTestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity-alias>
 
         <activity-alias android:name="a.DisabledMain"
             android:targetActivity="com.android.server.pm.ShortcutTestActivity"

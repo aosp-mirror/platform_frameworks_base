@@ -881,6 +881,31 @@ public class ShortcutManager {
     }
 
     /**
+     * Returns an Intent which can be used by the default launcher to pin {@param shortcut}.
+     * This should be used by an Activity to set result in response to
+     * {@link Intent#ACTION_CREATE_SHORTCUT}.
+     *
+     * @param shortcut New shortcut to pin.  If an app wants to pin an existing (either dynamic
+     *     or manifest) shortcut, then it only needs to have an ID, and other fields don't have to
+     *     be set, in which case, the target shortcut must be enabled.
+     *     If it's a new shortcut, all the mandatory fields, such as a short label, must be
+     *     set.
+     * @return The intent that should be set as the result for the calling activity or null.
+     *
+     * @see Intent#ACTION_CREATE_SHORTCUT
+     *
+     * @throws IllegalArgumentException if a shortcut with the same ID exists and is disabled.
+     */
+    public Intent createShortcutResultIntent(@NonNull ShortcutInfo shortcut) {
+        try {
+            return mService.createShortcutResultIntent(mContext.getPackageName(), shortcut,
+                    injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called internally when an app is considered to have come to the foreground
      * even when technically it's not.  This method resets the throttling for this package.
      * For example, when the user sends an "inline reply" on a notification, the system UI will

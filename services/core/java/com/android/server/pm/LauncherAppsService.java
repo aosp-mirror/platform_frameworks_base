@@ -21,9 +21,11 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
@@ -277,24 +279,11 @@ public class LauncherAppsService extends SystemService {
         @Override
         public ParceledListSlice<ResolveInfo> getLauncherActivities(String packageName, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot retrieve activities for unrelated profile " + user);
-            if (!isUserEnabled(user)) {
-                return null;
-            }
-
-            final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            mainIntent.setPackage(packageName);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent,
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.getIdentifier());
-                return new ParceledListSlice<>(apps);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            return queryActivitiesForUser(
+                    new Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_LAUNCHER)
+                            .setPackage(packageName),
+                    user);
         }
 
         @Override
@@ -314,6 +303,53 @@ public class LauncherAppsService extends SystemService {
                         user.getIdentifier());
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public ParceledListSlice getShortcutConfigActivities(String packageName, UserHandle user)
+                throws RemoteException {
+            return queryActivitiesForUser(
+                    new Intent(Intent.ACTION_CREATE_SHORTCUT).setPackage(packageName), user);
+        }
+
+        private ParceledListSlice<ResolveInfo> queryActivitiesForUser(Intent intent,
+                UserHandle user) {
+            ensureInUserProfiles(user, "Cannot retrieve activities for unrelated profile " + user);
+            if (!isUserEnabled(user)) {
+                return null;
+            }
+
+            long ident = injectClearCallingIdentity();
+            try {
+                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(intent,
+                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                        user.getIdentifier());
+                return new ParceledListSlice<>(apps);
+            } finally {
+                injectRestoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public IntentSender getShortcutConfigActivityIntent(String callingPackage,
+                ComponentName component, UserHandle user) throws RemoteException {
+            ensureShortcutPermission(callingPackage, user);
+            Preconditions.checkNotNull(component);
+            Preconditions.checkArgument(isUserEnabled(user), "User not enabled");
+
+            // All right, create the sender.
+            Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return PendingIntent.getActivityAsUser(
+                        mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                                | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
+                        null, user)
+                        .getIntentSender();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
