@@ -191,8 +191,21 @@ class DimLayerController {
         boolean result = false;
 
         for (int i = mState.size() - 1; i >= 0; i--) {
-            DimLayer.DimLayerUser user = mState.keyAt(i);
-            DimLayerState state = mState.valueAt(i);
+            final DimLayer.DimLayerUser user = mState.keyAt(i);
+            final DimLayerState state = mState.valueAt(i);
+
+            if (!user.isAttachedToDisplay()) {
+                // Leaked dim user that is no longer attached to the display. Go ahead and clean it
+                // clean-up and log what happened.
+                // TODO: This is a work around for b/34395537 as the dim user should have cleaned-up
+                // it self when it was detached from the display. Need to investigate how the dim
+                // user is leaking...
+                Slog.wtfStack(TAG_WM, "Leaked dim user=" + user.toShortString()
+                        + " state=" + state);
+                removeDimLayerUser(user);
+                continue;
+            }
+
             // We have to check that we are actually the shared fullscreen layer
             // for this path. If we began as non fullscreen and became fullscreen
             // (e.g. Docked stack closing), then we may not be the shared layer
