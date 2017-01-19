@@ -22776,6 +22776,52 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mUserController.restartUser(userId, /* foreground */ false);
     }
 
+    @Override
+    public void scheduleApplicationInfoChanged(List<String> packageNames, int userId) {
+        enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
+                "scheduleApplicationInfoChanged()");
+
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                updateApplicationInfoLocked(packageNames, userId);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
+        final boolean updateFrameworkRes = packagesToUpdate.contains("android");
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+            final ProcessRecord app = mLruProcesses.get(i);
+            if (app.thread == null) {
+                continue;
+            }
+
+            if (userId != UserHandle.USER_ALL && app.userId != userId) {
+                continue;
+            }
+
+            final int packageCount = app.pkgList.size();
+            for (int j = 0; j < packageCount; j++) {
+                final String packageName = app.pkgList.keyAt(j);
+                if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
+                    try {
+                        final ApplicationInfo ai = mPackageManagerInt.getApplicationInfo(
+                                packageName, app.userId);
+                        if (ai != null) {
+                            app.thread.scheduleApplicationInfoChanged(ai);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
+                                    packageName, app));
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Attach an agent to the specified process (proces name or PID)
      */

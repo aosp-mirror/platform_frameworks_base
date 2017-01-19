@@ -916,41 +916,82 @@ public class ResourcesManager {
                 }
             }
 
-            // Bail early if there is no work to do.
-            if (updatedResourceKeys.isEmpty()) {
-                return;
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        }
+    }
+
+    // TODO(adamlesinski): Make this accept more than just overlay directories.
+    final void applyNewResourceDirsLocked(@NonNull final String baseCodePath,
+            @NonNull final String[] newResourceDirs) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#applyNewResourceDirsLocked");
+
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+                if (impl != null && key.mResDir != null && key.mResDir.equals(baseCodePath)) {
+                    updatedResourceKeys.put(impl, new ResourcesKey(
+                            key.mResDir,
+                            key.mSplitResDirs,
+                            newResourceDirs,
+                            key.mLibDirs,
+                            key.mDisplayId,
+                            key.mOverrideConfiguration,
+                            key.mCompatInfo));
+                }
             }
 
-            // Update any references to ResourcesImpl that require reloading.
-            final int resourcesCount = mResourceReferences.size();
-            for (int i = 0; i < resourcesCount; i++) {
-                final Resources r = mResourceReferences.get(i).get();
+            invalidatePath("/");
+
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    private void redirectResourcesToNewImplLocked(
+            @NonNull final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys) {
+        // Bail early if there is no work to do.
+        if (updatedResourceKeys.isEmpty()) {
+            return;
+        }
+
+        // Update any references to ResourcesImpl that require reloading.
+        final int resourcesCount = mResourceReferences.size();
+        for (int i = 0; i < resourcesCount; i++) {
+            final WeakReference<Resources> ref = mResourceReferences.get(i);
+            final Resources r = ref != null ? ref.get() : null;
+            if (r != null) {
+                final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+                if (key != null) {
+                    final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
+                    if (impl == null) {
+                        throw new Resources.NotFoundException("failed to redirect ResourcesImpl");
+                    }
+                    r.setImpl(impl);
+                }
+            }
+        }
+
+        // Update any references to ResourcesImpl that require reloading for each Activity.
+        for (ActivityResources activityResources : mActivityResourceReferences.values()) {
+            final int resCount = activityResources.activityResources.size();
+            for (int i = 0; i < resCount; i++) {
+                final WeakReference<Resources> ref = activityResources.activityResources.get(i);
+                final Resources r = ref != null ? ref.get() : null;
                 if (r != null) {
                     final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
                     if (key != null) {
                         final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
                         if (impl == null) {
-                            throw new Resources.NotFoundException("failed to load " + libAsset);
+                            throw new Resources.NotFoundException(
+                                    "failed to redirect ResourcesImpl");
                         }
                         r.setImpl(impl);
-                    }
-                }
-            }
-
-            // Update any references to ResourcesImpl that require reloading for each Activity.
-            for (ActivityResources activityResources : mActivityResourceReferences.values()) {
-                final int resCount = activityResources.activityResources.size();
-                for (int i = 0; i < resCount; i++) {
-                    final Resources r = activityResources.activityResources.get(i).get();
-                    if (r != null) {
-                        final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
-                        if (key != null) {
-                            final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
-                            if (impl == null) {
-                                throw new Resources.NotFoundException("failed to load " + libAsset);
-                            }
-                            r.setImpl(impl);
-                        }
                     }
                 }
             }

@@ -346,6 +346,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_FONT_SCALE) != 0) {
             list.add("CONFIG_FONT_SCALE");
         }
+        if ((diff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+            list.add("CONFIG_ASSETS_PATHS");
+        }
         StringBuilder builder = new StringBuilder("{");
         for (int i = 0, n = list.size(); i < n; i++) {
             builder.append(list.get(i));
@@ -671,6 +674,21 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int compatSmallestScreenWidthDp;
 
     /**
+     * An undefined assetsSeq. This will not override an existing assetsSeq.
+     * @hide
+     */
+    public static final int ASSETS_SEQ_UNDEFINED = 0;
+
+    /**
+     * Internal counter that allows us to piggyback off the configuration change mechanism to
+     * signal to apps that the the assets for an Application have changed. A difference in these
+     * between two Configurations will yield a diff flag of
+     * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
+     * @hide
+     */
+    public int assetsSeq;
+
+    /**
      * @hide Internal book-keeping.
      */
     public int seq;
@@ -795,6 +813,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = o.compatScreenWidthDp;
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
+        assetsSeq = o.assetsSeq;
         seq = o.seq;
     }
 
@@ -930,9 +949,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
+        if (assetsSeq != 0) {
+            sb.append(" as.").append(assetsSeq);
+        }
         if (seq != 0) {
-            sb.append(" s.");
-            sb.append(seq);
+            sb.append(" s.").append(seq);
         }
         sb.append('}');
         return sb.toString();
@@ -960,6 +981,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
+        assetsSeq = ASSETS_SEQ_UNDEFINED;
         seq = 0;
     }
 
@@ -1130,6 +1152,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
+        if (delta.assetsSeq != ASSETS_SEQ_UNDEFINED) {
+            changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
+            assetsSeq = delta.assetsSeq;
+        }
         if (delta.seq != 0) {
             seq = delta.seq;
         }
@@ -1254,6 +1280,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
         }
+        if ((compareUndefined || delta.assetsSeq != ASSETS_SEQ_UNDEFINED)
+                && assetsSeq != delta.assetsSeq) {
+            changed |= ActivityInfo.CONFIG_ASSETS_PATHS;
+        }
 
         return changed;
     }
@@ -1272,7 +1302,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public static boolean needNewResources(@Config int configChanges,
             @Config int interestingChanges) {
-        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
+        // CONFIG_ASSETS_PATHS and CONFIG_FONT_SCALE are higher level configuration changes that
+        // all resources are subject to change with.
+        interestingChanges = interestingChanges | ActivityInfo.CONFIG_ASSETS_PATHS
+                | ActivityInfo.CONFIG_FONT_SCALE;
+        return (configChanges & interestingChanges) != 0;
     }
 
     /**
@@ -1345,6 +1379,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
+        dest.writeInt(assetsSeq);
         dest.writeInt(seq);
     }
 
@@ -1378,6 +1413,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
+        assetsSeq = source.readInt();
         seq = source.readInt();
     }
 
@@ -1461,6 +1497,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         if (n != 0) return n;
         n = this.densityDpi - that.densityDpi;
+        if (n != 0) return n;
+        n = this.assetsSeq - that.assetsSeq;
         //if (n != 0) return n;
         return n;
     }
@@ -1498,6 +1536,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + screenHeightDp;
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
+        result = 31 * result + assetsSeq;
         return result;
     }
 
@@ -1979,6 +2018,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (base.densityDpi != change.densityDpi) {
             delta.densityDpi = change.densityDpi;
         }
+
+        if (base.assetsSeq != change.assetsSeq) {
+            delta.assetsSeq = change.assetsSeq;
+        }
         return delta;
     }
 
@@ -2046,6 +2089,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
+
+        // For persistence, we don't care about assetsSeq, so do not read it out.
     }
 
 
@@ -2111,5 +2156,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
         }
+
+        // For persistence, we do not care about assetsSeq, so do not write it out.
     }
 }

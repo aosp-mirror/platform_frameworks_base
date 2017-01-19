@@ -245,7 +245,7 @@ public final class ActivityThread {
     boolean mSomeActivitiesChanged = false;
     boolean mUpdatingSystemConfig = false;
 
-    // These can be accessed by multiple threads; mPackages is the lock.
+    // These can be accessed by multiple threads; mResourcesManager is the lock.
     // XXX For now we keep around information about all packages we have
     // seen, not removing entries from this map.
     // NOTE: The activity and window managers need to call in to
@@ -254,12 +254,13 @@ public final class ActivityThread {
     // holds their own lock.  Thus you MUST NEVER call back into the activity manager
     // or window manager or anything that depends on them while holding this lock.
     // These LoadedApk are only valid for the userId that we're running as.
-    final ArrayMap<String, WeakReference<LoadedApk>> mPackages
-            = new ArrayMap<String, WeakReference<LoadedApk>>();
-    final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages
-            = new ArrayMap<String, WeakReference<LoadedApk>>();
-    final ArrayList<ActivityClientRecord> mRelaunchingActivities
-            = new ArrayList<ActivityClientRecord>();
+    @GuardedBy("mResourcesManager")
+    final ArrayMap<String, WeakReference<LoadedApk>> mPackages = new ArrayMap<>();
+    @GuardedBy("mResourcesManager")
+    final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages = new ArrayMap<>();
+    @GuardedBy("mResourcesManager")
+    final ArrayList<ActivityClientRecord> mRelaunchingActivities = new ArrayList<>();
+    @GuardedBy("mResourcesManager")
     Configuration mPendingConfiguration = null;
     // Because we merge activity relaunch operations we can't depend on the ordering provided by
     // the handler messages. We need to introduce secondary ordering mechanism, which will allow
@@ -904,6 +905,10 @@ public final class ActivityThread {
             sendMessage(H.CONFIGURATION_CHANGED, config);
         }
 
+        public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            sendMessage(H.APPLICATION_INFO_CHANGED, ai);
+        }
+
         public void updateTimeZone() {
             TimeZone.setDefault(null);
         }
@@ -1448,6 +1453,7 @@ public final class ActivityThread {
         public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
         public static final int ATTACH_AGENT = 155;
+        public static final int APPLICATION_INFO_CHANGED = 156;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1505,6 +1511,7 @@ public final class ActivityThread {
                     case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                     case ATTACH_AGENT: return "ATTACH_AGENT";
+                    case APPLICATION_INFO_CHANGED: return "APPLICATION_INFO_CHANGED";
                 }
             }
             return Integer.toString(code);
@@ -1636,8 +1643,11 @@ public final class ActivityThread {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
                     mCurDefaultDisplayDpi = ((Configuration)msg.obj).densityDpi;
                     mUpdatingSystemConfig = true;
-                    handleConfigurationChanged((Configuration)msg.obj, null);
-                    mUpdatingSystemConfig = false;
+                    try {
+                        handleConfigurationChanged((Configuration) msg.obj, null);
+                    } finally {
+                        mUpdatingSystemConfig = false;
+                    }
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CLEAN_UP_CONTEXT:
@@ -1762,6 +1772,14 @@ public final class ActivityThread {
                     break;
                 case ATTACH_AGENT:
                     handleAttachAgent((String) msg.obj);
+                    break;
+                case APPLICATION_INFO_CHANGED:
+                    mUpdatingSystemConfig = true;
+                    try {
+                        handleApplicationInfoChanged((ApplicationInfo) msg.obj);
+                    } finally {
+                        mUpdatingSystemConfig = false;
+                    }
                     break;
             }
             Object obj = msg.obj;
@@ -3500,15 +3518,17 @@ public final class ActivityThread {
                 }
                 r.activity.performResume();
 
-                // If there is a pending local relaunch that was requested when the activity was
-                // paused, it will put the activity into paused state when it finally happens.
-                // Since the activity resumed before being relaunched, we don't want that to happen,
-                // so we need to clear the request to relaunch paused.
-                for (int i = mRelaunchingActivities.size() - 1; i >= 0; i--) {
-                    final ActivityClientRecord relaunching = mRelaunchingActivities.get(i);
-                    if (relaunching.token == r.token
-                            && relaunching.onlyLocalRequest && relaunching.startsNotResumed) {
-                        relaunching.startsNotResumed = false;
+                synchronized (mResourcesManager) {
+                    // If there is a pending local relaunch that was requested when the activity was
+                    // paused, it will put the activity into paused state when it finally happens.
+                    // Since the activity resumed before being relaunched, we don't want that to
+                    // happen, so we need to clear the request to relaunch paused.
+                    for (int i = mRelaunchingActivities.size() - 1; i >= 0; i--) {
+                        final ActivityClientRecord relaunching = mRelaunchingActivities.get(i);
+                        if (relaunching.token == r.token
+                                && relaunching.onlyLocalRequest && relaunching.startsNotResumed) {
+                            relaunching.startsNotResumed = false;
+                        }
                     }
                 }
 
@@ -4894,6 +4914,44 @@ public final class ActivityThread {
                 } else {
                     performConfigurationChanged(cb, null, config, null, REPORT_TO_ACTIVITY);
                 }
+            }
+        }
+    }
+
+    void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
+        synchronized (mResourcesManager) {
+            // Update all affected loaded packages with new package information
+            WeakReference<LoadedApk> ref = mPackages.get(ai.packageName);
+            LoadedApk apk = ref != null ? ref.get() : null;
+            if (apk != null) {
+                apk.updateApplicationInfo(ai, null);
+            }
+
+            ref = mResourcePackages.get(ai.packageName);
+            apk = ref != null ? ref.get() : null;
+            if (apk != null) {
+                apk.updateApplicationInfo(ai, null);
+            }
+
+            // Update all affected Resources objects to use new ResourcesImpl
+            mResourcesManager.applyNewResourceDirsLocked(ai.sourceDir, ai.resourceDirs);
+        }
+
+        ApplicationPackageManager.configurationChanged();
+
+        // Trigger a regular Configuration change event, only with a different assetsSeq number
+        // so that we actually call through to all components.
+        Configuration newConfig = new Configuration();
+        newConfig.unset();
+        newConfig.assetsSeq = mConfiguration.assetsSeq + 1;
+        handleConfigurationChanged(newConfig, null);
+
+        // Schedule all activities to reload
+        for (final Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+            final Activity activity = entry.getValue().activity;
+            if (!activity.mFinished) {
+                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false,
+                        false);
             }
         }
     }

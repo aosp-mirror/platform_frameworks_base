@@ -235,6 +235,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSupportsMultiwindow(pw);
                 case "supports-split-screen-multi-window":
                     return runSupportsSplitScreenMultiwindow(pw);
+                case "update-appinfo":
+                    return runUpdateApplicationInfo(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2323,6 +2325,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runUpdateApplicationInfo(PrintWriter pw) throws RemoteException {
+        int userid = UserHandle.parseUserArg(getNextArgRequired());
+        ArrayList<String> packages = new ArrayList<>();
+        packages.add(getNextArgRequired());
+        String packageName;
+        while ((packageName = getNextArg()) != null) {
+            packages.add(packageName);
+        }
+        mInternal.scheduleApplicationInfoChanged(packages, userid);
+        pw.println("Packages updated with most recent ApplicationInfos.");
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -2584,6 +2599,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Test command for sizing <TASK_ID> by <STEP_SIZE>");
             pw.println("           increments within the screen applying the optional [DELAY_MS] between");
             pw.println("           each step.");
+            pw.println("  update-appinfo <USER_ID> <PACKAGE_NAME> [<PACKAGE_NAME>...]");
+            pw.println("      Update the ApplicationInfo objects of the listed packages for <USER_ID>");
+            pw.println("      without restarting any processes.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
             pw.println();
