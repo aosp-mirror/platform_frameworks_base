@@ -143,4 +143,9 @@
     <!-- Path data for Solid battery -->
     <string name="battery_solid_full" translatable="false">M 12 2 C 17.5228474983 2 22 6.47715250169 22 12 C 22 17.5228474983 17.5228474983 22 12 22 C 6.47715250169 22 2 17.5228474983 2 12 C 2 6.47715250169 6.47715250169 2 12 2 Z</string>
     <string name="battery_solid_empty" translatable="false">M 12 12 C 12 12 12 12 12 12 C 12 12 12 12 12 12 C 12 12 12 12 12 12 C 12 12 12 12 12 12 Z</string>
+
+    <!-- vpn icon switch -->
+    <string name="status_bar_vpn">VPN</string>
+    <!-- data saver icon switch -->
+    <string name="status_bar_datasaver">Data saver</string>
 </resources>

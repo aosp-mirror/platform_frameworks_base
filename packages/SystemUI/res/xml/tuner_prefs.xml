@@ -27,6 +27,10 @@
         android:title="@string/headset" />
 
     <com.android.systemui.tuner.StatusBarSwitch
+        android:key="data_saver"
+        android:title="@string/status_bar_datasaver" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
         android:key="managed_profile"
         android:title="@string/status_bar_work" />
 
@@ -49,6 +53,10 @@
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="volume"
         android:title="@*android:string/volume_unknown" />
+
+    <com.android.systemui.tuner.StatusBarSwitch
+        android:key="vpn"
+        android:title="@string/status_bar_vpn" />
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="wifi"
