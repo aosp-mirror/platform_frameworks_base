@@ -27,7 +27,7 @@
     <LinearLayout
         android:id="@+id/date_time_group"
         android:layout_width="wrap_content"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:focusable="true" >
 
