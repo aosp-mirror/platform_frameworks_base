@@ -29,6 +29,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(uiautomator.core_src_files)
 LOCAL_MODULE := uiautomator.core
 LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ###############################################
@@ -36,6 +37,7 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(uiautomator.core_src_files)
 LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries)
+LOCAL_STATIC_JAVA_LIBRARIES := legacy-android-test
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/core-src \
 	$(LOCAL_PATH)/testrunner-src

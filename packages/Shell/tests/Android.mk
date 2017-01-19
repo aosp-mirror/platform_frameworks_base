@@ -12,6 +12,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     mockito-target-minus-junit4 \
     ub-uiautomator \
+    junit \
+    legacy-android-test \
 
 LOCAL_PACKAGE_NAME := ShellTests
 LOCAL_INSTRUMENTATION_FOR := Shell
