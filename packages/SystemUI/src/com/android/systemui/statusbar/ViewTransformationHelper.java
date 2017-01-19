@@ -23,6 +23,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -297,6 +298,15 @@ public class ViewTransformationHelper implements TransformableView {
         public boolean customTransformTarget(TransformState ownState,
                 TransformState otherState) {
             return false;
+        }
+
+        /**
+         * Get a custom interpolator for this animation
+         * @param interpolationType the type of the interpolation, i.e TranslationX / TranslationY
+         * @param isFrom true if this transformation from the other view
+         */
+        public Interpolator getCustomInterpolator(int interpolationType, boolean isFrom) {
+            return null;
         }
     }
 }

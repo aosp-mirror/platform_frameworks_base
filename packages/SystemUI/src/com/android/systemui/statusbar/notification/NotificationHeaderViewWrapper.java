@@ -31,9 +31,12 @@ import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -43,17 +46,21 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.Stack;
 
+import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
+
 /**
  * Wraps a notification header view.
  */
 public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
+    private static final Interpolator LOW_PRIORITY_HEADER_CLOSE
+            = new PathInterpolator(0.4f, 0f, 0.7f, 1f);
     private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
             0, PorterDuff.Mode.SRC_ATOP);
     private final int mIconDarkAlpha;
     private final int mIconDarkColor = 0xffffffff;
-    protected final ViewInvertHelper mInvertHelper;
 
+    protected final ViewInvertHelper mInvertHelper;
     protected final ViewTransformationHelper mTransformationHelper;
 
     protected int mColor;
@@ -70,6 +77,32 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
         mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
+
+        // we want to avoid that the header clashes with the other text when transforming
+        // low-priority
+        mTransformationHelper.setCustomTransformation(
+                new CustomInterpolatorTransformation(TRANSFORMING_VIEW_TITLE) {
+
+                    @Override
+                    public Interpolator getCustomInterpolator(int interpolationType,
+                            boolean isFrom) {
+                        boolean isLowPriority = mView instanceof NotificationHeaderView;
+                        if (interpolationType == TRANSFORM_Y) {
+                            if (isLowPriority && !isFrom
+                                    || !isLowPriority && isFrom) {
+                                return Interpolators.LINEAR_OUT_SLOW_IN;
+                            } else {
+                                return LOW_PRIORITY_HEADER_CLOSE;
+                            }
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected boolean hasCustomTransformation() {
+                        return mIsLowPriority;
+                    }
+                }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         updateInvertHelper();
     }
