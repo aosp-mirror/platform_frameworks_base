@@ -185,8 +185,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lock screen."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Settings"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Overview."</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Work lock screen"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Close"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi turned off."</string>

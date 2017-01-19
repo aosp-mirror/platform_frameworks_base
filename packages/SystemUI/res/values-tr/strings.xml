@@ -185,8 +185,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Kilit ekranı"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Ayarlar"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Genel Bakış."</string>
-    <!-- no translation found for accessibility_desc_work_lock (4288774420752813383) -->
-    <skip />
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"İş profili kilit ekranı"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Kapat"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Kablosuz kapatıldı."</string>
@@ -440,10 +439,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Genişlet"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Daralt"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran sabitlendi"</string>
-    <!-- no translation found for screen_pinning_description (8909878447196419623) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (426190689254018656) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="8909878447196419623">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Genel Bakış\'a dokunup basılı tutun."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Genel bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Anladım"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Hayır, teşekkürler"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlensin mi?"</string>
@@ -510,28 +507,17 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Açık"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Kapalı"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Güç bildirim kontrolleriyle, bir uygulamanın bildirimleri için 0 ile 5 arasında bir önem düzeyi ayarlayabilirsiniz. \n\n"<b>"5. Düzey"</b>" \n- Bildirim listesinin en üstünde gösterilsin \n- Tam ekran kesintisine izin verilsin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"4. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"3. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n\n"<b>"2. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman belirmesin \n- Hiçbir zaman ses çıkarmasın ve titreştirmesin \n\n"<b>"1. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n- Hiçbir zaman ses çıkarmasın veya titreştirmesin \n- Kilit ekranından ve durum çubuğundan gizlensin \n- Bildirim listesinin en altında gösterilsin \n\n"<b>"0. Düzey"</b>" \n- Uygulamadan gelen tüm bildirimler engellensin"</string>
-    <!-- no translation found for notification_header_default_channel (7506845022070889909) -->
-    <skip />
-    <!-- no translation found for notification_channel_disabled (5805874247999578073) -->
-    <skip />
-    <!-- no translation found for notification_importance_header_app (3572576545406258751) -->
-    <skip />
-    <!-- no translation found for min_importance (7559703098688382595) -->
-    <skip />
-    <!-- no translation found for low_importance (6891335321576225228) -->
-    <skip />
-    <!-- no translation found for default_importance (6400766013567512061) -->
-    <skip />
-    <!-- no translation found for high_importance (730741630855788381) -->
-    <skip />
-    <!-- no translation found for notification_importance_min (3237794091374404537) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (8929105501798019743) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (9025125660733917469) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3316555356062640222) -->
-    <skip />
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirimler"</string>
+    <string name="notification_channel_disabled" msgid="5805874247999578073">"Bu bildirimleri artık almayacaksınız."</string>
+    <string name="notification_importance_header_app" msgid="3572576545406258751">"Şunun için <xliff:g id="APP">%s</xliff:g> bildirimleri:"</string>
+    <string name="min_importance" msgid="7559703098688382595">"Düşük"</string>
+    <string name="low_importance" msgid="6891335321576225228">"Orta"</string>
+    <string name="default_importance" msgid="6400766013567512061">"Yüksek"</string>
+    <string name="high_importance" msgid="730741630855788381">"Acil"</string>
+    <string name="notification_importance_min" msgid="3237794091374404537">"Ses veya görsel kesme yok"</string>
+    <string name="notification_importance_low" msgid="8929105501798019743">"Sessiz bir şekilde göster"</string>
+    <string name="notification_importance_default" msgid="9025125660733917469">"Ses çıkar"</string>
+    <string name="notification_importance_high" msgid="3316555356062640222">"Ses çıkar ve ekranda göster"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Diğer ayarlar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Bitti"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> bildirim denetimleri"</string>
