@@ -87,7 +87,6 @@ public class AppWindowContainerController
 
     private final Runnable mRemoveStartingWindow = () -> {
         StartingSurface surface = null;
-        StartingData data = null;
         synchronized (mWindowMap) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Remove starting " + mContainer
                     + ": startingWindow=" + mContainer.startingWindow
@@ -97,14 +96,13 @@ public class AppWindowContainerController
             }
             if (mContainer.startingWindow != null) {
                 surface = mContainer.startingSurface;
-                data = mContainer.startingData;
                 mContainer.startingData = null;
                 mContainer.startingSurface = null;
                 mContainer.startingWindow = null;
                 mContainer.startingDisplayed = false;
             }
         }
-        if (data != null && surface != null) {
+        if (surface != null) {
             try {
                 surface.remove();
             } catch (Exception e) {
@@ -115,12 +113,14 @@ public class AppWindowContainerController
 
     private final Runnable mAddStartingWindow = () -> {
         final StartingData startingData;
+        final AppWindowToken container;
 
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 return;
             }
             startingData = mContainer.startingData;
+            container = mContainer;
         }
 
         if (startingData == null) {
@@ -129,41 +129,40 @@ public class AppWindowContainerController
         }
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
-                + this + ": startingData=" + mContainer.startingData);
+                + this + ": startingData=" + container.startingData);
 
         StartingSurface surface = null;
         try {
-            surface = startingData.createStartingSurface();
+            surface = startingData.createStartingSurface(container);
         } catch (Exception e) {
             Slog.w(TAG_WM, "Exception when adding starting window", e);
         }
         if (surface != null) {
             boolean abort = false;
             synchronized(mWindowMap) {
-                if (mContainer.removed || mContainer.startingData == null) {
+                if (container.removed || container.startingData == null) {
                     // If the window was successfully added, then
                     // we need to remove it.
-                    if (mContainer.startingWindow != null) {
+                    if (container.startingWindow != null) {
                         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                                "Aborted starting " + mContainer
-                                        + ": removed=" + mContainer.removed
-                                        + " startingData=" + mContainer.startingData);
+                                "Aborted starting " + container
+                                        + ": removed=" + container.removed
+                                        + " startingData=" + container.startingData);
+                        container.startingWindow = null;
+                        container.startingData = null;
                         abort = true;
                     }
                 } else {
-                    mContainer.startingSurface = surface;
+                    container.startingSurface = surface;
                 }
                 if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
                         "Added starting " + mContainer
                                 + ": startingWindow="
-                                + mContainer.startingWindow + " startingView="
-                                + mContainer.startingSurface);
+                                + container.startingWindow + " startingView="
+                                + container.startingSurface);
             }
             if (abort) {
-                mRemoveStartingWindow.run();
-            if (mContainer == null) {
-                return;
-            }
+                surface.remove();
             }
         }
     };
@@ -465,7 +464,7 @@ public class AppWindowContainerController
             }
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
-            mContainer.startingData = new SplashScreenStartingData(mService, mContainer, pkg, theme,
+            mContainer.startingData = new SplashScreenStartingData(mService, pkg, theme,
                     compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                     mContainer.getMergedOverrideConfiguration());
             scheduleAddStartingWindow();
@@ -499,8 +498,7 @@ public class AppWindowContainerController
             return false;
         }
 
-        mContainer.startingData = new SnapshotStartingData(mService, mContainer,
-                snapshot.getSnapshot());
+        mContainer.startingData = new SnapshotStartingData(mService, snapshot.getSnapshot());
         scheduleAddStartingWindow();
         return true;
     }
