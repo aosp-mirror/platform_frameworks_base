@@ -21,6 +21,7 @@ import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RES
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -37,6 +38,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Class that manages communication between network subsystems and a network scorer.
@@ -371,25 +373,26 @@ public class NetworkScoreManager {
      *
      * @param request a {@link RecommendationRequest} instance containing additional
      *                request details
-     * @param callback a {@link RecommendationCallback} instance that will be invoked when
-     *                 the {@link RecommendationResult} is available
-     * @param handler a {@link Handler} instance representing the thread to run the callback on.
+     * @param handler a {@link Handler} instance representing the thread to complete the future on.
+     *                If null the responding binder thread will be used.
+     * @return a {@link CompletableFuture} instance that will eventually receive the
+     *         {@link RecommendationResult}.
      * @throws SecurityException
      * @hide
      */
-    public void requestRecommendation(
+    public CompletableFuture<RecommendationResult> requestRecommendation(
             final @NonNull RecommendationRequest request,
-            final @NonNull RecommendationCallback callback,
-            final @NonNull Handler handler) {
+            final @Nullable Handler handler) {
         Preconditions.checkNotNull(request, "RecommendationRequest cannot be null.");
-        Preconditions.checkNotNull(callback, "RecommendationCallback cannot be null.");
-        Preconditions.checkNotNull(handler, "Handler cannot be null.");
+
+        final CompletableFuture<RecommendationResult> futureResult =
+                new CompletableFuture<>();
 
         RemoteCallback remoteCallback = new RemoteCallback(new RemoteCallback.OnResultListener() {
             @Override
             public void onResult(Bundle data) {
                 RecommendationResult result = data.getParcelable(EXTRA_RECOMMENDATION_RESULT);
-                callback.onRecommendationAvailable(result);
+                futureResult.complete(result);
             }
         }, handler);
 
@@ -398,18 +401,7 @@ public class NetworkScoreManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
 
-    /**
-     * Callers of {@link #requestRecommendation(RecommendationRequest, RecommendationCallback, Handler)}
-     * must pass in an implementation of this class.
-     * @hide
-     */
-    public abstract static class RecommendationCallback {
-        /**
-         * Invoked when a {@link RecommendationResult} is available.
-         * @param result a {@link RecommendationResult} instance.
-         */
-        public abstract void onRecommendationAvailable(RecommendationResult result);
+        return futureResult;
     }
 }
