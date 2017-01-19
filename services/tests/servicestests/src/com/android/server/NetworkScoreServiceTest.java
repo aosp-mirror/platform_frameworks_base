@@ -61,21 +61,24 @@ import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
+import android.net.Uri;
 import android.net.WifiKey;
 import android.net.wifi.WifiConfiguration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Pair;
 
 import com.android.server.devicepolicy.MockUtils;
 
@@ -144,6 +147,9 @@ public class NetworkScoreServiceTest {
             .setCurrentRecommendedWifiConfig(configuration).build();
         mOnResultListener = new OnResultListener();
         mRemoteCallback = new RemoteCallback(mOnResultListener);
+        Settings.Global.putLong(mContentResolver,
+                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, -1L);
+        mNetworkScoreService.refreshRecommendationRequestTimeoutMs();
     }
 
     @After
@@ -307,13 +313,22 @@ public class NetworkScoreServiceTest {
     @Test
     public void testRequestRecommendationAsync_requestTimesOut() throws Exception {
         injectProvider();
-        mNetworkScoreService.setRecommendationRequestTimeoutMs(0L);
+        Settings.Global.putLong(mContentResolver,
+                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, 1L);
+        mNetworkScoreService.refreshRecommendationRequestTimeoutMs();
         mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
                 mRemoteCallback);
         boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
         assertTrue(callbackRan);
         verify(mRecommendationProvider).requestRecommendation(eq(mRecommendationRequest),
                 isA(IRemoteCallback.Stub.class), anyInt());
+
+        assertTrue(mOnResultListener.receivedBundle.containsKey(EXTRA_RECOMMENDATION_RESULT));
+        RecommendationResult result =
+                mOnResultListener.receivedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT);
+        assertTrue(result.hasRecommendation());
+        assertEquals(mRecommendationRequest.getCurrentSelectedConfig().SSID,
+                result.getWifiConfiguration().SSID);
     }
 
     @Test
@@ -349,34 +364,37 @@ public class NetworkScoreServiceTest {
     }
 
     @Test
+    public void dispatchingContentObserver_nullUri() throws Exception {
+        NetworkScoreService.DispatchingContentObserver observer =
+                new NetworkScoreService.DispatchingContentObserver(mContext, null /*handler*/);
+
+        observer.onChange(false, null);
+        // nothing to assert or verify but since we passed in a null handler we'd see a NPE
+        // if it were interacted with.
+    }
+
+    @Test
+    public void dispatchingContentObserver_dispatchUri() throws Exception {
+        final CountDownHandler handler = new CountDownHandler(mHandlerThread.getLooper());
+        NetworkScoreService.DispatchingContentObserver observer =
+                new NetworkScoreService.DispatchingContentObserver(mContext, handler);
+        Uri uri = Uri.parse("content://settings/global/network_score_service_test");
+        int expectedWhat = 24;
+        observer.observe(uri, expectedWhat);
+
+        observer.onChange(false, uri);
+        final boolean msgHandled = handler.latch.await(3, TimeUnit.SECONDS);
+        assertTrue(msgHandled);
+        assertEquals(expectedWhat, handler.receivedWhat);
+    }
+
+    @Test
     public void oneTimeCallback_multipleCallbacks() throws Exception {
         NetworkScoreService.OneTimeCallback callback =
                 new NetworkScoreService.OneTimeCallback(mRemoteCallback);
         callback.sendResult(null);
         callback.sendResult(null);
         assertEquals(1, mOnResultListener.resultCount);
-    }
-
-    @Test
-    public void serviceHandler_timeoutMsg() throws Exception {
-        NetworkScoreService.ServiceHandler handler =
-                new NetworkScoreService.ServiceHandler(mHandlerThread.getLooper());
-        NetworkScoreService.OneTimeCallback callback =
-                new NetworkScoreService.OneTimeCallback(mRemoteCallback);
-        final Pair<RecommendationRequest, NetworkScoreService.OneTimeCallback> pair =
-                Pair.create(mRecommendationRequest, callback);
-        handler.obtainMessage(
-                NetworkScoreService.ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT, pair)
-                .sendToTarget();
-
-        boolean callbackRan = mOnResultListener.countDownLatch.await(3, TimeUnit.SECONDS);
-        assertTrue(callbackRan);
-        assertTrue(mOnResultListener.receivedBundle.containsKey(EXTRA_RECOMMENDATION_RESULT));
-        RecommendationResult result =
-                mOnResultListener.receivedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT);
-        assertTrue(result.hasRecommendation());
-        assertEquals(mRecommendationRequest.getCurrentSelectedConfig().SSID,
-                result.getWifiConfiguration().SSID);
     }
 
     @Test
@@ -644,6 +662,21 @@ public class NetworkScoreServiceTest {
             countDownLatch.countDown();
             resultCount++;
             receivedBundle = result;
+        }
+    }
+
+    private static class CountDownHandler extends Handler {
+        CountDownLatch latch = new CountDownLatch(1);
+        int receivedWhat;
+
+        CountDownHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            latch.countDown();
+            receivedWhat = msg.what;
         }
     }
 }
