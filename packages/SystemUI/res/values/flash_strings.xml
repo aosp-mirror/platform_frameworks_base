@@ -44,6 +44,19 @@
          [CHAR LIMIT=4] -->
     <string name="status_bar_notification_info_overflow" translatable="false">\u221E</string>
 
+    <!-- Advanced location quick setting tile -->
+    <string name="accessibility_quick_settings_location_battery_saving">Location reporting: battery saving mode.</string>
+    <string name="accessibility_quick_settings_location_gps_only">Location reporting: sensors only mode.</string>
+    <string name="accessibility_quick_settings_location_high_accuracy">Location reporting: high accuracy mode.</string>
+    <string name="accessibility_quick_settings_location_changed_battery_saving">Location reporting changed to battery saving mode.</string>
+    <string name="accessibility_quick_settings_location_changed_gps_only">Location reporting changed to sensors only mode.</string>
+    <string name="accessibility_quick_settings_location_changed_high_accuracy">Location reporting changed to high accuracy mode.</string>
+    <string name="quick_settings_location_detail_title">Location mode</string>
+    <string name="quick_settings_location_battery_saving_label">Battery saving</string>
+    <string name="quick_settings_location_gps_only_label">Device only</string>
+    <string name="quick_settings_location_high_accuracy_label">High accuracy</string>
+    <string name="quick_settings_location_off_label">Location off</string>
+
     <!-- Ambient display and lift gesture Tile -->
     <string name="quick_settings_doze_notifications_label">Doze notifications</string>
     <string name="quick_settings_doze_notifications_user">Doze notifications</string>
