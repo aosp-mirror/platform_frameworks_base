@@ -1565,7 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"Sélectionnez une année"</string>
     <string name="deleted_key" msgid="7659477886625566590">"« <xliff:g id="KEY">%1$s</xliff:g> » a été supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"Pour annuler l\'épinglage de cet écran, maintenez enfoncée les touches Retour et Aperçu."</string>
+    <string name="lock_to_app_toast" msgid="7693684144593484">"Pour annuler l\'épinglage de cet écran, maintenez enfoncées les touches Retour et Aperçu."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'application est épinglée : l\'annulation de l\'épinglage n\'est pas autorisée sur cet appareil."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Épinglage d\'écran annulé"</string>

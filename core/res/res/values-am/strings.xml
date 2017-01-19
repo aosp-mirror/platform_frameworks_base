@@ -1565,7 +1565,7 @@
     <string name="select_year" msgid="7952052866994196170">"ዓመት ይምረጡ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ተሰርዟል"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7693684144593484">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላ እይታን ተጭነው ይያዙ።"</string>
+    <string name="lock_to_app_toast" msgid="7693684144593484">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላይ እይታን ተጭነው ይያዙ።"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"መተግበሪያ ተሰክቷል፦ በዚህ መሣሪያ ላይ ማላቀቅ አይፈቀድም።"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ማያ ገጽ ተሰክቷል"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ማያ ገጽ ተነቅሏል"</string>
