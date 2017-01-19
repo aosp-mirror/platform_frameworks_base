@@ -1209,6 +1209,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override
+    public boolean isAttachedToDisplay() {
+        return mDisplayContent != null;
+    }
+
+    @Override
     public String toString() {
         return "{stackId=" + mStackId + " tasks=" + mChildren + "}";
     }

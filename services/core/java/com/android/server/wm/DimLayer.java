@@ -77,6 +77,8 @@ public class DimLayer {
         boolean dimFullscreen();
         /** Returns the display info. of the dim layer user. */
         DisplayInfo getDisplayInfo();
+        /** Returns true if the dim layer user is currently attached to a display */
+        boolean isAttachedToDisplay();
         /** Gets the bounds of the dim layer user. */
         void getDimBounds(Rect outBounds);
         String toShortString();

@@ -693,6 +693,11 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     }
 
     @Override
+    public boolean isAttachedToDisplay() {
+        return mTask != null && mTask.getDisplayContent() != null;
+    }
+
+    @Override
     public void getDimBounds(Rect out) {
         // This dim layer user doesn't need this.
     }

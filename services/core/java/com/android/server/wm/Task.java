@@ -628,7 +628,12 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     public DisplayInfo getDisplayInfo() {
-        return mStack.getDisplayContent().getDisplayInfo();
+        return getDisplayContent().getDisplayInfo();
+    }
+
+    @Override
+    public boolean isAttachedToDisplay() {
+        return getDisplayContent() != null;
     }
 
     void forceWindowsScaleable(boolean force) {
