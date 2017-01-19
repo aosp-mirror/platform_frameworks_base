@@ -242,6 +242,16 @@ public class Installer extends SystemService {
         }
     }
 
+    public void setAppQuota(String uuid, int userId, int appId, long cacheQuota)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.setAppQuota(uuid, userId, appId, cacheQuota);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
             String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries)
@@ -351,10 +361,10 @@ public class Installer extends SystemService {
         }
     }
 
-    public void freeCache(String uuid, long freeStorageSize) throws InstallerException {
+    public void freeCache(String uuid, long freeStorageSize, int flags) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.freeCache(uuid, freeStorageSize);
+            mInstalld.freeCache(uuid, freeStorageSize, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

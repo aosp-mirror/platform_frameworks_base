@@ -3389,7 +3389,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 boolean success = true;
                 synchronized (mInstallLock) {
                     try {
-                        mInstaller.freeCache(volumeUuid, freeStorageSize);
+                        mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
                     } catch (InstallerException e) {
                         Slog.w(TAG, "Couldn't clear application caches: " + e);
                         success = false;
@@ -3418,7 +3418,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 boolean success = true;
                 synchronized (mInstallLock) {
                     try {
-                        mInstaller.freeCache(volumeUuid, freeStorageSize);
+                        mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
                     } catch (InstallerException e) {
                         Slog.w(TAG, "Couldn't clear application caches: " + e);
                         success = false;
@@ -3441,7 +3441,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     void freeStorage(String volumeUuid, long freeStorageSize) throws IOException {
         synchronized (mInstallLock) {
             try {
-                mInstaller.freeCache(volumeUuid, freeStorageSize);
+                mInstaller.freeCache(volumeUuid, freeStorageSize, 0);
             } catch (InstallerException e) {
                 throw new IOException("Failed to free enough space", e);
             }
@@ -13022,7 +13022,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             origin.resolvedPath, isForwardLocked(), packageAbiOverride);
 
                     try {
-                        mInstaller.freeCache(null, sizeBytes + lowThreshold);
+                        mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
                         pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath,
                                 installFlags, packageAbiOverride);
                     } catch (InstallerException e) {
