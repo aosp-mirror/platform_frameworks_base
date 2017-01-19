@@ -55,6 +55,7 @@ public class PipManager {
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
     private PipMenuActivityController mMenuController;
+    private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
 
     /**
@@ -67,6 +68,7 @@ public class PipManager {
                 return;
             }
             mTouchHandler.onActivityPinned();
+            mMediaController.onActivityPinned();
         }
 
         @Override
@@ -84,17 +86,9 @@ public class PipManager {
             // another package than the top activity in the stack
             boolean expandPipToFullscreen = true;
             if (sourceComponent != null) {
-                try {
-                    StackInfo pinnedStackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                    if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
-                            pinnedStackInfo.taskIds.length > 0) {
-                        expandPipToFullscreen =
-                                !pinnedStackInfo.topActivity.getPackageName().equals(
-                                        sourceComponent.getPackageName());
-                    }
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Unable to get pinned stack.");
-                }
+                ComponentName topActivity = PipUtils.getTopPinnedActivity(mActivityManager);
+                expandPipToFullscreen = topActivity != null && topActivity.getPackageName().equals(
+                        sourceComponent.getPackageName());
             }
             if (expandPipToFullscreen) {
                 mTouchHandler.expandPinnedStackToFullscreen();
@@ -124,7 +118,7 @@ public class PipManager {
         @Override
         public void onActionsChanged(ParceledListSlice actions) {
             mHandler.post(() -> {
-                mMenuController.setActions(actions);
+                mMenuController.setAppActions(actions);
             });
         }
 
@@ -160,7 +154,9 @@ public class PipManager {
         }
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
 
-        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);
+        mMediaController = new PipMediaController(context, mActivityManager);
+        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager,
+                mMediaController);
         mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,
                 mWindowManager);
     }
