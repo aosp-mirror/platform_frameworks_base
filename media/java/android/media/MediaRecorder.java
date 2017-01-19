@@ -801,6 +801,28 @@ public class MediaRecorder
     }
 
     /**
+     * Sets the next output file descriptor to be used when the maximum filesize is reached
+     * on the prior output {@link #setOutputFile} or {@link #setNextOutputFile}). File descriptor
+     * must be seekable and in read-write mode. After setting the next output file, application
+     * should not use the file referenced by this file descriptor until {@link #stop}. Application
+     * must call this after receiving on the {@link android.media.MediaRecorder.OnInfoListener} a
+     * "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving
+     * a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used
+     * until switching to that output. Application will receive
+     * {@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED} when the next output file is used.
+     * Application will not be able to set a new output file if the previous one has not been used.
+     * Application is responsible for cleaning up unused files after {@link #stop} is called.
+     *
+     * @param fd an open file descriptor to be written into.
+     * @throws IllegalStateException if it is called before prepare().
+     * @throws IOException if setNextOutputFile fails otherwise.
+     */
+    public void setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException
+    {
+        _setNextOutputFile(fd);
+    }
+
+    /**
      * Sets the path of the output file to be produced. Call this after
      * setOutputFormat() but before prepare().
      *
@@ -814,9 +836,38 @@ public class MediaRecorder
         mPath = path;
     }
 
+    /**
+     * Sets the next output file path to be used when the maximum filesize is reached
+     * on the prior output {@link #setOutputFile} or {@link #setNextOutputFile}). File should
+     * be seekable. After setting the next output file, application should not use the file
+     * referenced by this file descriptor until {@link #stop}. Application must call this
+     * after receiving on the {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used until switching to
+     * that output. Application will receive {@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED}
+     * when the next output file is used. Application will not be able to set a new output file if
+     * the previous one has not been used. Application is responsible for cleaning up unused files
+     * after {@link #stop} is called.
+     *
+     * @param  path The pathname to use.
+     * @throws IllegalStateException if it is called before prepare().
+     * @throws IOException if setNextOutputFile fails otherwise.
+     */
+    public void setNextOutputFile(String path) throws IllegalStateException, IOException
+    {
+        if (path != null) {
+            RandomAccessFile file = new RandomAccessFile(path, "rws");
+            try {
+                _setNextOutputFile(file.getFD());
+            } finally {
+                file.close();
+            }
+        }
+    }
+
     // native implementation
-    private native void _setOutputFile(FileDescriptor fd, long offset, long length)
-        throws IllegalStateException, IOException;
+    private native void _setOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
+    private native void _setNextOutputFile(FileDescriptor fd) throws IllegalStateException, IOException;
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -833,12 +884,12 @@ public class MediaRecorder
         if (mPath != null) {
             RandomAccessFile file = new RandomAccessFile(mPath, "rws");
             try {
-                _setOutputFile(file.getFD(), 0, 0);
+                _setOutputFile(file.getFD());
             } finally {
                 file.close();
             }
         } else if (mFd != null) {
-            _setOutputFile(mFd, 0, 0);
+            _setOutputFile(mFd);
         } else {
             throw new IOException("No valid output file");
         }
@@ -980,9 +1031,26 @@ public class MediaRecorder
      */
     public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800;
     /** A maximum filesize had been setup and has now been reached.
+     * Note: This event will not be sent if application already set
+     * next output file through {@link #setNextOutputFile}.
      * @see android.media.MediaRecorder.OnInfoListener
      */
     public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED = 801;
+    /** A maximum filesize had been setup and current recorded file size
+     * has reached 90% of the limit. This is sent once per file upon
+     * reaching/passing the 90% limit. To continue the recording, applicaiton
+     * should use {@link #setNextOutputFile} to set the next output file.
+     * Otherwise, recording will stop when reaching maximum file size.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING = 802;
+    /** A maximum filesize had been reached and MediaRecorder has switched
+     * output to a new file set by application {@link #setNextOutputFile}.
+     * For best practice, application should use this event to keep track
+     * of whether the file previously set has been used or not.
+     * @see android.media.MediaRecorder.OnInfoListener
+     */
+    public static final int MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED = 803;
 
     /** informational events for individual tracks, for testing purpose.
      * The track informational event usually contains two parts in the ext1

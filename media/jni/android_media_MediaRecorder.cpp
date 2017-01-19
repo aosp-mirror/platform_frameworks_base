@@ -290,7 +290,7 @@ android_media_MediaRecorder_setParameter(JNIEnv *env, jobject thiz, jstring para
 }
 
 static void
-android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
+android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject fileDescriptor)
 {
     ALOGV("setOutputFile");
     if (fileDescriptor == NULL) {
@@ -303,7 +303,25 @@ android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject f
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    status_t opStatus = mr->setOutputFile(fd, offset, length);
+    status_t opStatus = mr->setOutputFile(fd);
+    process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
+}
+
+static void
+android_media_MediaRecorder_setNextOutputFileFD(JNIEnv *env, jobject thiz, jobject fileDescriptor)
+{
+    ALOGV("setNextOutputFile");
+    if (fileDescriptor == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    status_t opStatus = mr->setNextOutputFile(fd);
     process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
 }
 
@@ -617,7 +635,8 @@ static const JNINativeMethod gMethods[] = {
     {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
     {"setParameter",         "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameter},
-    {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
+    {"_setOutputFile",       "(Ljava/io/FileDescriptor;)V",     (void *)android_media_MediaRecorder_setOutputFileFD},
+    {"_setNextOutputFile",   "(Ljava/io/FileDescriptor;)V",     (void *)android_media_MediaRecorder_setNextOutputFileFD},
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},
     {"setMaxDuration",       "(I)V",                            (void *)android_media_MediaRecorder_setMaxDuration},
