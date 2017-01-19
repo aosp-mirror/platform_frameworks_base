@@ -7617,6 +7617,21 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- AutoFill attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>autofill-service</code> as the root tag of the XML resource that describes a
+         {@link android.service.autofill.AutoFillService}, which is referenced from its
+         {@link android.service.autofill#SERVICE_META_DATA} meta-data entry.
+    -->
+    <declare-styleable name="AutoFillService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->
     <eat-comment />
@@ -8430,7 +8445,7 @@
     <!-- @hide Attributes which will be read by the Activity to intialize the
                base activity TaskDescription. -->
     <declare-styleable name="ActivityTaskDescription">
-        <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary 
+        <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary
                    color. -->
         <attr name="colorPrimary" />
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background
