@@ -27,16 +27,14 @@ class SnapshotStartingData extends StartingData {
     private final WindowManagerService mService;
     private final GraphicBuffer mSnapshot;
 
-    SnapshotStartingData(WindowManagerService service, AppWindowToken appWindowToken,
-            GraphicBuffer snapshot) {
-        super(service, appWindowToken);
+    SnapshotStartingData(WindowManagerService service, GraphicBuffer snapshot) {
+        super(service);
         mService = service;
         mSnapshot = snapshot;
     }
 
     @Override
-    StartingSurface createStartingSurface() {
-        return mService.mTaskSnapshotController.createStartingSurface(
-                mAppWindowToken, mSnapshot);
+    StartingSurface createStartingSurface(AppWindowToken atoken) {
+        return mService.mTaskSnapshotController.createStartingSurface(atoken, mSnapshot);
     }
 }

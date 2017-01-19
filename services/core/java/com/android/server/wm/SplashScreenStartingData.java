@@ -35,11 +35,10 @@ class SplashScreenStartingData extends StartingData {
     private final int mWindowFlags;
     private final Configuration mMergedOverrideConfiguration;
 
-    SplashScreenStartingData(WindowManagerService service, AppWindowToken appWindowToken,
-            String pkg, int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel,
-            int labelRes, int icon, int logo, int windowFlags,
-            Configuration mergedOverrideConfiguration) {
-        super(service, appWindowToken);
+    SplashScreenStartingData(WindowManagerService service, String pkg, int theme,
+            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
+            int logo, int windowFlags, Configuration mergedOverrideConfiguration) {
+        super(service);
         mPkg = pkg;
         mTheme = theme;
         mCompatInfo = compatInfo;
@@ -52,8 +51,8 @@ class SplashScreenStartingData extends StartingData {
     }
 
     @Override
-    StartingSurface createStartingSurface() {
-        return mService.mPolicy.addSplashScreen(mAppWindowToken.token, mPkg, mTheme, mCompatInfo,
+    StartingSurface createStartingSurface(AppWindowToken atoken) {
+        return mService.mPolicy.addSplashScreen(atoken.token, mPkg, mTheme, mCompatInfo,
                 mNonLocalizedLabel, mLabelRes, mIcon, mLogo, mWindowFlags,
                 mMergedOverrideConfiguration);
     }
