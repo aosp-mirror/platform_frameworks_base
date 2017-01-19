@@ -74,6 +74,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
@@ -126,6 +127,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
@@ -1029,8 +1031,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public static Handler getTimeTickHandler(Context context) {
-        return ((SystemUIApplication) context.getApplicationContext())
-                .getComponent(PhoneStatusBar.class).getTimeTickHandler();
+        PhoneStatusBar statusBar = ((SysUiServiceProvider) context.getApplicationContext())
+                .getComponent(PhoneStatusBar.class);
+        return statusBar != null ? statusBar.getTimeTickHandler() :
+                new Handler(Looper.getMainLooper());
     }
 
     protected void createNavigationBar() {
