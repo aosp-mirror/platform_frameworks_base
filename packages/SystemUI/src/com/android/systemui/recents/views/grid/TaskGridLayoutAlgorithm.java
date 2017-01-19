@@ -23,6 +23,8 @@ import android.graphics.Rect;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
+import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent.Direction;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewTransform;
@@ -63,6 +65,8 @@ public class TaskGridLayoutAlgorithm  {
         Rect size;
         int[] xOffsets;
         int[] yOffsets;
+        int tasksPerLine;
+        int lines;
 
         TaskGridRectInfo(int taskCount) {
             size = new Rect();
@@ -71,10 +75,10 @@ public class TaskGridLayoutAlgorithm  {
 
             int layoutTaskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
 
-            int tasksPerLine = layoutTaskCount < 2 ? 1 : (
+            tasksPerLine = layoutTaskCount < 2 ? 1 : (
                 layoutTaskCount < 5 ? 2 : (
                     layoutTaskCount < 7 ? 3 : 4));
-            int lines = layoutTaskCount < 3 ? 1 : 2;
+            lines = layoutTaskCount < 3 ? 1 : 2;
 
             // A couple of special cases.
             boolean landscapeWindow = mWindowRect.width() > mWindowRect.height();
@@ -198,6 +202,48 @@ public class TaskGridLayoutAlgorithm  {
         // We only show the 8 most recent tasks.
         transformOut.visible = isTaskViewVisible;
         return transformOut;
+    }
+
+    /**
+     * Return the proper task index to focus for arrow key navigation.
+     * @param taskCount             The amount of tasks.
+     * @param currentFocusedIndex   The index of the currently focused task.
+     * @param direction             The direction we're navigating.
+     * @return  The index of the task that should get the focus.
+     */
+    public int navigateFocus(int taskCount, int currentFocusedIndex, Direction direction) {
+        if (taskCount < 1 || taskCount > MAX_LAYOUT_TASK_COUNT) {
+            return -1;
+        }
+        if (currentFocusedIndex == -1) {
+            return 0;
+        }
+        int newIndex = currentFocusedIndex;
+        final TaskGridRectInfo gridInfo = mTaskGridRectInfoList[taskCount - 1];
+        final int currentLine = (taskCount - 1 - currentFocusedIndex) / gridInfo.tasksPerLine;
+        switch (direction) {
+            case UP:
+                newIndex += gridInfo.tasksPerLine;
+                newIndex = newIndex >= taskCount ? currentFocusedIndex : newIndex;
+                break;
+            case DOWN:
+                newIndex -= gridInfo.tasksPerLine;
+                newIndex = newIndex < 0 ? currentFocusedIndex : newIndex;
+                break;
+            case LEFT:
+                newIndex++;
+                final int leftMostIndex = (taskCount - 1) - currentLine * gridInfo.tasksPerLine;
+                newIndex = newIndex > leftMostIndex ? currentFocusedIndex : newIndex;
+                break;
+            case RIGHT:
+                newIndex--;
+                int rightMostIndex =
+                    (taskCount - 1) - (currentLine + 1) * gridInfo.tasksPerLine + 1;
+                rightMostIndex = rightMostIndex < 0 ? 0 : rightMostIndex;
+                newIndex = newIndex < rightMostIndex ? currentFocusedIndex : newIndex;
+                break;
+        }
+        return newIndex;
     }
 
     public void initialize(Rect windowRect) {
