@@ -505,7 +505,9 @@ public class AccountManagerService
      * @param ua UserAccount that currently hosts the account and application
      */
     private void registerAccountTypesSupported(int uid, UserAccounts ua) {
-        /* Account types supported are drawn from the Android Manifest of the Application */
+        return;
+        // TODO clean up the code, manifest entry is deprecated
+        /*
         String interestedPackages = null;
         try {
             String[] allPackages = mPackageManager.getPackagesForUid(uid);
@@ -527,6 +529,7 @@ public class AccountManagerService
             // TODO request visibility
             // requestAccountVisibility(interestedPackages.split(";"), uid, ua);
         }
+        */
     }
 
     /**
@@ -536,6 +539,8 @@ public class AccountManagerService
      * @param visibleAccount to send to package
      */
     private void sendNotification(String desiredPackage, Account visibleAccount) {
+        // TODO replace with callback
+        /*
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.setAction(AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
@@ -543,6 +548,7 @@ public class AccountManagerService
         // TODO update documentation, add account extra if new account became visible
         // intent.putExtra("android.accounts.KEY_ACCOUNT", (Account) visibleAccount);
         mContext.sendBroadcast(intent);
+        */
     }
 
     @Override

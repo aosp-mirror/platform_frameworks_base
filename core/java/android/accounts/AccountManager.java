@@ -286,44 +286,29 @@ public class AccountManager {
 
     /**
      * Account visibility was not set.
-     * @hide
      */
     public static final int VISIBILITY_UNDEFINED = 0;
 
     /**
      * Account is always visible to given application and only authenticator can revoke visibility.
-     * @hide
      */
     public static final int VISIBILITY_VISIBLE = 1;
 
     /**
      * Account is visible to given application, but user can revoke visibility.
-     * @hide
      */
     public static final int VISIBILITY_USER_MANAGED_VISIBLE = 2;
 
     /**
      * Account is not visible to given application and only authenticator can grant visibility.
-     * @hide
      */
     public static final int VISIBILITY_NOT_VISIBLE = 3;
 
     /**
      * Account is not visible to given application, but user can reveal it, for example, using
      * {@link #newChooseAccountIntent(Account, List, String[], String, String, String[], Bundle)}
-     * @hide
      */
     public static final int VISIBILITY_USER_MANAGED_NOT_VISIBLE = 4;
-
-    /**
-     * Key to manifest entry with a list of account types in which application is interested.
-     * Example value: "com.google;com.customtype". If it is  specified then the application
-     * will only get notifications related to the types in the list (see
-     * {@link #ACTION_VISIBLE_ACCOUNTS_CHANGED}). Authenticators managing whitelisted types will be
-     * able to know about the application using {@link #ACTION_ACCOUNTS_LISTENER_PACKAGE_INSTALLED}
-     * @hide
-     */
-    public static final String SUPPORTED_ACCOUNT_TYPES = "android.accounts.SupportedAccountTypes";
 
     /**
      * Token type for the special case where a UID has access only to an account
@@ -344,48 +329,27 @@ public class AccountManager {
      *
      * @see #addOnAccountsUpdatedListener
      *
-     * Deprecated - use ACTION_VISIBLE_ACCOUNTS_CHANGED instead.
+     * @deprecated use #addOnAccountsUpdatedListener to get account updates in runtime.
      */
     public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 
     /**
-     * Action sent as a broadcast Intent by the AccountsService when accounts potentially visible to
-     * the applications are added, accounts are removed, or an account's credentials (saved
-     * password, etc) are changed. List of supported account types shoud be specified in the
-     * Manifest file using {@link #SUPPORTED_ACCOUNT_TYPES}
-     *
-     * @see #addOnAccountsUpdatedListener
-     * @hide
-     */
-    public static final String ACTION_VISIBLE_ACCOUNTS_CHANGED =
-            "android.accounts.action.VISIBLE_ACCOUNTS_CHANGED";
-
-    /**
-     * Authenticators may subscribe to get notifications about apps interested in their managed account
-     * types using {@link #SUPPORTED_ACCOUNT_TYPES}.
-     * @hide
-     */
-    public static final String ACTION_ACCOUNTS_LISTENER_PACKAGE_INSTALLED =
-            "android.accounts.action.ACCOUNTS_LISTENER_PACKAGE_INSTALLED";
-
-    /**
      * Uid key to set default visibility for applications targeting API level
-     * {@link android.os.Build.VERSION_CODES#O} or above. See {@link #getAccountVisibility}. If the
-     * value was not set by authenticator USER_MANAGED_NOT_VISIBLE is used.
-     * @hide
+     * {@link android.os.Build.VERSION_CODES#O} or above and don't have the same signature as
+     * authenticator See {@link #getAccountVisibility}. If the value was not set by authenticator
+     * USER_MANAGED_NOT_VISIBLE is used.
      */
-    public static final int DEFAULT_VISIBILITY = -2;
+    public static final int UID_KEY_DEFAULT_VISIBILITY = -2;
 
     /**
      * Uid key to set visibility for applications targeting API level below
-     * {@link android.os.Build.VERSION_CODES#O}, which were able to see the account before. It
-     * includes applications with GET_ACCOUNTS permission or with the same signature as
-     * authenticator. See {@link #getAccountVisibility}. If the value was not set by authenticator
-     * USER_MANAGED_VISIBLE is used.
-     * @hide
+     * {@link android.os.Build.VERSION_CODES#O} with GET_ACCOUNS permission, or applications with
+     * any targeting API level with the same signature as authenticator. See
+     * {@link #getAccountVisibility}. If the value was not set by authenticator USER_MANAGED_VISIBLE
+     * is used.
      */
-    public static final int DEFAULT_LEGACY_VISIBILITY = -3;
+    public static final int UID_KEY_DEFAULT_LEGACY_VISIBILITY = -3;
 
     /**
      * @hide
@@ -874,43 +838,11 @@ public class AccountManager {
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
      * @param extras String values to use for the account's userdata, null for none
-     * @param selectedUids Array of uids whose associated applications can access this account
-     *        without any additional user approval.
-     *
-     * @return True if the account was successfully added, false if the account already exists, the
-     *         account is null, or another error occurs.
-     */
-    public boolean addAccountExplicitly(Account account, String password, Bundle extras,
-            int[] selectedUids) {
-        return false; // TODO remove this method.
-    }
-
-    /**
-     * Adds an account directly to the AccountManager. Additionally this makes the Account visible
-     * to desired UIDs of applications on the device, and sends directed broadcasts to these
-     * individual applications.
-     * <p>
-     * Normally used by sign-up wizards associated with authenticators, not directly by
-     * applications.
-     * <p>
-     * Calling this method does not update the last authenticated timestamp, referred by
-     * {@link #KEY_LAST_AUTHENTICATED_TIME}. To update it, call
-     * {@link #notifyAccountAuthenticated(Account)} after getting success.
-     * <p>
-     * It is safe to call this method from the main thread.
-     * <p>
-     * This method requires the caller to have a signature match with the authenticator that owns
-     * the specified account.
-     *
-     * @param account The {@link Account} to add
-     * @param password The password to associate with the account, null for none
-     * @param extras String values to use for the account's userdata, null for none
      * @param visibility Map from uid to visibility values which will be set before account is
      *        added. See getAccountVisibility for possilbe values.
      *
      * @return True if the account was successfully added, false if the account already exists, the
      *         account is null, or another error occurs.
-     * @hide
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle extras,
             Map<Integer, Integer> visibility) {
@@ -925,22 +857,18 @@ public class AccountManager {
     }
 
     /**
-     * Returns all UIDs for applications that requested the account type.
-     * <p>This method requires the caller to have a signature match with the authenticator
-     * that owns the specified account.
+     * Returns UIDs of applications for which visibility of given account was explicitly set.
+     * <p>
+     * This method requires the caller to have a signature match with the authenticator that owns
+     * the specified account.
      *
-     * @param accountType The account type to be authenticated.
+     * @param account The account for which visibility data should be returned.
      *
-     * @return array of all UIDs that support accounts of this
-     * account type that seek approval (to be used to know which accounts for
-     * the authenticator to include in addAccountExplicitly). Null if none.
+     * @return Map from uid to visibility for given account
      */
-    public int[] getRequestingUidsForType(String accountType) {
-        try {
-            return mService.getRequestingUidsForType(accountType);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+    public Map<Integer, Integer> getUidsAndVisibilityForAccount(Account account) {
+        // TODO implement.
+        return null;
     }
 
     /**
@@ -954,9 +882,8 @@ public class AccountManager {
      * @param packageName Package name.
      * @param accountType Account type.
      *
-     * @return Map with visibility for all accounts of given type. See {@link #getAccountVisibility}
-     *         for possilbe values.
-     * @hide
+     * @return Map with visibility for all accounts of given type.
+     * See {@link #getAccountVisibility} for possilbe values.
      */
     public Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             String accountType) {
@@ -965,67 +892,6 @@ public class AccountManager {
             Map<Account, Integer> result = (Map<Account, Integer>) mService
                     .getAccountsAndVisibilityForPackage(packageName, accountType);
             return result;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Gives a certain UID, represented a application, access to an account
-     * <p>
-     * This method requires the caller to have a signature match with the authenticator that owns
-     * the specified account.
-     *
-     * @param account Account to make visible.
-     * @param uid The UID of the application to add account access.
-     *
-     * @return True if account made visible to application and was not previously visible.
-     */
-    public boolean makeAccountVisible(Account account, int uid) {
-        try {
-            return mService.setAccountVisibility(account, uid, VISIBILITY_USER_MANAGED_VISIBLE);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Removes visibility of certain account of a process identified by a given UID to an
-     * application. This is called by the Authenticator.
-     * <p>
-     * This method requires the caller to have a signature match with the authenticator that owns
-     * the specified account.
-     *
-     * @param account Remove visibility of this account..
-     * @param uid The UID of the application to remove account access.
-     *
-     * @return True if application access to account removed and was previously visible.
-     */
-    public boolean removeAccountVisibility(Account account, int uid) {
-        try {
-            return mService.setAccountVisibility(account, uid, VISIBILITY_USER_MANAGED_NOT_VISIBLE);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Checks visibility of certain account of a process identified by a given UID. This is called
-     * by the Authenticator.
-     * <p>
-     * This method requires the caller to have a signature match with the authenticator that owns
-     * the specified account.
-     *
-     * @param account Account to check visibility.
-     * @param uid The UID of the application to check account access.
-     *
-     * @return True if application has access to the account
-     */
-    public boolean isAccountVisible(Account account, int uid) {
-        try {
-            Integer visibility = mService.getAccountVisibility(account, uid);
-            return visibility == VISIBILITY_USER_MANAGED_NOT_VISIBLE
-                    || visibility == VISIBILITY_VISIBLE;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1044,7 +910,6 @@ public class AccountManager {
      * @param visibility - new visibility value.
      *
      * @return True if visibility value was succesfully updated.
-     * @hide
      */
     public boolean setAccountVisibility(Account account, int uid,
             @AccountVisibility int visibility) {
@@ -1058,6 +923,7 @@ public class AccountManager {
     /**
      * Gets visibility of certain account for given UID. Possible returned values are:
      * <ul>
+     * <li>{@link #VISIBILITY_UNDEFINED}</li>
      * <li>{@link #VISIBILITY_VISIBLE}</li>
      * <li>{@link #VISIBILITY_USER_MANAGED_VISIBLE}</li>
      * <li>{@link #VISIBILITY_NOT_VISIBLE}
@@ -1072,7 +938,6 @@ public class AccountManager {
      * @param uid The UID of the application to get account visibility.
      *
      * @return int Visibility for given account and uid.
-     * @hide
      */
     public @AccountVisibility int getAccountVisibility(Account account, int uid) {
         try {
@@ -2916,20 +2781,29 @@ public class AccountManager {
     /**
      * Adds an {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}. This
      * listener will be notified whenever user or AbstractAcccountAuthenticator made changes to
-     * accounts related to the caller - either list of accounts returned by {@link #getAccounts()}
-     * was changed, or new account was added for which user can grant access to the caller.
+     * accounts of any type related to the caller. This method is equivalent to
+     * addOnAccountsUpdatedListener(listener, handler, updateImmediately, null)
      *
+     * @see #addOnAccountsUpdatedListener(OnAccountsUpdateListener, Handler, boolean, Handler,
+     *      String[])
+     */
+    public void addOnAccountsUpdatedListener(final OnAccountsUpdateListener listener,
+            Handler handler, boolean updateImmediately) {
+        addOnAccountsUpdatedListener(listener, handler,updateImmediately, null);
+    }
+
+    /**
+     * Adds an {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}. This
+     * listener will be notified whenever user or AbstractAcccountAuthenticator made changes to
+     * accounts of given types related to the caller -
+     * either list of accounts returned by {@link #getAccounts()}
+     * was changed, or new account was added for which user can grant access to the caller.
      * <p>
      * As long as this listener is present, the AccountManager instance will not be
      * garbage-collected, and neither will the {@link Context} used to retrieve it, which may be a
      * large Activity instance. To avoid memory leaks, you must remove this listener before then.
      * Normally listeners are added in an Activity or Service's {@link Activity#onCreate} and
      * removed in {@link Activity#onDestroy}.
-     *
-     *
-     * If SUPPORTED_ACCOUNT_TYPES is specified in the manifest file, listener will only be
-     * notified about whitelisted types.
-     *
      * <p>
      * It is safe to call this method from the main thread.
      *
@@ -2938,11 +2812,12 @@ public class AccountManager {
      *        main thread
      * @param updateImmediately If true, the listener will be invoked (on the handler thread) right
      *        away with the current account list
+     * @param accountTypes If set, only changes to accounts of given types will be reported.
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was already added
      */
     public void addOnAccountsUpdatedListener(final OnAccountsUpdateListener listener,
-            Handler handler, boolean updateImmediately) {
+            Handler handler, boolean updateImmediately, String[] accountTypes) {
         if (listener == null) {
             throw new IllegalArgumentException("the listener is null");
         }
@@ -2958,11 +2833,11 @@ public class AccountManager {
             if (wasEmpty) {
                 // Register a broadcast receiver to monitor account changes
                 IntentFilter intentFilter = new IntentFilter();
-                if (isVisibleAccountsChangedBroadcastSupported()) {
-                    intentFilter.addAction(ACTION_VISIBLE_ACCOUNTS_CHANGED);
-                } else {
-                    intentFilter.addAction(LOGIN_ACCOUNTS_CHANGED_ACTION);
-                }
+                // TODO get rid of the broadcast receiver
+                // create android.os.ResultReceiver
+                // send it to the service via aidl
+                // handle onReceiveResult
+                intentFilter.addAction(LOGIN_ACCOUNTS_CHANGED_ACTION);
                 // To recover from disk-full.
                 intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
                 // Register a broadcast receiver to monitor account changes
@@ -2972,26 +2847,6 @@ public class AccountManager {
         if (updateImmediately) {
             postToHandler(handler, listener, getAccounts());
         }
-    }
-
-    /**
-     * @hide
-     */
-    private boolean isVisibleAccountsChangedBroadcastSupported() {
-        String interestedTypes = null;
-        try {
-            String packageName = mContext.getOpPackageName();
-            ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_META_DATA);
-            Bundle b = ai.metaData;
-            if (b == null) {
-                return false;
-            }
-            interestedTypes = b.getString(SUPPORTED_ACCOUNT_TYPES);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-        return !TextUtils.isEmpty(interestedTypes);
     }
 
     /**
