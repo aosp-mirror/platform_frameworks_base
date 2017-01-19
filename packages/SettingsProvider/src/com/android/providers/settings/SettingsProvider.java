@@ -61,7 +61,6 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.ByteStringUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -77,13 +76,9 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,7 +162,6 @@ public class SettingsProvider extends ContentProvider {
     public static final int SETTINGS_TYPE_GLOBAL = 0;
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
-    public static final int SETTINGS_TYPE_SSAID = 3;
 
     public static final int SETTINGS_TYPE_MASK = 0xF0000000;
     public static final int SETTINGS_TYPE_SHIFT = 28;
@@ -254,9 +248,6 @@ public class SettingsProvider extends ContentProvider {
             }
             case SETTINGS_TYPE_SYSTEM: {
                 return "SETTINGS_SYSTEM";
-            }
-            case SETTINGS_TYPE_SSAID: {
-                return "SETTINGS_SSAID";
             }
             default: {
                 return "UNKNOWN";
@@ -713,13 +704,6 @@ public class SettingsProvider extends ContentProvider {
                             UserHandle.getUserId(uid));
                 }
             }
-
-            @Override
-            public void onUidRemoved(int uid) {
-                synchronized (mLock) {
-                    mSettingsRegistry.onUidRemovedLocked(uid);
-                }
-            }
         };
 
         // package changes
@@ -973,15 +957,8 @@ public class SettingsProvider extends ContentProvider {
                     continue;
                 }
 
-                // As of Android O (API 24), the SSAID is read from an app-specific entry in table
-                // SETTINGS_FILE_SSAID, unless accessed by a system process.
-                final Setting setting;
-                if (isNewSsaidSetting(name)) {
-                    setting = getSsaidSettingLocked(owningUserId);
-                } else {
-                    setting = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE, owningUserId,
-                            name);
-                }
+                Setting setting = mSettingsRegistry.getSettingLocked(
+                        SETTINGS_TYPE_SECURE, owningUserId, name);
                 appendSettingToCursor(result, setting);
             }
 
@@ -1009,41 +986,9 @@ public class SettingsProvider extends ContentProvider {
 
         // Get the value.
         synchronized (mLock) {
-            // As of Android O (API 24), the SSAID is read from an app-specific entry in table
-            // SETTINGS_FILE_SSAID, unless accessed by a system process.
-            if (isNewSsaidSetting(name)) {
-                return getSsaidSettingLocked(owningUserId);
-            }
-
             return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SECURE,
                     owningUserId, name);
         }
-    }
-
-    private boolean isNewSsaidSetting(String name) {
-        return Settings.Secure.ANDROID_ID.equals(name)
-                && UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID;
-    }
-
-    private Setting getSsaidSettingLocked(int owningUserId) {
-        // Get uid of caller (key) used to store ssaid value
-        String name = Integer.toString(
-                UserHandle.getUid(owningUserId, UserHandle.getAppId(Binder.getCallingUid())));
-
-        if (DEBUG) {
-            Slog.v(LOG_TAG, "getSsaidSettingLocked(" + name + "," + owningUserId + ")");
-        }
-
-        // Retrieve the ssaid from the table if present.
-        final Setting ssaid = mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_SSAID, owningUserId,
-                name);
-
-        // Lazy initialize ssaid if not yet present in ssaid table.
-        if (ssaid.isNull() || ssaid.getValue() == null) {
-            return mSettingsRegistry.generateSsaidLocked(getCallingPackage(), owningUserId);
-        }
-
-        return ssaid;
     }
 
     private boolean insertSecureSetting(String name, String value, String tag,
@@ -1873,9 +1818,6 @@ public class SettingsProvider extends ContentProvider {
         private static final String SETTINGS_FILE_GLOBAL = "settings_global.xml";
         private static final String SETTINGS_FILE_SYSTEM = "settings_system.xml";
         private static final String SETTINGS_FILE_SECURE = "settings_secure.xml";
-        private static final String SETTINGS_FILE_SSAID = "settings_ssaid.xml";
-
-        private static final String SSAID_USER_KEY = "userkey";
 
         private final SparseArray<SettingsState> mSettingsStates = new SparseArray<>();
 
@@ -1890,115 +1832,6 @@ public class SettingsProvider extends ContentProvider {
             mGenerationRegistry = new GenerationRegistry(mLock);
             mBackupManager = new BackupManager(getContext());
             migrateAllLegacySettingsIfNeeded();
-            syncSsaidTableOnStart();
-        }
-
-        private void generateUserKeyLocked(int userId) {
-            // Generate a random key for each user used for creating a new ssaid.
-            final byte[] keyBytes = new byte[16];
-            final SecureRandom rand = new SecureRandom();
-            rand.nextBytes(keyBytes);
-
-            // Convert to string for storage in settings table.
-            final String userKey = ByteStringUtils.toString(keyBytes);
-
-            // Store the key in the ssaid table.
-            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
-            final boolean success = ssaidSettings.insertSettingLocked(SSAID_USER_KEY, userKey, null,
-                    true, SettingsState.SYSTEM_PACKAGE_NAME);
-
-            if (!success) {
-                throw new IllegalStateException("Ssaid settings not accessible");
-            }
-        }
-
-        public Setting generateSsaidLocked(String packageName, int userId) {
-            final PackageInfo packageInfo;
-            try {
-                packageInfo = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_SIGNATURES, userId);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Package info doesn't exist");
-            }
-
-            // Read the user's key from the ssaid table.
-            Setting userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
-            if (userKeySetting.isNull() || userKeySetting.getValue() == null) {
-                // Lazy initialize and store the user key.
-                generateUserKeyLocked(userId);
-                userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
-                if (userKeySetting.isNull() || userKeySetting.getValue() == null) {
-                    throw new IllegalStateException("User key not accessible");
-                }
-            }
-            final String userKey = userKeySetting.getValue();
-
-            // Convert the user's key back to a byte array.
-            final byte[] keyBytes = ByteStringUtils.toByteArray(userKey);
-            if (keyBytes == null || keyBytes.length != 16) {
-                throw new IllegalStateException("User key invalid");
-            }
-
-            final MessageDigest md;
-            try {
-                // Hash package name and signature.
-                md = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException("HmacSHA256 is not available");
-            }
-            md.update(keyBytes);
-            md.update(packageInfo.packageName.getBytes(StandardCharsets.UTF_8));
-            md.update(packageInfo.signatures[0].toByteArray());
-
-            // Convert result to a string for storage in settings table. Only want first 64 bits.
-            final String ssaid = ByteStringUtils.toString(md.digest()).substring(0, 16)
-                    .toLowerCase();
-
-            // Save the ssaid in the ssaid table.
-            final String uid = Integer.toString(packageInfo.applicationInfo.uid);
-            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
-            final boolean success = ssaidSettings.insertSettingLocked(uid, ssaid, null, true,
-                    packageName);
-
-            if (!success) {
-                throw new IllegalStateException("Ssaid settings not accessible");
-            }
-
-            return getSettingLocked(SETTINGS_TYPE_SSAID, userId, uid);
-        }
-
-        public void syncSsaidTableOnStart() {
-            synchronized (mLock) {
-                // Verify that each user's packages and ssaid's are in sync.
-                for (UserInfo user : mUserManager.getUsers(true)) {
-                    // Get all uids for the user's packages.
-                    final List<PackageInfo> packages;
-                    try {
-                        packages = mPackageManager.getInstalledPackages(0, user.id).getList();
-                    } catch (RemoteException e) {
-                        throw new IllegalStateException("Package manager not available");
-                    }
-                    final Set<String> appUids = new HashSet<>();
-                    for (PackageInfo info : packages) {
-                        appUids.add(Integer.toString(info.applicationInfo.uid));
-                    }
-
-                    // Get all uids currently stored in the user's ssaid table.
-                    final Set<String> ssaidUids = new HashSet<>(
-                            getSettingsNamesLocked(SETTINGS_TYPE_SSAID, user.id));
-                    ssaidUids.remove(SSAID_USER_KEY);
-
-                    // Perform a set difference for the appUids and ssaidUids.
-                    ssaidUids.removeAll(appUids);
-
-                    // If there are ssaidUids left over they need to be removed from the table.
-                    final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
-                            user.id);
-                    for (String uid : ssaidUids) {
-                        ssaidSettings.deleteSettingLocked(uid);
-                    }
-                }
-            }
         }
 
         public List<String> getSettingsNamesLocked(int type, int userId) {
@@ -2050,10 +1883,6 @@ public class SettingsProvider extends ContentProvider {
             // Ensure system settings loaded.
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             ensureSettingsStateLocked(systemKey);
-
-            // Ensure secure settings loaded.
-            final int ssaidKey = makeKey(SETTINGS_TYPE_SSAID, userId);
-            ensureSettingsStateLocked(ssaidKey);
 
             // Upgrade the settings to the latest version.
             UpgradeController upgrader = new UpgradeController(userId);
@@ -2107,23 +1936,6 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
 
-            // Nuke ssaid settings.
-            final int ssaidKey = makeKey(SETTINGS_TYPE_SSAID, userId);
-            final SettingsState ssaidSettingsState = mSettingsStates.get(ssaidKey);
-            if (ssaidSettingsState != null) {
-                if (permanently) {
-                    mSettingsStates.remove(ssaidKey);
-                    ssaidSettingsState.destroyLocked(null);
-                } else {
-                    ssaidSettingsState.destroyLocked(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSettingsStates.remove(ssaidKey);
-                        }
-                    });
-                }
-            }
-
             // Nuke generation tracking data
             mGenerationRegistry.onUserRemoved(userId);
         }
@@ -2165,10 +1977,8 @@ public class SettingsProvider extends ContentProvider {
 
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
-                return settingsState.getNullSetting();
+                return null;
             }
-
-            // getSettingLocked will return non-null result
             return settingsState.getSettingLocked(name);
         }
 
@@ -2267,12 +2077,6 @@ public class SettingsProvider extends ContentProvider {
             if (systemSettings != null) {
                 systemSettings.onPackageRemovedLocked(packageName);
             }
-        }
-
-        public void onUidRemovedLocked(int uid) {
-            final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
-                    UserHandle.getUserId(uid));
-            ssaidSettings.deleteSettingLocked(Integer.toString(uid));
         }
 
         private SettingsState peekSettingsStateLocked(int key) {
@@ -2496,10 +2300,6 @@ public class SettingsProvider extends ContentProvider {
             return getTypeFromKey(key) == SETTINGS_TYPE_SECURE;
         }
 
-        private boolean isSsaidSettingsKey(int key) {
-            return getTypeFromKey(key) == SETTINGS_TYPE_SSAID;
-        }
-
         private File getSettingsFile(int key) {
             if (isGlobalSettingsKey(key)) {
                 final int userId = getUserIdFromKey(key);
@@ -2513,10 +2313,6 @@ public class SettingsProvider extends ContentProvider {
                 final int userId = getUserIdFromKey(key);
                 return new File(Environment.getUserSystemDirectory(userId),
                         SETTINGS_FILE_SECURE);
-            } else if (isSsaidSettingsKey(key)) {
-                final int userId = getUserIdFromKey(key);
-                return new File(Environment.getUserSystemDirectory(userId),
-                        SETTINGS_FILE_SSAID);
             } else {
                 throw new IllegalArgumentException("Invalid settings key:" + key);
             }
@@ -2540,8 +2336,7 @@ public class SettingsProvider extends ContentProvider {
         private int getMaxBytesPerPackageForType(int type) {
             switch (type) {
                 case SETTINGS_TYPE_GLOBAL:
-                case SETTINGS_TYPE_SECURE:
-                case SETTINGS_TYPE_SSAID: {
+                case SETTINGS_TYPE_SECURE: {
                     return SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED;
                 }
 
@@ -2579,7 +2374,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 137;
+            private static final int SETTINGS_VERSION = 136;
 
             private final int mUserId;
 
@@ -2650,10 +2445,6 @@ public class SettingsProvider extends ContentProvider {
 
             private SettingsState getSecureSettingsLocked(int userId) {
                 return getSettingsLocked(SETTINGS_TYPE_SECURE, userId);
-            }
-
-            private SettingsState getSsaidSettingsLocked(int userId) {
-                return getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
             }
 
             private SettingsState getSystemSettingsLocked(int userId) {
@@ -2983,48 +2774,6 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 136;
-                }
-
-                if (currentVersion == 136) {
-                    // Version 136: Store legacy SSAID for all apps currently installed on the
-                    // device as first step in migrating SSAID to be unique per application.
-
-                    final boolean isUpgrade;
-                    try {
-                        isUpgrade = mPackageManager.isUpgrade();
-                    } catch (RemoteException e) {
-                        throw new IllegalStateException("Package manager not available");
-                    }
-                    // Only retain legacy ssaid if the device is performing an OTA. After wiping
-                    // user data or first boot on a new device should use new ssaid generation.
-                    if (isUpgrade) {
-                        // Retrieve the legacy ssaid from the secure settings table.
-                        final String legacySsaid = getSettingLocked(SETTINGS_TYPE_SECURE, userId,
-                                Settings.Secure.ANDROID_ID).getValue();
-
-                        // Fill each uid with the legacy ssaid to be backwards compatible.
-                        final List<PackageInfo> packages;
-                        try {
-                            packages = mPackageManager.getInstalledPackages(0, userId).getList();
-                        } catch (RemoteException e) {
-                            throw new IllegalStateException("Package manager not available");
-                        }
-
-                        final SettingsState ssaidSettings = getSsaidSettingsLocked(userId);
-                        for (PackageInfo info : packages) {
-                            // Check if the UID already has an entry in the table.
-                            final String uid = Integer.toString(info.applicationInfo.uid);
-                            final Setting ssaid = ssaidSettings.getSettingLocked(uid);
-
-                            if (ssaid.isNull() || ssaid.getValue() == null) {
-                                // Android Id doesn't exist for this package so create it.
-                                ssaidSettings.insertSettingLocked(uid, legacySsaid, null, true,
-                                        info.packageName);
-                            }
-                        }
-                    }
-
-                    currentVersion = 137;
                 }
 
                 if (currentVersion != newVersion) {

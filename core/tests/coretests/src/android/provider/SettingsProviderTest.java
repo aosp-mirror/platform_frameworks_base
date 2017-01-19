@@ -364,20 +364,4 @@ public class SettingsProviderTest extends AndroidTestCase {
         // one or more activity can handle this intent.
         assertTrue(resolveInfoList.size() > 0);
     }
-
-    @SmallTest
-    public void testValidSsaid() {
-        ContentResolver r = getContext().getContentResolver();
-
-        // Verify ssaid
-        String ssaid = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID);
-        assertTrue(ssaid != null);
-        assertTrue(ssaid.length() == 16);
-
-        String ssaid2 = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID);
-        assertTrue(ssaid2 != null);
-        assertTrue(ssaid2.length() == 16);
-
-        assertTrue(ssaid.equals(ssaid2));
-    }
 }
