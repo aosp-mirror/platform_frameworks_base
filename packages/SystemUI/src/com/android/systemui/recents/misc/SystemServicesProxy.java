@@ -79,6 +79,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.pip.tv.PipMenuActivity;
 import com.android.systemui.pip.tv.PipOnboardingActivity;
@@ -152,11 +153,30 @@ public class SystemServicesProxy {
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned() { }
-        public void onPinnedActivityRestartAttempt() { }
+        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId) { }
         public void onActivityDismissingDockedStack() { }
         public void onTaskProfileLocked(int taskId, int userId) { }
+
+        /**
+         * Checks that the current user matches the user's SystemUI process. Since
+         * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
+         * TaskStackListener should make this call to verify that we don't act on events from other
+         * user's processes.
+         */
+        protected final boolean checkCurrentUserId(boolean debug) {
+            int processUserId = UserHandle.myUserId();
+            int currentUserId = KeyguardUpdateMonitor.getCurrentUser();
+            if (processUserId != currentUserId) {
+                if (debug) {
+                    Log.d(TAG, "UID mismatch. SystemUI is running uid=" + processUserId
+                            + " and the current user is uid=" + currentUserId);
+                }
+                return false;
+            }
+            return true;
+        }
     }
 
     /**
@@ -178,9 +198,11 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt() throws RemoteException{
+        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent)
+                throws RemoteException{
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.sendEmptyMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
+            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, sourceComponent)
+                    .sendToTarget();
         }
 
         @Override
@@ -1214,7 +1236,8 @@ public class SystemServicesProxy {
                 }
                 case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt();
+                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
+                                (ComponentName) msg.obj);
                     }
                     break;
                 }

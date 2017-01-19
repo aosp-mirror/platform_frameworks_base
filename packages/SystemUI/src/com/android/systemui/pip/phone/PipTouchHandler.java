@@ -487,7 +487,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**
      * Resizes the pinned stack back to fullscreen.
      */
-    private void expandPinnedStackToFullscreen() {
+    void expandPinnedStackToFullscreen() {
         BackgroundThread.getHandler().post(() -> {
             try {
                 mActivityManager.resizeStack(PINNED_STACK_ID, null /* bounds */,

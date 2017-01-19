@@ -16,14 +16,20 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackInfo;
+import android.app.ActivityOptions;
 import android.app.IActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -49,6 +55,7 @@ public class PipManager {
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
     private PipMenuActivityController mMenuController;
+    private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
 
     /**
@@ -57,7 +64,11 @@ public class PipManager {
     TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onActivityPinned() {
+            if (!checkCurrentUserId(false /* debug */)) {
+                return;
+            }
             mTouchHandler.onActivityPinned();
+            mMediaController.onActivityPinned();
         }
 
         @Override
@@ -66,8 +77,24 @@ public class PipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt() {
-            // TODO(winsonc): Hide the menu and expand the PiP
+        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) {
+            if (!checkCurrentUserId(false /* debug */)) {
+                return;
+            }
+
+            // Expand the activity back to fullscreen only if it was attempted to be restarted from
+            // another package than the top activity in the stack
+            boolean expandPipToFullscreen = true;
+            if (sourceComponent != null) {
+                ComponentName topActivity = PipUtils.getTopPinnedActivity(mActivityManager);
+                expandPipToFullscreen = topActivity != null && topActivity.getPackageName().equals(
+                        sourceComponent.getPackageName());
+            }
+            if (expandPipToFullscreen) {
+                mTouchHandler.expandPinnedStackToFullscreen();
+            } else {
+                Log.w(TAG, "Can not expand PiP to fullscreen via intent from the same package.");
+            }
         }
     };
 
@@ -91,7 +118,7 @@ public class PipManager {
         @Override
         public void onActionsChanged(ParceledListSlice actions) {
             mHandler.post(() -> {
-                mMenuController.setActions(actions);
+                mMenuController.setAppActions(actions);
             });
         }
 
@@ -127,7 +154,9 @@ public class PipManager {
         }
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
 
-        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager);
+        mMediaController = new PipMediaController(context, mActivityManager);
+        mMenuController = new PipMenuActivityController(context, mActivityManager, mWindowManager,
+                mMediaController);
         mTouchHandler = new PipTouchHandler(context, mMenuController, mActivityManager,
                 mWindowManager);
     }

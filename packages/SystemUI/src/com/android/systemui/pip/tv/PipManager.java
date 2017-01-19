@@ -590,7 +590,7 @@ public class PipManager {
         @Override
         public void onTaskStackChanged() {
             if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
-            if (!checkCurrentUserId()) {
+            if (!checkCurrentUserId(DEBUG)) {
                 return;
             }
             if (mState != STATE_NO_PIP) {
@@ -627,7 +627,7 @@ public class PipManager {
         @Override
         public void onActivityPinned() {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
-            if (!checkCurrentUserId()) {
+            if (!checkCurrentUserId(DEBUG)) {
                 return;
             }
             StackInfo stackInfo = getPinnedStackInfo();
@@ -658,9 +658,9 @@ public class PipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt() {
+        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) {
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
-            if (!checkCurrentUserId()) {
+            if (!checkCurrentUserId(DEBUG)) {
                 return;
             }
             // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
@@ -670,7 +670,7 @@ public class PipManager {
         @Override
         public void onPinnedStackAnimationEnded() {
             if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
-            if (!checkCurrentUserId()) {
+            if (!checkCurrentUserId(DEBUG)) {
                 return;
             }
             switch (mState) {
@@ -692,26 +692,6 @@ public class PipManager {
                     showPipMenu();
                     break;
             }
-        }
-
-        // {@link android.app.ITaskStackListener} isn't multi-user aware.
-        // Check the current uid and current SystemUI's running uid
-        // so we can handle the PIP status change only once.
-        private boolean checkCurrentUserId() {
-            try {
-                int processUserId = UserHandle.myUserId();
-                int currentUserId = mActivityManager.getCurrentUser().id;
-                if (processUserId != currentUserId) {
-                    if (DEBUG) {
-                        Log.d(TAG, "UID mismatch. SystemUI is running uid=" + processUserId
-                            + " and the current user is uid=" + currentUserId);
-                    }
-                    return false;
-                }
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to get current user.");
-            }
-            return true;
         }
     };
 

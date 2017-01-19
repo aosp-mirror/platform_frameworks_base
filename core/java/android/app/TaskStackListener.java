@@ -35,7 +35,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onPinnedActivityRestartAttempt() throws RemoteException {
+    public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) throws RemoteException {
     }
 
     @Override
