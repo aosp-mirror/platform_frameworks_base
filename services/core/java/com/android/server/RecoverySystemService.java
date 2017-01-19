@@ -181,7 +181,7 @@ public final class RecoverySystemService extends SystemService {
         }
 
         @Override // Binder call
-        public void rebootRecoveryWithCommand(String command, boolean update) {
+        public void rebootRecoveryWithCommand(String command) {
             if (DEBUG) Slog.d(TAG, "rebootRecoveryWithCommand: [" + command + "]");
             synchronized (sRequestLock) {
                 if (!setupOrClearBcb(true, command)) {
@@ -190,10 +190,7 @@ public final class RecoverySystemService extends SystemService {
 
                 // Having set up the BCB, go ahead and reboot.
                 PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-                // PowerManagerService may additionally request uncrypting the package when it's
-                // to install an update (REBOOT_RECOVERY_UPDATE).
-                pm.reboot(update ? PowerManager.REBOOT_RECOVERY_UPDATE :
-                        PowerManager.REBOOT_RECOVERY);
+                pm.reboot(PowerManager.REBOOT_RECOVERY);
             }
         }
 
