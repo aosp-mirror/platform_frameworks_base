@@ -782,6 +782,16 @@
         android:description="@string/permdesc_callPhone"
         android:protectionLevel="dangerous" />
 
+    <!-- Allows an application to manage its own calls, but rely on the system to route focus to the
+         currently active call.
+        <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.MANAGE_OWN_CALLS"
+        android:permissionGroup="android.permission-group.PHONE"
+        android:label="@string/permlab_manageOwnCalls"
+        android:description="@string/permdesc_manageOwnCalls"
+        android:protectionLevel="dangerous" />
+
     <!-- Allows an application to access the IMS call service: making and
          modifying a call
         <p>Protection level: signature|privileged

@@ -376,8 +376,16 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 1<<6;
 
+    /**
+     * Set by the framework to indicate that the {@link Connection} originated from a self-managed
+     * {@link ConnectionService}.
+     * <p>
+     * See {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
+     */
+    public static final int PROPERTY_SELF_MANAGED = 1<<7;
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<7
+    // Next PROPERTY value: 1<<8
     //**********************************************************************************************
 
     /**
@@ -680,6 +688,10 @@ public abstract class Connection extends Conferenceable {
             builder.append("Properties:");
         }
 
+        if (can(properties, PROPERTY_SELF_MANAGED)) {
+            builder.append(isLong ? " PROPERTY_SELF_MANAGED" : " self_mng");
+        }
+
         if (can(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
             builder.append(isLong ? " PROPERTY_EMERGENCY_CALLBACK_MODE" : " ecbm");
         }
@@ -740,6 +752,7 @@ public abstract class Connection extends Conferenceable {
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
         /** @hide */
         public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
+        public void onAudioRouteChanged(Connection c, int audioRoute) {}
     }
 
     /**
@@ -2268,6 +2281,25 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Sets the audio route (speaker, bluetooth, etc...).  When this request is honored, there will
+     * be change to the {@link #getCallAudioState()}.
+     * <p>
+     * Used by self-managed {@link ConnectionService}s which wish to change the audio route for a
+     * self-managed {@link Connection} (see {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.)
+     * <p>
+     * See also {@link InCallService#setAudioRoute(int)}.
+     *
+     * @param route The audio route to use (one of {@link CallAudioState#ROUTE_BLUETOOTH},
+     *              {@link CallAudioState#ROUTE_EARPIECE}, {@link CallAudioState#ROUTE_SPEAKER}, or
+     *              {@link CallAudioState#ROUTE_WIRED_HEADSET}).
+     */
+    public final void setAudioRoute(int route) {
+        for (Listener l : mListeners) {
+            l.onAudioRouteChanged(this, route);
+        }
+    }
+
+    /**
      * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
@@ -2421,6 +2453,21 @@ public abstract class Connection extends Conferenceable {
      * @param extras The new extras bundle.
      */
     public void onExtrasChanged(Bundle extras) {}
+
+    /**
+     * Notifies this {@link Connection} that its {@link ConnectionService} is responsible for
+     * displaying its incoming call user interface for the {@link Connection}.
+     * <p>
+     * Will only be called for incoming calls added via a self-managed {@link ConnectionService}
+     * (see {@link PhoneAccount#CAPABILITY_SELF_MANAGED}), where the {@link ConnectionService}
+     * should show its own incoming call user interface.
+     * <p>
+     * Where there are ongoing calls in other self-managed {@link ConnectionService}s, or in a
+     * regular {@link ConnectionService}, the Telecom framework will display its own incoming call
+     * user interface to allow the user to choose whether to answer the new incoming call and
+     * disconnect other ongoing calls, or to reject the new incoming call.
+     */
+    public void onShowIncomingCallUi() {}
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
