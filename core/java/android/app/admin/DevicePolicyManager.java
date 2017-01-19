@@ -20,7 +20,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -28,7 +27,6 @@ import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
-import android.app.admin.PasswordMetrics;
 import android.app.IServiceConnection;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
@@ -5536,7 +5534,7 @@ public class DevicePolicyManager {
      *         {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty
      *         {@link Bundle} if no restrictions have been set.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
-     * @see {@link #setApplicationRestrictionsManagingPackage}
+     * @see #setApplicationRestrictionsManagingPackage
      */
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
@@ -6217,6 +6215,23 @@ public class DevicePolicyManager {
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Called by device or profile owners to get information about a pending system update.
+     *
+     * @param admin Which profile or device owner this request is associated with.
+     * @return Information about a pending system update or {@code null} if no update pending.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @see DeviceAdminReceiver#onSystemUpdatePending(Context, Intent, long)
+     */
+    public @Nullable SystemUpdateInfo getPendingSystemUpdate(@NonNull ComponentName admin) {
+        throwIfParentInstance("getPendingSystemUpdate");
+        try {
+            return mService.getPendingSystemUpdate(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 

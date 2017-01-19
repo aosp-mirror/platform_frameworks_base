@@ -20,6 +20,7 @@ package android.app.admin;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
+import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
@@ -264,6 +265,7 @@ interface IDevicePolicyManager {
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in long updateReceivedTime);
+    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin);
 
     void setPermissionPolicy(in ComponentName admin, int policy);
     int  getPermissionPolicy(in ComponentName admin);
