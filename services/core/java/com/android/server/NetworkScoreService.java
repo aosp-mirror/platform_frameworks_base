@@ -45,6 +45,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -551,6 +552,33 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    /**
+     * Request a recommendation for the best network to connect to
+     * taking into account the inputs from the {@link RecommendationRequest}.
+     *
+     * @param request a {@link RecommendationRequest} instance containing the details of the request
+     * @param remoteCallback a {@link IRemoteCallback} instance to invoke when the recommendation
+     *                       is available.
+     * @throws SecurityException if the caller is not the system
+     */
+    @Override
+    public void requestRecommendationAsync(RecommendationRequest request,
+            RemoteCallback remoteCallback) {
+        // TODO(jjoslin): 12/28/16 - Provide actual impl.
+
+        final RecommendationResult result;
+        if (request != null && request.getCurrentSelectedConfig() != null) {
+            result = RecommendationResult.createConnectRecommendation(
+                    request.getCurrentSelectedConfig());
+        } else {
+            result = RecommendationResult.createDoNotConnectRecommendation();
+        }
+
+        final Bundle data = new Bundle();
+        data.putParcelable(EXTRA_RECOMMENDATION_RESULT, result);
+        remoteCallback.sendResult(data);
     }
 
     @Override

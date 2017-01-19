@@ -21,6 +21,7 @@ import android.net.NetworkKey;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
+import android.os.RemoteCallback;
 
 /**
  * A service for updating network scores from a network scorer application.
@@ -117,4 +118,16 @@ interface INetworkScoreService
      *         scorer.
      */
     String getActiveScorerPackage();
+    
+    /**
+     * Request a recommendation for the best network to connect to
+     * taking into account the inputs from the {@link RecommendationRequest}.
+     *
+     * @param request a {@link RecommendationRequest} instance containing the details of the request
+     * @param remoteCallback a {@link RemoteCallback} instance to invoke when the recommendation
+     *                       is available.
+     * @throws SecurityException if the caller is not the system
+     */
+    oneway void requestRecommendationAsync(in RecommendationRequest request,
+                                           in RemoteCallback remoteCallback);
 }
