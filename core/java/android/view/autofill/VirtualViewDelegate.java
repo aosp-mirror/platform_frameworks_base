@@ -15,6 +15,8 @@
  */
 package android.view.autofill;
 
+import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewStructure;
@@ -71,20 +73,18 @@ public abstract class VirtualViewDelegate {
     public abstract static class Callback {
 
         /**
-         * Sent when the focus inside the hierarchy changed.
+         * Sent when the auto-fill bar for a child must be updated.
          *
-         * <p>Typically callled twice - for the nodes that lost and gained focus.
-         *
-         * <p>This method should only be called when the change was not caused by the AutoFill
-         * Framework itselft (i.e, through {@link VirtualViewDelegate#autoFill(int, AutoFillValue)},
-         * but by external causes (for example, when the user changed the value through the view's
-         * UI).
-         *
-         * @param virtualId id of the node whose focus changed.
-         * @param hasFocus {@code true} when focus was gained, {@code false} when it was lost.
+         * See {@link AutoFillManager#updateAutoFillInput(View, int, android.graphics.Rect, int)}
+         * for more details.
          */
-        public void onFocusChanged(int virtualId, boolean hasFocus) {
-            if (DEBUG) Log.d(TAG, "onFocusChanged() for " + virtualId + ": " + hasFocus);
+        // TODO(b/33197203): do we really need it, or should the parent view just call
+        // AutoFillManager.updateAutoFillInput() directly?
+        public void onAutoFillInputUpdated(int virtualId, @Nullable Rect boundaries, int flags) {
+            if (DEBUG) {
+                Log.v(TAG, "onAutoFillInputUpdated(): virtualId=" + virtualId + ", boundaries="
+                        + boundaries + ", flags=" + flags);
+            }
         }
 
         /**

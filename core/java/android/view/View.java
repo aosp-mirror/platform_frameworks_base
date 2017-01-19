@@ -1748,6 +1748,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mAccessibilityViewId = NO_ID;
 
+    /**
+     * The stable ID of this view for auto-fill purposes.
+     */
+    private int mAutoFillId = NO_ID;
+
+
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
 
     SendViewStateChangedAccessibilityEvent mSendViewStateChangedAccessibilityEvent;
@@ -6911,8 +6917,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (forAutoFill) {
             // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
             // reuse the accessibility id to save space.
-            structure.setAutoFillId(getAccessibilityViewId());
-
+            mAutoFillId = getAccessibilityViewId();
+            structure.setAutoFillId(mAutoFillId);
             structure.setAutoFillType(getAutoFillType());
         }
 
@@ -7042,7 +7048,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Describes the auto-fill type that should be used on callas to
+     * Describes the auto-fill type that should be used on calls to
      * {@link #autoFill(AutoFillValue)} and
      * {@link VirtualViewDelegate#autoFill(int, AutoFillValue)}.
      *
@@ -7536,6 +7542,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAccessibilityViewId = sNextAccessibilityViewId++;
         }
         return mAccessibilityViewId;
+    }
+
+    /**
+     * Gets the unique identifier of this view for auto-fill purposes.
+     *
+     * <p>It's only set after {@link #onProvideAutoFillStructure(ViewStructure, int)} is called.
+     *
+     * @return The view autofill id or {@link #NO_ID} if
+     * {@link #onProvideAutoFillStructure(ViewStructure, int)}  was not called yet.
+     *
+     * @hide
+     */
+    public int getAutoFillViewId() {
+        return mAutoFillId;
     }
 
     /**

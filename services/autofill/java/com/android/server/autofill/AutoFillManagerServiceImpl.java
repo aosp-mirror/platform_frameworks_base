@@ -163,7 +163,6 @@ final class AutoFillManagerServiceImpl {
             }
             final AssistStructure structure = resultData
                     .getParcelable(VoiceInteractionSession.KEY_STRUCTURE);
-            final Bundle data = resultData.getBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS);
             final int flags = resultData.getInt(VoiceInteractionSession.KEY_FLAGS, 0);
 
             final ServerCallback serverCallback;

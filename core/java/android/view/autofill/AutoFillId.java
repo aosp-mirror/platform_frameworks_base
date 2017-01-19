@@ -43,6 +43,13 @@ public final class AutoFillId implements Parcelable {
     }
 
     /** @hide */
+    public AutoFillId(int parentId, int virtualChildId) {
+        mVirtual = true;
+        mViewId = parentId;
+        mVirtualId = virtualChildId;
+    }
+
+    /** @hide */
     public int getViewId() {
         return mViewId;
     }
