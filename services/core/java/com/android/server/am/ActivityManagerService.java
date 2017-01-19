@@ -62,7 +62,6 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
@@ -120,7 +119,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_B
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
-import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -312,6 +310,7 @@ import android.view.WindowManager;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.AssistUtils;
@@ -342,7 +341,6 @@ import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.ServiceThread;
-import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
@@ -386,10 +384,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import dalvik.system.VMRuntime;
-
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
+import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
 
@@ -758,18 +756,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The currently running heavy-weight process, if any.
      */
     ProcessRecord mHeavyWeightProcess = null;
-
-    /**
-     * Non-persistent app uid whitelist for background restrictions
-     */
-    int[] mBackgroundUidWhitelist = new int[] {
-            Process.BLUETOOTH_UID
-    };
-
-    /**
-     * Broadcast actions that will always be deliverable to unlaunched/background apps
-     */
-    final ArraySet<String> mBackgroundLaunchBroadcasts;
 
     /**
      * All of the processes we currently have running organized by pid.
@@ -2604,17 +2590,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPermissionReviewRequired = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
-        mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
-        if (DEBUG_BACKGROUND) {
-            StringBuilder sb = new StringBuilder(200);
-            sb.append("  ");
-            for (String a : mBackgroundLaunchBroadcasts) {
-                sb.append(' '); sb.append(a);
-            }
-            Slog.d(TAG, "Background implicit broadcasts:");
-            Slog.d(TAG, sb.toString());
-        }
-
         mHandlerThread = new ServiceThread(TAG,
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
         mHandlerThread.start();
@@ -4215,7 +4190,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             validateUid = mValidateUids.get(item.uid);
                             if (validateUid == null && change != UidRecord.CHANGE_GONE
                                     && change != UidRecord.CHANGE_GONE_IDLE) {
-                                validateUid = new UidRecord(item.uid, false);
+                                validateUid = new UidRecord(item.uid);
                                 mValidateUids.put(item.uid, validateUid);
                             }
                         }
@@ -5529,7 +5504,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                             Uri.fromParts("package", packageName, null));
-                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                     intent.putExtra(Intent.EXTRA_UID, pkgUidF);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(pkgUidF));
                     broadcastIntentInPackage("android", Process.SYSTEM_UID, intent,
@@ -6305,7 +6279,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
-            uidRec = new UidRecord(proc.uid, proc.persistent);
+            uidRec = new UidRecord(proc.uid);
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
@@ -8052,84 +8026,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    // Unified app-op and target sdk check
-    boolean appRestrictedInBackgroundLocked(int uid, String packageName) {
-        if (packageName == null) {
-            packageName = mPackageManagerInt.getNameForUid(uid);
-            if (packageName == null) {
-                Slog.w(TAG, "No package known for uid " + uid);
-                return false;
-            }
-        }
-
-        // !!! TODO: cache the package/versionCode lookups to fast path this
-        ApplicationInfo app = getPackageManagerInternalLocked().getApplicationInfo(packageName,
-                UserHandle.getUserId(uid));
-        if (app != null) {
-            // Apps that target O+ are always subject to background check
-            if (app.targetSdkVersion >= Build.VERSION_CODES.O) {
-                if (DEBUG_BACKGROUND) {
-                    Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, restricted");
-                }
-                return true;
-            }
-            // ...and legacy apps get an AppOp check
-            int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
-                    uid, packageName);
-            if (DEBUG_BACKGROUND) {
-                Slog.i(TAG, "Legacy app " + uid + "/" + packageName + " bg appop " + appop);
-            }
-            return (appop != AppOpsManager.MODE_ALLOWED);
-        } else {
-            Slog.w(TAG, "Unknown app " + packageName + " / " + uid);
-        }
-        return false;
-    }
-
-    // Service launch is available to apps with run-in-background exemptions but
-    // some other background operations are not.  If we're doing a check
-    // of service-launch policy, allow those callers to proceed unrestricted.
-    boolean appServicesRestrictedInBackgroundLocked(int uid, String packageName) {
-        if (packageName == null) {
-            packageName = mPackageManagerInt.getNameForUid(uid);
-            if (packageName == null) {
-                Slog.w(TAG, "No package known for uid " + uid);
-                return false;
-            }
-        }
-
-        // Persistent app?  NB: expects that persistent uids are always active.
-        final UidRecord uidRec = mActiveUids.get(uid);
-        if (uidRec != null && uidRec.persistent) {
-            if (DEBUG_BACKGROUND) {
-                Slog.i(TAG, "App " + uid + "/" + packageName
-                        + " is persistent; not restricted in background");
-            }
-            return false;
-        }
-
-        // Non-persistent but background whitelisted?
-        if (uidOnBackgroundWhitelist(uid)) {
-            if (DEBUG_BACKGROUND) {
-                Slog.i(TAG, "App " + uid + "/" + packageName
-                        + " on background whitelist; not restricted in background");
-            }
-            return false;
-        }
-
-        // Is this app on the battery whitelist?
-        if (mLocalDeviceIdleController.isAppOnWhitelist(UserHandle.getAppId(uid))) {
-            if (DEBUG_BACKGROUND) {
-                Slog.i(TAG, "App " + uid + "/" + packageName
-                        + " on idle whitelist; not restricted in background");
-            }
-            return false;
-        }
-
-        // None of the service-policy criteria apply, so we apply the common criteria
-        return appRestrictedInBackgroundLocked(uid, packageName);
-    }
-
     int checkAllowBackgroundLocked(int uid, String packageName, int callingPid,
             boolean alwaysRestrict) {
         UidRecord uidRec = mActiveUids.get(uid);
@@ -8158,13 +8054,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return ActivityManager.APP_START_MODE_NORMAL;
                     }
                 }
-                final boolean restricted = (alwaysRestrict)
-                        ? appRestrictedInBackgroundLocked(uid, packageName)
-                        : appServicesRestrictedInBackgroundLocked(uid, packageName);
-                if (restricted) {
-                    if (DEBUG_BACKGROUND) {
-                        Slog.i(TAG, "App " + uid + "/" + packageName + " restricted in background");
-                    }
+                if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid,
+                        packageName) != AppOpsManager.MODE_ALLOWED) {
                     return ActivityManager.APP_START_MODE_DELAYED;
                 }
             }
@@ -11758,16 +11649,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         addProcessNameLocked(r);
         return r;
-    }
-
-    private boolean uidOnBackgroundWhitelist(final int uid) {
-        final int N = mBackgroundUidWhitelist.length;
-        for (int i = 0; i < N; i++) {
-            if (uid == mBackgroundUidWhitelist[i]) {
-                return true;
-            }
-        }
-        return false;
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated,
@@ -17403,8 +17284,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int id, Notification notification,
-            String callingPackage, int userId)
+            String resolvedType, String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
@@ -17423,8 +17303,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int callingUid = Binder.getCallingUid();
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(caller, service,
-                    resolvedType, id, notification,
-                    callingPid, callingUid, callingPackage, userId);
+                    resolvedType, callingPid, callingUid, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -17438,7 +17317,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "startServiceInPackage: " + service + " type=" + resolvedType);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res = mServices.startServiceLocked(null, service,
-                    resolvedType, 0, null, -1, uid, callingPackage, userId);
+                    resolvedType, -1, uid, callingPackage, userId);
             Binder.restoreCallingIdentity(origId);
             return res;
         }
@@ -18297,13 +18176,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (action != null) {
-            if (mBackgroundLaunchBroadcasts.contains(action)) {
-                if (DEBUG_BACKGROUND) {
-                    Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
-                }
-                intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            }
-
             switch (action) {
                 case Intent.ACTION_UID_REMOVED:
                 case Intent.ACTION_PACKAGE_REMOVED:
@@ -19428,8 +19300,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 UserHandle.USER_ALL);
         if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
             intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             if (initLocale || !mProcessesReady) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }

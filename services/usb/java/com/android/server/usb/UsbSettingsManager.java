@@ -182,7 +182,6 @@ class UsbSettingsManager {
         }
 
         Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
 
         if (DEBUG) {
@@ -205,7 +204,6 @@ class UsbSettingsManager {
         }
 
         Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }

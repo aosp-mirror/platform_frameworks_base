@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
-import android.app.Notification;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -624,13 +623,6 @@ public class ContextWrapper extends Context {
         return mBase.startService(service);
     }
 
-    /** @hide */
-    @Override
-    public ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification) {
-        return mBase.startServiceInForeground(service, id, notification);
-    }
-
     @Override
     public boolean stopService(Intent name) {
         return mBase.stopService(name);
@@ -640,13 +632,6 @@ public class ContextWrapper extends Context {
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         return mBase.startServiceAsUser(service, user);
-    }
-
-    /** @hide */
-    @Override
-    public ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user) {
-        return mBase.startServiceInForegroundAsUser(service, id, notification, user);
     }
 
     /** @hide */

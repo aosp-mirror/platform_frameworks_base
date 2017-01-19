@@ -19,7 +19,6 @@ package android.test.mock;
 import android.annotation.SystemApi;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
-import android.app.Notification;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -514,12 +513,6 @@ public class MockContext extends Context {
     }
 
     @Override
-    public ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean stopService(Intent service) {
         throw new UnsupportedOperationException();
     }
@@ -527,13 +520,6 @@ public class MockContext extends Context {
     /** @hide */
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @hide */
-    @Override
-    public ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user) {
         throw new UnsupportedOperationException();
     }
 
