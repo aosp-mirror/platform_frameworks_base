@@ -45,6 +45,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.support.annotation.VisibleForTesting;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -447,7 +448,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         return false;
     }
 
-    private boolean onHomeLongClick(View v) {
+    @VisibleForTesting
+    boolean onHomeLongClick(View v) {
         if (shouldDisableNavbarGestures()) {
             return false;
         }
@@ -562,6 +564,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     public void setAssistManager(AssistManager assistManager) {
         mAssistManager = assistManager;
+        mAssistManager.onConfigurationChanged();
     }
 
     public void setLightBarController(LightBarController lightBarController) {

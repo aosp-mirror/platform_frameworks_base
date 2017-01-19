@@ -16,12 +16,17 @@ package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
+import android.view.WindowManager;
+
 import com.android.systemui.FragmentTestCase;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
+import org.junit.Test;
 
 public class NavigationBarFragmentTest extends FragmentTestCase {
 
@@ -35,6 +40,19 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
         mContext.putComponent(PhoneStatusBar.class, mock(PhoneStatusBar.class));
         mContext.putComponent(Recents.class, mock(Recents.class));
         mContext.putComponent(Divider.class, mock(Divider.class));
+    }
+
+    @Test
+    public void testHomeLongPress() {
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
+        NavigationBarFragment navigationBarFragment = (NavigationBarFragment) mFragment;
+
+        AssistManager assistManager = new AssistManager(mContext.getComponent(PhoneStatusBar.class),
+                mContext);
+        navigationBarFragment.setAssistManager(assistManager);
+
+        postAndWait(() -> mFragments.dispatchResume());
+        navigationBarFragment.onHomeLongClick(navigationBarFragment.getView());
     }
 
 }
