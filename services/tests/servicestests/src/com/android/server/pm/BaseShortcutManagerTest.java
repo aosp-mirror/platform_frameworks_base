@@ -618,9 +618,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final UserInfo USER_INFO_11 =
             new UserInfo(USER_11, "user11", UserInfo.FLAG_INITIALIZED);
 
+    /*
+     * Cheat: USER_P0 is a sub profile of USER_0, but it doesn't have the MANAGED_PROFILE flag set.
+     * Due to a change made to LauncherApps (b/34340531), work profile apps a no longer able
+     * to see the main profile, which would break tons of unit tests.  We avoid it by not setting
+     * MANAGED_PROFILE for P0.
+     * We cover this negative case in CTS. (i.e. CTS has tests to make sure maanged profile
+     * can't access main profile's shortcuts.)
+     */
     protected static final UserInfo USER_INFO_P0 = withProfileGroupId(
-            new UserInfo(USER_P0, "userP0",
-                    UserInfo.FLAG_MANAGED_PROFILE), 0);
+            new UserInfo(USER_P0, "userP0", UserInfo.FLAG_INITIALIZED), 0);
 
     protected BiPredicate<String, Integer> mDefaultLauncherChecker =
             (callingPackage, userId) ->
