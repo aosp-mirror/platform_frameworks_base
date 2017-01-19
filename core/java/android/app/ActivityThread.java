@@ -4919,18 +4919,27 @@ public final class ActivityThread {
     }
 
     void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
+        // Updates triggered by package installation go through a package update
+        // receiver. Here we try to capture ApplicationInfo changes that are
+        // caused by other sources, such as overlays. That means we want to be as conservative
+        // about code changes as possible. Take the diff of the old ApplicationInfo and the new
+        // to see if anything needs to change.
         synchronized (mResourcesManager) {
             // Update all affected loaded packages with new package information
             WeakReference<LoadedApk> ref = mPackages.get(ai.packageName);
             LoadedApk apk = ref != null ? ref.get() : null;
             if (apk != null) {
-                apk.updateApplicationInfo(ai, null);
+                final ArrayList<String> oldPaths = new ArrayList<>();
+                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths, null /*outLibPaths*/);
+                apk.updateApplicationInfo(ai, oldPaths);
             }
 
             ref = mResourcePackages.get(ai.packageName);
             apk = ref != null ? ref.get() : null;
             if (apk != null) {
-                apk.updateApplicationInfo(ai, null);
+                final ArrayList<String> oldPaths = new ArrayList<>();
+                LoadedApk.makePaths(this, apk.getApplicationInfo(), oldPaths, null /*outLibPaths*/);
+                apk.updateApplicationInfo(ai, oldPaths);
             }
 
             // Update all affected Resources objects to use new ResourcesImpl

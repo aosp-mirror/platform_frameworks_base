@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -262,7 +264,15 @@ public final class LoadedApk {
         return ai.sharedLibraryFiles;
     }
 
-    public void updateApplicationInfo(ApplicationInfo aInfo, List<String> oldPaths) {
+    /**
+     * Update the ApplicationInfo for an app. If oldPaths is null, all the paths are considered
+     * new.
+     * @param aInfo The new ApplicationInfo to use for this LoadedApk
+     * @param oldPaths The code paths for the old ApplicationInfo object. null means no paths can
+     *                 be reused.
+     */
+    public void updateApplicationInfo(@NonNull ApplicationInfo aInfo,
+            @Nullable List<String> oldPaths) {
         setApplicationInfo(aInfo);
 
         final List<String> newPaths = new ArrayList<>();
