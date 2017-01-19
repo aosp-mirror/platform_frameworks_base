@@ -128,8 +128,7 @@ interface IActivityManager {
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
     PendingIntent getRunningServiceControlPanel(in ComponentName service);
     ComponentName startService(in IApplicationThread caller, in Intent service,
-            in String resolvedType, int id, in Notification notification,
-            in String callingPackage, int userId);
+            in String resolvedType, in String callingPackage, int userId);
     int stopService(in IApplicationThread caller, in Intent service,
             in String resolvedType, int userId);
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,

@@ -1272,11 +1272,6 @@ public class DeviceIdleController extends SystemService
             DeviceIdleController.this.setAlarmsActive(active);
         }
 
-        /** Is the app on any of the power save whitelists, whether system or user? */
-        public boolean isAppOnWhitelist(int appid) {
-            return DeviceIdleController.this.isAppOnWhitelistInternal(appid);
-        }
-
         /**
          * Returns the array of app ids whitelisted by user. Take care not to
          * modify this, as it is a reference to the original copy. But the reference
@@ -1292,12 +1287,6 @@ public class DeviceIdleController extends SystemService
         super(context);
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = new MyHandler(BackgroundThread.getHandler().getLooper());
-    }
-
-    boolean isAppOnWhitelistInternal(int appid) {
-        synchronized (this) {
-            return Arrays.binarySearch(mPowerSaveWhitelistAllAppIdArray, appid) >= 0;
-        }
     }
 
     int[] getPowerSaveWhitelistUserAppIds() {

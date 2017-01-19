@@ -414,8 +414,7 @@ final class UserController {
                 if (userId != UserHandle.USER_SYSTEM) {
                     Slog.d(TAG, "Initializing user #" + userId);
                     Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
-                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                            | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     mInjector.broadcastIntentLocked(intent, null,
                             new IIntentReceiver.Stub() {
                                 @Override

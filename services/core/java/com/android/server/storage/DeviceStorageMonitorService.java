@@ -338,11 +338,9 @@ public class DeviceStorageMonitorService extends SystemService {
         mTotalMemory = (long)mDataFileStats.getBlockCount() *
                         mDataFileStats.getBlockSize();
         mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
-        mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mStorageLowIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
-        mStorageOkIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mStorageOkIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_FULL);
         mStorageFullIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mStorageNotFullIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_NOT_FULL);

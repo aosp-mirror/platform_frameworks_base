@@ -109,10 +109,6 @@ public class SystemConfig {
     // background while in data-usage save mode, as read from the configuration files.
     final ArraySet<String> mAllowInDataUsageSave = new ArraySet<>();
 
-    // These are the action strings of broadcasts which are whitelisted to
-    // be delivered anonymously even to apps which target O+.
-    final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
-
     // These are the package names of apps which should be in the 'always'
     // URL-handling state upon factory reset.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
@@ -164,10 +160,6 @@ public class SystemConfig {
 
     public ArrayMap<String, PermissionEntry> getPermissions() {
         return mPermissions;
-    }
-
-    public ArraySet<String> getAllowImplicitBroadcasts() {
-        return mAllowImplicitBroadcasts;
     }
 
     public ArraySet<String> getAllowInPowerSaveExceptIdle() {
@@ -442,17 +434,6 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mAllowInDataUsageSave.add(pkgname);
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                    continue;
-
-                } else if ("allow-implicit-broadcast".equals(name) && allowAll) {
-                    String action = parser.getAttributeValue(null, "action");
-                    if (action == null) {
-                        Slog.w(TAG, "<allow-implicit-broadcast> without action in " + permFile
-                                + " at " + parser.getPositionDescription());
-                    } else {
-                        mAllowImplicitBroadcasts.add(action);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;

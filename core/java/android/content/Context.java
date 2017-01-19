@@ -35,7 +35,6 @@ import android.annotation.UserIdInt;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.LoadedApk;
-import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -2518,17 +2517,6 @@ public abstract class Context {
     public abstract ComponentName startService(Intent service);
 
     /**
-     * Start a service directly into the "foreground service" state.  Unlike {@link #startService},
-     * this method can be used from within background operations like broadcast receivers
-     * or scheduled jobs.  The API entry point for this is in NotificationManager in order to
-     * preserve appropriate public package layering.
-     * @hide
-     */
-    @Nullable
-    public abstract ComponentName startServiceInForeground(Intent service,
-            int id, Notification notification);
-
-    /**
      * Request that a given application service be stopped.  If the service is
      * not running, nothing happens.  Otherwise it is stopped.  Note that calls
      * to startService() are not counted -- this stops the service no matter
@@ -2559,16 +2547,7 @@ public abstract class Context {
     /**
      * @hide like {@link #startService(Intent)} but for a specific user.
      */
-    @Nullable
     public abstract ComponentName startServiceAsUser(Intent service, UserHandle user);
-
-    /**
-     * @hide like {@link #startServiceInForeground(Intent, int, Notification)}
-     * but for a specific user.
-     */
-    @Nullable
-    public abstract ComponentName startServiceInForegroundAsUser(Intent service,
-            int id, Notification notification, UserHandle user);
 
     /**
      * @hide like {@link #stopService(Intent)} but for a specific user.
