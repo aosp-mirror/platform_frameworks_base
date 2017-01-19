@@ -1689,7 +1689,7 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sutraukti"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Netrukdyti"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prastova"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Savaitgalio vakarą"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Darbo dienos vakarą"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Savaitgalį"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Įvykis"</string>
     <string name="muted_by" msgid="6147073845094180001">"Nutildė <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
