@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -36,38 +37,13 @@ import org.junit.Test;
 
 @RunWith(JUnit4.class)
 public class AppFusePerfTest {
+    final static int SIZE = 10 * 1024 * 1024;  // 10MB
+
     @Test
     @LargeTest
     public void testReadWriteFile() throws IOException {
         final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         final StorageManager storageManager = context.getSystemService(StorageManager.class);
-        final int INODE = 10;
-        final int SIZE = 10 * 1024 * 1024;  // 10MB
-        final AppFuse appFuse = new AppFuse(
-                "test",
-                new TestCallback() {
-                    @Override
-                    public long getFileSize(int inode) throws FileNotFoundException {
-                        if (inode != INODE) {
-                            throw new FileNotFoundException();
-                        }
-                        return SIZE;
-                    }
-
-                    @Override
-                    public long readObjectBytes(int inode, long offset, long size, byte[] bytes)
-                            throws IOException {
-                        return size;
-                    }
-
-                    @Override
-                    public int writeObjectBytes(
-                            long fileHandle, int inode, long offset, int size, byte[] bytes) {
-                        return size;
-                    }
-                });
-
-        appFuse.mount(storageManager);
 
         final byte[] bytes = new byte[SIZE];
         final int SAMPLES = 100;
@@ -75,22 +51,20 @@ public class AppFusePerfTest {
         final double[] writeTime = new double[SAMPLES];
 
         for (int i = 0; i < SAMPLES; i++) {
-            final ParcelFileDescriptor fd = appFuse.openFile(
-                    INODE,
-                    ParcelFileDescriptor.MODE_READ_ONLY);
+            final ParcelFileDescriptor fd = storageManager.openProxyFileDescriptor(
+                    ParcelFileDescriptor.MODE_READ_ONLY, new TestCallback());
             try (final ParcelFileDescriptor.AutoCloseInputStream stream =
                     new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
                 final long startTime = System.nanoTime();
                 stream.read(bytes);
                 readTime[i] = (System.nanoTime() - startTime) / 1000.0 / 1000.0;
             }
-
         }
 
         for (int i = 0; i < SAMPLES; i++) {
-            final ParcelFileDescriptor fd = appFuse.openFile(
-                    INODE,
-                    ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_TRUNCATE);
+            final ParcelFileDescriptor fd = storageManager.openProxyFileDescriptor(
+                    ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_TRUNCATE,
+                    new TestCallback());
             try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
                     new ParcelFileDescriptor.AutoCloseOutputStream(fd)) {
                 final long startTime = System.nanoTime();
@@ -98,8 +72,6 @@ public class AppFusePerfTest {
                 writeTime[i] = (System.nanoTime() - startTime) / 1000.0 / 1000.0;
             }
         }
-
-        appFuse.close();
 
         double readAverage = 0;
         double writeAverage = 0;
@@ -127,28 +99,26 @@ public class AppFusePerfTest {
         InstrumentationRegistry.getInstrumentation().sendStatus(Activity.RESULT_OK, results);
     }
 
-    private static class TestCallback implements AppFuse.Callback {
+    private static class TestCallback extends ProxyFileDescriptorCallback {
         @Override
-        public long getFileSize(int inode) throws FileNotFoundException {
-            throw new FileNotFoundException();
+        public long onGetSize() throws ErrnoException {
+            return SIZE;
         }
 
         @Override
-        public long readObjectBytes(int inode, long offset, long size, byte[] bytes)
-                throws IOException {
-            throw new IOException();
+        public int onRead(long offset, int size, byte[] data) throws ErrnoException {
+            return size;
         }
 
         @Override
-        public int writeObjectBytes(long fileHandle, int inode, long offset, int size, byte[] bytes)
-                throws IOException {
-            throw new IOException();
+        public int onWrite(long offset, int size, byte[] data) throws ErrnoException {
+            return size;
         }
 
         @Override
-        public void flushFileHandle(long fileHandle) throws IOException {}
+        public void onFsync() throws ErrnoException {}
 
         @Override
-        public void closeFileHandle(long fileHandle) {}
+        public void onRelease() {}
     }
 }
