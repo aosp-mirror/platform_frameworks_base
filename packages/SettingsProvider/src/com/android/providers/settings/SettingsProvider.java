@@ -1039,7 +1039,7 @@ public class SettingsProvider extends ContentProvider {
                 name);
 
         // Lazy initialize ssaid if not yet present in ssaid table.
-        if (ssaid.isNull() || ssaid.getValue() == null) {
+        if (ssaid == null || ssaid.isNull() || ssaid.getValue() == null) {
             return mSettingsRegistry.generateSsaidLocked(getCallingPackage(), owningUserId);
         }
 
@@ -1923,11 +1923,13 @@ public class SettingsProvider extends ContentProvider {
 
             // Read the user's key from the ssaid table.
             Setting userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
-            if (userKeySetting.isNull() || userKeySetting.getValue() == null) {
+            if (userKeySetting == null || userKeySetting.isNull()
+                    || userKeySetting.getValue() == null) {
                 // Lazy initialize and store the user key.
                 generateUserKeyLocked(userId);
                 userKeySetting = getSettingLocked(SETTINGS_TYPE_SSAID, userId, SSAID_USER_KEY);
-                if (userKeySetting.isNull() || userKeySetting.getValue() == null) {
+                if (userKeySetting == null || userKeySetting.isNull()
+                        || userKeySetting.getValue() == null) {
                     throw new IllegalStateException("User key not accessible");
                 }
             }
@@ -2165,7 +2167,7 @@ public class SettingsProvider extends ContentProvider {
 
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
-                return settingsState.getNullSetting();
+                return null;
             }
 
             // getSettingLocked will return non-null result
@@ -2999,8 +3001,13 @@ public class SettingsProvider extends ContentProvider {
                     // user data or first boot on a new device should use new ssaid generation.
                     if (isUpgrade) {
                         // Retrieve the legacy ssaid from the secure settings table.
-                        final String legacySsaid = getSettingLocked(SETTINGS_TYPE_SECURE, userId,
-                                Settings.Secure.ANDROID_ID).getValue();
+                        final Setting legacySsaidSetting = getSettingLocked(SETTINGS_TYPE_SECURE,
+                                userId, Settings.Secure.ANDROID_ID);
+                        if (legacySsaidSetting == null || legacySsaidSetting.isNull()
+                                || legacySsaidSetting.getValue() == null) {
+                            throw new IllegalStateException("Legacy ssaid not accessible");
+                        }
+                        final String legacySsaid = legacySsaidSetting.getValue();
 
                         // Fill each uid with the legacy ssaid to be backwards compatible.
                         final List<PackageInfo> packages;
