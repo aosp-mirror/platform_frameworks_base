@@ -239,11 +239,12 @@ final class UserController {
             // storage is already unlocked.
             if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
                 getUserManagerInternal().setUserState(userId, uss.state);
-
-                int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
-                MetricsLogger.histogram(mService.mContext, "framework_locked_boot_completed",
-                    uptimeSeconds);
-
+                if (!mService.mSystemServiceManager.isRuntimeRestarted()
+                        && !mService.mSystemServiceManager.isFirstBoot()) {
+                    int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
+                    MetricsLogger.histogram(mService.mContext, "framework_locked_boot_completed",
+                            uptimeSeconds);
+                }
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -415,8 +416,13 @@ final class UserController {
             }
 
             Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
-            int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
-            MetricsLogger.histogram(mService.mContext, "framework_boot_completed", uptimeSeconds);
+            if (!mService.mSystemServiceManager.isRuntimeRestarted()
+                    && !mService.mSystemServiceManager.isFirstBoot()) {
+
+                int uptimeSeconds = (int) (SystemClock.elapsedRealtime() / 1000);
+                MetricsLogger
+                        .histogram(mService.mContext, "framework_boot_completed", uptimeSeconds);
+            }
             final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
             bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
