@@ -1146,11 +1146,26 @@ struct ResTable_config
         SCREENROUND_YES = ACONFIGURATION_SCREENROUND_YES,
     };
 
+    enum {
+        // colorimetry bits for wide-color gamut/narrow-color gamut.
+        MASK_WIDE_COLOR_GAMUT = 0x03,
+        WIDE_COLOR_GAMUT_ANY = ACONFIGURATION_WIDE_COLOR_GAMUT_ANY,
+        WIDE_COLOR_GAMUT_NO = ACONFIGURATION_WIDE_COLOR_GAMUT_NO,
+        WIDE_COLOR_GAMUT_YES = ACONFIGURATION_WIDE_COLOR_GAMUT_YES,
+
+        // colorimetry bits for HDR/LDR.
+        MASK_HDR = 0x0c,
+        SHIFT_COLORIMETRY_HDR = 2,
+        HDR_ANY = ACONFIGURATION_HDR_ANY << SHIFT_COLORIMETRY_HDR,
+        HDR_NO = ACONFIGURATION_HDR_NO << SHIFT_COLORIMETRY_HDR,
+        HDR_YES = ACONFIGURATION_HDR_YES << SHIFT_COLORIMETRY_HDR,
+    };
+
     // An extension of screenConfig.
     union {
         struct {
             uint8_t screenLayout2;      // Contains round/notround qualifier.
-            uint8_t screenConfigPad1;   // Reserved padding.
+            uint8_t colorimetry;        // Wide-gamut, HDR, etc.
             uint16_t screenConfigPad2;  // Reserved padding.
         };
         uint32_t screenConfig2;
@@ -1193,6 +1208,7 @@ struct ResTable_config
         CONFIG_UI_MODE = ACONFIGURATION_UI_MODE,
         CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
         CONFIG_SCREEN_ROUND = ACONFIGURATION_SCREEN_ROUND,
+        CONFIG_COLORIMETRY = ACONFIGURATION_COLORIMETRY,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value

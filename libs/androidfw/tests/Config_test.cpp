@@ -182,4 +182,24 @@ TEST(ConfigTest, RoundIsMoreSpecific) {
   EXPECT_TRUE(targetConfigC.isBetterThan(targetConfigB, &deviceConfig));
 }
 
+TEST(ConfigTest, ScreenIsWideGamut) {
+  ResTable_config defaultConfig;
+  memset(&defaultConfig, 0, sizeof(defaultConfig));
+
+  ResTable_config wideGamutConfig = defaultConfig;
+  wideGamutConfig.colorimetry = ResTable_config::WIDE_COLOR_GAMUT_YES;
+
+  EXPECT_EQ(defaultConfig.diff(wideGamutConfig), ResTable_config::CONFIG_COLORIMETRY);
+}
+
+TEST(ConfigTest, ScreenIsHdr) {
+  ResTable_config defaultConfig;
+  memset(&defaultConfig, 0, sizeof(defaultConfig));
+
+  ResTable_config hdrConfig = defaultConfig;
+  hdrConfig.colorimetry = ResTable_config::HDR_YES;
+
+  EXPECT_EQ(defaultConfig.diff(hdrConfig), ResTable_config::CONFIG_COLORIMETRY);
+}
+
 }  // namespace android.

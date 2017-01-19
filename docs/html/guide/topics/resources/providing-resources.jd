@@ -565,6 +565,38 @@ which indicates whether the screen is long.</p>
 method, which indicates whether the screen is round.</p>
       </td>
     </tr>
+    <tr id="WideColorGamutQualifier">
+      <td>Wide Color Gamut</td>
+      <td>
+        <code>widecg</code><br/>
+        <code>nowidecg</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code widecg}: Displays with a wide color gamut such as Display P3 or AdobeRGB</li>
+          <li>{@code nowidecg}: Displays with a narrow color gamut such as sRGB</li>
+        </ul>
+        <p><em>Added in API level 26.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#isScreenWideColorGamut()} configuration
+        method, which indicates whether the screen has a wide color gamut.</p>
+      </td>
+    </tr>
+    <tr id="HDRQualifier">
+      <td>High Dynamic Range (HDR)</td>
+      <td>
+        <code>highdr</code><br/>
+        <code>lowdr</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code highdr}: Displays with a high-dynamic range</li>
+          <li>{@code lowdr}: Displays with a low/standard dynamic range</li>
+        </ul>
+        <p><em>Added in API level 26.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#isScreenHdr()} configuration
+        method, which indicates whether the screen has a HDR capabilities.</p>
+      </td>
+    </tr>
     <tr id="OrientationQualifier">
       <td>Screen orientation</td>
       <td>

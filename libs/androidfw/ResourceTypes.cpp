@@ -1907,6 +1907,8 @@ int ResTable_config::compare(const ResTable_config& o) const {
     if (diff != 0) return diff;
     diff = (int32_t)(screenLayout2 - o.screenLayout2);
     if (diff != 0) return diff;
+    diff = (int32_t)(colorimetry - o.colorimetry);
+    if (diff != 0) return diff;
     diff = (int32_t)(uiMode - o.uiMode);
     if (diff != 0) return diff;
     diff = (int32_t)(smallestScreenWidthDp - o.smallestScreenWidthDp);
@@ -1967,6 +1969,9 @@ int ResTable_config::compareLogical(const ResTable_config& o) const {
     if (screenLayout2 != o.screenLayout2) {
         return screenLayout2 < o.screenLayout2 ? -1 : 1;
     }
+    if (colorimetry != o.colorimetry) {
+        return colorimetry < o.colorimetry ? -1 : 1;
+    }
     if (uiMode != o.uiMode) {
         return uiMode < o.uiMode ? -1 : 1;
     }
@@ -1992,6 +1997,8 @@ int ResTable_config::diff(const ResTable_config& o) const {
     if ((screenLayout & MASK_LAYOUTDIR) != (o.screenLayout & MASK_LAYOUTDIR)) diffs |= CONFIG_LAYOUTDIR;
     if ((screenLayout & ~MASK_LAYOUTDIR) != (o.screenLayout & ~MASK_LAYOUTDIR)) diffs |= CONFIG_SCREEN_LAYOUT;
     if ((screenLayout2 & MASK_SCREENROUND) != (o.screenLayout2 & MASK_SCREENROUND)) diffs |= CONFIG_SCREEN_ROUND;
+    if ((colorimetry & MASK_WIDE_COLOR_GAMUT) != (o.colorimetry & MASK_WIDE_COLOR_GAMUT)) diffs |= CONFIG_COLORIMETRY;
+    if ((colorimetry & MASK_HDR) != (o.colorimetry & MASK_HDR)) diffs |= CONFIG_COLORIMETRY;
     if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
     if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
     if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
@@ -2100,6 +2107,17 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
         if (((screenLayout2^o.screenLayout2) & MASK_SCREENROUND) != 0) {
             if (!(screenLayout2 & MASK_SCREENROUND)) return false;
             if (!(o.screenLayout2 & MASK_SCREENROUND)) return true;
+        }
+    }
+
+    if (colorimetry || o.colorimetry) {
+        if (((colorimetry^o.colorimetry) & MASK_HDR) != 0) {
+            if (!(colorimetry & MASK_HDR)) return false;
+            if (!(o.colorimetry & MASK_HDR)) return true;
+        }
+        if (((colorimetry^o.colorimetry) & MASK_WIDE_COLOR_GAMUT) != 0) {
+            if (!(colorimetry & MASK_WIDE_COLOR_GAMUT)) return false;
+            if (!(o.colorimetry & MASK_WIDE_COLOR_GAMUT)) return true;
         }
     }
 
@@ -2390,6 +2408,17 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
             }
         }
 
+        if (colorimetry || o.colorimetry) {
+            if (((colorimetry^o.colorimetry) & MASK_WIDE_COLOR_GAMUT) != 0 &&
+                    (requested->colorimetry & MASK_WIDE_COLOR_GAMUT)) {
+                return colorimetry & MASK_WIDE_COLOR_GAMUT;
+            }
+            if (((colorimetry^o.colorimetry) & MASK_HDR) != 0 &&
+                    (requested->colorimetry & MASK_HDR)) {
+                return colorimetry & MASK_HDR;
+            }
+        }
+
         if ((orientation != o.orientation) && requested->orientation) {
             return (orientation);
         }
@@ -2637,6 +2666,18 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         const int screenRound = screenLayout2 & MASK_SCREENROUND;
         const int setScreenRound = settings.screenLayout2 & MASK_SCREENROUND;
         if (screenRound != 0 && screenRound != setScreenRound) {
+            return false;
+        }
+
+        const int hdr = colorimetry & MASK_HDR;
+        const int setHdr = settings.colorimetry & MASK_HDR;
+        if (hdr != 0 && hdr != setHdr) {
+            return false;
+        }
+
+        const int wideColorGamut = colorimetry & MASK_WIDE_COLOR_GAMUT;
+        const int setWideColorGamut = settings.colorimetry & MASK_WIDE_COLOR_GAMUT;
+        if (wideColorGamut != 0 && wideColorGamut != setWideColorGamut) {
             return false;
         }
     }
@@ -2956,6 +2997,34 @@ String8 ResTable_config::toString() const {
                 break;
             default:
                 res.appendFormat("screenRound=%d", dtohs(screenLayout2&MASK_SCREENROUND));
+                break;
+        }
+    }
+    if ((colorimetry&MASK_HDR) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (colorimetry&MASK_HDR) {
+            case ResTable_config::HDR_NO:
+                res.append("lowdr");
+                break;
+            case ResTable_config::HDR_YES:
+                res.append("highdr");
+                break;
+            default:
+                res.appendFormat("hdr=%d", dtohs(colorimetry&MASK_HDR));
+                break;
+        }
+    }
+    if ((colorimetry&MASK_WIDE_COLOR_GAMUT) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (colorimetry&MASK_WIDE_COLOR_GAMUT) {
+            case ResTable_config::WIDE_COLOR_GAMUT_NO:
+                res.append("nowidecg");
+                break;
+            case ResTable_config::WIDE_COLOR_GAMUT_YES:
+                res.append("widecg");
+                break;
+            default:
+                res.appendFormat("wideColorGamut=%d", dtohs(colorimetry&MASK_WIDE_COLOR_GAMUT));
                 break;
         }
     }
