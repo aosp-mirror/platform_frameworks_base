@@ -21,4 +21,8 @@
     <string name="shortcut_title2"></string>
     <string name="shortcut_text2"></string>
     <string name="shortcut_disabled_message2"></string>
+    <string name="test_account_type1_authenticator_label">AccountManagerService Test Account Type1</string>
+    <string name="test_account_type2_authenticator_label">AccountManagerService Test Account Type2</string>
+    <string name="test_account_type1">com.android.server.accounts.account_manager_service_test.account.type1</string>
+    <string name="test_account_type2">com.android.server.accounts.account_manager_service_test.account.type2</string>
 </resources>

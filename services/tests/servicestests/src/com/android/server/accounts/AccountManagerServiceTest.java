@@ -17,36 +17,61 @@
 package com.android.server.accounts;
 
 import static android.database.sqlite.SQLiteDatabase.deleteDatabase;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
+import android.accounts.CantAddAccountActivity;
+import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.INotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.RegisteredServicesCache.ServiceInfo;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+
+import com.android.frameworks.servicestests.R;
+import com.android.server.LocalServices;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -61,6 +86,19 @@ import java.util.concurrent.TimeUnit;
 public class AccountManagerServiceTest extends AndroidTestCase {
     private static final String TAG = AccountManagerServiceTest.class.getSimpleName();
 
+    @Mock private Context mMockContext;
+    @Mock private AppOpsManager mMockAppOpsManager;
+    @Mock private UserManager mMockUserManager;
+    @Mock private PackageManager mMockPackageManager;
+    @Mock private DevicePolicyManagerInternal mMockDevicePolicyManagerInternal;
+    @Mock private DevicePolicyManager mMockDevicePolicyManager;
+    @Mock private IAccountManagerResponse mMockAccountManagerResponse;
+    @Mock private IBinder mMockBinder;
+
+    @Captor private ArgumentCaptor<Intent> mIntentCaptor;
+    @Captor private ArgumentCaptor<Bundle> mBundleCaptor;
+
+    private static final int LATCH_TIMEOUT_MS = 500;
     private static final String PREN_DB = "pren.db";
     private static final String DE_DB = "de.db";
     private static final String CE_DB = "ce.db";
@@ -69,8 +107,27 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        when(mMockPackageManager.checkSignatures(anyInt(), anyInt()))
+                    .thenReturn(PackageManager.SIGNATURE_MATCH);
+        final UserInfo ui = new UserInfo(UserHandle.USER_SYSTEM, "user0", 0);
+        when(mMockUserManager.getUserInfo(eq(ui.id))).thenReturn(ui);
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mMockAppOpsManager);
+        when(mMockContext.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
+        when(mMockContext.getSystemServiceName(AppOpsManager.class)).thenReturn(
+                Context.APP_OPS_SERVICE);
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        Bundle bundle = new Bundle();
+        when(mMockUserManager.getUserRestrictions(any(UserHandle.class))).thenReturn(bundle);
+        when(mMockContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
+                mMockDevicePolicyManager);
+        when(mMockAccountManagerResponse.asBinder()).thenReturn(mMockBinder);
+
         Context realTestContext = getContext();
-        MyMockContext mockContext = new MyMockContext(realTestContext);
+        MyMockContext mockContext = new MyMockContext(realTestContext, mMockContext);
         setContext(mockContext);
         mTestInjector = new TestInjector(realTestContext, mockContext);
         mAms = new AccountManagerService(mTestInjector);
@@ -104,12 +161,12 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testCheckAddAccount() throws Exception {
         unlockSystemUser();
-        Account a11 = new Account("account1", "type1");
-        Account a21 = new Account("account2", "type1");
-        Account a31 = new Account("account3", "type1");
-        Account a12 = new Account("account1", "type2");
-        Account a22 = new Account("account2", "type2");
-        Account a32 = new Account("account3", "type2");
+        Account a11 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a21 = new Account("account2", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a31 = new Account("account3", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a12 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
+        Account a22 = new Account("account2", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
+        Account a32 = new Account("account3", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
         mAms.addAccountExplicitly(a11, "p11", null);
         mAms.addAccountExplicitly(a12, "p12", null);
         mAms.addAccountExplicitly(a21, "p21", null);
@@ -127,7 +184,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a22, accounts[4]);
         assertEquals(a32, accounts[5]);
 
-        accounts = mAms.getAccounts("type1", mContext.getOpPackageName());
+        accounts = mAms.getAccounts(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(3, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -136,7 +194,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         mAms.removeAccountInternal(a21);
 
-        accounts = mAms.getAccounts("type1", mContext.getOpPackageName());
+        accounts = mAms.getAccounts(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(2, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -146,8 +205,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testPasswords() throws Exception {
         unlockSystemUser();
-        Account a11 = new Account("account1", "type1");
-        Account a12 = new Account("account1", "type2");
+        Account a11 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a12 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
         mAms.addAccountExplicitly(a11, "p11", null);
         mAms.addAccountExplicitly(a12, "p12", null);
 
@@ -163,12 +222,12 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testUserdata() throws Exception {
         unlockSystemUser();
-        Account a11 = new Account("account1", "type1");
+        Account a11 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
         Bundle u11 = new Bundle();
         u11.putString("a", "a_a11");
         u11.putString("b", "b_a11");
         u11.putString("c", "c_a11");
-        Account a12 = new Account("account1", "type2");
+        Account a12 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
         Bundle u12 = new Bundle();
         u12.putString("a", "a_a12");
         u12.putString("b", "b_a12");
@@ -197,8 +256,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testAuthtokens() throws Exception {
         unlockSystemUser();
-        Account a11 = new Account("account1", "type1");
-        Account a12 = new Account("account1", "type2");
+        Account a11 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a12 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
         mAms.addAccountExplicitly(a11, "p11", null);
         mAms.addAccountExplicitly(a12, "p12", null);
 
@@ -232,8 +291,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @SmallTest
     public void testRemovedAccountSync() throws Exception {
         unlockSystemUser();
-        Account a1 = new Account("account1", "type1");
-        Account a2 = new Account("account2", "type2");
+        Account a1 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Account a2 = new Account("account2", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
         mAms.addAccountExplicitly(a1, "p1", null);
         mAms.addAccountExplicitly(a2, "p2", null);
 
@@ -292,6 +351,329 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 new File(ceDatabaseName).exists());
     }
 
+    @SmallTest
+    public void testStartAddAccountSessionWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.startAddAccountSession(
+                null, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                null); // optionsIn
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionWithNullAccountType() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.startAddAccountSession(
+                    mMockAccountManagerResponse, // response
+                    null, // accountType
+                    "authTokenType",
+                    null, // requiredFeatures
+                    true, // expectActivityLaunch
+                    null); // optionsIn
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserCannotModifyAccountNoDPM() throws Exception {
+        unlockSystemUser();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, true);
+        when(mMockUserManager.getUserRestrictions(any(UserHandle.class))).thenReturn(bundle);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+
+        mAms.startAddAccountSession(
+                mMockAccountManagerResponse, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                null); // optionsIn
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_USER_RESTRICTED), anyString());
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+
+        // verify the intent for default CantAddAccountActivity is sent.
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getComponent().getClassName(), CantAddAccountActivity.class.getName());
+        assertEquals(intent.getIntExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, 0),
+                AccountManager.ERROR_CODE_USER_RESTRICTED);
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserCannotModifyAccountWithDPM() throws Exception {
+        unlockSystemUser();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, true);
+        when(mMockUserManager.getUserRestrictions(any(UserHandle.class))).thenReturn(bundle);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.addService(
+                DevicePolicyManagerInternal.class, mMockDevicePolicyManagerInternal);
+        when(mMockDevicePolicyManagerInternal.createUserRestrictionSupportIntent(
+                anyInt(), anyString())).thenReturn(new Intent());
+        when(mMockDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                anyInt(), anyBoolean())).thenReturn(new Intent());
+
+        mAms.startAddAccountSession(
+                mMockAccountManagerResponse, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                null); // optionsIn
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_USER_RESTRICTED), anyString());
+        verify(mMockContext).startActivityAsUser(any(Intent.class), eq(UserHandle.SYSTEM));
+        verify(mMockDevicePolicyManagerInternal).createUserRestrictionSupportIntent(
+                anyInt(), anyString());
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserCannotModifyAccountForTypeNoDPM() throws Exception {
+        unlockSystemUser();
+        when(mMockDevicePolicyManager.getAccountTypesWithManagementDisabledAsUser(anyInt()))
+                .thenReturn(new String[]{AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, "BBB"});
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+
+        mAms.startAddAccountSession(
+                mMockAccountManagerResponse, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                null); // optionsIn
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE), anyString());
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.SYSTEM));
+
+        // verify the intent for default CantAddAccountActivity is sent.
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getComponent().getClassName(), CantAddAccountActivity.class.getName());
+        assertEquals(intent.getIntExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, 0),
+                AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE);
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserCannotModifyAccountForTypeWithDPM() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
+                mMockDevicePolicyManager);
+        when(mMockDevicePolicyManager.getAccountTypesWithManagementDisabledAsUser(anyInt()))
+                .thenReturn(new String[]{AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, "BBB"});
+
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.addService(
+                DevicePolicyManagerInternal.class, mMockDevicePolicyManagerInternal);
+        when(mMockDevicePolicyManagerInternal.createUserRestrictionSupportIntent(
+                anyInt(), anyString())).thenReturn(new Intent());
+        when(mMockDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                anyInt(), anyBoolean())).thenReturn(new Intent());
+
+        mAms.startAddAccountSession(
+                mMockAccountManagerResponse, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                null); // optionsIn
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE), anyString());
+        verify(mMockContext).startActivityAsUser(any(Intent.class), eq(UserHandle.SYSTEM));
+        verify(mMockDevicePolicyManagerInternal).createShowAdminSupportIntent(
+                anyInt(), anyBoolean());
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserSuccessWithoutPasswordForwarding() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        mAms.startAddAccountSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                false, // expectActivityLaunch
+                options); // optionsIn
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is encrypted and hence data not visible.
+        assertNull(sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert password is not returned
+        assertNull(result.getString(AccountManager.KEY_PASSWORD));
+        assertNull(result.getString(AccountManager.KEY_AUTHTOKEN, null));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN,
+                result.getString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN));
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserSuccessWithPasswordForwarding() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        mAms.startAddAccountSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                false, // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is encrypted and hence data not visible.
+        assertNull(sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert password is returned
+        assertEquals(result.getString(AccountManager.KEY_PASSWORD),
+                AccountManagerServiceTestFixtures.ACCOUNT_PASSWORD);
+        assertNull(result.getString(AccountManager.KEY_AUTHTOKEN));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN,
+                result.getString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN));
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserReturnWithInvalidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_NO_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE);
+
+        mAms.startAddAccountSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                options); // optionsIn
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_REMOTE_EXCEPTION), anyString());
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserReturnWithValidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE);
+
+        mAms.startAddAccountSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                true, // expectActivityLaunch
+                options); // optionsIn
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
+        assertNotNull(intent);
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_RESULT));
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK));
+    }
+
+    @SmallTest
+    public void testStartAddAccountSessionUserError() throws Exception {
+        unlockSystemUser();
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_ERROR);
+        options.putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_INVALID_RESPONSE);
+        options.putString(AccountManager.KEY_ERROR_MESSAGE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.startAddAccountSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                "authTokenType",
+                null, // requiredFeatures
+                false, // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+    }
+
+    private void waitForLatch(CountDownLatch latch) {
+        try {
+            latch.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            fail("should not throw an InterruptedException");
+        }
+    }
+
+    private Bundle createOptionsWithAccountName(final String accountName) {
+        Bundle sessionBundle = new Bundle();
+        sessionBundle.putString(
+                AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1,
+                AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1);
+        sessionBundle.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        Bundle options = new Bundle();
+        options.putString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME, accountName);
+        options.putBundle(AccountManagerServiceTestFixtures.KEY_ACCOUNT_SESSION_BUNDLE,
+                sessionBundle);
+        options.putString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_PASSWORD,
+                AccountManagerServiceTestFixtures.ACCOUNT_PASSWORD);
+        return options;
+    }
+
     private int readNumberOfAccountsFromDbFile(Context context, String dbName) {
         SQLiteDatabase ceDb = context.openOrCreateDatabase(dbName, 0, null);
         try (Cursor cursor = ceDb.rawQuery("SELECT count(*) FROM accounts", null)) {
@@ -310,78 +692,34 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         return intent;
     }
 
-    static class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
-        private ArrayList<ServiceInfo<AuthenticatorDescription>> mServices;
-
-        MockAccountAuthenticatorCache() {
-            mServices = new ArrayList<>();
-            AuthenticatorDescription d1 = new AuthenticatorDescription("type1", "p1", 0, 0, 0, 0);
-            AuthenticatorDescription d2 = new AuthenticatorDescription("type2", "p2", 0, 0, 0, 0);
-            mServices.add(new ServiceInfo<>(d1, null, null));
-            mServices.add(new ServiceInfo<>(d2, null, null));
-        }
-
-        @Override
-        public ServiceInfo<AuthenticatorDescription> getServiceInfo(
-                AuthenticatorDescription type, int userId) {
-            for (ServiceInfo<AuthenticatorDescription> service : mServices) {
-                if (service.type.equals(type)) {
-                    return service;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public Collection<ServiceInfo<AuthenticatorDescription>> getAllServices(int userId) {
-            return mServices;
-        }
-
-        @Override
-        public void dump(
-                final FileDescriptor fd, final PrintWriter fout, final String[] args, int userId) {
-        }
-
-        @Override
-        public void setListener(
-                final RegisteredServicesCacheListener<AuthenticatorDescription> listener,
-                final Handler handler) {
-        }
-
-        @Override
-        public void invalidateCache(int userId) {
-        }
-
-        @Override
-        public void updateServices(int userId) {
-        }
-    }
-
     static class MyMockContext extends MockContext {
         private Context mTestContext;
-        private AppOpsManager mAppOpsManager;
-        private UserManager mUserManager;
-        private PackageManager mPackageManager;
+        private Context mMockContext;
 
-        MyMockContext(Context testContext) {
+        MyMockContext(Context testContext, Context mockContext) {
             this.mTestContext = testContext;
-            this.mAppOpsManager = mock(AppOpsManager.class);
-            this.mUserManager = mock(UserManager.class);
-            this.mPackageManager = mock(PackageManager.class);
-            when(mPackageManager.checkSignatures(anyInt(), anyInt()))
-                    .thenReturn(PackageManager.SIGNATURE_MATCH);
-            final UserInfo ui = new UserInfo(UserHandle.USER_SYSTEM, "user0", 0);
-            when(mUserManager.getUserInfo(eq(ui.id))).thenReturn(ui);
+            this.mMockContext = mockContext;
         }
 
         @Override
         public int checkCallingOrSelfPermission(final String permission) {
-            return PackageManager.PERMISSION_GRANTED;
+            return mMockContext.checkCallingOrSelfPermission(permission);
+        }
+
+        @Override
+        public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+                UserHandle user) {
+            return mTestContext.bindServiceAsUser(service, conn, flags, user);
+        }
+
+        @Override
+        public void unbindService(ServiceConnection conn) {
+            mTestContext.unbindService(conn);
         }
 
         @Override
         public PackageManager getPackageManager() {
-            return mPackageManager;
+            return mMockContext.getPackageManager();
         }
 
         @Override
@@ -391,54 +729,62 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         public Object getSystemService(String name) {
-            if (Context.APP_OPS_SERVICE.equals(name)) {
-                return mAppOpsManager;
-            } else if( Context.USER_SERVICE.equals(name)) {
-                return mUserManager;
-            }
-            return null;
+            return mMockContext.getSystemService(name);
         }
 
         @Override
         public String getSystemServiceName(Class<?> serviceClass) {
-            if (AppOpsManager.class.equals(serviceClass)) {
-                return Context.APP_OPS_SERVICE;
-            }
-            return null;
+            return mMockContext.getSystemServiceName(serviceClass);
+        }
+
+        @Override
+        public void startActivityAsUser(Intent intent, UserHandle user) {
+            mMockContext.startActivityAsUser(intent, user);
         }
 
         @Override
         public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            return null;
+            return mMockContext.registerReceiver(receiver, filter);
         }
 
         @Override
         public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
                 IntentFilter filter, String broadcastPermission, Handler scheduler) {
-            return null;
+            return mMockContext.registerReceiverAsUser(
+                    receiver, user, filter, broadcastPermission, scheduler);
         }
 
         @Override
         public SQLiteDatabase openOrCreateDatabase(String file, int mode,
                 SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
-            Log.i(TAG, "openOrCreateDatabase " + file + " mode " + mode);
             return mTestContext.openOrCreateDatabase(file, mode, factory,errorHandler);
         }
 
         @Override
         public void sendBroadcastAsUser(Intent intent, UserHandle user) {
-            Log.i(TAG, "sendBroadcastAsUser " + intent + " " + user);
+            mMockContext.sendBroadcastAsUser(intent, user);
         }
 
         @Override
         public String getOpPackageName() {
-            return null;
+            return mMockContext.getOpPackageName();
+        }
+    }
+
+    static class TestAccountAuthenticatorCache extends AccountAuthenticatorCache {
+        public TestAccountAuthenticatorCache(Context realContext) {
+            super(realContext);
+        }
+
+        @Override
+        protected File getUserSystemDirectory(int userId) {
+            return new File(mContext.getCacheDir(), "authenticator");
         }
     }
 
     static class TestInjector extends AccountManagerService.Injector {
         private Context mRealContext;
-        TestInjector(Context realContext, MyMockContext mockContext) {
+        TestInjector(Context realContext, Context mockContext) {
             super(mockContext);
             mRealContext = realContext;
         }
@@ -454,7 +800,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         IAccountAuthenticatorCache getAccountAuthenticatorCache() {
-            return new MockAccountAuthenticatorCache();
+            return new TestAccountAuthenticatorCache(mRealContext);
         }
 
         @Override
@@ -475,6 +821,33 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         INotificationManager getNotificationManager() {
             return mock(INotificationManager.class);
+        }
+    }
+
+    class Response extends IAccountManagerResponse.Stub {
+        private CountDownLatch mLatch;
+        private IAccountManagerResponse mMockResponse;
+        public Response(CountDownLatch latch, IAccountManagerResponse mockResponse) {
+            mLatch = latch;
+            mMockResponse = mockResponse;
+        }
+
+        @Override
+        public void onResult(Bundle bundle) {
+            try {
+                mMockResponse.onResult(bundle);
+            } catch (RemoteException e) {
+            }
+            mLatch.countDown();
+        }
+
+        @Override
+        public void onError(int code, String message) {
+            try {
+                mMockResponse.onError(code, message);
+            } catch (RemoteException e) {
+            }
+            mLatch.countDown();
         }
     }
 }
