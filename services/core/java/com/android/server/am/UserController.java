@@ -259,6 +259,11 @@ final class UserController {
                     int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
                     MetricsLogger.histogram(mInjector.getContext(),
                             "framework_locked_boot_completed", uptimeSeconds);
+                    final int MAX_UPTIME_SECONDS = 120;
+                    if (uptimeSeconds > MAX_UPTIME_SECONDS) {
+                        Slog.wtf("SystemServerTiming",
+                                "finishUserBoot took too long. uptimeSeconds=" + uptimeSeconds);
+                    }
                 }
 
                 mHandler.sendMessage(mHandler.obtainMessage(REPORT_LOCKED_BOOT_COMPLETE_MSG,

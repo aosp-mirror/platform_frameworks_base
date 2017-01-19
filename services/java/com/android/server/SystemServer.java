@@ -377,8 +377,13 @@ public final class SystemServer {
             Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
         if (!mRuntimeRestart && !mFirstBoot) {
-            MetricsLogger.histogram(null, "boot_system_server_ready",
-                    (int) SystemClock.elapsedRealtime());
+            int uptimeMillis = (int) SystemClock.elapsedRealtime();
+            MetricsLogger.histogram(null, "boot_system_server_ready", uptimeMillis);
+            final int MAX_UPTIME_MILLIS = 60 * 1000;
+            if (uptimeMillis > MAX_UPTIME_MILLIS) {
+                Slog.wtf("SystemServerTiming",
+                        "SystemServer init took too long. uptimeMillis=" + uptimeMillis);
+            }
         }
 
         // Loop forever.
