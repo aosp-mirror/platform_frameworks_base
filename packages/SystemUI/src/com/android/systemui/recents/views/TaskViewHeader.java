@@ -201,7 +201,9 @@ public class TaskViewHeader extends FrameLayout
         Resources res = context.getResources();
         mLightDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
-        mCornerRadius = res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
+        mCornerRadius = Recents.getConfiguration().isGridEnabled ?
+                res.getDimensionPixelSize(R.dimen.recents_grid_task_view_rounded_corners_radius) :
+                res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         mHighlightHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         mTaskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
         mTaskBarViewDarkTextColor = context.getColor(R.color.recents_task_bar_dark_text_color);
