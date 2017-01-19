@@ -47,7 +47,7 @@ public final class GnssMeasurement implements Parcelable {
     private double mCarrierPhaseUncertainty;
     private int mMultipathIndicator;
     private double mSnrInDb;
-    private double mAgcLevelDb;
+    private double mAutomaticGainControlLevelInDb;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -117,14 +117,12 @@ public final class GnssMeasurement implements Parcelable {
      * This GNSS measurement's tracking state has time-of-week known, possibly not decoded
      * over the air but has been determined from other sources. If TOW decoded is set then TOW Known
      * will also be set.
-     * @hide
      */
     public static final int STATE_TOW_KNOWN = (1<<14);
     /**
      * This Glonass measurement's tracking state has time-of-day known, possibly not decoded
      * over the air but has been determined from other sources. If TOD decoded is set then TOD Known
      * will also be set.
-     * @hide
      */
     public static final int STATE_GLO_TOD_KNOWN = (1<<15);
 
@@ -196,7 +194,7 @@ public final class GnssMeasurement implements Parcelable {
         mCarrierPhaseUncertainty = measurement.mCarrierPhaseUncertainty;
         mMultipathIndicator = measurement.mMultipathIndicator;
         mSnrInDb = measurement.mSnrInDb;
-        mAgcLevelDb = measurement.mAgcLevelDb;
+        mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
     }
 
     /**
@@ -884,10 +882,10 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if {@link #getAgcLevelDb()} is available, {@code false} otherwise.
-     * @hide
+     * Returns {@code true} if {@link #getAutomaticGainControlLevelInDb()} is available, 
+     * {@code false} otherwise.
      */
-    public boolean hasAgcLevelDb() {
+    public boolean hasAutomaticGainControlLevelInDb() {
         return isFlagSet(HAS_AUTOMATIC_GAIN_CONTROL);
     }
 
@@ -903,29 +901,30 @@ public final class GnssMeasurement implements Parcelable {
      * components) may also affect the typical output of of this value on any given hardware design
      * in an open sky test - the important aspect of this output is that changes in this value are
      * indicative of changes on input signal power in the frequency band for this measurement.
-     * <p>The value is only available if {@link #hasAgcLevelDb()} is {@code true}.
-     * @hide
+     * <p>The value is only available if {@link #hasAutomaticGainControlLevelInDb()} is {@code true}
      */
-    public double getAgcLevelDb() {
-        return mAgcLevelDb;
+    public double getAutomaticGainControlLevelInDb() {
+        return mAutomaticGainControlLevelInDb;
     }
 
     /**
      * Sets the Automatic Gain Control level in dB.
      * @hide
      */
-    public void setAgcLevelDb(double agcLevelDb) {
+    @TestApi
+    public void setAutomaticGainControlLevelInDb(double agcLevelDb) {
         setFlag(HAS_AUTOMATIC_GAIN_CONTROL);
-        mAgcLevelDb = agcLevelDb;
+        mAutomaticGainControlLevelInDb = agcLevelDb;
     }
 
     /**
      * Resets the Automatic Gain Control level.
      * @hide
      */
-    public void resetAgcLevel() {
+    @TestApi
+    public void resetAutomaticGainControlLevel() {
         resetFlag(HAS_AUTOMATIC_GAIN_CONTROL);
-        mAgcLevelDb = Double.NaN;
+        mAutomaticGainControlLevelInDb = Double.NaN;
     }
 
     public static final Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
@@ -952,7 +951,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
-            gnssMeasurement.mAgcLevelDb = parcel.readDouble();
+            gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
 
             return gnssMeasurement;
         }
@@ -984,7 +983,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mCarrierPhaseUncertainty);
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
-        parcel.writeDouble(mAgcLevelDb);
+        parcel.writeDouble(mAutomaticGainControlLevelInDb);
     }
 
     @Override
@@ -1058,7 +1057,7 @@ public final class GnssMeasurement implements Parcelable {
         builder.append(String.format(
             format,
             "AgcLevelDb",
-            hasAgcLevelDb() ? mAgcLevelDb : null));
+            hasAutomaticGainControlLevelInDb() ? mAutomaticGainControlLevelInDb : null));
 
         return builder.toString();
     }
@@ -1082,7 +1081,7 @@ public final class GnssMeasurement implements Parcelable {
         resetCarrierPhaseUncertainty();
         setMultipathIndicator(MULTIPATH_INDICATOR_UNKNOWN);
         resetSnrInDb();
-        resetAgcLevel();
+        resetAutomaticGainControlLevel();
     }
 
     private void setFlag(int flag) {

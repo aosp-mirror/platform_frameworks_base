@@ -223,7 +223,6 @@ public final class GnssStatus {
      * frequency is available for the satellite at the specified index).
      *
      * @param satIndex the index of the satellite in the list.
-     * @hide
      */
     public boolean hasCarrierFrequency(int satIndex) {
         return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
@@ -236,7 +235,6 @@ public final class GnssStatus {
      * the field is not set, it is the primary common use frequency, e.g. L1 for GPS.
      *
      * <p>The value is only available if {@link #hasCarrierFrequency(int satIndex)} is {@code true}.
-     * @hide
      */
     public float getCarrierFrequencyHz(int satIndex) {
         return mCarrierFrequencies[satIndex];
