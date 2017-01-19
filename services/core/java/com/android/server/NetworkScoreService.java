@@ -42,9 +42,13 @@ import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -52,6 +56,7 @@ import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.annotations.GuardedBy;
@@ -68,6 +73,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -76,7 +82,7 @@ import java.util.function.Consumer;
  */
 public class NetworkScoreService extends INetworkScoreService.Stub {
     private static final String TAG = "NetworkScoreService";
-    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DBG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
     private final NetworkScorerAppManager mNetworkScorerAppManager;
@@ -84,13 +90,15 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @GuardedBy("mScoreCaches")
     private final Map<Integer, RemoteCallbackList<INetworkScoreCache>> mScoreCaches;
     /** Lock used to update mPackageMonitor when scorer package changes occur. */
-    private final Object mPackageMonitorLock = new Object[0];
-    private final Object mServiceConnectionLock = new Object[0];
+    private final Object mPackageMonitorLock = new Object();
+    private final Object mServiceConnectionLock = new Object();
+    private final Handler mHandler;
 
     @GuardedBy("mPackageMonitorLock")
     private NetworkScorerPackageMonitor mPackageMonitor;
     @GuardedBy("mServiceConnectionLock")
     private ScoringServiceConnection mServiceConnection;
+    private long mRecommendationRequestTimeoutMs;
 
     private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -207,11 +215,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     public NetworkScoreService(Context context) {
-      this(context, new NetworkScorerAppManager(context));
+      this(context, new NetworkScorerAppManager(context), Looper.myLooper());
     }
 
     @VisibleForTesting
-    NetworkScoreService(Context context, NetworkScorerAppManager networkScoreAppManager) {
+    NetworkScoreService(Context context, NetworkScorerAppManager networkScoreAppManager,
+            Looper looper) {
         mContext = context;
         mNetworkScorerAppManager = networkScoreAppManager;
         mScoreCaches = new ArrayMap<>();
@@ -223,6 +232,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         // TODO(jjoslin): 12/15/16 - Make timeout configurable.
         mRequestRecommendationCaller =
             new RequestRecommendationCaller(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+        mRecommendationRequestTimeoutMs = TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS;
+        mHandler = new ServiceHandler(looper);
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -566,19 +577,42 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public void requestRecommendationAsync(RecommendationRequest request,
             RemoteCallback remoteCallback) {
-        // TODO(jjoslin): 12/28/16 - Provide actual impl.
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
 
-        final RecommendationResult result;
-        if (request != null && request.getCurrentSelectedConfig() != null) {
-            result = RecommendationResult.createConnectRecommendation(
-                    request.getCurrentSelectedConfig());
-        } else {
-            result = RecommendationResult.createDoNotConnectRecommendation();
+        final OneTimeCallback oneTimeCallback = new OneTimeCallback(remoteCallback);
+        final Pair<RecommendationRequest, OneTimeCallback> pair =
+                Pair.create(request, oneTimeCallback);
+        final Message timeoutMsg = mHandler.obtainMessage(
+                ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT, pair);
+        final INetworkRecommendationProvider provider = getRecommendationProvider();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (provider != null) {
+                try {
+                    mHandler.sendMessageDelayed(timeoutMsg, mRecommendationRequestTimeoutMs);
+                    provider.requestRecommendation(request, new IRemoteCallback.Stub() {
+                        @Override
+                        public void sendResult(Bundle data) throws RemoteException {
+                            // Remove the timeout message
+                            mHandler.removeMessages(timeoutMsg.what, pair);
+                            oneTimeCallback.sendResult(data);
+                        }
+                    }, 0 /*sequence*/);
+                    return;
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to request a recommendation.", e);
+                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                    // Remove the timeout message
+                    mHandler.removeMessages(timeoutMsg.what, pair);
+                    // Will fall through and send back the default recommendation.
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
-        final Bundle data = new Bundle();
-        data.putParcelable(EXTRA_RECOMMENDATION_RESULT, result);
-        remoteCallback.sendResult(data);
+        // Else send back the default recommendation.
+        sendDefaultRecommendationResponse(request, oneTimeCallback);
     }
 
     @Override
@@ -677,6 +711,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             }
         }
         return null;
+    }
+
+    @VisibleForTesting
+    public void setRecommendationRequestTimeoutMs(long recommendationRequestTimeoutMs) {
+        mRecommendationRequestTimeoutMs = recommendationRequestTimeoutMs;
     }
 
     private static class ScoringServiceConnection implements ServiceConnection {
@@ -782,6 +821,75 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             final int sequence = onBeforeRemoteCall();
             target.requestRecommendation(request, mCallback, sequence);
             return getResultTimed(sequence);
+        }
+    }
+
+    /**
+     * A wrapper around {@link RemoteCallback} that guarantees
+     * {@link RemoteCallback#sendResult(Bundle)} will be invoked at most once.
+     */
+    @VisibleForTesting
+    public static final class OneTimeCallback {
+        private final RemoteCallback mRemoteCallback;
+        private final AtomicBoolean mCallbackRun;
+
+        public OneTimeCallback(RemoteCallback remoteCallback) {
+            mRemoteCallback = remoteCallback;
+            mCallbackRun = new AtomicBoolean(false);
+        }
+
+        public void sendResult(Bundle data) {
+            if (mCallbackRun.compareAndSet(false, true)) {
+                mRemoteCallback.sendResult(data);
+            }
+        }
+    }
+
+    private static void sendDefaultRecommendationResponse(RecommendationRequest request,
+            OneTimeCallback remoteCallback) {
+        if (DBG) {
+            Log.d(TAG, "Returning the default network recommendation.");
+        }
+
+        final RecommendationResult result;
+        if (request != null && request.getCurrentSelectedConfig() != null) {
+            result = RecommendationResult.createConnectRecommendation(
+                    request.getCurrentSelectedConfig());
+        } else {
+            result = RecommendationResult.createDoNotConnectRecommendation();
+        }
+
+        final Bundle data = new Bundle();
+        data.putParcelable(EXTRA_RECOMMENDATION_RESULT, result);
+        remoteCallback.sendResult(data);
+    }
+
+    @VisibleForTesting
+    public static final class ServiceHandler extends Handler {
+        public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT = 1;
+
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final int what = msg.what;
+            switch (what) {
+                case MSG_RECOMMENDATION_REQUEST_TIMEOUT:
+                    if (DBG) {
+                        Log.d(TAG, "Network recommendation request timed out.");
+                    }
+                    final Pair<RecommendationRequest, OneTimeCallback> pair =
+                            (Pair<RecommendationRequest, OneTimeCallback>) msg.obj;
+                    final RecommendationRequest request = pair.first;
+                    final OneTimeCallback remoteCallback = pair.second;
+                    sendDefaultRecommendationResponse(request, remoteCallback);
+                    break;
+
+                default:
+                    Log.w(TAG,"Unknown message: " + what);
+            }
         }
     }
 }
