@@ -25,6 +25,7 @@ import android.view.Display;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -1705,6 +1706,7 @@ public class InputManagerService extends IInputManager.Stub
     // Binder call
     @Override
     public void setCustomPointerIcon(PointerIcon icon) {
+        Preconditions.checkNotNull(icon);
         nativeSetCustomPointerIcon(mPtr, icon);
     }
 
