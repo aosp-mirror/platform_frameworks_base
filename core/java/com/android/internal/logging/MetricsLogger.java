@@ -17,11 +17,9 @@ package com.android.internal.logging;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.EventLog;
 import android.view.View;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
 
 /**
  * Log all the things.
@@ -38,6 +36,10 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 100);
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(category)
+                        .setType(MetricsEvent.TYPE_OPEN)
+                        .serialize());
     }
 
     public static void hidden(Context context, int category) throws IllegalArgumentException {
@@ -45,6 +47,10 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 0);
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(category)
+                        .setType(MetricsEvent.TYPE_CLOSE)
+                        .serialize());
     }
 
     public static void visibility(Context context, int category, boolean visibile)
@@ -62,21 +68,38 @@ public class MetricsLogger {
     }
 
     public static void action(Context context, int category) {
-        action(context, category, "");
+        EventLogTags.writeSysuiAction(category, "");
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(category)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .serialize());
     }
 
     public static void action(Context context, int category, int value) {
-        action(context, category, Integer.toString(value));
+        EventLogTags.writeSysuiAction(category, Integer.toString(value));
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(category)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(value)
+                        .serialize());
     }
 
     public static void action(Context context, int category, boolean value) {
-        action(context, category, Boolean.toString(value));
+        EventLogTags.writeSysuiAction(category, Boolean.toString(value));
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(category)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(value ? 1 : 0)
+                        .serialize());
     }
 
     public static void action(LogBuilder content) {
         //EventLog.writeEvent(524292, content.serialize());
         // Below would be the *right* way to do this, using the generated
         // EventLogTags method, but that doesn't work.
+        if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
+            content.setType(MetricsEvent.TYPE_ACTION);
+        }
         EventLogTags.writeSysuiMultiAction(content.serialize());
     }
 
@@ -86,15 +109,30 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiAction(category, pkg);
+        EventLogTags.writeSysuiMultiAction(new LogBuilder(category)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .setPackageName(pkg)
+                .serialize());
     }
 
     /** Add an integer value to the monotonically increasing counter with the given name. */
     public static void count(Context context, String name, int value) {
         EventLogTags.writeSysuiCount(name, value);
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
+                        .setCounterName(name)
+                        .setCounterValue(value)
+                        .serialize());
     }
 
     /** Increment the bucket with the integer label on the histogram with the given name. */
     public static void histogram(Context context, String name, int bucket) {
         EventLogTags.writeSysuiHistogram(name, bucket);
+        EventLogTags.writeSysuiMultiAction(
+                new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
+                        .setCounterName(name)
+                        .setCounterBucket(bucket)
+                        .setCounterValue(1)
+                        .serialize());
     }
 }
