@@ -23,6 +23,7 @@ import android.view.View;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 
+
 /**
  * Helper class to assemble more complex logs.
  *
@@ -31,6 +32,13 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class LogBuilder {
     private static final String TAG = "LogBuilder";
+
+    // Min required eventlog line length.
+    // See: android/util/cts/EventLogTest.java
+    // Size checks enforced here are intended only as sanity checks;
+    // your logs may be truncated earlier. Please log responsibly.
+    public static final int MAX_SERIALIZED_SIZE = 4000;
+
     private SparseArray<Object> entries = new SparseArray();
 
     public LogBuilder(int mainCategory) {
@@ -97,7 +105,11 @@ public class LogBuilder {
             throw new IllegalArgumentException(
                     "Value must be loggable type - int, long, float, String");
         }
-        entries.put(tag, value);
+        if (value.toString().getBytes().length > MAX_SERIALIZED_SIZE) {
+            Log.i(TAG, "Log value too long, omitted: " + value.toString());
+        } else {
+            entries.put(tag, value);
+        }
         return this;
     }
 
@@ -198,18 +210,23 @@ public class LogBuilder {
             out[i * 2] = entries.keyAt(i);
             out[i * 2 + 1] = entries.valueAt(i);
         }
+        int size = out.toString().getBytes().length;
+        if (size > MAX_SERIALIZED_SIZE) {
+            Log.i(TAG, "Log line too long, did not emit: " + size + " bytes.");
+            throw new RuntimeException();
+        }
         return out;
     }
 
     public void deserialize(Object[] items) {
         int i = 0;
-        while(i < items.length) {
+        while (i < items.length) {
             Object key = items[i++];
             Object value = i < items.length ? items[i++] : null;
             if (key instanceof Integer) {
                 entries.put((Integer) key, value);
             } else {
-              Log.i(TAG, "Invalid key " + key.toString());
+                Log.i(TAG, "Invalid key " + key.toString());
             }
         }
     }

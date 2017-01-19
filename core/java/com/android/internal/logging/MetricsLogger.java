@@ -94,9 +94,6 @@ public class MetricsLogger {
     }
 
     public static void action(LogBuilder content) {
-        //EventLog.writeEvent(524292, content.serialize());
-        // Below would be the *right* way to do this, using the generated
-        // EventLogTags method, but that doesn't work.
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
             content.setType(MetricsEvent.TYPE_ACTION);
         }
