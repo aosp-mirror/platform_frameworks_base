@@ -42,10 +42,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An abstract service that should be implemented by any apps which can make phone calls (VoIP or
- * otherwise) and want those calls to be integrated into the built-in phone app.
- * Once implemented, the {@code ConnectionService} needs two additional steps before it will be
- * integrated into the phone app:
+ * An abstract service that should be implemented by any apps which either:
+ * <ol>
+ *     <li>Can make phone calls (VoIP or otherwise) and want those calls to be integrated into the
+ *     built-in phone app.  Referred to as a <b>system managed</b> {@link ConnectionService}.</li>
+ *     <li>Are a standalone calling app and don't want their calls to be integrated into the
+ *     built-in phone app.  Referred to as a <b>self managed</b> {@link ConnectionService}.</li>
+ * </ol>
+ * Once implemented, the {@link ConnectionService} needs to take the following steps so that Telecom
+ * will bind to it:
  * <p>
  * 1. <i>Registration in AndroidManifest.xml</i>
  * <br/>
@@ -63,16 +68,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * <br/>
  * See {@link PhoneAccount} and {@link TelecomManager#registerPhoneAccount} for more information.
  * <p>
- * Once registered and enabled by the user in the phone app settings, telecom will bind to a
- * {@code ConnectionService} implementation when it wants that {@code ConnectionService} to place
- * a call or the service has indicated that is has an incoming call through
- * {@link TelecomManager#addNewIncomingCall}. The {@code ConnectionService} can then expect a call
- * to {@link #onCreateIncomingConnection} or {@link #onCreateOutgoingConnection} wherein it
- * should provide a new instance of a {@link Connection} object.  It is through this
- * {@link Connection} object that telecom receives state updates and the {@code ConnectionService}
+ * System managed {@link ConnectionService}s must be enabled by the user in the phone app settings
+ * before Telecom will bind to them.  Self-manged {@link ConnectionService}s must be granted the
+ * appropriate permission before Telecom will bind to them.
+ * <p>
+ * Once registered and enabled by the user in the phone app settings or granted permission, telecom
+ * will bind to a {@link ConnectionService} implementation when it wants that
+ * {@link ConnectionService} to place a call or the service has indicated that is has an incoming
+ * call through {@link TelecomManager#addNewIncomingCall}. The {@link ConnectionService} can then
+ * expect a call to {@link #onCreateIncomingConnection} or {@link #onCreateOutgoingConnection}
+ * wherein it should provide a new instance of a {@link Connection} object.  It is through this
+ * {@link Connection} object that telecom receives state updates and the {@link ConnectionService}
  * receives call-commands such as answer, reject, hold and disconnect.
  * <p>
- * When there are no more live calls, telecom will unbind from the {@code ConnectionService}.
+ * When there are no more live calls, telecom will unbind from the {@link ConnectionService}.
  */
 public abstract class ConnectionService extends Service {
     /**
@@ -1054,6 +1063,7 @@ public abstract class ConnectionService extends Service {
             }
         }
 
+        @Override
         public void onExtrasRemoved(Connection c, List<String> keys) {
             String id = mIdByConnection.get(c);
             if (id != null) {
@@ -1061,12 +1071,19 @@ public abstract class ConnectionService extends Service {
             }
         }
 
-
         @Override
         public void onConnectionEvent(Connection connection, String event, Bundle extras) {
             String id = mIdByConnection.get(connection);
             if (id != null) {
                 mAdapter.onConnectionEvent(id, event, extras);
+            }
+        }
+
+        @Override
+        public void onAudioRouteChanged(Connection c, int audioRoute) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.setAudioRoute(id, audioRoute);
             }
         }
     };
@@ -1146,6 +1163,13 @@ public abstract class ConnectionService extends Service {
                         connection.getDisconnectCause(),
                         createIdList(connection.getConferenceables()),
                         connection.getExtras()));
+
+        if (isIncoming && request.shouldShowIncomingCallUi() &&
+                (connection.getConnectionProperties() & Connection.PROPERTY_SELF_MANAGED) ==
+                        Connection.PROPERTY_SELF_MANAGED) {
+            // Tell ConnectionService to show its incoming call UX.
+            connection.onShowIncomingCallUi();
+        }
         if (isUnknown) {
             triggerConferenceRecalculate();
         }
@@ -1584,6 +1608,38 @@ public abstract class ConnectionService extends Service {
             PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
         return null;
+    }
+
+    /**
+     * Called by Telecom to inform the {@link ConnectionService} that its request to create a new
+     * incoming {@link Connection} was denied.
+     * <p>
+     * Used when a self-managed {@link ConnectionService} attempts to create a new incoming
+     * {@link Connection}, but Telecom has determined that the call cannot be allowed at this time.
+     * The {@link ConnectionService} is responsible for silently rejecting the new incoming
+     * {@link Connection}.
+     * <p>
+     * See {@link TelecomManager#isIncomingCallPermitted(PhoneAccountHandle)} for more information.
+     *
+     * @param request The incoming connection request.
+     */
+    public void onCreateIncomingConnectionFailed(ConnectionRequest request) {
+    }
+
+    /**
+     * Called by Telecom to inform the {@link ConnectionService} that its request to create a new
+     * outgoing {@link Connection} was denied.
+     * <p>
+     * Used when a self-managed {@link ConnectionService} attempts to create a new outgoing
+     * {@link Connection}, but Telecom has determined that the call cannot be placed at this time.
+     * The {@link ConnectionService} is responisible for informing the user that the
+     * {@link Connection} cannot be made at this time.
+     * <p>
+     * See {@link TelecomManager#isOutgoingCallPermitted(PhoneAccountHandle)} for more information.
+     *
+     * @param request The outgoing connection request.
+     */
+    public void onCreateOutgoingConnectionFailed(ConnectionRequest request) {
     }
 
     /**
