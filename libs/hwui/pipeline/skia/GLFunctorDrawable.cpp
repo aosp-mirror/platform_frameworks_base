@@ -19,7 +19,6 @@
 #include "RenderNode.h"
 #include "SkClipStack.h"
 #include <private/hwui/DrawGlInfo.h>
-#include <SkPath.h>
 #include <GrContext.h>
 
 namespace android {
@@ -76,9 +75,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     //apply a simple clip with a scissor or a complex clip with a stencil
     SkRegion clipRegion;
-    SkPath path;
-    canvas->getClipStack()->asPath(&path);
-    clipRegion.setPath(path, SkRegion(ibounds));
+    canvas->temporary_internal_getRgnClip(&clipRegion);
     if (CC_UNLIKELY(clipRegion.isComplex())) {
         //It is only a temporary solution to use a scissor to draw the stencil.
         //There is a bug 31489986 to implement efficiently non-rectangular clips.
