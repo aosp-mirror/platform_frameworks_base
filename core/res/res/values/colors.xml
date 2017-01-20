@@ -89,7 +89,7 @@
     <color name="perms_dangerous_perm_color">#33b5e5</color>
     <color name="shadow">#cc222222</color>
     <color name="perms_costs_money">#fff4511e</color>
-    
+
     <!-- For search-related UIs -->
     <color name="search_url_text_normal">#7fa87f</color>
     <color name="search_url_text_selected">@android:color/black</color>
@@ -132,6 +132,10 @@
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
     <drawable name="notification_template_divider">#29000000</drawable>
     <drawable name="notification_template_divider_media">#29ffffff</drawable>
+    <color name="notification_primary_text_color_light">@color/primary_text_default_material_light</color>
+    <color name="notification_primary_text_color_dark">@color/primary_text_default_material_dark</color>
+    <color name="notification_secondary_text_color_light">@color/secondary_text_material_light</color>
+    <color name="notification_secondary_text_color_dark">@color/secondary_text_material_dark</color>
 
     <color name="notification_material_background_color">#ffffffff</color>
 

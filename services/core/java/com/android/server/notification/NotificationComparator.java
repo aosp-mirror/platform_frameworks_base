@@ -30,7 +30,6 @@ import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Slog;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -57,7 +56,15 @@ public class NotificationComparator
 
     @Override
     public int compare(NotificationRecord left, NotificationRecord right) {
-        // First up: sufficiently important ongoing notifications of certain categories
+        // first all colorized notifications
+        boolean leftImportantColorized = isImportantColorized(left);
+        boolean rightImportantColorized = isImportantColorized(right);
+
+        if (leftImportantColorized != rightImportantColorized) {
+            return -1 * Boolean.compare(leftImportantColorized, rightImportantColorized);
+        }
+
+        // sufficiently important ongoing notifications of certain categories
         boolean leftImportantOngoing = isImportantOngoing(left);
         boolean rightImportantOngoing = isImportantOngoing(right);
 
@@ -106,6 +113,13 @@ public class NotificationComparator
         return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }
 
+    private boolean isImportantColorized(NotificationRecord record) {
+        if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
+            return false;
+        }
+        return record.getNotification().isColorized();
+    }
+
     private boolean isImportantOngoing(NotificationRecord record) {
         if (!isOngoing(record)) {
             return false;
@@ -147,7 +161,6 @@ public class NotificationComparator
                 Notification.FLAG_FOREGROUND_SERVICE | Notification.FLAG_ONGOING_EVENT;
         return (record.getNotification().flags & ongoingFlags) != 0;
     }
-
 
     private Class<? extends Notification.Style> getNotificationStyle(NotificationRecord record) {
         String templateClass =

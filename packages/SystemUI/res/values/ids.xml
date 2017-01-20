@@ -58,7 +58,6 @@
     <item type="id" name="transformation_start_y_tag"/>
     <item type="id" name="transformation_start_scale_x_tag"/>
     <item type="id" name="transformation_start_scale_y_tag"/>
-    <item type="id" name="custom_background_color"/>
 
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>

@@ -40,9 +40,6 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     private final ViewInvertHelper mInvertHelper;
     private final Paint mGreyPaint = new Paint();
-    private int mBackgroundColor = 0;
-    private static final int CUSTOM_BACKGROUND_TAG = R.id.custom_background_color;
-    private boolean mShouldInvertDark;
     private boolean mShowingLegacyBackground;
 
     protected NotificationCustomViewWrapper(View view, ExpandableNotificationRow row) {
@@ -103,32 +100,6 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         mView.setAlpha(visible ? 1.0f : 0.0f);
-    }
-
-    @Override
-    public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
-        super.notifyContentUpdated(notification, isLowPriority);
-        Drawable background = mView.getBackground();
-        mBackgroundColor = 0;
-        if (background instanceof ColorDrawable) {
-            mBackgroundColor = ((ColorDrawable) background).getColor();
-            mView.setBackground(null);
-            mView.setTag(CUSTOM_BACKGROUND_TAG, mBackgroundColor);
-        } else if (mView.getTag(CUSTOM_BACKGROUND_TAG) != null) {
-            mBackgroundColor = (int) mView.getTag(CUSTOM_BACKGROUND_TAG);
-        }
-        mShouldInvertDark = mBackgroundColor == 0 || isColorLight(mBackgroundColor);
-    }
-
-    private boolean isColorLight(int backgroundColor) {
-        return Color.alpha(backgroundColor) == 0
-                || ColorUtils.calculateLuminance(backgroundColor) > 0.5;
-    }
-
-    @Override
-    public int getCustomBackgroundColor() {
-        // Parent notifications should always use the normal background color
-        return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
     @Override

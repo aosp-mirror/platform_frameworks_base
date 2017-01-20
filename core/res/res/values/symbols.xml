@@ -2791,6 +2791,11 @@
   <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
   <java-symbol type="string" name="config_defaultCellBroadcastReceiverComponent" />
 
+  <java-symbol type="color" name="notification_primary_text_color_light" />
+  <java-symbol type="color" name="notification_primary_text_color_dark" />
+  <java-symbol type="color" name="notification_secondary_text_color_light" />
+  <java-symbol type="color" name="notification_secondary_text_color_dark" />
+
   <java-symbol type="string" name="app_category_game" />
   <java-symbol type="string" name="app_category_audio" />
   <java-symbol type="string" name="app_category_video" />
