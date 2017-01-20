@@ -1269,7 +1269,7 @@
          recommendations and scores from the NetworkScoreService.
          <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|setup" />
 
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
