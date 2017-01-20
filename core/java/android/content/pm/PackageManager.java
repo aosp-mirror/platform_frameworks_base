@@ -1862,6 +1862,20 @@ public abstract class PackageManager {
     public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports telephony carrier restriction mechanism.
+     *
+     * <p>Devices declaring this feature must have an implementation of the
+     * {@link android.telephony.TelephonyManager#getAllowedCarriers} and
+     * {@link android.telephony.TelephonyManager#setAllowedCarriers}.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_CARRIERLOCK =
+            "android.hardware.telephony.carrierlock";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports connecting to USB devices
      * as the USB host.
