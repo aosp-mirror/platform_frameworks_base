@@ -7,8 +7,9 @@ import android.test.AndroidTestCase;
 
 public class RecommendationRequestTest extends AndroidTestCase {
     private ScanResult[] mScanResults;
-    private WifiConfiguration mConfiguration;
-    private NetworkCapabilities mCapabilities;
+    private WifiConfiguration mDefaultConfig;
+    private WifiConfiguration mConnectedConfig;
+    private WifiConfiguration[] mConnectableConfigs;
 
     @Override
     public void setUp() throws Exception {
@@ -29,43 +30,56 @@ public class RecommendationRequestTest extends AndroidTestCase {
                 8 /*centerFreq0*/,
                 9 /*centerFreq1*/,
                 false /*is80211McRTTResponder*/);
-        mConfiguration = new WifiConfiguration();
-        mConfiguration.SSID = "RecommendationRequestTest";
-        mCapabilities = new NetworkCapabilities()
-                .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED);
+        mDefaultConfig = new WifiConfiguration();
+        mDefaultConfig.SSID = "default_config";
+        mConnectedConfig = new WifiConfiguration();
+        mConnectedConfig.SSID = "connected_config";
+        mConnectableConfigs = new WifiConfiguration[] {mDefaultConfig, mConnectedConfig};
     }
 
     public void testParceling() throws Exception {
         RecommendationRequest request = new RecommendationRequest.Builder()
-                .setCurrentRecommendedWifiConfig(mConfiguration)
+                .setDefaultWifiConfig(mDefaultConfig)
                 .setScanResults(mScanResults)
-                .setNetworkCapabilities(mCapabilities)
+                .setConnectedWifiConfig(mConnectedConfig)
+                .setConnectableConfigs(mConnectableConfigs)
                 .build();
 
         RecommendationRequest parceled = passThroughParcel(request);
-        assertEquals(request.getCurrentSelectedConfig().SSID,
-                parceled.getCurrentSelectedConfig().SSID);
-        assertEquals(request.getRequiredCapabilities(), parceled.getRequiredCapabilities());
+        assertEquals(request.getDefaultWifiConfig().SSID,
+                parceled.getDefaultWifiConfig().SSID);
+        assertEquals(request.getConnectedConfig().SSID,
+                parceled.getConnectedConfig().SSID);
         ScanResult[] parceledScanResults = parceled.getScanResults();
         assertNotNull(parceledScanResults);
         assertEquals(mScanResults.length, parceledScanResults.length);
         for (int i = 0; i < mScanResults.length; i++) {
             assertEquals(mScanResults[i].SSID, parceledScanResults[i].SSID);
         }
+        WifiConfiguration[] parceledConfigs = parceled.getConnectableConfigs();
+        for (int i = 0; i < parceledConfigs.length; i++) {
+            assertEquals(mConnectableConfigs[i].SSID, parceledConfigs[i].SSID);
+        }
     }
 
     public void testParceling_nullScanResults() throws Exception {
         RecommendationRequest request = new RecommendationRequest.Builder()
-                .setCurrentRecommendedWifiConfig(mConfiguration)
-                .setNetworkCapabilities(mCapabilities)
+                .setDefaultWifiConfig(mDefaultConfig)
                 .build();
 
         RecommendationRequest parceled = passThroughParcel(request);
-        assertEquals(request.getCurrentSelectedConfig().SSID,
-                parceled.getCurrentSelectedConfig().SSID);
-        assertEquals(request.getRequiredCapabilities(), parceled.getRequiredCapabilities());
         ScanResult[] parceledScanResults = parceled.getScanResults();
         assertNull(parceledScanResults);
+    }
+
+    public void testParceling_nullWifiConfigArray() throws Exception {
+        RecommendationRequest request = new RecommendationRequest.Builder()
+                .setDefaultWifiConfig(mDefaultConfig)
+                .build();
+
+        RecommendationRequest parceled = passThroughParcel(request);
+        WifiConfiguration[] parceledConfigs = parceled.getConnectableConfigs();
+        assertNull(parceledConfigs);
     }
 
     private RecommendationRequest passThroughParcel(RecommendationRequest request) {
