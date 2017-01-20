@@ -1022,10 +1022,10 @@
     <string name="monitoring_title">Network monitoring</string>
 
     <!-- STOPSHIP Monitoring strings still need to be finalized and approved -->
-    <!-- Monitoring dialog subtitle for the section describing VPN [CHAR LIMIT=TODO]-->
+    <!-- Monitoring dialog subtitle for the section describing VPN [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_vpn">VPN</string>
 
-    <!-- Monitoring dialog subtitle for the section describing network logging [CHAR LIMIT=TODO]-->
+    <!-- Monitoring dialog subtitle for the section describing network logging [CHAR LIMIT=35]-->
     <string name="monitoring_subtitle_network_logging">Network Logging</string>
 
     <!-- Monitoring dialog disable vpn button [CHAR LIMIT=30] -->
@@ -1041,7 +1041,7 @@
     <string name="monitoring_description_do_header_with_name"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> uses <xliff:g id="device_owner_app" example="Google Mobile Management">%2$s</xliff:g> to manage your device.</string>
 
     <!-- Monitoring dialog: Part of text body explaining what a Device Owner app can do [CHAR LIMIT=130] -->
-    <string name="monitoring_description_do_body">Your administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.</string>
+    <string name="monitoring_description_do_body">Your admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.</string>
 
     <!-- Monitoring dialog: Space that separates the body text and the "learn more" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_do_learn_more_separator">" "</string>
@@ -1055,18 +1055,18 @@
     <!-- Monitoring dialog: Space that separates the VPN body text and the "Open VPN Settings" link that follows it. [CHAR LIMIT=5] -->
     <string name="monitoring_description_vpn_settings_separator">" "</string>
 
-    <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=TODO] -->
+    <!-- Monitoring dialog: Link to open the VPN settings page [CHAR LIMIT=60] -->
     <string name="monitoring_description_vpn_settings">Open VPN Settings</string>
 
-    <!-- Monitoring dialog: Network logging text [CHAR LIMIT=TODO] -->
-    <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information contact your admin.</string>
+    <!-- Monitoring dialog: Network logging text [CHAR LIMIT=400] -->
+    <string name="monitoring_description_network_logging">Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin.</string>
 
 
     <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
     <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog VPN with profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your administrator.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
+    <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
 
     <!-- Name for a generic legacy VPN connection [CHAR LIMIT=20] -->
     <string name="legacy_vpn_name">VPN</string>
@@ -1081,7 +1081,7 @@
     <string name="branded_monitoring_description_app_personal">You\'re connected to <xliff:g id="application">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps, and websites.</string>
 
     <!-- Monitoring dialog text for single app (inside work profile) [CHAR LIMIT=400] -->
-    <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
+    <string name="monitoring_description_app_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your admin.</string>
 
     <!-- Monitoring dialog text for multiple apps (in personal and work profiles) [CHAR LIMIT=400] -->
     <string name="monitoring_description_app_personal_work">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>. It is connected to <xliff:g id="application_work">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nYou\'re also connected to <xliff:g id="application_personal">%3$s</xliff:g>, which can monitor your personal network activity.</string>
