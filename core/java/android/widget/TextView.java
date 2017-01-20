@@ -783,6 +783,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList textColorLink = null;
         int textSize = 15;
         String fontFamily = null;
+        Typeface fontTypeface = null;
         boolean fontFamilyExplicit = false;
         int typefaceIndex = -1;
         int styleIndex = -1;
@@ -845,7 +846,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         break;
 
                     case com.android.internal.R.styleable.TextAppearance_fontFamily:
-                        fontFamily = appearance.getString(attr);
+                        try {
+                            fontTypeface = appearance.getFont(attr);
+                        } catch (UnsupportedOperationException e) {
+                            // Expected if it is not a font resource.
+                        }
+                        if (fontTypeface == null) {
+                            fontFamily = appearance.getString(attr);
+                        }
                         break;
 
                     case com.android.internal.R.styleable.TextAppearance_textStyle:
@@ -1149,7 +1157,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_fontFamily:
-                    fontFamily = a.getString(attr);
+                    try {
+                        fontTypeface = appearance.getFont(attr);
+                    } catch (UnsupportedOperationException e) {
+                        // Expected if it is not a font resource.
+                    }
+                    if (fontTypeface == null) {
+                        fontFamily = appearance.getString(attr);
+                    }
                     fontFamilyExplicit = true;
                     break;
 
@@ -1499,7 +1514,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (typefaceIndex != -1 && !fontFamilyExplicit) {
             fontFamily = null;
         }
-        setTypefaceFromAttrs(fontFamily, typefaceIndex, styleIndex);
+        setTypefaceFromAttrs(fontTypeface, fontFamily, typefaceIndex, styleIndex);
 
         if (shadowcolor != 0) {
             setShadowLayer(r, dx, dy, shadowcolor);
@@ -1792,14 +1807,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void setTypefaceFromAttrs(String familyName, int typefaceIndex, int styleIndex) {
-        Typeface tf = null;
-        if (familyName != null) {
+    private void setTypefaceFromAttrs(Typeface fontTypeface, String familyName, int typefaceIndex,
+            int styleIndex) {
+        Typeface tf = fontTypeface;
+        if (tf == null && familyName != null) {
             tf = Typeface.create(familyName, styleIndex);
-            if (tf != null) {
-                setTypeface(tf);
-                return;
-            }
+        }
+        if (tf != null) {
+            setTypeface(tf);
+            return;
         }
         switch (typefaceIndex) {
             case SANS:
@@ -3097,10 +3113,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setLinkTextColor(textColorLink);
         }
 
-        final String fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
+        Typeface fontTypeface = null;
+        String fontFamily = null;
+        try {
+            fontTypeface = ta.getFont(R.styleable.TextAppearance_fontFamily);
+        } catch (UnsupportedOperationException e) {
+            // Expected if it is not a font resource.
+        }
+        if (fontTypeface == null) {
+            fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
+        }
         final int typefaceIndex = ta.getInt(R.styleable.TextAppearance_typeface, -1);
         final int styleIndex = ta.getInt(R.styleable.TextAppearance_textStyle, -1);
-        setTypefaceFromAttrs(fontFamily, typefaceIndex, styleIndex);
+        setTypefaceFromAttrs(fontTypeface, fontFamily, typefaceIndex, styleIndex);
 
         final int shadowColor = ta.getInt(R.styleable.TextAppearance_shadowColor, 0);
         if (shadowColor != 0) {
@@ -5161,15 +5186,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean forceUpdate = false;
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
-            setTypefaceFromAttrs(null /* fontFamily */, MONOSPACE, 0);
+            setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */, MONOSPACE, 0);
         } else if (isVisiblePassword) {
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }
-            setTypefaceFromAttrs(null /* fontFamily */, MONOSPACE, 0);
+            setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */, MONOSPACE, 0);
         } else if (wasPassword || wasVisiblePassword) {
             // not in password mode, clean up typeface and transformation
-            setTypefaceFromAttrs(null /* fontFamily */, -1, -1);
+            setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */, -1, -1);
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }

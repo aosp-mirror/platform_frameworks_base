@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
@@ -932,6 +933,36 @@ public class TypedArray {
                         "Failed to resolve attribute at index " + index + ": " + value);
             }
             return mResources.loadDrawable(value, value.resourceId, mTheme);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the Typeface for the attribute at <var>index</var>.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a font.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return Typeface for the attribute, or {@code null} if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a font resource.
+     */
+    @Nullable
+    public Typeface getFont(@StyleableRes int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        final TypedValue value = mValue;
+        if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
+            }
+            return mResources.getFont(value, value.resourceId);
         }
         return null;
     }

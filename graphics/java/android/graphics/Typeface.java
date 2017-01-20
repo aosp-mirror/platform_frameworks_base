@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontRequest;
 import android.graphics.fonts.FontResult;
@@ -131,9 +132,9 @@ public class Typeface {
 
     /**
      * @hide
-     * Used by Resources.
+     * Used by Resources to load a font resource of type font file.
      */
-    @NonNull
+    @Nullable
     public static Typeface createFromResources(AssetManager mgr, String path, int cookie) {
         if (sFallbackFonts != null) {
             synchronized (sDynamicTypefaceCache) {
@@ -143,6 +144,7 @@ public class Typeface {
 
                 FontFamily fontFamily = new FontFamily();
                 if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */)) {
+                    fontFamily.freeze();
                     FontFamily[] families = {fontFamily};
                     typeface = createFromFamiliesWithDefault(families);
                     sDynamicTypefaceCache.put(key, typeface);
@@ -150,7 +152,62 @@ public class Typeface {
                 }
             }
         }
-        throw new RuntimeException("Font resource not found " + path);
+        return null;
+    }
+
+    /**
+     * @hide
+     * Used by Resources to load a font resource of type xml.
+     */
+    @Nullable
+    public static Typeface createFromResources(FontConfig config, AssetManager mgr, String path) {
+        if (sFallbackFonts != null) {
+            synchronized (sDynamicTypefaceCache) {
+                final String key = createAssetUid(mgr, path);
+                Typeface typeface = sDynamicTypefaceCache.get(key);
+                if (typeface != null) return typeface;
+
+                List<FontConfig.Family> families = config.getFamilies();
+                if (families == null || families.isEmpty()) {
+                    throw new RuntimeException("Font resource contained no fonts.");
+                }
+                if (families.size() > 1) {
+                    throw new RuntimeException("Font resource contained more than one family.");
+                }
+                FontConfig.Family family = families.get(0);
+
+                FontFamily fontFamily = new FontFamily();
+                List<FontConfig.Font> fonts = family.getFonts();
+                for (int i = 0; i < fonts.size(); i++) {
+                    FontConfig.Font font = fonts.get(i);
+                    // TODO: Use style and weight info
+                    if (!fontFamily.addFontFromAssetManager(mgr, font.getFontName(),
+                            0 /* resourceCookie */, false /* isAsset */)) {
+                        return null;
+                    }
+                }
+                fontFamily.freeze();
+                FontFamily[] familyChain = { fontFamily };
+                typeface = createFromFamiliesWithDefault(familyChain);
+                sDynamicTypefaceCache.put(key, typeface);
+                return typeface;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    public static Typeface createFromCache(AssetManager mgr, String path) {
+        synchronized (sDynamicTypefaceCache) {
+            final String key = createAssetUid(mgr, path);
+            Typeface typeface = sDynamicTypefaceCache.get(key);
+            if (typeface != null) {
+                return typeface;
+            }
+        }
+        return null;
     }
 
     /**

@@ -164,7 +164,7 @@ public final class FontConfig implements Parcelable {
      * Class that holds information about a Font.
      */
     public static final class Font implements Parcelable {
-        private final String mFontName;
+        private String mFontName;
         private final int mTtcIndex;
         private final List<Axis> mAxes;
         private final int mWeight;
@@ -200,6 +200,13 @@ public final class FontConfig implements Parcelable {
          */
         public String getFontName() {
             return mFontName;
+        }
+
+        /**
+         * @hide
+         */
+        public void setFontName(String fontName) {
+            mFontName = fontName;
         }
 
         /**
