@@ -7137,15 +7137,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Enable backup service.
-     * <p>This includes all backup and restore mechanisms.
-     * Setting this to {@code false} will make backup service no-op or return empty results.
+     * Allows the device owner to enable or disable the backup service.
      *
-     * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a {@link SecurityException} will be thrown.
+     * <p> Backup service manages all backup and restore mechanisms on the device. Setting this to
+     * false will prevent data from being backed up or restored.
      *
-     * <p>Backup service is off by default when device owner is present.
+     * <p> Backup service is off by default when device owner is present.
+     *
+     * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
         try {
@@ -7156,8 +7155,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
+     * Return whether the backup service is enabled by the device owner.
+     *
+     * <p> Backup service manages all backup and restore mechanisms on the device.
+     *
      * @return {@code true} if backup service is enabled, {@code false} otherwise.
+     * @see #setBackupServiceEnabled
      */
     public boolean isBackupServiceEnabled(@NonNull ComponentName admin) {
         try {
