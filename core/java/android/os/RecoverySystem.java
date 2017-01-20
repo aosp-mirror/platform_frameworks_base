@@ -650,6 +650,18 @@ public class RecoverySystem {
         bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
     }
 
+    /** {@hide} */
+    public static void rebootPromptAndWipeUserData(Context context, String reason)
+            throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, null, "--prompt_and_wipe_data", reasonArg, localeArg);
+    }
+
     /**
      * Reboot into the recovery system to wipe the /cache partition.
      * @throws IOException if something goes wrong.

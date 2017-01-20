@@ -57,6 +57,7 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -69,6 +70,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
+import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -2549,7 +2551,14 @@ public final class PowerManagerService extends SystemService
     private void shutdownOrRebootInternal(final @HaltMode int haltMode, final boolean confirm,
             final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
-            throw new IllegalStateException("Too early to call shutdown() or reboot()");
+            if (RescueParty.isAttemptingFactoryReset()) {
+                // If we're stuck in a really low-level reboot loop, and a
+                // rescue party is trying to prompt the user for a factory data
+                // reset, we must GET TO DA CHOPPA!
+                PowerManagerService.lowLevelReboot(reason);
+            } else {
+                throw new IllegalStateException("Too early to call shutdown() or reboot()");
+            }
         }
 
         Runnable runnable = new Runnable() {

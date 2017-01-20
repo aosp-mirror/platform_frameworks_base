@@ -20,6 +20,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.server.RescueParty;
 import com.android.server.Watchdog;
 
 import android.app.ActivityManager;
@@ -321,6 +322,12 @@ class AppErrors {
             longMsg = shortMsg + ": " + longMsg;
         } else if (shortMsg != null) {
             longMsg = shortMsg;
+        }
+
+        // If a persistent app is stuck in a crash loop, the device isn't very
+        // usable, so we want to consider sending out a rescue party.
+        if (r != null && r.persistent) {
+            RescueParty.notePersistentAppCrash(mContext, r.uid);
         }
 
         AppErrorResult result = new AppErrorResult();
