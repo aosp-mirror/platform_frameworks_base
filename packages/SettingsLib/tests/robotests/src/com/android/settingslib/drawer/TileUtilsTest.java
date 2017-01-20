@@ -255,6 +255,7 @@ public class TileUtilsTest {
 
         Bundle bundle = new Bundle();
         bundle.putInt("com.android.settings.icon", 161803);
+        bundle.putString("com.android.settings.icon_package", "abc");
         bundle.putString("com.android.settings.summary", "dynamic-summary");
         when(mIContentProvider.call(anyString(),
                 eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_ICON))), eq(URI_GET_ICON), any()))
