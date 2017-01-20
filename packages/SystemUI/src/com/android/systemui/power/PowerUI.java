@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -221,11 +222,15 @@ public class PowerUI extends SystemUI {
     };
 
     private void initTemperatureWarning() {
-        if (!mContext.getResources().getBoolean(R.bool.config_showTemperatureWarning)) {
+        ContentResolver resolver = mContext.getContentResolver();
+        Resources resources = mContext.getResources();
+        if (Settings.Global.getInt(resolver, Settings.Global.SHOW_TEMPERATURE_WARNING,
+                resources.getInteger(R.integer.config_showTemperatureWarning)) == 0) {
             return;
         }
 
-        mThrottlingTemp = mContext.getResources().getInteger(R.integer.config_warningTemperature);
+        mThrottlingTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
+                resources.getInteger(R.integer.config_warningTemperature));
 
         if (mThrottlingTemp < 0f) {
             // Get the throttling temperature. No need to check if we're not throttling.

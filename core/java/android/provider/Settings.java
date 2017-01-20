@@ -10015,6 +10015,17 @@ public final class Settings {
             EPHEMERAL_SETTINGS.add(EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
         }
 
+        /**
+         * Whether to show the high temperature warning notification.
+         * @hide
+         */
+        public static final String SHOW_TEMPERATURE_WARNING = "show_temperature_warning";
+
+        /**
+         * Temperature at which the high temperature warning notification should be shown.
+         * @hide
+         */
+        public static final String WARNING_TEMPERATURE = "warning_temperature";
     }
 
     /**

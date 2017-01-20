@@ -291,7 +291,7 @@
     <bool name="quick_settings_show_full_alarm">false</bool>
 
     <!-- Whether to show a warning notification when the device reaches a certain temperature. -->
-    <bool name="config_showTemperatureWarning">false</bool>
+    <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
          If < 0, uses the value from HardwarePropertiesManager#getDeviceTemperatures. -->
