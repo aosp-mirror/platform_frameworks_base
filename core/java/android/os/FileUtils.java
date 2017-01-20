@@ -38,7 +38,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -334,12 +333,7 @@ public class FileUtils {
      * @throws IOException
      */
     public static void stringToFile(String filename, String string) throws IOException {
-        FileWriter out = new FileWriter(filename);
-        try {
-            out.write(string);
-        } finally {
-            out.close();
-        }
+        bytesToFile(filename, string.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
