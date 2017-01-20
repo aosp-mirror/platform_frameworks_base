@@ -14,7 +14,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
+import android.net.ScoredNetwork;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
@@ -28,6 +30,14 @@ public class Utils {
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
+
+    static final int[] WIFI_PIE_FOR_BADGING = {
+          com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
+          com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
+    };
 
     /**
      * Return string resource that best describes combination of tethering
@@ -232,5 +242,42 @@ public class Utils {
         String deviceProvisioningPackage = resources.getString(
                 com.android.internal.R.string.config_deviceProvisioningPackage);
         return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
+    /**
+     * Returns a badged Wifi icon drawable.
+     *
+     * <p>The first layer contains the Wifi pie and the second layer contains the badge. Callers
+     * should set the drawable to the appropriate size and tint color.
+     *
+     * @param context The caller's context (must have access to internal resources)
+     * @param level The number of bars to show (0-4)
+     * @param badge The badge enum {@see android.net.ScoredNetwork}
+     *
+     * @throws IllegalArgumentException if an invalid badge enum is given
+     *
+     * @deprecated TODO(sghuman): Finalize the form of this method and then move it to a new
+     *         location.
+     */
+    public static LayerDrawable getBadgedWifiIcon(Context context, int level, int badge) {
+        return new LayerDrawable(
+                new Drawable[] {
+                        context.getDrawable(WIFI_PIE_FOR_BADGING[level]),
+                        context.getDrawable(getWifiBadgeResource(badge))
+                });
+    }
+
+    private static int getWifiBadgeResource(int badge) {
+        switch (badge) {
+            case ScoredNetwork.BADGING_SD:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
+            case ScoredNetwork.BADGING_HD:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
+            case ScoredNetwork.BADGING_4K:
+                return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
+            default:
+                throw new IllegalArgumentException(
+                    "No badge resource found for badge value: " + badge);
+        }
     }
 }
