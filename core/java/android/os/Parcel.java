@@ -27,6 +27,8 @@ import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
+import libcore.util.SneakyThrow;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -249,6 +251,7 @@ public final class Parcel {
     private static final int EX_NETWORK_MAIN_THREAD = -6;
     private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_SERVICE_SPECIFIC = -8;
+    private static final int EX_PARCELABLE = -9;
     private static final int EX_HAS_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
@@ -1555,7 +1558,12 @@ public final class Parcel {
      */
     public final void writeException(Exception e) {
         int code = 0;
-        if (e instanceof SecurityException) {
+        if (e instanceof Parcelable
+                && (e.getClass().getClassLoader() == Parcelable.class.getClassLoader())) {
+            // We only send Parcelable exceptions that are in the
+            // BootClassLoader to ensure that the receiver can unpack them
+            code = EX_PARCELABLE;
+        } else if (e instanceof SecurityException) {
             code = EX_SECURITY;
         } else if (e instanceof BadParcelableException) {
             code = EX_BAD_PARCELABLE;
@@ -1581,8 +1589,20 @@ public final class Parcel {
             throw new RuntimeException(e);
         }
         writeString(e.getMessage());
-        if (e instanceof ServiceSpecificException) {
-            writeInt(((ServiceSpecificException)e).errorCode);
+        switch (code) {
+            case EX_SERVICE_SPECIFIC:
+                writeInt(((ServiceSpecificException) e).errorCode);
+                break;
+            case EX_PARCELABLE:
+                // Write parceled exception prefixed by length
+                final int sizePosition = dataPosition();
+                writeInt(0);
+                writeParcelable((Parcelable) e, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                final int payloadPosition = dataPosition();
+                setDataPosition(sizePosition);
+                writeInt(payloadPosition - sizePosition);
+                setDataPosition(payloadPosition);
+                break;
         }
     }
 
@@ -1680,6 +1700,13 @@ public final class Parcel {
      */
     public final void readException(int code, String msg) {
         switch (code) {
+            case EX_PARCELABLE:
+                if (readInt() > 0) {
+                    SneakyThrow.sneakyThrow(
+                            (Exception) readParcelable(Parcelable.class.getClassLoader()));
+                } else {
+                    throw new RuntimeException(msg + " [missing Parcelable]");
+                }
             case EX_SECURITY:
                 throw new SecurityException(msg);
             case EX_BAD_PARCELABLE:
