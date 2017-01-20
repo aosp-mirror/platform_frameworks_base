@@ -863,4 +863,10 @@
     <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
     <string name="content_description_menu_button">Menu</string>
 
+    <!-- Label for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="retail_demo_reset_message">Enter password to perform factory reset in demo mode</string>
+    <!-- Label for positive button on carrier demo  mode factory reset confirmation dialog [CHAR LIMIT=40] -->
+    <string name="retail_demo_reset_next">Next</string>
+    <!-- Title for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="retail_demo_reset_title">Password required</string>
 </resources>
