@@ -3,6 +3,7 @@ package android.net;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.os.Parcel;
+import android.os.SystemClock;
 import android.test.AndroidTestCase;
 
 public class RecommendationRequestTest extends AndroidTestCase {
@@ -10,6 +11,8 @@ public class RecommendationRequestTest extends AndroidTestCase {
     private WifiConfiguration mDefaultConfig;
     private WifiConfiguration mConnectedConfig;
     private WifiConfiguration[] mConnectableConfigs;
+    private int mLastSelectedNetworkId;
+    private long mLastSelectedNetworkTimestamp;
 
     @Override
     public void setUp() throws Exception {
@@ -35,6 +38,8 @@ public class RecommendationRequestTest extends AndroidTestCase {
         mConnectedConfig = new WifiConfiguration();
         mConnectedConfig.SSID = "connected_config";
         mConnectableConfigs = new WifiConfiguration[] {mDefaultConfig, mConnectedConfig};
+        mLastSelectedNetworkId = 5;
+        mLastSelectedNetworkTimestamp = SystemClock.elapsedRealtime();
     }
 
     public void testParceling() throws Exception {
@@ -43,6 +48,7 @@ public class RecommendationRequestTest extends AndroidTestCase {
                 .setScanResults(mScanResults)
                 .setConnectedWifiConfig(mConnectedConfig)
                 .setConnectableConfigs(mConnectableConfigs)
+                .setLastSelectedNetwork(mLastSelectedNetworkId, mLastSelectedNetworkTimestamp)
                 .build();
 
         RecommendationRequest parceled = passThroughParcel(request);
@@ -60,6 +66,8 @@ public class RecommendationRequestTest extends AndroidTestCase {
         for (int i = 0; i < parceledConfigs.length; i++) {
             assertEquals(mConnectableConfigs[i].SSID, parceledConfigs[i].SSID);
         }
+        assertEquals(mLastSelectedNetworkId, parceled.getLastSelectedNetworkId());
+        assertEquals(mLastSelectedNetworkTimestamp, parceled.getLastSelectedNetworkTimestamp());
     }
 
     public void testParceling_nullScanResults() throws Exception {
@@ -80,6 +88,16 @@ public class RecommendationRequestTest extends AndroidTestCase {
         RecommendationRequest parceled = passThroughParcel(request);
         WifiConfiguration[] parceledConfigs = parceled.getConnectableConfigs();
         assertNull(parceledConfigs);
+    }
+
+    public void testParceling_unsetLastSelectedNetwork() throws Exception {
+        RecommendationRequest request = new RecommendationRequest.Builder()
+                .build();
+
+        RecommendationRequest parceled = passThroughParcel(request);
+
+        assertEquals(0, parceled.getLastSelectedNetworkId());
+        assertEquals(0, parceled.getLastSelectedNetworkTimestamp());
     }
 
     private RecommendationRequest passThroughParcel(RecommendationRequest request) {
