@@ -16,6 +16,11 @@
 
 package com.android.server.connectivity;
 
+import static android.hardware.usb.UsbManager.USB_CONNECTED;
+import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
+import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -208,13 +213,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiver(mStateReceiver, filter);
+        mContext.registerReceiver(mStateReceiver, filter, null, mTetherMasterSM.getHandler());
 
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MEDIA_SHARED);
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
         filter.addDataScheme("file");
-        mContext.registerReceiver(mStateReceiver, filter);
+        mContext.registerReceiver(mStateReceiver, filter, null, mTetherMasterSM.getHandler());
 
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
@@ -779,67 +784,82 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private class StateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context content, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) { return; }
+            final String action = intent.getAction();
+            if (action == null) return;
+
             if (action.equals(UsbManager.ACTION_USB_STATE)) {
-                synchronized (Tethering.this.mPublicSync) {
-                    boolean usbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
-                    mRndisEnabled = intent.getBooleanExtra(UsbManager.USB_FUNCTION_RNDIS, false);
-                    // start tethering if we have a request pending
-                    if (usbConnected && mRndisEnabled && mUsbTetherRequested) {
-                        tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_USB);
-                    }
-                    mUsbTetherRequested = false;
-                }
+                handleUsbAction(intent);
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
-                        ConnectivityManager.EXTRA_NETWORK_INFO);
-                if (networkInfo != null &&
-                        networkInfo.getDetailedState() != NetworkInfo.DetailedState.FAILED) {
-                    if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
-                    mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
-                }
+                handleConnectivityAction(intent);
             } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
-                synchronized (Tethering.this.mPublicSync) {
-                    int curState =  intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
-                            WifiManager.WIFI_AP_STATE_DISABLED);
-                    switch (curState) {
-                        case WifiManager.WIFI_AP_STATE_ENABLING:
-                            // We can see this state on the way to both enabled and failure states.
-                            break;
-                        case WifiManager.WIFI_AP_STATE_ENABLED:
-                            // When the AP comes up and we've been requested to tether it, do so.
-                            if (mWifiTetherRequested) {
-                                tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_WIFI);
-                            }
-                            break;
-                        case WifiManager.WIFI_AP_STATE_DISABLED:
-                        case WifiManager.WIFI_AP_STATE_DISABLING:
-                        case WifiManager.WIFI_AP_STATE_FAILED:
-                        default:
-                            if (DBG) {
-                                Log.d(TAG, "Canceling WiFi tethering request - AP_STATE=" +
-                                    curState);
-                            }
-                            // Tell appropriate interface state machines that they should tear
-                            // themselves down.
-                            for (int i = 0; i < mTetherStates.size(); i++) {
-                                TetherInterfaceStateMachine tism =
-                                        mTetherStates.valueAt(i).mStateMachine;
-                                if (tism.interfaceType() == ConnectivityManager.TETHERING_WIFI) {
-                                    tism.sendMessage(
-                                            TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
-                                    break;  // There should be at most one of these.
-                                }
-                            }
-                            // Regardless of whether we requested this transition, the AP has gone
-                            // down.  Don't try to tether again unless we're requested to do so.
-                            mWifiTetherRequested = false;
-                            break;
-                    }
-                }
+                handleWifiApAction(intent);
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 updateConfiguration();
+            }
+        }
+
+        private void handleConnectivityAction(Intent intent) {
+            final NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
+                    ConnectivityManager.EXTRA_NETWORK_INFO);
+            if (networkInfo == null ||
+                    networkInfo.getDetailedState() == NetworkInfo.DetailedState.FAILED) {
+                return;
+            }
+
+            if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION: " + networkInfo.toString());
+            mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+        }
+
+        private void handleUsbAction(Intent intent) {
+            final boolean usbConnected = intent.getBooleanExtra(USB_CONNECTED, false);
+            final boolean rndisEnabled = intent.getBooleanExtra(USB_FUNCTION_RNDIS, false);
+            synchronized (Tethering.this.mPublicSync) {
+                mRndisEnabled = rndisEnabled;
+                // start tethering if we have a request pending
+                if (usbConnected && mRndisEnabled && mUsbTetherRequested) {
+                    tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_USB);
+                }
+                mUsbTetherRequested = false;
+            }
+        }
+
+        private void handleWifiApAction(Intent intent) {
+            final int curState =  intent.getIntExtra(EXTRA_WIFI_AP_STATE, WIFI_AP_STATE_DISABLED);
+            synchronized (Tethering.this.mPublicSync) {
+                switch (curState) {
+                    case WifiManager.WIFI_AP_STATE_ENABLING:
+                        // We can see this state on the way to both enabled and failure states.
+                        break;
+                    case WifiManager.WIFI_AP_STATE_ENABLED:
+                        // When the AP comes up and we've been requested to tether it, do so.
+                        if (mWifiTetherRequested) {
+                            tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_WIFI);
+                        }
+                        break;
+                    case WifiManager.WIFI_AP_STATE_DISABLED:
+                    case WifiManager.WIFI_AP_STATE_DISABLING:
+                    case WifiManager.WIFI_AP_STATE_FAILED:
+                    default:
+                        if (DBG) {
+                            Log.d(TAG, "Canceling WiFi tethering request - AP_STATE=" +
+                                curState);
+                        }
+                        // Tell appropriate interface state machines that they should tear
+                        // themselves down.
+                        for (int i = 0; i < mTetherStates.size(); i++) {
+                            TetherInterfaceStateMachine tism =
+                                    mTetherStates.valueAt(i).mStateMachine;
+                            if (tism.interfaceType() == ConnectivityManager.TETHERING_WIFI) {
+                                tism.sendMessage(
+                                        TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
+                                break;  // There should be at most one of these.
+                            }
+                        }
+                        // Regardless of whether we requested this transition, the AP has gone
+                        // down.  Don't try to tether again unless we're requested to do so.
+                        mWifiTetherRequested = false;
+                    break;
+                }
             }
         }
     }
@@ -1341,7 +1361,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 final IntentFilter filter = new IntentFilter();
                 filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
 
-                mContext.registerReceiver(mBroadcastReceiver, filter);
+                mContext.registerReceiver(mBroadcastReceiver, filter, null,
+                        mTetherMasterSM.getHandler());
             }
         }
 
