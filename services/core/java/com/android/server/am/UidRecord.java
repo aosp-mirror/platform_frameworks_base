@@ -31,6 +31,8 @@ public final class UidRecord {
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     long lastBackgroundTime;
     boolean ephemeral;
+    boolean curWhitelist;
+    boolean setWhitelist;
     boolean idle;
     int numProcs;
 
@@ -70,6 +72,9 @@ public final class UidRecord {
         sb.append(ProcessList.makeProcStateString(curProcState));
         if (ephemeral) {
             sb.append(" ephemeral");
+        }
+        if (curWhitelist) {
+            sb.append(" whitelist");
         }
         if (lastBackgroundTime > 0) {
             sb.append(" bg:");

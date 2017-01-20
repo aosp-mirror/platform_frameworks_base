@@ -1430,6 +1430,9 @@ class ContextImpl extends Context {
                     throw new SecurityException(
                             "Unable to start service " + service
                             + ": " + cn.getClassName());
+                } else if (cn.getPackageName().equals("?")) {
+                    throw new IllegalStateException(
+                            "Not allowed to start service " + service + ": " + cn.getClassName());
                 }
             }
             return cn;

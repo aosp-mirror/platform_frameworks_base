@@ -2509,7 +2509,10 @@ public abstract class Context {
      * {@link ComponentName} of the actual service that was started is
      * returned; else if the service does not exist null is returned.
      *
-     * @throws SecurityException &nbsp;
+     * @throws SecurityException If the caller does not permission to access the service
+     * or the service can not be found.
+     * @throws IllegalStateException If the application is in a state where the service
+     * can not be started (such as not in the foreground in a state when services are allowed).
      *
      * @see #stopService
      * @see #bindService
@@ -2550,7 +2553,10 @@ public abstract class Context {
      * @return If there is a service matching the given Intent that is already
      * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
      *
-     * @throws SecurityException &nbsp;
+     * @throws SecurityException If the caller does not permission to access the service
+     * or the service can not be found.
+     * @throws IllegalStateException If the application is in a state where the service
+     * can not be started (such as not in the foreground in a state when services are allowed).
      *
      * @see #startService
      */
@@ -2612,7 +2618,8 @@ public abstract class Context {
      *         {@code false} is returned if the connection is not made so you will not
      *         receive the service object.
      *
-     * @throws SecurityException &nbsp;
+     * @throws SecurityException If the caller does not permission to access the service
+     * or the service can not be found.
      *
      * @see #unbindService
      * @see #startService

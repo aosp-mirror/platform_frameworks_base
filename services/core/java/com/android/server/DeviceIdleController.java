@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -114,6 +115,7 @@ public class DeviceIdleController extends SystemService
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
+    private ActivityManagerInternal mLocalActivityManager;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private ConnectivityService mConnectivityService;
@@ -1373,6 +1375,7 @@ public class DeviceIdleController extends SystemService
             synchronized (this) {
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mBatteryStats = BatteryStatsService.getService();
+                mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
                 mPowerManager = getContext().getSystemService(PowerManager.class);
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -1442,6 +1445,7 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 getContext().registerReceiver(mReceiver, filter);
 
+                mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
@@ -1663,7 +1667,7 @@ public class DeviceIdleController extends SystemService
                 } catch (RemoteException e) {
                 }
                 postTempActiveTimeoutMessage(appId, duration);
-                updateTempWhitelistAppIdsLocked();
+                updateTempWhitelistAppIdsLocked(appId, true);
                 if (mNetworkPolicyTempWhitelistCallback != null) {
                     if (!sync) {
                         mHandler.post(mNetworkPolicyTempWhitelistCallback);
@@ -1709,7 +1713,7 @@ public class DeviceIdleController extends SystemService
                 if (DEBUG) {
                     Slog.d(TAG, "Removing UID " + uid + " from temp whitelist");
                 }
-                updateTempWhitelistAppIdsLocked();
+                updateTempWhitelistAppIdsLocked(uid, false);
                 if (mNetworkPolicyTempWhitelistCallback != null) {
                     mHandler.post(mNetworkPolicyTempWhitelistCallback);
                 }
@@ -2329,6 +2333,13 @@ public class DeviceIdleController extends SystemService
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistAllAppIds);
         mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
+        if (mLocalActivityManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting activity manager whitelist to "
+                        + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
+            }
+            mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+        }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting wakelock whitelist to "
@@ -2345,13 +2356,21 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    private void updateTempWhitelistAppIdsLocked() {
+    private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (mTempWhitelistAppIdArray.length != size) {
             mTempWhitelistAppIdArray = new int[size];
         }
         for (int i = 0; i < size; i++) {
             mTempWhitelistAppIdArray[i] = mTempWhitelistAppIdEndTimes.keyAt(i);
+        }
+        if (mLocalActivityManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting activity manager temp whitelist to "
+                        + Arrays.toString(mTempWhitelistAppIdArray));
+            }
+            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, appId,
+                    adding);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -2523,8 +2542,9 @@ public class DeviceIdleController extends SystemService
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
         pw.println("  tempwhitelist");
         pw.println("    Print packages that are temporarily whitelisted.");
-        pw.println("  tempwhitelist [-u] [package ..]");
-        pw.println("    Temporarily place packages in whitelist for 10 seconds.");
+        pw.println("  tempwhitelist [-u USER] [-d DURATION] [package ..]");
+        pw.println("    Temporarily place packages in whitelist for DURATION milliseconds.");
+        pw.println("    If no DURATION is specified, 10 seconds is used");
     }
 
     class Shell extends ShellCommand {
@@ -2807,6 +2827,7 @@ public class DeviceIdleController extends SystemService
                 }
             }
         } else if ("tempwhitelist".equals(cmd)) {
+            long duration = 10000;
             String opt;
             while ((opt=shell.getNextOption()) != null) {
                 if ("-u".equals(opt)) {
@@ -2816,12 +2837,19 @@ public class DeviceIdleController extends SystemService
                         return -1;
                     }
                     shell.userId = Integer.parseInt(opt);
+                } else if ("-d".equals(opt)) {
+                    opt = shell.getNextArg();
+                    if (opt == null) {
+                        pw.println("-d requires a duration");
+                        return -1;
+                    }
+                    duration = Long.parseLong(opt);
                 }
             }
             String arg = shell.getNextArg();
             if (arg != null) {
                 try {
-                    addPowerSaveTempWhitelistAppChecked(arg, 10000L, shell.userId, "shell");
+                    addPowerSaveTempWhitelistAppChecked(arg, duration, shell.userId, "shell");
                 } catch (RemoteException re) {
                     pw.println("Failed: " + re);
                 }

@@ -201,6 +201,17 @@ public abstract class ActivityManagerInternal {
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
 
     /**
+     * Allow DeviceIdleController to tell us about what apps are whitelisted.
+     */
+    public abstract void setDeviceIdleWhitelist(int[] appids);
+
+    /**
+     * Update information about which app IDs are on the temp whitelist.
+     */
+    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId,
+            boolean adding);
+
+    /**
      * Updates and persists the {@link Configuration} for a given user.
      *
      * @param values the configuration to update

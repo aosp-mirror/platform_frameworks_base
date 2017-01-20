@@ -526,9 +526,13 @@ public class ActivityManager {
     /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later. */
     public static final int APP_START_MODE_DELAYED = 1;
 
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later, with
+     * rigid errors (throwing exception). */
+    public static final int APP_START_MODE_DELAYED_RIGID = 2;
+
     /** @hide Mode for {@link IActivityManager#getAppStartMode}: disable/cancel pending
-     * launches. */
-    public static final int APP_START_MODE_DISABLED = 2;
+     * launches; this is the mode for ephemeral apps. */
+    public static final int APP_START_MODE_DISABLED = 3;
 
     /**
      * Lock task mode is not active.

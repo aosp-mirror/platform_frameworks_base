@@ -356,7 +356,14 @@ public final class ActiveServices {
                             + service + " to " + r.name.flattenToShortString()
                             + " from pid=" + callingPid + " uid=" + callingUid
                             + " pkg=" + callingPackage);
-                    return null;
+                    if (allowed == ActivityManager.APP_START_MODE_DELAYED) {
+                        // In this case we are silently disabling the app, to disrupt as
+                        // little as possible existing apps.
+                        return null;
+                    }
+                    // This app knows it is in the new model where this operation is not
+                    // allowed, so tell it what has happened.
+                    return new ComponentName("?", "app is in background");
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1453,6 +1460,8 @@ public final class ActiveServices {
             // If service is not currently running, can't yet bind.
             return false;
         }
+        if (DEBUG_SERVICE) Slog.d(TAG_SERVICE, "requestBind " + i + ": requested=" + i.requested
+                + " rebind=" + rebind);
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
                 bumpServiceExecutingLocked(r, execInFg, "bind");
@@ -2024,6 +2033,7 @@ public final class ActiveServices {
                         bumpServiceExecutingLocked(r, false, "bring down unbind");
                         mAm.updateOomAdjLocked(r.app);
                         ibr.hasBound = false;
+                        ibr.requested = false;
                         r.app.thread.scheduleUnbindService(r,
                                 ibr.intent.getIntent());
                     } catch (Exception e) {
