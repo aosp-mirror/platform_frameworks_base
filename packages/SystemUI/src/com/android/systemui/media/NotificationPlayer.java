@@ -22,6 +22,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.PlayerBase;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -81,6 +82,12 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                     (AudioManager) mCmd.context.getSystemService(Context.AUDIO_SERVICE);
                 try {
                     MediaPlayer player = new MediaPlayer();
+                    if (mCmd.attributes == null) {
+                        mCmd.attributes = new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build();
+                    }
                     player.setAudioAttributes(mCmd.attributes);
                     player.setDataSource(mCmd.context, mCmd.uri);
                     player.setLooping(mCmd.looping);
@@ -92,13 +99,11 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                                 if (mAudioManagerWithAudioFocus == null) {
                                     if (mDebug) Log.d(mTag, "requesting AudioFocus");
                                     if (mCmd.looping) {
-                                        audioManager.requestAudioFocus(null,
-                                                AudioAttributes.toLegacyStreamType(mCmd.attributes),
-                                                AudioManager.AUDIOFOCUS_GAIN);
+                                        audioManager.requestAudioFocus(null, mCmd.attributes,
+                                                AudioManager.AUDIOFOCUS_GAIN, 0);
                                     } else {
-                                        audioManager.requestAudioFocus(null,
-                                                AudioAttributes.toLegacyStreamType(mCmd.attributes),
-                                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+                                        audioManager.requestAudioFocus(null, mCmd.attributes,
+                                                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK, 0);
                                     }
                                     mAudioManagerWithAudioFocus = audioManager;
                                 } else {
@@ -296,6 +301,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
      */
     @Deprecated
     public void play(Context context, Uri uri, boolean looping, int stream) {
+        PlayerBase.deprecateStreamTypeForPlayback(stream, "NotificationPlayer", "play");
         Command cmd = new Command();
         cmd.requestTime = SystemClock.uptimeMillis();
         cmd.code = PLAY;
