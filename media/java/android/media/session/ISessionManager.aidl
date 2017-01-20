@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.media.IRemoteVolumeController;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
+import android.media.session.IOnMediaKeyListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.os.Bundle;
@@ -45,5 +46,6 @@ interface ISessionManager {
     boolean isGlobalPriorityActive();
 
     void setOnVolumeKeyLongPressListener(in IOnVolumeKeyLongPressListener listener);
+    void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 }
 

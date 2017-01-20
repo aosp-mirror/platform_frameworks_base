@@ -423,6 +423,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/projection/IMediaProjectionWatcherCallback.aidl \
 	media/java/android/media/session/IActiveSessionsListener.aidl \
+	media/java/android/media/session/IOnMediaKeyListener.aidl \
 	media/java/android/media/session/IOnVolumeKeyLongPressListener.aidl \
 	media/java/android/media/session/ISession.aidl \
 	media/java/android/media/session/ISessionCallback.aidl \
