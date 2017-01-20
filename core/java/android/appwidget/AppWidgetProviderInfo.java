@@ -26,6 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.content.ComponentName;
 import android.os.UserHandle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 /**
  * Describes the meta data for an installed AppWidget provider.  The fields in this class
@@ -376,6 +378,17 @@ public class AppWidgetProviderInfo implements Parcelable {
             /* ignore */
         }
         return loadDefaultIcon ? providerInfo.loadIcon(context.getPackageManager()) : null;
+    }
+
+    /**
+     * @hide
+     */
+    public void updateDimensions(DisplayMetrics displayMetrics) {
+        // Converting complex to dp.
+        minWidth = TypedValue.complexToDimensionPixelSize(minWidth, displayMetrics);
+        minHeight = TypedValue.complexToDimensionPixelSize(minHeight, displayMetrics);
+        minResizeWidth = TypedValue.complexToDimensionPixelSize(minResizeWidth, displayMetrics);
+        minResizeHeight = TypedValue.complexToDimensionPixelSize(minResizeHeight, displayMetrics);
     }
 
     /**

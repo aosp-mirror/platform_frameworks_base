@@ -36,7 +36,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.widget.RemoteViews;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -381,15 +380,7 @@ public class AppWidgetHost {
         // Convert complex to dp -- we are getting the AppWidgetProviderInfo from the
         // AppWidgetService, which doesn't have our context, hence we need to do the
         // conversion here.
-        appWidget.minWidth =
-            TypedValue.complexToDimensionPixelSize(appWidget.minWidth, mDisplayMetrics);
-        appWidget.minHeight =
-            TypedValue.complexToDimensionPixelSize(appWidget.minHeight, mDisplayMetrics);
-        appWidget.minResizeWidth =
-            TypedValue.complexToDimensionPixelSize(appWidget.minResizeWidth, mDisplayMetrics);
-        appWidget.minResizeHeight =
-            TypedValue.complexToDimensionPixelSize(appWidget.minResizeHeight, mDisplayMetrics);
-
+        appWidget.updateDimensions(mDisplayMetrics);
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
         }

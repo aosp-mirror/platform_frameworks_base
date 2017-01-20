@@ -31,7 +31,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetService;
@@ -760,7 +759,7 @@ public class AppWidgetManager {
             }
             for (AppWidgetProviderInfo info : providers.getList()) {
                 // Converting complex to dp.
-                convertSizesToPixels(info);
+                info.updateDimensions(mDisplayMetrics);
             }
             return providers.getList();
         } catch (RemoteException e) {
@@ -782,7 +781,7 @@ public class AppWidgetManager {
             AppWidgetProviderInfo info = mService.getAppWidgetInfo(mPackageName, appWidgetId);
             if (info != null) {
                 // Converting complex to dp.
-                convertSizesToPixels(info);
+                info.updateDimensions(mDisplayMetrics);
             }
             return info;
         } catch (RemoteException e) {
@@ -1070,18 +1069,6 @@ public class AppWidgetManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    private void convertSizesToPixels(AppWidgetProviderInfo info) {
-        // Converting complex to dp.
-        info.minWidth = TypedValue.complexToDimensionPixelSize(info.minWidth,
-                mDisplayMetrics);
-        info.minHeight = TypedValue.complexToDimensionPixelSize(info.minHeight,
-                mDisplayMetrics);
-        info.minResizeWidth = TypedValue.complexToDimensionPixelSize(info.minResizeWidth,
-                mDisplayMetrics);
-        info.minResizeHeight = TypedValue.complexToDimensionPixelSize(info.minResizeHeight,
-                mDisplayMetrics);
     }
 
     /**

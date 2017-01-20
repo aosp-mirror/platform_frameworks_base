@@ -1256,8 +1256,13 @@ public class LauncherApps {
          * {@link #REQUEST_TYPE_APPWIDGET} request.
          */
         @Nullable
-        public AppWidgetProviderInfo getAppWidgetProviderInfo() {
-            return mAppWidgetInfo;
+        public AppWidgetProviderInfo getAppWidgetProviderInfo(Context context) {
+            if (mAppWidgetInfo != null) {
+                AppWidgetProviderInfo info = mAppWidgetInfo.clone();
+                info.updateDimensions(context.getResources().getDisplayMetrics());
+                return info;
+            }
+            return null;
         }
 
         /**

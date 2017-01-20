@@ -83,7 +83,8 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
     private void assertPinItemRequest(PinItemRequest actualRequest, String className) {
         assertNotNull(actualRequest);
         assertEquals(PinItemRequest.REQUEST_TYPE_APPWIDGET, actualRequest.getRequestType());
-        assertEquals(className, actualRequest.getAppWidgetProviderInfo().provider.getClassName());
+        assertEquals(className, actualRequest.getAppWidgetProviderInfo(getTestContext())
+                .provider.getClassName());
     }
 
     public void testNotForeground() {
