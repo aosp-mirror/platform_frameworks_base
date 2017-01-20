@@ -109,7 +109,7 @@ public class UpstreamNetworkMonitor {
         mNetworkMap.clear();
     }
 
-    public void mobileUpstreamRequiresDun(boolean dunRequired) {
+    public void updateMobileRequiresDun(boolean dunRequired) {
         final boolean valueChanged = (mDunRequired != dunRequired);
         mDunRequired = dunRequired;
         if (valueChanged && mobileNetworkRequested()) {
@@ -123,7 +123,10 @@ public class UpstreamNetworkMonitor {
     }
 
     public void registerMobileNetworkRequest() {
-        if (mMobileNetworkCallback != null) return;
+        if (mMobileNetworkCallback != null) {
+            Log.e(TAG, "registerMobileNetworkRequest() already registered");
+            return;
+        }
 
         final NetworkRequest.Builder builder = new NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
@@ -139,11 +142,10 @@ public class UpstreamNetworkMonitor {
         // Therefore, to avoid duplicate notifications, we only register a no-op.
         mMobileNetworkCallback = new NetworkCallback();
 
-        // TODO: Change the timeout from 0 (no onUnavailable callback) to use some
-        // moderate callback time (once timeout callbacks are implemented). This might
-        // be useful for updating some UI. Additionally, we should definitely log a
-        // message to aid in any subsequent debugging
-        if (DBG) Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
+        // TODO: Change the timeout from 0 (no onUnavailable callback) to some
+        // moderate callback timeout. This might be useful for updating some UI.
+        // Additionally, we log a message to aid in any subsequent debugging.
+        Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
 
         // The following use of the legacy type system cannot be removed until
         // after upstream selection no longer finds networks by legacy type.
