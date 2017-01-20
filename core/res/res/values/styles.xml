@@ -1290,7 +1290,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.ActionButton.Overflow">
         <item name="src">@drawable/ic_menu_more</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
-        <item name="tooltip">@string/action_menu_overflow_description</item>
+        <item name="tooltipText">@string/action_menu_overflow_description</item>
     </style>
 
     <style name="Widget.ActionButton.CloseMode">

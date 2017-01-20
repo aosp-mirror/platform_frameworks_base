@@ -621,9 +621,9 @@ public interface MenuItem {
     /**
      * Change the tooltip text associated with this menu item.
      *
-     * @param tooltip The new tooltip text.
+     * @param tooltipText The new tooltip text.
      */
-    default MenuItem setTooltip(CharSequence tooltip) {
+    default MenuItem setTooltipText(CharSequence tooltipText) {
         return this;
     }
 
@@ -632,7 +632,7 @@ public interface MenuItem {
      *
      * @return The tooltip text.
      */
-    default CharSequence getTooltip() {
+    default CharSequence getTooltipText() {
         return null;
     }
 }

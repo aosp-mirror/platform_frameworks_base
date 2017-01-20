@@ -193,12 +193,12 @@ public class ActionMenuItemView extends TextView
             setContentDescription(contentDescription);
         }
 
-        final CharSequence tooltip = mItemData.getTooltip();
-        if (TextUtils.isEmpty(tooltip)) {
+        final CharSequence tooltipText = mItemData.getTooltipText();
+        if (TextUtils.isEmpty(tooltipText)) {
             // Use the uncondensed title for tooltip, but only if the title is not shown already.
-            setTooltip(visible ? null : mItemData.getTitle());
+            setTooltipText(visible ? null : mItemData.getTitle());
         } else {
-            setTooltip(tooltip);
+            setTooltipText(tooltipText);
         }
     }
 

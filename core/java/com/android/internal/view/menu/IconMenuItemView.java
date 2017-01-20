@@ -113,7 +113,7 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
             } else {
                 setContentDescription(contentDescription);
             }
-            setTooltip(mItemData.getTooltip());
+            setTooltipText(mItemData.getTooltipText());
         }
     }
 

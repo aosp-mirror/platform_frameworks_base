@@ -48,7 +48,7 @@ public class ActionMenuItem implements MenuItem {
     private MenuItem.OnMenuItemClickListener mClickListener;
 
     private CharSequence mContentDescription;
-    private CharSequence mTooltip;
+    private CharSequence mTooltipText;
 
     private static final int NO_ICON = 0;
 
@@ -290,13 +290,13 @@ public class ActionMenuItem implements MenuItem {
     }
 
     @Override
-    public MenuItem setTooltip(CharSequence tooltip) {
-        mTooltip = tooltip;
+    public MenuItem setTooltipText(CharSequence tooltipText) {
+        mTooltipText = tooltipText;
         return this;
     }
 
     @Override
-    public CharSequence getTooltip() {
-        return mTooltip;
+    public CharSequence getTooltipText() {
+        return mTooltipText;
     }
 }

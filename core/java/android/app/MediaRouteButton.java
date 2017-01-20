@@ -174,7 +174,7 @@ public class MediaRouteButton extends View {
     @Override
     public void setContentDescription(CharSequence contentDescription) {
         super.setContentDescription(contentDescription);
-        setTooltip(contentDescription);
+        setTooltipText(contentDescription);
     }
 
     @Override

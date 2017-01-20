@@ -1591,7 +1591,7 @@ public final class FloatingToolbar {
                     } else {
                         menuButton.setContentDescription(contentDescription);
                     }
-                    menuButton.setTooltip(menuItem.getTooltip());
+                    menuButton.setTooltipText(menuItem.getTooltipText());
                     menuButton.setMinimumWidth(minimumWidth);
                 }
                 return menuButton;
@@ -1642,17 +1642,17 @@ public final class FloatingToolbar {
             ((ImageButton) menuItemButton
                     .findViewById(R.id.floating_toolbar_menu_item_image_button))
                     .setImageDrawable(menuItem.getIcon());
-            final CharSequence tooltip = menuItem.getTooltip();
-            if (TextUtils.isEmpty(tooltip)) {
-                menuItemButton.setTooltip(menuItem.getTitle());
+            final CharSequence tooltipText = menuItem.getTooltipText();
+            if (TextUtils.isEmpty(tooltipText)) {
+                menuItemButton.setTooltipText(menuItem.getTitle());
             } else {
-                menuItemButton.setTooltip(tooltip);
+                menuItemButton.setTooltipText(tooltipText);
             }
         } else {
             menuItemButton = LayoutInflater.from(context)
                     .inflate(R.layout.floating_popup_menu_button, null);
             ((Button) menuItemButton).setText(menuItem.getTitle());
-            menuItemButton.setTooltip(menuItem.getTooltip());
+            menuItemButton.setTooltipText(menuItem.getTooltipText());
         }
         final CharSequence contentDescription = menuItem.getContentDescription();
         if (TextUtils.isEmpty(contentDescription)) {
