@@ -138,6 +138,8 @@ interface IPackageManager {
 
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
+    ResolveInfo findPersistentPreferredActivity(in Intent intent, int userId);
+
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
     ParceledListSlice queryIntentActivities(in Intent intent,

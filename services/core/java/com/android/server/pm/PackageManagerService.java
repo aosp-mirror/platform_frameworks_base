@@ -3766,6 +3766,19 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
+     * Update given intent when being used to request {@link ResolveInfo}.
+     */
+    private Intent updateIntentForResolve(Intent intent) {
+        if (intent.getSelector() != null) {
+            intent = intent.getSelector();
+        }
+        if (DEBUG_PREFERRED) {
+            intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
+        }
+        return intent;
+    }
+
+    /**
      * Update given flags when being used to request {@link ResolveInfo}.
      */
     int updateFlagsForResolve(int flags, int userId, Object cookie) {
@@ -5149,6 +5162,26 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public ResolveInfo findPersistentPreferredActivity(Intent intent, int userId) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
+            throw new SecurityException(
+                    "findPersistentPreferredActivity can only be run by the system");
+        }
+        if (!sUserManager.exists(userId)) {
+            return null;
+        }
+        intent = updateIntentForResolve(intent);
+        final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+        final int flags = updateFlagsForResolve(0, userId, intent);
+        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
+                userId);
+        synchronized (mPackages) {
+            return findPersistentPreferredActivityLP(intent, resolvedType, flags, query, false,
+                    userId);
+        }
+    }
+
+    @Override
     public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
             IntentFilter filter, int match, ComponentName activity) {
         final int userId = UserHandle.getCallingUserId();
@@ -5414,13 +5447,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForResolve(flags, userId, intent);
+        intent = updateIntentForResolve(intent);
         // writer
         synchronized (mPackages) {
-            if (intent.getSelector() != null) {
-                intent = intent.getSelector();
-            }
-            if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-
             // Try to find a matching persistent preferred activity.
             ResolveInfo pri = findPersistentPreferredActivityLP(intent, resolvedType, flags, query,
                     debug, userId);
