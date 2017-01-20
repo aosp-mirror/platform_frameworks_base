@@ -37,6 +37,8 @@ public final class RecommendationRequest implements Parcelable {
     private final WifiConfiguration mDefaultConfig;
     private WifiConfiguration mConnectedConfig;
     private WifiConfiguration[] mConnectableConfigs;
+    private final int mLastSelectedNetworkId;
+    private final long mLastSelectedNetworkTimestamp;
 
     /**
      * Builder class for constructing {@link RecommendationRequest} instances.
@@ -48,17 +50,9 @@ public final class RecommendationRequest implements Parcelable {
         private WifiConfiguration mDefaultConfig;
         private WifiConfiguration mConnectedConfig;
         private WifiConfiguration[] mConnectableConfigs;
+        private int mLastSelectedNetworkId;
+        private long mLastSelectedTimestamp;
 
-        /**
-         * @param scanResults the array of {@link ScanResult}s the recommendation must be
-         *                    constrained to i.e. if a non-null wifi config recommendation is
-         *                    returned then it must be able to connect to one of the networks in
-         *                    the results list.
-         *
-         *                    If the array is {@code null} or empty then there is no constraint.
-         *
-         * @return this
-         */
         public Builder setScanResults(ScanResult[] scanResults) {
             mScanResults = scanResults;
             return this;
@@ -89,7 +83,20 @@ public final class RecommendationRequest implements Parcelable {
          * @return this
          */
         public Builder setConnectableConfigs(WifiConfiguration[] connectableConfigs) {
-            mConnectableConfigs = connectableConfigs;
+            this.mConnectableConfigs = connectableConfigs;
+            return this;
+        }
+
+        /**
+         * @param networkId The {@link WifiConfiguration#networkId} of the last user selected
+         *                  network.
+         * @param timestamp The {@link android.os.SystemClock#elapsedRealtime()} when the user
+         *                  selected {@code networkId}.
+         * @return this
+         */
+        public Builder setLastSelectedNetwork(int networkId, long timestamp) {
+            this.mLastSelectedNetworkId = networkId;
+            this.mLastSelectedTimestamp = timestamp;
             return this;
         }
 
@@ -97,10 +104,8 @@ public final class RecommendationRequest implements Parcelable {
          * @return a new {@link RecommendationRequest} instance
          */
         public RecommendationRequest build() {
-            return new RecommendationRequest(mScanResults,
-                    mDefaultConfig,
-                    mConnectedConfig,
-                    mConnectableConfigs);
+            return new RecommendationRequest(mScanResults, mDefaultConfig, mConnectedConfig,
+                    mConnectableConfigs, mLastSelectedNetworkId, mLastSelectedTimestamp);
         }
     }
 
@@ -154,15 +159,35 @@ public final class RecommendationRequest implements Parcelable {
         mConnectableConfigs = connectableConfigs;
     }
 
+    /**
+     * @return The {@link WifiConfiguration#networkId} of the last user selected network.
+     *         {@code 0} if not set.
+     */
+    public int getLastSelectedNetworkId() {
+        return mLastSelectedNetworkId;
+    }
+
+    /**
+     * @return The {@link android.os.SystemClock#elapsedRealtime()} when the user selected
+     *         {@link #getLastSelectedNetworkId()}. {@code 0} if not set.
+     */
+    public long getLastSelectedNetworkTimestamp() {
+        return mLastSelectedNetworkTimestamp;
+    }
+
     @VisibleForTesting
     RecommendationRequest(ScanResult[] scanResults,
             WifiConfiguration defaultWifiConfig,
             WifiConfiguration connectedWifiConfig,
-            WifiConfiguration[] connectableConfigs) {
+            WifiConfiguration[] connectableConfigs,
+            int lastSelectedNetworkId,
+            long lastSelectedNetworkTimestamp) {
         mScanResults = scanResults;
         mDefaultConfig = defaultWifiConfig;
         mConnectedConfig = connectedWifiConfig;
         mConnectableConfigs = connectableConfigs;
+        mLastSelectedNetworkId = lastSelectedNetworkId;
+        mLastSelectedNetworkTimestamp = lastSelectedNetworkTimestamp;
     }
 
     protected RecommendationRequest(Parcel in) {
@@ -190,6 +215,9 @@ public final class RecommendationRequest implements Parcelable {
         } else {
             mConnectableConfigs = null;
         }
+
+        mLastSelectedNetworkId = in.readInt();
+        mLastSelectedNetworkTimestamp = in.readLong();
     }
 
     @Override
@@ -220,7 +248,8 @@ public final class RecommendationRequest implements Parcelable {
             dest.writeInt(0);
         }
 
-
+        dest.writeInt(mLastSelectedNetworkId);
+        dest.writeLong(mLastSelectedNetworkTimestamp);
     }
 
     public static final Creator<RecommendationRequest> CREATOR =
