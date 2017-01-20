@@ -24,6 +24,7 @@ import android.annotation.XmlRes;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -1386,7 +1387,7 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    ApplicationPackageManager(ContextImpl context,
+    protected ApplicationPackageManager(ContextImpl context,
                               IPackageManager pm) {
         mContext = context;
         mPM = pm;
@@ -1820,6 +1821,12 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        return getPackageCurrentVolume(app, storage);
+    }
+
+    @VisibleForTesting
+    protected @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app,
+            StorageManager storage) {
         if (app.isInternal()) {
             return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
         } else if (app.isExternalAsec()) {
@@ -1831,25 +1838,43 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        final VolumeInfo currentVol = getPackageCurrentVolume(app);
-        final List<VolumeInfo> vols = storage.getVolumes();
+        final StorageManager storageManager = mContext.getSystemService(StorageManager.class);
+        return getPackageCandidateVolumes(app, storageManager, mPM);
+    }
+
+    @VisibleForTesting
+    protected @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app,
+            StorageManager storageManager, IPackageManager pm) {
+        final VolumeInfo currentVol = getPackageCurrentVolume(app, storageManager);
+        final List<VolumeInfo> vols = storageManager.getVolumes();
         final List<VolumeInfo> candidates = new ArrayList<>();
         for (VolumeInfo vol : vols) {
-            if (Objects.equals(vol, currentVol) || isPackageCandidateVolume(mContext, app, vol)) {
+            if (Objects.equals(vol, currentVol)
+                    || isPackageCandidateVolume(mContext, app, vol, pm)) {
                 candidates.add(vol);
             }
         }
         return candidates;
     }
 
-    private boolean isPackageCandidateVolume(
-            ContextImpl context, ApplicationInfo app, VolumeInfo vol) {
-        final boolean forceAllowOnExternal = Settings.Global.getInt(
+    @VisibleForTesting
+    protected boolean isForceAllowOnExternal(Context context) {
+        return Settings.Global.getInt(
                 context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
-        // Private internal is always an option
+    }
+
+    @VisibleForTesting
+    protected boolean isAllow3rdPartyOnInternal(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allow3rdPartyAppOnInternal);
+    }
+
+    private boolean isPackageCandidateVolume(
+            ContextImpl context, ApplicationInfo app, VolumeInfo vol, IPackageManager pm) {
+        final boolean forceAllowOnExternal = isForceAllowOnExternal(context);
+
         if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
-            return true;
+            return app.isSystemApp() || isAllow3rdPartyOnInternal(context);
         }
 
         // System apps and apps demanding internal storage can't be moved
@@ -1875,7 +1900,7 @@ public class ApplicationPackageManager extends PackageManager {
 
         // Some apps can't be moved. (e.g. device admins)
         try {
-            if (mPM.isPackageDeviceAdminOnAnyUser(app.packageName)) {
+            if (pm.isPackageDeviceAdminOnAnyUser(app.packageName)) {
                 return false;
             }
         } catch (RemoteException e) {

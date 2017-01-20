@@ -68,6 +68,7 @@ import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.MOVE_FAILED_3RD_PARTY_NOT_ALLOWED_ON_INTERNAL;
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
@@ -21040,6 +21041,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             if (pkg.applicationInfo.isSystemApp()) {
                 throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
                         "Cannot move system application");
+            }
+
+            final boolean isInternalStorage = VolumeInfo.ID_PRIVATE_INTERNAL.equals(volumeUuid);
+            final boolean allow3rdPartyOnInternal = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_allow3rdPartyAppOnInternal);
+            if (isInternalStorage && !allow3rdPartyOnInternal) {
+                throw new PackageManagerException(MOVE_FAILED_3RD_PARTY_NOT_ALLOWED_ON_INTERNAL,
+                        "3rd party apps are not allowed on internal storage");
             }
 
             if (pkg.applicationInfo.isExternalAsec()) {
