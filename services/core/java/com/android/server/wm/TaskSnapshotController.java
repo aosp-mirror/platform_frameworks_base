@@ -22,11 +22,13 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.GraphicBuffer;
+import android.os.Environment;
 import android.util.ArraySet;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
 import java.io.PrintWriter;
 
 /**
@@ -45,12 +47,19 @@ import java.io.PrintWriter;
 class TaskSnapshotController {
 
     private final WindowManagerService mService;
-    private final TaskSnapshotCache mCache = new TaskSnapshotCache();
 
+    private final TaskSnapshotCache mCache = new TaskSnapshotCache();
+    private final TaskSnapshotPersister mPersister = new TaskSnapshotPersister(
+            Environment::getDataSystemCeDirectory);
+    private final TaskSnapshotLoader mLoader = new TaskSnapshotLoader(mPersister);
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
+    }
+
+    void systemReady() {
+        mPersister.start();
     }
 
     void onTransitionStarting() {
@@ -69,6 +78,7 @@ class TaskSnapshotController {
             final TaskSnapshot snapshot = snapshotTask(task);
             if (snapshot != null) {
                 mCache.putSnapshot(task, snapshot);
+                mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
                 if (task.getController() != null) {
                     task.getController().reportSnapshotChanged(snapshot);
                 }
@@ -139,6 +149,17 @@ class TaskSnapshotController {
 
         // TODO: Only clean from running cache.
         mCache.cleanCache(wtoken);
+    }
+
+    void notifyTaskRemovedFromRecents(int taskId, int userId) {
+        mPersister.onTaskRemovedFromRecents(taskId, userId);
+    }
+
+    /**
+     * See {@link TaskSnapshotPersister#removeObsoleteFiles}
+     */
+    void removeObsoleteTaskFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
+        mPersister.removeObsoleteFiles(persistentTaskIds, runningUserIds);
     }
 
     void dump(PrintWriter pw, String prefix) {

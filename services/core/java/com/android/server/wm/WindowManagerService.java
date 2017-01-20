@@ -3902,6 +3902,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * In case a task write/delete operation was lost because the system crashed, this makes sure to
+     * clean up the directory to remove obsolete files.
+     *
+     * @param persistentTaskIds A set of task ids that exist in our in-memory model.
+     * @param runningUserIds The ids of the list of users that have tasks loaded in our in-memory
+     *                       model.
+     */
+    public void removeObsoleteTaskFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
+        synchronized (mWindowMap) {
+            mTaskSnapshotController.removeObsoleteTaskFiles(persistentTaskIds, runningUserIds);
+        }
+    }
+
+    /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the full screenshot.
      *
@@ -5346,6 +5360,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void systemReady() {
         mPolicy.systemReady();
+        mTaskSnapshotController.systemReady();
     }
 
     // -------------------------------------------------------------
@@ -6982,6 +6997,18 @@ public class WindowManagerService extends IWindowManager.Stub
             if (appWindow != null) {
                 mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
             }
+        }
+    }
+
+    /**
+     * Called when a task has been removed from the recent tasks list.
+     * <p>
+     * Note: This doesn't go through {@link TaskWindowContainerController} yet as the window
+     * container may not exist when this happens.
+     */
+    public void notifyTaskRemovedFromRecents(int taskId, int userId) {
+        synchronized (mWindowMap) {
+            mTaskSnapshotController.notifyTaskRemovedFromRecents(taskId, userId);
         }
     }
 

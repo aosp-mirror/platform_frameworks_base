@@ -788,6 +788,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             inRecents = false;
             mService.notifyTaskPersisterLocked(this, false);
         }
+
+        // TODO: Use window container controller once tasks are better synced between AM and WM
+        mService.mWindowManager.notifyTaskRemovedFromRecents(taskId, userId);
     }
 
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
