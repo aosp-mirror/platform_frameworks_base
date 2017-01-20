@@ -27,7 +27,8 @@ LOCAL_PACKAGE_NAME := SettingsLibTests
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     espresso-core \
-    mockito-target-minus-junit4
+    mockito-target-minus-junit4 \
+    legacy-android-test
 
 include frameworks/base/packages/SettingsLib/common.mk
 
