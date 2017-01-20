@@ -58,66 +58,22 @@
     <item msgid="3878793616631049349">"Utilitza la comprovació HDCP només per a contingut DRM"</item>
     <item msgid="45075631231212732">"Utilitza sempre la comprovació HDCP"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="1852387125374225729">"Predeterminat"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="4260844283202960798">"aptX"</item>
-    <item msgid="7279983368484312990">"aptX-HD"</item>
-    <item msgid="2301339338870319651">"LDAC"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="9072025520360316957">"Predeterminat"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="1190434429082395888">"aptX"</item>
-    <item msgid="649699003004233053">"aptX-HD"</item>
-    <item msgid="508106435710925399">"LDAC"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="7102940318360468759">"Predeterminat"</item>
-    <item msgid="8895532488906185219">"44,1 kHz"</item>
-    <item msgid="2909915718994807056">"48,0 kHz"</item>
-    <item msgid="3347287377354164611">"88,2 kHz"</item>
-    <item msgid="1234212100239985373">"96,0 kHz"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="7224433008148687313">"Predeterminat"</item>
-    <item msgid="4482862757811638365">"44,1 kHz"</item>
-    <item msgid="354495328188724404">"48,0 kHz"</item>
-    <item msgid="7329816882213695083">"88,2 kHz"</item>
-    <item msgid="6967397666254430476">"96,0 kHz"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="6694044160540313386">"Predeterminat"</item>
-    <item msgid="5618929009984956469">"16 bits/mostra"</item>
-    <item msgid="3412640499234627248">"24 bits/mostra"</item>
-    <item msgid="121583001492929387">"32 bits/mostra"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="5091076677792306320">"Predeterminat"</item>
-    <item msgid="4726688794884191540">"16 bits/mostra"</item>
-    <item msgid="305344756485516870">"24 bits/mostra"</item>
-    <item msgid="244568657919675099">"32 bits/mostra"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="13423709606339855">"Predeterminat"</item>
-    <item msgid="4106832974775067314">"Mono"</item>
-    <item msgid="5571632958424639155">"Estèreo"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="8128478683963250130">"Predeterminat"</item>
-    <item msgid="8900559293912978337">"Mono"</item>
-    <item msgid="8883739882299884241">"Estèreo"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="2944889121850394020">"Qualitat del so preferida (990 kbps/909 kbps)"</item>
-    <item msgid="138837449700903545">"Estàndard (660 kbps/606 kbps)"</item>
-    <item msgid="4777177307869441982">"Connexió preferida (330 kbps/303 kbps)"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="172302906231378902">"Qualitat del so preferida (990 kbps/909 kbps)"</item>
-    <item msgid="9091111147684472529">"Estàndard (660 kbps/606 kbps)"</item>
-    <item msgid="3367904477834831032">"Connexió preferida (330 kbps/303 kbps)"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:0 (7065842274271279580) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (500463122137421129) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:0 (5062108632402595000) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3093550793512117000) -->
+    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_titles:0 (3093023430402746802) -->
+    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_summaries:0 (3214516120190965356) -->
+    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_titles:0 (2684127272582591429) -->
+    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_summaries:0 (1081159789834584363) -->
+    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_titles:0 (5226878858503393706) -->
+    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_summaries:0 (4118561796005528173) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:0 (3411577996960199959) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:1 (2921767058740704969) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:2 (3682554248829489641) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:0 (7668834469173465015) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:1 (4327143584633311908) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:2 (6155648878105378550) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"No"</item>
     <item msgid="1593289376502312923">"64 K"</item>

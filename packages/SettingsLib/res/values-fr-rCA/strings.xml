@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Données cellulaires toujours actives"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Désactiver le volume absolu"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Sélectionnez le codec Bluetooth A2DP préféré"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Taux d\'échantillonnage pour l\'audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Sélectionnez le taux d\'échantillonnage préféré pour le codec Bluetooth A2DP"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits par échantillon pour l\'audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"Sélectionnez le nombre de bits par échantillon préféré pour le codec Bluetooth A2DP"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Mode de canal pour l\'audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"Sélectionnez le mode de canal préféré pour le codec Bluetooth A2DP"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"Qualité de lecture LDAC pour l\'audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"Sélectionnez la qualité de lecture LDAC préférée pour le codec Bluetooth A2DP"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si cette option est activée, le passage du Wi-Fi aux données cellulaires est forcé lorsque le signal Wi-Fi est faible"</string>

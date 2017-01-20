@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ဆဲလ်လူလာဒေတာ အမြဲတမ်းဖွင့်ထားသည်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ဘလူးတုသ်အသံ ကိုးဒက်ခ်"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"လိုလားသည့် ဘလူးတုသ် A2DP ကိုးဒက်ခ်ကို ရွေးချယ်ပါ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ဘလူးတုသ်အသံနမူနာနှုန်း"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"လိုလားသည့် ဘလူးတုသ် A2DP ကိုးဒက်ခ် အသံနမူနာနှုန်းကို ရွေးချယ်ပါ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"နမူနာတစ်ခုစီတွင် ပါဝင်သော ဘလူးတုသ်အသံပမာဏ Bits"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"နမူနာတစ်ခုချင်းစီအတွက် လိုလားသည့် ဘလူးတုသ် A2DP ကိုးဒက်ခ် Bits ကို ရွေးပါ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ဘလူးတုသ်အသံချန်နယ်မုဒ်"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"လိုလားသည့် ဘလူးတုသ် A2DP ကိုးဒက်ခ် ချန်နယ်မုဒ်ကို ရွေးချယ်ပါ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"LDAC ဖွင့်ရန် ဘလူးတုသ်အသံ အရည်အသွေး"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"LDAC ဖွင့်ရန် လိုလားသည့် ဘလူးတုသ်အသံ အရည်အသွေးကို ရွေးချယ်ပါ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ဖွင့်ထားလျှင်၊ Wi‑Fi မှ ဆယ်လူလာသို့ အချက်လက် ချိတ်ဆက်မှုအား လွှဲပြောင်းရာ၌ ပိုမိုထိရောက်ပါသည်၊ WIFI အားနည်းနေချိန်တွင်"</string>

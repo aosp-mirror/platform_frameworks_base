@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"‏حدّد ترميز بلوتوث A2DP المفضّل"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"‏حدّد معدّل عيّنة ترميز A2DP بلوتوث المفضّل"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"وحدات البت لكل عيّنة في صوت بلوتوث"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"‏حدّد عدد وحدات البت لكل عيّنة المفضّل في ترميز بلوتوث A2DP"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"وضع قناة صوت بلوتوث"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"‏حدّد وضع القناة المفضّل في ترميز بلوتوث A2DP"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"‏جودة تشغيل صوت بلوتوث LDAC"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"‏حدّد جودة التشغيل المفضّلة في ترميز بلوتوث A2DP"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏عند تمكينه، سيكون Wi-Fi أكثر حدة في تسليم اتصال البيانات إلى الشبكة الخلوية، وذلك عندما تكون إشارة WiFi منخفضة"</string>

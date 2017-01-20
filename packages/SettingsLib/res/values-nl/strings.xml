@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele data altijd actief"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Absoluut volume uitschakelen"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-audiocodec"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Voorkeur voor Bluetooth A2DP-codec selecteren"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bemonsteringsfrequentie (sample rate) van Bluetooth-audio"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Voorkeur voor bemonsteringsfrequentie (sample rate) voor Bluetooth A2DP-codec selecteren"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits per sample voor Bluetooth-audio"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"Voorkeur voor bits per sample voor Bluetooth A2DP-codec selecteren"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanaalmodus voor Bluetooth-audio"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"Voorkeur voor kanaalmodus voor Bluetooth A2DP-codec selecteren"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"LDAC-afspeelkwaliteit voor Bluetooth-audio"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"Voorkeur voor LDAC-afspeelkwaliteit voor Bluetooth A2DP-codec selecteren"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Indien ingeschakeld, is wifi agressiever bij het overgeven van de gegevensverbinding aan mobiel wanneer het wifi-signaal zwak is"</string>

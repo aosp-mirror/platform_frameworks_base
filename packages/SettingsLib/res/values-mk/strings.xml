@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Мобилниот интернет е секогаш активен"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Оневозможете апсолутна јачина на звук"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек за аудио преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"Изберете претпочитан A2DP кодек преку Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Стапка на семпл преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"Изберете претпочитана стапка на семпл за A2DP кодекот преку Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Аудио бит-по-семпл преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"Изберете претпочитан бит-по-семпл за A2DP кодекот преку Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим на канал за аудио преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"Изберете претпочитан режим на канал за кодек за A2DP преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"Квалитет на LDAC-аудио репродукција преку Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"Изберете претпочитан квалитет на LDAC-репродукција на A2DP кодекот преку Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Кога е вклучено, Wi-Fi ќе биде поагресивно при предавање на поврзувањето со податоци на мобилната мрежа при слаб сигнал на Wi-Fi."</string>
