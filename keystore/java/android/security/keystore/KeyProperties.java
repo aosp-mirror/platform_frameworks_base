@@ -45,6 +45,7 @@ public abstract class KeyProperties {
                 PURPOSE_DECRYPT,
                 PURPOSE_SIGN,
                 PURPOSE_VERIFY,
+                PURPOSE_WRAP_KEY,
                 })
     public @interface PurposeEnum {}
 
@@ -69,6 +70,12 @@ public abstract class KeyProperties {
     public static final int PURPOSE_VERIFY = 1 << 3;
 
     /**
+     * Purpose of key: wrapping key for secure key import.
+     */
+    public static final int PURPOSE_WRAP_KEY = 1 << 4;
+
+
+    /**
      * @hide
      */
     public static abstract class Purpose {
@@ -84,6 +91,8 @@ public abstract class KeyProperties {
                     return KeymasterDefs.KM_PURPOSE_SIGN;
                 case PURPOSE_VERIFY:
                     return KeymasterDefs.KM_PURPOSE_VERIFY;
+                case PURPOSE_WRAP_KEY:
+                    return KeymasterDefs.KM_PURPOSE_WRAP_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -99,6 +108,8 @@ public abstract class KeyProperties {
                     return PURPOSE_SIGN;
                 case KeymasterDefs.KM_PURPOSE_VERIFY:
                     return PURPOSE_VERIFY;
+                case KeymasterDefs.KM_PURPOSE_WRAP_KEY:
+                    return PURPOSE_WRAP_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
