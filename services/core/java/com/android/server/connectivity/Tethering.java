@@ -910,10 +910,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public int setUsbTethering(boolean enable) {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = mContext.getSystemService(UsbManager.class);
-        if (usbManager == null) {
-            return enable ? ConnectivityManager.TETHER_ERROR_MASTER_ERROR
-                          : ConnectivityManager.TETHER_ERROR_NO_ERROR;
-        }
 
         synchronized (mPublicSync) {
             if (enable) {
@@ -1102,7 +1098,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         private final ArrayList<TetherInterfaceStateMachine> mNotifyList;
         private final IPv6TetheringCoordinator mIPv6TetheringCoordinator;
 
-        private int mPreviousMobileApn = ConnectivityManager.TYPE_NONE;
+        private int mPreviousMobileType = ConnectivityManager.TYPE_NONE;
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
 
@@ -1137,13 +1133,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 return false;
             }
 
-            protected boolean turnOnUpstreamMobileConnection(int apnType) {
+            protected boolean requestUpstreamMobileConnection(int apnType) {
                 if (apnType == ConnectivityManager.TYPE_NONE) { return false; }
 
-                if (apnType != mPreviousMobileApn) {
+                if (apnType != mPreviousMobileType) {
                     // Unregister any previous mobile upstream callback because
                     // this request, if any, will be different.
-                    turnOffUpstreamMobileConnection();
+                    unrequestUpstreamMobileConnection();
                 }
 
                 if (mUpstreamNetworkMonitor.mobileNetworkRequested()) {
@@ -1155,25 +1151,25 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     case ConnectivityManager.TYPE_MOBILE_DUN:
                     case ConnectivityManager.TYPE_MOBILE:
                     case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                        mPreviousMobileApn = apnType;
+                        mPreviousMobileType = apnType;
                         break;
                     default:
                         return false;
                 }
 
-                // TODO: This should be called by the code that observes
-                // configuration changes, once the above code in this function
-                // is simplified (i.e. eradicated).
-                mUpstreamNetworkMonitor.mobileUpstreamRequiresDun(
+                // TODO: Replace this with a call to pass the current tethering
+                // configuration to mUpstreamNetworkMonitor and let it handle
+                // choosing APN type accordingly.
+                mUpstreamNetworkMonitor.updateMobileRequiresDun(
                         apnType == ConnectivityManager.TYPE_MOBILE_DUN);
 
                 mUpstreamNetworkMonitor.registerMobileNetworkRequest();
                 return true;
             }
 
-            protected void turnOffUpstreamMobileConnection() {
+            protected void unrequestUpstreamMobileConnection() {
                 mUpstreamNetworkMonitor.releaseMobileNetworkRequest();
-                mPreviousMobileApn = ConnectivityManager.TYPE_NONE;
+                mPreviousMobileType = ConnectivityManager.TYPE_NONE;
             }
 
             protected boolean turnOnMasterTetherSettings() {
@@ -1252,11 +1248,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     case ConnectivityManager.TYPE_MOBILE_DUN:
                     case ConnectivityManager.TYPE_MOBILE_HIPRI:
                         // If we're on DUN, put our own grab on it.
-                        turnOnUpstreamMobileConnection(upType);
+                        requestUpstreamMobileConnection(upType);
                         break;
                     case ConnectivityManager.TYPE_NONE:
                         if (tryCell &&
-                                turnOnUpstreamMobileConnection(mPreferredUpstreamMobileApn)) {
+                                requestUpstreamMobileConnection(mPreferredUpstreamMobileApn)) {
                             // We think mobile should be coming up; don't set a retry.
                         } else {
                             sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
@@ -1269,7 +1265,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                          * If we found NONE we don't want to do this as we want any previous
                          * requests to keep trying to bring up something we can use.
                          */
-                        turnOffUpstreamMobileConnection();
+                        unrequestUpstreamMobileConnection();
                         break;
                 }
 
@@ -1490,7 +1486,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
             @Override
             public void exit() {
-                turnOffUpstreamMobileConnection();
+                unrequestUpstreamMobileConnection();
                 mUpstreamNetworkMonitor.stop();
                 stopListeningForSimChanges();
                 notifyTetheredOfNewUpstreamIface(null);

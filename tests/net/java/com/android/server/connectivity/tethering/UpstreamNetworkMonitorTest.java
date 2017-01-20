@@ -73,8 +73,8 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(unm.mobileNetworkRequested());
         // Given a null Context, and therefore a null ConnectivityManager,
         // these would cause an exception, if they actually attempted anything.
-        unm.mobileUpstreamRequiresDun(true);
-        unm.mobileUpstreamRequiresDun(false);
+        unm.updateMobileRequiresDun(true);
+        unm.updateMobileRequiresDun(false);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
-        mUNM.mobileUpstreamRequiresDun(false);
+        mUNM.updateMobileRequiresDun(false);
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
@@ -135,7 +135,7 @@ public class UpstreamNetworkMonitorTest {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
-        mUNM.mobileUpstreamRequiresDun(true);
+        mUNM.updateMobileRequiresDun(true);
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
 
