@@ -285,7 +285,10 @@ public class ConnectivityPacketSummary {
             final int ndType = asUint(mPacket.get());
             final int ndLength = asUint(mPacket.get());
             final int ndBytes = ndLength * ICMPV6_ND_OPTION_LENGTH_SCALING_FACTOR - 2;
-            if (mPacket.remaining() < ndBytes) break;
+            if (ndBytes < 0 || ndBytes > mPacket.remaining()) {
+                sj.add("<malformed>");
+                break;
+            }
             final int position = mPacket.position();
 
             switch (ndType) {
