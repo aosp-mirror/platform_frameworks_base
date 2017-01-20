@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
@@ -170,10 +171,7 @@ public class Utils {
 
     @ColorInt
     public static int getColorAccent(Context context) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
-        @ColorInt int colorAccent = ta.getColor(0, 0);
-        ta.recycle();
-        return colorAccent;
+        return getColorAttr(context, android.R.attr.colorAccent);
     }
 
     @ColorInt
@@ -190,6 +188,29 @@ public class Utils {
                 context.getResources().getColorStateList(resId, context.getTheme());
 
         return list.getDefaultColor();
+    }
+
+    @ColorInt
+    public static int getDisabled(Context context, int inputColor) {
+        return applyAlphaAttr(context, android.R.attr.disabledAlpha, inputColor);
+    }
+
+    @ColorInt
+    public static int applyAlphaAttr(Context context, int attr, int inputColor) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        float alpha = ta.getFloat(0, 0);
+        ta.recycle();
+        alpha *= Color.alpha(inputColor);
+        return Color.argb((int) (alpha), Color.red(inputColor), Color.green(inputColor),
+                Color.blue(inputColor));
+    }
+
+    @ColorInt
+    public static int getColorAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        @ColorInt int colorAccent = ta.getColor(0, 0);
+        ta.recycle();
+        return colorAccent;
     }
 
     /**

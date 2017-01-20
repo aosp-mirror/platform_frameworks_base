@@ -17,7 +17,8 @@ Copyright (C) 2014 The Android Open Source Project
     android:width="24.0dp"
     android:height="24.0dp"
     android:viewportWidth="72.0"
-    android:viewportHeight="72.0">
+    android:viewportHeight="72.0"
+    android:tint="?android:attr/textColorPrimary">
     <group
         android:translateX="52.0"
         android:translateY="42.0" >

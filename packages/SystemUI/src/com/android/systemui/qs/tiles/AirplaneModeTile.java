@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -92,6 +93,7 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         } else {
             state.icon = mDisable;
         }
+        state.state = airplaneMode ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.contentDescription = state.label;
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();

@@ -21,9 +21,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.icu.text.NumberFormat;
 import android.os.UserManager;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,21 +36,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.settingslib.Utils;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
-import com.android.systemui.qs.QSPanel;
 import com.android.systemui.plugins.qs.QS.Callback;
+import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.qs.TouchAnimator.Builder;
+import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -54,7 +62,8 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener {
+        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
+        BatteryStateChangeCallback {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -67,14 +76,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private TextView mAlarmStatus;
     private View mAlarmStatusCollapsed;
+    private ViewGroup mDateTimeGroup;
+    private ViewGroup mDateTimeAlarmGroup;
 
     private QSPanel mQsPanel;
 
     private boolean mExpanded;
     private boolean mAlarmShowing;
 
-    private ViewGroup mDateTimeGroup;
-    private ViewGroup mDateTimeAlarmGroup;
     private TextView mEmergencyOnly;
 
     protected ExpandableIndicator mExpandIndicator;
@@ -95,6 +104,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected View mEdit;
     private boolean mShowFullAlarm;
     private float mDateTimeTranslation;
+    private TextView mBatteryLevel;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -129,6 +139,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAlarmStatusCollapsed = findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
+
+        mBatteryLevel = (TextView) findViewById(R.id.battery_level);
 
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -236,13 +248,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
     }
 
-    @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
         mHost.getUserInfoController().removeCallback(this);
         mHost.getNetworkController().removeEmergencyListener(this);
-        mHost.getUserInfoController().removeCallback(this);
         super.onDetachedFromWindow();
     }
 
@@ -325,6 +335,19 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         if (isAPhone) {
             mHost.getNetworkController().addEmergencyListener(this);
         }
+
+        // Set the light/dark theming on the header status UI to match the current theme.
+        SignalClusterView cluster = (SignalClusterView) findViewById(R.id.signal_cluster);
+        cluster.setNetworkController((NetworkControllerImpl) host.getNetworkController());
+        cluster.setSecurityController(host.getSecurityController());
+        int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
+        float intensity = colorForeground / (float) Color.WHITE;
+        cluster.setIconTint(colorForeground, intensity,
+                new Rect(0, 0, 0, 0));
+        BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
+        battery.setBatteryController(host.getBatteryController());
+        int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
+        battery.setRawColors(colorForeground, colorSecondary);
     }
 
     @Override
@@ -367,7 +390,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setBatteryController(BatteryController batteryController) {
-        // Don't care
+        batteryController.addCallback(this);
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {
@@ -388,6 +411,17 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 updateEverything();
             }
         }
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
+        mBatteryLevel.setText(percentage);
+    }
+
+    @Override
+    public void onPowerSaveChanged(boolean isPowerSave) {
+        // Don't care.
     }
 
     @Override

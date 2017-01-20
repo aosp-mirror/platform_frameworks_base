@@ -15,31 +15,49 @@
  */
 package com.android.systemui.qs;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.service.quicksettings.Tile;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.Switch;
+
+import com.android.settingslib.Utils;
 
 import com.android.systemui.R;
 
 public class QSTileBaseView extends LinearLayout {
 
+    private static final String TAG = "QSTileBaseView";
     private final H mHandler = new H();
+    private final ImageView mBg;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
     private Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
     private boolean mCollapsedView;
+    private final int mColorActive;
+    private final int mColorInactive;
+    private final int mColorDisabled;
+    private int mCircleColor;
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -47,8 +65,26 @@ public class QSTileBaseView extends LinearLayout {
 
     public QSTileBaseView(Context context, QSIconView icon, boolean collapsedView) {
         super(context);
+        // Default to Quick Tile padding, and QSTileView will specify its own padding.
+        int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
+
+        FrameLayout frame = new FrameLayout(context);
+        frame.setForegroundGravity(Gravity.CENTER);
+        int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+        addView(frame, new LayoutParams(size, size));
+        mBg = new ImageView(getContext());
+        mBg.setScaleType(ScaleType.FIT_CENTER);
+        mBg.setImageResource(R.drawable.ic_qs_circle);
+        frame.addView(mBg);
         mIcon = icon;
-        addView(mIcon);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, padding, 0, padding);
+        frame.addView(mIcon, params);
+        mColorActive = Utils.getColorAttr(context, android.R.attr.textColorPrimary);
+        mColorDisabled = Utils.getDisabled(context,
+                Utils.getColorAttr(context, android.R.attr.textColorTertiary));
+        mColorInactive = Utils.getColorAttr(context, android.R.attr.textColorSecondary);
 
         mTileBackground = newTileBackground();
         if (mTileBackground instanceof RippleDrawable) {
@@ -57,18 +93,20 @@ public class QSTileBaseView extends LinearLayout {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBackground(mTileBackground);
 
-        // Default to Quick Tile padding, and QSTileView will specify its own padding.
-        int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
-        setPadding(0, padding, 0, padding);
+        setPadding(0, 0, 0, 0);
         setClipChildren(false);
         setClipToPadding(false);
         mCollapsedView = collapsedView;
         setFocusable(true);
     }
 
+    public View getBgCicle() {
+        return mBg;
+    }
+
     protected Drawable newTileBackground() {
-        final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
-        final TypedArray ta = mContext.obtainStyledAttributes(attrs);
+        final int[] attrs = new int[]{android.R.attr.selectableItemBackgroundBorderless};
+        final TypedArray ta = getContext().obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
         ta.recycle();
         return d;
@@ -85,11 +123,12 @@ public class QSTileBaseView extends LinearLayout {
         // center the touch feedback on the center of the icon, and dial it down a bit
         final int cx = width / 2;
         final int cy = height / 2;
-        final int rad = (int)(mIcon.getHeight() * .85f);
+        final int rad = (int) (mIcon.getHeight() * .85f);
         mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
     }
 
-    public void init(OnClickListener click, OnLongClickListener longClick) {
+    public void init(OnClickListener click, OnClickListener secondaryClick,
+            OnLongClickListener longClick) {
         setClickable(true);
         setOnClickListener(click);
         setOnLongClickListener(longClick);
@@ -128,6 +167,16 @@ public class QSTileBaseView extends LinearLayout {
     }
 
     protected void handleStateChanged(QSTile.State state) {
+        int circleColor = getCircleColor(state.state);
+        if (circleColor != mCircleColor) {
+            if (mBg.isShown()) {
+                QSIconView.animateGrayScale(mCircleColor, circleColor, mBg);
+            } else {
+                QSIconView.setTint(mBg, circleColor);
+            }
+            mCircleColor = circleColor;
+        }
+
         mIcon.setIcon(state);
         if (mCollapsedView && !TextUtils.isEmpty(state.minimalContentDescription)) {
             setContentDescription(state.minimalContentDescription);
@@ -141,6 +190,19 @@ public class QSTileBaseView extends LinearLayout {
         }
         if (state instanceof QSTile.BooleanState) {
             mTileState = ((QSTile.BooleanState) state).value;
+        }
+    }
+
+    private int getCircleColor(int state) {
+        switch (state) {
+            case Tile.STATE_ACTIVE:
+                return mColorActive;
+            case Tile.STATE_INACTIVE:
+            case Tile.STATE_UNAVAILABLE:
+                return mColorDisabled;
+            default:
+                Log.e(TAG, "Invalid state " + state);
+                return 0;
         }
     }
 

@@ -23,7 +23,4 @@
     <target
         android:name="bar01_0"
         android:animation="@anim/ic_dnd_disable_bar01_0_animation" />
-    <target
-        android:name="ic_dnd_disable"
-        android:animation="@anim/ic_dnd_disable_alpha_animation" />
 </animated-vector>

@@ -15,15 +15,10 @@
  */
 package com.android.systemui.qs.external;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-
 import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
@@ -39,13 +34,18 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import libcore.util.Objects;
+
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
 public class CustomTile extends QSTile<QSTile.State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
@@ -63,7 +63,6 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
     private final int mUser;
-    private Context mAppContext;
     private android.graphics.drawable.Icon mDefaultIcon;
 
     private boolean mListening;
@@ -81,10 +80,6 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
         mUser = ActivityManager.getCurrentUser();
-        try {
-            mAppContext = mContext.createPackageContext(mComponent.getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-        }
     }
 
     private void setTileIcon() {
@@ -287,27 +282,17 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         if (mServiceManager.hasPendingBind()) {
             tileState = Tile.STATE_UNAVAILABLE;
         }
+        state.state = tileState;
         Drawable drawable;
-        boolean mHasRes = false;
-        android.graphics.drawable.Icon icon = mTile.getIcon();
         try {
-            drawable = icon.loadDrawable(mAppContext);
-            mHasRes = icon.getType() == android.graphics.drawable.Icon.TYPE_RESOURCE;
+            drawable = mTile.getIcon().loadDrawable(mContext);
         } catch (Exception e) {
             Log.w(TAG, "Invalid icon, forcing into unavailable state");
             tileState = Tile.STATE_UNAVAILABLE;
-            drawable = mDefaultIcon.loadDrawable(mAppContext);
+            drawable = mDefaultIcon.loadDrawable(mContext);
         }
-        final int color = TileColorPicker.getInstance(mContext).getColor(tileState);
-        drawable.setTint(color);
-        state.icon = mHasRes ? new DrawableIconWithRes(drawable, icon.getResId())
-                : new DrawableIcon(drawable);
+        state.icon = new DrawableIcon(drawable);
         state.label = mTile.getLabel();
-        if (tileState == Tile.STATE_UNAVAILABLE) {
-            state.label = new SpannableStringBuilder().append(state.label,
-                    new ForegroundColorSpan(color),
-                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
-        }
         if (mTile.getContentDescription() != null) {
             state.contentDescription = mTile.getContentDescription();
         } else {

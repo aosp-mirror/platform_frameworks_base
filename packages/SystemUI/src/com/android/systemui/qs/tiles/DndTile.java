@@ -25,6 +25,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.service.quicksettings.Tile;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -121,7 +122,17 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    public void handleClick() {
+    protected void handleClick() {
+        if (mState.value) {
+            mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
+        } else {
+            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
+            mController.setZen(zen, null, TAG);
+        }
+    }
+
+    @Override
+    protected void handleSecondaryClick() {
         if (mController.isVolumeRestricted()) {
             // Collapse the panels, so the user can see the toast.
             mHost.collapsePanels();
@@ -131,13 +142,9 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             return;
         }
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
-        if (mState.value) {
-            mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
-        } else {
-            showDetail(true);
-            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
-            mController.setZen(zen, null, TAG);
-        }
+        showDetail(true);
+        int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
+        mController.setZen(zen, null, TAG);
     }
 
     @Override
@@ -151,6 +158,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         final boolean newValue = zen != Global.ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
         state.value = newValue;
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:

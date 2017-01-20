@@ -16,6 +16,7 @@ package com.android.systemui.qs.tiles;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -96,6 +97,7 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.value = arg instanceof Boolean ? (Boolean) arg
                 : mDataSaverController.isDataSaverEnabled();
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.data_saver);
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_data_saver

@@ -16,12 +16,10 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="root"
-    android:alpha="0.3"
     android:height="48dp"
     android:width="48dp"
     android:viewportHeight="48"
-    android:viewportWidth="48"
-    android:tint="?android:attr/colorControlNormal" >
+    android:viewportWidth="48" >
     <group
         android:name="ic_signal_airplane"
         android:translateX="21.9995"

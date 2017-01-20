@@ -72,8 +72,6 @@ public class BatteryMeterView extends ImageView implements
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mBatteryController.addCallback(this);
-        mDrawable.startListening();
         TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
@@ -100,9 +98,15 @@ public class BatteryMeterView extends ImageView implements
     public void setBatteryController(BatteryController mBatteryController) {
         this.mBatteryController = mBatteryController;
         mDrawable.setBatteryController(mBatteryController);
+        mBatteryController.addCallback(this);
+        mDrawable.startListening();
     }
 
     public void setDarkIntensity(float f) {
         mDrawable.setDarkIntensity(f);
+    }
+
+    public void setRawColors(int fgColor, int bgColor) {
+        mDrawable.setColors(fgColor, bgColor);
     }
 }

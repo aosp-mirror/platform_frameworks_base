@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +75,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = (Boolean)mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
@@ -87,7 +88,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleSecondaryClick() {
         if (!mController.canConfigBluetooth()) {
             mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
             return;
@@ -140,11 +141,13 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
             if (TextUtils.isEmpty(state.label)) {
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             }
+            state.state = Tile.STATE_ACTIVE;
         } else {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_off);
             state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_bluetooth_off);
+            state.state = Tile.STATE_INACTIVE;
         }
 
         CharSequence bluetoothName = state.label;

@@ -17,12 +17,10 @@
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="minor_c_b"
-    android:alpha="0.3"
     android:width="16dp"
     android:viewportWidth="16"
     android:height="8dp"
-    android:viewportHeight="8"
-    android:tint="?android:attr/colorControlNormal" >
+    android:viewportHeight="8" >
     <group
         android:name="dot_02"
         android:translateX="12.75"

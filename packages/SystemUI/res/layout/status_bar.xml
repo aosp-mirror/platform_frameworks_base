@@ -42,7 +42,7 @@
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/status_bar_padding_start"
+        android:paddingStart="6dp"
         android:paddingEnd="8dp"
         android:orientation="horizontal"
         >

@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import android.content.Intent;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -95,6 +96,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
         state.value = enabled;
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName

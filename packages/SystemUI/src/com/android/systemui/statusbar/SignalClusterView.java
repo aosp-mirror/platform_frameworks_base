@@ -159,6 +159,7 @@ public class SignalClusterView
     public void setNetworkController(NetworkControllerImpl nc) {
         if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
         mNC = nc;
+        mNC.addCallback(this);
     }
 
     public void setSecurityController(SecurityController sc) {
@@ -214,7 +215,9 @@ public class SignalClusterView
         super.onAttachedToWindow();
 
         for (PhoneState state : mPhoneStates) {
-            mMobileSignalGroup.addView(state.mMobileGroup);
+            if (state.mMobileGroup.getParent() == null) {
+                mMobileSignalGroup.addView(state.mMobileGroup);
+            }
         }
 
         int endPadding = mMobileSignalGroup.getChildCount() > 0 ? mMobileSignalGroupEndPadding : 0;
@@ -224,7 +227,6 @@ public class SignalClusterView
 
         apply();
         applyIconTint();
-        mNC.addCallback(this);
     }
 
     @Override

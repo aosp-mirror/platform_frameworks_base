@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.UserManager;
 
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
@@ -115,6 +116,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location_off);
         }
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
     }

@@ -16,27 +16,34 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.QSTile.getColorForState;
+
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.util.MathUtils;
+import android.service.quicksettings.Tile;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+
 import libcore.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
-    private final int mTileSpacingPx;
-    private int mTilePaddingTopPx;
 
     protected TextView mLabel;
     private ImageView mPadLock;
+    private int mState;
+    private OnClickListener mClick;
+    private OnClickListener mSecondaryClick;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -45,13 +52,10 @@ public class QSTileView extends QSTileBaseView {
     public QSTileView(Context context, QSIconView icon, boolean collapsedView) {
         super(context, icon, collapsedView);
 
-        final Resources res = context.getResources();
-        mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
-
         setClipChildren(false);
+        setClipToPadding(false);
 
         setClickable(true);
-        updateTopPadding();
         setId(View.generateViewId());
         createLabel();
         setOrientation(VERTICAL);
@@ -62,27 +66,17 @@ public class QSTileView extends QSTileBaseView {
         return mLabel;
     }
 
-    protected void updateTopPadding() {
-        Resources res = getResources();
-        int padding = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);
-        int largePadding = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top_large_text);
-        float largeFactor = (MathUtils.constrain(getResources().getConfiguration().fontScale,
-                1.0f, FontSizeUtils.LARGE_TEXT_SCALE) - 1f) / (FontSizeUtils.LARGE_TEXT_SCALE - 1f);
-        mTilePaddingTopPx = Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
-        setPadding(mTileSpacingPx, mTilePaddingTopPx + mTileSpacingPx, mTileSpacingPx,
-                mTileSpacingPx);
-        requestLayout();
-    }
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        updateTopPadding();
         FontSizeUtils.updateFontSize(mLabel, R.dimen.qs_tile_text_size);
     }
 
     protected void createLabel() {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
+        ViewGroup view = (ViewGroup) LayoutInflater.from(getContext())
+                .inflate(R.layout.qs_tile_label, null);
+        view.setClipChildren(false);
+        view.setClipToPadding(false);
         mLabel = (TextView) view.findViewById(R.id.tile_label);
         mPadLock = (ImageView) view.findViewById(R.id.restricted_padlock);
         addView(view);
@@ -91,10 +85,32 @@ public class QSTileView extends QSTileBaseView {
     @Override
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
-        if (!Objects.equal(mLabel.getText(), state.label)) {
+        if (!Objects.equal(mLabel.getText(), state.label) || mState != state.state) {
+            if (state.state == Tile.STATE_UNAVAILABLE) {
+                int color = getColorForState(getContext(), state.state);
+                state.label = new SpannableStringBuilder().append(state.label,
+                        new ForegroundColorSpan(color),
+                        SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+            }
+            mState = state.state;
             mLabel.setText(state.label);
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void init(OnClickListener click, OnClickListener secondaryClick, OnLongClickListener longClick) {
+        mClick = click;
+        mSecondaryClick = secondaryClick;
+        super.init(click, secondaryClick, longClick);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_UP)  {
+            setOnClickListener(event.getY() < (getMeasuredHeight() / 2) ? mClick : mSecondaryClick);
+        }
+        return super.onTouchEvent(event);
     }
 }

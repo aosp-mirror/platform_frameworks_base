@@ -20,8 +20,7 @@
     android:height="48dp"
     android:width="48dp"
     android:viewportHeight="48"
-    android:viewportWidth="48"
-    android:tint="?android:attr/colorControlNormal" >
+    android:viewportWidth="48" >
     <group
         android:name="ic_signal_location"
         android:translateX="21.9995"

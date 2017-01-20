@@ -23,7 +23,4 @@
     <target
         android:name="outer_ring_merged"
         android:animation="@anim/ic_dnd_total_silence_disable_outer_ring_merged_animation" />
-    <target
-        android:name="ic_dnd_total_silence_disable"
-        android:animation="@anim/ic_dnd_total_silence_disable_alpha_animation" />
 </animated-vector>

@@ -224,7 +224,7 @@ class TelephonyIcons {
     static final int ICON_CARRIER_NETWORK_CHANGE =
             R.drawable.stat_sys_signal_carrier_network_change_animation;
 
-    static final int ICON_DATA_DISABLED = R.drawable.stat_sys_data_disabled;
+    static final int ICON_DATA_DISABLED = R.drawable.ic_qs_data_disabled;
 
     static final int QS_ICON_LTE = R.drawable.ic_qs_signal_lte;
     static final int QS_ICON_3G = R.drawable.ic_qs_signal_3g;

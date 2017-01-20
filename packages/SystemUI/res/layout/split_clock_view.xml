@@ -28,6 +28,7 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textSize="@dimen/qs_time_collapsed_size"
+        android:textColor="?android:attr/textColorPrimary"
         />
     <TextClock
         android:id="@+id/am_pm_view"
@@ -36,6 +37,7 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textSize="@dimen/qs_time_collapsed_size"
+        android:textColor="?android:attr/textColorPrimary"
         android:importantForAccessibility="no"
         />
 
@@ -44,8 +46,9 @@
         android:id="@+id/empty_time_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+        android:textColor="?android:attr/textColorPrimary"
         />
 </com.android.systemui.statusbar.policy.SplitClockView>

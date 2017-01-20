@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -93,6 +94,11 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    protected void handleSecondaryClick() {
+        handleClick();
+    }
+
+    @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
             mHost.startRunnableDismissingKeyguard(new Runnable() {
@@ -135,6 +141,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         if (!state.value && connecting) {
             state.label = mContext.getString(R.string.quick_settings_connecting);
         }
+        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
         mDetailAdapter.updateItems(devices);
