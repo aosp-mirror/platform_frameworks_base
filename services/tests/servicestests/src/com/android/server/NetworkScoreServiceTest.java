@@ -144,7 +144,7 @@ public class NetworkScoreServiceTest {
         configuration.SSID = "NetworkScoreServiceTest_SSID";
         configuration.BSSID = "NetworkScoreServiceTest_BSSID";
         mRecommendationRequest = new RecommendationRequest.Builder()
-            .setCurrentRecommendedWifiConfig(configuration).build();
+            .setDefaultWifiConfig(configuration).build();
         mOnResultListener = new OnResultListener();
         mRemoteCallback = new RemoteCallback(mOnResultListener);
         Settings.Global.putLong(mContentResolver,
@@ -240,7 +240,7 @@ public class NetworkScoreServiceTest {
         final RecommendationResult result =
                 mNetworkScoreService.requestRecommendation(mRecommendationRequest);
         assertNotNull(result);
-        assertEquals(mRecommendationRequest.getCurrentSelectedConfig(),
+        assertEquals(mRecommendationRequest.getDefaultWifiConfig(),
                 result.getWifiConfiguration());
     }
 
@@ -255,7 +255,7 @@ public class NetworkScoreServiceTest {
         final RecommendationResult result =
                 mNetworkScoreService.requestRecommendation(mRecommendationRequest);
         assertNotNull(result);
-        assertEquals(mRecommendationRequest.getCurrentSelectedConfig(),
+        assertEquals(mRecommendationRequest.getDefaultWifiConfig(),
                 result.getWifiConfiguration());
     }
 
@@ -327,7 +327,7 @@ public class NetworkScoreServiceTest {
         RecommendationResult result =
                 mOnResultListener.receivedBundle.getParcelable(EXTRA_RECOMMENDATION_RESULT);
         assertTrue(result.hasRecommendation());
-        assertEquals(mRecommendationRequest.getCurrentSelectedConfig().SSID,
+        assertEquals(mRecommendationRequest.getDefaultWifiConfig().SSID,
                 result.getWifiConfiguration().SSID);
     }
 
