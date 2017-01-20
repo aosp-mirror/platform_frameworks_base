@@ -18,7 +18,6 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.util.Log;
-import dalvik.annotation.optimization.CriticalNative;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,11 +39,11 @@ public class FontFamily {
      */
     public long mNativePtr;
 
-    // Points native font family builder. Must be zero after freezing this family.
-    private long mBuilderPtr;
-
     public FontFamily() {
-        mBuilderPtr = nInitBuilder(null, 0);
+        mNativePtr = nCreateFamily(null, 0);
+        if (mNativePtr == 0) {
+            throw new IllegalStateException("error creating native FontFamily");
+        }
     }
 
     public FontFamily(String lang, String variant) {
@@ -54,15 +53,10 @@ public class FontFamily {
         } else if ("elegant".equals(variant)) {
             varEnum = 2;
         }
-        mBuilderPtr = nInitBuilder(lang, varEnum);
-    }
-
-    public void freeze() {
-        if (mBuilderPtr == 0) {
-            throw new IllegalStateException("This FontFamily is already frozen");
+        mNativePtr = nCreateFamily(lang, varEnum);
+        if (mNativePtr == 0) {
+            throw new IllegalStateException("error creating native FontFamily");
         }
-        mNativePtr = nCreateFamily(mBuilderPtr);
-        mBuilderPtr = 0;
     }
 
     @Override
@@ -75,14 +69,11 @@ public class FontFamily {
     }
 
     public boolean addFont(String path, int ttcIndex) {
-        if (mBuilderPtr == 0) {
-            throw new IllegalStateException("Unable to call addFont after freezing.");
-        }
         try (FileInputStream file = new FileInputStream(path)) {
             FileChannel fileChannel = file.getChannel();
             long fontSize = fileChannel.size();
             ByteBuffer fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
-            return nAddFont(mBuilderPtr, fontBuffer, ttcIndex);
+            return nAddFont(mNativePtr, fontBuffer, ttcIndex);
         } catch (IOException e) {
             Log.e(TAG, "Error mapping font file " + path);
             return false;
@@ -91,29 +82,19 @@ public class FontFamily {
 
     public boolean addFontWeightStyle(ByteBuffer font, int ttcIndex, List<FontListParser.Axis> axes,
             int weight, boolean style) {
-        if (mBuilderPtr == 0) {
-            throw new IllegalStateException("Unable to call addFontWeightStyle after freezing.");
-        }
-        return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, axes, weight, style);
+        return nAddFontWeightStyle(mNativePtr, font, ttcIndex, axes, weight, style);
     }
 
     public boolean addFontFromAsset(AssetManager mgr, String path) {
-        if (mBuilderPtr == 0) {
-            throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
-        }
-        return nAddFontFromAsset(mBuilderPtr, mgr, path);
+        return nAddFontFromAsset(mNativePtr, mgr, path);
     }
 
-    private static native long nInitBuilder(String lang, int variant);
-
-    @CriticalNative
-    private static native long nCreateFamily(long mBuilderPtr);
-
-    @CriticalNative
+    private static native long nCreateFamily(String lang, int variant);
     private static native void nUnrefFamily(long nativePtr);
-    private static native boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex);
-    private static native boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
+    private static native boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex);
+    private static native boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
             int ttcIndex, List<FontListParser.Axis> listOfAxis,
             int weight, boolean isItalic);
-    private static native boolean nAddFontFromAsset(long builderPtr, AssetManager mgr, String path);
+    private static native boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr,
+            String path);
 }
