@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.os.ParcelableException;
+
 import java.io.IOException;
 
 /**
@@ -24,19 +26,13 @@ import java.io.IOException;
  * @hide
  */
 public class ExceptionUtils {
-    // TODO: longer term these should be replaced with first-class
-    // Parcel.read/writeException() and AIDL support, but for now do this using
-    // a nasty hack.
-
-    private static final String PREFIX_IO = "\u2603";
-
     public static RuntimeException wrap(IOException e) {
-        throw new IllegalStateException(PREFIX_IO + e.getMessage());
+        throw new ParcelableException(e);
     }
 
     public static void maybeUnwrapIOException(RuntimeException e) throws IOException {
-        if ((e instanceof IllegalStateException) && e.getMessage().startsWith(PREFIX_IO)) {
-            throw new IOException(e.getMessage().substring(PREFIX_IO.length()));
+        if (e instanceof ParcelableException) {
+            ((ParcelableException) e).maybeRethrow(IOException.class);
         }
     }
 
