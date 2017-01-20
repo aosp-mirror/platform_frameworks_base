@@ -78,6 +78,8 @@
     <item name="disabled_alpha_material_dark" format="float" type="dimen">0.30</item>
     <item name="primary_content_alpha_material_light" format="float" type="dimen">1</item>
     <item name="primary_content_alpha_material_dark" format="float" type="dimen">0.87</item>
+    <item name="secondary_content_alpha_material_light" format="float" type="dimen">.7</item>
+    <item name="secondary_content_alpha_material_dark" format="float" type="dimen">0.54</item>
 
     <item name="highlight_alpha_material_light" format="float" type="dimen">0.12</item>
     <item name="highlight_alpha_material_dark" format="float" type="dimen">0.20</item>

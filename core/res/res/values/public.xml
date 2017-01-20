@@ -2800,6 +2800,7 @@
     </public-group>
 
     <public type="attr" name="primaryContentAlpha" />
+    <public type="attr" name="secondaryContentAlpha" />
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
