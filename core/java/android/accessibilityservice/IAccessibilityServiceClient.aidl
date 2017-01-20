@@ -46,4 +46,8 @@ import android.view.KeyEvent;
     void onSoftKeyboardShowModeChanged(int showMode);
 
     void onPerformGestureResult(int sequence, boolean completedSuccessfully);
+
+    void onFingerprintCapturingGesturesChanged(boolean capturing);
+
+    void onFingerprintGesture(int gesture);
 }

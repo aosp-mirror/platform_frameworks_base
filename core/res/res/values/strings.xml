@@ -681,6 +681,12 @@
     <string name="capability_desc_canPerformGestures">Can tap, swipe, pinch, and perform other
         gestures.</string>
 
+    <!-- Title for the capability of an accessibility service to capture fingerprint gestures. -->
+    <string name="capability_title_canCaptureFingerprintGestures">Fingerprint gestures</string>
+    <!-- Description for the capability of an accessibility service to perform gestures. -->
+    <string name="capability_desc_canCaptureFingerprintGestures">Can capture gestures performed on
+        the device's fingerprint sensor.</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

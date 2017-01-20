@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.os.Binder;
 import android.os.Bundle;
@@ -82,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.
@@ -109,6 +111,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     private final ArrayList<FingerprintServiceLockoutResetMonitor> mLockoutMonitors =
             new ArrayList<>();
+    private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
+            new CopyOnWriteArrayList<>();
     private final AppOpsManager mAppOps;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
     private static final int MAX_FAILED_ATTEMPTS = 5;
@@ -338,6 +342,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             if (DEBUG) Slog.v(TAG, "Done with client: " + client.getOwnerString());
             mCurrentClient = null;
         }
+        if (mPendingClient == null) {
+            notifyClientActiveCallbacks(false);
+        }
     }
 
     private boolean inLockoutMode() {
@@ -407,6 +414,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     + newClient.getClass().getSuperclass().getSimpleName()
                     + "(" + newClient.getOwnerString() + ")"
                     + ", initiatedByClient = " + initiatedByClient + ")");
+            notifyClientActiveCallbacks(true);
+
             newClient.start();
         }
     }
@@ -575,6 +584,18 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private void notifyLockoutResetMonitors() {
         for (int i = 0; i < mLockoutMonitors.size(); i++) {
             mLockoutMonitors.get(i).sendLockoutReset();
+        }
+    }
+
+    private void notifyClientActiveCallbacks(boolean isActive) {
+        List<IFingerprintClientActiveCallback> callbacks = mClientActiveCallbacks;
+        for (int i = 0; i < callbacks.size(); i++) {
+            try {
+                callbacks.get(i).onClientActiveChanged(isActive);
+            } catch (RemoteException re) {
+                // If the remote is dead, stop notifying it
+                mClientActiveCallbacks.remove(callbacks.get(i));
+           }
         }
     }
 
@@ -1046,6 +1067,26 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                             new FingerprintServiceLockoutResetMonitor(callback));
                 }
             });
+        }
+
+        @Override
+        public boolean isClientActive() {
+            checkPermission(MANAGE_FINGERPRINT);
+            synchronized(FingerprintService.this) {
+                return (mCurrentClient != null) || (mPendingClient != null);
+            }
+        }
+
+        @Override
+        public void addClientActiveCallback(IFingerprintClientActiveCallback callback) {
+            checkPermission(MANAGE_FINGERPRINT);
+            mClientActiveCallbacks.add(callback);
+        }
+
+        @Override
+        public void removeClientActiveCallback(IFingerprintClientActiveCallback callback) {
+            checkPermission(MANAGE_FINGERPRINT);
+            mClientActiveCallbacks.remove(callback);
         }
     }
 

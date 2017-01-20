@@ -3392,6 +3392,8 @@
             <flag name="flagRetrieveInteractiveWindows" value="0x00000040" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_ENABLE_ACCESSIBILITY_VOLUME} -->
             <flag name="flagEnableAccessibilityVolume" value="0x00000080" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_CAPTURE_FINGERPRINT_GESTURES} -->
+            <flag name="flagCaptureFingerprintGestures" value="0x00000200" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
@@ -3440,6 +3442,14 @@
              </p>
          -->
         <attr name="canPerformGestures" format="boolean" />
+        <!-- Attribute whether the accessibility service wants to be able to capture gestures from
+             the fingerprint sensor.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_CAN_CAPTURE_FINGERPRINT_GESTURES} flag.
+             </p>
+         -->
+        <attr name="canCaptureFingerprintGestures" format="boolean" />
         <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
     </declare-styleable>

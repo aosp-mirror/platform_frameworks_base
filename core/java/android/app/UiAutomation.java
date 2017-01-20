@@ -1108,6 +1108,16 @@ public final class UiAutomation {
                 public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
                     /* do nothing */
                 }
+
+                @Override
+                public void onFingerprintCapturingGesturesChanged(boolean active) {
+                    /* do nothing */
+                }
+
+                @Override
+                public void onFingerprintGesture(int gesture) {
+                    /* do nothing */
+                }
             });
         }
     }

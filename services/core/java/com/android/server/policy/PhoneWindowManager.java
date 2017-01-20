@@ -6106,13 +6106,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * @param event
      */
     private void interceptSystemNavigationKey(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_UP && areSystemNavigationKeysEnabled()) {
-            IStatusBarService sbar = getStatusBarService();
-            if (sbar != null) {
-                try {
-                    sbar.handleSystemNavigationKey(event.getKeyCode());
-                } catch (RemoteException e1) {
-                    // oops, no statusbar. Ignore event.
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            if (!mAccessibilityManager.isEnabled()
+                    || !mAccessibilityManager.sendFingerprintGesture(event.getKeyCode())) {
+                if (areSystemNavigationKeysEnabled()) {
+                    IStatusBarService sbar = getStatusBarService();
+                    if (sbar != null) {
+                        try {
+                            sbar.handleSystemNavigationKey(event.getKeyCode());
+                        } catch (RemoteException e1) {
+                            // oops, no statusbar. Ignore event.
+                        }
+                    }
                 }
             }
         }

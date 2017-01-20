@@ -20,11 +20,13 @@ import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -33,11 +35,9 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
@@ -362,19 +362,22 @@ public abstract class AccessibilityService extends Service {
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
+     * Interface used by IAccessibilityServiceWrapper to call the service from its main thread.
      * @hide
      */
     public interface Callbacks {
-        public void onAccessibilityEvent(AccessibilityEvent event);
-        public void onInterrupt();
-        public void onServiceConnected();
-        public void init(int connectionId, IBinder windowToken);
-        public boolean onGesture(int gestureId);
-        public boolean onKeyEvent(KeyEvent event);
-        public void onMagnificationChanged(@NonNull Region region,
+        void onAccessibilityEvent(AccessibilityEvent event);
+        void onInterrupt();
+        void onServiceConnected();
+        void init(int connectionId, IBinder windowToken);
+        boolean onGesture(int gestureId);
+        boolean onKeyEvent(KeyEvent event);
+        void onMagnificationChanged(@NonNull Region region,
                 float scale, float centerX, float centerY);
-        public void onSoftKeyboardShowModeChanged(int showMode);
-        public void onPerformGestureResult(int sequence, boolean completedSuccessfully);
+        void onSoftKeyboardShowModeChanged(int showMode);
+        void onPerformGestureResult(int sequence, boolean completedSuccessfully);
+        void onFingerprintCapturingGesturesChanged(boolean active);
+        void onFingerprintGesture(int gesture);
     }
 
     /**
@@ -403,6 +406,8 @@ public abstract class AccessibilityService extends Service {
     private SparseArray<GestureResultCallbackInfo> mGestureStatusCallbackInfos;
 
     private final Object mLock = new Object();
+
+    private FingerprintGestureController mFingerprintGestureController;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -598,6 +603,32 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
+     * Get the controller for fingerprint gestures. This feature requires {@link
+     * AccessibilityServiceInfo#CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES}.
+     *
+     *<strong>Note: </strong> The service must be connected before this method is called.
+     *
+     * @return The controller for fingerprint gestures, or {@code null} if gestures are unavailable.
+     */
+    @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT)
+    public final @Nullable FingerprintGestureController getFingerprintGestureController() {
+        if (mFingerprintGestureController == null) {
+            FingerprintManager fingerprintManager = getSystemService(FingerprintManager.class);
+            if ((fingerprintManager != null) && fingerprintManager.isHardwareDetected()) {
+                AccessibilityServiceInfo info = getServiceInfo();
+                int fingerprintCapabilityMask =
+                        AccessibilityServiceInfo.CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES;
+                if ((info.getCapabilities() & fingerprintCapabilityMask) != 0) {
+                    mFingerprintGestureController = new FingerprintGestureController(
+                            AccessibilityInteractionClient.getInstance()
+                                    .getConnection(mConnectionId));
+                }
+            }
+        }
+        return mFingerprintGestureController;
+    }
+
+    /**
      * Dispatch a gesture to the touch screen. Any gestures currently in progress, whether from
      * the user, this service, or another service, will be cancelled.
      * <p>
@@ -691,6 +722,22 @@ public abstract class AccessibilityService extends Service {
             mMagnificationController.dispatchMagnificationChanged(
                     region, scale, centerX, centerY);
         }
+    }
+
+    /**
+     * Callback for fingerprint gesture handling
+     * @param active If gesture detection is active
+     */
+    private void onFingerprintCapturingGesturesChanged(boolean active) {
+        getFingerprintGestureController().onGestureDetectionActiveChanged(active);
+    }
+
+    /**
+     * Callback for fingerprint gesture handling
+     * @param gesture The identifier for the gesture performed
+     */
+    private void onFingerprintGesture(int gesture) {
+        getFingerprintGestureController().onGesture(gesture);
     }
 
     /**
@@ -1486,6 +1533,16 @@ public abstract class AccessibilityService extends Service {
             public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
                 AccessibilityService.this.onPerformGestureResult(sequence, completedSuccessfully);
             }
+
+            @Override
+            public void onFingerprintCapturingGesturesChanged(boolean active) {
+                AccessibilityService.this.onFingerprintCapturingGesturesChanged(active);
+            }
+
+            @Override
+            public void onFingerprintGesture(int gesture) {
+                AccessibilityService.this.onFingerprintGesture(gesture);
+            }
         });
     }
 
@@ -1506,6 +1563,8 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_ON_MAGNIFICATION_CHANGED = 7;
         private static final int DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED = 8;
         private static final int DO_GESTURE_COMPLETE = 9;
+        private static final int DO_ON_FINGERPRINT_ACTIVE_CHANGED = 10;
+        private static final int DO_ON_FINGERPRINT_GESTURE = 11;
 
         private final HandlerCaller mCaller;
 
@@ -1575,6 +1634,15 @@ public abstract class AccessibilityService extends Service {
             Message message = mCaller.obtainMessageII(DO_GESTURE_COMPLETE, sequence,
                     successfully ? 1 : 0);
             mCaller.sendMessage(message);
+        }
+
+        public void onFingerprintCapturingGesturesChanged(boolean active) {
+            mCaller.sendMessage(mCaller.obtainMessageI(
+                    DO_ON_FINGERPRINT_ACTIVE_CHANGED, active ? 1 : 0));
+        }
+
+        public void onFingerprintGesture(int gesture) {
+            mCaller.sendMessage(mCaller.obtainMessageI(DO_ON_FINGERPRINT_GESTURE, gesture));
         }
 
         @Override
@@ -1674,6 +1742,12 @@ public abstract class AccessibilityService extends Service {
                 case DO_GESTURE_COMPLETE: {
                     final boolean successfully = message.arg2 == 1;
                     mCallback.onPerformGestureResult(message.arg1, successfully);
+                } return;
+                case DO_ON_FINGERPRINT_ACTIVE_CHANGED: {
+                    mCallback.onFingerprintCapturingGesturesChanged(message.arg1 == 1);
+                } return;
+                case DO_ON_FINGERPRINT_GESTURE: {
+                    mCallback.onFingerprintGesture(message.arg1);
                 } return;
 
                 default :
