@@ -203,7 +203,8 @@ class EphemeralApplicationRegistry {
             }
 
             // Propagate permissions before removing any state
-            propagateEphemeralAppPermissionsIfNeeded(pkg, userId);
+            // TODO: Fix this later
+            // propagateEphemeralAppPermissionsIfNeeded(pkg, userId);
             if (pkg.applicationInfo.isEphemeralApp()) {
                 addEphemeralAppLPw(userId, ps.appId);
             }
