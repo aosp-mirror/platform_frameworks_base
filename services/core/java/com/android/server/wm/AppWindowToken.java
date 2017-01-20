@@ -375,6 +375,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // affected.
                 mService.getDefaultDisplayContentLocked().getDockedDividerController()
                         .notifyAppVisibilityChanged();
+                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
             }
         }
 

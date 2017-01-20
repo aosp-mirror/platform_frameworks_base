@@ -1795,6 +1795,12 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
+    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            mTaskHistory.get(taskNdx).addStartingWindowsForVisibleActivities(taskSwitch);
+        }
+    }
+
     /**
      * @return true if the top visible activity wants to occlude the Keyguard, false otherwise
      */

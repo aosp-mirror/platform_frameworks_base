@@ -1981,6 +1981,15 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return rootAffinity != null && getStackId() != PINNED_STACK_ID;
     }
 
+    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
+        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord r = mActivities.get(activityNdx);
+            if (r.visible) {
+                r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
+            }
+        }
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
