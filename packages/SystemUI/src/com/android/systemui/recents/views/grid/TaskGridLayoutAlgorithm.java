@@ -105,11 +105,13 @@ public class TaskGridLayoutAlgorithm  {
             if (maxTaskHeight >= maxTaskWidth / mAppAspectRatio + mTitleBarHeight) {
                 // Width bound.
                 taskWidth = maxTaskWidth;
-                taskHeight = (int) (maxTaskWidth / mAppAspectRatio + mTitleBarHeight);
+                // Here we should round the height to the nearest integer.
+                taskHeight = (int) (maxTaskWidth / mAppAspectRatio + mTitleBarHeight + 0.5);
             } else {
                 // Height bound.
                 taskHeight = maxTaskHeight;
-                taskWidth = (int) ((taskHeight - mTitleBarHeight) * mAppAspectRatio);
+                // Here we should round the width to the nearest integer.
+                taskWidth = (int) ((taskHeight - mTitleBarHeight) * mAppAspectRatio + 0.5);
             }
             size.set(0, 0, taskWidth, taskHeight);
 
