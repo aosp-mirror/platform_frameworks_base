@@ -23,6 +23,9 @@
 #include "jni.h"
 #include "JNIHelp.h"
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -137,6 +140,28 @@ static jlong android_media_MediaMuxer_native_setup(
         jint format) {
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     ALOGV("native_setup: fd %d", fd);
+
+    // It appears that if an invalid file descriptor is passed through
+    // binder calls, the server-side of the inter-process function call
+    // is skipped. As a result, the check at the server-side to catch
+    // the invalid file descritpor never gets invoked. This is to workaround
+    // this issue by checking the file descriptor first before passing
+    // it through binder call.
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        ALOGE("Fail to get File Status Flags err: %s", strerror(errno));
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "Invalid file descriptor");
+        return 0;
+    }
+
+    // fd must be in read-write mode or write-only mode.
+    if ((flags & (O_RDWR | O_WRONLY)) == 0) {
+        ALOGE("File descriptor is not in read-write mode or write-only mode");
+        jniThrowException(env, "java/io/IOException",
+                "File descriptor is not in read-write mode or write-only mode");
+        return 0;
+    }
 
     MediaMuxer::OutputFormat fileFormat =
         static_cast<MediaMuxer::OutputFormat>(format);
