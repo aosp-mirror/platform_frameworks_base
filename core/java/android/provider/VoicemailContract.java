@@ -30,6 +30,7 @@ import android.provider.CallLog.Calls;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.Voicemail;
+
 import java.util.List;
 
 /**
@@ -316,6 +317,48 @@ public class VoicemailContract {
          * <P>Type: INTEGER (long)</P>
          */
         public static final String LAST_MODIFIED = "last_modified";
+
+        /**
+         * Flag to indicate the voicemail was backed up. The value will be 1 if backed up, 0 if
+         * not.
+         *
+         * <P>Type: INTEGER (boolean)</P>
+         *
+         * @hide
+         */
+        public static final String BACKED_UP = "backed_up";
+
+        /**
+         * Flag to indicate the voicemail was restored from a backup. The value will be 1 if
+         * restored, 0 if not.
+         *
+         * <P>Type: INTEGER (boolean)</P>
+         *
+         * @hide
+         */
+        public static final String RESTORED = "restored";
+
+        /**
+         * Flag to indicate the voicemail was marked as archived. Archived voicemail should not be
+         * deleted even if it no longer exist on the server. The value will be 1 if archived true, 0
+         * if not.
+         *
+         * <P>Type: INTEGER (boolean)</P>
+         *
+         * @hide
+         */
+        public static final String ARCHIVED = "archived";
+
+        /**
+         * Flag to indicate the voicemail is a OMTP voicemail handled by the {@link
+         * android.telephony.VisualVoicemailService}. The UI should only show OMTP voicemails from
+         * the current visual voicemail package.
+         *
+         * <P>Type: INTEGER (boolean)</P>
+         *
+         * @hide
+         */
+        public static final String IS_OMTP_VOICEMAIL = "is_omtp_voicmail";
 
         /**
          * A convenience method to build voicemail URI specific to a source package by appending
