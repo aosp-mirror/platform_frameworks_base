@@ -971,7 +971,9 @@ class UsbProfileGroupSettingsManager {
     public void accessoryAttached(UsbAccessory accessory) {
         Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
         intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
         ArrayList<ResolveInfo> matches;
         String defaultPackage = null;
@@ -1364,7 +1366,9 @@ class UsbProfileGroupSettingsManager {
     private static Intent createDeviceAttachedIntent(UsbDevice device) {
         Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         return intent;
     }
 }
