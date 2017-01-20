@@ -395,7 +395,7 @@
     <string name="network_logging_notification_title">Network traffic is being monitored</string>
     <!-- Content text for a notification. Tapping opens a dialog with more information on network
         logging. [CHAR LIMIT=NONE]-->
-    <string name="network_logging_notification_text">Tap for more details</string>
+    <string name="network_logging_notification_text">Tap to learn more</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
