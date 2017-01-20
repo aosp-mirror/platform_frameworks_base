@@ -290,12 +290,12 @@ public class NetworkScoreServiceTest {
     @Test
     public void testRequestRecommendationAsync_noPermission() throws Exception {
         doThrow(new SecurityException()).when(mContext)
-                .enforceCallingOrSelfPermission(eq(permission.BROADCAST_NETWORK_PRIVILEGED),
+                .enforceCallingOrSelfPermission(eq(permission.REQUEST_NETWORK_SCORES),
                         anyString());
         try {
             mNetworkScoreService.requestRecommendationAsync(mRecommendationRequest,
                     mRemoteCallback);
-            fail("BROADCAST_NETWORK_PRIVILEGED not enforced.");
+            fail("REQUEST_NETWORK_SCORES not enforced.");
         } catch (SecurityException e) {
             // expected
         }
