@@ -18,7 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true">
-    <com.android.systemui.recents.views.TaskViewThumbnail
+    <com.android.systemui.recents.views.grid.GridTaskViewThumbnail
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

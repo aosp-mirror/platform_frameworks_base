@@ -60,11 +60,11 @@ public class TaskViewThumbnail extends View {
 
     // Drawing
     @ViewDebug.ExportedProperty(category="recents")
-    private Rect mTaskViewRect = new Rect();
+    protected Rect mTaskViewRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
-    private Rect mThumbnailRect = new Rect();
+    protected Rect mThumbnailRect = new Rect();
     @ViewDebug.ExportedProperty(category="recents")
-    private float mThumbnailScale;
+    protected float mThumbnailScale;
     private float mFullscreenThumbnailScale;
     /** The height, in pixels, of the task view's title bar. */
     private int mTitleBarHeight;
@@ -72,14 +72,14 @@ public class TaskViewThumbnail extends View {
     private boolean mOverlayHeaderOnThumbnailActionBar = true;
     private ThumbnailData mThumbnailData;
 
-    private int mCornerRadius;
+    protected int mCornerRadius;
     @ViewDebug.ExportedProperty(category="recents")
     private float mDimAlpha;
     private Matrix mMatrix = new Matrix();
-    private Paint mDrawPaint = new Paint();
+    protected Paint mDrawPaint = new Paint();
     private Paint mLockedPaint = new Paint();
-    private Paint mBgFillPaint = new Paint();
-    private BitmapShader mBitmapShader;
+    protected Paint mBgFillPaint = new Paint();
+    protected BitmapShader mBitmapShader;
     private LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
     // Clip the top of the thumbnail against the opaque header bar that overlaps this view
