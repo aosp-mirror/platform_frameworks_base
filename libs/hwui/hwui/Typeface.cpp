@@ -130,9 +130,9 @@ void Typeface::setRobotoTypefaceForTest() {
     sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(fontData.release());
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
+    minikin::FontFamily* family = new minikin::FontFamily();
     minikin::MinikinFont* font = new MinikinFontSkia(std::move(typeface), data, st.st_size, 0);
-    minikin::FontFamily* family = new minikin::FontFamily(
-                 std::vector<minikin::Font>({ minikin::Font(font, minikin::FontStyle()) }));
+    family->addFont(font);
     font->Unref();
 
     std::vector<minikin::FontFamily*> typefaces = { family };
