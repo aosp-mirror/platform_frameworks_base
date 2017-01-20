@@ -243,8 +243,10 @@ public class AppOpsManager {
     public static final int OP_AUDIO_ACCESSIBILITY_VOLUME = 64;
     /** @hide Read the phone number. */
     public static final int OP_READ_PHONE_NUMBER = 65;
+    /** @hide Request package installs through package installer */
+    public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
     /** @hide */
-    public static final int _NUM_OP = 66;
+    public static final int _NUM_OP = 67;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -461,6 +463,7 @@ public class AppOpsManager {
             OP_RUN_IN_BACKGROUND,
             OP_AUDIO_ACCESSIBILITY_VOLUME,
             OP_READ_PHONE_NUMBER,
+            OP_REQUEST_INSTALL_PACKAGES,
     };
 
     /**
@@ -534,6 +537,7 @@ public class AppOpsManager {
             null,
             null, // OP_AUDIO_ACCESSIBILITY_VOLUME
             OPSTR_READ_PHONE_NUMBER,
+            null, // OP_REQUEST_INSTALL_PACKAGES
     };
 
     /**
@@ -607,6 +611,7 @@ public class AppOpsManager {
             "RUN_IN_BACKGROUND",
             "AUDIO_ACCESSIBILITY_VOLUME",
             "READ_PHONE_NUMBER",
+            "REQUEST_INSTALL_PACKAGES",
     };
 
     /**
@@ -680,6 +685,7 @@ public class AppOpsManager {
             null, // no permission for running in background
             null, // no permission for changing accessibility volume
             Manifest.permission.READ_PHONE_NUMBER,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES,
     };
 
     /**
@@ -754,6 +760,7 @@ public class AppOpsManager {
             null, // RUN_IN_BACKGROUND
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
             null, // READ_PHONE_NUMBER
+            null, // REQUEST_INSTALL_PACKAGES
     };
 
     /**
@@ -827,6 +834,7 @@ public class AppOpsManager {
             false, // RUN_IN_BACKGROUND
             false, // AUDIO_ACCESSIBILITY_VOLUME
             false, // READ_PHONE_NUMBER
+            false, // REQUEST_INSTALL_PACKAGES
     };
 
     /**
@@ -899,6 +907,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
             AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_DEFAULT, // OP_REQUEST_INSTALL_PACKAGES
     };
 
     /**
@@ -975,6 +984,7 @@ public class AppOpsManager {
             false,
             false, // OP_AUDIO_ACCESSIBILITY_VOLUME
             false,
+            false, // OP_REQUEST_INSTALL_PACKAGES
     };
 
     /**
