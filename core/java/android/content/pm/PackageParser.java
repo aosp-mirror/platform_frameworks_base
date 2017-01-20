@@ -3931,10 +3931,10 @@ public class PackageParser {
         }
 
         final boolean hasVisibleToEphemeral =
-                sa.hasValue(R.styleable.AndroidManifestActivity_visibleToEphemeral);
+                sa.hasValue(R.styleable.AndroidManifestActivity_visibleToInstantApps);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
-                || sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToEphemeral, false);
+                || sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             a.info.flags |= ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL;
         }
@@ -4244,7 +4244,7 @@ public class PackageParser {
             }
         }
 
-        // TODO add visibleToInstantApp attribute to activity alias
+        // TODO add visibleToInstantApps attribute to activity alias
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
                 || ((a.info.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) != 0);
@@ -4420,10 +4420,10 @@ public class PackageParser {
         }
 
         final boolean hasVisibleToEphemeral =
-                sa.hasValue(R.styleable.AndroidManifestProvider_visibleToEphemeral);
+                sa.hasValue(R.styleable.AndroidManifestProvider_visibleToInstantApps);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
-                || sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToEphemeral, false);
+                || sa.getBoolean(R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             p.info.flags |= ProviderInfo.FLAG_VISIBLE_TO_EPHEMERAL;
         }
@@ -4731,10 +4731,10 @@ public class PackageParser {
         }
 
         final boolean hasVisibleToEphemeral =
-                sa.hasValue(R.styleable.AndroidManifestService_visibleToEphemeral);
+                sa.hasValue(R.styleable.AndroidManifestService_visibleToInstantApps);
         final boolean isEphemeral = ((flags & PARSE_IS_EPHEMERAL) != 0);
         final boolean visibleToEphemeral = isEphemeral
-                || sa.getBoolean(R.styleable.AndroidManifestService_visibleToEphemeral, false);
+                || sa.getBoolean(R.styleable.AndroidManifestService_visibleToInstantApps, false);
         if (visibleToEphemeral) {
             s.info.flags |= ServiceInfo.FLAG_VISIBLE_TO_EPHEMERAL;
         }

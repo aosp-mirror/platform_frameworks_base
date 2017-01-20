@@ -1212,9 +1212,9 @@
          -->
     <attr name="autoVerify" format="boolean" />
 
-    <!-- Specify whether a component should be visible to ephemeral apps.
+    <!-- Specify whether a component should be visible to instant apps.
          -->
-    <attr name="visibleToEphemeral" format="boolean" />
+    <attr name="visibleToInstantApps" format="boolean" />
 
     <!-- An XML resource with the application's Network Security Config. -->
     <attr name="networkSecurityConfig" format="reference" />
@@ -1762,7 +1762,7 @@
         <attr name="exported" />
         <attr name="singleUser" />
         <attr name="directBootAware" />
-        <attr name="visibleToEphemeral" />
+        <attr name="visibleToInstantApps" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -1852,7 +1852,7 @@
              client to bind to the service as if it were running it its own package.  The service
              must also be {@link android.R.attr#exported} if this flag is set. -->
         <attr name="externalService" format="boolean" />
-        <attr name="visibleToEphemeral" />
+        <attr name="visibleToInstantApps" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
@@ -1974,7 +1974,7 @@
              This attribute is ignored if the activity isn't a launcher. -->
         <attr name="onTopLauncher" format="boolean" />
         <attr name="rotationAnimation" />
-        <attr name="visibleToEphemeral" />
+        <attr name="visibleToInstantApps" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
