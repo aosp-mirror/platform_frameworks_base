@@ -27,12 +27,15 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
+import android.net.NetworkKey;
+import android.net.ScoredNetwork;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -48,6 +51,7 @@ import android.util.Log;
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -132,6 +136,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private Object mTag;
 
+    private int mRankingScore = Integer.MIN_VALUE;
+    private int mBadge = ScoredNetwork.BADGING_NONE;
+
     // used to co-relate internal vs returned accesspoint.
     int mId;
 
@@ -205,6 +212,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         this.mScanResultCache.clear();
         this.mScanResultCache.putAll(that.mScanResultCache);
         this.mId = that.mId;
+        this.mBadge = that.mBadge;
+        this.mRankingScore = that.mRankingScore;
     }
 
     @Override
@@ -212,6 +221,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // Active one goes first.
         if (isActive() && !other.isActive()) return -1;
         if (!isActive() && other.isActive()) return 1;
+
+        // Higher scores go before lower scores
+        if (mRankingScore != other.mRankingScore) {
+            return (mRankingScore > other.mRankingScore) ? -1 : 1;
+        }
 
         // Reachable one goes before unreachable one.
         if (mRssi != Integer.MAX_VALUE && other.mRssi == Integer.MAX_VALUE) return -1;
@@ -268,7 +282,36 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (security != SECURITY_NONE) {
             builder.append(',').append(securityToString(security, pskType));
         }
+        builder.append(",rankingScore=").append(mRankingScore);
+        builder.append(",badge=").append(mBadge);
+
         return builder.append(')').toString();
+    }
+
+    /**
+     * Updates the AccessPoint rankingScore and badge, returning true if the data has changed.
+     *
+     * @param scoreCache The score cache to use to retrieve scores.
+     */
+    boolean updateScores(WifiNetworkScoreCache scoreCache) {
+        int oldBadge = mBadge;
+        int oldRankingScore = mRankingScore;
+        mBadge = ScoredNetwork.BADGING_NONE;
+        mRankingScore = Integer.MIN_VALUE;
+
+        for (ScanResult result : mScanResultCache.values()) {
+            ScoredNetwork score = scoreCache.getScoredNetwork(result);
+            if (score == null) {
+                continue;
+            }
+
+            if (score.hasRankingScore()) {
+                mRankingScore = Math.max(mRankingScore, score.calculateRankingScore(result.level));
+            }
+            mBadge = Math.max(mBadge, score.calculateBadge(result.level));
+        }
+
+        return (oldBadge != mBadge || oldRankingScore != mRankingScore);
     }
 
     private void evictOldScanResults() {
@@ -555,6 +598,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             visibility.append(" rssi=").append(mInfo.getRssi());
             visibility.append(" ");
             visibility.append(" score=").append(mInfo.score);
+            visibility.append(" rankingScore=").append(getRankingScore());
+            visibility.append(" badge=").append(getBadge());
             visibility.append(String.format(" tx=%.1f,", mInfo.txSuccessRate));
             visibility.append(String.format("%.1f,", mInfo.txRetriesRate));
             visibility.append(String.format("%.1f ", mInfo.txBadRate));
@@ -818,6 +863,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void setRssi(int rssi) {
         mRssi = rssi;
+    }
+
+    int getRankingScore() {
+        return mRankingScore;
+    }
+
+    int getBadge() {
+        return mBadge;
     }
 
     public static String getSummary(Context context, String ssid, DetailedState state,

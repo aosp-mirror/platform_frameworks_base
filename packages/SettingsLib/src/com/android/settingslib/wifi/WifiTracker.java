@@ -24,15 +24,22 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkKey;
 import android.net.NetworkRequest;
+import android.net.NetworkScoreManager;
+import android.net.ScoredNetwork;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiNetworkScoreCache;
+import android.net.wifi.WifiNetworkScoreCache.CacheListener;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.WorkerThread;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -49,14 +56,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tracks saved or available wifi networks and their state.
  */
 public class WifiTracker {
+    // TODO(sghuman): Document remaining methods with @UiThread and @WorkerThread where possible.
+    // TODO(sghuman): Refactor to avoid calling certain methods on the UiThread.
+
     private static final String TAG = "WifiTracker";
-    private static final boolean DBG = false;
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     /** verbose logging flag. this flag is set thru developer debugging options
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
@@ -122,6 +133,10 @@ public class WifiTracker {
     private NetworkInfo mLastNetworkInfo;
     private WifiInfo mLastInfo;
 
+    private final NetworkScoreManager mNetworkScoreManager;
+    private final WifiNetworkScoreCache mScoreCache;
+    private final Set<NetworkKey> mRequestedScores = new ArraySet<>();
+
     @VisibleForTesting
     Scanner mScanner;
 
@@ -144,14 +159,16 @@ public class WifiTracker {
             boolean includeSaved, boolean includeScans, boolean includePasspoints) {
         this(context, wifiListener, workerLooper, includeSaved, includeScans, includePasspoints,
                 context.getSystemService(WifiManager.class),
-                context.getSystemService(ConnectivityManager.class), Looper.myLooper());
+                context.getSystemService(ConnectivityManager.class),
+                context.getSystemService(NetworkScoreManager.class), Looper.myLooper()
+        );
     }
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints,
             WifiManager wifiManager, ConnectivityManager connectivityManager,
-            Looper currentLooper) {
+            NetworkScoreManager networkScoreManager, Looper currentLooper) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
@@ -186,6 +203,18 @@ public class WifiTracker {
                 .clearCapabilities()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .build();
+
+        mNetworkScoreManager = networkScoreManager;
+
+        mScoreCache = new WifiNetworkScoreCache(context, new CacheListener(mWorkHandler) {
+            @Override
+            public void networkCacheUpdated(List<ScoredNetwork> networks) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Score cache was updated with networks: " + networks);
+                }
+                Message.obtain(mWorkHandler, WorkHandler.MSG_UPDATE_NETWORK_SCORES).sendToTarget();
+            }
+        });
     }
 
     /**
@@ -216,6 +245,8 @@ public class WifiTracker {
 
     /**
      * Resume scanning for wifi networks after it has been paused.
+     *
+     * <p>The score cache should be registered before this method is invoked.
      */
     public void resumeScanning() {
         if (mScanner == null) {
@@ -230,11 +261,20 @@ public class WifiTracker {
     }
 
     /**
-     * Start tracking wifi networks.
-     * Registers listeners and starts scanning for wifi networks. If this is not called
+     * Start tracking wifi networks and scores.
+     *
+     * <p>Registers listeners and starts scanning for wifi networks. If this is not called
      * then forceUpdate() must be called to populate getAccessPoints().
      */
     public void startTracking() {
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                registerScoreCache();
+            }
+        });
+
+
         resumeScanning();
         if (!mRegistered) {
             mContext.registerReceiver(mReceiver, mFilter);
@@ -245,9 +285,28 @@ public class WifiTracker {
         }
     }
 
+    @WorkerThread
+    private void registerScoreCache() {
+        mNetworkScoreManager.registerNetworkScoreCache(
+                NetworkKey.TYPE_WIFI,
+                mScoreCache,
+                NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS);
+    }
+
+    private void requestScoresForNetworkKeys(Collection<NetworkKey> keys) {
+        if (keys.isEmpty()) return;
+
+        if (DBG) {
+            Log.d(TAG, "Requesting scores for Network Keys: " + keys);
+        }
+        mNetworkScoreManager.requestScores(keys.toArray(new NetworkKey[keys.size()]));
+        mRequestedScores.addAll(keys);
+    }
+
     /**
-     * Stop tracking wifi networks.
-     * Unregisters all listeners and stops scanning for wifi networks. This should always
+     * Stop tracking wifi networks and scores.
+     *
+     * <p>Unregisters all listeners and stops scanning for wifi networks. This should always
      * be called when done with a WifiTracker (if startTracking was called) to ensure
      * proper cleanup.
      */
@@ -255,11 +314,26 @@ public class WifiTracker {
         if (mRegistered) {
             mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_INFO);
+            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_SCORES);
             mContext.unregisterReceiver(mReceiver);
             mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
             mRegistered = false;
         }
         pauseScanning();
+
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                unregisterAndClearScoreCache();
+            }
+        });
+    }
+
+    @WorkerThread
+    private void unregisterAndClearScoreCache() {
+        mRequestedScores.clear();
+        mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, mScoreCache);
+        mScoreCache.clearScores();
     }
 
     /**
@@ -415,12 +489,18 @@ public class WifiTracker {
             }
         }
 
+        final List<NetworkKey> scoresToRequest = new ArrayList<>();
         if (results != null) {
             for (ScanResult result : results) {
                 // Ignore hidden and ad-hoc networks.
                 if (result.SSID == null || result.SSID.length() == 0 ||
                         result.capabilities.contains("[IBSS]")) {
                     continue;
+                }
+
+                NetworkKey key = NetworkKey.createFromScanResult(result);
+                if (!mRequestedScores.contains(key)) {
+                    scoresToRequest.add(key);
                 }
 
                 boolean found = false;
@@ -457,27 +537,35 @@ public class WifiTracker {
             }
         }
 
+
+        requestScoresForNetworkKeys(scoresToRequest);
+        for (AccessPoint ap : accessPoints) {
+            ap.updateScores(mScoreCache);
+        }
+
         // Pre-sort accessPoints to speed preference insertion
         Collections.sort(accessPoints);
 
         // Log accesspoints that were deleted
-        if (DBG) Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
-        for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
-            if (prevAccessPoint.getSsid() == null)
-                continue;
-            String prevSsid = prevAccessPoint.getSsidStr();
-            boolean found = false;
-            for (AccessPoint newAccessPoint : accessPoints) {
-                if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid()
-                        .equals(prevSsid)) {
-                    found = true;
-                    break;
+        if (DBG) {
+            Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
+            for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
+                if (prevAccessPoint.getSsid() == null)
+                    continue;
+                String prevSsid = prevAccessPoint.getSsidStr();
+                boolean found = false;
+                for (AccessPoint newAccessPoint : accessPoints) {
+                    if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid()
+                            .equals(prevSsid)) {
+                        found = true;
+                        break;
+                    }
                 }
+                if (!found)
+                    Log.d(TAG, "Did not find " + prevSsid + " in this scan");
             }
-            if (!found)
-                if (DBG) Log.d(TAG, "Did not find " + prevSsid + " in this scan");
+            Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
         }
-        if (DBG) Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
 
         mInternalAccessPoints.clear();
         mInternalAccessPoints.addAll(accessPoints);
@@ -549,7 +637,38 @@ public class WifiTracker {
 
         boolean reorder = false;
         for (int i = mInternalAccessPoints.size() - 1; i >= 0; --i) {
-            if (mInternalAccessPoints.get(i).update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
+            AccessPoint ap = mInternalAccessPoints.get(i);
+            if (ap.update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
+                reorder = true;
+            }
+            if (ap.updateScores(mScoreCache)) {
+                reorder = true;
+            }
+        }
+        if (reorder) {
+            Collections.sort(mInternalAccessPoints);
+            mMainHandler.scheduleAPCopyingAndCloseWriteLock();
+        }
+    }
+
+    /**
+     * Update all the internal access points rankingScores and badge.
+     *
+     * <p>Will trigger a resort and notify listeners of changes if applicable.
+     */
+    private void updateNetworkScores() {
+        // Lock required to prevent accidental copying of AccessPoint states while the modification
+        // is in progress. see #copyAndNotifyListeners
+        long before = System.currentTimeMillis();
+        mInternalAccessPointsWriteLock.block();
+        if (DBG) {
+            Log.d(TAG, "Acquired AP lock on WorkerHandler for inserting NetworkScores. Wait time = " +
+                    (System.currentTimeMillis() - before) + "ms.");
+        }
+
+        boolean reorder = false;
+        for (int i = 0; i < mInternalAccessPoints.size(); i++) {
+            if (mInternalAccessPoints.get(i).updateScores(mScoreCache)) {
                 reorder = true;
             }
         }
@@ -661,6 +780,7 @@ public class WifiTracker {
         private static final int MSG_UPDATE_NETWORK_INFO = 1;
         private static final int MSG_RESUME = 2;
         private static final int MSG_UPDATE_WIFI_STATE = 3;
+        private static final int MSG_UPDATE_NETWORK_SCORES = 4;
 
         public WorkHandler(Looper looper) {
             super(looper);
@@ -694,6 +814,9 @@ public class WifiTracker {
                     }
                     mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, msg.arg1, 0)
                             .sendToTarget();
+                    break;
+                case MSG_UPDATE_NETWORK_SCORES:
+                    updateNetworkScores();
                     break;
             }
         }
