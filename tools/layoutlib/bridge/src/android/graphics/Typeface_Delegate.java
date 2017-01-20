@@ -212,10 +212,9 @@ public final class Typeface_Delegate {
             Map<String, ByteBuffer> bufferForPath) {
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (FontListParser.Font font : family.fonts) {
-            FontFamily_Delegate.addFont(fontFamily.mBuilderPtr, font.fontName, font.weight,
+            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.fontName, font.weight,
                     font.isItalic);
         }
-        fontFamily.freeze();
         return fontFamily;
     }
 
