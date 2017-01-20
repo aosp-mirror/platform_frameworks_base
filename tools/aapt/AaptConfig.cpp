@@ -131,6 +131,22 @@ bool parse(const String8& str, ConfigDescription* out) {
         part = parts[index].string();
     }
 
+    if (parseWideColorGamut(part, &config)) {
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index].string();
+    }
+
+    if (parseHdr(part, &config)) {
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index].string();
+    }
+
     if (parseOrientation(part, &config)) {
         index++;
         if (index == N) {
@@ -250,7 +266,9 @@ void applyVersionForCompatibility(ConfigDescription* config) {
 
     uint16_t minSdk = 0;
     if ((config->uiMode & ResTable_config::MASK_UI_MODE_TYPE)
-                == ResTable_config::UI_MODE_TYPE_VR_HEADSET) {
+                == ResTable_config::UI_MODE_TYPE_VR_HEADSET
+            || config->colorimetry & ResTable_config::MASK_WIDE_COLOR_GAMUT
+            || config->colorimetry & ResTable_config::MASK_HDR) {
         minSdk = SDK_O;
     } else if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
         minSdk = SDK_MNC;
@@ -426,6 +444,46 @@ bool parseScreenRound(const char* name, ResTable_config* out) {
         if (out) out->screenLayout2 =
                 (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
                 | ResTable_config::SCREENROUND_NO;
+        return true;
+    }
+    return false;
+}
+
+bool parseWideColorGamut(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_ANY;
+        return true;
+    } else if (strcmp(name, "widecg") == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_YES;
+        return true;
+    } else if (strcmp(name, "nowidecg") == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+                | ResTable_config::WIDE_COLOR_GAMUT_NO;
+        return true;
+    }
+    return false;
+}
+
+bool parseHdr(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_ANY;
+        return true;
+    } else if (strcmp(name, "highdr") == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_YES;
+        return true;
+    } else if (strcmp(name, "lowdr") == 0) {
+        if (out) out->colorimetry =
+                (out->colorimetry&~ResTable_config::MASK_HDR)
+                | ResTable_config::HDR_NO;
         return true;
     }
     return false;

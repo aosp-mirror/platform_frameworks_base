@@ -566,6 +566,7 @@ public class ActivityInfo extends ComponentInfo
                     CONFIG_SMALLEST_SCREEN_SIZE,
                     CONFIG_DENSITY,
                     CONFIG_LAYOUT_DIRECTION,
+                    CONFIG_COLORIMETRY,
                     CONFIG_FONT_SCALE,
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -671,6 +672,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_LAYOUT_DIRECTION = 0x2000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the change to the display color gamut or dynamic
+     * range. Set from the {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_COLORIMETRY = 0x4000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
      * attribute. This is not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
@@ -706,6 +713,7 @@ public class ActivityInfo extends ComponentInfo
         Configuration.NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,   // SMALLEST SCREEN SIZE
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
+        Configuration.NATIVE_CONFIG_COLORIMETRY,            // COLORIMETRY
     };
 
     /**
@@ -761,7 +769,8 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
-     * {@link #CONFIG_DENSITY}, and {@link #CONFIG_LAYOUT_DIRECTION}.
+     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION} and
+     * {@link #CONFIG_COLORIMETRY}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;

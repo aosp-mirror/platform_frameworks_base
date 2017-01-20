@@ -101,6 +101,68 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean userSetLocale;
 
+
+    /** Constant for {@link #colorimetry}: bits that encode whether the screen is wide gamut. */
+    public static final int COLORIMETRY_WIDE_COLOR_GAMUT_MASK = 0x3;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that it is unknown whether or not the screen is wide gamut.
+     */
+    public static final int COLORIMETRY_WIDE_COLOR_GAMUT_UNDEFINED = 0x0;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that the screen is not wide gamut.
+     * <p>Corresponds to the <code>-nowidecg</code> resource qualifier.</p>
+     */
+    public static final int COLORIMETRY_WIDE_COLOR_GAMUT_NO = 0x1;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_WIDE_COLOR_GAMUT_MASK} value
+     * indicating that the screen is wide gamut.
+     * <p>Corresponds to the <code>-widecg</code> resource qualifier.</p>
+     */
+    public static final int COLORIMETRY_WIDE_COLOR_GAMUT_YES = 0x2;
+
+    /** Constant for {@link #colorimetry}: bits that encode whether the dynamic range of the screen. */
+    public static final int COLORIMETRY_HDR_MASK = 0xc;
+    /** Constant for {@link #colorimetry}: bits shift to get the screen dynamic range. */
+    public static final int COLORIMETRY_HDR_SHIFT = 2;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_HDR_MASK} value
+     * indicating that it is unknown whether or not the screen is HDR.
+     */
+    public static final int COLORIMETRY_HDR_UNDEFINED = 0x0;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_HDR_MASK} value
+     * indicating that the screen is not HDR (low/standard dynamic range).
+     * <p>Corresponds to the <code>-lowdr</code> resource qualifier.</p>
+     */
+    public static final int COLORIMETRY_HDR_NO = 0x1 << COLORIMETRY_HDR_SHIFT;
+    /**
+     * Constant for {@link #colorimetry}: a {@link #COLORIMETRY_HDR_MASK} value
+     * indicating that the screen is HDR (dynamic range).
+     * <p>Corresponds to the <code>-highdr</code> resource qualifier.</p>
+     */
+    public static final int COLORIMETRY_HDR_YES = 0x2 << COLORIMETRY_HDR_SHIFT;
+
+    /** Constant for {@link #colorimetry}: a value indicating that colorimetry is undefined */
+    @SuppressWarnings("PointlessBitwiseExpression")
+    public static final int COLORIMETRY_UNDEFINED = COLORIMETRY_WIDE_COLOR_GAMUT_UNDEFINED |
+            COLORIMETRY_HDR_UNDEFINED;
+
+    /**
+     * Bit mask of for color capabilities of the screen. Currently there are two fields:
+     * <p>The {@link #COLORIMETRY_WIDE_COLOR_GAMUT_MASK} bits define the color gamut of
+     * the screen. They may be one of
+     * {@link #COLORIMETRY_WIDE_COLOR_GAMUT_NO} or {@link #COLORIMETRY_WIDE_COLOR_GAMUT_YES}.</p>
+     *
+     * <p>The {@link #COLORIMETRY_HDR_MASK} defines the dynamic range of the screen. They may be
+     * one of {@link #COLORIMETRY_HDR_NO} or {@link #COLORIMETRY_HDR_YES}.</p>
+     *
+     * <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information.</p>
+     */
+    public int colorimetry;
+
     /** Constant for {@link #screenLayout}: bits that encode the size. */
     public static final int SCREENLAYOUT_SIZE_MASK = 0x0f;
     /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
@@ -330,6 +392,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if ((diff & ActivityInfo.CONFIG_SCREEN_LAYOUT) != 0) {
             list.add("CONFIG_SCREEN_LAYOUT");
+        }
+        if ((diff & ActivityInfo.CONFIG_COLORIMETRY) != 0) {
+            list.add("CONFIG_COLORIMETRY");
         }
         if ((diff & ActivityInfo.CONFIG_UI_MODE) != 0) {
             list.add("CONFIG_UI_MODE");
@@ -711,6 +776,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                     NATIVE_CONFIG_UI_MODE,
                     NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
                     NATIVE_CONFIG_LAYOUTDIR,
+                    NATIVE_CONFIG_COLORIMETRY,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NativeConfig {}
@@ -747,6 +813,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int NATIVE_CONFIG_SMALLEST_SCREEN_SIZE = 0x2000;
     /** @hide Native-specific bit mask for LAYOUTDIR config ; DO NOT USE UNLESS YOU ARE SURE.*/
     public static final int NATIVE_CONFIG_LAYOUTDIR = 0x4000;
+    /** @hide Native-specific bit mask for COLORIMETRY config ; DO NOT USE UNLESS YOU ARE SURE.*/
+    public static final int NATIVE_CONFIG_COLORIMETRY = 0x10000;
 
     /**
      * <p>Construct an invalid Configuration. This state is only suitable for constructing a
@@ -805,6 +873,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = o.navigationHidden;
         orientation = o.orientation;
         screenLayout = o.screenLayout;
+        colorimetry = o.colorimetry;
         uiMode = o.uiMode;
         screenWidthDp = o.screenWidthDp;
         screenHeightDp = o.screenHeightDp;
@@ -884,6 +953,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case SCREENLAYOUT_LONG_YES: sb.append(" long"); break;
             default: sb.append(" layoutLong=");
                     sb.append(screenLayout&SCREENLAYOUT_LONG_MASK); break;
+        }
+        switch ((colorimetry&COLORIMETRY_HDR_MASK)) {
+            case COLORIMETRY_HDR_UNDEFINED: sb.append(" ?ldr"); break; // most likely not HDR
+            case COLORIMETRY_HDR_NO: /* ldr is not interesting to print */ break;
+            case COLORIMETRY_HDR_YES: sb.append(" hdr"); break;
+            default: sb.append(" dynamicRange=");
+                sb.append(colorimetry&COLORIMETRY_HDR_MASK); break;
+        }
+        switch ((colorimetry&COLORIMETRY_WIDE_COLOR_GAMUT_MASK)) {
+            case COLORIMETRY_WIDE_COLOR_GAMUT_UNDEFINED: sb.append(" ?wideColorGamut"); break;
+            case COLORIMETRY_WIDE_COLOR_GAMUT_NO: /* not wide is not interesting to print */ break;
+            case COLORIMETRY_WIDE_COLOR_GAMUT_YES: sb.append(" widecg"); break;
+            default: sb.append(" wideColorGamut=");
+                sb.append(colorimetry&COLORIMETRY_WIDE_COLOR_GAMUT_MASK); break;
         }
         switch (orientation) {
             case ORIENTATION_UNDEFINED: sb.append(" ?orien"); break;
@@ -976,6 +1059,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = NAVIGATIONHIDDEN_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_UNDEFINED;
+        colorimetry = COLORIMETRY_UNDEFINED;
         uiMode = UI_MODE_TYPE_UNDEFINED;
         screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
@@ -1109,6 +1193,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
             screenLayout = (screenLayout & ~SCREENLAYOUT_COMPAT_NEEDED)
                 | (delta.screenLayout & SCREENLAYOUT_COMPAT_NEEDED);
+        }
+
+        if (((delta.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK) !=
+                     COLORIMETRY_WIDE_COLOR_GAMUT_UNDEFINED)
+                && (delta.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK)
+                != (colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLORIMETRY;
+            colorimetry = (colorimetry & ~COLORIMETRY_WIDE_COLOR_GAMUT_MASK)
+                    | (delta.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK);
+        }
+
+        if (((delta.colorimetry & COLORIMETRY_HDR_MASK) != COLORIMETRY_HDR_UNDEFINED)
+                && (delta.colorimetry & COLORIMETRY_HDR_MASK)
+                != (colorimetry & COLORIMETRY_HDR_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLORIMETRY;
+            colorimetry = (colorimetry & ~COLORIMETRY_HDR_MASK)
+                    | (delta.colorimetry & COLORIMETRY_HDR_MASK);
         }
 
         if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
@@ -1260,6 +1361,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 getScreenLayoutNoDirection(delta.screenLayout)) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }
+        if ((compareUndefined ||
+                     (delta.colorimetry & COLORIMETRY_HDR_MASK) != COLORIMETRY_HDR_UNDEFINED)
+                && (colorimetry & COLORIMETRY_HDR_MASK) !=
+                        (delta.colorimetry & COLORIMETRY_HDR_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLORIMETRY;
+        }
+        if ((compareUndefined ||
+                     (delta.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK) !=
+                             COLORIMETRY_WIDE_COLOR_GAMUT_UNDEFINED)
+                && (colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK) !=
+                        (delta.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK)) {
+            changed |= ActivityInfo.CONFIG_COLORIMETRY;
+        }
         if ((compareUndefined || delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED))
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
@@ -1371,6 +1485,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(navigationHidden);
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
+        dest.writeInt(colorimetry);
         dest.writeInt(uiMode);
         dest.writeInt(screenWidthDp);
         dest.writeInt(screenHeightDp);
@@ -1405,6 +1520,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         navigationHidden = source.readInt();
         orientation = source.readInt();
         screenLayout = source.readInt();
+        colorimetry = source.readInt();
         uiMode = source.readInt();
         screenWidthDp = source.readInt();
         screenHeightDp = source.readInt();
@@ -1486,6 +1602,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.orientation - that.orientation;
         if (n != 0) return n;
+        n = this.colorimetry - that.colorimetry;
+        if (n != 0) return n;
         n = this.screenLayout - that.screenLayout;
         if (n != 0) return n;
         n = this.uiMode - that.uiMode;
@@ -1531,6 +1649,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + navigationHidden;
         result = 31 * result + orientation;
         result = 31 * result + screenLayout;
+        result = 31 * result + colorimetry;
         result = 31 * result + uiMode;
         result = 31 * result + screenWidthDp;
         result = 31 * result + screenHeightDp;
@@ -1636,6 +1755,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean isScreenRound() {
         return (screenLayout & SCREENLAYOUT_ROUND_MASK) == SCREENLAYOUT_ROUND_YES;
+    }
+
+    /**
+     * Return whether the screen has a wide color gamut.
+     *
+     * @return true if the screen has a wide color gamut, false otherwise
+     */
+    public boolean isScreenWideColorGamut() {
+        return (colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK) == COLORIMETRY_WIDE_COLOR_GAMUT_YES;
+    }
+
+    /**
+     * Return whether the screen has a high dynamic range.
+     *
+     * @return true if the screen has a high dynamic range, false otherwise
+     */
+    public boolean isScreenHdr() {
+        return (colorimetry & COLORIMETRY_HDR_MASK) == COLORIMETRY_HDR_YES;
     }
 
     /**
@@ -1765,6 +1902,28 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case Configuration.SCREENLAYOUT_ROUND_NO:
                 parts.add("notround");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.colorimetry & Configuration.COLORIMETRY_HDR_MASK) {
+            case Configuration.COLORIMETRY_HDR_YES:
+                parts.add("highdr");
+                break;
+            case Configuration.COLORIMETRY_HDR_NO:
+                parts.add("lowdr");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.colorimetry & Configuration.COLORIMETRY_WIDE_COLOR_GAMUT_MASK) {
+            case Configuration.COLORIMETRY_WIDE_COLOR_GAMUT_YES:
+                parts.add("widecg");
+                break;
+            case Configuration.COLORIMETRY_WIDE_COLOR_GAMUT_NO:
+                parts.add("nowidecg");
                 break;
             default:
                 break;
@@ -1995,6 +2154,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             delta.screenLayout |= change.screenLayout & SCREENLAYOUT_ROUND_MASK;
         }
 
+        if ((base.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK) !=
+                (change.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK)) {
+            delta.colorimetry |= change.colorimetry & COLORIMETRY_WIDE_COLOR_GAMUT_MASK;
+        }
+
+        if ((base.colorimetry & COLORIMETRY_HDR_MASK) !=
+                (change.colorimetry & COLORIMETRY_HDR_MASK)) {
+            delta.colorimetry |= change.colorimetry & COLORIMETRY_HDR_MASK;
+        }
+
         if ((base.uiMode & UI_MODE_TYPE_MASK) != (change.uiMode & UI_MODE_TYPE_MASK)) {
             delta.uiMode |= change.uiMode & UI_MODE_TYPE_MASK;
         }
@@ -2037,6 +2206,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_NAVIGATION_HIDDEN = "navHid";
     private static final String XML_ATTR_ORIENTATION = "ori";
     private static final String XML_ATTR_SCREEN_LAYOUT = "scrLay";
+    private static final String XML_ATTR_COLORIMETRY = "clrMtry";
     private static final String XML_ATTR_UI_MODE = "ui";
     private static final String XML_ATTR_SCREEN_WIDTH = "width";
     private static final String XML_ATTR_SCREEN_HEIGHT = "height";
@@ -2079,6 +2249,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 ORIENTATION_UNDEFINED);
         configOut.screenLayout = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_LAYOUT,
                 SCREENLAYOUT_UNDEFINED);
+        configOut.colorimetry = XmlUtils.readIntAttribute(parser, XML_ATTR_COLORIMETRY,
+                COLORIMETRY_UNDEFINED);
         configOut.uiMode = XmlUtils.readIntAttribute(parser, XML_ATTR_UI_MODE, 0);
         configOut.screenWidthDp = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_WIDTH,
                 SCREEN_WIDTH_DP_UNDEFINED);
@@ -2140,6 +2312,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if (config.screenLayout != SCREENLAYOUT_UNDEFINED) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_LAYOUT, config.screenLayout);
+        }
+        if (config.colorimetry != COLORIMETRY_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_COLORIMETRY, config.colorimetry);
         }
         if (config.uiMode != 0) {
             XmlUtils.writeIntAttribute(xml, XML_ATTR_UI_MODE, config.uiMode);
