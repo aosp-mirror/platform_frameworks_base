@@ -2252,10 +2252,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 // Don't include wallpaper in bounds calculation
-                if (includeDecor && !stackBounds.isEmpty()) {
-                    frame.set(stackBounds);
-                } else if (includeDecor) {
-                    mutableIncludeFullDisplay.value = true;
+                if (!mutableIncludeFullDisplay.value && includeDecor) {
+                    final TaskStack stack = w.getStack();
+                    if (stack != null) {
+                        stack.getBounds(frame);
+                    }
                 } else if (!mutableIncludeFullDisplay.value && !w.mIsWallpaper) {
                     final Rect wf = w.mFrame;
                     final Rect cr = w.mContentInsets;
