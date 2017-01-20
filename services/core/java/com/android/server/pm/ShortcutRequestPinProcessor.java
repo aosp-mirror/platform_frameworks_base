@@ -203,18 +203,12 @@ class ShortcutRequestPinProcessor {
         // Next, validate the incoming shortcut, etc.
         final PinItemRequest request;
         if (inShortcut != null) {
-            request = requestPinShortcutLocked(inShortcut, resultIntent, confirmActivity,
-                    true /* ignoreIfAlreadyPinned */);
+            request = requestPinShortcutLocked(inShortcut, resultIntent, confirmActivity);
         } else {
             int launcherUid = mService.injectGetPackageUid(
                     confirmActivity.first.getPackageName(), launcherUserId);
             request = new PinItemRequest(inAppWidget,
                     new PinItemRequestInner(this, resultIntent, launcherUid));
-        }
-
-        if (request == null) {
-            sendResultIntent(resultIntent, null);
-            return true;
         }
         return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request);
     }
@@ -238,23 +232,17 @@ class ShortcutRequestPinProcessor {
         mService.throwIfUserLockedL(launcherUserId);
 
         // Next, validate the incoming shortcut, etc.
-        PinItemRequest request = requestPinShortcutLocked(inShortcut, null,
-                Pair.create(defaultLauncher, launcherUserId), false /* ignoreIfAlreadyPinned */);
-        if (request == null) {
-            return null;
-        }
+        final PinItemRequest request = requestPinShortcutLocked(inShortcut, null,
+                Pair.create(defaultLauncher, launcherUserId));
         return new Intent().putExtra(LauncherApps.EXTRA_PIN_ITEM_REQUEST, request);
     }
 
     /**
      * Handle {@link android.content.pm.ShortcutManager#requestPinShortcut)}.
-     *
-     * @param ignoreIfAlreadyPinned if true and the {@param inShortcut} is already pinned for
-     *                              {@param confirmActivity}, null is returned instead.
      */
+    @NonNull
     private PinItemRequest requestPinShortcutLocked(ShortcutInfo inShortcut,
-            IntentSender resultIntent, Pair<ComponentName, Integer> confirmActivity,
-            boolean ignoreIfAlreadyPinned) {
+            IntentSender resultIntentOriginal, Pair<ComponentName, Integer> confirmActivity) {
         final ShortcutPackage ps = mService.getPackageShortcutsForPublisherLocked(
                 inShortcut.getPackage(), inShortcut.getUserId());
 
@@ -272,16 +260,20 @@ class ShortcutRequestPinProcessor {
         final String launcherPackage = confirmActivity.first.getPackageName();
         final int launcherUserId = confirmActivity.second;
 
+        IntentSender resultIntentToSend = resultIntentOriginal;
+
         if (existsAlready) {
             validateExistingShortcut(existing);
 
             final boolean isAlreadyPinned = mService.getLauncherShortcutsLocked(
                     launcherPackage, existing.getUserId(), launcherUserId).hasPinned(existing);
-            // See if it's already pinned.
-            if (ignoreIfAlreadyPinned && isAlreadyPinned) {
-                Log.i(TAG, "Launcher's already pinning shortcut " + existing.getId()
-                        + " for package " + existing.getPackage());
-                return null;
+            if (isAlreadyPinned) {
+                // When the shortcut is already pinned by this launcher, the request will always
+                // succeed, so just send the result at this point.
+                sendResultIntent(resultIntentOriginal, null);
+
+                // So, do not send the intent again.
+                resultIntentToSend = null;
             }
 
             // Pass a clone, not the original.
@@ -289,7 +281,7 @@ class ShortcutRequestPinProcessor {
             shortcutForLauncher = existing.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
             if (!isAlreadyPinned) {
-                // FLAG_PINNED is still set, if it's pinned by other launchers.
+                // FLAG_PINNED may still be set, if it's pinned by other launchers.
                 shortcutForLauncher.clearFlags(ShortcutInfo.FLAG_PINNED);
             }
         } else {
@@ -320,8 +312,8 @@ class ShortcutRequestPinProcessor {
 
         // Create a request object.
         final PinShortcutRequestInner inner =
-                new PinShortcutRequestInner(this, inShortcut, shortcutForLauncher, resultIntent,
-                        launcherPackage, launcherUserId,
+                new PinShortcutRequestInner(this, inShortcut, shortcutForLauncher,
+                        resultIntentToSend, launcherPackage, launcherUserId,
                         mService.injectGetPackageUid(launcherPackage, launcherUserId),
                         existsAlready);
 
@@ -410,6 +402,16 @@ class ShortcutRequestPinProcessor {
                 return false;
             }
 
+            final ShortcutLauncher launcher = mService.getLauncherShortcutsLocked(
+                    launcherPackage, appUserId, launcherUserId);
+            launcher.attemptToRestoreIfNeededAndSave();
+            if (launcher.hasPinned(original)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Shortcut " + original + " already pinned.");
+                }
+                return true;
+            }
+
             final ShortcutPackage ps = mService.getPackageShortcutsForPublisherLocked(
                     appPackageName, appUserId);
             final ShortcutInfo current = ps.findShortcutById(shortcutId);
@@ -447,9 +449,6 @@ class ShortcutRequestPinProcessor {
                 Slog.d(TAG, "Pinning " + shortcutId);
             }
 
-            final ShortcutLauncher launcher = mService.getLauncherShortcutsLocked(
-                    launcherPackage, appUserId, launcherUserId);
-            launcher.attemptToRestoreIfNeededAndSave();
             launcher.addPinnedShortcut(appPackageName, appUserId, shortcutId);
 
             if (current == null) {

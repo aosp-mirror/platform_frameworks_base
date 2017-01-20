@@ -1185,6 +1185,13 @@ public class LauncherApps {
      * Represents a "pin shortcut" request made by an app, which is sent with
      * an {@link #ACTION_CONFIRM_PIN_ITEM} intent to the default launcher app.
      *
+     * <p>Note the launcher may receive a request to pin a shortcut that is already pinned, because
+     * the user may actually want to have multiple icons of the same shortcut on the launcher.
+     * The launcher can tell this case by calling {@link ShortcutInfo#isPinned()} on the shortcut
+     * returned by {@link #getShortcutInfo()}.  In this case, calling {@link #accept()} is optional;
+     * even if the launcher does not call it, the shortcut is already pinned.  Also in this case,
+     * the {@code options} argument to {@link #accept(Bundle)} will be ignored.
+     *
      * @see #EXTRA_PIN_ITEM_REQUEST
      * @see #getPinItemRequest(Intent)
      */
