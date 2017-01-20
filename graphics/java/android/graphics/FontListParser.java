@@ -21,7 +21,6 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
@@ -105,12 +104,9 @@ public class FontListParser {
     // Note that a well-formed variation contains a four-character tag and a float as styleValue,
     // with spacers in between. The tag is enclosd either by double quotes or single quotes.
     @VisibleForTesting
-    public static ArrayList<Axis> parseFontVariationSettings(@Nullable String settings) {
-        ArrayList<Axis> axisList = new ArrayList<>();
-        if (settings == null) {
-            return axisList;
-        }
+    public static Axis[] parseFontVariationSettings(String settings) {
         String[] settingList = settings.split(",");
+        ArrayList<Axis> axisList = new ArrayList<>();
         settingLoop:
         for (String setting : settingList) {
             int pos = 0;
@@ -154,7 +150,7 @@ public class FontListParser {
                     tagString.charAt(3));
             axisList.add(new Axis(tag, styleValue));
         }
-        return axisList;
+        return axisList.toArray(new Axis[axisList.size()]);
     }
 
     @VisibleForTesting
