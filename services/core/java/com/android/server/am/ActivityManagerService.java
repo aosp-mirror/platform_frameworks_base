@@ -5557,11 +5557,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     removeUriPermissionsForPackageLocked(packageName, userId, true);
                 }
 
-                // Remove all zen rules created by this package; revoke it's zen access.
+                // Reset notification settings.
                 INotificationManager inm = NotificationManager.getService();
-                inm.removeAutomaticZenRules(packageName);
-                inm.setNotificationPolicyAccessGranted(packageName, false);
-
+                inm.clearData(packageName, pkgUidF);
             } catch (RemoteException e) {
             }
         } finally {

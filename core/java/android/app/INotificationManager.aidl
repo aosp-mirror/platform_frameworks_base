@@ -40,6 +40,7 @@ interface INotificationManager
 {
     void cancelAllNotifications(String pkg, int userId);
 
+    void clearData(String pkg, int uid);
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
@@ -54,10 +55,10 @@ interface INotificationManager
     void createNotificationChannels(String pkg, in ParceledListSlice channelsList);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, String channelId);
-    NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId);
+    NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, String channelId);
     ParceledListSlice getNotificationChannels(String pkg);
-    ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid);
+    ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
