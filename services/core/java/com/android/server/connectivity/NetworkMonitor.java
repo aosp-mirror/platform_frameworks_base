@@ -779,6 +779,7 @@ public class NetworkMonitor extends StateMachine {
         int httpResponseCode = 599;
         String redirectUrl = null;
         final Stopwatch probeTimer = new Stopwatch().start();
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
         try {
             urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
             urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
@@ -839,6 +840,7 @@ public class NetworkMonitor extends StateMachine {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
+            TrafficStats.setThreadStatsTag(oldTag);
         }
         logValidationProbe(probeTimer.stop(), probeType, httpResponseCode);
         return new CaptivePortalProbeResult(httpResponseCode, redirectUrl, url.toString());

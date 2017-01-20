@@ -23,6 +23,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.TrafficStats;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -381,7 +382,12 @@ public class NetworkDiagnostics {
         protected void setupSocket(
                 int sockType, int protocol, long writeTimeout, long readTimeout, int dstPort)
                 throws ErrnoException, IOException {
-            mFileDescriptor = Os.socket(mAddressFamily, sockType, protocol);
+            final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
+            try {
+                mFileDescriptor = Os.socket(mAddressFamily, sockType, protocol);
+            } finally {
+                TrafficStats.setThreadStatsTag(oldTag);
+            }
             // Setting SNDTIMEO is purely for defensive purposes.
             Os.setsockoptTimeval(mFileDescriptor,
                     SOL_SOCKET, SO_SNDTIMEO, StructTimeval.fromMillis(writeTimeout));

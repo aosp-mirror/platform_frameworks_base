@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -245,11 +246,17 @@ public final class StrictMode {
      */
     private static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 0x80 << 8;  // for VmPolicy
 
+    /**
+     * @hide
+     */
+    private static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24;  // for VmPolicy
+
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS |
             DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS |
             DETECT_VM_REGISTRATION_LEAKS | DETECT_VM_FILE_URI_EXPOSURE |
-            DETECT_VM_CLEARTEXT_NETWORK | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
+            DETECT_VM_CLEARTEXT_NETWORK | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION |
+            DETECT_VM_UNTAGGED_SOCKET;
 
     // Byte 3: Penalty
 
@@ -299,6 +306,8 @@ public final class StrictMode {
      * @hide
      */
     public static final int PENALTY_DEATH_ON_FILE_URI_EXPOSURE = 0x04 << 24;
+
+    // CAUTION: we started stealing the top bits of Byte 4 for VM above
 
     /**
      * Mask of all the penalty bits valid for thread policies.
@@ -715,7 +724,8 @@ public final class StrictMode {
             public Builder detectAll() {
                 int flags = DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
                         | DETECT_VM_CLOSABLE_LEAKS | DETECT_VM_REGISTRATION_LEAKS
-                        | DETECT_VM_FILE_URI_EXPOSURE | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION;
+                        | DETECT_VM_FILE_URI_EXPOSURE | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION
+                        | DETECT_VM_UNTAGGED_SOCKET;
 
                 // TODO: always add DETECT_VM_CLEARTEXT_NETWORK once we have facility
                 // for apps to mark sockets that should be ignored
@@ -817,6 +827,22 @@ public final class StrictMode {
              */
             public Builder detectContentUriWithoutPermission() {
                 return enable(DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION);
+            }
+
+            /**
+             * Detect any sockets in the calling app which have not been tagged
+             * using {@link TrafficStats}. Tagging sockets can help you
+             * investigate network usage inside your app, such as a narrowing
+             * down heavy usage to a specific library or component.
+             * <p>
+             * This currently does not detect sockets created in native code.
+             *
+             * @see TrafficStats#setThreadStatsTag(int)
+             * @see TrafficStats#tagSocket(java.net.Socket)
+             * @see TrafficStats#tagDatagramSocket(java.net.DatagramSocket)
+             */
+            public Builder detectUntaggedSockets() {
+                return enable(DETECT_VM_UNTAGGED_SOCKET);
             }
 
             /**
@@ -1151,6 +1177,11 @@ public final class StrictMode {
             VmPolicy.Builder policyBuilder = new VmPolicy.Builder().detectAll().penaltyDropBox();
             if (IS_ENG_BUILD) {
                 policyBuilder.penaltyLog();
+            }
+            // All core system components need to tag their sockets to aid
+            // system health investigations
+            if (android.os.Process.myUid() < android.os.Process.FIRST_APPLICATION_UID) {
+                policyBuilder.detectUntaggedSockets();
             }
             setVmPolicy(policyBuilder.build());
             setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
@@ -1832,6 +1863,13 @@ public final class StrictMode {
     /**
      * @hide
      */
+    public static boolean vmUntaggedSocketEnabled() {
+        return (sVmPolicyMask & DETECT_VM_UNTAGGED_SOCKET) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(message, originStack);
     }
@@ -1909,6 +1947,14 @@ public final class StrictMode {
         final boolean forceDeath = (sVmPolicyMask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
         onVmPolicyViolation(HexDump.dumpHexString(firstPacket).trim(), new Throwable(msg),
                 forceDeath);
+    }
+
+    /**
+     * @hide
+     */
+    public static void onUntaggedSocket() {
+        onVmPolicyViolation(null, new Throwable("Untagged socket detected; use"
+                + " TrafficStats.setThreadSocketTag() to track all network usage"));
     }
 
     // Map from VM violation fingerprint to uptime millis.
