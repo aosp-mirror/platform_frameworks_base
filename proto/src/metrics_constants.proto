@@ -3303,6 +3303,9 @@ message MetricsEvent {
     RESERVED_FOR_LOGBUILDER_TIMESTAMP = 805;
     RESERVED_FOR_LOGBUILDER_PACKAGENAME = 806;
 
+    // ACTION: "Force stop" action on an app
+    ACTION_APP_FORCE_STOP = 807;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
