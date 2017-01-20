@@ -26,12 +26,12 @@
         android:orientation="vertical"
         android:fitsSystemWindows="true">
         <FrameLayout
+            style="?android:attr/actionBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="?android:attr/actionBarTheme">
             <Toolbar
                 android:id="@+id/action_bar"
-                style="?android:attr/actionBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:navigationContentDescription="@*android:string/action_bar_up_description"/>

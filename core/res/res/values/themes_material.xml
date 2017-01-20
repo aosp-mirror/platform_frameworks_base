@@ -1323,10 +1323,10 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Default theme for Settings and activities launched from Settings. -->
-    <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
-        <item name="colorPrimary">@color/primary_material_settings</item>
-        <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
-        <item name="colorSecondary">@color/secondary_material_settings</item>
+    <style name="Theme.Material.Settings" parent="Theme.Material.Light.LightStatusBar">
+        <item name="colorPrimary">@color/primary_material_settings_light</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_settings_light</item>
+        <item name="colorSecondary">@color/secondary_material_settings_light</item>
 
         <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
         <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
