@@ -443,6 +443,7 @@ public class Instrumentation {
         private final String mClass;
         private final ActivityResult mResult;
         private final boolean mBlock;
+        private final boolean mIgnoreMatchingSpecificIntents;
 
 
         // This is protected by 'Instrumentation.this.mSync'.
@@ -454,7 +455,7 @@ public class Instrumentation {
         /**
          * Create a new ActivityMonitor that looks for a particular kind of 
          * intent to be started.
-         *  
+         *
          * @param which The set of intents this monitor is responsible for.
          * @param result A canned result to return if the monitor is hit; can 
          *               be null.
@@ -470,6 +471,7 @@ public class Instrumentation {
             mClass = null;
             mResult = result;
             mBlock = block;
+            mIgnoreMatchingSpecificIntents = false;
         }
 
         /**
@@ -491,6 +493,34 @@ public class Instrumentation {
             mClass = cls;
             mResult = result;
             mBlock = block;
+            mIgnoreMatchingSpecificIntents = false;
+        }
+
+        /**
+         * Create a new ActivityMonitor that can be used for intercepting any activity to be
+         * started.
+         *
+         * <p> When an activity is started, {@link #onMatchIntent(Intent)} will be called on
+         * instances created using this constructor to see if it is a hit.
+         *
+         * @see #onMatchIntent(Intent)
+         */
+        public ActivityMonitor() {
+            mWhich = null;
+            mClass = null;
+            mResult = null;
+            mBlock = false;
+            mIgnoreMatchingSpecificIntents = true;
+        }
+
+        /**
+         * @return true if this monitor is used for intercepting any started activity by calling
+         *         into {@link #onMatchIntent(Intent)}, false if this monitor is only used
+         *         for specific intents corresponding to the intent filter or activity class
+         *         passed in the constructor.
+         */
+        final boolean ignoreMatchingSpecificIntents() {
+            return mIgnoreMatchingSpecificIntents;
         }
 
         /**
@@ -577,10 +607,31 @@ public class Instrumentation {
                 }
             }
         }
-        
+
+        /**
+         * Used for intercepting any started activity.
+         *
+         * <p> A non-null return value here will be considered a hit for this monitor.
+         * By default this will return {@code null} and subclasses can override this to return
+         * a non-null value if the intent needs to be intercepted.
+         *
+         * <p> Whenever a new activity is started, this method will be called on instances created
+         * using {@link #Instrumentation.ActivityMonitor()} to check if there is a match. In case
+         * of a match, the activity start will be blocked and the returned result will be used.
+         *
+         * @param intent The intent used for starting the activity.
+         * @return The {@link ActivityResult} that needs to be used in case of a match.
+         */
+        public ActivityResult onMatchIntent(Intent intent) {
+            return null;
+        }
+
         final boolean match(Context who,
                             Activity activity,
                             Intent intent) {
+            if (mIgnoreMatchingSpecificIntents) {
+                return false;
+            }
             synchronized (this) {
                 if (mWhich != null
                     && mWhich.match(who.getContentResolver(), intent,
@@ -1492,7 +1543,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intent)) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intent);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return result;
+                    } else if (am.match(who, null, intent)) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return requestCode >= 0 ? am.getResult() : null;
@@ -1548,7 +1606,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intents[0])) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intents[0]);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return;
+                    } else if (am.match(who, null, intents[0])) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return;
@@ -1611,7 +1676,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intent)) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intent);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return result;
+                    } else if (am.match(who, null, intent)) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return requestCode >= 0 ? am.getResult() : null;
@@ -1671,7 +1743,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intent)) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intent);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return result;
+                    } else if (am.match(who, null, intent)) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return requestCode >= 0 ? am.getResult() : null;
@@ -1710,7 +1789,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intent)) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intent);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return result;
+                    } else if (am.match(who, null, intent)) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return requestCode >= 0 ? am.getResult() : null;
@@ -1748,7 +1834,14 @@ public class Instrumentation {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
                     final ActivityMonitor am = mActivityMonitors.get(i);
-                    if (am.match(who, null, intent)) {
+                    ActivityResult result = null;
+                    if (am.ignoreMatchingSpecificIntents()) {
+                        result = am.onMatchIntent(intent);
+                    }
+                    if (result != null) {
+                        am.mHits++;
+                        return;
+                    } else if (am.match(who, null, intent)) {
                         am.mHits++;
                         if (am.isBlocking()) {
                             return;
