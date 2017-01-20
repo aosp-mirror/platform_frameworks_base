@@ -709,6 +709,16 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Indicate that a WifiConfiguration is temporary and should not be saved
+     * nor considered by AutoJoin.
+     */
+    @SystemApi
+    public boolean isEphemeral() {
+      return ephemeral;
+    }
+
+    /**
+     * @hide
      * A hint about whether or not the network represented by this WifiConfiguration
      * is metered. This is hinted at via the meteredHint bit on DHCP results set in
      * {@link com.android.server.wifi.WifiStateMachine}, or via a network score in
