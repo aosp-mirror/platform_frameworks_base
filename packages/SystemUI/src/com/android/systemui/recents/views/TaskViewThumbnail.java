@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.views;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -114,8 +115,12 @@ public class TaskViewThumbnail extends View {
         mCornerRadius = res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         mBgFillPaint.setColor(Color.WHITE);
         mLockedPaint.setColor(Color.WHITE);
-        mFullscreenThumbnailScale = res.getFraction(
-                com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
+        if (ActivityManager.ENABLE_TASK_SNAPSHOTS) {
+            mFullscreenThumbnailScale = 1f;
+        } else {
+            mFullscreenThumbnailScale = res.getFraction(
+                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
+        }
         mTitleBarHeight = res.getDimensionPixelSize(R.dimen.recents_grid_task_view_header_height);
     }
 
