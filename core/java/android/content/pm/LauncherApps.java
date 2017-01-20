@@ -61,15 +61,18 @@ import java.util.List;
 
 /**
  * Class for retrieving a list of launchable activities for the current user and any associated
- * managed profiles. This is mainly for use by launchers. Apps can be queried for each user profile.
+ * managed profiles that are visible to the current user, which can be retrieved with
+ * {@link #getProfiles}. This is mainly for use by launchers.
+ *
+ * Apps can be queried for each user profile.
  * Since the PackageManager will not deliver package broadcasts for other profiles, you can register
  * for package changes here.
  * <p>
  * To watch for managed profiles being added or removed, register for the following broadcasts:
  * {@link Intent#ACTION_MANAGED_PROFILE_ADDED} and {@link Intent#ACTION_MANAGED_PROFILE_REMOVED}.
  * <p>
- * You can retrieve the list of profiles associated with this user with
- * {@link UserManager#getUserProfiles()}.
+ * Note as of Android O, apps on a managed profile are no longer allowed to access apps on the
+ * main profile.  Apps can only access profiles returned by {@link #getProfiles()}.
  */
 public class LauncherApps {
 
@@ -373,6 +376,24 @@ public class LauncherApps {
     public LauncherApps(Context context) {
         this(context, ILauncherApps.Stub.asInterface(
                 ServiceManager.getService(Context.LAUNCHER_APPS_SERVICE)));
+    }
+
+    /**
+     * Return a list of profiles that the caller can access via the {@link LauncherApps} APIs.
+     *
+     * <p>If the caller is running on a managed profile, it'll return only the current profile.
+     * Otherwise it'll return the same list as {@link UserManager#getUserProfiles()} would.
+     */
+    public List<UserHandle> getProfiles() {
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        if (um.isManagedProfile()) {
+            // If it's a managed profile, only return the current profile.
+            final List result =  new ArrayList(1);
+            result.add(android.os.Process.myUserHandle());
+            return result;
+        } else {
+            return um.getUserProfiles();
+        }
     }
 
     /**

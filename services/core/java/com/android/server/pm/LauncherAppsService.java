@@ -231,11 +231,15 @@ public class LauncherAppsService extends SystemService {
             long ident = injectClearCallingIdentity();
             try {
                 UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
+                if (callingUserInfo.isManagedProfile()) {
+                    throw new SecurityException(message + " for another profile " + targetUserId);
+                }
+
                 UserInfo targetUserInfo = mUm.getUserInfo(targetUserId);
                 if (targetUserInfo == null
                         || targetUserInfo.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID
                         || targetUserInfo.profileGroupId != callingUserInfo.profileGroupId) {
-                    throw new SecurityException(message);
+                    throw new SecurityException(message + " for unrelated profile " + targetUserId);
                 }
             } finally {
                 injectRestoreCallingIdentity(ident);
@@ -289,7 +293,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public ActivityInfo resolveActivity(ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot resolve activity for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot resolve activity");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -315,7 +319,7 @@ public class LauncherAppsService extends SystemService {
 
         private ParceledListSlice<ResolveInfo> queryActivitiesForUser(Intent intent,
                 UserHandle user) {
-            ensureInUserProfiles(user, "Cannot retrieve activities for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot retrieve activities");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -356,7 +360,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public boolean isPackageEnabled(String packageName, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check package for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot check package");
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -377,7 +381,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public ApplicationInfo getApplicationInfo(String packageName, int flags, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check package for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot check package");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -399,7 +403,7 @@ public class LauncherAppsService extends SystemService {
 
         private void ensureShortcutPermission(@NonNull String callingPackage, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(userId, "Cannot access shortcuts for unrelated profile " + userId);
+            ensureInUserProfiles(userId, "Cannot access shortcuts");
 
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage)) {
@@ -475,7 +479,7 @@ public class LauncherAppsService extends SystemService {
         public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
                 Rect sourceBounds, Bundle startActivityOptions, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
+            ensureInUserProfiles(userId, "Cannot start activity");
 
             if (!isUserEnabled(userId)) {
                 throw new IllegalStateException("Cannot start a shortcut for disabled profile "
@@ -528,7 +532,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public boolean isActivityEnabled(ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check component for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot check component");
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -549,7 +553,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void startActivityAsUser(ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(user, "Cannot start activity for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot start activity");
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot start activity for disabled profile "  + user);
             }
@@ -602,7 +606,7 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void showAppDetailsAsUser(ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(user, "Cannot show app details for unrelated profile " + user);
+            ensureInUserProfiles(user, "Cannot show app details");
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot show app details for disabled profile "
                         + user);
