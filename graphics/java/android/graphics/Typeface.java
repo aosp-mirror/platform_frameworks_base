@@ -21,7 +21,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
-import android.graphics.FontListParser;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -170,15 +169,6 @@ public class Typeface {
         styles.put(style, typeface);
 
         return typeface;
-    }
-
-    /** @hide */
-    public static Typeface createFromTypefaceWithVariation(Typeface family,
-            String fontVariationSettings) {
-        final long ni = family == null ? 0 : family.native_instance;
-        ArrayList<FontListParser.Axis> axes =
-                FontListParser.parseFontVariationSettings(fontVariationSettings);
-        return new Typeface(nativeCreateFromTypefaceWithVariation(ni, axes));
     }
 
     /**
@@ -453,8 +443,6 @@ public class Typeface {
     }
 
     private static native long nativeCreateFromTypeface(long native_instance, int style);
-    private static native long nativeCreateFromTypefaceWithVariation(
-            long native_instance, List<FontListParser.Axis> axes);
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
