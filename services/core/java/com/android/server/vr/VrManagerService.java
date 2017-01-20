@@ -31,6 +31,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,6 +52,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+
 import com.android.internal.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
@@ -136,6 +138,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
     /** Tracks the state of the screen and keyguard UI.*/
     private int mSystemSleepFlags = FLAG_NONE;
+    private CompatibilityDisplay mCompatibilityDisplay;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
@@ -493,6 +496,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
                 mComponentObserver.rebuildAll();
             }
+
+            DisplayManager dm =
+                    (DisplayManager) getContext().getSystemService(Context.DISPLAY_SERVICE);
+            mCompatibilityDisplay = new CompatibilityDisplay(dm, mVrManager);
+            mCompatibilityDisplay.init();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 mVrModeAllowed = true;
