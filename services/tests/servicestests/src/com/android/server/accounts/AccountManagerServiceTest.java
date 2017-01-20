@@ -1263,25 +1263,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testHasFeaturesReadAccountsNotPermitted() throws Exception {
-        unlockSystemUser();
-        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
-                PackageManager.PERMISSION_DENIED);
-        when(mMockPackageManager.checkSignatures(anyInt(), anyInt()))
-                    .thenReturn(PackageManager.SIGNATURE_NO_MATCH);
-        try {
-            mAms.hasFeatures(
-                mMockAccountManagerResponse, // response
-                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, // account
-                new String[] {"feature1", "feature2"}, // features
-                "testPackage"); // opPackageName
-            fail("SecurityException expected. But no exception was thrown.");
-        } catch (SecurityException e) {
-            // SecurityException is expected.
-        }
-    }
-
-    @SmallTest
     public void testHasFeaturesReturnNullResult() throws Exception {
         unlockSystemUser();
         final CountDownLatch latch = new CountDownLatch(1);
