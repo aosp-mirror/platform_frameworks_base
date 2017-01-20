@@ -16642,6 +16642,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // safe to free its copy of the display list as it knows that we will
         // push an updated DisplayList if we try to draw again
         resetDisplayList();
+        if (mOverlay != null) {
+            mOverlay.getOverlayView().destroyHardwareResources();
+        }
+        if (mGhostView != null) {
+            mGhostView.destroyHardwareResources();
+        }
     }
 
     /**
@@ -16812,11 +16818,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void resetDisplayList() {
-        if (mRenderNode.isValid()) {
-            mRenderNode.discardDisplayList();
-        }
+        mRenderNode.discardDisplayList();
 
-        if (mBackgroundRenderNode != null && mBackgroundRenderNode.isValid()) {
+        if (mBackgroundRenderNode != null) {
             mBackgroundRenderNode.discardDisplayList();
         }
     }
