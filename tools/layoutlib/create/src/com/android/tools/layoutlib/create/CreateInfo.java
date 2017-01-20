@@ -336,8 +336,7 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] PROMOTED_FIELDS = new String[] {
         "android.graphics.drawable.VectorDrawable#mVectorState",
-        "android.view.Choreographer#mLastFrameTimeNanos",
-        "android.graphics.FontFamily#mBuilderPtr"
+        "android.view.Choreographer#mLastFrameTimeNanos"
     };
 
     /**
