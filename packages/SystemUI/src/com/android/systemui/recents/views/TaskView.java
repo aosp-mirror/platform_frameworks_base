@@ -183,6 +183,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         }
         setOutlineProvider(mViewBounds);
         setOnLongClickListener(this);
+        setAccessibilityDelegate(new TaskViewAccessibilityDelegate(this));
     }
 
     /** Set callback */
@@ -254,6 +255,11 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             mActionButtonView.setTranslationX(w - getMeasuredWidth());
             mActionButtonView.setTranslationY(h - getMeasuredHeight());
         }
+    }
+
+    @Override
+    public void addChildrenForAccessibility(ArrayList<View> outChildren) {
+        // Prevent any children from being focusable during talkback
     }
 
     @Override

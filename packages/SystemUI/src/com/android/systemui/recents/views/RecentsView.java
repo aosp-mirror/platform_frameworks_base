@@ -454,7 +454,7 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(DragStartEvent event) {
-        updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+        updateVisibleDockRegions(Recents.getConfiguration().getDockStatesForCurrentOrientation(),
                 true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
                 TaskStack.DockState.NONE.viewState.hintTextAlpha,
                 true /* animateAlpha */, false /* animateBounds */);
@@ -471,7 +471,8 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
         if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
-            updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+            updateVisibleDockRegions(
+                    Recents.getConfiguration().getDockStatesForCurrentOrientation(),
                     true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
                     TaskStack.DockState.NONE.viewState.hintTextAlpha,
                     true /* animateAlpha */, true /* animateBounds */);

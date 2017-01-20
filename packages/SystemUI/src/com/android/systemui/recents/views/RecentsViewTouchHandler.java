@@ -28,7 +28,6 @@ import android.view.ViewDebug;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
@@ -43,25 +42,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-
-/**
- * Represents the dock regions for each orientation.
- */
-class DockRegion {
-    public static TaskStack.DockState[] PHONE_LANDSCAPE = {
-            // We only allow docking to the left in landscape for now on small devices
-            TaskStack.DockState.LEFT
-    };
-    public static TaskStack.DockState[] PHONE_PORTRAIT = {
-            // We only allow docking to the top for now on small devices
-            TaskStack.DockState.TOP
-    };
-    public static TaskStack.DockState[] TABLET_LANDSCAPE = {
-            TaskStack.DockState.LEFT,
-            TaskStack.DockState.RIGHT
-    };
-    public static TaskStack.DockState[] TABLET_PORTRAIT = PHONE_PORTRAIT;
-}
 
 /**
  * Handles touch events for a RecentsView.
@@ -111,20 +91,6 @@ public class RecentsViewTouchHandler {
     }
 
     /**
-     * Returns the preferred dock states for the current orientation.
-     */
-    public TaskStack.DockState[] getDockStatesForCurrentOrientation() {
-        boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
-        RecentsConfiguration config = Recents.getConfiguration();
-        if (config.isLargeScreen) {
-            return isLandscape ? DockRegion.TABLET_LANDSCAPE : DockRegion.TABLET_PORTRAIT;
-        } else {
-            return isLandscape ? DockRegion.PHONE_LANDSCAPE : DockRegion.PHONE_PORTRAIT;
-        }
-    }
-
-    /**
      * Returns the set of visible dock states for this current drag.
      */
     public ArrayList<TaskStack.DockState> getVisibleDockStates() {
@@ -162,10 +128,14 @@ public class RecentsViewTouchHandler {
         mRv.getLocationInWindow(recentsViewLocation);
         mTaskViewOffset.set(mTaskView.getLeft() - recentsViewLocation[0] + event.tlOffset.x,
                 mTaskView.getTop() - recentsViewLocation[1] + event.tlOffset.y);
-        float x = mDownPos.x - mTaskViewOffset.x;
-        float y = mDownPos.y - mTaskViewOffset.y;
-        mTaskView.setTranslationX(x);
-        mTaskView.setTranslationY(y);
+
+        // Change space coordinates relative to the view to RecentsView when user initiates a touch
+        if (event.isUserTouchInitiated) {
+            float x = mDownPos.x - mTaskViewOffset.x;
+            float y = mDownPos.y - mTaskViewOffset.y;
+            mTaskView.setTranslationX(x);
+            mTaskView.setTranslationY(y);
+        }
 
         mVisibleDockStates.clear();
         if (ActivityManager.supportsMultiWindow() && !ssp.hasDockedTask()
@@ -176,7 +146,8 @@ public class RecentsViewTouchHandler {
                 EventBus.getDefault().send(new ShowIncompatibleAppOverlayEvent());
             } else {
                 // Add the dock state drop targets (these take priority)
-                TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
+                TaskStack.DockState[] dockStates = Recents.getConfiguration()
+                        .getDockStatesForCurrentOrientation();
                 for (TaskStack.DockState dockState : dockStates) {
                     registerDropTargetForCurrentDrag(dockState);
                     dockState.update(mRv.getContext());
