@@ -1131,7 +1131,8 @@ class ActivityStarter {
 
         mService.grantUriPermissionFromIntentLocked(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
-
+        mService.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
+                mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));
         if (mSourceRecord != null && mSourceRecord.isRecentsActivity()) {
             mStartActivity.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
         }

@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
@@ -27,10 +28,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -51,6 +55,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +67,7 @@ import java.util.Set;
 class EphemeralApplicationRegistry {
     private static final boolean DEBUG = false;
 
-    private static final boolean ENABLED = false;
+    private static final boolean ENABLED = true;
 
     private static final String LOG_TAG = "EphemeralAppRegistry";
 
@@ -89,6 +94,16 @@ class EphemeralApplicationRegistry {
 
     @GuardedBy("mService.mPackages")
     private SparseArray<List<UninstalledEphemeralAppState>> mUninstalledEphemeralApps;
+
+    /**
+     * Automatic grants for access to instant app metadata.
+     * The key is the target application UID.
+     * The value is a set of instant app UIDs.
+     * UserID -> TargetAppId -> InstantAppId
+     */
+    private SparseArray<SparseArray<SparseBooleanArray>> mEphemeralGrants;
+    /** The set of all installed instant apps. UserID -> AppID */
+    private SparseArray<SparseBooleanArray> mInstalledEphemeralAppUids;
 
     public EphemeralApplicationRegistry(PackageManagerService service) {
         mService = service;
@@ -189,6 +204,9 @@ class EphemeralApplicationRegistry {
 
             // Propagate permissions before removing any state
             propagateEphemeralAppPermissionsIfNeeded(pkg, userId);
+            if (pkg.applicationInfo.isEphemeralApp()) {
+                addEphemeralAppLPw(userId, ps.appId);
+            }
 
             // Remove the in-memory state
             if (mUninstalledEphemeralApps != null) {
@@ -248,9 +266,11 @@ class EphemeralApplicationRegistry {
             if (pkg.applicationInfo.isEphemeralApp()) {
                 // Add a record for an uninstalled ephemeral app
                 addUninstalledEphemeralAppLPw(pkg, userId);
+                removeEphemeralAppLPw(userId, ps.appId);
             } else {
                 // Deleting an app prunes all ephemeral state such as cookie
                 deleteDir(getEphemeralApplicationDir(pkg.packageName, userId));
+                removeAppLPw(userId, ps.appId);
             }
         }
     }
@@ -262,7 +282,112 @@ class EphemeralApplicationRegistry {
         if (mUninstalledEphemeralApps != null) {
             mUninstalledEphemeralApps.remove(userId);
         }
+        if (mInstalledEphemeralAppUids != null) {
+            mInstalledEphemeralAppUids.remove(userId);
+        }
+        if (mEphemeralGrants != null) {
+            mEphemeralGrants.remove(userId);
+        }
         deleteDir(getEphemeralApplicationsDir(userId));
+    }
+
+    public boolean isEphemeralAccessGranted(int userId, int targetAppId, int ephemeralAppId) {
+        if (mEphemeralGrants == null) {
+            return false;
+        }
+        final SparseArray<SparseBooleanArray> targetAppList = mEphemeralGrants.get(userId);
+        if (targetAppList == null) {
+            return false;
+        }
+        final SparseBooleanArray ephemeralGrantList = targetAppList.get(targetAppId);
+        if (ephemeralGrantList == null) {
+            return false;
+        }
+        return ephemeralGrantList.get(ephemeralAppId);
+    }
+
+    public void grantEphemeralAccessLPw(int userId, Intent intent,
+            int targetAppId, int ephemeralAppId) {
+        if (mInstalledEphemeralAppUids == null) {
+            return;     // no ephemeral apps installed; no need to grant
+        }
+        SparseBooleanArray ephemeralAppList = mInstalledEphemeralAppUids.get(userId);
+        if (ephemeralAppList == null || !ephemeralAppList.get(ephemeralAppId)) {
+            return;     // ephemeral app id isn't installed; no need to grant
+        }
+        if (ephemeralAppList.get(targetAppId)) {
+            return;     // target app id is an ephemeral app; no need to grant
+        }
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            final Set<String> categories = intent.getCategories();
+            if (categories != null && categories.contains(Intent.CATEGORY_BROWSABLE)) {
+                return;  // launched via VIEW/BROWSABLE intent; no need to grant
+            }
+        }
+        if (mEphemeralGrants == null) {
+            mEphemeralGrants = new SparseArray<>();
+        }
+        SparseArray<SparseBooleanArray> targetAppList = mEphemeralGrants.get(userId);
+        if (targetAppList == null) {
+            targetAppList = new SparseArray<>();
+            mEphemeralGrants.put(userId, targetAppList);
+        }
+        SparseBooleanArray ephemeralGrantList = targetAppList.get(targetAppId);
+        if (ephemeralGrantList == null) {
+            ephemeralGrantList = new SparseBooleanArray();
+            targetAppList.put(targetAppId, ephemeralGrantList);
+        }
+        ephemeralGrantList.put(ephemeralAppId, true /*granted*/);
+    }
+
+    public void addEphemeralAppLPw(int userId, int ephemeralAppId) {
+        if (mInstalledEphemeralAppUids == null) {
+            mInstalledEphemeralAppUids = new SparseArray<>();
+        }
+        SparseBooleanArray ephemeralAppList = mInstalledEphemeralAppUids.get(userId);
+        if (ephemeralAppList == null) {
+            ephemeralAppList = new SparseBooleanArray();
+            mInstalledEphemeralAppUids.put(userId, ephemeralAppList);
+        }
+        ephemeralAppList.put(ephemeralAppId, true /*installed*/);
+    }
+
+    private void removeEphemeralAppLPw(int userId, int ephemeralAppId) {
+        // remove from the installed list
+        if (mInstalledEphemeralAppUids == null) {
+            return; // no ephemeral apps on the system
+        }
+        final SparseBooleanArray ephemeralAppList = mInstalledEphemeralAppUids.get(userId);
+        if (ephemeralAppList == null) {
+            Slog.w(LOG_TAG, "Remove ephemeral not in install list");
+            return;
+        } else {
+            ephemeralAppList.delete(ephemeralAppId);
+        }
+        // remove any grants
+        if (mEphemeralGrants == null) {
+            return; // no grants on the system
+        }
+        final SparseArray<SparseBooleanArray> targetAppList = mEphemeralGrants.get(userId);
+        if (targetAppList == null) {
+            return; // no grants for this user
+        }
+        final int numApps = targetAppList.size();
+        for (int i = targetAppList.size() - 1; i >= 0; --i) {
+            targetAppList.valueAt(i).delete(ephemeralAppId);
+        }
+    }
+
+    private void removeAppLPw(int userId, int targetAppId) {
+        // remove from the installed list
+        if (mEphemeralGrants == null) {
+            return; // no grants on the system
+        }
+        final SparseArray<SparseBooleanArray> targetAppList = mEphemeralGrants.get(userId);
+        if (targetAppList == null) {
+            return; // no grants for this user
+        }
+        targetAppList.delete(targetAppId);
     }
 
     private void addUninstalledEphemeralAppLPw(PackageParser.Package pkg, int userId) {

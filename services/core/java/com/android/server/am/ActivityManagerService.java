@@ -8079,6 +8079,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         return pi;
     }
 
+    void grantEphemeralAccessLocked(int userId, Intent intent,
+            int targetAppId, int ephemeralAppId) {
+        getPackageManagerInternalLocked().
+                grantEphemeralAccess(userId, intent, targetAppId, ephemeralAppId);
+    }
+
     private UriPermission findUriPermissionLocked(int targetUid, GrantUri grantUri) {
         final ArrayMap<GrantUri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
         if (targetUris != null) {

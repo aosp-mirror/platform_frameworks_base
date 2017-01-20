@@ -2225,6 +2225,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(this);
+            mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
 
             File dataDir = Environment.getDataDirectory();
             mAppInstallDir = new File(dataDir, "app");
@@ -2807,8 +2808,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 setUpEphemeralInstallerActivityLP(mEphemeralInstallerComponent);
             }
 
-            mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
-
             // Read and update the usage of dex files.
             // Do this at the end of PM init so that all the packages have their
             // data directory reconciled.
@@ -3258,6 +3257,31 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (p == null) {
             return null;
         }
+        // Filter out ephemeral app metadata:
+        //   * The system/shell/root can see metadata for any app
+        //   * An installed app can see metadata for 1) other installed apps
+        //     and 2) ephemeral apps that have explicitly interacted with it
+        //   * Ephemeral apps can only see their own metadata
+        final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+        if (callingAppId != Process.SYSTEM_UID
+                && callingAppId != Process.SHELL_UID
+                && callingAppId != Process.ROOT_UID) {
+            final String ephemeralPackageName = getEphemeralPackageName(Binder.getCallingUid());
+            if (ephemeralPackageName != null) {
+                // ephemeral apps can only get information on themselves
+                if (!ephemeralPackageName.equals(p.packageName)) {
+                    return null;
+                }
+            } else {
+                if (p.applicationInfo.isEphemeralApp()) {
+                    // only get access to the ephemeral app if we've been granted access
+                    if (!mEphemeralApplicationRegistry.isEphemeralAccessGranted(
+                            userId, callingAppId, ps.appId)) {
+                        return null;
+                    }
+                }
+            }
+        }
 
         final PermissionsState permissionsState = ps.getPermissionsState();
 
@@ -3337,22 +3361,19 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // reader
         synchronized (mPackages) {
-            // Normalize package name to hanlde renamed packages
+            // Normalize package name to handle renamed packages
             packageName = normalizePackageNameLPr(packageName);
 
             final boolean matchFactoryOnly = (flags & MATCH_FACTORY_ONLY) != 0;
-            PackageParser.Package p = null;
             if (matchFactoryOnly) {
                 final PackageSetting ps = mSettings.getDisabledSystemPkgLPr(packageName);
                 if (ps != null) {
                     return generatePackageInfo(ps, flags, userId);
                 }
             }
-            if (p == null) {
-                p = mPackages.get(packageName);
-                if (matchFactoryOnly && p != null && !isSystemApp(p)) {
-                    return null;
-                }
+            PackageParser.Package p = mPackages.get(packageName);
+            if (matchFactoryOnly && p != null && !isSystemApp(p)) {
+                return null;
             }
             if (DEBUG_PACKAGE_INFO)
                 Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
@@ -8840,6 +8861,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Modify state for the given package setting
             commitPackageSettings(pkg, pkgSetting, user, scanFlags,
                     (policyFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
+            if (isEphemeral(pkg)) {
+                final int userId = user == null ? 0 : user.getIdentifier();
+                mEphemeralApplicationRegistry.addEphemeralAppLPw(userId, pkgSetting.appId);
+            }
         }
         return pkg;
     }
@@ -21931,6 +21956,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 String callingPackage, int userId) {
             PackageManagerService.this.requestEphemeralResolutionPhaseTwo(
                     responseObj, origIntent, resolvedType, launchIntent, callingPackage, userId);
+        }
+
+        @Override
+        public void grantEphemeralAccess(int userId, Intent intent,
+                int targetAppId, int ephemeralAppId) {
+            synchronized (mPackages) {
+                mEphemeralApplicationRegistry.grantEphemeralAccessLPw(userId, intent,
+                        targetAppId, ephemeralAppId);
+            }
         }
 
         public String getSetupWizardPackageName() {
