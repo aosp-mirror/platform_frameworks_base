@@ -776,6 +776,21 @@
         <enum name="locked" value="14" />
     </attr>
 
+    <!-- Specify the configuration changes that trigger the system to restart the
+         current activity if any of these configuration changes happen in the system.
+         The valid configuration changes include mcc and mnc which are the same with
+         those in configChanges. By default from Android O, we don't restart the activity
+         even the app doesn't specify mcc or mnc in configChanges. If the app wants to
+         restart, specify them in restartOnConfigChanges. -->
+    <attr name="restartOnConfigChanges">
+        <!-- The IMSI MCC has changed, that is a SIM has been detected and
+             updated the Mobile Country Code. -->
+        <flag name="mcc" value="0x0001" />
+        <!-- The IMSI MNC has changed, that is a SIM has been detected and
+             updated the Mobile Network Code. -->
+        <flag name="mnc" value="0x0002" />
+    </attr>
+
     <!-- Specify one or more configuration changes that the activity will
          handle itself.  If not specified, the activity will be restarted
          if any of these configuration changes happen in the system.  Otherwise,
@@ -793,10 +808,16 @@
          include/utils/ResourceTypes.h. -->
     <attr name="configChanges">
         <!-- The IMSI MCC has changed, that is a SIM has been detected and
-             updated the Mobile Country Code. -->
+             updated the Mobile Country Code. By default from Android O, we
+             don't restart the activity even the app doesn't specify mcc in
+             configChanges. If the app wants to restart, specify mcc in
+             restartOnConfigChanges. -->
         <flag name="mcc" value="0x0001" />
         <!-- The IMSI MNC has changed, that is a SIM has been detected and
-             updated the Mobile Network Code. -->
+             updated the Mobile Network Code. By default from Android O, we
+             don't restart the activity even the app doesn't specify mnc in
+             configChanges. If the app wants to restart, specify mnc in
+             restartOnConfigChanges. -->
         <flag name="mnc" value="0x0002" />
         <!-- The locale has changed, that is the user has selected a new
              language that text should be displayed in. -->
@@ -1920,6 +1941,7 @@
         <attr name="launchMode" />
         <attr name="screenOrientation" />
         <attr name="configChanges" />
+        <attr name="restartOnConfigChanges" />
         <attr name="permission" />
         <attr name="multiprocess" />
         <attr name="process" />
