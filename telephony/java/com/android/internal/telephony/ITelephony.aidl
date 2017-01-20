@@ -472,6 +472,9 @@ interface ITelephony {
     boolean isVisualVoicemailEnabled(String callingPackage,
             in PhoneAccountHandle accountHandle);
 
+    String getVisualVoicemailPackageName(String callingPackage,
+            in PhoneAccountHandle phoneAccountHandle);
+
     // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
     void enableVisualVoicemailSmsFilter(String callingPackage, int subId,
             in VisualVoicemailSmsFilterSettings settings);

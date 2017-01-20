@@ -284,8 +284,6 @@ public class VoicemailContract {
          * not.
          *
          * <P>Type: INTEGER (boolean)</P>
-         *
-         * @hide
          */
         public static final String BACKED_UP = "backed_up";
 
@@ -294,8 +292,6 @@ public class VoicemailContract {
          * restored, 0 if not.
          *
          * <P>Type: INTEGER (boolean)</P>
-         *
-         * @hide
          */
         public static final String RESTORED = "restored";
 
@@ -305,19 +301,19 @@ public class VoicemailContract {
          * if not.
          *
          * <P>Type: INTEGER (boolean)</P>
-         *
-         * @hide
          */
         public static final String ARCHIVED = "archived";
 
         /**
          * Flag to indicate the voicemail is a OMTP voicemail handled by the {@link
          * android.telephony.VisualVoicemailService}. The UI should only show OMTP voicemails from
-         * the current visual voicemail package.
+         * the current visual voicemail package. For example, the selection could be
+         * {@code WHERE (IS_OMTP_VOICEMAIL == 0) OR ( IS_OMTP_VOICEMAIL == 1 AND SOURCE_PACKAGE ==
+         * "current.vvm.package")}
          *
          * <P>Type: INTEGER (boolean)</P>
          *
-         * @hide
+         * @see android.telephony.TelephonyManager#getVisualVoicemailPackageName
          */
         public static final String IS_OMTP_VOICEMAIL = "is_omtp_voicmail";
 
