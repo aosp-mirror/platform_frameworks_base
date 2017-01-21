@@ -280,7 +280,7 @@ public final class SystemServer {
             Slog.i(TAG, "Entered the Android system server!");
             int uptimeMillis = (int) SystemClock.elapsedRealtime();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
-            if (!mRuntimeRestart && !mFirstBoot) {
+            if (!mRuntimeRestart) {
                 MetricsLogger.histogram(null, "boot_system_server_init", uptimeMillis);
             }
 
@@ -349,7 +349,6 @@ public final class SystemServer {
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
             mSystemServiceManager.setRuntimeRestarted(mRuntimeRestart);
-            mSystemServiceManager.setFirstBoot(mFirstBoot);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.get();
@@ -376,7 +375,7 @@ public final class SystemServer {
         if (StrictMode.conditionallyEnableDebugLogging()) {
             Slog.i(TAG, "Enabled StrictMode for system server main thread.");
         }
-        if (!mRuntimeRestart && !mFirstBoot) {
+        if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
             int uptimeMillis = (int) SystemClock.elapsedRealtime();
             MetricsLogger.histogram(null, "boot_system_server_ready", uptimeMillis);
             final int MAX_UPTIME_MILLIS = 60 * 1000;
@@ -389,6 +388,10 @@ public final class SystemServer {
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+
+    private boolean isFirstBootOrUpgrade() {
+        return mPackageManagerService.isFirstBoot() || mPackageManagerService.isUpgrade();
     }
 
     private void reportWtf(String msg, Throwable e) {
@@ -523,7 +526,7 @@ public final class SystemServer {
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
         traceEnd();
-        if (!mRuntimeRestart && !mFirstBoot) {
+        if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
             MetricsLogger.histogram(null, "boot_package_manager_init_ready",
                     (int) SystemClock.elapsedRealtime());
         }
