@@ -4936,7 +4936,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void crashApplication(int uid, int initialPid, String packageName,
+    public void crashApplication(int uid, int initialPid, String packageName, int userId,
             String message) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -4949,7 +4949,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, message);
+            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId, message);
         }
     }
 

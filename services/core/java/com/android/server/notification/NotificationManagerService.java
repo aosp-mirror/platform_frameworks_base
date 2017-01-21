@@ -605,7 +605,7 @@ public class NotificationManagerService extends SystemService {
                     REASON_DELEGATE_ERROR, null);
             long ident = Binder.clearCallingIdentity();
             try {
-                ActivityManager.getService().crashApplication(uid, initialPid, pkg,
+                ActivityManager.getService().crashApplication(uid, initialPid, pkg, -1,
                         "Bad notification posted from package " + pkg
                         + ": " + message);
             } catch (RemoteException e) {

@@ -167,6 +167,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
+                case "crash":
+                    return runCrash(pw);
                 case "kill":
                     return runKill(pw);
                 case "kill-all":
@@ -848,6 +850,32 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.forceStopPackage(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runCrash(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_ALL;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        int pid = -1;
+        String packageName = null;
+        final String arg = getNextArgRequired();
+        // The argument is either a pid or a package name
+        try {
+            pid = Integer.parseInt(arg);
+        } catch (NumberFormatException e) {
+            packageName = arg;
+        }
+        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash");
         return 0;
     }
 
@@ -2480,6 +2508,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("     --telephony: will dump only telephony sections.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
+            pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
+            pw.println("      Induce a VM crash in the specified package or process");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Kill all processes associated with the given application.");
             pw.println("  kill-all");
