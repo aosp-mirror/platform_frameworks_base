@@ -123,6 +123,7 @@ public class TrustAgentService extends Service {
     private static final int MSG_TRUST_TIMEOUT = 3;
     private static final int MSG_DEVICE_LOCKED = 4;
     private static final int MSG_DEVICE_UNLOCKED = 5;
+    private static final int MSG_UNLOCK_LOCKOUT = 6;
 
     /**
      * Class containing raw data for a given configuration request.
@@ -150,6 +151,9 @@ public class TrustAgentService extends Service {
             switch (msg.what) {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
+                    break;
+                case MSG_UNLOCK_LOCKOUT:
+                    onDeviceUnlockLockout(msg.arg1);
                     break;
                 case MSG_CONFIGURE:
                     ConfigurationData data = (ConfigurationData) msg.obj;
@@ -224,6 +228,21 @@ public class TrustAgentService extends Service {
      * password must be entered to unlock it.
      */
     public void onDeviceUnlocked() {
+    }
+
+    /**
+     * Called when the device enters a temporary unlock lockout.
+     *
+     * <p>This occurs when the user has consecutively failed to unlock the device too many times,
+     * and must wait until a timeout has passed to perform another attempt. The user may then only
+     * use strong authentication mechanisms (PIN, pattern or password) to unlock the device.
+     * Calls to {@link #grantTrust(CharSequence, long, int)} will be ignored until the user has
+     * unlocked the device and {@link #onDeviceUnlocked()} is called.
+     *
+     * @param timeoutMs The amount of time, in milliseconds, that needs to elapse before the user
+     *    can attempt to unlock the device again.
+     */
+    public void onDeviceUnlockLockout(long timeoutMs) {
     }
 
     private void onError(String msg) {
@@ -364,6 +383,11 @@ public class TrustAgentService extends Service {
         @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
             mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUnlockLockout(int timeoutMs) {
+            mHandler.obtainMessage(MSG_UNLOCK_LOCKOUT, timeoutMs, 0).sendToTarget();
         }
 
         @Override /* Binder API */

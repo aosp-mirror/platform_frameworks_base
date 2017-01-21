@@ -298,6 +298,10 @@ public class LockPatternUtils {
         getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
     }
 
+    public void reportPasswordLockout(int timeoutMs, int userId) {
+        getTrustManager().reportUnlockLockout(timeoutMs, userId);
+    }
+
     public int getCurrentFailedPasswordAttempts(int userId) {
         return getDevicePolicyManager().getCurrentFailedPasswordAttempts(userId);
     }

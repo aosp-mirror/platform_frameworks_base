@@ -81,6 +81,26 @@ public class TrustManager {
     }
 
     /**
+     * Reports that user {@param userId} has entered a temporary device lockout.
+     *
+     * This generally occurs when  the user has unsuccessfully tried to unlock the device too many
+     * times. The user will then be unable to unlock the device until a set amount of time has
+     * elapsed.
+     *
+     * @param timeout The amount of time that needs to elapse, in milliseconds, until the user may
+     *    attempt to unlock the device again.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportUnlockLockout(int timeoutMs, int userId) {
+        try {
+            mService.reportUnlockLockout(timeoutMs, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Reports that the list of enabled trust agents changed for user {@param userId}.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
