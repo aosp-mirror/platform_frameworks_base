@@ -79,7 +79,7 @@
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> से संचार नहीं कर सकता."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> द्वारा युग्‍मन अस्‍वीकृत किया गया."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"वाई-फ़ाई बंद है."</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"वाई-फ़ाई डिस्कनेक्ट है."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"वाई-फ़ाई डिसकनेक्ट है."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"वाई-फ़ाई का एक बार है."</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"वाई-फ़ाई की दो पट्टी मिल रही हैं."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"वाई-फ़ाई की एक पट्टी मिल रही है."</string>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"कस्टम (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"सहायता और फ़ीडबैक"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेनू"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

@@ -168,7 +168,7 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Uitgebreide wifi-logregistratie insch."</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agressieve handover van wifi naar mobiel"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Altijd roamingscans voor wifi toestaan"</string>
-    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele gegevens altijd actief"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele data altijd actief"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Absoluut volume uitschakelen"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
@@ -325,7 +325,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Ingesteld door beheerder"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Ingeschakeld door beheerder"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Uitgeschakeld door beheerder"</string>
-    <string name="home" msgid="3256884684164448244">"Startpagina voor instellingen"</string>
+    <string name="home" msgid="3256884684164448244">"Homepage voor instellingen"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
     <item msgid="8934126114226089439">"50%"</item>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Aangepast (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Help en feedback"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

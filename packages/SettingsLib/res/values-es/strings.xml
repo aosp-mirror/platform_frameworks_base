@@ -31,7 +31,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"No se ha detectado acceso a Internet, por lo que no se volverá a conectar automáticamente."</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"No se ha detectado acceso a Internet."</string>
     <string name="saved_network" msgid="4352716707126620811">"Guardadas por <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través de asistente Wi‑Fi"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Conectado a través del asistente de Wi‑Fi"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Conexión sin Internet"</string>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personalizado (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ayuda y sugerencias"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menú"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"सञ्जालका लागि स्क्यान गर्न सक्दैन"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"कुनै पनि होइन"</string>
-    <string name="wifi_remembered" msgid="4955746899347821096">"बचत गरियो"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"सुरक्षित गरियो"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"असक्षम पारियो"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP विन्यास असफल"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"वाईफाई जडान असफल"</string>
@@ -338,7 +338,13 @@
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"ठूलो"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"अझ ठूलो"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"सबैभन्दा ठूलो"</string>
-    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"अनुकूलन (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"आफू अनुकूल (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"मद्दत र प्रतिक्रिया"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेनु"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

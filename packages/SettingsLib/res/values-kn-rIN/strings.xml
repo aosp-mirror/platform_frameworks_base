@@ -155,7 +155,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ಎಚ್ಚರವಾಗಿರು"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ಲಾಗ್"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ bluetooth HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ ಬ್ಲೂಟೂತ್ HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ಕಸ್ಟಮ್ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ಮೆನು"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

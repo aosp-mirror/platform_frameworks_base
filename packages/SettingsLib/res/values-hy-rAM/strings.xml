@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ընդգրկույթից դուրս է"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="2211781637653149657">"Ինտերնետ կապ չկա, ինչի պատճառով ավտոմատ վերամիացում չի կատարվի:"</string>
     <string name="wifi_no_internet" msgid="5011955173375805204">"Ինտերնետ կապ չկա:"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Պահել է հետևյալ օգտվողը՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Պահել է հետևյալ օգտատերը՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"Կապակցված է Wi‑Fi Օգնականի միջոցով"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Կապակցված է %1$s-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Հասանելի է %1$s-ի միջոցով"</string>
@@ -86,7 +86,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi-ի ազդանշանը ուժեղ է:"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Հեռացված ծրագրեր"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Հեռացված հավելվածներն ու օգտվողները"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Հեռացված հավելվածներն ու օգտատերերը"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB միացում"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Դյուրակիր թեժ կետ"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth-ը կապվում է"</string>
@@ -95,7 +95,7 @@
     <string name="managed_user_title" msgid="8109605045406748842">"Բոլոր աշխատանքային հավելվածները"</string>
     <string name="user_guest" msgid="8475274842845401871">"Հյուր"</string>
     <string name="unknown" msgid="1592123443519355854">"Անհայտ"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"Օգտվող՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"Օտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Կանխադրված կարգավորումներ չկան"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Տեքստից-խոսք կարգավորումներ"</string>
@@ -143,10 +143,10 @@
     <string name="development_settings_title" msgid="215179176067683667">"Ծրագրավորողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Միացնել մշակողի ընտրանքները"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտվողի համար"</string>
-    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտվողին"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Միակցման կարգավորումները հասանելի չեն այս օգտվողին"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտվողին"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Միակցման կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Մատչման կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Կարգաբերել ռեժիմը, երբ USB-ն միացված է"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Չեղարկել USB վրիպազերծման լիազորումները"</string>
@@ -170,7 +170,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Բջջային տվյալները՝ միշտ ակտիվացրած"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի վկայագրման ընտրանքները"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Եթե այս գործառույթը միացված է, Wi‑Fi-ի թույլ ազդանշանի դեպքում Wi‑Fi ինտերնետից անցումը բջջային ինտերնետին ավելի կտրուկ կլինի"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Թույլատրել/արգելել Wi‑Fi ռոումինգի որոնումը՝ կախված միջերեսում տվյալների երթևեկի ծավալից"</string>
@@ -246,7 +246,7 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Կրկնաստեղծել երկրորդական էկրան"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Հավելվածներ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Պետք չէ պահել գործողությունները"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Ոչնչացնել ցանացած գործունեություն օգտվողի հեռացումից հետո"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Ոչնչացնել ցանացած գործունեություն օգտատիրոջ հեռացումից հետո"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Հետնաշերտի գործընթացի սահմանաչափ"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"Ցույց տալ բոլոր ANR-երը"</string>
     <string name="show_all_anrs_summary" msgid="641908614413544127">"Ցուցադրել այն ծրագիրը, որը չի արձագանքում երկխոսությունը հետնաշերտի ծրագրերի համար"</string>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Հատուկ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Օգնություն և հետադարձ կապ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Ընտրացանկ"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

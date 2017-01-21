@@ -230,7 +230,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL trassasini yoqish"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Audio uzatishni o‘ch. qo‘yish (USB)"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Tashqi USB qurilmaga avto-yo‘naltirishni o‘ch. qo‘yish"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Elementlar chegarasini ko‘rsatish"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Elementlar hoshiyasi"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Klip, maydon va h.k. chegaralarini ko‘rsatish"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"O‘ngdan chapga qarab yozish"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Barcha tillarda o‘ngdan chapga qarab yozish"</string>
@@ -341,4 +341,10 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Moslashtirilgan (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Yordam va fikr-mulohaza"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menyu"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>
