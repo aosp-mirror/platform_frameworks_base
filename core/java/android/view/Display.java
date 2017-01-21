@@ -292,7 +292,7 @@ public final class Display {
     public static final int STATE_VR = 5;
 
     /* The color mode constants defined below must be kept in sync with the ones in
-     * system/graphics.h */
+     * system/core/include/system/graphics-base.h */
 
     /**
      * Display color mode: The current color mode is unknown or invalid.
@@ -306,11 +306,24 @@ public final class Display {
      */
     public static final int COLOR_MODE_DEFAULT = 0;
 
-    /**
-     * Display color mode: SRGB
-     * @hide
-     */
+    /** @hide */
+    public static final int COLOR_MODE_BT601_625 = 1;
+    /** @hide */
+    public static final int COLOR_MODE_BT601_625_UNADJUSTED = 2;
+    /** @hide */
+    public static final int COLOR_MODE_BT601_525 = 3;
+    /** @hide */
+    public static final int COLOR_MODE_BT601_525_UNADJUSTED = 4;
+    /** @hide */
+    public static final int COLOR_MODE_BT709 = 5;
+    /** @hide */
+    public static final int COLOR_MODE_DCI_P3 = 6;
+    /** @hide */
     public static final int COLOR_MODE_SRGB = 7;
+    /** @hide */
+    public static final int COLOR_MODE_ADOBE_RGB = 8;
+    /** @hide */
+    public static final int COLOR_MODE_DISPLAY_P3 = 9;
 
     /**
      * Internal method to create a display.
@@ -745,11 +758,42 @@ public final class Display {
 
     /**
      * Returns the display's HDR capabilities.
+     *
+     * @see #isHdr()
      */
     public HdrCapabilities getHdrCapabilities() {
         synchronized (this) {
             updateDisplayInfoLocked();
             return mDisplayInfo.hdrCapabilities;
+        }
+    }
+
+    /**
+     * Returns whether this display supports any HDR type.
+     *
+     * @see #getHdrCapabilities()
+     * @see HdrCapabilities#getSupportedHdrTypes()
+     */
+    public boolean isHdr() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            int[] types = mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
+            return types != null && types.length > 0;
+        }
+    }
+
+    /**
+     * Returns whether this display can be used to display wide color gamut content.
+     */
+    public boolean isWideColorGamut() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            for (int colorMode : mDisplayInfo.supportedColorModes) {
+                if (colorMode == COLOR_MODE_DCI_P3 || colorMode > COLOR_MODE_SRGB) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
