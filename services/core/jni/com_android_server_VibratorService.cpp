@@ -43,7 +43,7 @@ static void vibratorInit(JNIEnv /* env */, jobject /* clazz */)
     if (mHal != nullptr) {
         return;
     }
-    mHal = IVibrator::getService("vibrator");
+    mHal = IVibrator::getService();
 }
 
 static jboolean vibratorExists(JNIEnv* /* env */, jobject /* clazz */)
