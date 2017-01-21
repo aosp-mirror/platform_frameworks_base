@@ -336,7 +336,7 @@ Return<void> HdmiCecController::HdmiCecCallback::onHotplugEvent(const HotplugEve
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj,
         jobject messageQueueObj) {
     // TODO(b/31632518)
-    sp<IHdmiCec> hdmiCec = IHdmiCec::getService("tv.cec");
+    sp<IHdmiCec> hdmiCec = IHdmiCec::getService();
     if (hdmiCec == nullptr) {
         ALOGE("Couldn't get tv.cec service.");
         return 0;
