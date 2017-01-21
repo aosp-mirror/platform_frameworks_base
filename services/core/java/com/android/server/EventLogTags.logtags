@@ -99,6 +99,13 @@ option java_package com.android.server
 2810 watchdog_vmstat (runtime|2|3),(pgfree|1|1),(pgactivate|1|1),(pgdeactivate|1|1),(pgfault|1|1),(pgmajfault|1|1)
 2811 watchdog_requested_reboot (NoWait|1|1),(ScheduleInterval|1|3),(RecheckInterval|1|3),(StartTime|1|3),(Window|1|3),(MinScreenOff|1|3),(MinNextAlarm|1|3)
 
+# ---------------------------
+# RescueParty.java
+# ---------------------------
+2900 rescue_note (uid|1),(count|1),(window|2)
+2901 rescue_level (level|1),(trigger_uid|1)
+2902 rescue_success (level|1)
+2903 rescue_failure (level|1),(msg|3)
 
 # ---------------------------
 # BackupManagerService.java

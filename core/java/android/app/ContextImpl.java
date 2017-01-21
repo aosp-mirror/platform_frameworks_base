@@ -18,7 +18,6 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -1591,9 +1590,17 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("permission is null");
         }
 
+        final IActivityManager am = ActivityManager.getService();
+        if (am == null && UserHandle.getAppId(Binder.getCallingUid()) == Process.SYSTEM_UID) {
+            // Well this is super awkward; we somehow don't have an active
+            // ActivityManager instance. If this is the system UID, then we
+            // totally have whatever permission this is.
+            Slog.w(TAG, "Missing ActivityManager; assuming system UID holds " + permission);
+            return PackageManager.PERMISSION_GRANTED;
+        }
+
         try {
-            return ActivityManager.getService().checkPermission(
-                    permission, pid, uid);
+            return am.checkPermission(permission, pid, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
