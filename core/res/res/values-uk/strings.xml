@@ -187,7 +187,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Додаток адміністратора в робочому профілі відсутній або пошкоджений. У результаті ваш робочий профіль і пов’язані з ним дані видалено. Зверніться до свого адміністратора по допомогу."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Робочий профіль більше не доступний на цьому пристрої."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Відстежується мережевий трафік"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Торкніться, щоб дізнатися більше"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Неможливо скористатися додатком адміністратора, оскільки в ньому немає певних компонентів або його пошкоджено. З вашого пристрою буде стерто всі дані. Зверніться до свого адміністратора по допомогу."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>

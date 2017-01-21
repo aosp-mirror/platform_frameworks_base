@@ -183,7 +183,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"네트워크 트래픽이 모니터링되고 있음"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"탭하여 세부정보 더보기"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"관리 앱이 손상되었거나 구성요소가 없어서 사용할 수 없습니다. 이제 기기가 삭제됩니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>

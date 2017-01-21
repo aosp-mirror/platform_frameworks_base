@@ -187,7 +187,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Brakuje aplikacji administracyjnej profilu do pracy lub jest ona uszkodzona. Z tego powodu Twój profil do pracy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Twój profil do pracy nie jest już dostępny na tym urządzeniu."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ruch w sieci jest monitorowany"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Kliknij, aby wyświetlić szczegóły"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacja administracyjna nie ma wszystkich składników lub jest uszkodzona i nie można jej użyć. Twoje urządzenie zostanie teraz wyczyszczone. Skontaktuj się ze swoim administratorem, aby uzyskać pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
