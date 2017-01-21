@@ -965,38 +965,6 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     }
 
     /**
-     * Accept the incoming connection.
-     */
-    public boolean acceptIncomingConnect(BluetoothDevice device) {
-        if (DBG) log("acceptIncomingConnect");
-        if (mService != null && isEnabled()) {
-            try {
-                return mService.acceptIncomingConnect(device);
-            } catch (RemoteException e) {Log.e(TAG, e.toString());}
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
-     * Reject the incoming connection.
-     */
-    public boolean rejectIncomingConnect(BluetoothDevice device) {
-        if (DBG) log("rejectIncomingConnect");
-        if (mService != null) {
-            try {
-                return mService.rejectIncomingConnect(device);
-            } catch (RemoteException e) {Log.e(TAG, e.toString());}
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
      * Returns current audio state of Audio Gateway.
      *
      * Note: This is an internal function and shouldn't be exposed
@@ -1017,13 +985,15 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     /**
      * Sets whether audio routing is allowed.
      *
+     * @param device    remote device
+     * @param allowed   if routing is allowed to the device
      * Note: This is an internal function and shouldn't be exposed
      */
-    public void setAudioRouteAllowed(boolean allowed) {
+    public void setAudioRouteAllowed(BluetoothDevice device, boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
         if (mService != null && isEnabled()) {
             try {
-                mService.setAudioRouteAllowed(allowed);
+                mService.setAudioRouteAllowed(device, allowed);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -1033,14 +1003,15 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
 
     /**
      * Returns whether audio routing is allowed.
-     *
+     * @param device    remote device
+     * @return whether the command succeeded
      * Note: This is an internal function and shouldn't be exposed
      */
-    public boolean getAudioRouteAllowed() {
+    public boolean getAudioRouteAllowed(BluetoothDevice device) {
         if (VDBG) log("getAudioRouteAllowed");
         if (mService != null && isEnabled()) {
             try {
-                return mService.getAudioRouteAllowed();
+                return mService.getAudioRouteAllowed(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -1054,15 +1025,16 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * It setup SCO channel with remote connected Handsfree AG device.
      *
+     * @param device    remote device
      * @return          <code>true</code> if command has been issued successfully;
      *                   <code>false</code> otherwise;
      *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
      *                   intent;
      */
-    public boolean connectAudio() {
+    public boolean connectAudio(BluetoothDevice device) {
         if (mService != null && isEnabled()) {
             try {
-                return mService.connectAudio();
+                return mService.connectAudio(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -1078,15 +1050,16 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      *
      * It tears down the SCO channel from remote AG device.
      *
+     * @param   device  remote device
      * @return          <code>true</code> if command has been issued successfully;
      *                   <code>false</code> otherwise;
      *                   upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED}
      *                   intent;
      */
-    public boolean disconnectAudio() {
+    public boolean disconnectAudio(BluetoothDevice device) {
         if (mService != null && isEnabled()) {
             try {
-                return mService.disconnectAudio();
+                return mService.disconnectAudio(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
