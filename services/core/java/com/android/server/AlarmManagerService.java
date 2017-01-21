@@ -504,8 +504,8 @@ class AlarmManagerService extends SystemService {
             for (int i = alarms.size()-1; i >= 0; i--) {
                 Alarm alarm = alarms.get(i);
                 try {
-                    if (alarm.uid == uid && ActivityManager.getService().getAppStartMode(
-                            uid, alarm.packageName) == ActivityManager.APP_START_MODE_DISABLED) {
+                    if (alarm.uid == uid && ActivityManager.getService().isAppStartModeDisabled(
+                            uid, alarm.packageName)) {
                         alarms.remove(i);
                         didRemove = true;
                         if (alarm.alarmClock != null) {
@@ -1089,8 +1089,7 @@ class AlarmManagerService extends SystemService {
                 operation, directReceiver, listenerTag, workSource, flags, alarmClock,
                 callingUid, callingPackage);
         try {
-            if (ActivityManager.getService().getAppStartMode(callingUid, callingPackage)
-                    == ActivityManager.APP_START_MODE_DISABLED) {
+            if (ActivityManager.getService().isAppStartModeDisabled(callingUid, callingPackage)) {
                 Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
                         + " -- package not allowed to start");
                 return;
