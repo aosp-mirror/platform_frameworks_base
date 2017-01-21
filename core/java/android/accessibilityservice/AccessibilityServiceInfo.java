@@ -69,10 +69,10 @@ import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
  * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
  * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
  * @attr ref android.R.styleable#AccessibilityService_description
+ * @attr ref android.R.styleable#AccessibilityService_summary
  * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
  * @attr ref android.R.styleable#AccessibilityService_packageNames
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
- *
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
@@ -431,6 +431,16 @@ public class AccessibilityServiceInfo implements Parcelable {
     private int mCapabilities;
 
     /**
+     * Resource id of the summary of the accessibility service.
+     */
+    private int mSummaryResId;
+
+    /**
+     * Non-localized summary of the accessibility service.
+     */
+    private String mNonLocalizedSummary;
+
+    /**
      * Resource id of the description of the accessibility service.
      */
     private int mDescriptionResId;
@@ -542,6 +552,15 @@ public class AccessibilityServiceInfo implements Parcelable {
                 CharSequence nonLocalizedDescription = peekedValue.coerceToString();
                 if (nonLocalizedDescription != null) {
                     mNonLocalizedDescription = nonLocalizedDescription.toString().trim();
+                }
+            }
+            peekedValue = asAttributes.peekValue(
+                com.android.internal.R.styleable.AccessibilityService_summary);
+            if (peekedValue != null) {
+                mSummaryResId = peekedValue.resourceId;
+                CharSequence nonLocalizedSummary = peekedValue.coerceToString();
+                if (nonLocalizedSummary != null) {
+                    mNonLocalizedSummary = nonLocalizedSummary.toString().trim();
                 }
             }
             asAttributes.recycle();
@@ -669,6 +688,27 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * The localized summary of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The localized summary.
+     */
+    public String loadSummary(PackageManager packageManager) {
+        if (mSummaryResId == 0) {
+            return mNonLocalizedSummary;
+        }
+        ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
+        CharSequence summary = packageManager.getText(serviceInfo.packageName,
+                mSummaryResId, serviceInfo.applicationInfo);
+        if (summary != null) {
+            return summary.toString().trim();
+        }
+        return null;
+    }
+
+    /**
      * Gets the non-localized description of the accessibility service.
      * <p>
      *    <strong>Statically set from
@@ -726,6 +766,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeParcelable(mResolveInfo, 0);
         parcel.writeString(mSettingsActivityName);
         parcel.writeInt(mCapabilities);
+        parcel.writeInt(mSummaryResId);
+        parcel.writeString(mNonLocalizedSummary);
         parcel.writeInt(mDescriptionResId);
         parcel.writeString(mNonLocalizedDescription);
     }
@@ -740,6 +782,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mResolveInfo = parcel.readParcelable(null);
         mSettingsActivityName = parcel.readString();
         mCapabilities = parcel.readInt();
+        mSummaryResId = parcel.readInt();
+        mNonLocalizedSummary = parcel.readString();
         mDescriptionResId = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
     }
@@ -789,6 +833,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("resolveInfo: ").append(mResolveInfo);
         stringBuilder.append(", ");
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
+        stringBuilder.append(", ");
+        stringBuilder.append("summary: ").append(mNonLocalizedSummary);
         stringBuilder.append(", ");
         appendCapabilities(stringBuilder, mCapabilities);
         return stringBuilder.toString();
