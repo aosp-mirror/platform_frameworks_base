@@ -19,6 +19,8 @@ package android.hardware.display;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.util.IntArray;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -145,6 +147,21 @@ public abstract class DisplayManagerInternal {
      * @param y The Y offset by which to shift the contents of the display.
      */
     public abstract void setDisplayOffsets(int displayId, int x, int y);
+
+    /**
+     * Provide a list of UIDs that are present on the display and are allowed to access it.
+     *
+     * @param displayAccessUIDs Mapping displayId -> int array of UIDs.
+     */
+    public abstract void setDisplayAccessUIDs(SparseArray<IntArray> displayAccessUIDs);
+
+    /**
+     * Check if specified UID's content is present on display and should be granted access to it.
+     *
+     * @param uid UID to be checked.
+     * @param displayId id of the display where presence of the content is checked.
+     * */
+    public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
 
     /**
      * Describes the requested power state of the display.

@@ -741,8 +741,14 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return mStack;
     }
 
-    /** Must be used for setting parent stack because it performs configuration updates. */
+    /**
+     * Must be used for setting parent stack because it performs configuration updates.
+     * Must be called after adding task as a child to the stack.
+     */
     void setStack(ActivityStack stack) {
+        if (stack != null && !stack.isInStackLocked(this)) {
+            throw new IllegalStateException("Task must be added as a Stack child first.");
+        }
         mStack = stack;
         onParentChanged();
     }
@@ -767,6 +773,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     @Override
     protected ConfigurationContainer getParent() {
         return mStack;
+    }
+
+    @Override
+    void onParentChanged() {
+        super.onParentChanged();
+        mService.mStackSupervisor.updateUIDsPresentOnDisplay();
     }
 
     // Close up recents linked list.

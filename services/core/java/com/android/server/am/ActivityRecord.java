@@ -149,6 +149,7 @@ final class ActivityRecord implements AppWindowContainerListener {
     AppWindowContainerController mWindowContainerController;
     final ActivityInfo info; // all about me
     final ApplicationInfo appInfo; // information about activity's app
+    final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
     final int userId;          // Which user is this running for?
@@ -588,7 +589,7 @@ final class ActivityRecord implements AppWindowContainerListener {
         return ResolverActivity.class.getName().equals(realActivity.getClassName());
     }
 
-    ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
+    ActivityRecord(ActivityManagerService _service, ProcessRecord _caller, int _launchedFromPid,
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
@@ -598,6 +599,7 @@ final class ActivityRecord implements AppWindowContainerListener {
         service = _service;
         appToken = new Token(this);
         info = aInfo;
+        launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
         userId = UserHandle.getUserId(aInfo.applicationInfo.uid);
@@ -2192,9 +2194,11 @@ final class ActivityRecord implements AppWindowContainerListener {
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
-                launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
-                null, null, 0, componentSpecified, false, stackSupervisor, null, null, null);
+        final ActivityRecord r = new ActivityRecord(service, null /* caller */,
+                0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, intent, resolvedType,
+                aInfo, service.getConfiguration(), null /* resultTo */, null /* resultWho */,
+                0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
+                stackSupervisor, null /* container */, null /* options */, null /* sourceRecord */);
 
         r.persistentState = persistentState;
         r.taskDescription = taskDescription;

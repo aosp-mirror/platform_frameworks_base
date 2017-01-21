@@ -54,6 +54,6 @@ class SplashScreenStartingData extends StartingData {
     StartingSurface createStartingSurface(AppWindowToken atoken) {
         return mService.mPolicy.addSplashScreen(atoken.token, mPkg, mTheme, mCompatInfo,
                 mNonLocalizedLabel, mLabelRes, mIcon, mLogo, mWindowFlags,
-                mMergedOverrideConfiguration);
+                mMergedOverrideConfiguration, atoken.getDisplayContent().getDisplayId());
     }
 }

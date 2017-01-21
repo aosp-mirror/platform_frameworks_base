@@ -750,13 +750,14 @@ public interface WindowManagerPolicy {
      * @param windowFlags Window layout flags.
      * @param overrideConfig override configuration to consider when generating
      *        context to for resources.
+     * @param displayId Id of the display to show the splash screen at.
      *
      * @return The starting surface.
      *
      */
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
-            int logo, int windowFlags, Configuration overrideConfig);
+            int logo, int windowFlags, Configuration overrideConfig, int displayId);
 
     /**
      * Prepare for a window being added to the window manager.  You can throw an
