@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.MenuRes;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.Menu;
@@ -280,5 +281,20 @@ public class PopupMenu {
          * @param menu the popup menu that was dismissed
          */
         void onDismiss(PopupMenu menu);
+    }
+
+    /**
+     * Returns the {@link ListView} representing the list of menu items in the currently showing
+     * menu.
+     *
+     * @return The view representing the list of menu items.
+     * @hide
+     */
+    @TestApi
+    public ListView getMenuListView() {
+        if (!mPopup.isShowing()) {
+            return null;
+        }
+        return mPopup.getPopup().getListView();
     }
 }
