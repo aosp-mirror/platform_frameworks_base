@@ -1485,6 +1485,7 @@ public class DevicePolicyManager {
      * or uninstalled.
      * @hide
      */
+    @SystemApi
     public boolean packageHasActiveAdmins(String packageName) {
         return packageHasActiveAdmins(packageName, myUserId());
     }
