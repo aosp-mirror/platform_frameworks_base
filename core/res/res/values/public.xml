@@ -2775,7 +2775,7 @@
         <public name="layout_marginVertical" />
         <public name="paddingHorizontal" />
         <public name="paddingVertical" />
-        <public name="visibleToEphemeral" />
+        <public name="visibleToInstantApps" />
         <public name="keyboardNavigationCluster" />
         <public name="keyboardNavigationSection" />
         <public name="nextClusterForward" />
