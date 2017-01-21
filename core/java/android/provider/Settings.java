@@ -7666,6 +7666,16 @@ public final class Settings {
                 "network_recommendations_enabled";
 
         /**
+         * Value to specify if the Wi-Fi Framework should defer to
+         * {@link com.android.server.NetworkScoreService} for evaluating saved open networks.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        @SystemApi
+        public static final String CURATE_SAVED_OPEN_NETWORKS = "curate_saved_open_networks";
+
+        /**
          * The number of milliseconds the {@link com.android.server.NetworkScoreService}
          * will give a recommendation request to complete before returning a default response.
          *
