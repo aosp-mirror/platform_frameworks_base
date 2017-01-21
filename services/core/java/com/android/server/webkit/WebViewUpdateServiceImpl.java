@@ -95,6 +95,7 @@ public class WebViewUpdateServiceImpl {
         updateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
         mSystemInterface.notifyZygote(isMultiProcessEnabled());
+        mSystemInterface.setMultiProcessSetting(mContext, 1);
     }
 
     private boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
@@ -242,16 +243,11 @@ public class WebViewUpdateServiceImpl {
     }
 
     boolean isMultiProcessEnabled() {
-        return mSystemInterface.getMultiProcessSetting(mContext) != 0;
+        return true;
     }
 
     void enableMultiProcess(boolean enable) {
-        PackageInfo current = getCurrentWebViewPackage();
-        mSystemInterface.setMultiProcessSetting(mContext, enable ? 1 : 0);
-        mSystemInterface.notifyZygote(enable);
-        if (current != null) {
-            mSystemInterface.killPackageDependents(current.packageName);
-        }
+        /* Ignore this */
     }
 
     /**
