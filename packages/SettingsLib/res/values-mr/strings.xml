@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"सेल्युलर डेटा नेहमी सक्रिय"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"संपूर्ण आवाज अक्षम करा"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लूटूथ ऑडिओ कोडेक"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"प्राधान्यीकृत ब्लूटुथ A2DP कोडेक निवडा"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ब्लूटूथ ऑडिओ नमुना दर"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"प्राधान्यीकृत ब्लूटुथ A2DP कोडेक नमुना दर निवडा"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"प्रति नमुना ब्लूटुथ ऑडिओ बिट"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"प्रति नमुना प्राधान्यीकृत ब्लूटुथ A2DP कोडेक बिट निवडा"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लूटूथ ऑडिओ चॅनेल मोड"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"प्राधान्यीकृत ब्लूटुथ A2DP कोडेक चॅनेल मोड निवडा"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"ब्लूटुथ ऑडिओ LDAC प्लेबॅक गुणवत्ता"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"प्राधान्यीकृत ब्लूटुथ A2DP कोडेक LDAC प्लेबॅक गुणवत्ता निवडा"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस प्रदर्शन प्रमाणिकरणासाठी पर्याय दर्शवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय निवडकामध्‍ये प्रति SSID RSSI दर्शवा"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"सक्षम केल्यास, वाय-फाय सिग्‍नल निम्‍न असताना, वाय-फाय डेटा कनेक्‍शन सेल्‍युलरवर बळपूर्वक स्विच करेल."</string>

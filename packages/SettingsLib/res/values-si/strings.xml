@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"සෙලියුලර් දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"බ්ලූටූත් ශ්‍රව්‍ය Codec"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"වඩා කැමති බ්ලූටූත් A2DP Codec තෝරන්න"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"බ්ලූටූත් ශ්‍රව්‍ය නියැදි අනුපාතය"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"වඩා කැමති බ්ලූටූත් A2DP Codec නියැදි අනුපාතය තෝරන්න"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"නියැදියකට බ්ලූටූත් ශ්‍රව්‍ය බිටු"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"නියැදියකට වඩා කැමති බ්ලූටූත් A2DP Codec බිටු තෝරන්න"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"බ්ලූටූත් ශ්‍රව්‍ය නාලිකා ප්‍රකාරය"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"වඩා කැමති බ්ලූටූත් A2DP Codec නාලිකා ප්‍රකාරය තෝරන්න"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"බ්ලූටූත් ශ්‍රව්‍ය LDAC පසුධාවන ගුණත්වය"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"වඩා කැමති බ්ලූටූත් A2DP Codec පසුධාවන ගුණත්වය තෝරන්න"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"සබල විට Wi‑Fi සිග්නලය අඩු විට Wi‑Fi දත්ත සම්බන්ධතාවය සෙලියුලර් වෙත භාර දීමට වඩා ආක්‍රමණික වේ"</string>

@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"സെല്ലുലാർ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth ഓഡിയോ കോഡെക്"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"നിർദ്ദേശിക്കുന്ന Bluetooth A2DP കോഡെക് തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth ഓഡിയോ സാമ്പിൾ നിരക്ക്"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"നിർദ്ദേശിക്കുന്ന Bluetooth A2DP കോഡെക് സാമ്പിൾ നിരക്ക് തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"പ്രതി സാമ്പിളിലെ Bluetooth ഓഡിയോ ബിറ്റ് നി"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"പ്രതി സാമ്പിളിന് നിർദ്ദേശിക്കുന്ന Bluetooth A2DP കോഡെക് ബിറ്റ് നിരക്ക് തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth ഓഡിയോ ചാനൽ മോഡ്"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"നിർദ്ദേശിക്കുന്ന Bluetooth A2DP കോഡെക് ചാനൽ മോഡ് തിരഞ്ഞെടുക്കുക"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"Bluetooth ഓഡിയോ LDAC പ്ലേബാക്ക് നിലവാരം"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"നിർദ്ദേശിക്കുന്ന Bluetooth A2DP കോഡെക് LDAC പ്ലേബാക്ക് നിലവാരം തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, വൈഫൈ സിഗ്‌നൽ കുറവായിരിക്കുന്ന സമയത്ത് സെല്ലുലാറിലേക്ക് ഡാറ്റ കണക്ഷൻ മുഖേന കൈമാറുന്നതിൽ വൈഫൈ കൂടുതൽ പ്രവർത്തനക്ഷമമാകും"</string>

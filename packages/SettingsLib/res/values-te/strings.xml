@@ -171,15 +171,23 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ఎల్లప్పుడూ సెల్యులార్ డేటాను సక్రియంగా ఉంచు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="6470824182074383881">"ప్రాధాన్య బ్లూటూత్ A2DP కోడెక్‌ను ఎంచుకోండి"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"బ్లూటూత్ ఆడియో నమూనా రేట్"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="4263851572248033749">"ప్రాధాన్య బ్లూటూత్ A2DP కోడెక్ నమూనా రేట్‌ను ఎంచుకోండి"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ఒక్కో నమూనాకు బ్లూటూత్ ఆడియో బిట్‌లు"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="2096170505745650345">"ఒక్కో నమూనాకు ప్రాధాన్య బ్లూటూత్ A2DP కోడెక్ బిట్‌లను ఎంచుకోండి"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"బ్లూటూత్ ఆడియో ఛానెల్ మోడ్"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="4073812880900816325">"ప్రాధాన్య బ్లూటూత్ A2DP కోడెక్ ఛానెల్ మోడ్‌ను ఎంచుకోండి"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="4846872213548295632">"బ్లూటూత్ ఆడియో LDAC ప్లేబ్యాక్ నాణ్యత"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3940973633342423717">"ప్రాధాన్య బ్లూటూత్ A2DP కోడెక్ LDAC ప్లేబ్యాక్ నాణ్యతను ఎంచుకోండి"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
+    <skip />
+    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన ప్రమాణపత్రం కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ప్రారంభించబడినప్పుడు, Wi‑Fi సిగ్నల్ బలహీనంగా ఉంటే డేటా కనెక్షన్‌ను సెల్యులార్‌కి మార్చేలా Wi‑Fiపై మరింత తీవ్ర ఒత్తిడి కలుగుతుంది"</string>
