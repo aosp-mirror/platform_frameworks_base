@@ -34,6 +34,7 @@ import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.PictureInPictureArgs;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.assist.AssistContent;
@@ -480,12 +481,8 @@ interface IActivityManager {
     boolean isInMultiWindowMode(in IBinder token);
     boolean isInPictureInPictureMode(in IBinder token);
     void killPackageDependents(in String packageName, int userId);
-    void enterPictureInPictureMode(in IBinder token);
-    void enterPictureInPictureModeWithAspectRatio(in IBinder token, float aspectRatio);
-    void enterPictureInPictureModeOnMoveToBackground(in IBinder token,
-            boolean enterPictureInPictureOnMoveToBg);
-    void setPictureInPictureAspectRatio(in IBinder token, float aspectRatio);
-    void setPictureInPictureActions(in IBinder token, in ParceledListSlice actions);
+    boolean enterPictureInPictureMode(in IBinder token, in PictureInPictureArgs args);
+    void setPictureInPictureArgs(in IBinder token, in PictureInPictureArgs args);
     void activityRelaunched(in IBinder token);
     IBinder getUriPermissionOwnerForActivity(in IBinder activityToken);
     /**

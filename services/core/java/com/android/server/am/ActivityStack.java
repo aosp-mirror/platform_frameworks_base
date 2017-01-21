@@ -1698,9 +1698,7 @@ final class ActivityStack extends ConfigurationContainer {
                                 + stackInvisible + " behindFullscreenActivity="
                                 + behindFullscreenActivity + " mLaunchTaskBehind="
                                 + r.mLaunchTaskBehind);
-                        if (!enterPictureInPictureOnActivityInvisible(r)) {
-                            makeInvisible(r, visibleBehind);
-                        }
+                        makeInvisible(r, visibleBehind);
                     }
                 }
                 if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -1859,35 +1857,6 @@ final class ActivityStack extends ConfigurationContainer {
         return false;
     }
 
-    /**
-     * Attempts to enter picture-in-picture if the activity that is being made invisible supports
-     * it.  If not, then
-     *
-     * @return whether or not picture-in-picture mode was entered.
-     */
-    private boolean enterPictureInPictureOnActivityInvisible(ActivityRecord r) {
-        final boolean hasPinnedStack =
-                mStackSupervisor.getStack(PINNED_STACK_ID) != null;
-        final boolean isKeyguardLocked = mService.isKeyguardLocked();
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, " enterPictureInPictureOnInvisible="
-                + r.shouldEnterPictureInPictureOnInvisible()
-                + " hasPinnedStack=" + hasPinnedStack
-                + " isKeyguardLocked=" + isKeyguardLocked);
-        if (!hasPinnedStack && !isKeyguardLocked && r.visible &&
-                r.shouldEnterPictureInPictureOnInvisible()) {
-            r.setEnterPipOnMoveToBackground(false);
-
-            // Enter picture in picture, but don't move the home stack to the front
-            // since it will affect the focused stack's visibility and occlude
-            // starting activities
-            mService.enterPictureInPictureModeLocked(r, r.getDisplayId(),
-                    r.pictureInPictureArgs, false /* moveHomeStackToFront */,
-                    "ensureActivitiesVisibleLocked");
-            return true;
-        }
-        return false;
-    }
-
     private void makeInvisible(ActivityRecord r, ActivityRecord visibleBehind) {
         if (!r.visible) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + r);
@@ -1906,6 +1875,10 @@ final class ActivityStack extends ConfigurationContainer {
                                 "Scheduling invisibility: " + r);
                         r.app.thread.scheduleWindowVisibility(r.appToken, false);
                     }
+
+                    // Reset the flag indicating that an app can enter picture-in-picture once the
+                    // activity is hidden
+                    r.supportsPictureInPictureWhilePausing = false;
                     break;
 
                 case INITIALIZING:
@@ -2187,15 +2160,16 @@ final class ActivityStack extends ConfigurationContainer {
 
         mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
-        // We need to start pausing the current activity so the top one can be resumed...
-        final boolean dontWaitForPause = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0;
-        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving, next, dontWaitForPause);
+        // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous activity
+        // to be paused, while at the same time resuming the new resume activity
+        final boolean resumeWhilePausing = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0;
+        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving, next, false);
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
-            pausing |= startPausingLocked(userLeaving, false, next, dontWaitForPause);
+            pausing |= startPausingLocked(userLeaving, false, next, false);
         }
-        if (pausing) {
+        if (pausing && !resumeWhilePausing) {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.v(TAG_STATES,
                     "resumeTopActivityLocked: Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
@@ -2696,10 +2670,10 @@ final class ActivityStack extends ConfigurationContainer {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
                     } else {
-                        // If a new task is being launched, then mark the existing top activity to
-                        // enter picture-in-picture if it supports auto-entering PiP
+                        // If a new task is being launched, then mark the existing top activity as
+                        // supporting picture-in-picture while pausing
                         if (focusedTopActivity != null) {
-                            focusedTopActivity.setEnterPipOnMoveToBackground(true);
+                            focusedTopActivity.supportsPictureInPictureWhilePausing = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
                     }
@@ -4245,10 +4219,10 @@ final class ActivityStack extends ConfigurationContainer {
         } else {
             updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
         }
-        // If a new task is moved to the front, then mark the existing top activity to enter
-        // picture-in-picture if it supports auto-entering PiP
+        // If a new task is moved to the front, then mark the existing top activity as supporting
+        // picture-in-picture while paused
         if (focusedTopActivity != null) {
-            focusedTopActivity.setEnterPipOnMoveToBackground(true);
+            focusedTopActivity.supportsPictureInPictureWhilePausing = true;
         }
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -4966,8 +4940,8 @@ final class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    void moveToFrontAndResumeStateIfNeeded(
-            ActivityRecord r, boolean moveToFront, boolean setResume, String reason) {
+    void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,
+            boolean setPause, String reason) {
         if (!moveToFront) {
             return;
         }
@@ -4977,6 +4951,10 @@ final class ActivityStack extends ConfigurationContainer {
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
             mResumedActivity = r;
+        }
+        // If the activity was previously pausing, then ensure we transfer that as well
+        if (setPause) {
+            mPausingActivity = r;
         }
         // Move the stack in which we are placing the activity to the front. The call will also
         // make sure the activity focus is set.
@@ -4998,6 +4976,7 @@ final class ActivityStack extends ConfigurationContainer {
         final boolean wasFocused = mStackSupervisor.isFocusedStack(prevStack)
                 && (mStackSupervisor.topRunningActivityLocked() == r);
         final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
+        final boolean wasPaused = prevStack.mPausingActivity == r;
 
         final TaskRecord task = createTaskRecord(
                 mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
@@ -5005,9 +4984,13 @@ final class ActivityStack extends ConfigurationContainer {
         r.setTask(task, null);
         task.addActivityToTop(r);
         mStackSupervisor.scheduleReportPictureInPictureModeChangedIfNeeded(task, prevStack);
-        moveToFrontAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
+        moveToFrontAndResumeStateIfNeeded(r, wasFocused, wasResumed, wasPaused,
+                "moveActivityToStack");
         if (wasResumed) {
             prevStack.mResumedActivity = null;
+        }
+        if (wasPaused) {
+            prevStack.mPausingActivity = null;
         }
     }
 

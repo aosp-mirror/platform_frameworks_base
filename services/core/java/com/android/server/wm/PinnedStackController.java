@@ -333,7 +333,9 @@ class PinnedStackController {
      */
     void setActions(List<RemoteAction> actions) {
         mActions.clear();
-        mActions.addAll(actions);
+        if (actions != null) {
+            mActions.addAll(actions);
+        }
         notifyActionsChanged(mActions);
     }
 
