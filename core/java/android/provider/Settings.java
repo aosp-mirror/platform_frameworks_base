@@ -3859,6 +3859,12 @@ public final class Settings {
         public static final String DISABLE_DASHBOARD_CONDITIONS = "disable_dashboard_conditions";
 
         /**
+	 * Dashboard columns in settings
+	 * @hide
+	 */
+	public static final String DASHBOARD_COLUMNS = "dashboard_columns";
+
+        /**
          * Start volume fraction for increasing ring volume
          * @hide
          */
