@@ -78,6 +78,7 @@ public abstract class PlayerBase {
         }
         mAttributes = attr;
         mImplType = implType;
+        mState = AudioPlaybackConfiguration.PLAYER_STATE_IDLE;
     };
 
     /**
@@ -138,7 +139,8 @@ public abstract class PlayerBase {
     void baseStart() {
         if (DEBUG) { Log.v(TAG, "baseStart() piid=" + mPlayerIId); }
         try {
-            getService().playerEvent(mPlayerIId, AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
+            mState = AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
+            getService().playerEvent(mPlayerIId, mState);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
         }
@@ -152,7 +154,8 @@ public abstract class PlayerBase {
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
         try {
-            getService().playerEvent(mPlayerIId, AudioPlaybackConfiguration.PLAYER_STATE_PAUSED);
+            mState = AudioPlaybackConfiguration.PLAYER_STATE_PAUSED;
+            getService().playerEvent(mPlayerIId, mState);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, PAUSED state will not be tracked", e);
         }
@@ -161,7 +164,8 @@ public abstract class PlayerBase {
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
         try {
-            getService().playerEvent(mPlayerIId, AudioPlaybackConfiguration.PLAYER_STATE_STOPPED);
+            mState = AudioPlaybackConfiguration.PLAYER_STATE_STOPPED;
+            getService().playerEvent(mPlayerIId, mState);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, STOPPED state will not be tracked", e);
         }
@@ -193,7 +197,7 @@ public abstract class PlayerBase {
      * Releases AppOps related resources.
      */
     void baseRelease() {
-        if (DEBUG) { Log.v(TAG, "baseRelease() piid=" + mPlayerIId); }
+        if (DEBUG) { Log.v(TAG, "baseRelease() piid=" + mPlayerIId + " state=" + mState); }
         try {
             if (mState != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
                 getService().releasePlayer(mPlayerIId);
