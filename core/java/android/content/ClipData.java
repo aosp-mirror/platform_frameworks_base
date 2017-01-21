@@ -32,6 +32,8 @@ import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -762,6 +764,18 @@ public class ClipData implements Parcelable {
     static public ClipData newUri(ContentResolver resolver, CharSequence label,
             Uri uri) {
         Item item = new Item(uri);
+        String[] mimeTypes = getMimeTypes(resolver, uri);
+        return new ClipData(label, mimeTypes, item);
+    }
+
+    /**
+     * Finds all applicable MIME types for a given URI.
+     *
+     * @param resolver ContentResolver used to get information about the URI.
+     * @param uri The URI.
+     * @return Returns an array of MIME types.
+     */
+    private static String[] getMimeTypes(ContentResolver resolver, Uri uri) {
         String[] mimeTypes = null;
         if ("content".equals(uri.getScheme())) {
             String realType = resolver.getType(uri);
@@ -769,7 +783,7 @@ public class ClipData implements Parcelable {
             if (realType != null) {
                 if (mimeTypes == null) {
                     mimeTypes = new String[] { realType };
-                } else {
+                } else if (!ArrayUtils.contains(mimeTypes, realType)) {
                     String[] tmp = new String[mimeTypes.length + 1];
                     tmp[0] = realType;
                     System.arraycopy(mimeTypes, 0, tmp, 1, mimeTypes.length);
@@ -780,7 +794,7 @@ public class ClipData implements Parcelable {
         if (mimeTypes == null) {
             mimeTypes = MIMETYPES_TEXT_URILIST;
         }
-        return new ClipData(label, mimeTypes, item);
+        return mimeTypes;
     }
 
     /**
@@ -811,8 +825,8 @@ public class ClipData implements Parcelable {
      * Add a new Item to the overall ClipData container.
      * <p> This method will <em>not</em> update the list of available MIME types in the
      * {@link ClipDescription}. It should be used only when adding items which do not add new
-     * MIME types to this clip. If this is not the case, {@link #ClipData(CharSequence, String[],
-     * Item)} should be used with a complete list of MIME types.
+     * MIME types to this clip. If this is not the case, use {@link #addItem(Item, ContentResolver)}
+     * or call {@link #ClipData(CharSequence, String[], Item)} with a complete list of MIME types.
      * @param item Item to be added.
      */
     public void addItem(Item item) {
@@ -820,6 +834,32 @@ public class ClipData implements Parcelable {
             throw new NullPointerException("item is null");
         }
         mItems.add(item);
+    }
+
+    /**
+     * Add a new Item to the overall ClipData container.
+     * <p> Unlike {@link #addItem(Item)}, this method will update the list of available MIME types
+     * in the {@link ClipDescription}.
+     * @param item Item to be added.
+     * @param resolver ContentResolver used to get information about the URI possibly contained in
+     * the item.
+     */
+    public void addItem(Item item, ContentResolver resolver) {
+        addItem(item);
+
+        if (item.getHtmlText() != null) {
+            mClipDescription.addMimeTypes(MIMETYPES_TEXT_HTML);
+        } else if (item.getText() != null) {
+            mClipDescription.addMimeTypes(MIMETYPES_TEXT_PLAIN);
+        }
+
+        if (item.getIntent() != null) {
+            mClipDescription.addMimeTypes(MIMETYPES_TEXT_INTENT);
+        }
+
+        if (item.getUri() != null) {
+            mClipDescription.addMimeTypes(getMimeTypes(resolver, item.getUri()));
+        }
     }
 
     /** @hide */
