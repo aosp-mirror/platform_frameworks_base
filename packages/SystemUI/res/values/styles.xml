@@ -93,13 +93,6 @@
         <item name="android:textColor">#FF808080</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.TextButton"
-        parent="@*android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FFFFFFFF</item>
-    </style>
-
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
