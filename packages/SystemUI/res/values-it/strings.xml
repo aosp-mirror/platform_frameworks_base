@@ -414,21 +414,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Log di rete"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Disattiva VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Scollega VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Il tuo dispositivo è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app e dati associati al dispositivo, incluse le informazioni sulla posizione del dispositivo. Per ulteriori informazioni, contatta l\'amministratore."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Apri impostazioni VPN"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"L\'amministratore ha attivato i log di rete, che monitorano il traffico sul dispositivo.\n\nContatta l\'amministratore per ulteriori informazioni."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Hai autorizzato l\'app a configurare una connessione VPN.\n\nQuesta app può monitorare il tuo dispositivo e l\'attività di rete, inclusi email, app e siti web."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Il tuo dispositivo è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app e dati associati al dispositivo, incluse le informazioni sulla posizione del dispositivo.\n\nSei connesso a una rete VPN da cui è possibile monitorare la tua attività di rete, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare l\'attività di rete, inclusi email, app e siti web.\n\nPer ulteriori informazioni, contatta l\'amministratore.\n\nSei connesso anche a VPN, da cui è possibile monitorare la tua attività di rete."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi email, app e siti web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale, inclusi email, app e siti web."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi email, app e siti web.\n\nPer ulteriori informazioni, contatta il tuo amministratore."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi email, app e siti web.\n\nSei connesso anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Il tuo dispositivo è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app e dati associati al dispositivo, incluse le informazioni sulla posizione del dispositivo.\n\nSei connesso a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi email, app e siti web.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ricevi notifiche più velocemente"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Visualizza prima di sbloccare"</string>

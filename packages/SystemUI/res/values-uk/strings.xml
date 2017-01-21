@@ -418,21 +418,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Реєстрація в мережі"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Від’єднатися від мережі VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Вашим пристроєм керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки й дані, пов’язані з вашим пристроєм, а також геодані пристрою. Зв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от доступ до електронної пошти, додатків і веб-сайтів."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Відкрити налаштування мережі VPN"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться зі своїм адміністратором."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Ви дозволили додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Вашим пристроєм керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки й дані, пов’язані з вашим пристроєм, а також геодані пристрою.\n\nПристрій під’єднано до мережі VPN, постачальник послуг якої може відстежувати вашу активність у мережі, зокрема листування, роботу в додатках і на сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Вашим пристроєм керує організація <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше.\n\nПристрій під’єднано до мережі VPN, у якій ваша активність може відстежуватись."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу особисту активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ваш профіль під’єднано до додатка <xliff:g id="APPLICATION">%1$s</xliff:g>, який може відстежувати вашу особисту активність у мережі, зокрема доступ до електронної пошти, додатків і веб-сайтів."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Вашим робочим профілем керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Профіль під’єднано до додатка <xliff:g id="APPLICATION">%2$s</xliff:g>, який може відстежувати вашу робочу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Вашим робочим профілем керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Профіль під’єднано до додатка <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, який може відстежувати вашу робочу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nВаш профіль також під’єднано до додатка <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, який може відстежувати вашу особисту активність у мережі."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Вашим пристроєм керує організація <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки, геодані й інші дані, пов’язані з вашим пристроєм.\n\nВаш профіль під’єднано до додатка <xliff:g id="APPLICATION">%2$s</xliff:g>, який може відстежувати вашу активність у мережі, зокрема в електронній пошті, додатках і на веб-сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Пристрій залишатиметься заблокованим, доки ви не розблокуєте його вручну"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Швидше отримуйте сповіщення"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Переглядайте сповіщення, перш ніж розблокувати екран"</string>

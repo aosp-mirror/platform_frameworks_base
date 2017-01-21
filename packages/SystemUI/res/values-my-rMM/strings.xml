@@ -412,21 +412,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"ကွန်ရက်မှတ်တမ်းတင်ခြင်း"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ကို ပိတ်ထားရန်"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ကို အဆက်ဖြတ်ရန်"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nမှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="VPN_APP">%1$s</xliff:g> သို့ သင်သည် ချိတ်ဆက်ထားပါသည်။"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Open VPN ဆက်တင်များ"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"သင့်စီမံခန့်ခွဲသူသည် သင့်စက်ပစ္စည်းပေါ်ရှိ ဒေတာအသွားအလာကို စောင့်ကြည့်နိုင်သည့် ကွန်ရက်မှတ်တမ်းတင်ခြင်းကို ဖွင့်ထားပါသည်။\n\nထပ်မံလေ့လာရန်အတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN ချိတ်ဆက်မှုပြုလုပ်ရန် အက်ပ်ကို သင်ခွင့်ပြုလိုက်သည်။ \n\n ဤအက်ပ်သည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n \n မှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။ \n\n အီးမေးလ်များ၊အက်ပလီကေးရှင်းများနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင်သင့်ကွန်ယက်လုပ်ဆောင်ချက်ကိုစောင့်ကြည့်နိုင်သည့် VPN ကိုချိတ်ဆက်ထားပြီဖြစ် သည်။\n\n အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g>မှ စီမံခန့်ခွဲပါသည်။ \n\nသင့်စီမံခန့်ခွဲသူသည် အီးမေးလ်များ၊ အက်ပ်များ၊ နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောက်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။ \n\nသင်သည် VPN တစ်ခုသို့ပါ ချိတ်ဆက်ထားပြီး ၎င်းကပါ သင်၏ ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်ပါသည်။"</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးများ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်။ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"သင်သည် အီးမေးလ်၊ အက်ပ်နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာ ကွန်ရက်အသုံးပြုမှုကို စောင့်ကြည့်နိုင်သည့် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားပါသည်။"</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်အလုပ်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်အလုပ်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\n သင်သည်<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ကိုလည်း ချိတ်ဆက်ထားသည်၊ ၎င်းသည် သင့်ကိုယ်ပိုင်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"သင့်စက်ကိရိယာကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲပါသည်။ \n\n စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊ စုပေါင်းဝင်ရောက်ခွင့်၊ အက်ပ်များ၊ သင့်ကိရိယာနှင့်သက်ဆိုင်သော ဒေတာနှင့် သင့်ကိရိယာ၏ တည်နေရာအချက်အလက်များကို စောင့်ကြည့်ပြီး စီမံခန့်ခွဲနိုင်သည်။ \n\nသင်သည် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များ၊ နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>

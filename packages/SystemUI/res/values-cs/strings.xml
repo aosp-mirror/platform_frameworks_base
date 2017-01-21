@@ -418,21 +418,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Protokolování sítě"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktivovat VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Odpojit VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu. O další informace požádejte svého administrátora."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Jste připojeni k aplikaci <xliff:g id="VPN_APP">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otevřít nastavení VPN"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení.\n\nDalší informace vám poskytne administrátor."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Udělili jste aplikaci oprávnění k nastavení připojení VPN.\n\nTato aplikace může sledovat vaši aktivitu v zařízení a v síti, včetně e-mailů, aplikací a webů."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nJste připojeni k síti VPN, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může monitorovat vaši síťovou aktivitu, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora.\n\nJste také připojeni k síti VPN, která může sledovat vaši aktivitu v síti."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a informace o jeho poloze.\n\nJste připojeni k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>
