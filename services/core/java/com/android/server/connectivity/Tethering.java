@@ -112,11 +112,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(messageClasses);
 
-    // TODO - remove both of these - should be part of interface inspection/selection stuff
-    private String[] mTetherableUsbRegexs;
-    private String[] mTetherableWifiRegexs;
-    private String[] mTetherableBluetoothRegexs;
-    private Collection<Integer> mUpstreamIfaceTypes;
+    private volatile TetheringConfiguration mConfig;
 
     // used to synchronize public access to members
     private final Object mPublicSync;
@@ -124,10 +120,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private static final Integer MOBILE_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE);
     private static final Integer HIPRI_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE_HIPRI);
     private static final Integer DUN_TYPE = new Integer(ConnectivityManager.TYPE_MOBILE_DUN);
-
-    // if we have to connect to mobile, what APN type should we use?  Calculated by examining the
-    // upstream type list and the DUN_REQUIRED secure-setting
-    private int mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_NONE;
 
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
@@ -153,24 +145,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     // {@link ComponentName} of the Service used to run tether provisioning.
     private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(Resources
             .getSystem().getString(com.android.internal.R.string.config_wifi_tether_enable));
-
-    // USB is  192.168.42.1 and 255.255.255.0
-    // Wifi is 192.168.43.1 and 255.255.255.0
-    // BT is limited to max default of 5 connections. 192.168.44.1 to 192.168.48.1
-    // with 255.255.255.0
-    // P2P is 192.168.49.1 and 255.255.255.0
-
-    private String[] mDhcpRange;
-    private static final String[] DHCP_DEFAULT_RANGE = {
-        "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
-        "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
-        "192.168.46.2", "192.168.46.254", "192.168.47.2", "192.168.47.254",
-        "192.168.48.2", "192.168.48.254", "192.168.49.2", "192.168.49.254",
-    };
-
-    private String[] mDefaultDnsServers;
-    private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
-    private static final String DNS_DEFAULT_SERVER2 = "8.8.4.4";
 
     private final StateMachine mTetherMasterSM;
     private final UpstreamNetworkMonitor mUpstreamNetworkMonitor;
@@ -220,19 +194,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         filter.addDataScheme("file");
         mContext.registerReceiver(mStateReceiver, filter, null, mTetherMasterSM.getHandler());
 
-        mDhcpRange = context.getResources().getStringArray(
-                com.android.internal.R.array.config_tether_dhcp_range);
-        if ((mDhcpRange.length == 0) || (mDhcpRange.length % 2 ==1)) {
-            mDhcpRange = DHCP_DEFAULT_RANGE;
-        }
-
         // load device config info
         updateConfiguration();
-
-        // TODO - remove and rely on real notifications of the current iface
-        mDefaultDnsServers = new String[2];
-        mDefaultDnsServers[0] = DNS_DEFAULT_SERVER1;
-        mDefaultDnsServers[1] = DNS_DEFAULT_SERVER2;
     }
 
     // We can't do this once in the Tethering() constructor and cache the value, because the
@@ -242,29 +205,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     void updateConfiguration() {
-        String[] tetherableUsbRegexs = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_tether_usb_regexs);
-        String[] tetherableWifiRegexs = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_tether_wifi_regexs);
-        String[] tetherableBluetoothRegexs = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_tether_bluetooth_regexs);
-
-        int ifaceTypes[] = mContext.getResources().getIntArray(
-                com.android.internal.R.array.config_tether_upstream_types);
-        Collection<Integer> upstreamIfaceTypes = new ArrayList<>();
-        for (int i : ifaceTypes) {
-            upstreamIfaceTypes.add(new Integer(i));
-        }
-
-        synchronized (mPublicSync) {
-            mTetherableUsbRegexs = tetherableUsbRegexs;
-            mTetherableWifiRegexs = tetherableWifiRegexs;
-            mTetherableBluetoothRegexs = tetherableBluetoothRegexs;
-            mUpstreamIfaceTypes = upstreamIfaceTypes;
-        }
-
-        // check if the upstream type list needs to be modified due to secure-settings
-        checkDunRequired();
+        mConfig = new TetheringConfiguration(mContext);
     }
 
     @Override
@@ -304,39 +245,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         interfaceStatusChanged(iface, up);
     }
 
-    private boolean isUsb(String iface) {
-        synchronized (mPublicSync) {
-            for (String regex : mTetherableUsbRegexs) {
-                if (iface.matches(regex)) return true;
-            }
-            return false;
-        }
-    }
-
-    private boolean isWifi(String iface) {
-        synchronized (mPublicSync) {
-            for (String regex : mTetherableWifiRegexs) {
-                if (iface.matches(regex)) return true;
-            }
-            return false;
-        }
-    }
-
-    private boolean isBluetooth(String iface) {
-        synchronized (mPublicSync) {
-            for (String regex : mTetherableBluetoothRegexs) {
-                if (iface.matches(regex)) return true;
-            }
-            return false;
-        }
-    }
-
     private int ifaceNameToType(String iface) {
-        if (isWifi(iface)) {
+        final TetheringConfiguration cfg = mConfig;
+
+        if (cfg.isWifi(iface)) {
             return ConnectivityManager.TETHERING_WIFI;
-        } else if (isUsb(iface)) {
+        } else if (cfg.isUsb(iface)) {
             return ConnectivityManager.TETHERING_USB;
-        } else if (isBluetooth(iface)) {
+        } else if (cfg.isBluetooth(iface)) {
             return ConnectivityManager.TETHERING_BLUETOOTH;
         }
         return ConnectivityManager.TETHERING_INVALID;
@@ -666,6 +582,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         boolean usbTethered = false;
         boolean bluetoothTethered = false;
 
+        final TetheringConfiguration cfg = mConfig;
+
         synchronized (mPublicSync) {
             for (int i = 0; i < mTetherStates.size(); i++) {
                 TetherState tetherState = mTetherStates.valueAt(i);
@@ -675,11 +593,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 } else if (tetherState.mLastState == IControlsTethering.STATE_AVAILABLE) {
                     availableList.add(iface);
                 } else if (tetherState.mLastState == IControlsTethering.STATE_TETHERED) {
-                    if (isUsb(iface)) {
+                    if (cfg.isUsb(iface)) {
                         usbTethered = true;
-                    } else if (isWifi(iface)) {
+                    } else if (cfg.isWifi(iface)) {
                         wifiTethered = true;
-                    } else if (isBluetooth(iface)) {
+                    } else if (cfg.isBluetooth(iface)) {
                         bluetoothTethered = true;
                     }
                     activeList.add(iface);
@@ -894,17 +812,22 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
     }
 
-    // TODO - return copies so people can't tamper
+    public TetheringConfiguration getTetheringConfiguration() {
+        return mConfig;
+    }
+
+    // TODO - update callers to use getTetheringConfiguration(),
+    // which has only final members.
     public String[] getTetherableUsbRegexs() {
-        return mTetherableUsbRegexs;
+        return copy(mConfig.tetherableUsbRegexs);
     }
 
     public String[] getTetherableWifiRegexs() {
-        return mTetherableWifiRegexs;
+        return copy(mConfig.tetherableWifiRegexs);
     }
 
     public String[] getTetherableBluetoothRegexs() {
-        return mTetherableBluetoothRegexs;
+        return copy(mConfig.tetherableBluetoothRegexs);
     }
 
     public int setUsbTethering(boolean enable) {
@@ -941,58 +864,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     public int[] getUpstreamIfaceTypes() {
-        int values[];
-        synchronized (mPublicSync) {
-            updateConfiguration();  // TODO - remove?
-            values = new int[mUpstreamIfaceTypes.size()];
-            Iterator<Integer> iterator = mUpstreamIfaceTypes.iterator();
-            for (int i=0; i < mUpstreamIfaceTypes.size(); i++) {
-                values[i] = iterator.next();
-            }
+        updateConfiguration();  // TODO - remove?
+        final Collection<Integer> upstreams = mConfig.preferredUpstreamIfaceTypes;
+        final int[] values = new int[upstreams.size()];
+        int i = 0;
+        for (Integer u : upstreams) {
+            values[i++] = u.intValue();
         }
         return values;
-    }
-
-    private void checkDunRequired() {
-        int secureSetting = 2;
-        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        if (tm != null) {
-            secureSetting = tm.getTetherApnRequired();
-        }
-        synchronized (mPublicSync) {
-            // 2 = not set, 0 = DUN not required, 1 = DUN required
-            if (secureSetting != 2) {
-                int requiredApn = (secureSetting == 1 ?
-                        ConnectivityManager.TYPE_MOBILE_DUN :
-                        ConnectivityManager.TYPE_MOBILE_HIPRI);
-                if (requiredApn == ConnectivityManager.TYPE_MOBILE_DUN) {
-                    while (mUpstreamIfaceTypes.contains(MOBILE_TYPE)) {
-                        mUpstreamIfaceTypes.remove(MOBILE_TYPE);
-                    }
-                    while (mUpstreamIfaceTypes.contains(HIPRI_TYPE)) {
-                        mUpstreamIfaceTypes.remove(HIPRI_TYPE);
-                    }
-                    if (mUpstreamIfaceTypes.contains(DUN_TYPE) == false) {
-                        mUpstreamIfaceTypes.add(DUN_TYPE);
-                    }
-                } else {
-                    while (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
-                        mUpstreamIfaceTypes.remove(DUN_TYPE);
-                    }
-                    if (mUpstreamIfaceTypes.contains(MOBILE_TYPE) == false) {
-                        mUpstreamIfaceTypes.add(MOBILE_TYPE);
-                    }
-                    if (mUpstreamIfaceTypes.contains(HIPRI_TYPE) == false) {
-                        mUpstreamIfaceTypes.add(HIPRI_TYPE);
-                    }
-                }
-            }
-            if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
-                mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
-            } else {
-                mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
-            }
-        }
     }
 
     // TODO review API - maybe return ArrayList<String> here and below?
@@ -1023,7 +902,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     public String[] getTetheredDhcpRanges() {
-        return mDhcpRange;
+        return mConfig.dhcpRanges;
     }
 
     public String[] getErroredIfaces() {
@@ -1173,6 +1052,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
             protected boolean turnOnMasterTetherSettings() {
+                final TetheringConfiguration cfg = mConfig;
                 try {
                     mNMService.setIpForwardingEnabled(true);
                 } catch (Exception e) {
@@ -1180,11 +1060,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     return false;
                 }
                 try {
-                    mNMService.startTethering(mDhcpRange);
+                    mNMService.startTethering(cfg.dhcpRanges);
                 } catch (Exception e) {
                     try {
                         mNMService.stopTethering();
-                        mNMService.startTethering(mDhcpRange);
+                        mNMService.startTethering(cfg.dhcpRanges);
                     } catch (Exception ee) {
                         transitionTo(mStartTetheringErrorState);
                         return false;
@@ -1217,29 +1097,31 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
                 updateConfiguration(); // TODO - remove?
 
-                synchronized (mPublicSync) {
-                    if (VDBG) {
-                        Log.d(TAG, "chooseUpstreamType has upstream iface types:");
-                        for (Integer netType : mUpstreamIfaceTypes) {
-                            Log.d(TAG, " " + netType);
-                        }
-                    }
-
-                    for (Integer netType : mUpstreamIfaceTypes) {
-                        NetworkInfo info = cm.getNetworkInfo(netType.intValue());
-                        // TODO: if the network is suspended we should consider
-                        // that to be the same as connected here.
-                        if ((info != null) && info.isConnected()) {
-                            upType = netType.intValue();
-                            break;
-                        }
+                final TetheringConfiguration cfg = mConfig;
+                if (VDBG) {
+                    Log.d(TAG, "chooseUpstreamType has upstream iface types:");
+                    for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
+                        Log.d(TAG, " " + netType);
                     }
                 }
 
+                for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
+                    NetworkInfo info = cm.getNetworkInfo(netType.intValue());
+                    // TODO: if the network is suspended we should consider
+                    // that to be the same as connected here.
+                    if ((info != null) && info.isConnected()) {
+                        upType = netType.intValue();
+                        break;
+                    }
+                }
+
+                final int preferredUpstreamMobileApn = cfg.isDunRequired
+                        ? ConnectivityManager.TYPE_MOBILE_DUN
+                        : ConnectivityManager.TYPE_MOBILE_HIPRI;
                 if (DBG) {
                     Log.d(TAG, "chooseUpstreamType(" + tryCell + "),"
                             + " preferredApn="
-                            + ConnectivityManager.getNetworkTypeName(mPreferredUpstreamMobileApn)
+                            + ConnectivityManager.getNetworkTypeName(preferredUpstreamMobileApn)
                             + ", got type="
                             + ConnectivityManager.getNetworkTypeName(upType));
                 }
@@ -1252,7 +1134,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         break;
                     case ConnectivityManager.TYPE_NONE:
                         if (tryCell &&
-                                requestUpstreamMobileConnection(mPreferredUpstreamMobileApn)) {
+                                requestUpstreamMobileConnection(preferredUpstreamMobileApn)) {
                             // We think mobile should be coming up; don't set a retry.
                         } else {
                             sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
@@ -1310,7 +1192,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
             protected void setDnsForwarders(final Network network, final LinkProperties lp) {
-                String[] dnsServers = mDefaultDnsServers;
+                // TODO: Set v4 and/or v6 DNS per available connectivity.
+                String[] dnsServers = mConfig.defaultIPv4DNS;
                 final Collection<InetAddress> dnses = lp.getDnsServers();
                 // TODO: Properly support the absence of DNS servers.
                 if (dnses != null && !dnses.isEmpty()) {
@@ -1719,9 +1602,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         pw.println("Tethering:");
         pw.increaseIndent();
-        pw.print("mUpstreamIfaceTypes:");
+        final TetheringConfiguration cfg = mConfig;
+        pw.print("preferredUpstreamIfaceTypes:");
         synchronized (mPublicSync) {
-            for (Integer netType : mUpstreamIfaceTypes) {
+            for (Integer netType : cfg.preferredUpstreamIfaceTypes) {
                 pw.print(" " + ConnectivityManager.getNetworkTypeName(netType));
             }
             pw.println();
@@ -1799,5 +1683,124 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 interfaceType, mNMService, mStatsService, this));
         mTetherStates.put(iface, tetherState);
         tetherState.mStateMachine.start();
+    }
+
+    private static String[] copy(String[] strarray) {
+        return Arrays.copyOf(strarray, strarray.length);
+    }
+
+    private static class TetheringConfiguration {
+        private static final int DUN_NOT_REQUIRED = 0;
+        private static final int DUN_REQUIRED = 1;
+        private static final int DUN_UNSPECIFIED = 2;
+
+        // USB is  192.168.42.1 and 255.255.255.0
+        // Wifi is 192.168.43.1 and 255.255.255.0
+        // BT is limited to max default of 5 connections. 192.168.44.1 to 192.168.48.1
+        // with 255.255.255.0
+        // P2P is 192.168.49.1 and 255.255.255.0
+        private static final String[] DHCP_DEFAULT_RANGE = {
+            "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
+            "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
+            "192.168.46.2", "192.168.46.254", "192.168.47.2", "192.168.47.254",
+            "192.168.48.2", "192.168.48.254", "192.168.49.2", "192.168.49.254",
+        };
+
+        private final String[] DEFAULT_IPV4_DNS = {"8.8.4.4", "8.8.8.8"};
+
+        public final String[] tetherableUsbRegexs;
+        public final String[] tetherableWifiRegexs;
+        public final String[] tetherableBluetoothRegexs;
+        public final boolean isDunRequired;
+        public final Collection<Integer> preferredUpstreamIfaceTypes;
+        public final String[] dhcpRanges;
+        public final String[] defaultIPv4DNS;
+
+        public TetheringConfiguration(Context ctx) {
+            tetherableUsbRegexs = ctx.getResources().getStringArray(
+                    com.android.internal.R.array.config_tether_usb_regexs);
+            tetherableWifiRegexs = ctx.getResources().getStringArray(
+                    com.android.internal.R.array.config_tether_wifi_regexs);
+            tetherableBluetoothRegexs = ctx.getResources().getStringArray(
+                    com.android.internal.R.array.config_tether_bluetooth_regexs);
+
+            isDunRequired = checkDunRequired(ctx);
+            preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(ctx, isDunRequired);
+
+            dhcpRanges = getDhcpRanges(ctx);
+            defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
+        }
+
+        public boolean isUsb(String iface) {
+            for (String regex : tetherableUsbRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
+        }
+
+        public boolean isWifi(String iface) {
+            for (String regex : tetherableWifiRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
+        }
+
+        public boolean isBluetooth(String iface) {
+            for (String regex : tetherableBluetoothRegexs) {
+                if (iface.matches(regex)) return true;
+            }
+            return false;
+        }
+
+        private static boolean checkDunRequired(Context ctx) {
+            final TelephonyManager tm = ctx.getSystemService(TelephonyManager.class);
+            final int secureSetting =
+                    (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
+            return (secureSetting == DUN_REQUIRED);
+        }
+
+        private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, boolean requiresDun) {
+            final int ifaceTypes[] = ctx.getResources().getIntArray(
+                    com.android.internal.R.array.config_tether_upstream_types);
+            final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
+            for (int i : ifaceTypes) {
+                upstreamIfaceTypes.add(i);
+            }
+
+            // Fix up upstream interface types for DUN or mobile.
+            // TODO: Perform this filtering step in the above for loop.
+            if (requiresDun) {
+                while (upstreamIfaceTypes.contains(MOBILE_TYPE)) {
+                    upstreamIfaceTypes.remove(MOBILE_TYPE);
+                }
+                while (upstreamIfaceTypes.contains(HIPRI_TYPE)) {
+                    upstreamIfaceTypes.remove(HIPRI_TYPE);
+                }
+                if (!upstreamIfaceTypes.contains(DUN_TYPE)) {
+                    upstreamIfaceTypes.add(DUN_TYPE);
+                }
+            } else {
+                while (upstreamIfaceTypes.contains(DUN_TYPE)) {
+                    upstreamIfaceTypes.remove(DUN_TYPE);
+                }
+                if (!upstreamIfaceTypes.contains(MOBILE_TYPE)) {
+                    upstreamIfaceTypes.add(MOBILE_TYPE);
+                }
+                if (!upstreamIfaceTypes.contains(HIPRI_TYPE)) {
+                    upstreamIfaceTypes.add(HIPRI_TYPE);
+                }
+            }
+
+            return upstreamIfaceTypes;
+        }
+
+        private static String[] getDhcpRanges(Context ctx) {
+            final String[] fromResource = ctx.getResources().getStringArray(
+                    com.android.internal.R.array.config_tether_dhcp_range);
+            if ((fromResource.length > 0) && (fromResource.length % 2 == 0)) {
+                return fromResource;
+            }
+            return copy(DHCP_DEFAULT_RANGE);
+        }
     }
 }
