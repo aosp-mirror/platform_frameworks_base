@@ -1488,6 +1488,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     boolean canAddToastWindowForUid(int uid) {
         // We allow one toast window per UID being shown at a time.
+        // Also if the app is focused adding more than one toast at
+        // a time for better backwards compatibility.
+        final WindowState focusedWindowForUid = getWindow(w ->
+                w.mOwnerUid == uid && w.isFocused());
+        if (focusedWindowForUid != null) {
+            return true;
+        }
         final WindowState win = getWindow(w ->
                 w.mAttrs.type == TYPE_TOAST && w.mOwnerUid == uid && !w.mPermanentlyHidden
                 && !w.mWindowRemovalAllowed);
