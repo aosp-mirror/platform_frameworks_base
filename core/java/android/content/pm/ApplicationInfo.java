@@ -551,6 +551,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 12;
 
     /**
+     * Value for {@link #privateFlags}: {@code true} means this application
+     * contains a static shared library. Defaults to {@code false} if unspecified.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_STATIC_SHARED_LIBRARY = 1 << 13;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
@@ -1353,6 +1360,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isRequiredForSystemUser() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isStaticSharedLibrary() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY) != 0;
     }
 
     /**

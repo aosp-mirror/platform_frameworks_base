@@ -17,11 +17,11 @@
 package android.app;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -53,13 +53,13 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -137,6 +137,21 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public PackageInfo getPackageInfo(VersionedPackage versionedPackage, int flags)
+            throws NameNotFoundException {
+        try {
+            PackageInfo pi = mPM.getPackageInfoVersioned(versionedPackage, flags,
+                    mContext.getUserId());
+            if (pi != null) {
+                return pi;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        throw new NameNotFoundException(versionedPackage.toString());
+    }
+
+    @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
         try {
@@ -147,7 +162,6 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
         throw new NameNotFoundException(packageName);
     }
 
@@ -438,6 +452,28 @@ public class ApplicationPackageManager extends PackageManager {
     public String[] getSystemSharedLibraryNames() {
         try {
             return mPM.getSystemSharedLibraryNames();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @Override
+    public @NonNull List<SharedLibraryInfo> getSharedLibraries(int flags) {
+        return getSharedLibrariesAsUser(flags, mContext.getUserId());
+    }
+
+    /** @hide */
+    @Override
+    @SuppressWarnings("unchecked")
+    public @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags, int userId) {
+        try {
+            ParceledListSlice<SharedLibraryInfo> sharedLibs = mPM.getSharedLibraries(
+                    flags, userId);
+            if (sharedLibs == null) {
+                return Collections.emptyList();
+            }
+            return sharedLibs.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1977,10 +2013,11 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int flags,
-            int userId) {
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer,
+            int flags, int userId) {
         try {
-            mPM.deletePackageAsUser(packageName, observer, userId, flags);
+            mPM.deletePackageAsUser(packageName, PackageManager.VERSION_CODE_HIGHEST,
+                    observer, userId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2303,7 +2340,7 @@ public class ApplicationPackageManager extends PackageManager {
         synchronized (mLock) {
             if (mInstaller == null) {
                 try {
-                    mInstaller = new PackageInstaller(mContext, this, mPM.getPackageInstaller(),
+                    mInstaller = new PackageInstaller(mPM.getPackageInstaller(),
                             mContext.getPackageName(), mContext.getUserId());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();

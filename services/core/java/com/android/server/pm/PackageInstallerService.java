@@ -52,6 +52,7 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -869,8 +870,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void uninstall(String packageName, String callerPackageName, int flags,
-                IntentSender statusReceiver, int userId) {
+    public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
+                IntentSender statusReceiver, int userId) throws RemoteException {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
@@ -884,24 +885,24 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 callerPackageName);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
-                statusReceiver, packageName, isDeviceOwner, userId);
+                statusReceiver, versionedPackage.getPackageName(), isDeviceOwner, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
-            mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
+            mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
         } else if (isDeviceOwner) {
             // Allow the DeviceOwner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             long ident = Binder.clearCallingIdentity();
             try {
-                mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
+                mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         } else {
             // Take a short detour to confirm with user
             final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
-            intent.setData(Uri.fromParts("package", packageName, null));
+            intent.setData(Uri.fromParts("package", versionedPackage.getPackageName(), null));
             intent.putExtra(PackageInstaller.EXTRA_CALLBACK, adapter.getBinder().asBinder());
             adapter.onUserActionRequired(intent);
         }

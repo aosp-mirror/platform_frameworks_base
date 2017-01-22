@@ -216,7 +216,9 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
                 PARENT_PACKAGE_NAME,
                 childPackageNames,
-                0);
+                0,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         final PackageSetting testPkgSetting01 = new PackageSetting(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -241,7 +243,9 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
                 PARENT_PACKAGE_NAME,
                 childPackageNames,
-                0);
+                0,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -256,7 +260,9 @@ public class PackageManagerSettingsTests {
                 0 /*pkgPrivateFlags*/,
                 null /*parentPkgName*/,
                 null /*childPkgNames*/,
-                0);
+                0,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         testPkgSetting01.copyFrom(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -281,7 +287,9 @@ public class PackageManagerSettingsTests {
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.origPackage, is(nullValue()));
@@ -313,7 +321,9 @@ public class PackageManagerSettingsTests {
                 ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.origPackage, is(nullValue()));
@@ -348,7 +358,9 @@ public class PackageManagerSettingsTests {
                     0 /*pkgFlags*/,
                     0 /*pkgPrivateFlags*/,
                     null /*childPkgNames*/,
-                    UserManagerService.getInstance());
+                    UserManagerService.getInstance(),
+                    null /*usesStaticLibraries*/,
+                    null /*usesStaticLibrariesVersions*/);
             fail("Expected a PackageManagerException");
         } catch (PackageManagerException expected) {
         }
@@ -378,7 +390,9 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 null /*parentPkgName*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.codePath, is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
@@ -416,7 +430,9 @@ public class PackageManagerSettingsTests {
                 true /*allowInstall*/,
                 null /*parentPkgName*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.appId, is(0));
         assertThat(testPkgSetting01.codePath, is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -457,7 +473,9 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 null /*parentPkgName*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.codePath, is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -498,7 +516,9 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 null /*parentPkgName*/,
                 null /*childPkgNames*/,
-                UserManagerService.getInstance());
+                UserManagerService.getInstance(),
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.codePath, is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -624,7 +644,9 @@ public class PackageManagerSettingsTests {
                 0 /*privateFlags*/,
                 null /*parentPackageName*/,
                 null /*childPackageNames*/,
-                sharedUserId);
+                sharedUserId,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
     }
 
     private @NonNull List<UserInfo> createFakeUsers() {

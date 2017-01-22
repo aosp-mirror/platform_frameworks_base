@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -1285,6 +1286,13 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static final int DELETE_FAILED_ABORTED = -5;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * because the packge is a shared library used by other installed packages.
+     * {@hide} */
+    public static final int DELETE_FAILED_USED_SHARED_LIBRARY = -6;
 
     /**
      * Return code that is passed to the {@link IPackageMoveObserver} when the
@@ -2624,6 +2632,11 @@ public abstract class PackageManager {
     public static final int NOTIFY_PACKAGE_USE_REASONS_COUNT = 8;
 
     /**
+     * Constant for specifying the highest installed package version code.
+     */
+    public static final int VERSION_CODE_HIGHEST = -1;
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
@@ -2671,7 +2684,58 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * @hide
+     * Retrieve overall information about an application package that is
+     * installed on the system. This method can be used for retrieving
+     * information about packages for which multiple versions can be
+     * installed at the time. Currently only packages hosting static shared
+     * libraries can have multiple installed versions. The method can also
+     * be used to get info for a package that has a single version installed
+     * by passing {@link #VERSION_CODE_HIGHEST} in the {@link VersionedPackage}
+     * constructor.
+     *
+     * @param versionedPackage The versioned packages for which to query.
+     * @param flags Additional option flags. Use any combination of
+     *         {@link #GET_ACTIVITIES}, {@link #GET_CONFIGURATIONS},
+     *         {@link #GET_GIDS}, {@link #GET_INSTRUMENTATION},
+     *         {@link #GET_INTENT_FILTERS}, {@link #GET_META_DATA},
+     *         {@link #GET_PERMISSIONS}, {@link #GET_PROVIDERS},
+     *         {@link #GET_RECEIVERS}, {@link #GET_SERVICES},
+     *         {@link #GET_SHARED_LIBRARY_FILES}, {@link #GET_SIGNATURES},
+     *         {@link #GET_URI_PERMISSION_PATTERNS}, {@link #GET_UNINSTALLED_PACKAGES},
+     *         {@link #MATCH_DISABLED_COMPONENTS}, {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS},
+     *         {@link #MATCH_UNINSTALLED_PACKAGES}
+     *         to modify the data returned.
+     *
+     * @return A PackageInfo object containing information about the
+     *         package. If flag {@code MATCH_UNINSTALLED_PACKAGES} is set and if the
+     *         package is not found in the list of installed applications, the
+     *         package information is retrieved from the list of uninstalled
+     *         applications (which includes installed applications as well as
+     *         applications with data directory i.e. applications which had been
+     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
+     * @see #GET_ACTIVITIES
+     * @see #GET_CONFIGURATIONS
+     * @see #GET_GIDS
+     * @see #GET_INSTRUMENTATION
+     * @see #GET_INTENT_FILTERS
+     * @see #GET_META_DATA
+     * @see #GET_PERMISSIONS
+     * @see #GET_PROVIDERS
+     * @see #GET_RECEIVERS
+     * @see #GET_SERVICES
+     * @see #GET_SHARED_LIBRARY_FILES
+     * @see #GET_SIGNATURES
+     * @see #GET_URI_PERMISSION_PATTERNS
+     * @see #MATCH_DISABLED_COMPONENTS
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
+     * @see #MATCH_UNINSTALLED_PACKAGES
+     */
+    public abstract PackageInfo getPackageInfo(VersionedPackage versionedPackage,
+            @PackageInfoFlags int flags) throws NameNotFoundException;
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
@@ -2715,6 +2779,8 @@ public abstract class PackageManager {
      * @see #MATCH_DISABLED_COMPONENTS
      * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_UNINSTALLED_PACKAGES
+     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract PackageInfo getPackageInfoAsUser(String packageName,
@@ -3703,6 +3769,37 @@ public abstract class PackageManager {
      *
      */
     public abstract String[] getSystemSharedLibraryNames();
+
+    /**
+     * Get a list of shared libraries on the device.
+     *
+     * @param flags To filter the libraries to return.
+     * @return The shared library list.
+     *
+     * @see #MATCH_FACTORY_ONLY
+     * @see #MATCH_KNOWN_PACKAGES
+     * @see #MATCH_ANY_USER
+     * @see #MATCH_UNINSTALLED_PACKAGES
+     */
+    public abstract @NonNull List<SharedLibraryInfo> getSharedLibraries(
+            @InstallFlags int flags);
+
+    /**
+     * Get a list of shared libraries on the device.
+     *
+     * @param flags To filter the libraries to return.
+     * @param userId The user to query for.
+     * @return The shared library list.
+     *
+     * @see #MATCH_FACTORY_ONLY
+     * @see #MATCH_KNOWN_PACKAGES
+     * @see #MATCH_ANY_USER
+     * @see #MATCH_UNINSTALLED_PACKAGES
+     *
+     * @hide
+     */
+    public abstract @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(
+            @InstallFlags int flags, @UserIdInt int userId);
 
     /**
      * Get the name of the package hosting the services shared library.
@@ -5088,6 +5185,7 @@ public abstract class PackageManager {
      *            indicate that no callback is desired.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
     public abstract void deletePackage(String packageName, IPackageDeleteObserver observer,
             @DeleteFlags int flags);
 
@@ -5106,11 +5204,11 @@ public abstract class PackageManager {
      * @param userId The user Id
      * @hide
      */
-     @RequiresPermission(anyOf = {
+    @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public abstract void deletePackageAsUser(String packageName, IPackageDeleteObserver observer,
-            @DeleteFlags int flags, @UserIdInt int userId);
+    public abstract void deletePackageAsUser(@NonNull String packageName,
+            IPackageDeleteObserver observer, @DeleteFlags int flags, @UserIdInt int userId);
 
     /**
      * Retrieve the package name of the application that installed a package. This identifies
@@ -5851,6 +5949,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_USER_RESTRICTED: return "DELETE_FAILED_USER_RESTRICTED";
             case DELETE_FAILED_OWNER_BLOCKED: return "DELETE_FAILED_OWNER_BLOCKED";
             case DELETE_FAILED_ABORTED: return "DELETE_FAILED_ABORTED";
+            case DELETE_FAILED_USED_SHARED_LIBRARY: return "DELETE_FAILED_USED_SHARED_LIBRARY";
             default: return Integer.toString(status);
         }
     }
@@ -5864,6 +5963,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_USER_RESTRICTED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             case DELETE_FAILED_OWNER_BLOCKED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             case DELETE_FAILED_ABORTED: return PackageInstaller.STATUS_FAILURE_ABORTED;
+            case DELETE_FAILED_USED_SHARED_LIBRARY: return PackageInstaller.STATUS_FAILURE_CONFLICT;
             default: return PackageInstaller.STATUS_FAILURE;
         }
     }

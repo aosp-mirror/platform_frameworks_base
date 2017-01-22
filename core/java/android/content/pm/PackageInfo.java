@@ -142,7 +142,7 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_INSTRUMENTATION} was set.
      */
     public InstrumentationInfo[] instrumentation;
-    
+
     /**
      * Array of all {@link android.R.styleable#AndroidManifestPermission
      * &lt;permission&gt;} tags included under &lt;manifest&gt;,
@@ -150,7 +150,7 @@ public class PackageInfo implements Parcelable {
      * {@link PackageManager#GET_PERMISSIONS} was set.
      */
     public PermissionInfo[] permissions;
-    
+
     /**
      * Array of all {@link android.R.styleable#AndroidManifestUsesPermission
      * &lt;uses-permission&gt;} tags included under &lt;manifest&gt;,
@@ -160,7 +160,7 @@ public class PackageInfo implements Parcelable {
      * by the system at install time.
      */
     public String[] requestedPermissions;
-    
+
     /**
      * Array of flags of all {@link android.R.styleable#AndroidManifestUsesPermission
      * &lt;uses-permission&gt;} tags included under &lt;manifest&gt;,

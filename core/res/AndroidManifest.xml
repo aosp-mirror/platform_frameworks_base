@@ -2489,6 +2489,16 @@
         android:description="@string/permdesc_requestInstallPackages"
         android:protectionLevel="signature|appop" />
 
+    <!-- Allows an application to request deleting packages. Apps
+         targeting APIs greater than 25 must hold this permission in
+         order to use {@link android.content.Intent#ACTION_UNINSTALL_PACKAGE}.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.REQUEST_DELETE_PACKAGES"
+        android:label="@string/permlab_requestDeletePackages"
+        android:description="@string/permdesc_requestDeletePackages"
+        android:protectionLevel="normal" />
+
     <!-- @SystemApi Allows an application to install packages.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.INSTALL_PACKAGES"
@@ -3127,7 +3137,7 @@
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
 
 
-    <!-- Allows the holder to access the ephemeral applications on the device.
+    <!-- Allows the holder to access the instant applications on the device.
     @hide -->
     <permission android:name="android.permission.ACCESS_EPHEMERAL_APPS"
             android:protectionLevel="signature" />

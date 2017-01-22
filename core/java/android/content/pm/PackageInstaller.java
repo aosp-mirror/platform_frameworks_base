@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -23,7 +24,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
@@ -36,9 +36,11 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.annotation.IntRange;
 import android.util.ExceptionUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -256,8 +258,6 @@ public class PackageInstaller {
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
 
-    private final Context mContext;
-    private final PackageManager mPm;
     private final IPackageInstaller mInstaller;
     private final int mUserId;
     private final String mInstallerPackageName;
@@ -265,10 +265,8 @@ public class PackageInstaller {
     private final ArrayList<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
     /** {@hide} */
-    public PackageInstaller(Context context, PackageManager pm, IPackageInstaller installer,
+    public PackageInstaller(IPackageInstaller installer,
             String installerPackageName, int userId) {
-        mContext = context;
-        mPm = pm;
         mInstaller = installer;
         mInstallerPackageName = installerPackageName;
         mUserId = userId;
@@ -413,10 +411,35 @@ public class PackageInstaller {
      * Uninstall the given package, removing it completely from the device. This
      * method is only available to the current "installer of record" for the
      * package.
+     *
+     * @param packageName The package to uninstall.
+     * @param statusReceiver Where to deliver the result.
      */
     public void uninstall(@NonNull String packageName, @NonNull IntentSender statusReceiver) {
+       uninstall(new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+               statusReceiver);
+    }
+
+    /**
+     * Uninstall the given package with a specific version code, removing it
+     * completely from the device. This method is only available to the current
+     * "installer of record" for the package. If the version code of the package
+     * does not match the one passed in the versioned package argument this
+     * method is a no-op. Use {@link PackageManager#VERSION_CODE_HIGHEST} to
+     * uninstall the latest version of the package.
+     *
+     * @param versionedPackage The versioned package to uninstall.
+     * @param statusReceiver Where to deliver the result.
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.REQUEST_DELETE_PACKAGES})
+    public void uninstall(@NonNull VersionedPackage versionedPackage,
+            @NonNull IntentSender statusReceiver) {
+        Preconditions.checkNotNull(versionedPackage, "versionedPackage cannot be null");
         try {
-            mInstaller.uninstall(packageName, mInstallerPackageName, 0, statusReceiver, mUserId);
+            mInstaller.uninstall(versionedPackage, mInstallerPackageName,
+                    0, statusReceiver, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

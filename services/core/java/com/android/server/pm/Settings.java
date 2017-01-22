@@ -183,6 +183,7 @@ final class Settings {
     private static final String TAG_RUNTIME_PERMISSIONS = "runtime-permissions";
     private static final String TAG_PERMISSIONS = "perms";
     private static final String TAG_CHILD_PACKAGE = "child-package";
+    private static final String TAG_USES_STATIC_LIB = "uses-static-lib";
 
     private static final String TAG_PERSISTENT_PREFERRED_ACTIVITIES =
             "persistent-preferred-activities";
@@ -201,6 +202,7 @@ final class Settings {
     private static final String ATTR_CODE = "code";
     private static final String ATTR_GRANTED = "granted";
     private static final String ATTR_FLAGS = "flags";
+    private static final String ATTR_VERSION = "version";
 
     private static final String ATTR_CE_DATA_INODE = "ceDataInode";
     private static final String ATTR_INSTALLED = "inst";
@@ -561,7 +563,8 @@ final class Settings {
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
-                p.parentPackageName, p.childPackageNames);
+                p.parentPackageName, p.childPackageNames, p.usesStaticLibraries,
+                p.usesStaticLibrariesVersions);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -578,7 +581,8 @@ final class Settings {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, int vc, int
             pkgFlags, int pkgPrivateFlags, String parentPackageName,
-            List<String> childPackageNames) {
+            List<String> childPackageNames, String[] usesStaticLibraries,
+            int[] usesStaticLibraryNames) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -591,7 +595,7 @@ final class Settings {
         p = new PackageSetting(name, realName, codePath, resourcePath,
                 legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
                 cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags, parentPackageName,
-                childPackageNames, 0 /*userId*/);
+                childPackageNames, 0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -678,7 +682,8 @@ final class Settings {
             File codePath, File resourcePath, String legacyNativeLibraryPath, String primaryCpuAbi,
             String secondaryCpuAbi, int versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, String parentPkgName,
-            List<String> childPkgNames, UserManagerService userManager) {
+            List<String> childPkgNames, UserManagerService userManager,
+            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -699,13 +704,16 @@ final class Settings {
             // overwrite the signatures in the original package setting.
             pkgSetting.signatures = new PackageSignatures();
             pkgSetting.versionCode = versionCode;
+            pkgSetting.usesStaticLibraries = usesStaticLibraries;
+            pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
             // Update new package state.
             pkgSetting.setTimeStamp(codePath.lastModified());
         } else {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath, resourcePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                    parentPkgName, childPkgNames, 0 /*sharedUserId*/);
+                    parentPkgName, childPkgNames, 0 /*sharedUserId*/, usesStaticLibraries,
+                    usesStaticLibrariesVersions);
             pkgSetting.setTimeStamp(codePath.lastModified());
             pkgSetting.sharedUser = sharedUser;
             // If this is not a system app, it starts out stopped.
@@ -782,7 +790,8 @@ final class Settings {
             @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi,
             int pkgFlags, int pkgPrivateFlags, @Nullable List<String> childPkgNames,
-            @NonNull UserManagerService userManager) throws PackageManagerException {
+            @NonNull UserManagerService userManager, @Nullable String[] usesStaticLibraries,
+            @Nullable int[] usesStaticLibrariesVersions) throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -843,6 +852,14 @@ final class Settings {
         pkgSetting.secondaryCpuAbiString = secondaryCpuAbi;
         if (childPkgNames != null) {
             pkgSetting.childPackageNames = new ArrayList<>(childPkgNames);
+        }
+        if (usesStaticLibraries != null) {
+            pkgSetting.usesStaticLibraries = Arrays.copyOf(usesStaticLibraries,
+                    usesStaticLibraries.length);
+        }
+        if (usesStaticLibrariesVersions != null) {
+            pkgSetting.usesStaticLibrariesVersions = Arrays.copyOf(usesStaticLibrariesVersions,
+                    usesStaticLibrariesVersions.length);
         }
     }
 
@@ -948,6 +965,16 @@ final class Settings {
         // the shared user signatures as well.
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
             p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
+        }
+        // Update static shared library dependencies if needed
+        if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
+                && pkg.usesStaticLibraries.size() == pkg.usesStaticLibrariesVersions.length) {
+            String[] usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
+            pkg.usesStaticLibraries.toArray(usesStaticLibraries);
+            p.usesStaticLibrariesVersions = pkg.usesStaticLibrariesVersions;
+        } else {
+            pkg.usesStaticLibraries = null;
+            p.usesStaticLibrariesVersions = null;
         }
         addPackageSettingLPw(p, p.sharedUser);
     }
@@ -2163,6 +2190,53 @@ final class Settings {
         }
     }
 
+    void readUsesStaticLibLPw(XmlPullParser parser, PackageSetting outPs)
+            throws IOException, XmlPullParserException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String libName = parser.getAttributeValue(null, ATTR_NAME);
+            String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
+
+            int libVersion = -1;
+            try {
+                libVersion = Integer.parseInt(libVersionStr);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+
+            if (libName != null && libVersion >= 0) {
+                outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
+                        outPs.usesStaticLibraries, libName);
+                outPs.usesStaticLibrariesVersions = ArrayUtils.appendInt(
+                        outPs.usesStaticLibrariesVersions, libVersion);
+            }
+
+            XmlUtils.skipCurrentTag(parser);
+        }
+    }
+
+    void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
+            int[] usesStaticLibraryVersions) throws IOException {
+        if (ArrayUtils.isEmpty(usesStaticLibraries) || ArrayUtils.isEmpty(usesStaticLibraryVersions)
+                || usesStaticLibraries.length != usesStaticLibraryVersions.length) {
+            return;
+        }
+        final int libCount = usesStaticLibraries.length;
+        for (int i = 0; i < libCount; i++) {
+            final String libName = usesStaticLibraries[i];
+            final int libVersion = usesStaticLibraryVersions[i];
+            serializer.startTag(null, TAG_USES_STATIC_LIB);
+            serializer.attribute(null, ATTR_NAME, libName);
+            serializer.attribute(null, ATTR_VERSION, Integer.toString(libVersion));
+            serializer.endTag(null, TAG_USES_STATIC_LIB);
+        }
+    }
+
     // Note: assumed "stopped" field is already cleared in all packages.
     // Legacy reader, used to read in the old file format after an upgrade. Not used after that.
     void readStoppedLPw() {
@@ -2622,6 +2696,8 @@ final class Settings {
 
         writeChildPackagesLPw(serializer, pkg.childPackageNames);
 
+        writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
+
         // If this is a shared user, the permissions will be written there.
         if (pkg.sharedUser == null) {
             writePermissionsLPr(serializer, pkg.getPermissionsState()
@@ -2691,6 +2767,8 @@ final class Settings {
         }
 
         writeChildPackagesLPw(serializer, pkg.childPackageNames);
+
+        writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
 
@@ -3465,7 +3543,7 @@ final class Settings {
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
                 secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
-                parentPackageName, null /*childPackageNames*/, 0 /*sharedUserId*/);
+                parentPackageName, null /*childPackageNames*/, 0 /*sharedUserId*/, null, null);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -3520,6 +3598,8 @@ final class Settings {
                     ps.childPackageNames = new ArrayList<>();
                 }
                 ps.childPackageNames.add(childPackageName);
+            } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
+                readUsesStaticLibLPw(parser, ps);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <updated-package>: " + parser.getName());
@@ -3705,7 +3785,8 @@ final class Settings {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
                         secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags,
-                        pkgPrivateFlags, parentPackageName, null /*childPackageNames*/);
+                        pkgPrivateFlags, parentPackageName, null /*childPackageNames*/,
+                        null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3724,7 +3805,8 @@ final class Settings {
                             codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                             versionCode, pkgFlags, pkgPrivateFlags, parentPackageName,
-                            null /*childPackageNames*/, sharedUserId);
+                            null /*childPackageNames*/, sharedUserId,
+                            null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -4294,6 +4376,7 @@ final class Settings {
         ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET, "RESIZEABLE_ACTIVITIES_EXPLICITLY_SET",
         ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION, "RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION",
         ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND, "BACKUP_IN_FOREGROUND",
+        ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY, "STATIC_SHARED_LIBRARY",
     };
 
     void dumpVersionLPr(IndentingPrintWriter pw) {
@@ -4486,10 +4569,17 @@ final class Settings {
             }
             pw.println("]");
             if (ps.pkg.libraryNames != null && ps.pkg.libraryNames.size() > 0) {
-                pw.print(prefix); pw.println("  libraries:");
-                for (int i=0; i<ps.pkg.libraryNames.size(); i++) {
-                    pw.print(prefix); pw.print("    "); pw.println(ps.pkg.libraryNames.get(i));
+                pw.print(prefix); pw.println("  dynamic libraries:");
+                for (int i = 0; i<ps.pkg.libraryNames.size(); i++) {
+                    pw.print(prefix); pw.print("    ");
+                            pw.println(ps.pkg.libraryNames.get(i));
                 }
+            }
+            if (ps.pkg.staticSharedLibName != null) {
+                pw.print(prefix); pw.println("  static library:");
+                pw.print(prefix); pw.print("    ");
+                pw.print("name:"); pw.print(ps.pkg.staticSharedLibName);
+                pw.print(" version:"); pw.println(ps.pkg.staticSharedLibVersion);
             }
             if (ps.pkg.usesLibraries != null && ps.pkg.usesLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraries:");
@@ -4497,12 +4587,21 @@ final class Settings {
                     pw.print(prefix); pw.print("    "); pw.println(ps.pkg.usesLibraries.get(i));
                 }
             }
+            if (ps.pkg.usesStaticLibraries != null
+                    && ps.pkg.usesStaticLibraries.size() > 0) {
+                pw.print(prefix); pw.println("  usesStaticLibraries:");
+                for (int i=0; i<ps.pkg.usesStaticLibraries.size(); i++) {
+                    pw.print(prefix); pw.print("    ");
+                    pw.print(ps.pkg.usesStaticLibraries.get(i)); pw.print(" version:");
+                            pw.println(ps.pkg.usesStaticLibrariesVersions[i]);
+                }
+            }
             if (ps.pkg.usesOptionalLibraries != null
                     && ps.pkg.usesOptionalLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesOptionalLibraries:");
                 for (int i=0; i<ps.pkg.usesOptionalLibraries.size(); i++) {
                     pw.print(prefix); pw.print("    ");
-                        pw.println(ps.pkg.usesOptionalLibraries.get(i));
+                    pw.println(ps.pkg.usesOptionalLibraries.get(i));
                 }
             }
             if (ps.pkg.usesLibraryFiles != null

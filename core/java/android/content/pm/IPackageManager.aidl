@@ -47,6 +47,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -63,6 +64,8 @@ interface IPackageManager {
     void checkPackageStartable(String packageName, int userId);
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
+    PackageInfo getPackageInfoVersioned(in VersionedPackage versionedPackage,
+            int flags, int userId);
     int getPackageUid(String packageName, int flags, int userId);
     int[] getPackageGids(String packageName, int flags, int userId);
 
@@ -231,18 +234,19 @@ interface IPackageManager {
     void setApplicationCategoryHint(String packageName, int categoryHint, String callerPackageName);
 
     /** @deprecated rawr, don't call AIDL methods directly! */
-    void deletePackageAsUser(in String packageName, IPackageDeleteObserver observer,
-            int userId, int flags);
+    void deletePackageAsUser(in String packageName, int versionCode,
+            IPackageDeleteObserver observer, int userId, int flags);
 
     /**
      * Delete a package for a specific user.
      *
-     * @param packageName The fully qualified name of the package to delete.
+     * @param versionedPackage The package to delete.
      * @param observer a callback to use to notify when the package deletion in finished.
      * @param userId the id of the user for whom to delete the package
      * @param flags - possible values: {@link #DONT_DELETE_DATA}
      */
-    void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
+    void deletePackageVersioned(in VersionedPackage versionedPackage,
+            IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
 
@@ -588,4 +592,6 @@ interface IPackageManager {
     List<String> getPreviousCodePaths(in String packageName);
 
     int getInstallReason(String packageName, int userId);
+
+    ParceledListSlice getSharedLibraries(int flags, int userId);
 }

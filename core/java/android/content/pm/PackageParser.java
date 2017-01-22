@@ -1373,6 +1373,11 @@ public class PackageParser {
                         "No APK Signature Scheme v2 signature in ephemeral package " + apkPath,
                         e);
                 }
+                // Static shared libraries must use only the V2 signing scheme
+                if (pkg.applicationInfo.isStaticSharedLibrary()) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                            "Static shared libs must use v2 signature scheme " + apkPath);
+                }
             } catch (Exception e) {
                 // APK Signature Scheme v2 signature was found but did not verify
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
@@ -2568,6 +2573,52 @@ public class PackageParser {
         return fi;
     }
 
+    private boolean parseUsesStaticLibrary(Package pkg, Resources res, XmlResourceParser parser,
+            String[] outError) throws XmlPullParserException, IOException {
+        TypedArray sa = res.obtainAttributes(parser,
+                com.android.internal.R.styleable.AndroidManifestUsesStaticLibrary);
+
+        // Note: don't allow this value to be a reference to a resource that may change.
+        String lname = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
+        final int version = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestUsesStaticLibrary_version, -1);
+        String certSha256 = sa.getNonResourceString(com.android.internal.R.styleable
+                .AndroidManifestUsesStaticLibrary_certDigest);
+        sa.recycle();
+
+        // Since an APK providing a static shared lib can only provide the lib - fail if malformed
+        if (lname == null || version < 0 || certSha256 == null) {
+            outError[0] = "Bad uses-static-library declaration name: " + lname + " version: "
+                    + version + " certDigest" + certSha256;
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            XmlUtils.skipCurrentTag(parser);
+            return false;
+        }
+
+        // Can depend only on one version of the same library
+        if (pkg.usesStaticLibraries != null && pkg.usesStaticLibraries.contains(lname)) {
+            outError[0] = "Depending on multiple versions of static library " + lname;
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            XmlUtils.skipCurrentTag(parser);
+            return false;
+        }
+
+        lname = lname.intern();
+        // We allow ":" delimiters in the SHA declaration as this is the format
+        // emitted by the certtool making it easy for developers to copy/paste.
+        certSha256 = certSha256.replace(":", "").toLowerCase();
+        pkg.usesStaticLibraries = ArrayUtils.add(pkg.usesStaticLibraries, lname);
+        pkg.usesStaticLibrariesVersions = ArrayUtils.appendInt(
+                pkg.usesStaticLibrariesVersions, version);
+        pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String.class,
+                pkg.usesStaticLibrariesCertDigests, certSha256);
+
+        XmlUtils.skipCurrentTag(parser);
+
+        return true;
+    }
+
     private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
@@ -3416,6 +3467,47 @@ public class PackageParser {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
                 }
+            } else if (tagName.equals("static-library")) {
+                sa = res.obtainAttributes(parser,
+                        com.android.internal.R.styleable.AndroidManifestStaticLibrary);
+
+                // Note: don't allow this value to be a reference to a resource
+                // that may change.
+                final String lname = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestStaticLibrary_name);
+                final int version = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestStaticLibrary_version, -1);
+
+                sa.recycle();
+
+                // Since the app canot run without a static lib - fail if malformed
+                if (lname == null || version < 0) {
+                    outError[0] = "Bad static-library declaration name: " + lname
+                            + " version: " + version;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    XmlUtils.skipCurrentTag(parser);
+                    return false;
+                }
+
+                if (owner.mSharedUserId != null) {
+                    outError[0] = "sharedUserId not allowed in static shared library";
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+                    XmlUtils.skipCurrentTag(parser);
+                    return false;
+                }
+
+                if (owner.staticSharedLibName != null) {
+                    outError[0] = "Multiple static-shared libs for package " + pkgName;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    XmlUtils.skipCurrentTag(parser);
+                    return false;
+                }
+
+                owner.staticSharedLibName = lname.intern();
+                owner.staticSharedLibVersion = version;
+                ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY;
+
+                XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("library")) {
                 sa = res.obtainAttributes(parser,
@@ -3431,11 +3523,17 @@ public class PackageParser {
                 if (lname != null) {
                     lname = lname.intern();
                     if (!ArrayUtils.contains(owner.libraryNames, lname)) {
-                        owner.libraryNames = ArrayUtils.add(owner.libraryNames, lname);
+                        owner.libraryNames = ArrayUtils.add(
+                                owner.libraryNames, lname);
                     }
                 }
 
                 XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("uses-static-library")) {
+                if (!parseUsesStaticLibrary(owner, res, parser, outError)) {
+                    return false;
+                }
 
             } else if (tagName.equals("uses-library")) {
                 sa = res.obtainAttributes(parser,
@@ -3612,6 +3710,11 @@ public class PackageParser {
                 if ((owner.mAppMetaData = parseMetaData(res, parser, owner.mAppMetaData,
                         outError)) == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    return false;
+                }
+
+            } else if (tagName.equals("uses-static-library")) {
+                if (!parseUsesStaticLibrary(owner, res, parser, outError)) {
                     return false;
                 }
 
@@ -5187,6 +5290,10 @@ public class PackageParser {
 
         public String packageName;
 
+        // The package name declared in the manifest as the package can be
+        // renamed, for example static shared libs use synthetic package names.
+        public String manifestPackageName;
+
         /** Names of any split APKs, ordered by parsed splitName */
         public String[] splitNames;
 
@@ -5241,8 +5348,13 @@ public class PackageParser {
         public Package parentPackage;
         public ArrayList<Package> childPackages;
 
+        public String staticSharedLibName = null;
+        public int staticSharedLibVersion = 0;
         public ArrayList<String> libraryNames = null;
         public ArrayList<String> usesLibraries = null;
+        public ArrayList<String> usesStaticLibraries = null;
+        public int[] usesStaticLibrariesVersions = null;
+        public String[] usesStaticLibrariesCertDigests = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
@@ -5341,6 +5453,7 @@ public class PackageParser {
 
         public Package(String packageName) {
             this.packageName = packageName;
+            this.manifestPackageName = packageName;
             applicationInfo.packageName = packageName;
             applicationInfo.uid = -1;
         }
@@ -5659,6 +5772,7 @@ public class PackageParser {
             final ClassLoader boot = Object.class.getClassLoader();
 
             packageName = dest.readString();
+            manifestPackageName = dest.readString();
             splitNames = dest.readStringArray();
             volumeUuid = dest.readString();
             codePath = dest.readString();
@@ -5699,10 +5813,22 @@ public class PackageParser {
                 childPackages = null;
             }
 
+            staticSharedLibName = dest.readString();
+            staticSharedLibVersion = dest.readInt();
             libraryNames = dest.createStringArrayList();
             usesLibraries = dest.createStringArrayList();
             usesOptionalLibraries = dest.createStringArrayList();
             usesLibraryFiles = dest.readStringArray();
+
+            final int libCount = dest.readInt();
+            if (libCount > 0) {
+                usesStaticLibraries = new ArrayList<>(libCount);
+                dest.readStringList(usesStaticLibraries);
+                usesStaticLibrariesVersions = new int[libCount];
+                dest.readIntArray(usesStaticLibrariesVersions);
+                usesStaticLibrariesCertDigests = new String[libCount];
+                dest.readStringArray(usesStaticLibrariesCertDigests);
+            }
 
             preferredActivityFilters = new ArrayList<>();
             dest.readParcelableList(preferredActivityFilters, boot);
@@ -5789,6 +5915,7 @@ public class PackageParser {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(packageName);
+            dest.writeString(manifestPackageName);
             dest.writeStringArray(splitNames);
             dest.writeString(volumeUuid);
             dest.writeString(codePath);
@@ -5813,10 +5940,21 @@ public class PackageParser {
             dest.writeStringList(protectedBroadcasts);
             dest.writeParcelable(parentPackage, flags);
             dest.writeParcelableList(childPackages, flags);
+            dest.writeString(staticSharedLibName);
+            dest.writeInt(staticSharedLibVersion);
             dest.writeStringList(libraryNames);
             dest.writeStringList(usesLibraries);
             dest.writeStringList(usesOptionalLibraries);
             dest.writeStringArray(usesLibraryFiles);
+
+            if (ArrayUtils.isEmpty(usesStaticLibraries)) {
+                dest.writeInt(-1);
+            } else {
+                dest.writeInt(usesStaticLibraries.size());
+                dest.writeStringList(usesStaticLibraries);
+                dest.writeIntArray(usesStaticLibrariesVersions);
+                dest.writeStringArray(usesStaticLibrariesCertDigests);
+            }
 
             dest.writeParcelableList(preferredActivityFilters, flags);
 
@@ -6237,6 +6375,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
                 && p.usesLibraryFiles != null) {
+            return true;
+        }
+        if (p.staticSharedLibName != null) {
             return true;
         }
         return false;
