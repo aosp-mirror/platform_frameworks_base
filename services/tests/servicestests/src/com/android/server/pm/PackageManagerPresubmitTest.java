@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
-import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.GlobalPresubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -63,7 +63,7 @@ public class PackageManagerPresubmitTest {
      */
     @Test
     @SmallTest
-    @Presubmit
+    @GlobalPresubmit
     public void testPrivAppPermissions() throws PackageManager.NameNotFoundException {
         List<PackageInfo> installedPackages = mPackageManager
                 .getInstalledPackages(PackageManager.MATCH_UNINSTALLED_PACKAGES | GET_PERMISSIONS);
