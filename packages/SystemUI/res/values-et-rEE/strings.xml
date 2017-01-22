@@ -414,21 +414,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Võrgu logimine"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Keela VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Katkesta VPN-i ühendus"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Teie seadet haldab <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministraator saab jälgida ja hallata seadeid, ettevõttesisest juurdepääsu, rakendusi, seadmega seotud andmeid ja seadme asukohateavet. Lisateabe saamiseks võtke ühendust administraatoriga."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Olete ühendatud rakendusega <xliff:g id="VPN_APP">%1$s</xliff:g>, mis saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Ava VPN-i seaded"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Teie administraator on sisse lülitanud võrgu logimise funktsiooni, mis jälgib liiklust teie seadmes.\n\nLisateabe saamiseks pöörduge administraatori poole."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Andsite rakendusele loa VPN-i ühenduse seadistamiseks.\n\nSee rakendus võib jälgida teie seadet ja võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Teie seadet haldab <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministraator saab jälgida ja hallata seadeid, ettevõttesisest juurdepääsu, rakendusi, seadmega seotud andmeid ja seadme asukohateavet.\n\nTeil on ühendus VPN-iga, mis saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Teie tööprofiili haldab organisatsioon <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministraator saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga.\n\nTeil on ühendus ka VPN-iga, mis saab jälgida teie võrgutegevusi."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Teie seade on ühendatud rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>, mis võib jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Teie seade on ühendatud rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>, mis võib jälgida teie isiklikke võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Olete ühendatud rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>, mis võib jälgida teie isiklikke võrgutegevusi, sh meile, rakendusi ja veebisaite."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Teie tööprofiili haldab organisatsioon <xliff:g id="ORGANIZATION">%1$s</xliff:g>. See on ühendatud rakendusega <xliff:g id="APPLICATION">%2$s</xliff:g>, mis võib jälgida teie töökoha võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Teie tööprofiili haldab organisatsioon <xliff:g id="ORGANIZATION">%1$s</xliff:g>. See on ühendatud rakendusega <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, mis võib jälgida teie töökoha võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nTeie seade on ühendatud ka rakendusega <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, mis võib jälgida teie isiklikke võrgutegevusi."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Teie seadet haldab organisatsioon <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministraator saab jälgida ja hallata seadeid, ettevõttesisest juurdepääsu, rakendusi, seadmega seotud andmeid ja seadme asukohateavet.\n\nOlete ühendatud rakendusega <xliff:g id="APPLICATION">%2$s</xliff:g>, mis saab jälgida teie võrgutegevusi, sh meile, rakendusi ja veebisaite.\n\nLisateabe saamiseks võtke ühendust administraatoriga."</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Seade jääb lukku, kuni selle käsitsi avate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saate märguandeid kiiremini"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Näete neid enne avamist"</string>

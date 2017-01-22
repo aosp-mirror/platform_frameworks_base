@@ -412,21 +412,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Hálózati naplózás"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN letiltása"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-kapcsolat bontása"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Az eszközt a következő felügyeli:<xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája ellenőrizheti és módosíthatja a beállításokat, vállalati hozzáféréseket, alkalmazásokat, az eszközéhez társított adatokat és eszköze helyadatait. További tájékoztatásért forduljon rendszergazdájához."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ön kapcsolódik ehhez: <xliff:g id="VPN_APP">%1$s</xliff:g>, amely figyelheti hálózati tevékenységét, köztük a levelezést, az alkalmazás- és webhelyhasználatot."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-beállítások megnyitása"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Rendszergazdája bekapcsolta a hálózati naplózást, amely figyeli eszköze forgalmát.\n\nHa további információra van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Engedélyezte egy alkalmazásnak, hogy VPN-kapcsolatot létesítsen.\n\nEz az alkalmazás (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti az Ön eszközét és hálózati tevékenységét."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\n Ön egy VPN-hez is kapcsolódik, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi tájékoztatásért forduljon rendszergazdájához."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Munkaprofilját a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához.\n\nÖn egy VPN-hez is csatlakozik, amely szintén figyelemmel kísérheti hálózati tevékenységét."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Csatlakoztatta a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazást, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ön a(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazáshoz csatlakozik, amely figyelheti személyes hálózati tevékenységét, beleértve az e-maileket, alkalmazásokat és webhelyeket."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nTovábbi információért forduljon a rendszergazdájához."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Munkaprofilját a(z) <xliff:g id="ORGANIZATION">%1$s</xliff:g> felügyeli. Csatlakoztatva van hozzá a(z) <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> alkalmazás, amely figyelheti az Ön hálózati tevékenységét, beleértve az e-maileket, az alkalmazásokat és a webhelyeket.\n\nCsatlakoztatta továbbá a(z) <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> alkalmazást, amely szintén figyelemmel kísérheti személyes hálózati tevékenységét."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\nÖn a következőhöz csatlakozik: <xliff:g id="APPLICATION">%2$s</xliff:g>, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához."</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Az eszköz addig zárolva marad, amíg kézileg fel nem oldja"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Gyorsabban megkaphatja az értesítéseket"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Már a képernyőzár feloldása előtt megtekintheti őket"</string>

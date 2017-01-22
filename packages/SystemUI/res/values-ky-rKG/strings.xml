@@ -412,21 +412,27 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Тармактын таржымалы алынууда"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN\'ди өчүрүү"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN\'ди ажыратуу"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Түзмөгүңүздү <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат.\n\nАдминистраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайындарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат. Көбүрөөк маалымат үчүн, администраторуңузга кайрылыңыз."</string>
+    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
+    <skip />
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей турган <xliff:g id="VPN_APP">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN жөндөөлөрүн ачуу"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Администраторуңуз тармактын таржымалын алууну иштетти, андыктан түзмөгүңүздөгү трафик көзөмөлгө алынды.\n\nКеңири маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Колдонмого VPN туташуусун орнотууга уруксат бердиңиз.\n\nБул колдонмо түзмөгүңүздү жана электрондук почталар, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди көзөмөлдөй алат."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Түзмөгүңүздү <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат.\n\nАдминистраторуңуз жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, түзмөгүңүзгө байланыштуу дайындарды жана түзмөгүңүздүн жайгашкан жери тууралуу маалыматты көзөмөлдөп жана башкара алат.\n\nСиз тармактагы жеке аракетиңизди көзөмөлдөй турган VPN\'ге туташкансыз.\n\nКөбүрөөк маалымат үчүн, администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат.\n\nАдминистраторуңуз электрондук почталар, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тескей алат.\n\nКөбүрөөк маалымат алуу үчүн, администраторуңузга кайрылыңыз.\n\nМындан тышкары, тармактагы аракеттериңизди тескей турган VPN\'ге да туташып турасыз."</string>
+    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактык аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы жеке аракеттериңизди көзөмөлдөй турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Электрондук почта, колдонмолор жана вебсайттар сыяктуу тармактагы жеке аракеттериңизди тескей турган <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосуна туташып турасыз."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION">%2$s</xliff:g> менен туташкан.\n\nКөбүрөөк маалымат алуу үчүн администраторуңузга кайрылыңыз."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Жумуш профилиңизди <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат. Ал электрондук почта, колдонмолор жана вебсайттар сыяктуу жумуш тармагыңыздагы аракеттерди көзөмөлдөй турган <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> менен туташкан.\n\nМындан тышкары, тармактагы жеке аракеттериңизди көзөмөлдөгөн <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> колдонмосуна туташып турасыз."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Түзмөгүңүздү <xliff:g id="ORGANIZATION">%1$s</xliff:g> башкарат.\nАдминистраторуңуз түзмөгүңүздөгү жөндөөлөрдү, корпоративдик мүмкүнчүлүктү, колдонмолорду, дайындарды, ошону менен катар жайгашкан жер дайындарын башкарып, тийиштүү маалыматты карай алат.\n\nСиз электрондук почталар, колдонмолор жана вебсайттар сыяктуу тармактагы аракеттериңизди тармактагы аракетиңизди тескей турган APPLICATION колдонмосуна туташып турасыз.\n<xliff:g id="APPLICATION">%2$s</xliff:g>Көбүрөөк маалымат алуу үчүн, администраторуңузга кайрылыңыз.\n\n"</string>
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Түзмөктүн кулпусу кол менен ачылмайынча кулпуланган бойдон алат"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Эскертмелерди тезирээк алуу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Аларды кулпудан чыгараардан мурун көрүңүз"</string>
