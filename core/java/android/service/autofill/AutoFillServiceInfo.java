@@ -25,15 +25,26 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.RemoteException;
+import android.util.AndroidException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.android.internal.R;
+
 import java.io.IOException;
 
-/** @hide */
+// TODO(b/33197203 , b/33802548): add CTS tests
+/**
+ * {@link ServiceInfo} and meta-data about an {@link AutoFillService}.
+ *
+ * <p>Upon construction, if {@link #getParseError()} is {@code null}, then the service is configured
+ * correctly. Otherwise, {@link #getParseError()} indicates the parsing error.
+ *
+ * @hide
+ */
 public final class AutoFillServiceInfo {
     static final String TAG = "AutoFillServiceInfo";
 
@@ -53,67 +64,87 @@ public final class AutoFillServiceInfo {
     }
 
     @Nullable
-    private String mParseError;
+    private final String mParseError;
 
+    private final ServiceInfo mServiceInfo;
     @Nullable
-    private ServiceInfo mServiceInfo;
-    @Nullable
-    private String mSettingsActivity;
+    private final String mSettingsActivity;
 
     public AutoFillServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         this(pm, getServiceInfoOrThrow(comp, userHandle));
     }
 
-    public AutoFillServiceInfo(PackageManager pm, ServiceInfo si)
-            throws PackageManager.NameNotFoundException{
-        if (si == null) {
-            mParseError = "Service not available";
-            return;
-        }
-        if (!Manifest.permission.BIND_AUTO_FILL.equals(si.permission)) {
-            mParseError = "Service does not require permission "
-                    + Manifest.permission.BIND_AUTO_FILL;
-            return;
-        }
-
-        XmlResourceParser parser = null;
-        try {
-            parser = si.loadXmlMetaData(pm, AutoFillService.SERVICE_META_DATA);
-            if (parser == null) {
-                mParseError = "No " + AutoFillService.SERVICE_META_DATA
-                        + " meta-data for " + si.packageName;
-                return;
-            }
-
-            Resources res = pm.getResourcesForApplication(si.applicationInfo);
-
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.START_TAG) {
-            }
-
-            String nodeName = parser.getName();
-            if (!"autofill-service".equals(nodeName)) {
-                mParseError = "Meta-data does not start with autofill-service tag";
-                return;
-            }
-
-            TypedArray array = res.obtainAttributes(attrs,
-                    com.android.internal.R.styleable.AutoFillService);
-            mSettingsActivity = array.getString(
-                    com.android.internal.R.styleable.AutoFillService_settingsActivity);
-            array.recycle();
-        } catch (XmlPullParserException | IOException | PackageManager.NameNotFoundException e) {
-            mParseError = "Error parsing auto fill service meta-data: " + e;
-            Log.w(TAG, "error parsing auto fill service meta-data", e);
-            return;
-        } finally {
-            if (parser != null) parser.close();
-        }
+    public AutoFillServiceInfo(PackageManager pm, ServiceInfo si) {
         mServiceInfo = si;
+        TypedArray metaDataArray;
+        try {
+            metaDataArray = getMetaDataArray(pm, si);
+        } catch (AndroidException e) {
+            mParseError = e.getMessage();
+            mSettingsActivity = null;
+            Log.w(TAG, mParseError, e);
+            return;
+        }
+
+        mParseError = null;
+        if (metaDataArray != null) {
+            mSettingsActivity =
+                    metaDataArray.getString(R.styleable.AutoFillService_settingsActivity);
+            metaDataArray.recycle();
+        } else {
+            mSettingsActivity = null;
+        }
+    }
+
+    /**
+     * Gets the meta-data as a TypedArray, or null if not provided, or throws if invalid.
+     */
+    @Nullable
+    private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si)
+            throws AndroidException {
+        // Check for permissions.
+        if (!Manifest.permission.BIND_AUTO_FILL.equals(si.permission)) {
+            throw new AndroidException(
+                "Service does not require permission " + Manifest.permission.BIND_AUTO_FILL);
+        }
+
+        // Get the AutoFill metadata, if declared.
+        XmlResourceParser parser = si.loadXmlMetaData(pm, AutoFillService.SERVICE_META_DATA);
+        if (parser == null) {
+            return null;
+        }
+
+        // Parse service info and get the <autofill-service> tag as an AttributeSet.
+        AttributeSet attrs;
+        try {
+            // Move the XML parser to the first tag.
+            try {
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && type != XmlPullParser.START_TAG) {
+                }
+            } catch (XmlPullParserException | IOException e) {
+                throw new AndroidException("Error parsing auto fill service meta-data: " + e, e);
+            }
+
+            if (!"autofill-service".equals(parser.getName())) {
+                throw new AndroidException("Meta-data does not start with autofill-service tag");
+            }
+            attrs = Xml.asAttributeSet(parser);
+
+            // Get resources required to read the AttributeSet.
+            Resources res;
+            try {
+                res = pm.getResourcesForApplication(si.applicationInfo);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new AndroidException("Error getting application resources: " + e, e);
+            }
+
+            return res.obtainAttributes(attrs, R.styleable.AutoFillService);
+        } finally {
+            parser.close();
+        }
     }
 
     @Nullable
@@ -121,7 +152,6 @@ public final class AutoFillServiceInfo {
         return mParseError;
     }
 
-    @Nullable
     public ServiceInfo getServiceInfo() {
         return mServiceInfo;
     }
