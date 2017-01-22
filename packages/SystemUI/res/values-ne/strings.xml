@@ -321,6 +321,12 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी दिँदै"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"कार्य मोड"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"रात्रिको प्रकाश"</string>
+    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
+    <skip />
+    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
+    <skip />
+    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
+    <skip />
     <string name="recents_empty_message" msgid="808480104164008572">"हालका कुनै पनि वस्तुहरू छैनन्"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"तपाईँले सबै कुरा खाली गर्नुभएको छ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"अनुप्रयोग जानकारी"</string>
@@ -334,6 +340,16 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"तेर्सो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ठाडो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"आफू अनुकूल विभाजन गर्नुहोस्"</string>
+    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
+    <skip />
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज भयो"</string>
@@ -414,20 +430,24 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तपाईंको यन्त्र <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> द्वारा व्यवस्थापन गरिएको छ।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्न <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> को प्रयोग गर्दछ।"</string>
-    <string name="monitoring_description_do_body" msgid="6764108354701060766">"तपाईंको प्रशासकले सेटिङ, संस्थागत पहुँच, अनुप्रयोग, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
+    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
+    <skip />
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"तपाईंको प्रशासकले तपाईंको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्कको लगिङलाई सक्रिय गर्नुभएको छ।\n\nथप जानकरीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईँका यन्त्र र  नेटवर्क गतिविधि लगायत इमेल, अनुप्रयोग र वेबसाइटहरू अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g>द्वारा व्यवस्थापन गरिन्छ।.\n\nतपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्षम छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।\n\nतपाईँ VPN सँग पनि जडित हुनुहुन्छ, जसले तपाईँको नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>

@@ -321,6 +321,12 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Amaran <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mod kerja"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Cahaya Malam"</string>
+    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
+    <skip />
+    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
+    <skip />
+    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
+    <skip />
     <string name="recents_empty_message" msgid="808480104164008572">"Tiada item terbaharu"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Anda telah mengetepikan semua item"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Maklumat Aplikasi"</string>
@@ -334,6 +340,16 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Mendatar Terpisah"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Menegak Terpisah"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tersuai Terpisah"</string>
+    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
+    <skip />
+    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
+    <skip />
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Sudah dicas"</string>
@@ -414,20 +430,24 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"Putuskan sambungan VPN"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Peranti anda diurus oleh <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> menggunakan <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> untuk mengurus peranti anda."</string>
-    <string name="monitoring_description_do_body" msgid="6764108354701060766">"Pentadbir anda boleh memantau dan mengurus tetapan, akses korporat, apl, data yang dikaitkan dengan peranti dan maklumat lokasi peranti anda."</string>
+    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
+    <skip />
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Ketahui lebih lanjut"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Anda disambungkan ke <xliff:g id="VPN_APP">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Buka Tetapan VPN"</string>
-    <string name="monitoring_description_network_logging" msgid="3901006351911787915">"Pentadbir anda telah menghidupkan pengelogan rangkaian yang memantau trafik pada peranti anda.\n\nUntuk mendapatkan maklumat lanjut, hubungi pentadbir anda."</string>
+    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
+    <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Anda memberikan kebenaran kepada apl untuk menyediakan sambungan VPN.\n\nApl ini boleh memantau aktiviti peranti dan rangkaian anda, termasuk e-mel, apl dan tapak web."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profil kerja anda diurus oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nPentadbir anda boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web.\n\nUntuk mendapatkan maklumat lanjut, hubungi pentadbir anda.\n\nAnda turut disambungkan ke VPN, yang boleh memantau aktiviti rangkaian anda."</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
+    <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Anda disambungkan ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian anda, termasuk e-mel, apl dan tapak web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Anda disambungkan ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian peribadi anda, termasuk e-mel, apl dan tapak web."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Anda disambungkan ke <xliff:g id="APPLICATION">%1$s</xliff:g>, yang boleh memantau aktiviti rangkaian peribadi anda, termasuk e-mel, apl dan tapak web."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Profil kerja anda diurus oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil ini disambungkan ke <xliff:g id="APPLICATION">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian kerja anda, termasuk e-mel, apl dan tapak web.\n\nUntuk mendapatkan maklumat lanjut, sila hubungi pentadbir anda."</string>
+    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
+    <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Profil kerja anda diurus oleh <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil disambungkan ke <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, yang boleh memantau aktiviti rangkaian kerja anda, termasuk e-mel, apl dan tapak web.\n\nAnda turut disambungkan ke <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, yang boleh memantau aktiviti rangkaian peribadi anda."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Peranti akan kekal terkunci sehingga anda membuka kunci secara manual"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Dapatkan pemberitahuan lebih cepat"</string>
