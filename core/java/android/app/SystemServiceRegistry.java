@@ -30,6 +30,8 @@ import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
+import android.companion.CompanionDeviceManager;
+import android.companion.ICompanionDeviceManager;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.IRestrictionsManager;
@@ -633,6 +635,18 @@ final class SystemServiceRegistry {
                 return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
                         UserHandle.getAppId(Process.myUid()));
             }});
+
+        registerService(Context.COMPANION_DEVICE_SERVICE, CompanionDeviceManager.class,
+                new CachedServiceFetcher<CompanionDeviceManager>() {
+                    @Override
+                    public CompanionDeviceManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder =
+                                ServiceManager.getServiceOrThrow(Context.COMPANION_DEVICE_SERVICE);
+                        ICompanionDeviceManager service =
+                                ICompanionDeviceManager.Stub.asInterface(iBinder);
+                        return new CompanionDeviceManager(service, ctx);
+                    }});
 
         registerService(Context.CONSUMER_IR_SERVICE, ConsumerIrManager.class,
                 new CachedServiceFetcher<ConsumerIrManager>() {

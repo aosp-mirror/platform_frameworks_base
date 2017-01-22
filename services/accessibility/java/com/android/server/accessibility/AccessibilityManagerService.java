@@ -70,6 +70,8 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.hardware.fingerprint.IFingerprintService;
+import android.provider.SettingsStringUtil.ComponentNameSet;
+import android.provider.SettingsStringUtil.SettingStringHelper;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
@@ -98,9 +100,9 @@ import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
-
 import com.android.server.policy.AccessibilityShortcutController;
 import com.android.server.statusbar.StatusBarManagerInternal;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
@@ -2013,10 +2015,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Enables accessibility service specified by {@param componentName} for the {@param userId}.
      */
     private void enableAccessibilityServiceLocked(ComponentName componentName, int userId) {
-        SettingsStringHelper settingsHelper = new SettingsStringHelper(
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
-        settingsHelper.addService(componentName);
-        settingsHelper.writeToSettings();
+        final SettingStringHelper setting =
+                new SettingStringHelper(
+                        mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                        userId);
+        setting.write(ComponentNameSet.add(setting.read(), componentName));
 
         UserState userState = getUserStateLocked(userId);
         if (userState.mEnabledServices.add(componentName)) {
@@ -2028,10 +2032,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * Disables accessibility service specified by {@param componentName} for the {@param userId}.
      */
     private void disableAccessibilityServiceLocked(ComponentName componentName, int userId) {
-        SettingsStringHelper settingsHelper = new SettingsStringHelper(
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, userId);
-        settingsHelper.deleteService(componentName);
-        settingsHelper.writeToSettings();
+        final SettingStringHelper setting =
+                new SettingStringHelper(
+                        mContext.getContentResolver(),
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                        userId);
+        setting.write(ComponentNameSet.remove(setting.read(), componentName));
 
         UserState userState = getUserStateLocked(userId);
         if (userState.mEnabledServices.remove(componentName)) {
@@ -2058,45 +2064,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return false;
         }
         return mFingerprintGestureDispatcher.onFingerprintGesture(gestureKeyCode);
-    }
-
-    private class SettingsStringHelper {
-        private static final String SETTINGS_DELIMITER = ":";
-        private ContentResolver mContentResolver;
-        private final String mSettingsName;
-        private Set<String> mServices;
-        private final int mUserId;
-
-        public SettingsStringHelper(String name, int userId) {
-            mUserId = userId;
-            mSettingsName = name;
-            mContentResolver = mContext.getContentResolver();
-            String servicesString = Settings.Secure.getStringForUser(
-                    mContentResolver, mSettingsName, userId);
-            mServices = new HashSet();
-            if (!TextUtils.isEmpty(servicesString)) {
-                final TextUtils.SimpleStringSplitter colonSplitter =
-                        new TextUtils.SimpleStringSplitter(SETTINGS_DELIMITER.charAt(0));
-                colonSplitter.setString(servicesString);
-                while (colonSplitter.hasNext()) {
-                    final String serviceName = colonSplitter.next();
-                    mServices.add(serviceName);
-                }
-            }
-        }
-
-        public void addService(ComponentName component) {
-            mServices.add(component.flattenToString());
-        }
-
-        public void deleteService(ComponentName component) {
-            mServices.remove(component.flattenToString());
-        }
-
-        public void writeToSettings() {
-            Settings.Secure.putStringForUser(mContentResolver, mSettingsName,
-                    TextUtils.join(SETTINGS_DELIMITER, mServices), mUserId);
-        }
     }
 
     @Override

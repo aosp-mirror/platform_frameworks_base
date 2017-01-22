@@ -154,6 +154,8 @@ public final class SystemServer {
             "com.android.server.voiceinteraction.VoiceInteractionManagerService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
+    private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
+            "com.android.server.print.CompanionDeviceManagerService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -1349,6 +1351,10 @@ public final class SystemServer {
                 mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
                 traceEnd();
             }
+
+            traceBeginAndSlog("StartCompanionDeviceManager");
+            mSystemServiceManager.startService(COMPANION_DEVICE_MANAGER_SERVICE_CLASS);
+            traceEnd();
 
             traceBeginAndSlog("StartRestrictionManager");
             mSystemServiceManager.startService(RestrictionsManagerService.class);

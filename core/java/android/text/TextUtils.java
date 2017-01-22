@@ -62,6 +62,7 @@ import android.view.View;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
@@ -464,6 +465,16 @@ public class TextUtils {
     /** {@hide} */
     public static String nullIfEmpty(@Nullable String str) {
         return isEmpty(str) ? null : str;
+    }
+
+    /** {@hide} */
+    public static String emptyIfNull(@Nullable String str) {
+        return str == null ? "" : str;
+    }
+
+    /** {@hide} */
+    public static String firstNotEmpty(@Nullable String a, @NonNull String b) {
+        return !isEmpty(a) ? a : Preconditions.checkStringNotEmpty(b);
     }
 
     /**
