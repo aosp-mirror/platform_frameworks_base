@@ -21,6 +21,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
@@ -30,11 +31,20 @@ import com.android.systemui.R;
 /** Quick settings tile: Ambient and LiftToWake mode **/
 public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
 
+    private AmbientDisplayConfiguration mAmbientConfig;
+    private boolean isAmbientAvailable;
+    private boolean isPickupAvailable;
     private boolean isSomethingEnabled() {
-        int DozeValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ENABLED, 1);
-        int DozePickupValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP, 1);
+        int DozeValue = 0;
+        int DozePickupValue = 0;
+        if (isAmbientAvailable) {
+            DozeValue = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_ENABLED, 1);
+        }
+        if (isPickupAvailable) {
+            DozePickupValue = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_PULSE_ON_PICK_UP, 1);
+        }
         if (DozeValue == 1 || DozePickupValue == 1) {
             return true;
         }
@@ -43,6 +53,9 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
 
     public AmbientLiftToWakeTile(Host host) {
         super(host);
+        mAmbientConfig = new AmbientDisplayConfiguration(mContext);
+        isAmbientAvailable =  mAmbientConfig.pulseOnNotificationAvailable() ? true : false;
+        isPickupAvailable = mAmbientConfig.pulseOnPickupAvailable() ? true : false;
     }
 
     @Override
@@ -61,30 +74,48 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
+    @Override
+    public boolean isAvailable() {
+        // Do not show the tile if doze is unavailable
+        return isAmbientAvailable;
+    }
+
     private void setDisabled() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ENABLED, 0);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP, 0);
+        if (isAmbientAvailable) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_ENABLED, 0);
+        }
+        if (isPickupAvailable) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_PULSE_ON_PICK_UP, 0);
+        }
     }
 
     private void setUserValues() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ENABLED, Prefs.getInt(mContext, Prefs.Key.QS_AMBIENT_DOZE, 1));
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP, Prefs.getInt(mContext, Prefs.Key.QS_AMBIENT_PICKUP, 1));
+        if (isAmbientAvailable) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_ENABLED, Prefs.getInt(mContext, Prefs.Key.QS_AMBIENT_DOZE, 1));
+        }
+        if (isPickupAvailable) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_PULSE_ON_PICK_UP, Prefs.getInt(mContext, Prefs.Key.QS_AMBIENT_PICKUP, 1));
+        }
     }
 
     private void getUserDozeValue() {
-        int getUserDozeValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_ENABLED, 1);
-        Prefs.putInt(mContext, Prefs.Key.QS_AMBIENT_DOZE, getUserDozeValue);
+        if (isAmbientAvailable) {
+            int getUserDozeValue = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_ENABLED, 1);
+            Prefs.putInt(mContext, Prefs.Key.QS_AMBIENT_DOZE, getUserDozeValue);
+        }
     }
 
     private void getUserDozePickUpValue() {
-        int getUserDozePickUpValue =  Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP, 1);
-        Prefs.putInt(mContext, Prefs.Key.QS_AMBIENT_PICKUP, getUserDozePickUpValue);
+        if (isPickupAvailable) {
+            int getUserDozePickUpValue =  Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DOZE_PULSE_ON_PICK_UP, 1);
+            Prefs.putInt(mContext, Prefs.Key.QS_AMBIENT_PICKUP, getUserDozePickUpValue);
+        }
     }
 
     @Override
@@ -122,9 +153,9 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
     private ContentObserver mObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            //doing refreshState here when the user manually changes
-            //one of the two options, so it will call the handleUpdateState
-            //refreshing the tile and getting the new user values
+            // doing refreshState here when the user manually changes
+            // one of the two options, so it will call the handleUpdateState
+            // refreshing the tile and getting the new user values
             refreshState();
         }
     };
@@ -137,12 +168,16 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.DOZE_ENABLED),
-                    false, mObserver);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.DOZE_PULSE_ON_PICK_UP),
-                    false, mObserver);
+            if (isAmbientAvailable) {
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(Settings.Secure.DOZE_ENABLED),
+                        false, mObserver);
+            }
+            if (isPickupAvailable) {
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(Settings.Secure.DOZE_PULSE_ON_PICK_UP),
+                        false, mObserver);
+            }
         } else {
             mContext.getContentResolver().unregisterContentObserver(mObserver);
         }
