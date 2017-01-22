@@ -183,7 +183,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din jobbprofil är inte längre tillgänglig på den här enheten."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Nätverkstrafiken övervakas"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tryck om du vill ha mer information"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>

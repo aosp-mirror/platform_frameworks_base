@@ -183,7 +183,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"İş profili yönetici uygulaması eksik ya da bozuk. Bunun sonucunda iş profiliniz ve ilgili veriler silindi. Yardım almak için yöneticiniz ile iletişim kurun."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"İş profiliniz arık bu cihazda kullanılamıyor."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ağ trafiği izleniyor"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Daha fazla ayrıntı için dokunun"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Yönetici uygulamasında bileşen eksik ya da uygulama bozuk ve kullanılamaz durumda. Cihazınız şimdi silinecek. Yardım için yöneticinizle iletişim kurun."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>

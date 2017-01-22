@@ -187,7 +187,8 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Skrbniška aplikacija delovnega profila manjka ali pa je poškodovana, zaradi česar je bil delovni profil s povezanimi podatki izbrisan. Za pomoč se obrnite na skrbnika."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vaš delovni profil ni več na voljo v tej napravi."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Omrežni promet je nadzorovan"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Dotaknite se za več podrobnosti"</string>
+    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
+    <skip />
     <string name="factory_reset_warning" msgid="5423253125642394387">"Podatki v napravi bodo izbrisani"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Skrbniška aplikacija je nepopolna ali poškodovana, zato je ni mogoče uporabiti. Podatki v napravi bodo izbrisani. Za pomoč se obrnite na skrbnika."</string>
     <string name="me" msgid="6545696007631404292">"Jaz"</string>
