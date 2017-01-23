@@ -3449,7 +3449,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
 
-    private boolean filterSharedLibPackageLPr(PackageSetting ps, int uid, int userId) {
+    private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId) {
         // System/shell/root get to see all static libs
         final int appId = UserHandle.getAppId(uid);
         if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
@@ -3458,7 +3458,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // No package means no static lib as it is always on internal storage
-        if (ps.pkg == null || !ps.pkg.applicationInfo.isStaticSharedLibrary()) {
+        if (ps == null || ps.pkg == null || !ps.pkg.applicationInfo.isStaticSharedLibrary()) {
             return false;
         }
 
