@@ -85,6 +85,9 @@ namespace uirenderer {
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 42
 #define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
+#define PROGRAM_IS_FAST_COLOR 46
+#define PROGRAM_IS_FAST_COLOR_OPAQUE 47
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,6 +152,7 @@ struct ProgramDescription {
     // Color operations
     ColorFilterMode colorOp;
     SkXfermode::Mode colorMode;
+    bool isColorOpaque;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())
     // Ignored for all values < SkXfermode::kPlus_Mode
@@ -190,6 +194,7 @@ struct ProgramDescription {
 
         colorOp = ColorFilterMode::None;
         colorMode = SkXfermode::kClear_Mode;
+        isColorOpaque = false;
 
         framebufferMode = SkXfermode::kClear_Mode;
         swapSrcDst = false;
@@ -224,6 +229,25 @@ struct ProgramDescription {
      */
     programid key() const {
         programid key = 0;
+
+        // duplicates ProgramCache's definition of fast path for color uniform
+        // special key for fast paths, and modulate should be ignored for single color
+        // this lets us avoid duplicate programs with the same GLSL (lower CPU overhead)
+        // any change in ProgramCache.cpp should be reflected here
+        bool singleColor = !hasTexture && !hasExternalTexture && !hasGradient && !hasBitmap;
+        bool fastPath = !hasVertexAlpha && framebufferMode < SkXfermode::kPlus_Mode &&
+            !hasColors && colorOp == ProgramDescription::ColorFilterMode::None &&
+            !hasDebugHighlight && !hasRoundRectClip;
+
+        if (singleColor && fastPath) {
+            if (isColorOpaque) {
+                return programid(0x1) << PROGRAM_IS_FAST_COLOR_OPAQUE;
+            }
+            else {
+                return programid(0x1) << PROGRAM_IS_FAST_COLOR;
+            }
+        }
+
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
@@ -253,7 +277,7 @@ struct ProgramDescription {
         }
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
-        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
+        if (modulate && !singleColor) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT; // modulate is ignored for single color
         if (hasVertexAlpha) key |= programid(0x1) << PROGRAM_HAS_VERTEX_ALPHA_SHIFT;
         if (useShadowAlphaInterp) key |= programid(0x1) << PROGRAM_USE_SHADOW_ALPHA_INTERP_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;

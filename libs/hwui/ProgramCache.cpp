@@ -190,6 +190,10 @@ const char* gFS_Fast_SingleColor =
         "\nvoid main(void) {\n"
         "    gl_FragColor = color;\n"
         "}\n\n";
+const char* gFS_Fast_SingleColorOpaque =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = vec4(color.xyz,1.0);\n"
+        "}\n\n";
 const char* gFS_Fast_SingleTexture =
         "\nvoid main(void) {\n"
         "    gl_FragColor = texture2D(baseSampler, outTexCoords);\n"
@@ -596,7 +600,12 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 description.gradientType == ProgramDescription::kGradientLinear;
 
         if (singleColor) {
-            shader.append(gFS_Fast_SingleColor);
+            if (description.isColorOpaque) {
+                // fast path where the compiler can optimise away the blend code by knowing alpha == 1.0
+                shader.append(gFS_Fast_SingleColorOpaque);
+            } else {
+                shader.append(gFS_Fast_SingleColor);
+            }
             fast = true;
         } else if (singleTexture) {
             if (!description.modulate) {
