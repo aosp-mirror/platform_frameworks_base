@@ -86,6 +86,10 @@ public:
         mRegisteredContexts.erase(context);
     }
 
+    void setES3(bool hasES3) {
+        mHasES3 = hasES3;
+    }
+
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
@@ -129,6 +133,8 @@ private:
     GLuint mFramebuffer;
 
     pthread_t mThreadId;
+
+    bool mHasES3;
 };
 
 } /* namespace uirenderer */
