@@ -7601,6 +7601,14 @@ public final class Settings {
                "hdmi_control_auto_device_off_enabled";
 
        /**
+        * The interval in milliseconds at which location requests will be throttled when they are
+        * coming from the background.
+        * @hide
+        */
+       public static final String LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS =
+                "location_background_throttle_interval_ms";
+
+       /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide
