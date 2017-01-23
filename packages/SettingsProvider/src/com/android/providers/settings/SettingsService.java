@@ -65,6 +65,7 @@ final public class SettingsService extends Binder {
         }
 
         int opti = 0;
+        boolean dumpAsProto = false;
         while (opti < args.length) {
             String opt = args[opti];
             if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
@@ -74,16 +75,22 @@ final public class SettingsService extends Binder {
             if ("-h".equals(opt)) {
                 MyShellCommand.dumpHelp(pw, true);
                 return;
+            } else if ("--proto".equals(opt)) {
+                dumpAsProto = true;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
         }
 
-        long caller = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
-            mProvider.dumpInternal(fd, pw, args);
+            if (dumpAsProto) {
+                mProvider.dumpProto(fd);
+            } else {
+                mProvider.dumpInternal(fd, pw, args);
+            }
         } finally {
-            Binder.restoreCallingIdentity(caller);
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -449,8 +456,9 @@ final public class SettingsService extends Binder {
         static void dumpHelp(PrintWriter pw, boolean dumping) {
             if (dumping) {
                 pw.println("Settings provider dump options:");
-                pw.println("  [-h]");
+                pw.println("  [-h] [--proto]");
                 pw.println("  -h: print this help.");
+                pw.println("  --proto: dump as protobuf.");
             } else {
                 pw.println("Settings provider (settings) commands:");
                 pw.println("  help");
