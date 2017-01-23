@@ -177,8 +177,12 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "onPluginConnected");
                     PluginPrefs.setHasPlugins(mContext);
                     PluginInfo<T> info = (PluginInfo<T>) msg.obj;
-                    info.mPlugin.onCreate(mContext, info.mPluginContext);
-                    mListener.onPluginConnected(info.mPlugin);
+                    if (!(msg.obj instanceof PluginFragment)) {
+                        // Only call onDestroy for plugins that aren't fragments, as fragments
+                        // will get the onCreate as part of the fragment lifecycle.
+                        info.mPlugin.onCreate(mContext, info.mPluginContext);
+                    }
+                    mListener.onPluginConnected(info.mPlugin, info.mPluginContext);
                     break;
                 case PLUGIN_DISCONNECTED:
                     if (DEBUG) Log.d(TAG, "onPluginDisconnected");

@@ -15,6 +15,7 @@
 package com.android.systemui.fragments;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
@@ -30,27 +31,19 @@ public class PluginFragmentListener implements PluginListener<Plugin> {
     private final FragmentHostManager mFragmentHostManager;
     private final PluginManager mPluginManager;
     private final Class<? extends Fragment> mDefaultClass;
-    private final int mId;
-    private final String mTag;
     private final Class<? extends FragmentBase> mExpectedInterface;
+    private final String mTag;
 
-    public PluginFragmentListener(View view, String tag, int id,
-            Class<? extends Fragment> defaultFragment,
+    public PluginFragmentListener(View view, String tag, Class<? extends Fragment> defaultFragment,
             Class<? extends FragmentBase> expectedInterface) {
+        mTag = tag;
         mFragmentHostManager = FragmentHostManager.get(view);
         mPluginManager = PluginManager.getInstance(view.getContext());
         mExpectedInterface = expectedInterface;
-        mTag = tag;
         mDefaultClass = defaultFragment;
-        mId = id;
     }
 
     public void startListening(String action, int version) {
-        try {
-            setFragment(mDefaultClass.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
-            Log.e(TAG, "Couldn't instantiate " + mDefaultClass.getName(), e);
-        }
         mPluginManager.addPluginListener(action, this, version, false /* Only allow one */);
     }
 
@@ -58,17 +51,13 @@ public class PluginFragmentListener implements PluginListener<Plugin> {
         mPluginManager.removePluginListener(this);
     }
 
-    private void setFragment(Fragment fragment) {
-        mFragmentHostManager.getFragmentManager().beginTransaction()
-                .replace(mId, fragment, mTag)
-                .commit();
-    }
-
     @Override
-    public void onPluginConnected(Plugin plugin) {
+    public void onPluginConnected(Plugin plugin, Context pluginContext) {
         try {
             mExpectedInterface.cast(plugin);
-            setFragment((Fragment) plugin);
+            Fragment.class.cast(plugin);
+            mFragmentHostManager.getPluginManager().setCurrentPlugin(mTag,
+                    plugin.getClass().getName(), pluginContext);
         } catch (ClassCastException e) {
             Log.e(TAG, plugin.getClass().getName() + " must be a Fragment and implement "
                     + mExpectedInterface.getName(), e);
@@ -77,10 +66,7 @@ public class PluginFragmentListener implements PluginListener<Plugin> {
 
     @Override
     public void onPluginDisconnected(Plugin plugin) {
-        try {
-            setFragment(mDefaultClass.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
-            Log.e(TAG, "Couldn't instantiate " + mDefaultClass.getName(), e);
-        }
+        mFragmentHostManager.getPluginManager().removePlugin(mTag,
+                plugin.getClass().getName(), mDefaultClass.getName());
     }
 }

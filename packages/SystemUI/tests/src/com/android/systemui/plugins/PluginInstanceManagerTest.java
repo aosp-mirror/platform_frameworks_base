@@ -113,8 +113,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
 
-        verify(mMockListener, Mockito.never()).onPluginConnected(
-                ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
     }
 
     @Test
@@ -124,7 +123,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Verify startup lifecycle
         verify(sMockPlugin).onCreate(ArgumentCaptor.forClass(Context.class).capture(),
                 ArgumentCaptor.forClass(Context.class).capture());
-        verify(mMockListener).onPluginConnected(ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(mMockListener).onPluginConnected(any(), any());
     }
 
     @Test
@@ -154,8 +153,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
 
         // Plugin shouldn't be connected because it is the wrong version.
-        verify(mMockListener, Mockito.never()).onPluginConnected(
-                ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
         verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(SystemMessage.NOTE_PLUGIN),
                 any(), eq(UserHandle.ALL));
     }
@@ -176,8 +174,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         verify(sMockPlugin, Mockito.times(2)).onCreate(
                 ArgumentCaptor.forClass(Context.class).capture(),
                 ArgumentCaptor.forClass(Context.class).capture());
-        verify(mMockListener, Mockito.times(2)).onPluginConnected(
-                ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(mMockListener, Mockito.times(2)).onPluginConnected(any(), any());
     }
 
     @Test
@@ -193,8 +190,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mMainHandler);;
 
         // Non-debuggable build should receive no plugins.
-        verify(mMockListener, Mockito.never()).onPluginConnected(
-                ArgumentCaptor.forClass(Plugin.class).capture());
+        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
     }
 
     @Test

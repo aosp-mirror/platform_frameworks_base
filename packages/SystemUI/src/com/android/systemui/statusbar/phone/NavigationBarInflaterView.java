@@ -365,7 +365,7 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     @Override
-    public void onPluginConnected(NavBarButtonProvider plugin) {
+    public void onPluginConnected(NavBarButtonProvider plugin, Context context) {
         mPlugins.add(plugin);
         clearViews();
         inflateLayout(mCurrentLayout);

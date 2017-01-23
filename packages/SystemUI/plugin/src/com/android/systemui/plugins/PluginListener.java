@@ -14,6 +14,8 @@
 
 package com.android.systemui.plugins;
 
+import android.content.Context;
+
 /**
  * Interface for listening to plugins being connected.
  */
@@ -24,7 +26,7 @@ public interface PluginListener<T extends Plugin> {
      * It may also be called in the future if the plugin package changes
      * and needs to be reloaded.
      */
-    void onPluginConnected(T plugin);
+    void onPluginConnected(T plugin, Context pluginContext);
 
     /**
      * Called when a plugin has been uninstalled/updated and should be removed
