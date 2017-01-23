@@ -3108,10 +3108,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0)
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
         return tetherEnabledInSettings && mUserManager.isAdminUser() &&
-                ((mTethering.getTetherableUsbRegexs().length != 0 ||
-                mTethering.getTetherableWifiRegexs().length != 0 ||
-                mTethering.getTetherableBluetoothRegexs().length != 0) &&
-                mTethering.getUpstreamIfaceTypes().length != 0);
+               mTethering.hasTetherableConfiguration();
     }
 
     @Override
