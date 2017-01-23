@@ -103,12 +103,10 @@ public class PackageManagerPresubmitTest {
                 // if privapp permissions are enforced, platform permissions must be whitelisted
                 // in SystemConfig
                 if (platformPermission && RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
-                    assertTrue("Permission " + pName
-                                    + " should be declared in "
-                                    + "/etc/permissions/privapp-permissions-platform.xml "
-                                    + "or privapp-permissions-<device>.xml file for package "
+                    assertTrue("Permission " + pName + " should be declared in "
+                                    + "privapp-permissions-<category>.xml file for package "
                                     + packageName,
-                            privAppPermissions.contains(pName));
+                            privAppPermissions != null && privAppPermissions.contains(pName));
                 }
                 assertTrue("Permission " + pName + " should be granted to " + packageName, granted);
             }
