@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.content.res.AssetManager;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -109,6 +110,30 @@ public class Typeface {
     }
 
     /**
+     * @hide
+     * Used by Resources.
+     */
+    @NonNull
+    public static Typeface createFromResources(AssetManager mgr, String path, int cookie) {
+        if (sFallbackFonts != null) {
+            synchronized (sDynamicTypefaceCache) {
+                final String key = createAssetUid(mgr, path);
+                Typeface typeface = sDynamicTypefaceCache.get(key);
+                if (typeface != null) return typeface;
+
+                FontFamily fontFamily = new FontFamily();
+                if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */)) {
+                    FontFamily[] families = { fontFamily };
+                    typeface = createFromFamiliesWithDefault(families);
+                    sDynamicTypefaceCache.put(key, typeface);
+                    return typeface;
+                }
+            }
+        }
+        throw new RuntimeException("Font resource not found " + path);
+    }
+
+    /**
      * Create a typeface object given a family name, and option style information.
      * If null is passed for the name, then the "default" font will be chosen.
      * The resulting typeface object can be queried (getStyle()) to discover what
@@ -195,7 +220,7 @@ public class Typeface {
                 if (typeface != null) return typeface;
 
                 FontFamily fontFamily = new FontFamily();
-                if (fontFamily.addFontFromAsset(mgr, path)) {
+                if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */)) {
                     FontFamily[] families = { fontFamily };
                     typeface = createFromFamiliesWithDefault(families);
                     sDynamicTypefaceCache.put(key, typeface);

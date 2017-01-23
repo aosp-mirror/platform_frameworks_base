@@ -190,8 +190,8 @@ static void releaseAsset(const void* ptr, void* context) {
     delete static_cast<Asset*>(context);
 }
 
-static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPtr,
-        jobject jassetMgr, jstring jpath) {
+static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong familyPtr,
+        jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset) {
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
@@ -201,7 +201,18 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     }
 
     ScopedUtfChars str(env, jpath);
-    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
+    if (str.c_str() == nullptr) {
+        return false;
+    }
+
+    Asset* asset;
+    if (isAsset) {
+        asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
+    } else {
+        asset = cookie ? mgr->openNonAsset(static_cast<int32_t>(cookie), str.c_str(),
+                Asset::ACCESS_BUFFER) : mgr->openNonAsset(str.c_str(), Asset::ACCESS_BUFFER);
+    }
+
     if (NULL == asset) {
         return false;
     }
@@ -234,8 +245,8 @@ static const JNINativeMethod gFontFamilyMethods[] = {
     { "nAddFont",              "(JLjava/nio/ByteBuffer;I)Z", (void*)FontFamily_addFont },
     { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;ILjava/util/List;IZ)Z",
             (void*)FontFamily_addFontWeightStyle },
-    { "nAddFontFromAsset",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
-            (void*)FontFamily_addFontFromAsset },
+    { "nAddFontFromAssetManager",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZ)Z",
+            (void*)FontFamily_addFontFromAssetManager },
 };
 
 int register_android_graphics_FontFamily(JNIEnv* env)

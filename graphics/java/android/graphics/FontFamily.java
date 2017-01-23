@@ -85,8 +85,9 @@ public class FontFamily {
         return nAddFontWeightStyle(mNativePtr, font, ttcIndex, axes, weight, style);
     }
 
-    public boolean addFontFromAsset(AssetManager mgr, String path) {
-        return nAddFontFromAsset(mNativePtr, mgr, path);
+    public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
+            boolean isAsset) {
+        return nAddFontFromAssetManager(mNativePtr, mgr, path, cookie, isAsset);
     }
 
     private static native long nCreateFamily(String lang, int variant);
@@ -95,6 +96,6 @@ public class FontFamily {
     private static native boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
             int ttcIndex, List<FontListParser.Axis> listOfAxis,
             int weight, boolean isItalic);
-    private static native boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr,
-            String path);
+    private static native boolean nAddFontFromAssetManager(long nativeFamily, AssetManager mgr,
+            String path, int cookie, boolean isAsset);
 }
