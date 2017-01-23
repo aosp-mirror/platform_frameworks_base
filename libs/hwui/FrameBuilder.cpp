@@ -180,16 +180,18 @@ void FrameBuilder::deferRenderNodeScene(const std::vector< sp<RenderNode> >& nod
         }
     }
 
-    if (!backdrop.isEmpty()) {
-        // content node translation to catch up with backdrop
-        float dx = contentDrawBounds.left - backdrop.left;
-        float dy = contentDrawBounds.top - backdrop.top;
+    if (!nodes[1]->nothingToDraw()) {
+        if (!backdrop.isEmpty()) {
+            // content node translation to catch up with backdrop
+            float dx = contentDrawBounds.left - backdrop.left;
+            float dy = contentDrawBounds.top - backdrop.top;
 
-        Rect contentLocalClip = backdrop;
-        contentLocalClip.translate(dx, dy);
-        deferRenderNode(-dx, -dy, contentLocalClip, *nodes[1]);
-    } else {
-        deferRenderNode(*nodes[1]);
+            Rect contentLocalClip = backdrop;
+            contentLocalClip.translate(dx, dy);
+            deferRenderNode(-dx, -dy, contentLocalClip, *nodes[1]);
+        } else {
+            deferRenderNode(*nodes[1]);
+        }
     }
 
     // remaining overlay nodes, simply defer
