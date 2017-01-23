@@ -67,6 +67,12 @@ static void logUnreachable(initializer_list<UnreachableMemoryInfo> infolist) {
 }
 
 void LeakChecker::checkForLeaks() {
+    // TODO: Re-enable, disabled to workaround b/34586922
+    if ((true)) {
+        cout << "checkForLeaks disabled, see b/34586922" << endl;
+        return;
+    }
+
     // TODO: Until we can shutdown the RT thread we need to do this in
     // two passes as GetUnreachableMemory has limited insight into
     // thread-local caches so some leaks will not be properly tagged as leaks
