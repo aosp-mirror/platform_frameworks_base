@@ -319,7 +319,7 @@ public class VoicemailContract {
          *
          * @hide
          */
-        public static final String IS_OMTP_VOICEMAIL = "is_omtp_voicmail";
+        public static final String IS_OMTP_VOICEMAIL = "is_omtp_voicemail";
 
         /**
          * A convenience method to build voicemail URI specific to a source package by appending
