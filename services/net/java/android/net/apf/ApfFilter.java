@@ -285,10 +285,9 @@ public class ApfFilter {
         mReceiveThread.start();
     }
 
-    // Returns seconds since Unix Epoch.
-    // TODO: use SystemClock.elapsedRealtime() instead
+    // Returns seconds since device boot.
     private static long curTime() {
-        return System.currentTimeMillis() / DateUtils.SECOND_IN_MILLIS;
+        return SystemClock.elapsedRealtime() / DateUtils.SECOND_IN_MILLIS;
     }
 
     public static class InvalidRaException extends Exception {
@@ -381,16 +380,16 @@ public class ApfFilter {
         // TODO: Make this static once RA is its own class.
         private void prefixOptionToString(StringBuffer sb, int offset) {
             String prefix = IPv6AddresstoString(offset + 16);
-            int length = uint8(mPacket.get(offset + 2));
-            long valid = mPacket.getInt(offset + 4);
-            long preferred = mPacket.getInt(offset + 8);
+            int length = getUint8(mPacket, offset + 2);
+            long valid = getUint32(mPacket, offset + 4);
+            long preferred = getUint32(mPacket, offset + 8);
             sb.append(String.format("%s/%d %ds/%ds ", prefix, length, valid, preferred));
         }
 
         private void rdnssOptionToString(StringBuffer sb, int offset) {
-            int optLen = uint8(mPacket.get(offset + 1)) * 8;
+            int optLen = getUint8(mPacket, offset + 1) * 8;
             if (optLen < 24) return;  // Malformed or empty.
-            long lifetime = uint32(mPacket.getInt(offset + 4));
+            long lifetime = getUint32(mPacket, offset + 4);
             int numServers = (optLen - 8) / 16;
             sb.append("DNS ").append(lifetime).append("s");
             for (int server = 0; server < numServers; server++) {
@@ -404,7 +403,7 @@ public class ApfFilter {
                 sb.append(String.format("RA %s -> %s %ds ",
                         IPv6AddresstoString(IPV6_SRC_ADDR_OFFSET),
                         IPv6AddresstoString(IPV6_DEST_ADDR_OFFSET),
-                        uint16(mPacket.getShort(ICMP6_RA_ROUTER_LIFETIME_OFFSET))));
+                        getUint16(mPacket, ICMP6_RA_ROUTER_LIFETIME_OFFSET)));
                 for (int i: mPrefixOptionOffsets) {
                     prefixOptionToString(sb, i);
                 }
@@ -456,8 +455,8 @@ public class ApfFilter {
             // Sanity check packet in case a packet arrives before we attach RA filter
             // to our packet socket. b/29586253
             if (getUint16(mPacket, ETH_ETHERTYPE_OFFSET) != ETH_P_IPV6 ||
-                    uint8(mPacket.get(IPV6_NEXT_HEADER_OFFSET)) != IPPROTO_ICMPV6 ||
-                    uint8(mPacket.get(ICMP6_TYPE_OFFSET)) != ICMP6_ROUTER_ADVERTISEMENT) {
+                    getUint8(mPacket, IPV6_NEXT_HEADER_OFFSET) != IPPROTO_ICMPV6 ||
+                    getUint8(mPacket, ICMP6_TYPE_OFFSET) != ICMP6_ROUTER_ADVERTISEMENT) {
                 throw new InvalidRaException("Not an ICMP6 router advertisement");
             }
 
@@ -479,8 +478,8 @@ public class ApfFilter {
             mPacket.position(ICMP6_RA_OPTION_OFFSET);
             while (mPacket.hasRemaining()) {
                 final int position = mPacket.position();
-                final int optionType = uint8(mPacket.get(position));
-                final int optionLength = uint8(mPacket.get(position + 1)) * 8;
+                final int optionType = getUint8(mPacket, position);
+                final int optionLength = getUint8(mPacket, position + 1) * 8;
                 long lifetime;
                 switch (optionType) {
                     case ICMP6_PREFIX_OPTION_TYPE:
@@ -565,10 +564,10 @@ public class ApfFilter {
                 final long optionLifetime;
                 switch (lifetimeLength) {
                     case 2:
-                        optionLifetime = uint16(byteBuffer.getShort(offset));
+                        optionLifetime = getUint16(byteBuffer, offset);
                         break;
                     case 4:
-                        optionLifetime = uint32(byteBuffer.getInt(offset));
+                        optionLifetime = getUint32(byteBuffer, offset);
                         break;
                     default:
                         throw new IllegalStateException("bogus lifetime size " + lifetimeLength);
@@ -1169,7 +1168,11 @@ public class ApfFilter {
         return i & 0xffffffffL;
     }
 
-    private static long getUint16(ByteBuffer buffer, int position) {
+    private static int getUint8(ByteBuffer buffer, int position) {
+        return uint8(buffer.get(position));
+    }
+
+    private static int getUint16(ByteBuffer buffer, int position) {
         return uint16(buffer.getShort(position));
     }
 
