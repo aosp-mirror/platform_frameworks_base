@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.logging;
+package android.metrics;
 
-import android.util.EventLog;
+import android.annotation.SystemApi;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 
@@ -29,68 +29,73 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  *
  * @hide
  */
-
-public class LogBuilder {
+@SystemApi
+public class LogMaker {
     private static final String TAG = "LogBuilder";
 
-    // Min required eventlog line length.
-    // See: android/util/cts/EventLogTest.java
-    // Size checks enforced here are intended only as sanity checks;
-    // your logs may be truncated earlier. Please log responsibly.
+    /**
+     * Min required eventlog line length.
+     * See: android/util/cts/EventLogTest.java
+     * Size checks enforced here are intended only as sanity checks;
+     * your logs may be truncated earlier. Please log responsibly.
+     *
+     * @hide
+     */
+    @VisibleForTesting
     public static final int MAX_SERIALIZED_SIZE = 4000;
 
     private SparseArray<Object> entries = new SparseArray();
 
-    public LogBuilder(int mainCategory) {
+    public LogMaker(int mainCategory) {
         setCategory(mainCategory);
     }
 
     /* Deserialize from the eventlog */
-    public LogBuilder(Object[] items) {
+    public LogMaker(Object[] items) {
       deserialize(items);
     }
 
-    public LogBuilder setCategory(int category) {
+    public LogMaker setCategory(int category) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY, category);
         return this;
     }
 
-    public LogBuilder setType(int type) {
+    public LogMaker setType(int type) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TYPE, type);
         return this;
     }
 
-    public LogBuilder setSubtype(int subtype) {
+    public LogMaker setSubtype(int subtype) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_SUBTYPE, subtype);
         return this;
     }
 
-    public LogBuilder setTimestamp(long timestamp) {
+    public LogMaker setTimestamp(long timestamp) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_TIMESTAMP, timestamp);
         return this;
     }
 
-    public LogBuilder setPackageName(String packageName) {
+    public LogMaker setPackageName(String packageName) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_PACKAGENAME, packageName);
         return this;
     }
 
-    public LogBuilder setCounterName(String name) {
+    public LogMaker setCounterName(String name) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_NAME, name);
         return this;
     }
 
-    public LogBuilder setCounterBucket(int bucket) {
+    public LogMaker setCounterBucket(int bucket) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
         return this;
     }
 
-    public LogBuilder setCounterBucket(long bucket) {
+    public LogMaker setCounterBucket(long bucket) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_BUCKET, bucket);
         return this;
     }
 
-    public LogBuilder setCounterValue(int value) {
+    public LogMaker setCounterValue(int value) {
         entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_VALUE, value);
         return this;
     }
@@ -100,7 +105,7 @@ public class LogBuilder {
      * @param value One of Integer, Long, Float, String
      * @return
      */
-    public LogBuilder addTaggedData(int tag, Object value) {
+    public LogMaker addTaggedData(int tag, Object value) {
         if (isValidValue(value)) {
             throw new IllegalArgumentException(
                     "Value must be loggable type - int, long, float, String");

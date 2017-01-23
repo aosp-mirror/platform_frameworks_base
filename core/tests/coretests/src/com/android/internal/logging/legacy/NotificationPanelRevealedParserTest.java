@@ -20,7 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class NotificationPanelRevealedParserTest extends ParserTest {
@@ -37,7 +37,7 @@ public class NotificationPanelRevealedParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_PANEL, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_OPEN, proto.getType());
@@ -57,7 +57,7 @@ public class NotificationPanelRevealedParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_PANEL, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_OPEN, proto.getType());
@@ -69,7 +69,7 @@ public class NotificationPanelRevealedParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, times(1)).addEvent((LogBuilder) anyObject());
+        verify(mLogger, times(1)).addEvent((LogMaker) anyObject());
     }
 
     public void testIgnoreUnexpectedData() throws Throwable {

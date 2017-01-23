@@ -16,16 +16,12 @@
 package com.android.internal.logging.legacy;
 
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
-import org.mockito.ArgumentCaptor;
 
 public class NotificationVisibilityParserTest extends ParserTest {
     private final int mCreationTime = 23124;
@@ -84,7 +80,7 @@ public class NotificationVisibilityParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(mTime, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_ITEM, proto.getCategory());
         assertEquals(mKeyPackage, proto.getPackageName());

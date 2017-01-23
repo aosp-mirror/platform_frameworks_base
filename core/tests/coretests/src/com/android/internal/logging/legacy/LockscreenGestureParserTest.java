@@ -19,7 +19,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class LockscreenGestureParserTest extends ParserTest {
@@ -79,7 +79,7 @@ public class LockscreenGestureParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(view, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_ACTION, proto.getType());
@@ -95,6 +95,6 @@ public class LockscreenGestureParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, t, objects);
 
-        verify(mLogger, times(1)).addEvent((LogBuilder) anyObject());
+        verify(mLogger, times(1)).addEvent((LogMaker) anyObject());
     }
 }

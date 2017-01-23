@@ -3,9 +3,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -17,7 +15,7 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.util.Slog;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -172,7 +170,7 @@ class ActivityMetricsLogger {
         MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS,
                 (int) (SystemClock.uptimeMillis() / 1000));
 
-        LogBuilder builder = new LogBuilder(MetricsEvent.APP_TRANSITION);
+        LogMaker builder = new LogMaker(MetricsEvent.APP_TRANSITION);
         builder.addTaggedData(MetricsEvent.APP_TRANSITION_COMPONENT_NAME, componentName);
         builder.addTaggedData(MetricsEvent.APP_TRANSITION_PROCESS_RUNNING, processRunning ? 1 : 0);
         builder.addTaggedData(MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS,

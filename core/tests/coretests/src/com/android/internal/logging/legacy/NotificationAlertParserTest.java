@@ -21,11 +21,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
-import java.util.Collections;
-import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 
@@ -126,7 +123,7 @@ public class NotificationAlertParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(mTime, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_ALERT, proto.getCategory());
         assertEquals(mKeyPackage, proto.getPackageName());

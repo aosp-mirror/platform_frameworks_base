@@ -23,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class SysuiViewVisibilityParserTest extends ParserTest {
@@ -47,7 +47,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(view, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_OPEN, proto.getType());
@@ -64,7 +64,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(MetricsEvent.TYPE_CLOSE, proto.getType());
     }
 
@@ -73,7 +73,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 
@@ -84,7 +84,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 
@@ -95,7 +95,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 
@@ -105,7 +105,7 @@ public class SysuiViewVisibilityParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 

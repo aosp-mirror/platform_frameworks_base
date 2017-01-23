@@ -17,8 +17,8 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
+import android.metrics.LogMaker;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.LogBuilder;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -87,7 +87,7 @@ public abstract class TagParser {
         }
     }
 
-   public void filltimes(LogBuilder proto) {
+   public void filltimes(LogMaker proto) {
         if (mSinceCreationMillis != 0) {
             proto.addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS,
                     mSinceCreationMillis);

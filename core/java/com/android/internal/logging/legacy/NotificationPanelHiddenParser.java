@@ -15,7 +15,7 @@
  */
 package com.android.internal.logging.legacy;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -33,7 +33,7 @@ public class NotificationPanelHiddenParser extends TagParser {
 
     @Override
     public void parseEvent(TronLogger logger, long eventTimeMs, Object[] operands) {
-        LogBuilder proto = logger.obtain();
+        LogMaker proto = logger.obtain();
         proto.setCategory(MetricsEvent.NOTIFICATION_PANEL);
         proto.setType(MetricsEvent.TYPE_CLOSE);
         proto.setTimestamp(eventTimeMs);

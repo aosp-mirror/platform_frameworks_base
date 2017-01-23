@@ -16,6 +16,7 @@
 package com.android.internal.logging;
 
 import android.content.Context;
+import android.metrics.LogMaker;
 import android.os.Build;
 import android.view.View;
 
@@ -37,7 +38,7 @@ public class MetricsLogger {
         }
         EventLogTags.writeSysuiViewVisibility(category, 100);
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(category)
+                new LogMaker(category)
                         .setType(MetricsEvent.TYPE_OPEN)
                         .serialize());
     }
@@ -48,7 +49,7 @@ public class MetricsLogger {
         }
         EventLogTags.writeSysuiViewVisibility(category, 0);
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(category)
+                new LogMaker(category)
                         .setType(MetricsEvent.TYPE_CLOSE)
                         .serialize());
     }
@@ -70,7 +71,7 @@ public class MetricsLogger {
     public static void action(Context context, int category) {
         EventLogTags.writeSysuiAction(category, "");
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(category)
+                new LogMaker(category)
                         .setType(MetricsEvent.TYPE_ACTION)
                         .serialize());
     }
@@ -78,7 +79,7 @@ public class MetricsLogger {
     public static void action(Context context, int category, int value) {
         EventLogTags.writeSysuiAction(category, Integer.toString(value));
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(category)
+                new LogMaker(category)
                         .setType(MetricsEvent.TYPE_ACTION)
                         .setSubtype(value)
                         .serialize());
@@ -87,13 +88,13 @@ public class MetricsLogger {
     public static void action(Context context, int category, boolean value) {
         EventLogTags.writeSysuiAction(category, Boolean.toString(value));
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(category)
+                new LogMaker(category)
                         .setType(MetricsEvent.TYPE_ACTION)
                         .setSubtype(value ? 1 : 0)
                         .serialize());
     }
 
-    public static void action(LogBuilder content) {
+    public static void action(LogMaker content) {
         if (content.getType() == MetricsEvent.TYPE_UNKNOWN) {
             content.setType(MetricsEvent.TYPE_ACTION);
         }
@@ -106,7 +107,7 @@ public class MetricsLogger {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiAction(category, pkg);
-        EventLogTags.writeSysuiMultiAction(new LogBuilder(category)
+        EventLogTags.writeSysuiMultiAction(new LogMaker(category)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .setPackageName(pkg)
                 .serialize());
@@ -116,7 +117,7 @@ public class MetricsLogger {
     public static void count(Context context, String name, int value) {
         EventLogTags.writeSysuiCount(name, value);
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
+                new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
                         .setCounterName(name)
                         .setCounterValue(value)
                         .serialize());
@@ -126,7 +127,7 @@ public class MetricsLogger {
     public static void histogram(Context context, String name, int bucket) {
         EventLogTags.writeSysuiHistogram(name, bucket);
         EventLogTags.writeSysuiMultiAction(
-                new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
+                new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
                         .setCounterName(name)
                         .setCounterBucket(bucket)
                         .setCounterValue(1)

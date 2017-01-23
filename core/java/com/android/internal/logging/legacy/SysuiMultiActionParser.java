@@ -17,8 +17,7 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
-import com.android.internal.logging.LogBuilder;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import android.metrics.LogMaker;
 
 /**
  * ...and one parser to rule them all.
@@ -39,7 +38,7 @@ public class SysuiMultiActionParser extends TagParser {
     public void parseEvent(TronLogger logger, long eventTimeMs, Object[] operands) {
         final boolean debug = Util.debug();
         try {
-            logger.addEvent(new LogBuilder(operands).setTimestamp(eventTimeMs));
+            logger.addEvent(new LogMaker(operands).setTimestamp(eventTimeMs));
         } catch (ClassCastException e) {
             if (debug) {
                 Log.e(TAG, "unexpected operand type: ", e);

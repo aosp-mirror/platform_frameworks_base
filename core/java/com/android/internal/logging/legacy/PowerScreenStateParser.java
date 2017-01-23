@@ -17,7 +17,7 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -48,7 +48,7 @@ public class PowerScreenStateParser extends TagParser {
                 boolean state = (((Integer) operands[0]).intValue()) == 1;
                 int why = ((Integer) operands[1]).intValue();
 
-                LogBuilder proto = logger.obtain();
+                LogMaker proto = logger.obtain();
                 proto.setCategory(MetricsEvent.SCREEN);
                 proto.setType(state ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE);
                 proto.setTimestamp(eventTimeMs);
