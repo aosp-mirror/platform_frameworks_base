@@ -1319,16 +1319,6 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public ParcelFileDescriptor mountAppFuse(String name) {
-        try {
-            return mStorageManager.mountAppFuse(name);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-
-    /** {@hide} */
     @VisibleForTesting
     public @NonNull ParcelFileDescriptor openProxyFileDescriptor(
             int mode, ProxyFileDescriptorCallback callback, ThreadFactory factory)
