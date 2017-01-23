@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.Widget;
@@ -60,6 +61,8 @@ import android.widget.AbsoluteLayout;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
 /**
@@ -2151,6 +2154,94 @@ public class WebView extends AbsoluteLayout
         return mProvider.findHierarchyView(className, hashCode);
     }
 
+    /** @hide */
+    @IntDef({
+        RENDERER_PRIORITY_WAIVED,
+        RENDERER_PRIORITY_BOUND,
+        RENDERER_PRIORITY_IMPORTANT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RendererPriority {}
+
+    /**
+     * The renderer associated with this WebView is bound with
+     * {@link Context#BIND_WAIVE_PRIORITY}. At this priority level
+     * {@link WebView} renderers will be strong targets for out of memory
+     * killing.
+     *
+     * Use with {@link #setRendererPriorityPolicy}.
+     */
+    public static final int RENDERER_PRIORITY_WAIVED = 0;
+    /**
+     * The renderer associated with this WebView is bound with
+     * the default priority for services.
+     *
+     * Use with {@link #setRendererPriorityPolicy}.
+     */
+    public static final int RENDERER_PRIORITY_BOUND = 1;
+    /**
+     * The renderer associated with this WebView is bound with
+     * {@link Context#BIND_IMPORTANT}.
+     *
+     * Use with {@link #setRendererPriorityPolicy}.
+     */
+    public static final int RENDERER_PRIORITY_IMPORTANT = 2;
+
+    /**
+     * Set the renderer priority policy for this {@link WebView}. The
+     * priority policy will be used to determine whether an out of
+     * process renderer should be considered to be a target for OOM
+     * killing.
+     *
+     * Because a renderer can be associated with more than one
+     * WebView, the final priority it is computed as the maximum of
+     * any attached WebViews. When a WebView is destroyed it will
+     * cease to be considerered when calculating the renderer
+     * priority. Once no WebViews remain associated with the renderer,
+     * the priority of the renderer will be reduced to
+     * {@link #RENDERER_PRIORITY_WAIVED}.
+     *
+     * The default policy is to set the priority to
+     * {@link #RENDERER_PRIORITY_IMPORTANT} regardless of visibility,
+     * and this should not be changed unless the caller also handles
+     * renderer crashes with
+     * {@link WebViewClient#onRenderProcessGone}. Any other setting
+     * will result in WebView renderers being killed by the system
+     * more aggressively than the application.
+     *
+     * @param rendererRequestedPriority the minimum priority at which
+     *        this WebView desires the renderer process to be bound.
+     * @param waivedWhenNotVisible if true, this flag specifies that
+     *        when this WebView is not visible, it will be treated as
+     *        if it had requested a priority of
+     *        {@link #RENDERER_PRIORITY_WAIVED}.
+     */
+    public void setRendererPriorityPolicy(
+            @RendererPriority int rendererRequestedPriority,
+            boolean waivedWhenNotVisible) {
+        mProvider.setRendererPriorityPolicy(rendererRequestedPriority, waivedWhenNotVisible);
+    }
+
+    /**
+     * Get the requested renderer priority for this WebView.
+     *
+     * @return the requested renderer priority policy.
+     */
+    @RendererPriority
+    public int getRendererRequestedPriority() {
+        return mProvider.getRendererRequestedPriority();
+    }
+
+    /**
+     * Return whether this WebView requests a priority of
+     * {@link #RENDERER_PRIORITY_WAIVED} when not visible.
+     *
+     * @return whether this WebView requests a priority of
+     * {@link #RENDERER_PRIORITY_WAIVED} when not visible.
+     */
+    public boolean getRendererPriorityWaivedWhenNotVisible() {
+        return mProvider.getRendererPriorityWaivedWhenNotVisible();
+    }
     //-------------------------------------------------------------------------
     // Interface for WebView providers
     //-------------------------------------------------------------------------
