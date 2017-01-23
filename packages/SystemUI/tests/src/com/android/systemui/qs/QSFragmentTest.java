@@ -58,6 +58,7 @@ public class QSFragmentTest extends FragmentTestCase {
 
     @Before
     public void addLeakCheckDependencies() {
+        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         injectMockDependency(UserSwitcherController.class);
         injectLeakCheckedDependencies(BluetoothController.class, LocationController.class,
                 RotationLockController.class, NetworkController.class, ZenModeController.class,

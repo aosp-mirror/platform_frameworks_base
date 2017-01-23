@@ -43,6 +43,7 @@ public abstract class SysuiTestCase {
     public void SysuiSetup() throws Exception {
         System.setProperty("dexmaker.share_classloader", "true");
         mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
+        SystemUIFactory.createFromConfig(mContext);
         mDependency = new TestDependency();
         mDependency.mContext = mContext;
         mDependency.start();
