@@ -1240,6 +1240,10 @@
     <!-- An XML resource with the application's Network Security Config. -->
     <attr name="networkSecurityConfig" format="reference" />
 
+    <!-- When an application is partitioned into splits, this is the name of the
+         split that contains the defined component. -->
+    <attr name="splitName" format="string" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1823,6 +1827,8 @@
         <attr name="singleUser" />
         <attr name="directBootAware" />
         <attr name="visibleToInstantApps" />
+        <!-- The code for this component is located in the given split. -->
+        <attr name="splitName" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -1913,6 +1919,8 @@
              must also be {@link android.R.attr#exported} if this flag is set. -->
         <attr name="externalService" format="boolean" />
         <attr name="visibleToInstantApps" />
+        <!-- The code for this component is located in the given split. -->
+        <attr name="splitName" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
@@ -2036,6 +2044,8 @@
         <attr name="onTopLauncher" format="boolean" />
         <attr name="rotationAnimation" />
         <attr name="visibleToInstantApps" />
+        <!-- The code for this component is located in the given split. -->
+        <attr name="splitName" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
