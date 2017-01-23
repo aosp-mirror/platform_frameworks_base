@@ -749,10 +749,7 @@ public class ResolverActivity extends Activity {
                     }
                 } else {
                     try {
-                        AppGlobals.getPackageManager().setLastChosenActivity(intent,
-                                intent.resolveType(getContentResolver()),
-                                PackageManager.MATCH_DEFAULT_ONLY,
-                                filter, bestMatch, intent.getComponent());
+                        mAdapter.mResolverListController.setLastChosen(intent, filter, bestMatch);
                     } catch (RemoteException re) {
                         Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
                     }
@@ -1312,10 +1309,7 @@ public class ResolverActivity extends Activity {
         protected boolean rebuildList() {
             List<ResolvedComponentInfo> currentResolveList = null;
             try {
-                final Intent primaryIntent = getTargetIntent();
-                mLastChosen = AppGlobals.getPackageManager().getLastChosenActivity(
-                        primaryIntent, primaryIntent.resolveTypeIfNeeded(getContentResolver()),
-                        PackageManager.MATCH_DEFAULT_ONLY);
+                mLastChosen = mResolverListController.getLastChosen();
             } catch (RemoteException re) {
                 Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
             }

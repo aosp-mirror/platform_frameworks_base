@@ -19,13 +19,16 @@ package com.android.internal.app;
 
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.RemoteException;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -63,6 +66,22 @@ public class ResolverListController {
         mLaunchedFromUid = launchedFromUid;
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
+    }
+
+    @VisibleForTesting
+    ResolveInfo getLastChosen() throws RemoteException {
+        return AppGlobals.getPackageManager().getLastChosenActivity(
+                mTargetIntent, mTargetIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                PackageManager.MATCH_DEFAULT_ONLY);
+    }
+
+    @VisibleForTesting
+    void setLastChosen(Intent intent, IntentFilter filter, int match)
+            throws RemoteException {
+        AppGlobals.getPackageManager().setLastChosenActivity(intent,
+                intent.resolveType(mContext.getContentResolver()),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                filter, match, intent.getComponent());
     }
 
     @VisibleForTesting

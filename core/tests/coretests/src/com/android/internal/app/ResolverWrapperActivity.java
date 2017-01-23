@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,25 @@ package com.android.internal.app;
 
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.RemoteException;
 
 import java.util.function.Function;
 
 import static org.mockito.Mockito.mock;
 
-public class ChooserWrapperActivity extends ChooserActivity {
-    /*
-     * Simple wrapper around chooser activity to be able to initiate it under test
-     */
+
+/*
+ * Simple wrapper around chooser activity to be able to initiate it under test
+ */
+public class ResolverWrapperActivity extends ResolverActivity {
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
 
     ResolveListAdapter getAdapter() {
         return mAdapter;
-    }
-
-    boolean getIsSelected() { return mIsSuccessfullySelected; }
-
-    UsageStatsManager getUsageStatsManager() {
-        if (mUsm == null) {
-            mUsm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-        }
-        return mUsm;
     }
 
     @Override
