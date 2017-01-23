@@ -9391,8 +9391,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // A package name must be unique; don't allow duplicates
-            if (mPackages.containsKey(pkg.packageName)
-                    || mSharedLibraries.containsKey(pkg.packageName)) {
+            if (mPackages.containsKey(pkg.packageName)) {
                 throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                         "Application package " + pkg.packageName
                         + " already installed.  Skipping duplicate.");
