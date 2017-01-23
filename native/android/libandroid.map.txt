@@ -139,6 +139,17 @@ LIBANDROID {
     ANativeActivity_setWindowFlags;
     ANativeActivity_setWindowFormat;
     ANativeActivity_showSoftInput;
+    AHardwareBuffer_acquire; # introduced=26
+    AHardwareBuffer_allocate; # introduced=26
+    AHardwareBuffer_describe; # introduced=26
+    AHardwareBuffer_fromHardwareBuffer; # introduced=26
+    AHardwareBuffer_getNativeHandle; # introduced=26
+    AHardwareBuffer_lock; # introduced=26
+    AHardwareBuffer_recvHandleFromUnixSocket; # introduced=26
+    AHardwareBuffer_release; # introduced=26
+    AHardwareBuffer_sendHandleToUnixSocket; # introduced=26
+    AHardwareBuffer_toHardwareBuffer; # introduced=26
+    AHardwareBuffer_unlock; # introduced=26
     ANativeWindow_acquire;
     ANativeWindow_fromSurface;
     ANativeWindow_fromSurfaceTexture; # introduced-arm=13 introduced-mips=13 introduced-x86=13

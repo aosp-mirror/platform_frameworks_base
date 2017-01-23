@@ -9,6 +9,7 @@ LOCAL_SRC_FILES:= \
     asset_manager.cpp \
     choreographer.cpp \
     configuration.cpp \
+    hardware_buffer.cpp \
     input.cpp \
     looper.cpp \
     native_activity.cpp \
