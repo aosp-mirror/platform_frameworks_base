@@ -5501,6 +5501,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
 
+            // Turn Always-on VPN off
+            if (mLockdownEnabled && userId == UserHandle.USER_SYSTEM) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mKeyStore.delete(Credentials.LOCKDOWN_VPN);
+                    mLockdownEnabled = false;
+                    setLockdownTracker(null);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+
             // Turn VPN off
             VpnConfig vpnConfig = getVpnConfig(userId);
             if (vpnConfig != null) {
