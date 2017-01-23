@@ -144,26 +144,22 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
     return ctx.write();
 }
 
-/*
- * In class android.util.EventLog:
- *  static native void readEvents(int[] tags, Collection<Event> output)
- *
- *  Reads events from the event log
- */
-static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
-                                             jintArray tags,
-                                             jobject out) {
-
-    if (tags == NULL || out == NULL) {
-        jniThrowNullPointerException(env, NULL);
+static void readEvents(JNIEnv* env, int loggerMode, jintArray tags, jlong startTime, jobject out) {
+    struct logger_list *logger_list;
+    if (startTime) {
+        logger_list = android_logger_list_alloc_time(loggerMode,
+                log_time(startTime / NS_PER_SEC, startTime % NS_PER_SEC), 0);
+    } else {
+        logger_list = android_logger_list_alloc(loggerMode, 0, 0);
+    }
+    if (!logger_list) {
+        jniThrowIOException(env, errno);
         return;
     }
 
-    struct logger_list *logger_list = android_logger_list_open(
-        LOG_ID_EVENTS, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0);
-
-    if (!logger_list) {
+    if (!android_logger_open(logger_list, LOG_ID_EVENTS)) {
         jniThrowIOException(env, errno);
+        android_logger_list_free(logger_list);
         return;
     }
 
@@ -228,6 +224,41 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
 }
 
 /*
+ * In class android.util.EventLog:
+ *  static native void readEvents(int[] tags, Collection<Event> output)
+ *
+ *  Reads events from the event log
+ */
+static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
+                                             jintArray tags,
+                                             jobject out) {
+
+    if (tags == NULL || out == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+
+    readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, tags, 0, out);
+ }
+/*
+ * In class android.util.EventLog:
+ *  static native void readEventsOnWrapping(int[] tags, long timestamp, Collection<Event> output)
+ *
+ *  Reads events from the event log, blocking until events after timestamp are to be overwritten.
+ */
+static void android_util_EventLog_readEventsOnWrapping(JNIEnv* env, jobject clazz UNUSED,
+                                             jintArray tags,
+                                             jlong timestamp,
+                                             jobject out) {
+    if (tags == NULL || out == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+    readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK | ANDROID_LOG_WRAP,
+            tags, timestamp, out);
+}
+
+/*
  * JNI registration.
  */
 static const JNINativeMethod gRegisterMethods[] = {
@@ -246,6 +277,10 @@ static const JNINativeMethod gRegisterMethods[] = {
     { "readEvents",
       "([ILjava/util/Collection;)V",
       (void*) android_util_EventLog_readEvents
+    },
+    { "readEventsOnWrapping",
+      "([IJLjava/util/Collection;)V",
+      (void*) android_util_EventLog_readEventsOnWrapping
     },
 };
 
