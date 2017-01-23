@@ -40,6 +40,9 @@ import java.util.Set;
  * Settings base class for pending and resolved classes.
  */
 abstract class PackageSettingBase extends SettingBase {
+
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+
     /**
      * Indicates the state of installation. Used by PackageManager to figure out
      * incomplete installations. Say a package is being installed (the state is
@@ -500,6 +503,25 @@ abstract class PackageSettingBase extends SettingBase {
 
     void removeUser(int userId) {
         userState.delete(userId);
+    }
+
+    public int[] getNotInstalledUserIds() {
+        int count = 0;
+        int userStateCount = userState.size();
+        for (int i = 0; i < userStateCount; i++) {
+            if (userState.valueAt(i).installed == false) {
+                count++;
+            }
+        }
+        if (count == 0) return EMPTY_INT_ARRAY;
+        int[] excludedUserIds = new int[count];
+        int idx = 0;
+        for (int i = 0; i < userStateCount; i++) {
+            if (userState.valueAt(i).installed == false) {
+                excludedUserIds[idx++] = userState.keyAt(i);
+            }
+        }
+        return excludedUserIds;
     }
 
     IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
