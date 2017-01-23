@@ -2505,18 +2505,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE),
                 eq(UserHandle.SYSTEM)))
                 .thenReturn(true);
+        when(mContext.userManager.getUserRestrictionSource(
+                eq(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE),
+                eq(UserHandle.SYSTEM)))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
 
         // We can't remove the profile to create a new one.
-        assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
-                DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
-        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
-
         assertCheckProvisioningPreCondition(
                 DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DpmMockContext.ANOTHER_PACKAGE_NAME,
                 DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false,
                 DpmMockContext.ANOTHER_PACKAGE_NAME, DpmMockContext.ANOTHER_UID);
+
+        // But the device owner can still do it because it has set the restriction itself.
+        assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
+                DevicePolicyManager.CODE_OK);
+        assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, true);
     }
 
     private void setup_splitUser_firstBoot_systemUser() throws Exception {
