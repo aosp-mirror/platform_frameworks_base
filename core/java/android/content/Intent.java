@@ -4842,6 +4842,10 @@ public class Intent implements Parcelable, Cloneable {
      * or not running) apps, regardless of whether that would be done by default.  By
      * default they will only receive broadcasts if the broadcast has specified an
      * explicit component or package name.
+     *
+     * NOTE: dumpstate uses this flag numerically, so when its value is changed
+     * the broadcast code there must also be changed to match.
+     *
      * @hide
      */
     public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 0x01000000;
