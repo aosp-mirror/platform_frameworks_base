@@ -49,12 +49,15 @@ final class CoreSettingsObserver extends ContentObserver {
         // add other system settings here...
 
         sGlobalSettingToTypeMap.put(Settings.Global.DEBUG_VIEW_ATTRIBUTES, int.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.WAIT_FOR_NETWORK_TIMEOUT_MS, long.class);
         // add other global settings here...
     }
 
     private final Bundle mCoreSettings = new Bundle();
 
     private final ActivityManagerService mActivityManagerService;
+
+    private static final long WAIT_FOR_NETWORK_TIMEOUT_DEFAULT_MS = 2000; // 2 sec
 
     public CoreSettingsObserver(ActivityManagerService activityManagerService) {
         super(activityManagerService.mHandler);
@@ -143,7 +146,13 @@ final class CoreSettingsObserver extends ContentObserver {
                 } else if (map == sSystemSettingToTypeMap) {
                     value = Settings.System.getLong(context.getContentResolver(), setting, 0);
                 } else {
-                    value = Settings.Global.getLong(context.getContentResolver(), setting, 0);
+                    // TODO: remove this conditional and set the default in settings provider.
+                    if (Settings.Global.WAIT_FOR_NETWORK_TIMEOUT_MS.equals(setting)) {
+                        value = Settings.Global.getLong(context.getContentResolver(), setting,
+                                WAIT_FOR_NETWORK_TIMEOUT_DEFAULT_MS);
+                    } else {
+                        value = Settings.Global.getLong(context.getContentResolver(), setting, 0);
+                    }
                 }
                 snapshot.putLong(setting, value);
             }
