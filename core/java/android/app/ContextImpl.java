@@ -1591,12 +1591,15 @@ class ContextImpl extends Context {
         }
 
         final IActivityManager am = ActivityManager.getService();
-        if (am == null && UserHandle.getAppId(Binder.getCallingUid()) == Process.SYSTEM_UID) {
+        if (am == null) {
             // Well this is super awkward; we somehow don't have an active
-            // ActivityManager instance. If this is the system UID, then we
-            // totally have whatever permission this is.
-            Slog.w(TAG, "Missing ActivityManager; assuming system UID holds " + permission);
-            return PackageManager.PERMISSION_GRANTED;
+            // ActivityManager instance. If we're testing a root or system
+            // UID, then they totally have whatever permission this is.
+            final int appId = UserHandle.getAppId(uid);
+            if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
+                Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " holds " + permission);
+                return PackageManager.PERMISSION_GRANTED;
+            }
         }
 
         try {
