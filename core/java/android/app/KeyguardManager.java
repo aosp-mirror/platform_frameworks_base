@@ -322,7 +322,7 @@ public class KeyguardManager {
      * password.
      */
     public boolean isDeviceLocked() {
-        return isDeviceLocked(UserHandle.getCallingUserId());
+        return isDeviceLocked(UserHandle.myUserId());
     }
 
     /**
@@ -347,7 +347,7 @@ public class KeyguardManager {
      * @return true if a PIN, pattern or password was set.
      */
     public boolean isDeviceSecure() {
-        return isDeviceSecure(UserHandle.getCallingUserId());
+        return isDeviceSecure(UserHandle.myUserId());
     }
 
     /**
