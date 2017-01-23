@@ -76,6 +76,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,6 +95,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     @Mock private DevicePolicyManager mMockDevicePolicyManager;
     @Mock private IAccountManagerResponse mMockAccountManagerResponse;
     @Mock private IBinder mMockBinder;
+    @Mock private INotificationManager mMockNotificationManager;
 
     @Captor private ArgumentCaptor<Intent> mIntentCaptor;
     @Captor private ArgumentCaptor<Bundle> mBundleCaptor;
@@ -129,7 +131,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         Context realTestContext = getContext();
         MyMockContext mockContext = new MyMockContext(realTestContext, mMockContext);
         setContext(mockContext);
-        mTestInjector = new TestInjector(realTestContext, mockContext);
+        mTestInjector = new TestInjector(realTestContext, mockContext, mMockNotificationManager);
         mAms = new AccountManagerService(mTestInjector);
     }
 
@@ -500,7 +502,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStartAddAccountSessionUserSuccessWithoutPasswordForwarding() throws Exception {
+    public void testStartAddAccountSessionSuccessWithoutPasswordForwarding() throws Exception {
         unlockSystemUser();
         when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
                 PackageManager.PERMISSION_DENIED);
@@ -531,7 +533,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStartAddAccountSessionUserSuccessWithPasswordForwarding() throws Exception {
+    public void testStartAddAccountSessionSuccessWithPasswordForwarding() throws Exception {
         unlockSystemUser();
         when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
                 PackageManager.PERMISSION_GRANTED);
@@ -564,7 +566,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStartAddAccountSessionUserReturnWithInvalidIntent() throws Exception {
+    public void testStartAddAccountSessionReturnWithInvalidIntent() throws Exception {
         unlockSystemUser();
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
@@ -593,7 +595,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStartAddAccountSessionUserReturnWithValidIntent() throws Exception {
+    public void testStartAddAccountSessionReturnWithValidIntent() throws Exception {
         unlockSystemUser();
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
@@ -626,7 +628,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
     }
 
     @SmallTest
-    public void testStartAddAccountSessionUserError() throws Exception {
+    public void testStartAddAccountSessionError() throws Exception {
         unlockSystemUser();
         Bundle options = createOptionsWithAccountName(
                 AccountManagerServiceTestFixtures.ACCOUNT_NAME_ERROR);
@@ -650,12 +652,627 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
     }
 
+    @SmallTest
+    public void testStartUpdateCredentialsSessionWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.startUpdateCredentialsSession(
+                null, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "authTokenType",
+                true, // expectActivityLaunch
+                null); // optionsIn
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionWithNullAccount() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.startUpdateCredentialsSession(
+                mMockAccountManagerResponse, // response
+                null,
+                "authTokenType",
+                true, // expectActivityLaunch
+                null); // optionsIn
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionSuccessWithoutPasswordForwarding()
+            throws Exception {
+        unlockSystemUser();
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+            AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        mAms.startUpdateCredentialsSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "authTokenType",
+                false, // expectActivityLaunch
+                options); // optionsIn
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is encrypted and hence data not visible.
+        assertNull(sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert password is not returned
+        assertNull(result.getString(AccountManager.KEY_PASSWORD));
+        assertNull(result.getString(AccountManager.KEY_AUTHTOKEN, null));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN,
+                result.getString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN));
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionSuccessWithPasswordForwarding() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+            AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        mAms.startUpdateCredentialsSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                "authTokenType",
+                false, // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is encrypted and hence data not visible.
+        assertNull(sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert password is returned
+        assertEquals(result.getString(AccountManager.KEY_PASSWORD),
+                AccountManagerServiceTestFixtures.ACCOUNT_PASSWORD);
+        assertNull(result.getString(AccountManager.KEY_AUTHTOKEN));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN,
+                result.getString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN));
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionReturnWithInvalidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_NO_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE);
+
+        mAms.startUpdateCredentialsSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE,
+                "authTokenType",
+                true,  // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_REMOTE_EXCEPTION), anyString());
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionReturnWithValidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE);
+
+        mAms.startUpdateCredentialsSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE,
+                "authTokenType",
+                true,  // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
+        assertNotNull(intent);
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_RESULT));
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK));
+    }
+
+    @SmallTest
+    public void testStartUpdateCredentialsSessionError() throws Exception {
+        unlockSystemUser();
+        Bundle options = createOptionsWithAccountName(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_ERROR);
+        options.putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_INVALID_RESPONSE);
+        options.putString(AccountManager.KEY_ERROR_MESSAGE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.startUpdateCredentialsSession(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_ERROR,
+                "authTokenType",
+                true,  // expectActivityLaunch
+                options); // optionsIn
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.finishSessionAsUser(
+                null, // response
+                createEncryptedSessionBundle(
+                        AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+                false, // expectActivityLaunch
+                createAppBundle(), // appInfo
+                UserHandle.USER_SYSTEM);
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserWithNullSessionBundle() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.finishSessionAsUser(
+                mMockAccountManagerResponse, // response
+                null, // sessionBundle
+                false, // expectActivityLaunch
+                createAppBundle(), // appInfo
+                UserHandle.USER_SYSTEM);
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserUserCannotModifyAccountNoDPM() throws Exception {
+        unlockSystemUser();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, true);
+        when(mMockUserManager.getUserRestrictions(any(UserHandle.class))).thenReturn(bundle);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_USER_RESTRICTED), anyString());
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.of(2)));
+
+        // verify the intent for default CantAddAccountActivity is sent.
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getComponent().getClassName(), CantAddAccountActivity.class.getName());
+        assertEquals(intent.getIntExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, 0),
+                AccountManager.ERROR_CODE_USER_RESTRICTED);
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserUserCannotModifyAccountWithDPM() throws Exception {
+        unlockSystemUser();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, true);
+        when(mMockUserManager.getUserRestrictions(any(UserHandle.class))).thenReturn(bundle);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.addService(
+                DevicePolicyManagerInternal.class, mMockDevicePolicyManagerInternal);
+        when(mMockDevicePolicyManagerInternal.createUserRestrictionSupportIntent(
+                anyInt(), anyString())).thenReturn(new Intent());
+        when(mMockDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                anyInt(), anyBoolean())).thenReturn(new Intent());
+
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_USER_RESTRICTED), anyString());
+        verify(mMockContext).startActivityAsUser(any(Intent.class), eq(UserHandle.of(2)));
+        verify(mMockDevicePolicyManagerInternal).createUserRestrictionSupportIntent(
+                anyInt(), anyString());
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserWithBadSessionBundle() throws Exception {
+        unlockSystemUser();
+
+        Bundle badSessionBundle = new Bundle();
+        badSessionBundle.putString("any", "any");
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            badSessionBundle, // sessionBundle
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_BAD_REQUEST), anyString());
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserWithBadAccountType() throws Exception {
+        unlockSystemUser();
+
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            createEncryptedSessionBundleWithNoAccountType(
+                    AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_BAD_ARGUMENTS), anyString());
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserUserCannotModifyAccountForTypeNoDPM() throws Exception {
+        unlockSystemUser();
+        when(mMockDevicePolicyManager.getAccountTypesWithManagementDisabledAsUser(anyInt()))
+                .thenReturn(new String[]{AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, "BBB"});
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE), anyString());
+        verify(mMockContext).startActivityAsUser(mIntentCaptor.capture(), eq(UserHandle.of(2)));
+
+        // verify the intent for default CantAddAccountActivity is sent.
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getComponent().getClassName(), CantAddAccountActivity.class.getName());
+        assertEquals(intent.getIntExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, 0),
+                AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE);
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserUserCannotModifyAccountForTypeWithDPM() throws Exception {
+        unlockSystemUser();
+        when(mMockContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
+                mMockDevicePolicyManager);
+        when(mMockDevicePolicyManager.getAccountTypesWithManagementDisabledAsUser(anyInt()))
+                .thenReturn(new String[]{AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, "BBB"});
+
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.addService(
+                DevicePolicyManagerInternal.class, mMockDevicePolicyManagerInternal);
+        when(mMockDevicePolicyManagerInternal.createUserRestrictionSupportIntent(
+                anyInt(), anyString())).thenReturn(new Intent());
+        when(mMockDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                anyInt(), anyBoolean())).thenReturn(new Intent());
+
+        mAms.finishSessionAsUser(
+            mMockAccountManagerResponse, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            2); // fake user id
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE), anyString());
+        verify(mMockContext).startActivityAsUser(any(Intent.class), eq(UserHandle.of(2)));
+        verify(mMockDevicePolicyManagerInternal).createShowAdminSupportIntent(
+                anyInt(), anyBoolean());
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserSuccess() throws Exception {
+        unlockSystemUser();
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.finishSessionAsUser(
+            response, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS),
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            UserHandle.USER_SYSTEM);
+
+        waitForLatch(latch);
+        // Verify notification is cancelled
+        verify(mMockNotificationManager).cancelNotificationWithTag(
+                anyString(), anyString(), anyInt(), anyInt());
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is decrypted and hence data is visible.
+        assertEquals(AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1,
+                sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert finishSessionAsUser added calling uid and pid into the sessionBundle
+        assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_UID));
+        assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_PID));
+        // Assert App bundle data overrides sessionBundle data
+        assertEquals(sessionBundle.getString(
+                AccountManager.KEY_ANDROID_PACKAGE_NAME), "APCT.package");
+
+        // Verify response data
+        assertNull(result.getString(AccountManager.KEY_AUTHTOKEN, null));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_NAME,
+                result.getString(AccountManager.KEY_ACCOUNT_NAME));
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserReturnWithInvalidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_NO_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.finishSessionAsUser(
+            response, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE),
+            true, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            UserHandle.USER_SYSTEM);
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_REMOTE_EXCEPTION), anyString());
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserReturnWithValidIntent() throws Exception {
+        unlockSystemUser();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
+        when(mMockPackageManager.resolveActivityAsUser(
+                any(Intent.class), anyInt(), anyInt())).thenReturn(resolveInfo);
+        when(mMockPackageManager.checkSignatures(
+                anyInt(), anyInt())).thenReturn(PackageManager.SIGNATURE_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.finishSessionAsUser(
+            response, // response
+            createEncryptedSessionBundle(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE),
+            true, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            UserHandle.USER_SYSTEM);
+
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
+        assertNotNull(intent);
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_RESULT));
+        assertNotNull(intent.getParcelableExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK));
+    }
+
+    @SmallTest
+    public void testFinishSessionAsUserError() throws Exception {
+        unlockSystemUser();
+        Bundle sessionBundle = createEncryptedSessionBundleWithError(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_ERROR);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.finishSessionAsUser(
+            response, // response
+            sessionBundle,
+            false, // expectActivityLaunch
+            createAppBundle(), // appInfo
+            UserHandle.USER_SYSTEM);
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+    }
+
+    @SmallTest
+    public void testIsCredentialsUpdatedSuggestedWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.isCredentialsUpdateSuggested(
+                null, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testIsCredentialsUpdatedSuggestedWithNullAccount() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.isCredentialsUpdateSuggested(
+                mMockAccountManagerResponse,
+                null, // account
+                AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testIsCredentialsUpdatedSuggestedWithEmptyStatusToken() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.isCredentialsUpdateSuggested(
+                mMockAccountManagerResponse,
+                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                null);
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+        } catch(Exception e){
+            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+        }
+    }
+
+    @SmallTest
+    public void testIsCredentialsUpdatedSuggestedError() throws Exception {
+        unlockSystemUser();
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.isCredentialsUpdateSuggested(
+            response,
+            AccountManagerServiceTestFixtures.ACCOUNT_ERROR,
+            AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
+    }
+
+    @SmallTest
+    public void testIsCredentialsUpdatedSuggestedSuccess() throws Exception {
+        unlockSystemUser();
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+
+        mAms.isCredentialsUpdateSuggested(
+            response,
+            AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+            AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
+
+        waitForLatch(latch);
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        boolean needUpdate = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
+        assertTrue(needUpdate);
+    }
+
     private void waitForLatch(CountDownLatch latch) {
         try {
             latch.await(LATCH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            fail("should not throw an InterruptedException");
+            throw new IllegalStateException("Should not throw an InterruptedException", e);
         }
+    }
+
+    private Bundle encryptBundleWithCryptoHelper(Bundle sessionBundle) {
+        Bundle encryptedBundle = null;
+        try {
+            CryptoHelper cryptoHelper = CryptoHelper.getInstance();
+            encryptedBundle = cryptoHelper.encryptBundle(sessionBundle);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Failed to encrypt session bundle.", e);
+        }
+        return encryptedBundle;
+    }
+
+    private Bundle createEncryptedSessionBundle(final String accountName) {
+        Bundle sessionBundle = new Bundle();
+        sessionBundle.putString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME, accountName);
+        sessionBundle.putString(
+                AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1,
+                AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1);
+        sessionBundle.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        sessionBundle.putString(AccountManager.KEY_ANDROID_PACKAGE_NAME, "APCT.session.package");
+        return encryptBundleWithCryptoHelper(sessionBundle);
+    }
+
+    private Bundle createEncryptedSessionBundleWithError(final String accountName) {
+        Bundle sessionBundle = new Bundle();
+        sessionBundle.putString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME, accountName);
+        sessionBundle.putString(
+                AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1,
+                AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1);
+        sessionBundle.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        sessionBundle.putString(AccountManager.KEY_ANDROID_PACKAGE_NAME, "APCT.session.package");
+        sessionBundle.putInt(
+                AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_INVALID_RESPONSE);
+        sessionBundle.putString(AccountManager.KEY_ERROR_MESSAGE,
+                AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        return encryptBundleWithCryptoHelper(sessionBundle);
+    }
+
+    private Bundle createEncryptedSessionBundleWithNoAccountType(final String accountName) {
+        Bundle sessionBundle = new Bundle();
+        sessionBundle.putString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME, accountName);
+        sessionBundle.putString(
+                AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1,
+                AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1);
+        sessionBundle.putString(AccountManager.KEY_ANDROID_PACKAGE_NAME, "APCT.session.package");
+        return encryptBundleWithCryptoHelper(sessionBundle);
+    }
+
+    private Bundle createAppBundle() {
+        Bundle appBundle = new Bundle();
+        appBundle.putString(AccountManager.KEY_ANDROID_PACKAGE_NAME, "APCT.package");
+        return appBundle;
     }
 
     private Bundle createOptionsWithAccountName(final String accountName) {
@@ -784,9 +1401,13 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     static class TestInjector extends AccountManagerService.Injector {
         private Context mRealContext;
-        TestInjector(Context realContext, Context mockContext) {
+        private INotificationManager mMockNotificationManager;
+        TestInjector(Context realContext,
+                Context mockContext,
+                INotificationManager mockNotificationManager) {
             super(mockContext);
             mRealContext = realContext;
+            mMockNotificationManager = mockNotificationManager;
         }
 
         @Override
@@ -820,7 +1441,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         INotificationManager getNotificationManager() {
-            return mock(INotificationManager.class);
+            return mMockNotificationManager;
         }
     }
 
