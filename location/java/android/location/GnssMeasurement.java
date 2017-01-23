@@ -660,8 +660,14 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the carrier frequency of the tracked signal.
      *
-     * <p>For example it can be the GPS L1 = 1.57542e9 Hz, or L2, L5, varying GLO channels, etc. If
-     * the field is not set, it is the primary common use frequency, e.g. L1 for GPS.
+     * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60 MHz,
+     * L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
+     * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
+     *
+     * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two raw
+     * measurement objects will be reported for this same satellite, in one of the measurement
+     * objects, all the values related to L1 will be filled, and in the other all of the values
+     * related to L5 will be filled.
      *
      * <p>The value is only available if {@link #hasCarrierFrequencyHz()} is {@code true}.
      */
@@ -882,7 +888,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if {@link #getAutomaticGainControlLevelInDb()} is available, 
+     * Returns {@code true} if {@link #getAutomaticGainControlLevelInDb()} is available,
      * {@code false} otherwise.
      */
     public boolean hasAutomaticGainControlLevelInDb() {
@@ -892,11 +898,12 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Gets the Automatic Gain Control level in dB.
      *
-     * <p> AGC acts as a variable gain amplifier adjusting the power of the incoming signal to
-     * minimize the quantization losses. The AGC level may be used to indicate potential
-     * interference. When AGC is at a nominal level, this value must be set as 0.  Higher gain
-     * (and/or lower input power) shall be output as a positive number. Hence in cases of strong
-     * jamming, in the band of this signal, this value will go more negative.
+     * <p> AGC acts as a variable gain amplifier adjusting the power of the incoming signal. The AGC
+     * level may be used to indicate potential interference. When AGC is at a nominal level, this
+     * value must be set as 0. Higher gain (and/or lower input power) shall be output as a positive
+     * number. Hence in cases of strong jamming, in the band of this signal, this value will go more
+     * negative.
+     *
      * <p>Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
      * components) may also affect the typical output of of this value on any given hardware design
      * in an open sky test - the important aspect of this output is that changes in this value are
