@@ -43,9 +43,11 @@ public final class EphemeralResolveInfo implements Parcelable {
     private final String mPackageName;
     /** The filters used to match domain */
     private final List<EphemeralIntentFilter> mFilters;
+    /** The version code of the app that this class resolves to */
+    private final int mVersionCode;
     /** Filters only for legacy clients */
     @Deprecated
-    private List<IntentFilter> mLegacyFilters;
+    private final List<IntentFilter> mLegacyFilters;
 
     @Deprecated
     public EphemeralResolveInfo(@NonNull Uri uri, @NonNull String packageName,
@@ -59,10 +61,17 @@ public final class EphemeralResolveInfo implements Parcelable {
         mFilters.add(new EphemeralIntentFilter(packageName, filters));
         mLegacyFilters = new ArrayList<IntentFilter>(filters.size());
         mLegacyFilters.addAll(filters);
+        mVersionCode = -1;
+    }
+
+    @Deprecated
+    public EphemeralResolveInfo(@NonNull EphemeralDigest digest, @Nullable String packageName,
+            @Nullable List<EphemeralIntentFilter> filters) {
+        this(digest, packageName, filters, -1 /*versionCode*/);
     }
 
     public EphemeralResolveInfo(@NonNull EphemeralDigest digest, @Nullable String packageName,
-            @Nullable List<EphemeralIntentFilter> filters) {
+            @Nullable List<EphemeralIntentFilter> filters, int versionConde) {
         // validate arguments
         if ((packageName == null && (filters != null && filters.size() != 0))
                 || (packageName != null && (filters == null || filters.size() == 0))) {
@@ -75,7 +84,9 @@ public final class EphemeralResolveInfo implements Parcelable {
         } else {
             mFilters = null;
         }
+        mLegacyFilters = null;
         mPackageName = packageName;
+        mVersionCode = versionConde;
     }
 
     public EphemeralResolveInfo(@NonNull String hostName, @Nullable String packageName,
@@ -88,6 +99,7 @@ public final class EphemeralResolveInfo implements Parcelable {
         mPackageName = in.readString();
         mFilters = new ArrayList<EphemeralIntentFilter>();
         in.readList(mFilters, null /*loader*/);
+        mVersionCode = in.readInt();
         mLegacyFilters = new ArrayList<IntentFilter>();
         in.readList(mLegacyFilters, null /*loader*/);
     }
@@ -104,13 +116,17 @@ public final class EphemeralResolveInfo implements Parcelable {
         return mPackageName;
     }
 
+    public List<EphemeralIntentFilter> getIntentFilters() {
+        return mFilters;
+    }
+
+    public int getVersionCode() {
+        return mVersionCode;
+    }
+
     @Deprecated
     public List<IntentFilter> getFilters() {
         return mLegacyFilters;
-    }
-
-    public List<EphemeralIntentFilter> getIntentFilters() {
-        return mFilters;
     }
 
     @Override
@@ -123,6 +139,7 @@ public final class EphemeralResolveInfo implements Parcelable {
         out.writeParcelable(mDigest, flags);
         out.writeString(mPackageName);
         out.writeList(mFilters);
+        out.writeInt(mVersionCode);
         out.writeList(mLegacyFilters);
     }
 
