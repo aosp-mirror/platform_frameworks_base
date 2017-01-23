@@ -193,10 +193,9 @@ SkColor TestUtils::getColor(const sk_sp<SkSurface>& surface, int x, int y) {
 }
 
 SkRect TestUtils::getClipBounds(const SkCanvas* canvas) {
-    SkClipStack::BoundsType boundType;
-    SkRect clipBounds;
-    canvas->getClipStack()->getBounds(&clipBounds, &boundType);
-    return clipBounds;
+    SkIRect bounds;
+    (void)canvas->getClipDeviceBounds(&bounds);
+    return SkRect::Make(bounds);
 }
 
 SkRect TestUtils::getLocalClipBounds(const SkCanvas* canvas) {
