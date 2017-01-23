@@ -262,6 +262,11 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix, bool firs
         const FloatColor& color = fill.filter.color;
         glUniform4f(mCaches->program().getUniform("colorBlend"),
                 color.r, color.g, color.b, color.a);
+    } else if (fill.filterMode == ProgramDescription::ColorFilterMode::SimpleMatrix) {
+        // Fast path shader where vector components are used as follows:
+        // X = RGB addition, Y = Alpha addition, Z = RGB multiplier, W = alpha multiplier
+        glUniform4fv(mCaches->program().getUniform("colorMatrixPacked"), 1,
+                fill.filter.matrix.vector);
     } else if (fill.filterMode == ProgramDescription::ColorFilterMode::Matrix) {
         glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
                 fill.filter.matrix.matrix);

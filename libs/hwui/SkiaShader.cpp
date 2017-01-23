@@ -175,6 +175,14 @@ bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 mode
 
         outData->startColor.set(gradInfo.fColors[0]);
         outData->endColor.set(gradInfo.fColors[1]);
+
+        // Optimise the very simple case where we're only interpolating from opaque black
+        if (outData->startColor.a == 1.0 && outData->endColor.a == 1.0 &&
+            outData->startColor.r == 0.0 && outData->startColor.g == 0.0 &&
+            outData->startColor.b == 0.0)
+        {
+            description->isVerySimpleGradient = true;
+        }
     }
 
     outData->ditherSampler = (*textureUnit)++;

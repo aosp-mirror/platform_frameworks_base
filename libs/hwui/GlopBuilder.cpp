@@ -315,6 +315,21 @@ void GlopBuilder::setFill(int color, float alphaScale,
             colorVector[1] = srcColorMatrix[9] / 255.0f;
             colorVector[2] = srcColorMatrix[14] / 255.0f;
             colorVector[3] = srcColorMatrix[19] / 255.0f;
+
+            // Optimise the case where we are only changing brightness (R/G/B are identical)
+            if(colorVector[0] == colorVector[1] && colorVector[0] == colorVector[2] &&
+               colorMatrix[0] == colorMatrix[5] && colorMatrix[0] == colorMatrix[10] &&
+               colorMatrix[1] == 0.0 && colorMatrix[2] == 0.0 && colorMatrix[3] == 0.0 &&
+               colorMatrix[4] == 0.0 && colorMatrix[6] == 0.0 && colorMatrix[7] == 0.0 &&
+               colorMatrix[8] == 0.0 && colorMatrix[9] == 0.0 && colorMatrix[11] == 0.0)
+            {
+                // Fast path shader where vector components are used as follows:
+                // X = RGB addition, Y = Alpha addition, Z = RGB multiplier, W = alpha multiplier
+                mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::ColorFilterMode::SimpleMatrix;
+                colorVector[1] = colorVector[3];
+                colorVector[2] = colorMatrix[0];
+                colorVector[3] = colorMatrix[15];
+            }
         } else {
             LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }

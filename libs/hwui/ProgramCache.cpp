@@ -149,18 +149,23 @@ const char* gFS_Uniforms_ExternalTextureSampler =
         "uniform samplerExternalOES baseSampler;\n";
 const char* gFS_Uniforms_Dither =
         "uniform sampler2D ditherSampler;";
-const char* gFS_Uniforms_GradientSampler[2] = {
+const char* gFS_Uniforms_GradientSampler[3] = {
         "%s\n"
         "uniform sampler2D gradientSampler;\n",
         "%s\n"
         "uniform vec4 startColor;\n"
+        "uniform vec4 endColor;\n",
+        "%s\n"
+        "uniform vec4 startColor;\n" // TODO: unused -> remove this here & in skia
         "uniform vec4 endColor;\n"
 };
 const char* gFS_Uniforms_BitmapSampler =
         "uniform sampler2D bitmapSampler;\n";
-const char* gFS_Uniforms_ColorOp[3] = {
+const char* gFS_Uniforms_ColorOp[4] = {
         // None
         "",
+        // Simple Matrix
+        "uniform vec4 colorMatrixPacked;\n",
         // Matrix
         "uniform mat4 colorMatrix;\n"
         "uniform vec4 colorMatrixVector;\n",
@@ -210,20 +215,26 @@ const char* gFS_Fast_SingleModulateA8Texture =
         "\nvoid main(void) {\n"
         "    gl_FragColor = color * texture2D(baseSampler, outTexCoords).a;\n"
         "}\n\n";
-const char* gFS_Fast_SingleGradient[2] = {
+const char* gFS_Fast_SingleGradient[3] = {
         "\nvoid main(void) {\n"
         "    gl_FragColor = %s + texture2D(gradientSampler, linear);\n"
         "}\n\n",
         "\nvoid main(void) {\n"
         "    gl_FragColor = %s + mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
         "}\n\n",
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = %s + (vec4(endColor.xyz * clamp(linear, 0.0, 1.0), 1.0));\n"
+        "}\n\n"
 };
-const char* gFS_Fast_SingleModulateGradient[2] = {
+const char* gFS_Fast_SingleModulateGradient[3] = {
         "\nvoid main(void) {\n"
         "    gl_FragColor = %s + color.a * texture2D(gradientSampler, linear);\n"
         "}\n\n",
         "\nvoid main(void) {\n"
         "    gl_FragColor = %s + color.a * mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n"
+        "}\n\n",
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = %s + color.a * (vec4(endColor.xyz * clamp(linear, 0.0, 1.0), 1.0));\n"
         "}\n\n"
 };
 
@@ -249,23 +260,30 @@ const char* gFS_Main_FetchA8Texture[2] = {
         // Modulate
         "    fragColor = color * texture2D(baseSampler, outTexCoords).a;\n",
 };
-const char* gFS_Main_FetchGradient[6] = {
+const char* gFS_Main_FetchGradient[9] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
 
         "    vec4 gradientColor = mix(startColor, endColor, clamp(linear, 0.0, 1.0));\n",
+
+        "    vec4 gradientColor = vec4(endColor.xyz * clamp(linear, 0.0, 1.0), 1.0);\n",
 
         // Circular
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(length(circular), 0.5));\n",
 
         "    vec4 gradientColor = mix(startColor, endColor, clamp(length(circular), 0.0, 1.0));\n",
 
+        "    vec4 gradientColor = vec4(endColor.xyz * clamp(length(circular), 0.0, 1.0), 1.0);\n",
+
         // Sweep
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index - floor(index), 0.5));\n",
 
         "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
-        "    vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
+        "    vec4 gradientColor = mix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n",
+
+        "    highp float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
+        "    vec4 gradientColor = vec4(endColor.xyz * clamp(index - floor(index), 0.0, 1.0), 1.0);\n"
 };
 const char* gFS_Main_FetchBitmap =
         "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
@@ -307,14 +325,19 @@ const char* gFS_Main_FragColor_Blend =
         "    gl_FragColor = blendFramebuffer(fragColor, gl_LastFragColor);\n";
 const char* gFS_Main_FragColor_Blend_Swap =
         "    gl_FragColor = blendFramebuffer(gl_LastFragColor, fragColor);\n";
-const char* gFS_Main_ApplyColorOp[3] = {
+const char* gFS_Main_ApplyColorOp[4] = {
         // None
         "",
+        // Simple Matrix: RGB have the same value, diagonal only -> mul+add
+        "    fragColor.rgb /= max(fragColor.a, 0.0019);\n" // un-premultiply
+        "    fragColor *= colorMatrixPacked.zzzw;\n"
+        "    fragColor += colorMatrixPacked.xxxy;\n"
+        "    fragColor.rgb *= (fragColor.a);\n", // re-premultiply
         // Matrix
-        "    fragColor.rgb /= (fragColor.a + 0.0019);\n" // un-premultiply
+        "    fragColor.rgb /= max(fragColor.a, 0.0019);\n" // un-premultiply
         "    fragColor *= colorMatrix;\n"
         "    fragColor += colorMatrixVector;\n"
-        "    fragColor.rgb *= (fragColor.a + 0.0019);\n", // re-premultiply
+        "    fragColor.rgb *= (fragColor.a);\n", // re-premultiply
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
@@ -436,8 +459,14 @@ Program* ProgramCache::generateProgram(const ProgramDescription& description, pr
     return new Program(description, vertexShader.string(), fragmentShader.string());
 }
 
-static inline size_t gradientIndex(const ProgramDescription& description) {
-    return description.gradientType * 2 + description.isSimpleGradient;
+static inline size_t gradientIndex(const ProgramDescription& description, bool supportVerySimple) {
+    // Some strings support the 'very simple' case where startColor.rgb = vec3(0.0) and both are opaque
+    // But others do not and should use the normal indexing calculation
+    if (supportVerySimple) {
+        return description.gradientType * 3 + description.isSimpleGradient + description.isVerySimpleGradient;
+    } else {
+        return description.gradientType * 2 + description.isSimpleGradient;
+    }
 }
 
 String8 ProgramCache::generateVertexShader(const ProgramDescription& description) {
@@ -477,7 +506,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Header_Varyings_HasColors);
     }
     if (description.hasGradient) {
-        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
+        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description, false)]);
     }
     if (description.hasBitmap) {
         shader.append(gVS_Header_Varyings_HasBitmap);
@@ -505,7 +534,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         // Output transformed position
         shader.append(gVS_Main_Position);
         if (description.hasGradient) {
-            shader.append(gVS_Main_OutGradient[gradientIndex(description)]);
+            shader.append(gVS_Main_OutGradient[gradientIndex(description, false)]);
         }
         if (description.hasRoundRectClip) {
             shader.append(gVS_Main_HasRoundRectClip);
@@ -550,7 +579,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gVS_Header_Varyings_HasColors);
     }
     if (description.hasGradient) {
-        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description)]);
+        shader.append(gVS_Header_Varyings_HasGradient[gradientIndex(description, false)]);
     }
     if (description.hasBitmap) {
         shader.append(gVS_Header_Varyings_HasBitmap);
@@ -574,7 +603,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gFS_Uniforms_ExternalTextureSampler);
     }
     if (description.hasGradient) {
-        shader.appendFormat(gFS_Uniforms_GradientSampler[description.isSimpleGradient],
+        shader.appendFormat(gFS_Uniforms_GradientSampler[description.isSimpleGradient + description.isVerySimpleGradient],
                 gFS_Uniforms_Dither);
     }
     if (description.hasRoundRectClip) {
@@ -623,10 +652,10 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             fast = true;
         } else if (singleGradient) {
             if (!description.modulate) {
-                shader.appendFormat(gFS_Fast_SingleGradient[description.isSimpleGradient],
+                shader.appendFormat(gFS_Fast_SingleGradient[description.isSimpleGradient + description.isVerySimpleGradient],
                         gFS_Main_Dither[mHasES3]);
             } else {
-                shader.appendFormat(gFS_Fast_SingleModulateGradient[description.isSimpleGradient],
+                shader.appendFormat(gFS_Fast_SingleModulateGradient[description.isSimpleGradient + description.isVerySimpleGradient],
                         gFS_Main_Dither[mHasES3]);
             }
             fast = true;
@@ -679,7 +708,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             }
         }
         if (description.hasGradient) {
-            shader.append(gFS_Main_FetchGradient[gradientIndex(description)]);
+            shader.append(gFS_Main_FetchGradient[gradientIndex(description, true)]);
             shader.appendFormat(gFS_Main_AddDitherToGradient, gFS_Main_Dither[mHasES3]);
         }
         if (description.hasBitmap) {
