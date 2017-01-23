@@ -463,6 +463,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         mDark = dark;
         updateBackground();
+        updateBackgroundTint(fade);
         if (!dark && fade && !shouldHideBackground()) {
             fadeInFromDark(delay);
         }
@@ -700,8 +701,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void updateBackground() {
         cancelFadeAnimations();
         if (shouldHideBackground()) {
-            mBackgroundDimmed.setVisibility(View.INVISIBLE);
-            mBackgroundNormal.setVisibility(View.INVISIBLE);
+            mBackgroundDimmed.setVisibility(INVISIBLE);
+            mBackgroundNormal.setVisibility(mActivated ? VISIBLE : INVISIBLE);
         } else if (mDimmed) {
             // When groups are animating to the expanded state from the lockscreen, show the
             // normal background instead of the dimmed background
@@ -940,6 +941,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * @return the calculated background color
      */
     private int calculateBgColor(boolean withTint, boolean withOverRide) {
+        if (mDark) {
+            return getContext().getColor(R.color.notification_material_background_dark_color);
+        }
         if (withOverRide && mOverrideTint != NO_COLOR) {
             int defaultTint = calculateBgColor(withTint, false);
             return NotificationUtils.interpolateColors(defaultTint, mOverrideTint, mOverrideAmount);

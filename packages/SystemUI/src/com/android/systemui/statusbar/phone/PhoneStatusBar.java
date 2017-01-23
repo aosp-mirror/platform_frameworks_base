@@ -4604,12 +4604,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
-    public void wakeUpIfDozing(long time, MotionEvent event) {
+    @Override
+    public void wakeUpIfDozing(long time, PointF where) {
         if (mDozing && mDozeScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time, "com.android.systemui:NODOZE");
             mWakeUpComingFromTouch = true;
-            mWakeUpTouchLocation = new PointF(event.getX(), event.getY());
+            mWakeUpTouchLocation = where;
             mNotificationPanel.setTouchDisabled(false);
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
             mFalsingManager.onScreenOnFromTouch();
