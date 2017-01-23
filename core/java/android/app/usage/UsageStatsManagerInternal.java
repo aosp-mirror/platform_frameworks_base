@@ -19,7 +19,7 @@ package android.app.usage;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
  * UsageStatsManager local system service interface.
@@ -127,4 +127,7 @@ public abstract class UsageStatsManagerInternal {
 
     public abstract void applyRestoredPayload(int user, String key, byte[] payload);
 
+    /* Cache Quota Service API */
+    public abstract List<UsageStats> queryUsageStatsForUser(
+            int userId, int interval, long beginTime, long endTime);
 }

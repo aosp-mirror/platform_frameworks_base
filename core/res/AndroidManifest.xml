@@ -3107,6 +3107,13 @@
     <permission android:name="android.permission.BIND_DREAM_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.app.usage.CacheQuotaService} to ensure that only the
+         system can bind to it.
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_CACHE_QUOTA_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to call into a carrier setup flow. It is up to the
          carrier setup application to enforce that this permission is required
          @hide This is not a third-party API (intended for OEMs and system apps). -->

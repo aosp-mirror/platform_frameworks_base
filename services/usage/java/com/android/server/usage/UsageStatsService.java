@@ -1603,5 +1603,12 @@ public class UsageStatsService extends SystemService implements
                 userStats.applyRestoredPayload(key, payload);
             }
         }
+
+        @Override
+        public List<UsageStats> queryUsageStatsForUser(
+                int userId, int intervalType, long beginTime, long endTime) {
+            return UsageStatsService.this.queryUsageStats(
+                    userId, intervalType, beginTime, endTime);
+        }
     }
 }
