@@ -707,7 +707,7 @@ public final class ActiveServices {
         try {
             ServiceRecord r = findServiceLocked(className, token, userId);
             if (r != null) {
-                setServiceForegroundInnerLocked(r, userId, notification, flags);
+                setServiceForegroundInnerLocked(r, id, notification, flags);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
