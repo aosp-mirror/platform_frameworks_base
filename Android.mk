@@ -346,6 +346,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
 	core/java/com/android/internal/backup/IObbBackupService.aidl \
+	core/java/com/android/internal/font/IFontManager.aidl \
 	core/java/com/android/internal/inputmethod/IInputContentUriToken.aidl \
 	core/java/com/android/internal/policy/IKeyguardDrawnCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardDismissCallback.aidl \

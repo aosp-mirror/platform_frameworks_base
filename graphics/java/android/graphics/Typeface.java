@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.content.res.AssetManager;
+import android.text.FontConfig;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
@@ -319,25 +320,25 @@ public class Typeface {
         mStyle = nativeGetStyle(ni);
     }
 
-    private static FontFamily makeFamilyFromParsed(FontListParser.Family family,
+    private static FontFamily makeFamilyFromParsed(FontConfig.Family family,
             Map<String, ByteBuffer> bufferForPath) {
-        FontFamily fontFamily = new FontFamily(family.lang, family.variant);
-        for (FontListParser.Font font : family.fonts) {
-            ByteBuffer fontBuffer = bufferForPath.get(font.fontName);
+        FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
+        for (FontConfig.Font font : family.getFonts()) {
+            ByteBuffer fontBuffer = bufferForPath.get(font.getFontName());
             if (fontBuffer == null) {
-                try (FileInputStream file = new FileInputStream(font.fontName)) {
+                try (FileInputStream file = new FileInputStream(font.getFontName())) {
                     FileChannel fileChannel = file.getChannel();
                     long fontSize = fileChannel.size();
                     fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
-                    bufferForPath.put(font.fontName, fontBuffer);
+                    bufferForPath.put(font.getFontName(), fontBuffer);
                 } catch (IOException e) {
-                    Log.e(TAG, "Error mapping font file " + font.fontName);
+                    Log.e(TAG, "Error mapping font file " + font.getFontName());
                     continue;
                 }
             }
-            if (!fontFamily.addFontWeightStyle(fontBuffer, font.ttcIndex, font.axes,
-                    font.weight, font.isItalic)) {
-                Log.e(TAG, "Error creating font " + font.fontName + "#" + font.ttcIndex);
+            if (!fontFamily.addFontWeightStyle(fontBuffer, font.getTtcIndex(), font.getAxes(),
+                    font.getWeight(), font.isItalic())) {
+                Log.e(TAG, "Error creating font " + font.getFontName() + "#" + font.getTtcIndex());
             }
         }
         return fontFamily;
@@ -354,16 +355,16 @@ public class Typeface {
         File configFilename = new File(systemFontConfigLocation, FONTS_CONFIG);
         try {
             FileInputStream fontsIn = new FileInputStream(configFilename);
-            FontListParser.Config fontConfig = FontListParser.parse(fontsIn);
+            FontConfig fontConfig = FontListParser.parse(fontsIn);
 
             Map<String, ByteBuffer> bufferForPath = new HashMap<String, ByteBuffer>();
 
             List<FontFamily> familyList = new ArrayList<FontFamily>();
             // Note that the default typeface is always present in the fallback list;
             // this is an enhancement from pre-Minikin behavior.
-            for (int i = 0; i < fontConfig.families.size(); i++) {
-                FontListParser.Family f = fontConfig.families.get(i);
-                if (i == 0 || f.name == null) {
+            for (int i = 0; i < fontConfig.getFamilies().size(); i++) {
+                FontConfig.Family f = fontConfig.getFamilies().get(i);
+                if (i == 0 || f.getName() == null) {
                     familyList.add(makeFamilyFromParsed(f, bufferForPath));
                 }
             }
@@ -371,10 +372,10 @@ public class Typeface {
             setDefault(Typeface.createFromFamilies(sFallbackFonts));
 
             Map<String, Typeface> systemFonts = new HashMap<String, Typeface>();
-            for (int i = 0; i < fontConfig.families.size(); i++) {
+            for (int i = 0; i < fontConfig.getFamilies().size(); i++) {
                 Typeface typeface;
-                FontListParser.Family f = fontConfig.families.get(i);
-                if (f.name != null) {
+                FontConfig.Family f = fontConfig.getFamilies().get(i);
+                if (f.getName() != null) {
                     if (i == 0) {
                         // The first entry is the default typeface; no sense in
                         // duplicating the corresponding FontFamily.
@@ -384,17 +385,17 @@ public class Typeface {
                         FontFamily[] families = { fontFamily };
                         typeface = Typeface.createFromFamiliesWithDefault(families);
                     }
-                    systemFonts.put(f.name, typeface);
+                    systemFonts.put(f.getName(), typeface);
                 }
             }
-            for (FontListParser.Alias alias : fontConfig.aliases) {
-                Typeface base = systemFonts.get(alias.toName);
+            for (FontConfig.Alias alias : fontConfig.getAliases()) {
+                Typeface base = systemFonts.get(alias.getToName());
                 Typeface newFace = base;
-                int weight = alias.weight;
+                int weight = alias.getWeight();
                 if (weight != 400) {
                     newFace = new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
                 }
-                systemFonts.put(alias.name, newFace);
+                systemFonts.put(alias.getName(), newFace);
             }
             sSystemFontMap = systemFonts;
 

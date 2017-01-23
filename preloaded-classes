@@ -823,11 +823,6 @@ android.graphics.DrawFilter
 android.graphics.EmbossMaskFilter
 android.graphics.FontFamily
 android.graphics.FontListParser
-android.graphics.FontListParser$Alias
-android.graphics.FontListParser$Axis
-android.graphics.FontListParser$Config
-android.graphics.FontListParser$Family
-android.graphics.FontListParser$Font
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Interpolator$Result
@@ -1847,6 +1842,11 @@ android.text.DynamicLayout
 android.text.DynamicLayout$ChangeWatcher
 android.text.Editable
 android.text.Editable$Factory
+android.text.FontConfig
+android.text.FontConfig$Alias
+android.text.FontConfig$Axis
+android.text.FontConfig$Family
+android.text.FontConfig$Font
 android.text.GetChars
 android.text.GraphicsOperations
 android.text.Html

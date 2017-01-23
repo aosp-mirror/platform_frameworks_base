@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.text.FontConfig;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
@@ -208,12 +209,12 @@ public final class Typeface_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static FontFamily makeFamilyFromParsed(FontListParser.Family family,
+    /*package*/ static FontFamily makeFamilyFromParsed(FontConfig.Family family,
             Map<String, ByteBuffer> bufferForPath) {
-        FontFamily fontFamily = new FontFamily(family.lang, family.variant);
-        for (FontListParser.Font font : family.fonts) {
-            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.fontName, font.weight,
-                    font.isItalic);
+        FontFamily fontFamily = new FontFamily(family.getLanguage(), family.getVariant());
+        for (FontConfig.Font font : family.getFonts()) {
+            FontFamily_Delegate.addFont(fontFamily.mNativePtr, font.getFontName(),
+                    font.getWeight(), font.isItalic());
         }
         return fontFamily;
     }
