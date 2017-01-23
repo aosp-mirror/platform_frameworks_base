@@ -78,16 +78,20 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -973,7 +977,7 @@ public class SettingsProvider extends ContentProvider {
                     continue;
                 }
 
-                // As of Android O (API 24), the SSAID is read from an app-specific entry in table
+                // As of Android O, the SSAID is read from an app-specific entry in table
                 // SETTINGS_FILE_SSAID, unless accessed by a system process.
                 final Setting setting;
                 if (isNewSsaidSetting(name)) {
@@ -1009,7 +1013,7 @@ public class SettingsProvider extends ContentProvider {
 
         // Get the value.
         synchronized (mLock) {
-            // As of Android O (API 24), the SSAID is read from an app-specific entry in table
+            // As of Android O, the SSAID is read from an app-specific entry in table
             // SETTINGS_FILE_SSAID, unless accessed by a system process.
             if (isNewSsaidSetting(name)) {
                 return getSsaidSettingLocked(owningUserId);
@@ -1895,12 +1899,12 @@ public class SettingsProvider extends ContentProvider {
 
         private void generateUserKeyLocked(int userId) {
             // Generate a random key for each user used for creating a new ssaid.
-            final byte[] keyBytes = new byte[16];
+            final byte[] keyBytes = new byte[32];
             final SecureRandom rand = new SecureRandom();
             rand.nextBytes(keyBytes);
 
             // Convert to string for storage in settings table.
-            final String userKey = ByteStringUtils.toString(keyBytes);
+            final String userKey = ByteStringUtils.toHexString(keyBytes);
 
             // Store the key in the ssaid table.
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID, userId);
@@ -1910,6 +1914,10 @@ public class SettingsProvider extends ContentProvider {
             if (!success) {
                 throw new IllegalStateException("Ssaid settings not accessible");
             }
+        }
+
+        private byte[] getLengthPrefix(byte[] data) {
+            return ByteBuffer.allocate(4).putInt(data.length).array();
         }
 
         public Setting generateSsaidLocked(String packageName, int userId) {
@@ -1936,25 +1944,37 @@ public class SettingsProvider extends ContentProvider {
             final String userKey = userKeySetting.getValue();
 
             // Convert the user's key back to a byte array.
-            final byte[] keyBytes = ByteStringUtils.toByteArray(userKey);
-            if (keyBytes == null || keyBytes.length != 16) {
+            final byte[] keyBytes = ByteStringUtils.fromHexToByteArray(userKey);
+
+            // Validate that the key is of expected length.
+            // Keys are currently 32 bytes, but were once 16 bytes during Android O development.
+            if (keyBytes == null || (keyBytes.length != 16 && keyBytes.length != 32)) {
                 throw new IllegalStateException("User key invalid");
             }
 
-            final MessageDigest md;
+            final Mac m;
             try {
-                // Hash package name and signature.
-                md = MessageDigest.getInstance("SHA-256");
+                m = Mac.getInstance("HmacSHA256");
+                m.init(new SecretKeySpec(keyBytes, m.getAlgorithm()));
             } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException("HmacSHA256 is not available");
+                throw new IllegalStateException("HmacSHA256 is not available", e);
+            } catch (InvalidKeyException e) {
+                throw new IllegalStateException("Key is corrupted", e);
             }
-            md.update(keyBytes);
-            md.update(packageInfo.packageName.getBytes(StandardCharsets.UTF_8));
-            md.update(packageInfo.signatures[0].toByteArray());
+
+            // Mac the package name and each of the signatures.
+            byte[] packageNameBytes = packageInfo.packageName.getBytes(StandardCharsets.UTF_8);
+            m.update(getLengthPrefix(packageNameBytes), 0, 4);
+            m.update(packageNameBytes);
+            for (int i = 0; i < packageInfo.signatures.length; i++) {
+                byte[] sig = packageInfo.signatures[i].toByteArray();
+                m.update(getLengthPrefix(sig), 0, 4);
+                m.update(sig);
+            }
 
             // Convert result to a string for storage in settings table. Only want first 64 bits.
-            final String ssaid = ByteStringUtils.toString(md.digest()).substring(0, 16)
-                    .toLowerCase();
+            final String ssaid = ByteStringUtils.toHexString(m.doFinal()).substring(0, 16)
+                    .toLowerCase(Locale.US);
 
             // Save the ssaid in the ssaid table.
             final String uid = Integer.toString(packageInfo.applicationInfo.uid);

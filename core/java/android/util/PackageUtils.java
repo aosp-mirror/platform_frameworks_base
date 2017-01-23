@@ -80,6 +80,6 @@ public final class PackageUtils {
 
         messageDigest.update(data);
 
-        return ByteStringUtils.toString(messageDigest.digest());
+        return ByteStringUtils.toHexString(messageDigest.digest());
     }
 }
