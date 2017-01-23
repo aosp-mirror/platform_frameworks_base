@@ -311,13 +311,32 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, deferRenderNodeScene) {
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     }
 
-    FrameBuilder frameBuilder(SkRect::MakeWH(800, 600), 800, 600,
-            sLightGeometry, Caches::getInstance());
-    frameBuilder.deferRenderNodeScene(nodes, contentDrawBounds);
+    {
+        FrameBuilder frameBuilder(SkRect::MakeWH(800, 600), 800, 600,
+                sLightGeometry, Caches::getInstance());
+        frameBuilder.deferRenderNodeScene(nodes, contentDrawBounds);
 
-    DeferRenderNodeSceneTestRenderer renderer;
-    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
-    EXPECT_EQ(4, renderer.getIndex());
+        DeferRenderNodeSceneTestRenderer renderer;
+        frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+        EXPECT_EQ(4, renderer.getIndex());
+    }
+
+    for (auto& node : nodes) {
+        EXPECT_FALSE(node->nothingToDraw());
+        node->setStagingDisplayList(nullptr, nullptr);
+        node->destroyHardwareResources(nullptr);
+        EXPECT_TRUE(node->nothingToDraw());
+    }
+
+    {
+        // Validate no crashes if any nodes are missing DisplayLists
+        FrameBuilder frameBuilder(SkRect::MakeWH(800, 600), 800, 600,
+                sLightGeometry, Caches::getInstance());
+        frameBuilder.deferRenderNodeScene(nodes, contentDrawBounds);
+
+        FailRenderer renderer;
+        frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    }
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, empty_noFbo0) {
