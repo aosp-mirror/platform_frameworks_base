@@ -8814,7 +8814,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void notifyPendingSystemUpdate(long updateReceivedTime) {
+    public void notifyPendingSystemUpdate(@Nullable SystemUpdateInfo info) {
         mContext.enforceCallingOrSelfPermission(permission.NOTIFY_PENDING_SYSTEM_UPDATE,
                 "Only the system update service can broadcast update information");
 
@@ -8824,13 +8824,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (!mOwners.saveSystemUpdateInfo(updateReceivedTime)) {
-            // Received time hasn't changed, don't send duplicate notification.
+        if (!mOwners.saveSystemUpdateInfo(info)) {
+            // Pending system update hasn't changed, don't send duplicate notification.
             return;
         }
 
-        final Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME, updateReceivedTime);
+        final Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE)
+                .putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME,
+                        info == null ? -1 : info.getReceivedTime());
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {

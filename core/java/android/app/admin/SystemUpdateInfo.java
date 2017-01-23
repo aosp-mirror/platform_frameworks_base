@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.Parcel;
@@ -25,39 +26,84 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
  * A class containing information about a pending system update.
  */
 public final class SystemUpdateInfo implements Parcelable {
-    private static final String ATTR_RECEIVED_TIME = "mReceivedTime";
-    // Tag used to store original build fingerprint to detect when the update is applied.
-    private static final String ATTR_ORIGINAL_BUILD = "originalBuild";
-    private final long mReceivedTime;
 
-    private SystemUpdateInfo(long receivedTime) {
+    /**
+     * Represents it is unknown whether the system update is a security patch.
+     */
+    public static final int SECURITY_PATCH_STATE_UNKNOWN = 0;
+
+    /**
+     * Represents the system update is not a security patch.
+     */
+    public static final int SECURITY_PATCH_STATE_FALSE = 1;
+
+    /**
+     * Represents the system update is a security patch.
+     */
+    public static final int SECURITY_PATCH_STATE_TRUE = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SECURITY_PATCH_STATE_FALSE, SECURITY_PATCH_STATE_TRUE, SECURITY_PATCH_STATE_UNKNOWN})
+    public @interface SecurityPatchState {}
+
+    private static final String ATTR_RECEIVED_TIME = "received-time";
+    private static final String ATTR_SECURITY_PATCH_STATE = "security-patch-state";
+    // Tag used to store original build fingerprint to detect when the update is applied.
+    private static final String ATTR_ORIGINAL_BUILD = "original-build";
+
+    private final long mReceivedTime;
+    @SecurityPatchState
+    private final int mSecurityPatchState;
+
+    private SystemUpdateInfo(long receivedTime, @SecurityPatchState int securityPatchState) {
         this.mReceivedTime = receivedTime;
+        this.mSecurityPatchState = securityPatchState;
     }
 
     private SystemUpdateInfo(Parcel in) {
         mReceivedTime = in.readLong();
+        mSecurityPatchState = in.readInt();
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @Nullable
     public static SystemUpdateInfo of(long receivedTime) {
-        return receivedTime == -1 ? null : new SystemUpdateInfo(receivedTime);
+        return receivedTime == -1
+                ? null : new SystemUpdateInfo(receivedTime, SECURITY_PATCH_STATE_UNKNOWN);
+    }
+
+    /** @hide */
+    @Nullable
+    public static SystemUpdateInfo of(long receivedTime, boolean isSecurityPatch) {
+        return receivedTime == -1 ? null : new SystemUpdateInfo(receivedTime,
+                isSecurityPatch ? SECURITY_PATCH_STATE_TRUE : SECURITY_PATCH_STATE_FALSE);
     }
 
     /**
-     * Get time when the update was first available.
-     * @return time as given by {@link System#currentTimeMillis()}
+     * Gets time when the update was first available.
+     * @return Time as given by {@link System#currentTimeMillis()}
      */
     public long getReceivedTime() {
         return mReceivedTime;
+    }
+
+    /**
+     * Gets whether the update is a security patch.
+     * @return {@link #SECURITY_PATCH_STATE_FALSE}, {@link #SECURITY_PATCH_STATE_TRUE}, or
+     *         {@link #SECURITY_PATCH_STATE_UNKNOWN}.
+     */
+    @SecurityPatchState
+    public int getSecurityPatchState() {
+        return mSecurityPatchState;
     }
 
     public static final Creator<SystemUpdateInfo> CREATOR =
@@ -73,19 +119,16 @@ public final class SystemUpdateInfo implements Parcelable {
                 }
             };
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public void writeToXml(XmlSerializer out, String tag) throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_RECEIVED_TIME, String.valueOf(mReceivedTime));
+        out.attribute(null, ATTR_SECURITY_PATCH_STATE, String.valueOf(mSecurityPatchState));
         out.attribute(null, ATTR_ORIGINAL_BUILD , Build.FINGERPRINT);
         out.endTag(null, tag);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @Nullable
     public static SystemUpdateInfo readFromXml(XmlPullParser parser) {
         // If an OTA has been applied (build fingerprint has changed), discard stale info.
@@ -95,7 +138,9 @@ public final class SystemUpdateInfo implements Parcelable {
         }
         final long receivedTime =
                 Long.parseLong(parser.getAttributeValue(null, ATTR_RECEIVED_TIME));
-        return of(receivedTime);
+        final int securityPatchState =
+                Integer.parseInt(parser.getAttributeValue(null, ATTR_SECURITY_PATCH_STATE));
+        return new SystemUpdateInfo(receivedTime, securityPatchState);
     }
 
     @Override
@@ -106,11 +151,26 @@ public final class SystemUpdateInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(getReceivedTime());
+        dest.writeInt(getSecurityPatchState());
     }
 
     @Override
     public String toString() {
-        return String.format("SystemUpdateInfo (receivedTime = %d)", mReceivedTime);
+        return String.format("SystemUpdateInfo (receivedTime = %d, securityPatchState = %s)",
+                mReceivedTime, securityPatchStateToString(mSecurityPatchState));
+    }
+
+    private static String securityPatchStateToString(@SecurityPatchState int state) {
+        switch (state) {
+            case SECURITY_PATCH_STATE_FALSE:
+                return "false";
+            case SECURITY_PATCH_STATE_TRUE:
+                return "true";
+            case SECURITY_PATCH_STATE_UNKNOWN:
+                return "unknown";
+            default:
+                throw new IllegalArgumentException("Unrecognized security patch state: " + state);
+        }
     }
 
     @Override
@@ -118,11 +178,12 @@ public final class SystemUpdateInfo implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemUpdateInfo that = (SystemUpdateInfo) o;
-        return mReceivedTime == that.mReceivedTime;
+        return mReceivedTime == that.mReceivedTime
+                && mSecurityPatchState == that.mSecurityPatchState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mReceivedTime);
+        return Objects.hash(mReceivedTime, mSecurityPatchState);
     }
 }
