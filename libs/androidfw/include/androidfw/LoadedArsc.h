@@ -45,16 +45,17 @@ struct FindEntryResult {
   // A pointer to the resource table entry for this resource.
   // If the size of the entry is > sizeof(ResTable_entry), it can be cast to
   // a ResTable_map_entry and processed as a bag/map.
-  const ResTable_entry* entry = nullptr;
+  const ResTable_entry* entry;
 
-  // The configuration for which the resulting entry was defined.
-  const ResTable_config* config = nullptr;
+  // The configuration for which the resulting entry was defined. This points to a structure that
+  // is already swapped to host endianness.
+  const ResTable_config* config;
 
-  // Stores the resulting bitmask of configuration axis with which the resource value varies.
-  uint32_t type_flags = 0u;
+  // The bitmask of configuration axis with which the resource value varies.
+  uint32_t type_flags;
 
   // The dynamic package ID map for the package from which this resource came from.
-  const DynamicRefTable* dynamic_ref_table = nullptr;
+  const DynamicRefTable* dynamic_ref_table;
 
   // The string pool reference to the type's name. This uses a different string pool than
   // the global string pool, but this is hidden from the caller.

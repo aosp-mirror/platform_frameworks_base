@@ -265,8 +265,6 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
 
 ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_override,
                                          bool stop_at_first_match, FindEntryResult* out_entry) {
-  ATRACE_CALL();
-
   // Might use this if density_override != 0.
   ResTable_config density_override_config;
 
@@ -429,9 +427,7 @@ ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_valu
   for (size_t iteration = 0u; in_out_value->dataType == Res_value::TYPE_REFERENCE &&
                               in_out_value->data != 0u && iteration < kMaxIterations;
        iteration++) {
-    if (out_last_reference != nullptr) {
-      *out_last_reference = in_out_value->data;
-    }
+    *out_last_reference = in_out_value->data;
     uint32_t new_flags = 0u;
     cookie = GetResource(in_out_value->data, true /*may_be_bag*/, 0u /*density_override*/,
                          in_out_value, in_out_selected_config, &new_flags);
