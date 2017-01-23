@@ -803,15 +803,17 @@ public class MediaRecorder
     /**
      * Sets the next output file descriptor to be used when the maximum filesize is reached
      * on the prior output {@link #setOutputFile} or {@link #setNextOutputFile}). File descriptor
-     * must be seekable and in read-write mode. After setting the next output file, application
-     * should not use the file referenced by this file descriptor until {@link #stop}. Application
-     * must call this after receiving on the {@link android.media.MediaRecorder.OnInfoListener} a
-     * "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving
-     * a "what" code of {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used
-     * until switching to that output. Application will receive
-     * {@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED} when the next output file is used.
-     * Application will not be able to set a new output file if the previous one has not been used.
-     * Application is responsible for cleaning up unused files after {@link #stop} is called.
+     * must be seekable and writable. After setting the next output file, application should not
+     * use the file referenced by this file descriptor until {@link #stop}. It is the application's
+     * responsibility to close the file descriptor. It is safe to do so as soon as this call returns.
+     * Application must call this after receiving on the
+     * {@link android.media.MediaRecorder.OnInfoListener} a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING} and before receiving a "what" code of
+     * {@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}. The file is not used until switching to
+     * that output. Application will receive{@link #MEDIA_RECORDER_INFO_NEXT_OUTPUT_FILE_STARTED}
+     * when the next output file is used. Application will not be able to set a new output file if
+     * the previous one has not been used. Application is responsible for cleaning up unused files
+     * after {@link #stop} is called.
      *
      * @param fd an open file descriptor to be written into.
      * @throws IllegalStateException if it is called before prepare().
