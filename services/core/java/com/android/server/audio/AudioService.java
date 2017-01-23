@@ -5932,7 +5932,7 @@ public class AudioService extends IAudioService.Stub
      *   the whether any exposes the FLAG_ENABLE_ACCESSIBILITY_VOLUME flag
      * - set to false to listen to when accessibility services are started (e.g. "TalkBack started")
      */
-    private static final boolean USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME = true;
+    private static final boolean USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME = false;
 
     private void initA11yMonitoring() {
         final AccessibilityManager accessibilityManager =
