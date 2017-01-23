@@ -16,22 +16,29 @@
 
 package com.android.server;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
+
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 
+import android.app.AlarmManager;
+import android.app.AlarmManager.OnAlarmListener;
+import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.content.Context;
+import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
 import java.util.ArrayList;
-
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 
 /**
  * Keeps track of requests for strong authentication.
@@ -45,12 +52,22 @@ public class LockSettingsStrongAuth {
     private static final int MSG_UNREGISTER_TRACKER = 3;
     private static final int MSG_REMOVE_USER = 4;
 
+    private static final String STRONG_AUTH_TIMEOUT_ALARM_TAG =
+            "LockSettingsStrongAuth.timeoutForUser";
+
     private final ArrayList<IStrongAuthTracker> mStrongAuthTrackers = new ArrayList<>();
     private final SparseIntArray mStrongAuthForUser = new SparseIntArray();
+    private final ArrayMap<Integer, StrongAuthTimeoutAlarmListener>
+            mStrongAuthTimeoutAlarmListenerForUser = new ArrayMap<>();
     private final int mDefaultStrongAuthFlags;
+    private final Context mContext;
+
+    private AlarmManager mAlarmManager;
 
     public LockSettingsStrongAuth(Context context) {
+        mContext = context;
         mDefaultStrongAuthFlags = StrongAuthTracker.getDefaultFlags(context);
+        mAlarmManager = context.getSystemService(AlarmManager.class);
     }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
@@ -149,6 +166,46 @@ public class LockSettingsStrongAuth {
 
     public void reportUnlock(int userId) {
         requireStrongAuth(STRONG_AUTH_NOT_REQUIRED, userId);
+    }
+
+    public void reportSuccessfulStrongAuthUnlock(int userId) {
+        scheduleStrongAuthTimeout(userId);
+    }
+
+    private void scheduleStrongAuthTimeout(int userId) {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        long when = SystemClock.elapsedRealtime() + dpm.getRequiredStrongAuthTimeout(null, userId);
+        // cancel current alarm listener for the user (if there was one)
+        StrongAuthTimeoutAlarmListener alarm = mStrongAuthTimeoutAlarmListenerForUser.get(userId);
+        if (alarm != null) {
+            mAlarmManager.cancel(alarm);
+        } else {
+            alarm = new StrongAuthTimeoutAlarmListener(userId);
+            mStrongAuthTimeoutAlarmListenerForUser.put(userId, alarm);
+        }
+        // schedule a new alarm listener for the user
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, STRONG_AUTH_TIMEOUT_ALARM_TAG,
+                    alarm, mHandler);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private class StrongAuthTimeoutAlarmListener implements OnAlarmListener {
+
+        private final int mUserId;
+
+        public StrongAuthTimeoutAlarmListener(int userId) {
+            mUserId = userId;
+        }
+
+        @Override
+        public void onAlarm() {
+            requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT, mUserId);
+        }
     }
 
     private final Handler mHandler = new Handler() {

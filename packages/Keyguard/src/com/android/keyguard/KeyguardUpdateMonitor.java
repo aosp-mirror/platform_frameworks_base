@@ -26,7 +26,6 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -105,12 +104,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             = "com.android.facelock.FACE_UNLOCK_STARTED";
     private static final String ACTION_FACE_UNLOCK_STOPPED
             = "com.android.facelock.FACE_UNLOCK_STOPPED";
-
-    private static final String ACTION_STRONG_AUTH_TIMEOUT =
-            "com.android.systemui.ACTION_STRONG_AUTH_TIMEOUT";
-    private static final String USER_ID = "com.android.systemui.USER_ID";
-
-    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
@@ -203,7 +196,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mDeviceInteractive;
     private boolean mScreenOn;
     private SubscriptionManager mSubscriptionManager;
-    private AlarmManager mAlarmManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
     private TrustManager mTrustManager;
     private UserManager mUserManager;
@@ -588,24 +580,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public void reportSuccessfulStrongAuthUnlockAttempt() {
-        scheduleStrongAuthTimeout();
         if (mFpm != null) {
             byte[] token = null; /* TODO: pass real auth token once fp HAL supports it */
             mFpm.resetTimeout(token);
         }
-    }
-
-    private void scheduleStrongAuthTimeout() {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        long when = SystemClock.elapsedRealtime() + dpm.getRequiredStrongAuthTimeout(null,
-                sCurrentUser);
-        Intent intent = new Intent(ACTION_STRONG_AUTH_TIMEOUT);
-        intent.putExtra(USER_ID, sCurrentUser);
-        PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                sCurrentUser, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, sender);
-        notifyStrongAuthStateChanged(sCurrentUser);
     }
 
     private void notifyStrongAuthStateChanged(int userId) {
@@ -719,17 +697,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.sendEmptyMessage(MSG_DPM_STATE_CHANGED);
             } else if (ACTION_USER_UNLOCKED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_USER_UNLOCKED);
-            }
-        }
-    };
-
-    private final BroadcastReceiver mStrongAuthTimeoutReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (ACTION_STRONG_AUTH_TIMEOUT.equals(intent.getAction())) {
-                int userId = intent.getIntExtra(USER_ID, -1);
-                mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT, userId);
-                notifyStrongAuthStateChanged(userId);
             }
         }
     };
@@ -1034,7 +1001,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
-        mAlarmManager = context.getSystemService(AlarmManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context);
 
@@ -1094,10 +1060,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             e.rethrowAsRuntimeException();
         }
 
-        IntentFilter strongAuthTimeoutFilter = new IntentFilter();
-        strongAuthTimeoutFilter.addAction(ACTION_STRONG_AUTH_TIMEOUT);
-        context.registerReceiver(mStrongAuthTimeoutReceiver, strongAuthTimeoutFilter,
-                PERMISSION_SELF, null /* handler */);
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mTrustManager.registerTrustListener(this);
         mLockPatternUtils = new LockPatternUtils(context);
