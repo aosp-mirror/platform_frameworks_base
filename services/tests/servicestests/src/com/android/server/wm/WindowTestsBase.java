@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -180,7 +181,7 @@ class WindowTestsBase {
     /**Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     static Task createTaskInStack(TaskStack stack, int userId) {
         final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, false, 0,
-                false, null);
+                false, new TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
     }
@@ -239,7 +240,7 @@ class WindowTestsBase {
                 Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
                 boolean homeTask, TaskWindowContainerController controller) {
             super(taskId, stack, userId, service, bounds, overrideConfig, isOnTopLauncher,
-                    resizeMode, homeTask, controller);
+                    resizeMode, homeTask, new TaskDescription(), controller);
         }
 
         boolean shouldDeferRemoval() {
@@ -270,13 +271,14 @@ class WindowTestsBase {
         TestTaskWindowContainerController(int stackId) {
             super(sNextTaskId++, snapshot -> {}, stackId, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE, false /* homeTask*/,
-                    false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */);
+                    false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */,
+                    new TaskDescription());
         }
 
         @Override
         TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
                 Configuration overrideConfig, int resizeMode, boolean homeTask,
-                boolean isOnTopLauncher) {
+                boolean isOnTopLauncher, TaskDescription taskDescription) {
             return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig,
                     isOnTopLauncher, resizeMode, homeTask, this);
         }

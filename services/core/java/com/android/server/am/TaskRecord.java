@@ -416,7 +416,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Configuration overrideConfig = getOverrideConfiguration();
         mWindowContainerController = new TaskWindowContainerController(taskId, this, getStackId(),
                 userId, bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
-                showForAllUsers);
+                showForAllUsers, lastTaskDescription);
     }
 
     void removeWindowContainer() {
@@ -1402,6 +1402,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             }
             lastTaskDescription = new TaskDescription(label, null, iconFilename, colorPrimary,
                     colorBackground);
+            if (mWindowContainerController != null) {
+                mWindowContainerController.setTaskDescription(lastTaskDescription);
+            }
             // Update the task affiliation color if we are the parent of the group
             if (taskId == mAffiliatedTaskId) {
                 mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
