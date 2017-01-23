@@ -18,13 +18,13 @@ package com.android.internal.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.Slog;
 
@@ -81,7 +81,7 @@ public final class NightDisplayController {
     private Callback mCallback;
 
     public NightDisplayController(@NonNull Context context) {
-        this(context, UserHandle.myUserId());
+        this(context, ActivityManager.getCurrentUser());
     }
 
     public NightDisplayController(@NonNull Context context, int userId) {

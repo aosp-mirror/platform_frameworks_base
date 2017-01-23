@@ -47,6 +47,7 @@ public final class Prefs {
         Key.QS_DATA_SAVER_DIALOG_SHOWN,
         Key.QS_INVERT_COLORS_ADDED,
         Key.QS_WORK_ADDED,
+        Key.QS_NIGHTDISPLAY_ADDED,
     })
     public @interface Key {
         @Deprecated
@@ -67,6 +68,7 @@ public final class Prefs {
         String QS_DATA_SAVER_DIALOG_SHOWN = "QsDataSaverDialogShown";
         String QS_INVERT_COLORS_ADDED = "QsInvertColorsAdded";
         String QS_WORK_ADDED = "QsWorkAdded";
+        String QS_NIGHTDISPLAY_ADDED = "QsNightDisplayAdded";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

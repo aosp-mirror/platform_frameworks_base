@@ -19,6 +19,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Secure;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.NightDisplayController;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
@@ -64,6 +66,11 @@ public class AutoTileManager {
         if (!Prefs.getBoolean(context, Key.QS_WORK_ADDED, false)) {
             Dependency.get(ManagedProfileController.class).addCallback(mProfileCallback);
         }
+
+        if (!Prefs.getBoolean(context, Key.QS_NIGHTDISPLAY_ADDED, false)
+                && NightDisplayController.isAvailable(mContext)) {
+            Dependency.get(NightDisplayController.class).setListener(mNightDisplayCallback);
+        }
     }
 
     public void destroy() {
@@ -71,6 +78,7 @@ public class AutoTileManager {
         Dependency.get(HotspotController.class).removeCallback(mHotspotCallback);
         Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
         Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
+        Dependency.get(NightDisplayController.class).setListener(null);
     }
 
     private final ManagedProfileController.Callback mProfileCallback =
@@ -113,6 +121,32 @@ public class AutoTileManager {
                 mHandler.post(() -> Dependency.get(HotspotController.class)
                         .removeCallback(mHotspotCallback));
             }
+        }
+    };
+
+    @VisibleForTesting
+    final NightDisplayController.Callback mNightDisplayCallback =
+            new NightDisplayController.Callback() {
+        @Override
+        public void onActivated(boolean activated) {
+            if (activated) {
+                addNightTile();
+            }
+        }
+
+        @Override
+        public void onAutoModeChanged(int autoMode) {
+            if (autoMode == NightDisplayController.AUTO_MODE_CUSTOM
+                    || autoMode == NightDisplayController.AUTO_MODE_TWILIGHT) {
+                addNightTile();
+            }
+        }
+
+        private void addNightTile() {
+            mHost.addTile("night");
+            Prefs.putBoolean(mContext, Key.QS_NIGHTDISPLAY_ADDED, true);
+            mHandler.post(() -> Dependency.get(NightDisplayController.class)
+                    .setListener(null));
         }
     };
 }
