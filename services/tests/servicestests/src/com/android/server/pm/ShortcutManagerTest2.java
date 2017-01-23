@@ -46,6 +46,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
+import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -2036,5 +2037,33 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mService.handleCleanupUser(USER_0);
         assertFalse(mService.isUserUnlockedL(USER_0));
         assertFalse(mService.isUserUnlockedL(USER_10));
+    }
+
+    public void testEphemeralApp() {
+        mRunningUsers.put(USER_10, true); // this test needs user 10.
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        // Make package 1 ephemeral.
+        mEphemeralPackages.add(PackageWithUser.of(USER_0, CALLING_PACKAGE_1));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertExpectException(IllegalStateException.class, "Ephemeral apps", () -> {
+                mManager.getDynamicShortcuts();
+            });
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
     }
 }
