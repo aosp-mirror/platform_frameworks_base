@@ -865,10 +865,8 @@ RENDERTHREAD_TEST(RenderNodeDrawable, colorOp_unbounded) {
         void onDrawPaint(const SkPaint&) {
             switch (mDrawCounter++) {
             case 0:
-                // While this mirrors FrameBuilder::colorOp_unbounded, this value is different
-                // because there is no root (root is clipped in SkiaPipeline::renderFrame).
-                // SkiaPipeline.clipped and clip_replace verify the root clip.
-                EXPECT_TRUE(TestUtils::getClipBounds(this).isEmpty());
+                EXPECT_EQ(SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT),
+                        TestUtils::getClipBounds(this));
                 break;
             case 1:
                 EXPECT_EQ(SkRect::MakeWH(10, 10), TestUtils::getClipBounds(this));

@@ -87,14 +87,7 @@ TEST(RenderNodeDrawable, renderPropRevealClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableRevealClip().set(true, 50, 50, 25);
     }, [](const SkCanvas& canvas) {
-        SkClipStack::Iter it(*canvas.getClipStack(), SkClipStack::Iter::kBottom_IterStart);
-        const SkClipStack::Element *top = it.next();
-        ASSERT_NE(nullptr, top);
-        SkPath clip;
-        top->asPath(&clip);
-        SkRect rect;
-        EXPECT_TRUE(clip.isOval(&rect));
-        EXPECT_EQ(SkRect::MakeLTRB(25, 25, 75, 75), rect);
+        EXPECT_EQ(SkRect::MakeLTRB(25, 25, 75, 75), TestUtils::getClipBounds(&canvas));
     });
 }
 
@@ -103,14 +96,7 @@ TEST(RenderNodeDrawable, renderPropOutlineClip) {
         properties.mutableOutline().setShouldClip(true);
         properties.mutableOutline().setRoundRect(10, 20, 30, 40, 5.0f, 0.5f);
     }, [](const SkCanvas& canvas) {
-        SkClipStack::Iter it(*canvas.getClipStack(), SkClipStack::Iter::kBottom_IterStart);
-        const SkClipStack::Element *top = it.next();
-        ASSERT_NE(nullptr, top);
-        SkPath clip;
-        top->asPath(&clip);
-        SkRRect rrect;
-        EXPECT_TRUE(clip.isRRect(&rrect));
-        EXPECT_EQ(SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 20, 30, 40), 5.0f, 5.0f), rrect);
+        EXPECT_EQ(SkRect::MakeLTRB(10, 20, 30, 40), TestUtils::getClipBounds(&canvas));
     });
 }
 
