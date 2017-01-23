@@ -41,5 +41,31 @@ void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out
   }
 }
 
+std::u16string Utf8ToUtf16(const StringPiece& utf8) {
+  ssize_t utf16_length =
+      utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length());
+  if (utf16_length <= 0) {
+    return {};
+  }
+
+  std::u16string utf16;
+  utf16.resize(utf16_length);
+  utf8_to_utf16(reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length(), &*utf16.begin(),
+                utf16_length + 1);
+  return utf16;
+}
+
+std::string Utf16ToUtf8(const StringPiece16& utf16) {
+  ssize_t utf8_length = utf16_to_utf8_length(utf16.data(), utf16.length());
+  if (utf8_length <= 0) {
+    return {};
+  }
+
+  std::string utf8;
+  utf8.resize(utf8_length);
+  utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8_length + 1);
+  return utf8;
+}
+
 } // namespace util
 } // namespace android

@@ -138,6 +138,17 @@ const DynamicRefTable* AssetManager2::GetDynamicRefTableForPackage(uint32_t pack
   return &package_groups_[idx].dynamic_ref_table;
 }
 
+const DynamicRefTable* AssetManager2::GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const {
+  for (const PackageGroup& package_group : package_groups_) {
+    for (const ApkAssetsCookie& package_cookie : package_group.cookies_) {
+      if (package_cookie == cookie) {
+        return &package_group.dynamic_ref_table;
+      }
+    }
+  }
+  return nullptr;
+}
+
 void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   const int diff = configuration_.diff(configuration);
   configuration_ = configuration;
@@ -186,6 +197,35 @@ std::unique_ptr<Asset> AssetManager2::Open(const std::string& filename, ApkAsset
                                            Asset::AccessMode mode) {
   const std::string new_path = "assets/" + filename;
   return OpenNonAsset(new_path, cookie, mode);
+}
+
+std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) {
+  ATRACE_CALL();
+
+  std::string full_path = "assets/" + dirname;
+  std::unique_ptr<SortedVector<AssetDir::FileInfo>> files =
+      util::make_unique<SortedVector<AssetDir::FileInfo>>();
+
+  // Start from the back.
+  for (auto iter = apk_assets_.rbegin(); iter != apk_assets_.rend(); ++iter) {
+    const ApkAssets* apk_assets = *iter;
+
+    auto func = [&](const StringPiece& name, FileType type) {
+      AssetDir::FileInfo info;
+      info.setFileName(String8(name.data(), name.size()));
+      info.setFileType(type);
+      info.setSourceName(String8(apk_assets->GetPath().c_str()));
+      files->add(info);
+    };
+
+    if (!apk_assets->ForEachFile(full_path, func)) {
+      return {};
+    }
+  }
+
+  std::unique_ptr<AssetDir> asset_dir = util::make_unique<AssetDir>();
+  asset_dir->setFileList(files.release());
+  return asset_dir;
 }
 
 // Search in reverse because that's how we used to do it and we need to preserve behaviour.
@@ -237,14 +277,14 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
     desired_config = &density_override_config;
   }
 
-  const uint32_t package_id = get_package_id(resid);
-  const uint8_t type_id = get_type_id(resid);
-  const uint16_t entry_id = get_entry_id(resid);
-
-  if (type_id == 0) {
+  if (!is_valid_resid(resid)) {
     LOG(ERROR) << base::StringPrintf("Invalid ID 0x%08x.", resid);
     return kInvalidCookie;
   }
+
+  const uint32_t package_id = get_package_id(resid);
+  const uint8_t type_idx = get_type_id(resid) - 1;
+  const uint16_t entry_id = get_entry_id(resid);
 
   const uint8_t idx = package_ids_[package_id];
   if (idx == 0xff) {
@@ -265,7 +305,7 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
     uint32_t current_flags = 0;
 
     const LoadedPackage* loaded_package = package_group.packages_[i];
-    if (!loaded_package->FindEntry(type_id - 1, entry_id, *desired_config, &current_entry,
+    if (!loaded_package->FindEntry(type_idx, entry_id, *desired_config, &current_entry,
                                    &current_config, &current_flags)) {
       continue;
     }
@@ -385,16 +425,16 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
 ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
                                                 ResTable_config* in_out_selected_config,
                                                 uint32_t* in_out_flags,
-                                                ResTable_ref* out_last_reference) {
+                                                uint32_t* out_last_reference) {
   ATRACE_CALL();
   constexpr const int kMaxIterations = 20;
 
-  out_last_reference->ident = 0u;
+  *out_last_reference = 0u;
   for (size_t iteration = 0u; in_out_value->dataType == Res_value::TYPE_REFERENCE &&
                               in_out_value->data != 0u && iteration < kMaxIterations;
        iteration++) {
     if (out_last_reference != nullptr) {
-      out_last_reference->ident = in_out_value->data;
+      *out_last_reference = in_out_value->data;
     }
     uint32_t new_flags = 0u;
     cookie = GetResource(in_out_value->data, true /*may_be_bag*/, 0u /*density_override*/,
@@ -405,7 +445,7 @@ ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_valu
     if (in_out_flags != nullptr) {
       *in_out_flags |= new_flags;
     }
-    if (out_last_reference->ident == in_out_value->data) {
+    if (*out_last_reference == in_out_value->data) {
       // This reference can't be resolved, so exit now and let the caller deal with it.
       return cookie;
     }
@@ -830,6 +870,25 @@ ApkAssetsCookie Theme::GetAttribute(uint32_t resid, Res_value* out_value,
   LOG(WARNING) << base::StringPrintf("Too many (%d) attribute references, stopped at: 0x%08x",
                                      kMaxIterations, resid);
   return kInvalidCookie;
+}
+
+ApkAssetsCookie Theme::ResolveAttributeReference(ApkAssetsCookie cookie, Res_value* in_out_value,
+                                                 ResTable_config* in_out_selected_config,
+                                                 uint32_t* in_out_type_spec_flags,
+                                                 uint32_t* out_last_ref) {
+  if (in_out_value->dataType == Res_value::TYPE_ATTRIBUTE) {
+    uint32_t new_flags;
+    cookie = GetAttribute(in_out_value->data, in_out_value, &new_flags);
+    if (cookie == kInvalidCookie) {
+      return kInvalidCookie;
+    }
+
+    if (in_out_type_spec_flags != nullptr) {
+      *in_out_type_spec_flags |= new_flags;
+    }
+  }
+  return asset_manager_->ResolveReference(cookie, in_out_value, in_out_selected_config,
+                                          in_out_type_spec_flags, out_last_ref);
 }
 
 void Theme::Clear() {

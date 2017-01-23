@@ -107,6 +107,9 @@ class AssetManager2 : public ::AAssetManager {
   // Returns the DynamicRefTable for the given package ID.
   const DynamicRefTable* GetDynamicRefTableForPackage(uint32_t package_id) const;
 
+  // Returns the DynamicRefTable for the ApkAssets represented by the cookie.
+  const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
+
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);
@@ -142,6 +145,11 @@ class AssetManager2 : public ::AAssetManager {
   // `mode` controls how the file is opened.
   std::unique_ptr<Asset> Open(const std::string& filename, ApkAssetsCookie cookie,
                               Asset::AccessMode mode);
+
+  // Opens the directory specified by `dirname`. The result is an AssetDir that is the combination
+  // of all directories matching `dirname` under the assets/ directory of every ApkAssets loaded.
+  // The entries are sorted by their ASCII name.
+  std::unique_ptr<AssetDir> OpenDir(const std::string& dirname);
 
   // Searches the set of APKs loaded by this AssetManager and opens the first one found.
   // `mode` controls how the file is opened.
@@ -203,7 +211,7 @@ class AssetManager2 : public ::AAssetManager {
   // it was not found.
   ApkAssetsCookie ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
                                    ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
-                                   ResTable_ref* out_last_reference);
+                                   uint32_t* out_last_reference);
 
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
@@ -298,6 +306,8 @@ class Theme {
 
   inline const AssetManager2* GetAssetManager() const { return asset_manager_; }
 
+  inline AssetManager2* GetAssetManager() { return asset_manager_; }
+
   // Returns a bit mask of configuration changes that will impact this
   // theme (and thus require completely reloading it).
   inline uint32_t GetChangingConfigurations() const { return type_spec_flags_; }
@@ -318,10 +328,10 @@ class Theme {
 
   // This is like AssetManager2::ResolveReference(), but also takes
   // care of resolving attribute references to the theme.
-  ApkAssetsCookie ResolveAttributeReference(Res_value* in_out_value, ApkAssetsCookie src_cookie,
-                                            uint32_t* out_last_ref = nullptr,
+  ApkAssetsCookie ResolveAttributeReference(ApkAssetsCookie cookie, Res_value* in_out_value,
+                                            ResTable_config* in_out_selected_config = nullptr,
                                             uint32_t* in_out_type_spec_flags = nullptr,
-                                            ResTable_config* out_selected_config = nullptr) const;
+                                            uint32_t* out_last_ref = nullptr);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Theme);
