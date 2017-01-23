@@ -11929,14 +11929,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (mUserController.shouldConfirmCredentials(userId)) {
-                    final int currentUserId = mUserController.getCurrentUserIdLocked();
-                    if (!mKeyguardController.isKeyguardLocked()) {
-                        // If the device is not locked, we will prompt for credentials immediately.
-                        mStackSupervisor.lockAllProfileTasks(userId);
-                    } else {
+                    if (mKeyguardController.isKeyguardLocked()) {
                         // Showing launcher to avoid user entering credential twice.
+                        final int currentUserId = mUserController.getCurrentUserIdLocked();
                         startHomeActivityLocked(currentUserId, "notifyLockedProfile");
                     }
+                    mStackSupervisor.lockAllProfileTasks(userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
