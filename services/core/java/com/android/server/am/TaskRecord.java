@@ -583,11 +583,14 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         mWindowContainerController.cancelThumbnailTransition();
     }
 
-    public TaskSnapshot getSnapshot() {
-        if (mWindowContainerController == null) {
-            return null;
-        }
-        return mWindowContainerController.getSnapshot();
+    /**
+     * DO NOT HOLD THE ACTIVITY MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    TaskSnapshot getSnapshot() {
+
+        // TODO: Move this to {@link TaskWindowContainerController} once recent tasks are more
+        // synchronized between AM and WM.
+        return mService.mWindowManager.getTaskSnapshot(taskId, userId);
     }
 
     void touchActiveTime() {
