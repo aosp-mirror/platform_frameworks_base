@@ -36,7 +36,6 @@ public class SystemServiceManager {
     private final Context mContext;
     private boolean mSafeMode;
     private boolean mRuntimeRestarted;
-    private boolean mFirstBoot;
 
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
@@ -260,16 +259,6 @@ public class SystemServiceManager {
         mRuntimeRestarted = runtimeRestarted;
     }
 
-    /**
-     * @return true if it's first boot after OTA
-     */
-    public boolean isFirstBoot() {
-        return mFirstBoot;
-    }
-
-    void setFirstBoot(boolean firstBoot) {
-        mFirstBoot = firstBoot;
-    }
 
     /**
      * Outputs the state of this manager to the System log.
