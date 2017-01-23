@@ -190,6 +190,7 @@ Texture* BakedOpRenderer::getTexture(const SkBitmap* bitmap) {
 }
 
 void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* paint) {
+    bool firstDraw = !mHasDrawn;
     std::vector<Vertex> vertices;
     vertices.reserve(count);
     Vertex* vertex = vertices.data();
@@ -219,7 +220,7 @@ void BakedOpRenderer::drawRects(const float* rects, int count, const SkPaint* pa
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, firstDraw);
 }
 
 // clears and re-fills stencil with provided rendertarget space quads,
@@ -236,7 +237,7 @@ void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices,
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, false);
     mRenderState.stencil().enableTest(incrementThreshold);
 }
 
@@ -348,7 +349,10 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
 void BakedOpRenderer::renderGlopImpl(const Rect* dirtyBounds, const ClipBase* clip,
         const Glop& glop) {
     prepareRender(dirtyBounds, clip);
-    mRenderState.render(glop, mRenderTarget.orthoMatrix);
+    // Let the renderer know that this is the first draw to the main framebuffer
+    // This lets us optimise away blending for badly behaved applications
+    // TODO: Is there a better way to enforce this? Also for other FBOs?
+    mRenderState.render(glop, mRenderTarget.orthoMatrix, !mHasDrawn && !mRenderTarget.frameBufferId);
     if (!mRenderTarget.frameBufferId) mHasDrawn = true;
 }
 

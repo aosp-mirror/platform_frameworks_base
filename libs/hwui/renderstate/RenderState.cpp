@@ -235,7 +235,7 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 // Render
 ///////////////////////////////////////////////////////////////////////////////
 
-void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
+void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix, bool firstDraw) {
     const Glop::Mesh& mesh = glop.mesh;
     const Glop::Mesh::Vertices& vertices = mesh.vertices;
     const Glop::Mesh::Indices& indices = mesh.indices;
@@ -350,7 +350,12 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     // ------------------------------------
     // ---------- GL state setup ----------
     // ------------------------------------
-    blend().setFactors(glop.blend.src, glop.blend.dst);
+    if (firstDraw) {
+        // Disable blending for first draw to optimise badly behaved applications
+        blend().setFactors(GL_ZERO, GL_ZERO);
+    } else {
+        blend().setFactors(glop.blend.src, glop.blend.dst);
+    }
 
     GL_CHECKPOINT(MODERATE);
 
