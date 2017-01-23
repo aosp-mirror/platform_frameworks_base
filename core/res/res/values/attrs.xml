@@ -8477,4 +8477,14 @@
         <attr name="font" format="reference" />
         <attr name="fontWeight" format="integer" />
     </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="RecyclerView">
+        <attr name="layoutManager" format="string" />
+        <attr name="orientation" />
+        <attr name="descendantFocusability" />
+        <attr name="spanCount" format="integer"/>
+        <attr name="reverseLayout" format="boolean" />
+        <attr name="stackFromEnd" format="boolean" />
+    </declare-styleable>
 </resources>
