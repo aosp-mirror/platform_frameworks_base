@@ -1310,7 +1310,7 @@ public class LockPatternUtils {
     }
 
     private boolean isDoNotAskCredentialsOnBootSet() {
-        return mDevicePolicyManager.getDoNotAskCredentialsOnBoot();
+        return getDevicePolicyManager().getDoNotAskCredentialsOnBoot();
     }
 
     private boolean shouldEncryptWithCredentials(boolean defaultValue) {
