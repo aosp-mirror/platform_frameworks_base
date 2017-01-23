@@ -16,9 +16,10 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
-public interface HotspotController extends CallbackController<Callback> {
+public interface HotspotController extends CallbackController<Callback>, Dumpable {
     boolean isHotspotEnabled();
     void setHotspotEnabled(boolean enabled);
     boolean isHotspotSupported();

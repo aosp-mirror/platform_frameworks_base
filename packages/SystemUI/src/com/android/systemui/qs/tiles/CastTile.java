@@ -28,7 +28,9 @@ import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
@@ -49,12 +51,14 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     private final CastDetailAdapter mDetailAdapter;
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
+    private final ActivityStarter mActivityStarter;
 
     public CastTile(Host host) {
         super(host);
-        mController = host.getCastController();
+        mController = Dependency.get(CastController.class);
         mDetailAdapter = new CastDetailAdapter();
-        mKeyguard = host.getKeyguardMonitor();
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     @Override
@@ -101,13 +105,10 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
-            mHost.startRunnableDismissingKeyguard(new Runnable() {
-                @Override
-                public void run() {
-                    MetricsLogger.action(mContext, getMetricsCategory());
-                    showDetail(true);
-                    mHost.openPanels();
-                }
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                MetricsLogger.action(mContext, getMetricsCategory());
+                showDetail(true);
+                mHost.openPanels();
             });
             return;
         }

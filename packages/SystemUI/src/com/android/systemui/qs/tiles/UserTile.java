@@ -22,6 +22,7 @@ import android.provider.Settings;
 import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -35,8 +36,8 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
 
     public UserTile(Host host) {
         super(host);
-        mUserSwitcherController = host.getUserSwitcherController();
-        mUserInfoController = host.getUserInfoController();
+        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
+        mUserInfoController = Dependency.get(UserInfoController.class);
     }
 
     @Override

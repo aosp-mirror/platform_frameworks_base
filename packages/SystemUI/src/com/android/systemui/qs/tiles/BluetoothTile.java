@@ -32,7 +32,9 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
@@ -48,10 +50,12 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     private final BluetoothController mController;
     private final BluetoothDetailAdapter mDetailAdapter;
+    private final ActivityStarter mActivityStarter;
 
     public BluetoothTile(Host host) {
         super(host);
-        mController = host.getBluetoothController();
+        mController = Dependency.get(BluetoothController.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
         mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
     }
 
@@ -90,7 +94,8 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     @Override
     protected void handleSecondaryClick() {
         if (!mController.canConfigBluetooth()) {
-            mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                    new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);
             return;
         }
         showDetail(true);

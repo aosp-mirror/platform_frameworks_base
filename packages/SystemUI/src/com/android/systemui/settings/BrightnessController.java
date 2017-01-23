@@ -37,6 +37,7 @@ import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 
 import java.util.ArrayList;
 
@@ -70,7 +71,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final CurrentUserTracker mUserTracker;
     private final IVrManager mVrManager;
 
-    private Handler mBackgroundHandler;
+    private final Handler mBackgroundHandler;
     private final BrightnessObserver mBrightnessObserver;
 
     private ArrayList<BrightnessStateChangeCallback> mChangeCallbacks =
@@ -276,7 +277,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         mContext = context;
         mIcon = icon;
         mControl = control;
-        mBackgroundHandler = new Handler(Looper.getMainLooper());
+        mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
             public void onUserSwitched(int newUserId) {
@@ -296,10 +297,6 @@ public class BrightnessController implements ToggleSlider.Listener {
                 com.android.internal.R.bool.config_automatic_brightness_available);
         mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
         mVrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
-    }
-
-    public void setBackgroundLooper(Looper backgroundLooper) {
-        mBackgroundHandler = new Handler(backgroundLooper);
     }
 
     public void addStateChangedCallback(BrightnessStateChangeCallback cb) {

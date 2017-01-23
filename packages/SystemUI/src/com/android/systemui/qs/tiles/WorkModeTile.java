@@ -23,6 +23,7 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -41,7 +42,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
 
     public WorkModeTile(Host host) {
         super(host);
-        mProfileController = host.getManagedProfileController();
+        mProfileController = Dependency.get(ManagedProfileController.class);
     }
 
     @Override

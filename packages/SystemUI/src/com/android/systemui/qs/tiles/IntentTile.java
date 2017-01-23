@@ -31,6 +31,8 @@ import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.qs.QSTile;
 
 import java.util.Arrays;
@@ -105,7 +107,7 @@ public class IntentTile extends QSTile<QSTile.State> {
         try {
             if (pi != null) {
                 if (pi.isActivity()) {
-                    getHost().startActivityDismissingKeyguard(pi);
+                    Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(pi);
                 } else {
                     pi.send();
                 }

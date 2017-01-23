@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -60,11 +61,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
 
-    public LightBarController(StatusBarIconController statusBarIconController,
-            BatteryController batteryController) {
+    public LightBarController(StatusBarIconController statusBarIconController) {
         mStatusBarIconController = statusBarIconController;
-        mBatteryController = batteryController;
-        batteryController.addCallback(this);
+        mBatteryController = Dependency.get(BatteryController.class);
+        mBatteryController.addCallback(this);
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {

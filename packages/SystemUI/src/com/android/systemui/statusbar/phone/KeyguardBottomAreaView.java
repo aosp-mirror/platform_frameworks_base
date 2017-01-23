@@ -58,6 +58,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
@@ -66,7 +67,7 @@ import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton.IconState;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.qs.QS.ActivityStarter;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -230,6 +231,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
         initAccessibility();
+        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mFlashlightController = Dependency.get(FlashlightController.class);
+        mAccessibilityController = Dependency.get(AccessibilityController.class);
+        mAssistManager = Dependency.get(AssistManager.class);
+        updateLeftAffordance();
     }
 
     @Override
@@ -297,20 +303,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setVisibility(state.isVisible ? View.VISIBLE : View.GONE);
         mRightAffordanceView.setImageDrawable(state.drawable);
         mRightAffordanceView.setContentDescription(state.contentDescription);
-    }
-
-    public void setActivityStarter(ActivityStarter activityStarter) {
-        mActivityStarter = activityStarter;
-    }
-
-    public void setFlashlightController(FlashlightController flashlightController) {
-        mFlashlightController = flashlightController;
-    }
-
-    public void setAccessibilityController(AccessibilityController accessibilityController) {
-        mAccessibilityController = accessibilityController;
-        mLockIcon.setAccessibilityController(accessibilityController);
-        accessibilityController.addStateChangedCallback(this);
     }
 
     public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
@@ -759,11 +751,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void setKeyguardIndicationController(
             KeyguardIndicationController keyguardIndicationController) {
         mIndicationController = keyguardIndicationController;
-    }
-
-    public void setAssistManager(AssistManager assistManager) {
-        mAssistManager = assistManager;
-        updateLeftAffordance();
     }
 
     public void updateLeftAffordance() {

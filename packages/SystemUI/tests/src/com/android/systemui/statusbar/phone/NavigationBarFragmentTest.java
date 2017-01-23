@@ -47,10 +47,6 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
         NavigationBarFragment navigationBarFragment = (NavigationBarFragment) mFragment;
 
-        AssistManager assistManager = new AssistManager(mContext.getComponent(PhoneStatusBar.class),
-                mContext);
-        navigationBarFragment.setAssistManager(assistManager);
-
         postAndWait(() -> mFragments.dispatchResume());
         navigationBarFragment.onHomeLongClick(navigationBarFragment.getView());
     }

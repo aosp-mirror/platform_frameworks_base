@@ -42,10 +42,10 @@ import android.view.ViewGroup;
 import com.android.internal.app.IBatteryStats;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 /**
@@ -109,7 +109,7 @@ public class KeyguardIndicationController {
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
         context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null,
-                PhoneStatusBar.getTimeTickHandler(mContext));
+                Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         updateDisclosure();
     }

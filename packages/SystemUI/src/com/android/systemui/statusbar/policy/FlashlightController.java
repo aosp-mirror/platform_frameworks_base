@@ -14,9 +14,10 @@
 
 package com.android.systemui.statusbar.policy;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
 
-public interface FlashlightController extends CallbackController<FlashlightListener> {
+public interface FlashlightController extends CallbackController<FlashlightListener>, Dumpable {
 
     boolean hasFlashlight();
     void setFlashlight(boolean newState);

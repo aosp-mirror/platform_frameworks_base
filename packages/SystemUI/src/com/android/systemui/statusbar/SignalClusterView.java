@@ -37,8 +37,10 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -62,8 +64,8 @@ public class SignalClusterView
     private static final String SLOT_WIFI = "wifi";
     private static final String SLOT_ETHERNET = "ethernet";
 
-    NetworkControllerImpl mNC;
-    SecurityController mSC;
+    private final NetworkController mNetworkController;
+    private final SecurityController mSecurityController;
 
     private boolean mNoSimsVisible = false;
     private boolean mVpnVisible = false;
@@ -131,6 +133,8 @@ public class SignalClusterView
         TypedValue typedValue = new TypedValue();
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         mIconScaleFactor = typedValue.getFloat();
+        mNetworkController = Dependency.get(NetworkController.class);
+        mSecurityController = Dependency.get(SecurityController.class);
     }
 
     @Override
@@ -151,23 +155,9 @@ public class SignalClusterView
             mBlockEthernet = blockEthernet;
             mBlockWifi = blockWifi;
             // Re-register to get new callbacks.
-            mNC.removeCallback(this);
-            mNC.addCallback(this);
+            mNetworkController.removeCallback(this);
+            mNetworkController.addCallback(this);
         }
-    }
-
-    public void setNetworkController(NetworkControllerImpl nc) {
-        if (DEBUG) Log.d(TAG, "NetworkController=" + nc);
-        mNC = nc;
-        mNC.addCallback(this);
-    }
-
-    public void setSecurityController(SecurityController sc) {
-        if (DEBUG) Log.d(TAG, "SecurityController=" + sc);
-        mSC = sc;
-        mSC.addCallback(this);
-        mVpnVisible = mSC.isVpnEnabled();
-        mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
     }
 
     @Override
@@ -213,6 +203,8 @@ public class SignalClusterView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mVpnVisible = mSecurityController.isVpnEnabled();
+        mVpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
 
         for (PhoneState state : mPhoneStates) {
             if (state.mMobileGroup.getParent() == null) {
@@ -227,14 +219,16 @@ public class SignalClusterView
 
         apply();
         applyIconTint();
+        mNetworkController.addCallback(this);
+        mSecurityController.addCallback(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         mMobileSignalGroup.removeAllViews();
         TunerService.get(mContext).removeTunable(this);
-        mSC.removeCallback(this);
-        mNC.removeCallback(this);
+        mSecurityController.removeCallback(this);
+        mNetworkController.removeCallback(this);
 
         super.onDetachedFromWindow();
     }
@@ -253,8 +247,8 @@ public class SignalClusterView
         post(new Runnable() {
             @Override
             public void run() {
-                mVpnVisible = mSC.isVpnEnabled();
-                mVpnIconId = currentVpnIconId(mSC.isVpnBranded());
+                mVpnVisible = mSecurityController.isVpnEnabled();
+                mVpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
                 apply();
             }
         });

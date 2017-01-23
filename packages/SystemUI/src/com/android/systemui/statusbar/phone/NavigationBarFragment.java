@@ -64,7 +64,9 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.LatencyTracker;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -124,16 +126,17 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCommandQueue = SystemUIApplication.getComponent(getContext(), CommandQueue.class);
+        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
         mCommandQueue.addCallbacks(this);
-        mPhoneStatusBar = SystemUIApplication.getComponent(getContext(), PhoneStatusBar.class);
-        mRecents = SystemUIApplication.getComponent(getContext(), Recents.class);
-        mDivider = SystemUIApplication.getComponent(getContext(), Divider.class);
+        mPhoneStatusBar = SysUiServiceProvider.getComponent(getContext(), PhoneStatusBar.class);
+        mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
+        mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
         }
+        mAssistManager = Dependency.get(AssistManager.class);
 
         try {
             WindowManagerGlobal.getWindowManagerService()
@@ -400,10 +403,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
         homeButton.setOnLongClickListener(this::onHomeLongClick);
-
-        if (mAssistManager != null) {
-            mAssistManager.onConfigurationChanged();
-        }
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -436,10 +435,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        if (mAssistManager != null) {
-            // TODO: Clean this up.
-            mAssistManager.onConfigurationChanged();
-        }
         mPhoneStatusBar.setQsScrimEnabled(!isVertical);
     }
 
@@ -561,11 +556,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     // ----- Methods that PhoneStatusBar talks to (should be minimized) -----
-
-    public void setAssistManager(AssistManager assistManager) {
-        mAssistManager = assistManager;
-        mAssistManager.onConfigurationChanged();
-    }
 
     public void setLightBarController(LightBarController lightBarController) {
         mLightBarController = lightBarController;

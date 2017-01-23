@@ -37,7 +37,7 @@ public interface QS extends FragmentBase {
 
     // This should be incremented any time this class or ActivityStarter or BaseStatusBarHeader
     // change in incompatible ways.
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
 
     String TAG = "QS";
 
@@ -105,24 +105,8 @@ public interface QS extends FragmentBase {
         public abstract void setExpansion(float headerExpansionFraction);
         public abstract void setListening(boolean listening);
         public abstract void updateEverything();
-        public abstract void setActivityStarter(ActivityStarter activityStarter);
         public abstract void setCallback(Callback qsPanelCallback);
         public abstract View getExpandView();
     }
 
-    /**
-     * An interface to start activities. This is used to as a callback from the views to
-     * {@link PhoneStatusBar} to allow custom handling for starting the activity, i.e. dismissing the
-     * Keyguard.
-     */
-    public static interface ActivityStarter {
-
-        void startPendingIntentDismissingKeyguard(PendingIntent intent);
-        void startActivity(Intent intent, boolean dismissShade);
-        void startActivity(Intent intent, boolean dismissShade, Callback callback);
-
-        interface Callback {
-            void onActivityStarted(int resultCode);
-        }
-    }
 }

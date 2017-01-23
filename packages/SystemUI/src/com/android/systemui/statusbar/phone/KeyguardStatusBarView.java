@@ -28,13 +28,15 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.systemui.BatteryMeterView;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import java.text.NumberFormat;
@@ -43,7 +45,7 @@ import java.text.NumberFormat;
  * The header group on Keyguard.
  */
 public class KeyguardStatusBarView extends RelativeLayout
-        implements BatteryController.BatteryStateChangeCallback {
+        implements BatteryStateChangeCallback, OnUserInfoChangedListener {
 
     private boolean mBatteryCharging;
     private boolean mKeyguardUserSwitcherShowing;
@@ -78,6 +80,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
         loadDimens();
         updateUserSwitcher();
+        mBatteryController = Dependency.get(BatteryController.class);
     }
 
     @Override
@@ -203,23 +206,25 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserSwitch.setKeyguardMode(keyguardSwitcherAvailable);
     }
 
-    public void setBatteryController(BatteryController batteryController) {
-        mBatteryController = batteryController;
-        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
+        userInfoController.addCallback(this);
+        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
+        mMultiUserSwitch.setUserSwitcherController(mUserSwitcherController);
+        userInfoController.reloadUserInfo();
     }
 
-    public void setUserSwitcherController(UserSwitcherController controller) {
-        mUserSwitcherController = controller;
-        mMultiUserSwitch.setUserSwitcherController(controller);
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(UserInfoController.class).removeCallback(this);
     }
 
-    public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addCallback(new UserInfoController.OnUserInfoChangedListener() {
-            @Override
-            public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
-                mMultiUserAvatar.setImageDrawable(picture);
-            }
-        });
+    @Override
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+        mMultiUserAvatar.setImageDrawable(picture);
     }
 
     public void setQSPanel(QSPanel qsp) {

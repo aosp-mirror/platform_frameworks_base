@@ -35,9 +35,11 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -74,7 +76,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     public DndTile(Host host) {
         super(host);
-        mController = host.getZenModeController();
+        mController = Dependency.get(ZenModeController.class);
         mDetailAdapter = new DndDetailAdapter();
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
         mReceiverRegistered = true;
@@ -313,7 +315,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
         @Override
         public void onPrioritySettings() {
-            mHost.startActivityDismissingKeyguard(ZEN_PRIORITY_SETTINGS);
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                    ZEN_PRIORITY_SETTINGS, 0);
         }
 
         @Override

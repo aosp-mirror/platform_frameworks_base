@@ -1,5 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
+import static org.mockito.Mockito.mock;
+
 import android.net.NetworkCapabilities;
 import android.os.Looper;
 import android.support.test.runner.AndroidJUnit4;
@@ -100,8 +102,9 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mConfig.show4gForLte = true;
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                Mockito.mock(AccessPointControllerImpl.class),
-                Mockito.mock(DataUsageController.class), mMockSubDefaults);
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class), mMockSubDefaults,
+                mock(DeviceProvisionedController.class));
         setupNetworkController();
 
         setupDefaultSignal();

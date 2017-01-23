@@ -190,12 +190,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         mHost = host;
         mHost.addCallback(this);
         setTiles(mHost.getTiles());
-        mFooter.setHostEnvironment(host, host.getSecurityController(), host.getLooper());
+        mFooter.setHostEnvironment(host);
         mCustomizePanel = customizer;
         if (mCustomizePanel != null) {
             mCustomizePanel.setHost(mHost);
         }
-        mBrightnessController.setBackgroundLooper(host.getLooper());
     }
 
     public QSTileHost getHost() {

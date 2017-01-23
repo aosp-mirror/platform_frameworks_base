@@ -31,7 +31,9 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.AccessPoint;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
@@ -55,12 +57,14 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     protected final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
+    private final ActivityStarter mActivityStarter;
 
     public WifiTile(Host host) {
         super(host);
-        mController = host.getNetworkController();
+        mController = Dependency.get(NetworkController.class);
         mWifiController = mController.getAccessPointController();
         mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
+        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     @Override
@@ -115,7 +119,8 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     @Override
     protected void handleSecondaryClick() {
         if (!mWifiController.canConfigWifi()) {
-            mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                    new Intent(Settings.ACTION_WIFI_SETTINGS), 0);
             return;
         }
         showDetail(true);
@@ -329,7 +334,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public void onSettingsActivityTriggered(Intent settingsIntent) {
-            mHost.startActivityDismissingKeyguard(settingsIntent);
+            mActivityStarter.postStartActivityDismissingKeyguard(settingsIntent, 0);
         }
 
         @Override

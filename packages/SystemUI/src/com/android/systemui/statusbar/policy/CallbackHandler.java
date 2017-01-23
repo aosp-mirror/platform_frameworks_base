@@ -47,7 +47,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     private final ArrayList<SignalCallback> mSignalCallbacks = new ArrayList<>();
 
     public CallbackHandler() {
-        super();
+        super(Looper.getMainLooper());
     }
 
     @VisibleForTesting

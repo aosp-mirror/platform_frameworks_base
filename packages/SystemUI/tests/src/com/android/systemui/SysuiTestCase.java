@@ -15,11 +15,14 @@
  */
 package com.android.systemui;
 
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.util.ArrayMap;
 
 import com.android.systemui.utils.TestableContext;
 import com.android.systemui.utils.leaks.Tracker;
@@ -34,11 +37,15 @@ public abstract class SysuiTestCase {
 
     private Handler mHandler;
     protected TestableContext mContext;
+    protected TestDependency mDependency;
 
     @Before
     public void SysuiSetup() throws Exception {
         System.setProperty("dexmaker.share_classloader", "true");
         mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
+        mDependency = new TestDependency();
+        mDependency.mContext = mContext;
+        mDependency.start();
     }
 
     @After
@@ -78,8 +85,34 @@ public abstract class SysuiTestCase {
         return null;
     }
 
+    public void injectMockDependency(Class<?> cls) {
+        mDependency.injectTestDependency(cls.getName(), mock(cls));
+    }
+
+    public void injectTestDependency(Class<?> cls, Object obj) {
+        mDependency.injectTestDependency(cls.getName(), obj);
+    }
+
+    public void injectTestDependency(String key, Object obj) {
+        mDependency.injectTestDependency(key, obj);
+    }
+
     public static final class EmptyRunnable implements Runnable {
         public void run() {
+        }
+    }
+
+    public static class TestDependency extends Dependency {
+        private final ArrayMap<String, Object> mObjs = new ArrayMap<>();
+
+        private void injectTestDependency(String key, Object obj) {
+            mObjs.put(key, obj);
+        }
+
+        @Override
+        protected <T> T createDependency(String cls) {
+            if (mObjs.containsKey(cls)) return (T) mObjs.get(cls);
+            return super.createDependency(cls);
         }
     }
 

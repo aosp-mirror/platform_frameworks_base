@@ -40,10 +40,11 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.settingslib.Utils;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QS.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.plugins.qs.QS.Callback;
 import com.android.systemui.qs.QSPanel;
@@ -51,10 +52,9 @@ import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -71,6 +71,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private ActivityStarter mActivityStarter;
     private NextAlarmController mNextAlarmController;
+    private UserInfoController mUserInfoController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
 
@@ -118,7 +119,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mEdit = findViewById(android.R.id.edit);
         findViewById(android.R.id.edit).setOnClickListener(view ->
-                mHost.startRunnableDismissingKeyguard(() -> mQsPanel.showEdit(view)));
+                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() ->
+                        mQsPanel.showEdit(view)));
 
         mDateTimeAlarmGroup = (ViewGroup) findViewById(R.id.date_time_alarm_group);
         mDateTimeAlarmGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
@@ -151,6 +153,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         ((RippleDrawable) mExpandIndicator.getBackground()).setForceSoftware(true);
 
         updateResources();
+
+        // Set the light/dark theming on the header status UI to match the current theme.
+        SignalClusterView cluster = (SignalClusterView) findViewById(R.id.signal_cluster);
+        int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
+        float intensity = colorForeground / (float) Color.WHITE;
+        cluster.setIconTint(colorForeground, intensity, new Rect(0, 0, 0, 0));
+        BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
+        int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
+        battery.setRawColors(colorForeground, colorSecondary);
     }
 
     @Override
@@ -248,11 +259,18 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mNextAlarmController = Dependency.get(NextAlarmController.class);
+        mUserInfoController = Dependency.get(UserInfoController.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
+    }
+
+    @Override
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
-        mHost.getUserInfoController().removeCallback(this);
-        mHost.getNetworkController().removeEmergencyListener(this);
         super.onDetachedFromWindow();
     }
 
@@ -304,14 +322,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private void updateListeners() {
         if (mListening) {
             mNextAlarmController.addCallback(this);
+            mUserInfoController.addCallback(this);
+            if (Dependency.get(NetworkController.class).hasVoiceCallingFeature()) {
+                Dependency.get(NetworkController.class).addEmergencyListener(this);
+            }
         } else {
             mNextAlarmController.removeCallback(this);
+            mUserInfoController.removeCallback(this);
+            Dependency.get(NetworkController.class).removeEmergencyListener(this);
         }
-    }
-
-    @Override
-    public void setActivityStarter(ActivityStarter activityStarter) {
-        mActivityStarter = activityStarter;
     }
 
     public void setQSPanel(final QSPanel qsPanel) {
@@ -324,30 +343,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     public void setupHost(final QSTileHost host) {
         mHost = host;
-        host.setHeaderView(mExpandIndicator);
+        //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(host, null /* No customization in header */);
-        setUserInfoController(host.getUserInfoController());
-        setBatteryController(host.getBatteryController());
-        setNextAlarmController(host.getNextAlarmController());
-
-        final boolean isAPhone = mHost.getNetworkController().hasVoiceCallingFeature();
-        if (isAPhone) {
-            mHost.getNetworkController().addEmergencyListener(this);
-        }
-
-        // Set the light/dark theming on the header status UI to match the current theme.
-        SignalClusterView cluster = (SignalClusterView) findViewById(R.id.signal_cluster);
-        cluster.setNetworkController((NetworkControllerImpl) host.getNetworkController());
-        cluster.setSecurityController(host.getSecurityController());
-        int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
-        float intensity = colorForeground / (float) Color.WHITE;
-        cluster.setIconTint(colorForeground, intensity,
-                new Rect(0, 0, 0, 0));
-        BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
-        battery.setBatteryController(host.getBatteryController());
-        int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
-        battery.setRawColors(colorForeground, colorSecondary);
     }
 
     @Override
@@ -357,7 +355,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                     mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
                             : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
-                mHost.startRunnableDismissingKeyguard(() -> post(() -> {
+                Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
                     if (TunerService.isTunerEnabled(mContext)) {
                         TunerService.showResetRequest(mContext, () -> {
                             // Relaunch settings so that the tuner disappears.
@@ -370,7 +368,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                     }
                     startSettingsActivity();
 
-                }));
+                });
             } else {
                 startSettingsActivity();
             }
@@ -383,18 +381,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private void startSettingsActivity() {
         mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
                 true /* dismissShade */);
-    }
-
-    public void setNextAlarmController(NextAlarmController nextAlarmController) {
-        mNextAlarmController = nextAlarmController;
-    }
-
-    public void setBatteryController(BatteryController batteryController) {
-        batteryController.addCallback(this);
-    }
-
-    public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addCallback(this);
     }
 
     @Override

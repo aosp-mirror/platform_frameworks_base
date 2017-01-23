@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -56,6 +57,8 @@ public class QSFooterTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        injectTestDependency(SecurityController.class, mSecurityController);
+        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
                 new LayoutInflaterBuilder(mContext)
                         .replace("ImageView", TestableImageView.class)
@@ -67,7 +70,7 @@ public class QSFooterTest extends SysuiTestCase {
         mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
         mFooterIcon = (TestableImageView) mRootView.findViewById(R.id.footer_icon);
         mFooterIcon2 = (TestableImageView) mRootView.findViewById(R.id.footer_icon2);
-        mFooter.setHostEnvironment(null, mSecurityController, Looper.getMainLooper());
+        mFooter.setHostEnvironment(null);
     }
 
     @Test

@@ -9,14 +9,15 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -33,14 +34,17 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.applications.InterestingConfigChanges;
+import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 /**
  * Class to manage everything related to assist in SystemUI.
  */
-public class AssistManager {
+public class AssistManager implements ConfigurationChangedReceiver {
 
     private static final String TAG = "AssistManager";
     private static final String ASSIST_ICON_METADATA_NAME =
@@ -52,9 +56,10 @@ public class AssistManager {
     protected final Context mContext;
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
+    private final InterestingConfigChanges mInterestingConfigChanges;
 
     private AssistOrbContainer mView;
-    private final BaseStatusBar mBar;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     protected final AssistUtils mAssistUtils;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
@@ -79,14 +84,16 @@ public class AssistManager {
         }
     };
 
-    public AssistManager(BaseStatusBar bar, Context context) {
+    public AssistManager(DeviceProvisionedController controller, Context context) {
         mContext = context;
-        mBar = bar;
+        mDeviceProvisionedController = controller;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
 
         registerVoiceInteractionSessionListener();
+        mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION);
+        onConfigurationChanged(context.getResources().getConfiguration());
     }
 
     protected void registerVoiceInteractionSessionListener() {
@@ -104,7 +111,10 @@ public class AssistManager {
         });
     }
 
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(Configuration newConfiguration) {
+        if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
+            return;
+        }
         boolean visible = false;
         if (mView != null) {
             visible = mView.isShowing();
@@ -183,13 +193,13 @@ public class AssistManager {
     }
 
     private void startAssistActivity(Bundle args, @NonNull ComponentName assistComponent) {
-        if (!mBar.isDeviceProvisioned()) {
+        if (!mDeviceProvisionedController.isDeviceProvisioned()) {
             return;
         }
 
         // Close Recent Apps if needed
-        mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL |
-                CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).animateCollapsePanels(
+                CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL);
 
         boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;

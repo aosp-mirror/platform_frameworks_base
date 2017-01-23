@@ -118,6 +118,12 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
         mTrackers.values().forEach(Tracker::verify);
     }
 
+    public void injectLeakCheckedDependencies(Class<?>... cls) {
+        for (Class<?> c : cls) {
+            injectTestDependency(c, getLeakChecker(c));
+        }
+    }
+
     public <T extends CallbackController> T addListening(T mock, Class<T> cls, String tag) {
         doAnswer(new Answer<Void>() {
             @Override

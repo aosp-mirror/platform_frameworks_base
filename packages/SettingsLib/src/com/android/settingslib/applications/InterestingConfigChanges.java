@@ -22,13 +22,22 @@ import android.content.res.Resources;
 
 public class InterestingConfigChanges {
     private final Configuration mLastConfiguration = new Configuration();
+    private final int mFlags;
     private int mLastDensity;
+
+    public InterestingConfigChanges() {
+        this(0);
+    }
+
+    public InterestingConfigChanges(int extraFlags) {
+        mFlags = extraFlags | ActivityInfo.CONFIG_LOCALE
+                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_SCREEN_LAYOUT;
+    }
 
     public boolean applyNewConfig(Resources res) {
         int configChanges = mLastConfiguration.updateFrom(res.getConfiguration());
         boolean densityChanged = mLastDensity != res.getDisplayMetrics().densityDpi;
-        if (densityChanged || (configChanges&(ActivityInfo.CONFIG_LOCALE
-                |ActivityInfo.CONFIG_UI_MODE|ActivityInfo.CONFIG_SCREEN_LAYOUT)) != 0) {
+        if (densityChanged || (configChanges & (mFlags)) != 0) {
             mLastDensity = res.getDisplayMetrics().densityDpi;
             return true;
         }

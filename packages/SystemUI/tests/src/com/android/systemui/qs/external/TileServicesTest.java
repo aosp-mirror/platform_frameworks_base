@@ -47,13 +47,7 @@ public class TileServicesTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mManagers = new ArrayList<>();
-        final NetworkController networkController = Mockito.mock(NetworkController.class);
-        Mockito.when(networkController.getDataSaverController()).thenReturn(
-                Mockito.mock(DataSaverController.class));
-        QSTileHost host = new QSTileHost(mContext, null, null, null, null,
-                networkController, null,
-                Mockito.mock(HotspotController.class), null,
-                null, null, null, null, null, null, null, null);
+        QSTileHost host = new QSTileHost(mContext, null, null);
         mTileService = new TestTileServices(host, Looper.getMainLooper());
     }
 

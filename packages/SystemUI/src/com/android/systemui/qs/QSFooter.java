@@ -19,11 +19,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
@@ -33,12 +31,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.ActivityStarter;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -55,12 +54,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private final ImageView mFooterIcon2;
     private final Context mContext;
     private final Callback mCallback = new Callback();
+    private final SecurityController mSecurityController;
+    private final ActivityStarter mActivityStarter;
+    private final Handler mMainHandler;
 
-    private SecurityController mSecurityController;
     private AlertDialog mDialog;
     private QSTileHost mHost;
     protected Handler mHandler;
-    private final Handler mMainHandler;
 
     private boolean mIsVisible;
     private boolean mIsIconVisible;
@@ -81,13 +81,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mFooterIcon2Id = R.drawable.ic_qs_network_logging;
         mContext = context;
         mMainHandler = new Handler(Looper.getMainLooper());
+        mActivityStarter = Dependency.get(ActivityStarter.class);
+        mSecurityController = Dependency.get(SecurityController.class);
+        mHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
     }
 
-    public void setHostEnvironment(QSTileHost host, SecurityController securityController,
-            Looper looper) {
+    public void setHostEnvironment(QSTileHost host) {
         mHost = host;
-        mSecurityController = securityController;
-        mHandler = new H(looper);
     }
 
     public void setListening(boolean listening) {
@@ -173,7 +173,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             final Intent settingsIntent = new Intent(ACTION_VPN_SETTINGS);
-            mHost.startActivityDismissingKeyguard(settingsIntent);
+            mActivityStarter.postStartActivityDismissingKeyguard(settingsIntent, 0);
         }
     }
 

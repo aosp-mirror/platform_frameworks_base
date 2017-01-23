@@ -30,7 +30,6 @@ public interface ZenModeController extends CallbackController<Callback> {
     ZenRule getManualRule();
     ZenModeConfig getConfig();
     long getNextAlarm();
-    void setUserId(int userId);
     boolean isZenAvailable();
     ComponentName getEffectsSuppressor();
     boolean isCountdownConditionSupported();

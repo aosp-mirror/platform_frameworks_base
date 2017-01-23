@@ -29,7 +29,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.systemui.doze.DozeFactory;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -64,6 +63,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      * The classes of the stuff to start.
      */
     private final Class<?>[] SERVICES = new Class[] {
+            Dependency.class,
             FragmentService.class,
             TunerService.class,
             CommandQueue.CommandQueueStart.class,
@@ -238,9 +238,5 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
     public SystemUI[] getServices() {
         return mServices;
-    }
-
-    public static <T> T getComponent(Context context, Class<T> interfaceType) {
-        return ((SysUiServiceProvider) context.getApplicationContext()).getComponent(interfaceType);
     }
 }

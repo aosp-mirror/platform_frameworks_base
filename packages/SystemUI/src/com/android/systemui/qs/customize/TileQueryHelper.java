@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.service.quicksettings.TileService;
 import android.widget.Button;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DrawableIcon;
@@ -59,7 +60,7 @@ public class TileQueryHelper {
     private void addSystemTiles(final QSTileHost host) {
         String possible = mContext.getString(R.string.quick_settings_tiles_stock);
         String[] possibleTiles = possible.split(",");
-        final Handler qsHandler = new Handler(host.getLooper());
+        final Handler qsHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
         final Handler mainHandler = new Handler(Looper.getMainLooper());
         for (int i = 0; i < possibleTiles.length; i++) {
             final String spec = possibleTiles[i];

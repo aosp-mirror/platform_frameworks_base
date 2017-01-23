@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -12,16 +12,10 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui;
 
-import android.app.AlarmManager;
+import android.content.res.Configuration;
 
-import com.android.systemui.Dumpable;
-import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
-
-public interface NextAlarmController extends CallbackController<NextAlarmChangeCallback>, Dumpable {
-
-    public interface NextAlarmChangeCallback {
-        void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm);
-    }
+public interface ConfigurationChangedReceiver {
+    void onConfigurationChanged(Configuration newConfiguration);
 }
