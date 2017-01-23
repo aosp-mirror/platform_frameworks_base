@@ -801,7 +801,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
-        mKeyguardIndicationController = new KeyguardIndicationController(mContext,
+        mKeyguardIndicationController =
+                SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
                 (ViewGroup) mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
@@ -1179,6 +1180,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mFingerprintUnlockController);
         mKeyguardIndicationController.setStatusBarKeyguardViewManager(
                 mStatusBarKeyguardViewManager);
+        mKeyguardIndicationController.setUserInfoController(
+                Dependency.get(UserInfoController.class));
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mIconPolicy.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);

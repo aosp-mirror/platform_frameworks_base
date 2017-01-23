@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
  * Controls the indications and error messages shown on the Keyguard
@@ -83,6 +84,8 @@ public class KeyguardIndicationController {
     private int mChargingWattage;
     private String mMessageToShowOnScreenOn;
 
+    private KeyguardUpdateMonitorCallback mUpdateMonitor;
+
     private final DevicePolicyManager mDevicePolicyManager;
 
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
@@ -106,12 +109,29 @@ public class KeyguardIndicationController {
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
 
-        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(getKeyguardCallback());
         context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         updateDisclosure();
+    }
+
+    /**
+     * Gets the {@link KeyguardUpdateMonitorCallback} instance associated with this
+     * {@link KeyguardIndicationController}.
+     *
+     * <p>Subclasses may override this method to extend or change the callback behavior by extending
+     * the {@link BaseKeyguardCallback}.
+     *
+     * @return A KeyguardUpdateMonitorCallback. Multiple calls to this method <b>must</b> return the
+     * same instance.
+     */
+    protected KeyguardUpdateMonitorCallback getKeyguardCallback() {
+        if (mUpdateMonitor == null) {
+            mUpdateMonitor = new BaseKeyguardCallback();
+        }
+        return mUpdateMonitor;
     }
 
     private void updateDisclosure() {
@@ -149,6 +169,12 @@ public class KeyguardIndicationController {
     public void setRestingIndication(String restingIndication) {
         mRestingIndication = restingIndication;
         updateIndication();
+    }
+
+    /**
+     * Sets the active controller managing changes and callbacks to user information.
+     */
+    public void setUserInfoController(UserInfoController userInfoController) {
     }
 
     /**
@@ -264,8 +290,37 @@ public class KeyguardIndicationController {
         }
     }
 
-    KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
-        public int mLastSuccessiveErrorMessage = -1;
+    public void setStatusBarKeyguardViewManager(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+    }
+
+    BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mHandler.post(() -> {
+                if (mVisible) {
+                    updateIndication();
+                }
+            });
+        }
+    };
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_HIDE_TRANSIENT && mTransientIndication != null) {
+                mTransientIndication = null;
+                updateIndication();
+            } else if (msg.what == MSG_CLEAR_FP_MSG) {
+                mLockIcon.setTransientFpError(false);
+                hideTransientIndication();
+            }
+        }
+    };
+
+    protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
+        private int mLastSuccessiveErrorMessage = -1;
 
         @Override
         public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
@@ -372,34 +427,4 @@ public class KeyguardIndicationController {
             }
         }
     };
-
-    BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mHandler.post(() -> {
-                if (mVisible) {
-                    updateIndication();
-                }
-            });
-        }
-    };
-
-
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_HIDE_TRANSIENT && mTransientIndication != null) {
-                mTransientIndication = null;
-                updateIndication();
-            } else if (msg.what == MSG_CLEAR_FP_MSG) {
-                mLockIcon.setTransientFpError(false);
-                hideTransientIndication();
-            }
-        }
-    };
-
-    public void setStatusBarKeyguardViewManager(
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-    }
 }
