@@ -996,10 +996,6 @@ android.hardware.input.InputDeviceIdentifier
 android.hardware.input.InputDeviceIdentifier$1
 android.hardware.input.InputManager
 android.hardware.input.InputManager$InputDevicesChangedListener
-# These cannot be preloaded and need to be refactored into system server. b/17791590, b/21935130
-# android.hardware.location.ActivityRecognitionHardware
-# android.hardware.location.IActivityRecognitionHardware
-# android.hardware.location.IActivityRecognitionHardware$Stub
 android.hardware.location.ContextHubManager
 android.hardware.location.IContextHubService
 android.hardware.location.IContextHubService$Stub
