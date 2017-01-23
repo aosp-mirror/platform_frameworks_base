@@ -94,6 +94,9 @@ public class WebViewUpdateService extends SystemService {
                         case Intent.ACTION_USER_ADDED:
                             mImpl.handleNewUser(userId);
                             break;
+                        case Intent.ACTION_USER_REMOVED:
+                            mImpl.handleUserRemoved(userId);
+                            break;
                     }
                 }
         };
@@ -112,6 +115,7 @@ public class WebViewUpdateService extends SystemService {
 
         IntentFilter userAddedFilter = new IntentFilter();
         userAddedFilter.addAction(Intent.ACTION_USER_ADDED);
+        userAddedFilter.addAction(Intent.ACTION_USER_REMOVED);
         getContext().registerReceiverAsUser(mWebViewUpdatedReceiver, UserHandle.ALL,
                 userAddedFilter, null /* broadcast permission */, null /* handler */);
 

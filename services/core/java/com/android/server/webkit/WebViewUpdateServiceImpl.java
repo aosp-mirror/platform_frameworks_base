@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Base64;
 import android.util.Slog;
+import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
@@ -100,32 +101,41 @@ public class WebViewUpdateServiceImpl {
     private boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
         for (WebViewProviderInfo provider : providers) {
             if (provider.availableByDefault && !provider.isFallback) {
-                try {
-                    PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(provider);
-                    if (isInstalledPackage(packageInfo) && isEnabledPackage(packageInfo)
-                            && mWebViewUpdater.isValidProvider(provider, packageInfo)) {
-                        return true;
-                    }
-                } catch (NameNotFoundException e) {
-                    // A non-existent provider is neither valid nor enabled
+                // userPackages can contain null objects.
+                List<UserPackage> userPackages =
+                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider);
+                if (isInstalledAndEnabledForAllUsers(userPackages) &&
+                        // Checking validity of the package for the system user (rather than all
+                        // users) since package validity depends not on the user but on the package
+                        // itself.
+                        mWebViewUpdater.isValidProvider(provider,
+                                userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo())) {
+                    return true;
                 }
             }
         }
         return false;
     }
 
-    /**
-     * Called when a new user has been added to update the state of its fallback package.
-     */
     void handleNewUser(int userId) {
-        if (!mSystemInterface.isFallbackLogicEnabled()) return;
+        handleUserChange();
+    }
 
-        WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
-        if (fallbackProvider == null) return;
+    void handleUserRemoved(int userId) {
+        handleUserChange();
+    }
 
-        mSystemInterface.enablePackageForUser(fallbackProvider.packageName,
-                !existsValidNonFallbackProvider(webviewProviders), userId);
+    /**
+     * Called when a user was added or removed to ensure fallback logic and WebView preparation are
+     * triggered. This has to be done since the WebView package we use depends on the enabled-state
+     * of packages for all users (so adding or removing a user might cause us to change package).
+     */
+    private void handleUserChange() {
+        if (mSystemInterface.isFallbackLogicEnabled()) {
+            updateFallbackState(mSystemInterface.getWebViewPackages());
+        }
+        // Potentially trigger package-changing logic.
+        mWebViewUpdater.updateCurrentWebViewPackage(null);
     }
 
     void notifyRelroCreationCompleted() {
@@ -141,7 +151,7 @@ public class WebViewUpdateServiceImpl {
     }
 
     WebViewProviderInfo[] getValidWebViewPackages() {
-        return mWebViewUpdater.getValidAndInstalledWebViewPackages();
+        return mWebViewUpdater.getValidWebViewPackages();
     }
 
     WebViewProviderInfo[] getWebViewPackages() {
@@ -160,7 +170,7 @@ public class WebViewUpdateServiceImpl {
         if (!mSystemInterface.isFallbackLogicEnabled()) return;
 
         WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-        updateFallbackState(webviewProviders, true);
+        updateFallbackState(webviewProviders);
     }
 
     /**
@@ -185,35 +195,23 @@ public class WebViewUpdateServiceImpl {
             }
         }
         if (!changedPackageAvailableByDefault) return;
-        updateFallbackState(webviewProviders, false);
+        updateFallbackState(webviewProviders);
     }
 
-    private void updateFallbackState(WebViewProviderInfo[] webviewProviders, boolean isBoot) {
+    private void updateFallbackState(WebViewProviderInfo[] webviewProviders) {
         // If there exists a valid and enabled non-fallback package - disable the fallback
         // package, otherwise, enable it.
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
         if (fallbackProvider == null) return;
         boolean existsValidNonFallbackProvider = existsValidNonFallbackProvider(webviewProviders);
 
-        boolean isFallbackEnabled = false;
-        try {
-            isFallbackEnabled = isEnabledPackage(
-                    mSystemInterface.getPackageInfoForProvider(fallbackProvider));
-        } catch (NameNotFoundException e) {
-            // No fallback package installed -> early out.
-            return;
-        }
-
-        if (existsValidNonFallbackProvider
-                // During an OTA the primary user's WebView state might differ from other users', so
-                // ignore the state of that user during boot.
-                && (isFallbackEnabled || isBoot)) {
+        List<UserPackage> userPackages =
+                mSystemInterface.getPackageInfoForProviderAllUsers(mContext, fallbackProvider);
+        if (existsValidNonFallbackProvider && !isDisabledForAllUsers(userPackages)) {
             mSystemInterface.uninstallAndDisablePackageForAllUsers(mContext,
                     fallbackProvider.packageName);
         } else if (!existsValidNonFallbackProvider
-                // During an OTA the primary user's WebView state might differ from other users', so
-                // ignore the state of that user during boot.
-                && (!isFallbackEnabled || isBoot)) {
+                && !isInstalledAndEnabledForAllUsers(userPackages)) {
             // Enable the fallback package for all users.
             mSystemInterface.enablePackageForAllUsers(mContext,
                     fallbackProvider.packageName, true);
@@ -376,38 +374,8 @@ public class WebViewUpdateServiceImpl {
          * or the replacement are done).
          */
         public String changeProviderAndSetting(String newProviderName) {
-            PackageInfo oldPackage = null;
-            PackageInfo newPackage = null;
-            boolean providerChanged = false;
-            synchronized(mLock) {
-                oldPackage = mCurrentWebViewPackage;
-                mSystemInterface.updateUserSetting(mContext, newProviderName);
-
-                try {
-                    newPackage = findPreferredWebViewPackage();
-                    providerChanged = (oldPackage == null)
-                            || !newPackage.packageName.equals(oldPackage.packageName);
-                } catch (WebViewPackageMissingException e) {
-                    mCurrentWebViewPackage = null;
-                    Slog.e(TAG, "Tried to change WebView provider but failed to fetch WebView " +
-                            "package " + e);
-                    // If we don't perform the user change but don't have an installed WebView
-                    // package, we will have changed the setting and it will be used when a package
-                    // is available.
-                    return "";
-                }
-                // Perform the provider change if we chose a new provider
-                if (providerChanged) {
-                    onWebViewProviderChanged(newPackage);
-                }
-            }
-            // Kill apps using the old provider only if we changed provider
-            if (providerChanged && oldPackage != null) {
-                mSystemInterface.killPackageDependents(oldPackage.packageName);
-            }
-            // Return the new provider, this is not necessarily the one we were asked to switch to
-            // But the persistent setting will now be pointing to the provider we were asked to
-            // switch to anyway
+            PackageInfo newPackage = updateCurrentWebViewPackage(newProviderName);
+            if (newPackage == null) return "";
             return newPackage.packageName;
         }
 
@@ -437,15 +405,14 @@ public class WebViewUpdateServiceImpl {
             }
         }
 
-        private ProviderAndPackageInfo[] getValidWebViewPackagesAndInfos(boolean onlyInstalled) {
+        private ProviderAndPackageInfo[] getValidWebViewPackagesAndInfos() {
             WebViewProviderInfo[] allProviders = mSystemInterface.getWebViewPackages();
             List<ProviderAndPackageInfo> providers = new ArrayList<>();
             for(int n = 0; n < allProviders.length; n++) {
                 try {
                     PackageInfo packageInfo =
                         mSystemInterface.getPackageInfoForProvider(allProviders[n]);
-                    if ((!onlyInstalled || isInstalledPackage(packageInfo))
-                            && isValidProvider(allProviders[n], packageInfo)) {
+                    if (isValidProvider(allProviders[n], packageInfo)) {
                         providers.add(new ProviderAndPackageInfo(allProviders[n], packageInfo));
                     }
                 } catch (NameNotFoundException e) {
@@ -458,9 +425,8 @@ public class WebViewUpdateServiceImpl {
         /**
          * Fetch only the currently valid WebView packages.
          **/
-        public WebViewProviderInfo[] getValidAndInstalledWebViewPackages() {
-            ProviderAndPackageInfo[] providersAndPackageInfos =
-                getValidWebViewPackagesAndInfos(true /* only fetch installed packages */);
+        public WebViewProviderInfo[] getValidWebViewPackages() {
+            ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
             WebViewProviderInfo[] providers =
                 new WebViewProviderInfo[providersAndPackageInfos.length];
             for(int n = 0; n < providersAndPackageInfos.length; n++) {
@@ -487,39 +453,49 @@ public class WebViewUpdateServiceImpl {
          *
          */
         private PackageInfo findPreferredWebViewPackage() throws WebViewPackageMissingException {
-            ProviderAndPackageInfo[] providers =
-                getValidWebViewPackagesAndInfos(false /* onlyInstalled */);
+            ProviderAndPackageInfo[] providers = getValidWebViewPackagesAndInfos();
 
             String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider(mContext);
 
-            // If the user has chosen provider, use that
+            // If the user has chosen provider, use that (if it's installed and enabled for all
+            // users).
             for (ProviderAndPackageInfo providerAndPackage : providers) {
-                if (providerAndPackage.provider.packageName.equals(userChosenProvider)
-                        && isInstalledPackage(providerAndPackage.packageInfo)
-                        && isEnabledPackage(providerAndPackage.packageInfo)) {
-                    return providerAndPackage.packageInfo;
+                if (providerAndPackage.provider.packageName.equals(userChosenProvider)) {
+                    // userPackages can contain null objects.
+                    List<UserPackage> userPackages =
+                            mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
+                                    providerAndPackage.provider);
+                    if (isInstalledAndEnabledForAllUsers(userPackages)) {
+                        return providerAndPackage.packageInfo;
+                    }
                 }
             }
 
             // User did not choose, or the choice failed; use the most stable provider that is
-            // installed and enabled for the device owner, and available by default (not through
+            // installed and enabled for all users, and available by default (not through
             // user choice).
             for (ProviderAndPackageInfo providerAndPackage : providers) {
-                if (providerAndPackage.provider.availableByDefault
-                        && isInstalledPackage(providerAndPackage.packageInfo)
-                        && isEnabledPackage(providerAndPackage.packageInfo)) {
-                    return providerAndPackage.packageInfo;
+                if (providerAndPackage.provider.availableByDefault) {
+                    // userPackages can contain null objects.
+                    List<UserPackage> userPackages =
+                            mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
+                                    providerAndPackage.provider);
+                    if (isInstalledAndEnabledForAllUsers(userPackages)) {
+                        return providerAndPackage.packageInfo;
+                    }
                 }
             }
 
             // Could not find any installed and enabled package either, use the most stable and
             // default-available provider.
+            // TODO(gsennton) remove this when we have a functional WebView stub.
             for (ProviderAndPackageInfo providerAndPackage : providers) {
                 if (providerAndPackage.provider.availableByDefault) {
                     return providerAndPackage.packageInfo;
                 }
             }
 
+            // This should never happen during normal operation (only with modified system images).
             mAnyWebViewInstalled = false;
             throw new WebViewPackageMissingException("Could not find a loadable WebView package");
         }
@@ -702,6 +678,48 @@ public class WebViewUpdateServiceImpl {
                         mAnyWebViewInstalled));
             }
         }
+
+        /**
+         * Update the current WebView package.
+         * @param newProviderName the package to switch to, null if no package has been explicitly
+         * chosen.
+         */
+        public PackageInfo updateCurrentWebViewPackage(String newProviderName) {
+            PackageInfo oldPackage = null;
+            PackageInfo newPackage = null;
+            boolean providerChanged = false;
+            synchronized(mLock) {
+                oldPackage = mCurrentWebViewPackage;
+
+                if (newProviderName != null) {
+                    mSystemInterface.updateUserSetting(mContext, newProviderName);
+                }
+
+                try {
+                    newPackage = findPreferredWebViewPackage();
+                    providerChanged = (oldPackage == null)
+                            || !newPackage.packageName.equals(oldPackage.packageName);
+                } catch (WebViewPackageMissingException e) {
+                    // If updated the Setting but don't have an installed WebView package, the
+                    // Setting will be used when a package is available.
+                    mCurrentWebViewPackage = null;
+                    Slog.e(TAG, "Couldn't find WebView package to use " + e);
+                    return null;
+                }
+                // Perform the provider change if we chose a new provider
+                if (providerChanged) {
+                    onWebViewProviderChanged(newPackage);
+                }
+            }
+            // Kill apps using the old provider only if we changed provider
+            if (providerChanged && oldPackage != null) {
+                mSystemInterface.killPackageDependents(oldPackage.packageName);
+            }
+            // Return the new provider, this is not necessarily the one we were asked to switch to,
+            // but the persistent setting will now be pointing to the provider we were asked to
+            // switch to anyway.
+            return newPackage;
+        }
     }
 
     private static boolean providerHasValidSignature(WebViewProviderInfo provider,
@@ -730,20 +748,27 @@ public class WebViewUpdateServiceImpl {
     }
 
     /**
-     * Returns whether the given package is enabled.
-     * This state can be changed by the user from Settings->Apps
+     * Return true iff {@param packageInfos} point to only installed and enabled packages.
+     * The given packages {@param packageInfos} should all be pointing to the same package, but each
+     * PackageInfo representing a different user's package.
      */
-    private static boolean isEnabledPackage(PackageInfo packageInfo) {
-        return packageInfo.applicationInfo.enabled;
+    private static boolean isInstalledAndEnabledForAllUsers(
+            List<UserPackage> userPackages) {
+        for (UserPackage userPackage : userPackages) {
+            if (!userPackage.isInstalledPackage() || !userPackage.isEnabledPackage()) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * Return true if the package is installed and not hidden
-     */
-    private static boolean isInstalledPackage(PackageInfo packageInfo) {
-        return (((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
-            && ((packageInfo.applicationInfo.privateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_HIDDEN) == 0));
+    private static boolean isDisabledForAllUsers(List<UserPackage> userPackages) {
+        for (UserPackage userPackage : userPackages) {
+            if (userPackage.getPackageInfo() != null && userPackage.isEnabledPackage()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
