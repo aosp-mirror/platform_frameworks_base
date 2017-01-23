@@ -566,6 +566,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected Map<String, PackageInfo> mInjectedPackages;
 
     protected Set<PackageWithUser> mUninstalledPackages;
+    protected Set<PackageWithUser> mEphemeralPackages;
     protected Set<String> mSystemPackages;
 
     protected PackageManager mMockPackageManager;
@@ -731,6 +732,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         mUninstalledPackages = new HashSet<>();
         mSystemPackages = new HashSet<>();
+        mEphemeralPackages = new HashSet<>();
 
         mInjectedFilePathRoot = new File(getTestContext().getCacheDir(), "test-files");
 
@@ -1033,6 +1035,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         if (mUninstalledPackages.contains(PackageWithUser.of(userId, packageName))) {
             ret.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+        }
+        if (mEphemeralPackages.contains(PackageWithUser.of(userId, packageName))) {
+            ret.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_EPHEMERAL;
         }
         if (mSystemPackages.contains(packageName)) {
             ret.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;

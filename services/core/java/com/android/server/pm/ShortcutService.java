@@ -1529,10 +1529,11 @@ public class ShortcutService extends IShortcutService.Stub {
         if (UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Invalid user-ID");
         }
-        if (injectGetPackageUid(packageName, userId) == callingUid) {
-            return; // Caller is valid.
+        if (injectGetPackageUid(packageName, userId) != callingUid) {
+            throw new SecurityException("Calling package name mismatch");
         }
-        throw new SecurityException("Calling package name mismatch");
+        Preconditions.checkState(!isEphemeralApp(packageName, userId),
+                "Ephemeral apps can't use ShortcutManager");
     }
 
     // Overridden in unit tests to execute r synchronously.
@@ -3073,6 +3074,10 @@ public class ShortcutService extends IShortcutService.Stub {
         return (ai != null) && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
     }
 
+    private static boolean isEphemeralApp(@Nullable ApplicationInfo ai) {
+        return (ai != null) && ai.isEphemeralApp();
+    }
+
     private static boolean isInstalled(@Nullable PackageInfo pi) {
         return (pi != null) && isInstalled(pi.applicationInfo);
     }
@@ -3095,6 +3100,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     boolean isPackageInstalled(String packageName, int userId) {
         return getApplicationInfo(packageName, userId) != null;
+    }
+
+    boolean isEphemeralApp(String packageName, int userId) {
+        return isEphemeralApp(getApplicationInfo(packageName, userId));
     }
 
     @Nullable
