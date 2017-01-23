@@ -205,7 +205,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
-    void updateConfiguration() {
+    private void updateConfiguration() {
         mConfig = new TetheringConfiguration(mContext);
     }
 
@@ -817,6 +817,17 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         return mConfig;
     }
 
+    public boolean hasTetherableConfiguration() {
+        final TetheringConfiguration cfg = mConfig;
+        final boolean hasDownstreamConfiguration =
+                (cfg.tetherableUsbRegexs.length != 0) ||
+                (cfg.tetherableWifiRegexs.length != 0) ||
+                (cfg.tetherableBluetoothRegexs.length != 0);
+        final boolean hasUpstreamConfiguration = !cfg.preferredUpstreamIfaceTypes.isEmpty();
+
+        return hasDownstreamConfiguration && hasUpstreamConfiguration;
+    }
+
     // TODO - update callers to use getTetheringConfiguration(),
     // which has only final members.
     public String[] getTetherableUsbRegexs() {
@@ -862,17 +873,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
         }
         return ConnectivityManager.TETHER_ERROR_NO_ERROR;
-    }
-
-    public int[] getUpstreamIfaceTypes() {
-        updateConfiguration();  // TODO - remove?
-        final Collection<Integer> upstreams = mConfig.preferredUpstreamIfaceTypes;
-        final int[] values = new int[upstreams.size()];
-        int i = 0;
-        for (Integer u : upstreams) {
-            values[i++] = u.intValue();
-        }
-        return values;
     }
 
     // TODO review API - maybe return ArrayList<String> here and below?
