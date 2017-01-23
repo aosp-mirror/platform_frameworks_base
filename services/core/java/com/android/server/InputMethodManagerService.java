@@ -243,7 +243,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
-    private final boolean mImeSelectedOnBoot;
 
     static class SessionState {
         final ClientState client;
@@ -566,7 +565,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    class ImmsBroadcastReceiver extends android.content.BroadcastReceiver {
+    class ImmsBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -586,6 +585,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final String newValue = intent.getStringExtra(
                             Intent.EXTRA_SETTING_NEW_VALUE);
                     restoreEnabledInputMethods(mContext, prevValue, newValue);
+                }
+            } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                synchronized (mMethodMap) {
+                    resetStateIfCurrentLocaleChangedLocked();
                 }
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
@@ -845,9 +848,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             mSettings.switchCurrentUser(currentUserId, !mSystemReady);
-            // We need to rebuild IMEs.
-            buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-            updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+            if (mSystemReady) {
+                // We need to rebuild IMEs.
+                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+            }
         }
     }
 
@@ -897,13 +902,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mShowOngoingImeSwitcherForPhones = false;
 
-        final IntentFilter broadcastFilter = new IntentFilter();
-        broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
-        broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
-        broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
-        mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
-
         mNotificationShown = false;
         int userId = 0;
         try {
@@ -911,7 +909,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } catch (RemoteException e) {
             Slog.w(TAG, "Couldn't get current user ID; guessing it's 0", e);
         }
-        mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
 
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
@@ -919,48 +916,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         updateCurrentProfileIds();
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
-        synchronized (mMethodMap) {
-            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
-                    mSettings, context);
-        }
-
-        // Just checking if defaultImiId is empty or not
-        final String defaultImiId = mSettings.getSelectedInputMethod();
-        if (DEBUG) {
-            Slog.d(TAG, "Initial default ime = " + defaultImiId);
-        }
-        mImeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
-
-        synchronized (mMethodMap) {
-            buildInputMethodListLocked(!mImeSelectedOnBoot /* resetDefaultEnabledIme */);
-        }
-        mSettings.enableAllIMEsIfThereIsNoEnabledIME();
-
-        if (!mImeSelectedOnBoot) {
-            Slog.w(TAG, "No IME selected. Choose the most applicable IME.");
-            synchronized (mMethodMap) {
-                resetDefaultImeLocked(context);
-            }
-        }
-
-        synchronized (mMethodMap) {
-            mSettingsObserver.registerContentObserverLocked(userId);
-            updateFromSettingsLocked(true);
-        }
-
-        // IMMS wants to receive Intent.ACTION_LOCALE_CHANGED in order to update the current IME
-        // according to the new system locale.
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        mContext.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        synchronized(mMethodMap) {
-                            resetStateIfCurrentLocaleChangedLocked();
-                        }
-                    }
-                }, filter);
+        mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                mSettings, context);
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -1089,6 +1046,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (!mSystemReady) {
                 mSystemReady = true;
+                mLastSystemLocales = mRes.getConfiguration().getLocales();
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
                         !mUserManager.isUserUnlockingOrUnlocked(currentUserId));
@@ -1105,14 +1063,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
-                if (!mImeSelectedOnBoot) {
-                    Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
-                    resetStateIfCurrentLocaleChangedLocked();
-                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
-                            mSettings.getEnabledInputMethodListLocked(),
-                            mSettings.getCurrentUserId(), mContext.getBasePackageName());
-                }
-                mLastSystemLocales = mRes.getConfiguration().getLocales();
+
+                mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+                mSettingsObserver.registerContentObserverLocked(currentUserId);
+
+                final IntentFilter broadcastFilter = new IntentFilter();
+                broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
+                broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
+                broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
+                broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+                mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
+
+                buildInputMethodListLocked(true /* resetDefaultEnabledIme */);
+                resetDefaultImeLocked(mContext);
+                updateFromSettingsLocked(true);
+                InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                        mSettings.getEnabledInputMethodListLocked(), currentUserId,
+                        mContext.getBasePackageName());
+
                 try {
                     startInputInnerLocked();
                 } catch (RuntimeException e) {
@@ -2624,6 +2593,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // additional input method subtypes to the IME.
         if (TextUtils.isEmpty(imiId) || subtypes == null) return;
         synchronized (mMethodMap) {
+            if (!mSystemReady) {
+                return;
+            }
             final InputMethodInfo imi = mMethodMap.get(imiId);
             if (imi == null) return;
             final String[] packageInfos;
@@ -3047,6 +3019,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
                     + " \n ------ caller=" + Debug.getCallers(10));
+        }
+        if (!mSystemReady) {
+            Slog.e(TAG, "buildInputMethodListLocked is not allowed until system is ready");
+            return;
         }
         mMethodList.clear();
         mMethodMap.clear();
