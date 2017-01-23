@@ -1444,6 +1444,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED = 0;
 
     /**
@@ -1454,6 +1455,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK = 1;
 
     /**
@@ -1465,6 +1467,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS = 2;
 
     /**
@@ -1476,6 +1479,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER = 3;
 
     /**
@@ -1489,6 +1493,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK = 4;
 
     /**
@@ -5070,6 +5075,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract int getIntentVerificationStatusAsUser(String packageName, @UserIdInt int userId);
 
     /**
@@ -5092,6 +5098,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract boolean updateIntentVerificationStatusAsUser(String packageName, int status,
             @UserIdInt int userId);
 
@@ -5107,6 +5114,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract List<IntentFilterVerificationInfo> getIntentFilterVerifications(
             String packageName);
 
@@ -5121,6 +5129,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract List<IntentFilter> getAllIntentFilters(String packageName);
 
     /**
@@ -5134,6 +5143,7 @@ public abstract class PackageManager {
      * @hide
      */
     @TestApi
+    @SystemApi
     public abstract String getDefaultBrowserPackageNameAsUser(@UserIdInt int userId);
 
     /**
@@ -5148,6 +5158,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName,
             @UserIdInt int userId);
 
