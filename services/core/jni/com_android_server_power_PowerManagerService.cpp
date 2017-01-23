@@ -110,7 +110,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 static void nativeInit(JNIEnv* env, jobject obj) {
     gPowerManagerServiceObj = env->NewGlobalRef(obj);
 
-    gPowerHal = IPower::getService("power");
+    gPowerHal = IPower::getService();
     if (gPowerHal == nullptr) {
         ALOGE("Couldn't load PowerHAL module");
     }
