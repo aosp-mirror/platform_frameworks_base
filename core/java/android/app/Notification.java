@@ -7088,11 +7088,13 @@ public class Notification implements Parcelable
         private static final String EXTRA_FLAGS = "flags";
         private static final String EXTRA_CONTENT_INTENT = "content_intent";
         private static final String EXTRA_DELETE_INTENT = "delete_intent";
+        private static final String EXTRA_CHANNEL_ID = "channel_id";
 
         // Flags bitwise-ored to mFlags
         private static final int FLAG_AVAILABLE_ON_TV = 0x1;
 
         private int mFlags;
+        private String mChannelId;
         private PendingIntent mContentIntent;
         private PendingIntent mDeleteIntent;
 
@@ -7113,6 +7115,7 @@ public class Notification implements Parcelable
                 null : notif.extras.getBundle(EXTRA_TV_EXTENDER);
             if (bundle != null) {
                 mFlags = bundle.getInt(EXTRA_FLAGS);
+                mChannelId = bundle.getString(EXTRA_CHANNEL_ID);
                 mContentIntent = bundle.getParcelable(EXTRA_CONTENT_INTENT);
                 mDeleteIntent = bundle.getParcelable(EXTRA_DELETE_INTENT);
             }
@@ -7128,6 +7131,7 @@ public class Notification implements Parcelable
             Bundle bundle = new Bundle();
 
             bundle.putInt(EXTRA_FLAGS, mFlags);
+            bundle.putString(EXTRA_CHANNEL_ID, mChannelId);
             if (mContentIntent != null) {
                 bundle.putParcelable(EXTRA_CONTENT_INTENT, mContentIntent);
             }
@@ -7146,6 +7150,23 @@ public class Notification implements Parcelable
          */
         public boolean isAvailableOnTv() {
             return (mFlags & FLAG_AVAILABLE_ON_TV) != 0;
+        }
+
+        /**
+         * Specifies the channel the notification should be delivered on when shown on TV.
+         * It can be different from the channel that the notification is delivered to when
+         * posting on a non-TV device.
+         */
+        public TvExtender setChannel(String channelId) {
+            mChannelId = channelId;
+            return this;
+        }
+
+        /**
+         * Returns the id of the channel this notification posts to on TV.
+         */
+        public String getChannel() {
+            return mChannelId;
         }
 
         /**
