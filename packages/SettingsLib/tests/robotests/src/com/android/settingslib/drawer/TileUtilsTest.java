@@ -34,9 +34,11 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.settingslib.SuggestionParser;
 import com.android.settingslib.TestConfig;
 import static org.mockito.Mockito.atLeastOnce;
 
@@ -153,6 +155,32 @@ public class TileUtilsTest {
                 false /* checkCategory */);
 
         assertThat(outTiles.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void getTilesForIntent_shouldSkipFilteredApps() {
+        final String testCategory = "category1";
+        Intent intent = new Intent();
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY);
+        addMetadataToInfo(resolveInfo, "com.android.settings.require_account", "com.google");
+        addMetadataToInfo(resolveInfo, "com.android.settings.require_connection", "true");
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
+                null /* defaultCategory */, outTiles, false /* usePriority */,
+                false /* checkCategory */);
+
+        assertThat(outTiles.size()).isEqualTo(1);
+        SuggestionParser parser = new SuggestionParser(mContext, null);
+        parser.filterSuggestions(outTiles, 0);
+        assertThat(outTiles.size()).isEqualTo(0);
     }
 
     @Test
@@ -308,5 +336,17 @@ public class TileUtilsTest {
             info.activityInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         }
         return info;
+    }
+
+    private void addMetadataToInfo(ResolveInfo info, String key, String value) {
+        if (!TextUtils.isEmpty(key)) {
+            if (info.activityInfo == null) {
+                info.activityInfo = new ActivityInfo();
+            }
+            if (info.activityInfo.metaData == null) {
+                info.activityInfo.metaData = new Bundle();
+            }
+            info.activityInfo.metaData.putString(key, value);
+        }
     }
 }
