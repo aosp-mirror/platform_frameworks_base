@@ -91,12 +91,12 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
-    public void testListensForDunNetworks() throws Exception {
+    public void testListensForAllNetworks() throws Exception {
         assertTrue(mCM.listening.isEmpty());
 
         mUNM.start();
         assertFalse(mCM.listening.isEmpty());
-        assertTrue(mCM.isListeningForDun());
+        assertTrue(mCM.isListeningForAll());
 
         mUNM.stop();
         assertTrue(mCM.hasNoCallbacks());
@@ -197,9 +197,12 @@ public class UpstreamNetworkMonitorTest {
                    legacyTypeMap.isEmpty();
         }
 
-        boolean isListeningForDun() {
+        boolean isListeningForAll() {
+            final NetworkCapabilities empty = new NetworkCapabilities();
+            empty.clearAll();
+
             for (NetworkRequest req : listening.values()) {
-                if (req.networkCapabilities.hasCapability(NET_CAPABILITY_DUN)) {
+                if (req.networkCapabilities.equalRequestableCapabilities(empty)) {
                     return true;
                 }
             }
