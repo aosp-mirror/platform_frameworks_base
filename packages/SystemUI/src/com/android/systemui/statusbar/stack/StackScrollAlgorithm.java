@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
@@ -244,7 +243,7 @@ public class StackScrollAlgorithm {
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
-        state.increasedPaddingMap.clear();
+        state.paddingMap.clear();
         int notGoneIndex = 0;
         ExpandableView lastView = null;
         for (int i = 0; i < childCount; i++) {
@@ -254,16 +253,31 @@ public class StackScrollAlgorithm {
                     continue;
                 }
                 notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
-                float increasedPadding = v.getIncreasedPaddingAmount();
+                float increasedPadding = v.getIncreasedPaddingAmount();;
                 if (increasedPadding != 0.0f) {
-                    state.increasedPaddingMap.put(v, increasedPadding);
+                    state.paddingMap.put(v, increasedPadding);
                     if (lastView != null) {
-                        Float prevValue = state.increasedPaddingMap.get(lastView);
-                        float newValue = prevValue != null
-                                ? Math.max(prevValue, increasedPadding)
-                                : increasedPadding;
-                        state.increasedPaddingMap.put(lastView, newValue);
+                        Float prevValue = state.paddingMap.get(lastView);
+                        float newValue = getPaddingForValue(increasedPadding);
+                        if (prevValue != null) {
+                            float prevPadding = getPaddingForValue(prevValue);
+                            if (increasedPadding > 0) {
+                                newValue = NotificationUtils.interpolate(
+                                        prevPadding,
+                                        newValue,
+                                        increasedPadding);
+                            } else if (prevValue > 0) {
+                                newValue = NotificationUtils.interpolate(
+                                        newValue,
+                                        prevPadding,
+                                        prevValue);
+                            }
+                        }
+                        state.paddingMap.put(lastView, newValue);
                     }
+                } else if (lastView != null) {
+                    float newValue = getPaddingForValue(state.paddingMap.get(lastView));
+                    state.paddingMap.put(lastView, newValue);
                 }
                 if (v instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) v;
@@ -284,6 +298,22 @@ public class StackScrollAlgorithm {
                 }
                 lastView = v;
             }
+        }
+    }
+
+    private float getPaddingForValue(Float increasedPadding) {
+        if (increasedPadding == null) {
+            return mPaddingBetweenElements;
+        } else if (increasedPadding >= 0.0f) {
+            return NotificationUtils.interpolate(
+                    mPaddingBetweenElements,
+                    mIncreasedPaddingBetweenElements,
+                    increasedPadding);
+        } else {
+            return NotificationUtils.interpolate(
+                    0,
+                    mPaddingBetweenElements,
+                    1.0f + increasedPadding);
         }
     }
 
@@ -527,18 +557,17 @@ public class StackScrollAlgorithm {
         public final ArrayList<ExpandableView> visibleChildren = new ArrayList<ExpandableView>();
 
         /**
-         * The children from the host that need an increased padding after them. A value of 0 means
-         * no increased padding, a value of 1 means full padding.
+         * The padding after each child measured in pixels.
          */
-        public final HashMap<ExpandableView, Float> increasedPaddingMap = new HashMap<>();
+        public final HashMap<ExpandableView, Float> paddingMap = new HashMap<>();
 
         public int getPaddingAfterChild(ExpandableView child) {
-            Float paddingValue = increasedPaddingMap.get(child);
-            return paddingValue == null
-                    ? mPaddingBetweenElements
-                    : (int) NotificationUtils.interpolate(mPaddingBetweenElements,
-                            mIncreasedPaddingBetweenElements,
-                            paddingValue);
+            Float padding = paddingMap.get(child);
+            if (padding == null) {
+                // Should only happen for the last view
+                return mPaddingBetweenElements;
+            }
+            return (int) padding.floatValue();
         }
     }
 
