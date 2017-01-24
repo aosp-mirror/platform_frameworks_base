@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -73,8 +74,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         mSpanFlags = EmptyArray.INT;
         mSpanMax = EmptyArray.INT;
         mSpanOrder = EmptyArray.INT;
-        mPrioSortBuffer = EmptyArray.INT;
-        mOrderSortBuffer = EmptyArray.INT;
 
         if (text instanceof Spanned) {
             Spanned sp = (Spanned) text;
@@ -856,14 +855,14 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * @param queryStart Start index.
      * @param queryEnd End index.
      * @param kind Class type to search for.
-     * @param sort If true the results are sorted by the insertion order.
+     * @param sortByInsertionOrder If true the results are sorted by the insertion order.
      * @param <T>
      * @return Array of the spans. Empty array if no results are found.
      *
      * @hide
      */
     public <T> T[] getSpans(int queryStart, int queryEnd, @Nullable Class<T> kind,
-                                 boolean sort) {
+            boolean sortByInsertionOrder) {
         if (kind == null) return (T[]) ArrayUtils.emptyArray(Object.class);
         if (mSpanCount == 0) return ArrayUtils.emptyArray(kind);
         int count = countSpans(queryStart, queryEnd, kind, treeRoot());
@@ -873,13 +872,15 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
         // Safe conversion, but requires a suppressWarning
         T[] ret = (T[]) Array.newInstance(kind, count);
-        if (sort) {
-            mPrioSortBuffer = checkSortBuffer(mPrioSortBuffer, count);
-            mOrderSortBuffer = checkSortBuffer(mOrderSortBuffer, count);
+        final int[] prioSortBuffer = sortByInsertionOrder ? obtain(count) : EmptyArray.INT;
+        final int[] orderSortBuffer = sortByInsertionOrder ? obtain(count) : EmptyArray.INT;
+        getSpansRec(queryStart, queryEnd, kind, treeRoot(), ret, prioSortBuffer,
+                orderSortBuffer, 0, sortByInsertionOrder);
+        if (sortByInsertionOrder) {
+            sort(ret, prioSortBuffer, orderSortBuffer);
+            recycle(prioSortBuffer);
+            recycle(orderSortBuffer);
         }
-        getSpansRec(queryStart, queryEnd, kind, treeRoot(), ret, mPrioSortBuffer,
-                mOrderSortBuffer, 0, sort);
-        if (sort) sort(ret, mPrioSortBuffer, mOrderSortBuffer);
         return ret;
     }
 
@@ -992,15 +993,63 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     /**
+     * Obtain a temporary sort buffer.
+     *
+     * @param elementCount the size of the int[] to be returned
+     * @return an int[] with elementCount length
+     */
+    private static int[] obtain(final int elementCount) {
+        int[] result = null;
+        synchronized (sCachedIntBuffer) {
+            // try finding a tmp buffer with length of at least elementCount
+            // if not get the first available one
+            int candidateIndex = -1;
+            for (int i = sCachedIntBuffer.length - 1; i >= 0; i--) {
+                if (sCachedIntBuffer[i] != null) {
+                    if (sCachedIntBuffer[i].length >= elementCount) {
+                        candidateIndex = i;
+                        break;
+                    } else if (candidateIndex == -1) {
+                        candidateIndex = i;
+                    }
+                }
+            }
+
+            if (candidateIndex != -1) {
+                result = sCachedIntBuffer[candidateIndex];
+                sCachedIntBuffer[candidateIndex] = null;
+            }
+        }
+        result = checkSortBuffer(result, elementCount);
+        return result;
+    }
+
+    /**
+     * Recycle sort buffer.
+     *
+     * @param buffer buffer to be recycled
+     */
+    private static void recycle(int[] buffer) {
+        synchronized (sCachedIntBuffer) {
+            for (int i = 0; i < sCachedIntBuffer.length; i++) {
+                if (sCachedIntBuffer[i] == null || buffer.length > sCachedIntBuffer[i].length) {
+                    sCachedIntBuffer[i] = buffer;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Check the size of the buffer and grow if required.
      *
-     * @param buffer Buffer to be checked.
-     * @param size Required size.
+     * @param buffer buffer to be checked.
+     * @param size   required size.
      * @return Same buffer instance if the current size is greater than required size. Otherwise a
      * new instance is created and returned.
      */
-    private final int[] checkSortBuffer(int[] buffer, int size) {
-        if(size > buffer.length) {
+    private static int[] checkSortBuffer(int[] buffer, int size) {
+        if (buffer == null || size > buffer.length) {
             return ArrayUtils.newUnpaddedIntArray(GrowingArrayUtils.growSize(size));
         }
         return buffer;
@@ -1708,6 +1757,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+
+    @GuardedBy("sCachedIntBuffer")
+    private static final int[][] sCachedIntBuffer = new int[6][0];
+
     private InputFilter[] mFilters = NO_FILTERS;
 
     private char[] mText;
@@ -1721,8 +1774,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     private int[] mSpanFlags;
     private int[] mSpanOrder;  // store the order of span insertion
     private int mSpanInsertCount;  // counter for the span insertion
-    private int[] mPrioSortBuffer;  // buffer used to sort getSpans result
-    private int[] mOrderSortBuffer;  // buffer used to sort getSpans result
 
     private int mSpanCount;
     private IdentityHashMap<Object, Integer> mIndexOfSpan;
