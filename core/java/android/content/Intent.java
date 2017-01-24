@@ -3966,6 +3966,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_EPHEMERAL_TOKEN = "android.intent.extra.EPHEMERAL_TOKEN";
 
     /**
+     * The version code of the app to install components from.
+     * @hide
+     */
+    public static final String EXTRA_VERSION_CODE = "android.intent.extra.VERSION_CODE";
+
+    /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles
      * to add to the default intent extras in {@link #EXTRA_INTENT} when used with
      * {@link #ACTION_CHOOSER}. Each key should be a package name. The package need not

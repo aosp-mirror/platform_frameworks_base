@@ -460,6 +460,7 @@ class ActivityStarter {
             final String splitName = rInfo.ephemeralResponse.splitName;
             final boolean needsPhaseTwo = rInfo.ephemeralResponse.needsPhase2;
             final String token = rInfo.ephemeralResponse.token;
+            final int versionCode = rInfo.ephemeralResponse.resolveInfo.getVersionCode();
             if (needsPhaseTwo) {
                 // request phase two resolution
                 mService.getPackageManagerInternalLocked().requestEphemeralResolutionPhaseTwo(
@@ -467,8 +468,8 @@ class ActivityStarter {
                         callingPackage, userId);
             }
             intent = EphemeralResolver.buildEphemeralInstallerIntent(intent, ephemeralIntent,
-                    callingPackage, resolvedType, userId, packageName, splitName, token,
-                    needsPhaseTwo);
+                    callingPackage, resolvedType, userId, packageName, splitName, versionCode,
+                    token, needsPhaseTwo);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;

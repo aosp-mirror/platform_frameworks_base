@@ -78,6 +78,7 @@ public abstract class EphemeralResolver {
                     int sequence) {
                 final String packageName;
                 final String splitName;
+                final int versionCode;
                 if (ephemeralResolveInfo != null) {
                     final ArrayList<EphemeralResolveInfo> ephemeralResolveInfoList =
                             new ArrayList<EphemeralResolveInfo>(1);
@@ -91,13 +92,16 @@ public abstract class EphemeralResolver {
                             && ephemeralIntentInfo.resolveInfo != null) {
                         packageName = ephemeralIntentInfo.resolveInfo.getPackageName();
                         splitName = ephemeralIntentInfo.splitName;
+                        versionCode = ephemeralIntentInfo.resolveInfo.getVersionCode();
                     } else {
                         packageName = null;
                         splitName = null;
+                        versionCode = -1;
                     }
                 } else {
                     packageName = null;
                     splitName = null;
+                    versionCode = -1;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
                         requestObj.launchIntent,
@@ -107,6 +111,7 @@ public abstract class EphemeralResolver {
                         requestObj.userId,
                         packageName,
                         splitName,
+                        versionCode,
                         requestObj.responseObj.token,
                         false /*needsPhaseTwo*/);
                 installerIntent.setComponent(new ComponentName(
@@ -123,7 +128,7 @@ public abstract class EphemeralResolver {
      */
     public static Intent buildEphemeralInstallerIntent(Intent launchIntent, Intent origIntent,
             String callingPackage, String resolvedType, int userId, String ephemeralPackageName,
-            String ephemeralSplitName, String token, boolean needsPhaseTwo) {
+            String ephemeralSplitName, int versionCode, String token, boolean needsPhaseTwo) {
         // Construct the intent that launches the ephemeral installer
         int flags = launchIntent.getFlags();
         final Intent intent = new Intent();
@@ -181,6 +186,7 @@ public abstract class EphemeralResolver {
 
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, ephemeralPackageName);
             intent.putExtra(Intent.EXTRA_SPLIT_NAME, ephemeralSplitName);
+            intent.putExtra(Intent.EXTRA_VERSION_CODE, versionCode);
         }
 
         return intent;
