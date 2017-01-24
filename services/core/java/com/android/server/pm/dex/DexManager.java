@@ -132,8 +132,8 @@ public class DexManager {
                 // - new installed splits
                 // If we can't find the owner of the dex we simply do not track it. The impact is
                 // that the dex file will not be considered for offline optimizations.
-                // TODO(calin): add hooks for install/uninstall notifications to
-                // capture new or obsolete packages.
+                // TODO(calin): add hooks for move/uninstall notifications to
+                // capture package moves or obsolete packages.
                 if (DEBUG) {
                     Slog.i(TAG, "Could not find owning package for dex file: " + dexPath);
                 }
@@ -157,6 +157,20 @@ public class DexManager {
         }
     }
 
+    public void notifyPackageInstalled(PackageInfo info, int userId) {
+        cachePackageCodeLocation(info, userId);
+    }
+
+    private void cachePackageCodeLocation(PackageInfo info, int userId) {
+        PackageCodeLocations pcl = mPackageCodeLocationsCache.get(info.packageName);
+        if (pcl != null) {
+            pcl.mergeAppDataDirs(info.applicationInfo, userId);
+        } else {
+            mPackageCodeLocationsCache.put(info.packageName,
+                new PackageCodeLocations(info.applicationInfo, userId));
+        }
+    }
+
     private void loadInternal(Map<Integer, List<PackageInfo>> existingPackages) {
         Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
         // Cache the code locations for the installed packages. This allows for
@@ -166,13 +180,8 @@ public class DexManager {
             int userId = entry.getKey();
             for (PackageInfo pi : packageInfoList) {
                 // Cache the code locations.
-                PackageCodeLocations pcl = mPackageCodeLocationsCache.get(pi.packageName);
-                if (pcl != null) {
-                    pcl.mergeAppDataDirs(pi.applicationInfo, userId);
-                } else {
-                    mPackageCodeLocationsCache.put(pi.packageName,
-                        new PackageCodeLocations(pi.applicationInfo, userId));
-                }
+                cachePackageCodeLocation(pi, userId);
+
                 // Cache a map from package name to the set of user ids who installed the package.
                 // We will use it to sync the data and remove obsolete entries from
                 // mPackageDexUsage.
