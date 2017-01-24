@@ -3433,16 +3433,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.dispatchDetachedFromWindow();
     }
 
-    /** @hide */
-    @Override
-    protected void destroyHardwareResources() {
-        super.destroyHardwareResources();
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            getChildAt(i).destroyHardwareResources();
-        }
-    }
-
     /**
      * @hide
      */
