@@ -31,7 +31,8 @@ public final class AccountManagerServiceTestFixtures {
             "account_manager_service_test:account_status_token_key";
     public static final String KEY_ACCOUNT_PASSWORD =
             "account_manager_service_test:account_password_key";
-
+    public static final String KEY_OPTIONS_BUNDLE =
+            "account_manager_service_test:option_bundle_key";
     public static final String ACCOUNT_NAME_SUCCESS = "success_on_return@fixture.com";
     public static final String ACCOUNT_NAME_INTERVENE = "intervene@fixture.com";
     public static final String ACCOUNT_NAME_ERROR = "error@fixture.com";
@@ -47,7 +48,20 @@ public final class AccountManagerServiceTestFixtures {
 
     public static final String ACCOUNT_STATUS_TOKEN =
             "com.android.server.accounts.account_manager_service_test.account.status.token";
-
+    public static final String AUTH_TOKEN_LABEL =
+            "com.android.server.accounts.account_manager_service_test.auth.token.label";
+    public static final String AUTH_TOKEN =
+            "com.android.server.accounts.account_manager_service_test.auth.token";
+    public static final String KEY_TOKEN_EXPIRY =
+            "com.android.server.accounts.account_manager_service_test.auth.token.expiry";
+    public static final String ACCOUNT_FEATURE1 =
+            "com.android.server.accounts.account_manager_service_test.feature1";
+    public static final String ACCOUNT_FEATURE2 =
+            "com.android.server.accounts.account_manager_service_test.feature2";
+    public static final String[] ACCOUNT_FEATURES =
+            new String[]{ACCOUNT_FEATURE1, ACCOUNT_FEATURE2};
+    public static final String CALLER_PACKAGE =
+            "com.android.server.accounts.account_manager_service_test.caller.package";
     public static final String ACCOUNT_PASSWORD =
             "com.android.server.accounts.account_manager_service_test.account.password";
     public static final String KEY_RESULT = "account_manager_service_test:result";

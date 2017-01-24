@@ -45,8 +45,15 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
 
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
-        throw new UnsupportedOperationException(
-                "editProperties is not yet supported by the TestAccountAuthenticator");
+        Bundle result = new Bundle();
+        result.putString(AccountManager.KEY_ACCOUNT_NAME,
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS);
+        result.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
+        result.putString(
+                AccountManager.KEY_AUTHTOKEN,
+                Integer.toString(mTokenCounter.incrementAndGet()));
+        return result;
     }
 
     @Override
@@ -59,10 +66,38 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
         if (!mAccountType.equals(accountType)) {
             throw new IllegalArgumentException("Request to the wrong authenticator!");
         }
+        String accountName = null;
+
+        if (options != null) {
+            accountName = options.getString(AccountManagerServiceTestFixtures.KEY_ACCOUNT_NAME);
+        }
 
         Bundle result = new Bundle();
-        result.putString(AccountManager.KEY_ACCOUNT_NAME, "test_account@test.com");
-        result.putString(AccountManager.KEY_ACCOUNT_TYPE, mAccountType);
+        if (accountName.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // fill bundle with a success result.
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, mAccountType);
+            result.putString(AccountManager.KEY_AUTHTOKEN,
+                    Integer.toString(mTokenCounter.incrementAndGet()));
+            result.putParcelable(AccountManagerServiceTestFixtures.KEY_OPTIONS_BUNDLE, options);
+        } else if (accountName.equals(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            // Specify data to be returned by the eventual activity.
+            Intent eventualActivityResultData = new Intent();
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+            // Fill result with Intent.
+            Intent intent = new Intent(mContext, AccountAuthenticatorDummyActivity.class);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_RESULT, eventualActivityResultData);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK, response);
+
+            result.putParcelable(AccountManager.KEY_INTENT, intent);
+        } else {
+            fillResultWithError(
+                    result,
+                    AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                    AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        }
         return result;
     }
 
@@ -71,8 +106,38 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             AccountAuthenticatorResponse response,
             Account account,
             Bundle options) throws NetworkErrorException {
-        throw new UnsupportedOperationException(
-                "confirmCredentials is not yet supported by the TestAccountAuthenticator");
+        if (!mAccountType.equals(account.type)) {
+            throw new IllegalArgumentException("Request to the wrong authenticator!");
+        }
+        Bundle result = new Bundle();
+
+        if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // fill bundle with a success result.
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+        } else if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            // Specify data to be returned by the eventual activity.
+            Intent eventualActivityResultData = new Intent();
+            eventualActivityResultData.putExtra(AccountManager.KEY_BOOLEAN_RESULT, true);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+
+            // Fill result with Intent.
+            Intent intent = new Intent(mContext, AccountAuthenticatorDummyActivity.class);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_RESULT,
+                    eventualActivityResultData);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK, response);
+
+            result.putParcelable(AccountManager.KEY_INTENT, intent);
+        } else {
+            // fill with error
+            fillResultWithError(
+                    result,
+                    AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                    AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        }
+        return result;
     }
 
     @Override
@@ -81,14 +146,53 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             Account account,
             String authTokenType,
             Bundle options) throws NetworkErrorException {
-        throw new UnsupportedOperationException(
-                "getAuthToken is not yet supported by the TestAccountAuthenticator");
+        if (!mAccountType.equals(account.type)) {
+            throw new IllegalArgumentException("Request to the wrong authenticator!");
+        }
+        Bundle result = new Bundle();
+
+        long expiryMillis = (options == null)
+                ? 0 : options.getLong(AccountManagerServiceTestFixtures.KEY_TOKEN_EXPIRY);
+        if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // fill bundle with a success result.
+            result.putString(
+                    AccountManager.KEY_AUTHTOKEN, AccountManagerServiceTestFixtures.AUTH_TOKEN);
+            result.putLong(
+                    AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY,
+                    expiryMillis);
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+        } else if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            // Specify data to be returned by the eventual activity.
+            Intent eventualActivityResultData = new Intent();
+            eventualActivityResultData.putExtra(
+                    AccountManager.KEY_AUTHTOKEN, AccountManagerServiceTestFixtures.AUTH_TOKEN);
+            eventualActivityResultData.putExtra(
+                    AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY,
+                    expiryMillis);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+
+            // Fill result with Intent.
+            Intent intent = new Intent(mContext, AccountAuthenticatorDummyActivity.class);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_RESULT,
+                    eventualActivityResultData);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK, response);
+
+            result.putParcelable(AccountManager.KEY_INTENT, intent);
+
+        } else {
+            fillResultWithError(
+                    result,
+                    AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                    AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        }
+        return result;
     }
 
     @Override
     public String getAuthTokenLabel(String authTokenType) {
-        throw new UnsupportedOperationException(
-                "getAuthTokenLabel is not yet supported by the TestAccountAuthenticator");
+        return AccountManagerServiceTestFixtures.AUTH_TOKEN_LABEL;
     }
 
     @Override
@@ -101,8 +205,31 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             throw new IllegalArgumentException("Request to the wrong authenticator!");
         }
         Bundle result = new Bundle();
-        result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-        result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+
+        if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // fill bundle with a success result.
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+        } else if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            // Specify data to be returned by the eventual activity.
+            Intent eventualActivityResultData = new Intent();
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            eventualActivityResultData.putExtra(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+
+            // Fill result with Intent.
+            Intent intent = new Intent(mContext, AccountAuthenticatorDummyActivity.class);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_RESULT,
+                    eventualActivityResultData);
+            intent.putExtra(AccountManagerServiceTestFixtures.KEY_CALLBACK, response);
+
+            result.putParcelable(AccountManager.KEY_INTENT, intent);
+        } else {
+            // fill with error
+            fillResultWithError(
+                    result,
+                    AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                    AccountManagerServiceTestFixtures.ERROR_MESSAGE);
+        }
         return result;
     }
 
@@ -111,8 +238,17 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             AccountAuthenticatorResponse response,
             Account account,
             String[] features) throws NetworkErrorException {
-        throw new UnsupportedOperationException(
-                "hasFeatures is not yet supported by the TestAccountAuthenticator");
+        Bundle result = new Bundle();
+        if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // fill bundle with a success result.
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
+        } else {
+            // return null for error
+            result = null;
+        }
+
+        response.onResult(result);
+        return null;
     }
 
     @Override
@@ -298,6 +434,22 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
 
         response.onResult(result);
         return null;
+    }
+
+    @Override
+    public Bundle getAccountRemovalAllowed(
+            AccountAuthenticatorResponse response, Account account) throws NetworkErrorException {
+        Bundle result = new Bundle();
+        if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
+        } else if (account.name.equals(
+                AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            Intent intent = new Intent(mContext, AccountAuthenticatorDummyActivity.class);
+            result.putParcelable(AccountManager.KEY_INTENT, intent);
+        } else {
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+        }
+        return result;
     }
 
     private void fillResultWithError(Bundle result, Bundle options) {
