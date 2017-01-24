@@ -29,9 +29,6 @@ interface IBluetoothHeadsetClient {
     boolean connect(in BluetoothDevice device);
     boolean disconnect(in BluetoothDevice device);
 
-    boolean acceptIncomingConnect(in BluetoothDevice device);
-    boolean rejectIncomingConnect(in BluetoothDevice device);
-
     List<BluetoothDevice> getConnectedDevices();
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
     int getConnectionState(in BluetoothDevice device);
@@ -58,10 +55,10 @@ interface IBluetoothHeadsetClient {
     boolean getLastVoiceTagNumber(in BluetoothDevice device);
 
     int getAudioState(in BluetoothDevice device);
-    boolean connectAudio();
-    boolean disconnectAudio();
-    void setAudioRouteAllowed(boolean allowed);
-    boolean getAudioRouteAllowed();
+    boolean connectAudio(in BluetoothDevice device);
+    boolean disconnectAudio(in BluetoothDevice device);
+    void setAudioRouteAllowed(in BluetoothDevice device, boolean allowed);
+    boolean getAudioRouteAllowed(in BluetoothDevice device);
 
     Bundle getCurrentAgFeatures(in BluetoothDevice device);
 }
