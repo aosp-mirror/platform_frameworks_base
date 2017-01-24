@@ -5839,6 +5839,14 @@
         <attr name="color" />
     </declare-styleable>
 
+    <!-- Drawable used to draw masked icons with foreground and background layers. -->
+    <declare-styleable name="MaskableIconDrawableLayer">
+        <!-- The color to use for the layer, only if drawable is not defined. -->
+        <attr name="color" />
+        <!-- The drawable to use for the layer. -->
+        <attr name="drawable" />
+     </declare-styleable>
+
     <!-- Drawable used to show animated touch feedback. -->
     <declare-styleable name="RippleDrawable">
         <!-- The color to use for ripple effects. This attribute is required. -->

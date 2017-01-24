@@ -147,6 +147,8 @@ public final class DrawableInflater {
                 return new TransitionDrawable();
             case "ripple":
                 return new RippleDrawable();
+            case "maskable-icon":
+                return new MaskableIconDrawable();
             case "color":
                 return new ColorDrawable();
             case "shape":

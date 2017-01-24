@@ -2799,6 +2799,8 @@
 
   <java-symbol type="raw" name="fallback_categories" />
 
+  <java-symbol type="string" name="config_icon_mask" />
+
   <java-symbol type="attr" name="primaryContentAlpha" />
 
   <!-- Accessibility Shortcut -->
