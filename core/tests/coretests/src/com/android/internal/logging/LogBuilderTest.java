@@ -107,11 +107,21 @@ public class LogBuilderTest extends TestCase {
         assertEquals(123.0F, out[7]);
     }
 
-  public void testCategoryDefault() {
+    public void testCategoryDefault() {
         LogBuilder builder = new LogBuilder(10);
         Object[] out = builder.serialize();
         assertEquals(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY, out[0]);
         assertEquals(10, out[1]);
+    }
+
+    public void testGiantLogOmitted() {
+        LogBuilder badBuilder = new LogBuilder(0);
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 4000; i++) {
+            b.append("test, " + i);
+        }
+        badBuilder.addTaggedData(100, b.toString());
+        assertTrue(badBuilder.serialize().length < LogBuilder.MAX_SERIALIZED_SIZE);
     }
 
 }
