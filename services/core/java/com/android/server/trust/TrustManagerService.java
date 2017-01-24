@@ -16,14 +16,6 @@
 
 package com.android.server.trust;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.server.SystemService;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -65,12 +57,17 @@ import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Manages trust agents and trust listeners.
@@ -229,6 +226,22 @@ public class TrustManagerService extends SystemService {
                 TRUST_USUALLY_MANAGED_FLUSH_DELAY);
     }
 
+    public long addEscrowToken(byte[] token, int userId) {
+        return mLockPatternUtils.addEscrowToken(token, userId);
+    }
+
+    public boolean removeEscrowToken(long handle, int userId) {
+        return mLockPatternUtils.removeEscrowToken(handle, userId);
+    }
+
+    public boolean isEscrowTokenActive(long handle, int userId) {
+        return mLockPatternUtils.isEscrowTokenActive(handle, userId);
+    }
+
+    public void unlockUserWithToken(long handle, byte[] token, int userId) {
+        mLockPatternUtils.unlockUserWithToken(handle, token, userId);
+    }
+
     void refreshAgentList(int userIdOrAll) {
         if (DEBUG) Slog.d(TAG, "refreshAgentList(" + userIdOrAll + ")");
         if (!mTrustAgentsCanRun) {
@@ -329,7 +342,7 @@ public class TrustManagerService extends SystemService {
                 if (!StorageManager.isUserKeyUnlocked(userInfo.id)
                         && !directUnlock) {
                     if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
-                            + "'s trust agent " + name + ": FDE still locked and "
+                            + "'s trust agent " + name + ": FBE still locked and "
                             + " the agent cannot unlock user profile.");
                     continue;
                 }

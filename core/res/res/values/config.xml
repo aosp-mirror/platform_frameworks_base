@@ -2751,4 +2751,13 @@
          without explicit consent of the user. If no accessibility service with the specified name
          exists on the device, the accessibility shortcut will be disabled by default. -->
     <string name="config_defaultAccessibilityService" translatable="false"></string>
+
+    <!-- Flag indicates that whether escrow token API is enabled for TrustAgent -->
+    <!-- Warning: This API can be dangerous when not implemented properly. In particular,
+         escrow token must NOT be retrievable from device storage. In other words, either
+         escrow token is not stored on device or its ciphertext is stored on device while
+         the decryption key is not. Before enabling this feature, please ensure you've read
+         and followed the pertinent sections of the escrow tokens section of the CDD <link>-->
+    <!-- TODO(b/35230407) complete the link field -->
+    <bool name="config_allowEscrowTokenForTrustAgent">false</bool>
 </resources>

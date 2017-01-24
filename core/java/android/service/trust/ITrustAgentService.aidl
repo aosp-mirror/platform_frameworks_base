@@ -16,6 +16,7 @@
 package android.service.trust;
 
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.service.trust.ITrustAgentServiceCallback;
 
 /**
@@ -30,4 +31,7 @@ interface ITrustAgentService {
     oneway void onDeviceUnlocked();
     oneway void onConfigure(in List<PersistableBundle> options, IBinder token);
     oneway void setCallback(ITrustAgentServiceCallback callback);
+    oneway void onEscrowTokenAdded(in byte[] token, long handle, in UserHandle user);
+    oneway void onTokenStateReceived(long handle, int tokenState);
+    oneway void onEscrowTokenRemoved(long handle, boolean successful);
 }

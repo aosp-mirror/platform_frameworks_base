@@ -16,6 +16,7 @@
 
 package com.android.server.trust;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
@@ -27,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -35,11 +37,11 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Log;
-import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
-
+import android.service.trust.TrustAgentService;
+import android.util.Log;
+import android.util.Slog;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,6 +49,7 @@ import java.util.List;
  * A wrapper around a TrustAgentService interface. Coordinates communication between
  * TrustManager and the actual TrustAgent.
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class TrustAgentWrapper {
     private static final String EXTRA_COMPONENT_NAME = "componentName";
     private static final String TRUST_EXPIRED_ACTION = "android.server.trust.TRUST_EXPIRED_ACTION";
@@ -60,6 +63,10 @@ public class TrustAgentWrapper {
     private static final int MSG_RESTART_TIMEOUT = 4;
     private static final int MSG_SET_TRUST_AGENT_FEATURES_COMPLETED = 5;
     private static final int MSG_MANAGING_TRUST = 6;
+    private static final int MSG_ADD_ESCROW_TOKEN = 7;
+    private static final int MSG_REMOVE_ESCROW_TOKEN = 8;
+    private static final int MSG_ESCROW_TOKEN_STATE = 9;
+    private static final int MSG_UNLOCK_USER = 10;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -71,6 +78,9 @@ public class TrustAgentWrapper {
      * Long extra for {@link #MSG_GRANT_TRUST}
      */
     private static final String DATA_DURATION = "duration";
+    private static final String DATA_ESCROW_TOKEN = "escrow_token";
+    private static final String DATA_HANDLE = "handle";
+    private static final String DATA_USER_ID = "user_id";
 
     private final TrustManagerService mTrustManagerService;
     private final int mUserId;
@@ -190,6 +200,49 @@ public class TrustAgentWrapper {
                     mTrustManagerService.mArchive.logManagingTrust(mUserId, mName, mManagingTrust);
                     mTrustManagerService.updateTrust(mUserId, 0);
                     break;
+                case MSG_ADD_ESCROW_TOKEN: {
+                    byte[] eToken = msg.getData().getByteArray(DATA_ESCROW_TOKEN);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    long handle = mTrustManagerService.addEscrowToken(eToken, userId);
+                    try {
+                        mTrustAgentService.onEscrowTokenAdded(
+                                eToken, handle, UserHandle.of(userId));
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+                    break;
+                }
+                case MSG_ESCROW_TOKEN_STATE: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    boolean active = mTrustManagerService.isEscrowTokenActive(handle, userId);
+                    try {
+                        mTrustAgentService.onTokenStateReceived(handle,
+                            active ? TrustAgentService.TOKEN_STATE_ACTIVE
+                                : TrustAgentService.TOKEN_STATE_INACTIVE);
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+                    break;
+                }
+                case MSG_REMOVE_ESCROW_TOKEN: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    boolean success = mTrustManagerService.removeEscrowToken(handle, userId);
+                    try {
+                        mTrustAgentService.onEscrowTokenRemoved(handle, success);
+                    } catch (RemoteException e) {
+                        onError(e);
+                    }
+                    break;
+                }
+                case MSG_UNLOCK_USER: {
+                    long handle = msg.getData().getLong(DATA_HANDLE);
+                    int userId = msg.getData().getInt(DATA_USER_ID);
+                    byte[] eToken = msg.getData().getByteArray(DATA_ESCROW_TOKEN);
+                    mTrustManagerService.unlockUserWithToken(handle, eToken, userId);
+                    break;
+                }
             }
         }
     };
@@ -224,6 +277,67 @@ public class TrustAgentWrapper {
             if (DEBUG) Slog.d(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
+        }
+
+        @Override
+        public void addEscrowToken(byte[] token, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                Slog.e(TAG, "Escrow token API is not allowed.");
+                return;
+            }
+
+            if (DEBUG) Slog.d(TAG, "adding escrow token for user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_ADD_ESCROW_TOKEN);
+            msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void isEscrowTokenActive(long handle, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                Slog.e(TAG, "Escrow token API is not allowed.");
+                return;
+            }
+
+            if (DEBUG) Slog.d(TAG, "checking the state of escrow token on user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_ESCROW_TOKEN_STATE);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void removeEscrowToken(long handle, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                Slog.e(TAG, "Escrow token API is not allowed.");
+                return;
+            }
+
+            if (DEBUG) Slog.d(TAG, "removing escrow token on user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_REMOVE_ESCROW_TOKEN);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void unlockUserWithToken(long handle, byte[] token, int userId) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_allowEscrowTokenForTrustAgent)) {
+                Slog.e(TAG, "Escrow token API is not allowed.");
+                return;
+            }
+
+            if (DEBUG) Slog.d(TAG, "unlocking user " + userId);
+            Message msg = mHandler.obtainMessage(MSG_UNLOCK_USER);
+            msg.getData().putInt(DATA_USER_ID, userId);
+            msg.getData().putLong(DATA_HANDLE, handle);
+            msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
+            msg.sendToTarget();
         }
     };
 
@@ -294,7 +408,7 @@ public class TrustAgentWrapper {
     }
 
     private void onError(Exception e) {
-        Slog.w(TAG , "Remote Exception", e);
+        Slog.w(TAG , "Exception ", e);
     }
 
     private void onTrustTimeout() {
