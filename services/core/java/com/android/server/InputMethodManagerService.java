@@ -926,7 +926,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
-                context, mSystemReady, mSettings.getEnabledInputMethodListLocked());
+                context, mSettings.getEnabledInputMethodListLocked());
         if (suitableImes.isEmpty()) {
             Slog.i(TAG, "No default found");
             return;
@@ -3089,7 +3089,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (resetDefaultEnabledIme) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, mMethodList);
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
             final int N = defaultEnabledIme.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi =  defaultEnabledIme.get(i);
