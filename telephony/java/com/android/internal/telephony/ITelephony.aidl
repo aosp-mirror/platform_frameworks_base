@@ -33,6 +33,8 @@ import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
+import com.android.ims.internal.IImsServiceController;
+import com.android.ims.internal.IImsServiceFeatureListener;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -743,6 +745,14 @@ interface ITelephony {
      * @return 0: Not required. 1: required. 2: Not set.
      */
     int getTetherApnRequired();
+
+    /**
+     *  Get ImsServiceController binder from ImsResolver that corresponds to the subId and feature
+     *  requested as well as registering the ImsServiceController for callbacks using the
+     *  IImsServiceFeatureListener interface.
+     */
+    IImsServiceController getImsServiceControllerAndListen(int slotId, int feature,
+                IImsServiceFeatureListener callback);
 
     /**
      * Set the network selection mode to automatic.
