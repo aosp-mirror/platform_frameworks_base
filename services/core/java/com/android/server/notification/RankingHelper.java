@@ -67,10 +67,12 @@ public class RankingHelper implements RankingConfig {
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
+    private static final String ATT_SHOW_BADGE = "show_badge";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
+    private static final boolean DEFAULT_SHOW_BADGE = true;
 
     private final NotificationSignalExtractor[] mSignalExtractors;
     private final NotificationComparator mPreliminaryComparator;
@@ -169,7 +171,8 @@ public class RankingHelper implements RankingConfig {
                         Record r = getOrCreateRecord(name, uid,
                                 safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
                                 safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
+                                safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                                safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
 
                         // Channels
                         final int innerDepth = parser.getDepth();
@@ -215,11 +218,11 @@ public class RankingHelper implements RankingConfig {
 
     private Record getOrCreateRecord(String pkg, int uid) {
         return getOrCreateRecord(pkg, uid,
-                DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY);
+                DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE);
     }
 
     private Record getOrCreateRecord(String pkg, int uid, int importance, int priority,
-            int visibility) {
+            int visibility, boolean showBadge) {
         final String key = recordKey(pkg, uid);
         Record r = (uid == Record.UNKNOWN_UID) ? mRestoredWithoutUids.get(pkg) : mRecords.get(key);
         if (r == null) {
@@ -229,6 +232,7 @@ public class RankingHelper implements RankingConfig {
             r.importance = importance;
             r.priority = priority;
             r.visibility = visibility;
+            r.showBadge = showBadge;
             createDefaultChannelIfMissing(r);
             if (r.uid == Record.UNKNOWN_UID) {
                 mRestoredWithoutUids.put(pkg, r);
@@ -298,7 +302,7 @@ public class RankingHelper implements RankingConfig {
             }
             final boolean hasNonDefaultSettings = r.importance != DEFAULT_IMPORTANCE
                     || r.priority != DEFAULT_PRIORITY || r.visibility != DEFAULT_VISIBILITY
-                    || r.channels.size() > 0;
+                    || r.showBadge != DEFAULT_SHOW_BADGE || r.channels.size() > 0;
             if (hasNonDefaultSettings) {
                 out.startTag(null, TAG_PACKAGE);
                 out.attribute(null, ATT_NAME, r.pkg);
@@ -311,6 +315,7 @@ public class RankingHelper implements RankingConfig {
                 if (r.visibility != DEFAULT_VISIBILITY) {
                     out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
                 }
+                out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(r.showBadge));
 
                 if (!forBackup) {
                     out.attribute(null, ATT_UID, Integer.toString(r.uid));
@@ -396,6 +401,12 @@ public class RankingHelper implements RankingConfig {
         return Collections.binarySearch(notificationList, target, mFinalComparator);
     }
 
+    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
+        final String value = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(value)) return defValue;
+        return Boolean.parseBoolean(value);
+    }
+
     private static int safeInt(XmlPullParser parser, String att, int defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseInt(val, defValue);
@@ -416,6 +427,17 @@ public class RankingHelper implements RankingConfig {
     @Override
     public int getImportance(String packageName, int uid) {
         return getOrCreateRecord(packageName, uid).importance;
+    }
+
+    @Override
+    public boolean canShowBadge(String packageName, int uid) {
+        return getOrCreateRecord(packageName, uid).showBadge;
+    }
+
+    @Override
+    public void setShowBadge(String packageName, int uid, boolean showBadge) {
+        getOrCreateRecord(packageName, uid).showBadge = showBadge;
+        updateConfig();
     }
 
     @Override
@@ -453,6 +475,9 @@ public class RankingHelper implements RankingConfig {
         clearLockedFields(channel);
         if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             channel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
+        }
+        if (!r.showBadge) {
+            channel.setShowBadge(false);
         }
         r.channels.put(channel.getId(), channel);
         updateConfig();
@@ -672,7 +697,7 @@ public class RankingHelper implements RankingConfig {
             final Record r = records.valueAt(i);
             if (filter == null || filter.matches(r.pkg)) {
                 pw.print(prefix);
-                pw.print("  ");
+                pw.print("  AppSettings: ");
                 pw.print(r.pkg);
                 pw.print(" (");
                 pw.print(r.uid == Record.UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
@@ -689,6 +714,8 @@ public class RankingHelper implements RankingConfig {
                     pw.print(" visibility=");
                     pw.print(Notification.visibilityToString(r.visibility));
                 }
+                pw.print(" showBadge=");
+                pw.print(Boolean.toString(r.showBadge));
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
                     pw.print(prefix);
@@ -724,6 +751,9 @@ public class RankingHelper implements RankingConfig {
                     }
                     if (r.visibility != DEFAULT_VISIBILITY) {
                         record.put("visibility", Notification.visibilityToString(r.visibility));
+                    }
+                    if (r.showBadge != DEFAULT_SHOW_BADGE) {
+                        record.put("showBadge", Boolean.valueOf(r.showBadge));
                     }
                     for (NotificationChannel channel : r.channels.values()) {
                         record.put("channel", channel.toJson());
@@ -838,6 +868,7 @@ public class RankingHelper implements RankingConfig {
         int importance = DEFAULT_IMPORTANCE;
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
+        boolean showBadge = DEFAULT_SHOW_BADGE;
 
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
    }

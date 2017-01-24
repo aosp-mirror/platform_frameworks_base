@@ -230,9 +230,9 @@ public class BuzzBeepBlinkTest {
             n.flags |= Notification.FLAG_INSISTENT;
         }
 
-        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, channel, id, mTag, mUid,
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, id, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn);
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
         mService.addNotification(r);
         return r;
     }

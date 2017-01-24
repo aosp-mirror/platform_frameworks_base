@@ -70,9 +70,7 @@ public class GroupHelperTest {
         if (groupKey != null) {
             nb.setGroup(groupKey);
         }
-        NotificationChannel channel =
-                new NotificationChannel("test", "test", NotificationManager.IMPORTANCE_LOW);
-        return new StatusBarNotification(pkg, pkg, channel, id, tag, 0, 0, nb.build(), user, null,
+        return new StatusBarNotification(pkg, pkg, id, tag, 0, 0, nb.build(), user, null,
                 System.currentTimeMillis());
     }
 

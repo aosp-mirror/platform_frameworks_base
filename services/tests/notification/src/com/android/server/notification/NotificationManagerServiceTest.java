@@ -132,9 +132,9 @@ public class NotificationManagerServiceTest {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .build();
         StatusBarNotification sbn = new StatusBarNotification(mContext.getPackageName(),
-                mContext.getPackageName(), channel, 1, "tag", uid, 0,
+                mContext.getPackageName(), 1, "tag", uid, 0,
                 n, new UserHandle(uid), null, 0);
-        return new NotificationRecord(mContext, sbn);
+        return new NotificationRecord(mContext, sbn, channel);
     }
 
     @Test

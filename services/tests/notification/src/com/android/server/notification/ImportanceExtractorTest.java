@@ -69,9 +69,9 @@ public class ImportanceExtractorTest {
                 .setDefaults(Notification.DEFAULT_SOUND);
 
         Notification n = builder.build();
-        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, channel, mId, mTag, mUid,
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
                 mPid, n, mUser, null, System.currentTimeMillis());
-        NotificationRecord r = new NotificationRecord(getContext(), sbn);
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
         return r;
     }
 

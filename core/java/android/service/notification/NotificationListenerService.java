@@ -1166,11 +1166,12 @@ public abstract class NotificationListenerService extends Service {
         // System specified group key.
         private String mOverrideGroupKey;
         // Notification assistant channel override.
-        private NotificationChannel mOverrideChannel;
+        private NotificationChannel mChannel;
         // Notification assistant people override.
         private ArrayList<String> mOverridePeople;
         // Notification assistant snooze criteria.
         private ArrayList<SnoozeCriterion> mSnoozeCriteria;
+        private boolean mShowBadge;
 
         public Ranking() {}
 
@@ -1200,7 +1201,7 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns the user specificed visibility for the package that posted
+         * Returns the user specified visibility for the package that posted
          * this notification, or
          * {@link NotificationListenerService.Ranking#VISIBILITY_NO_OVERRIDE} if
          * no such preference has been expressed.
@@ -1233,7 +1234,7 @@ public abstract class NotificationListenerService extends Service {
          * Returns the importance of the notification, which dictates its
          * modes of presentation, see: {@link NotificationManager#IMPORTANCE_DEFAULT}, etc.
          *
-         * @return the rank of the notification
+         * @return the importance of the notification
          */
         public @NotificationManager.Importance int getImportance() {
             return mImportance;
@@ -1258,12 +1259,11 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * If the {@link NotificationAssistantService} has overridden the channel this notification
-         * was posted to, then this will not match the channel provided by the posting application
-         * and this should be used to determine the interruptiveness of the notification instead.
+         * Returns the notification channel this notification was posted to, which dictates
+         * notification behavior and presentation.
          */
         public NotificationChannel getChannel() {
-            return mOverrideChannel;
+            return mChannel;
         }
 
         /**
@@ -1283,11 +1283,20 @@ public abstract class NotificationListenerService extends Service {
             return mSnoozeCriteria;
         }
 
+        /**
+         * Returns whether this notification can be displayed as a badge.
+         *
+         * @return true if the notification can be displayed as a badge, false otherwise.
+         */
+        public boolean canShowBadge() {
+            return mShowBadge;
+        }
+
         private void populate(String key, int rank, boolean matchesInterruptionFilter,
                 int visibilityOverride, int suppressedVisualEffects, int importance,
                 CharSequence explanation, String overrideGroupKey,
-                NotificationChannel overrideChannel, ArrayList<String> overridePeople,
-                ArrayList<SnoozeCriterion> snoozeCriteria) {
+                NotificationChannel channel, ArrayList<String> overridePeople,
+                ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1297,9 +1306,10 @@ public abstract class NotificationListenerService extends Service {
             mImportance = importance;
             mImportanceExplanation = explanation;
             mOverrideGroupKey = overrideGroupKey;
-            mOverrideChannel = overrideChannel;
+            mChannel = channel;
             mOverridePeople = overridePeople;
             mSnoozeCriteria = snoozeCriteria;
+            mShowBadge = showBadge;
         }
 
         /**
@@ -1343,9 +1353,10 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Integer> mImportance;
         private ArrayMap<String, String> mImportanceExplanation;
         private ArrayMap<String, String> mOverrideGroupKeys;
-        private ArrayMap<String, NotificationChannel> mOverrideChannels;
+        private ArrayMap<String, NotificationChannel> mChannels;
         private ArrayMap<String, ArrayList<String>> mOverridePeople;
         private ArrayMap<String, ArrayList<SnoozeCriterion>> mSnoozeCriteria;
+        private ArrayMap<String, Boolean> mShowBadge;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1373,7 +1384,8 @@ public abstract class NotificationListenerService extends Service {
             outRanking.populate(key, rank, !isIntercepted(key),
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
-                    getOverrideChannel(key), getOverridePeople(key), getSnoozeCriteria(key));
+                    getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
+                    getShowBadge(key));
             return rank >= 0;
         }
 
@@ -1453,13 +1465,13 @@ public abstract class NotificationListenerService extends Service {
             return mOverrideGroupKeys.get(key);
         }
 
-        private NotificationChannel getOverrideChannel(String key) {
+        private NotificationChannel getChannel(String key) {
             synchronized (this) {
-                if (mOverrideChannels == null) {
-                    buildOverrideChannelsLocked();
+                if (mChannels == null) {
+                    buildChannelsLocked();
                 }
             }
-            return mOverrideChannels.get(key);
+            return mChannels.get(key);
         }
 
         private ArrayList<String> getOverridePeople(String key) {
@@ -1478,6 +1490,16 @@ public abstract class NotificationListenerService extends Service {
                 }
             }
             return mSnoozeCriteria.get(key);
+        }
+
+        private boolean getShowBadge(String key) {
+            synchronized (this) {
+                if (mShowBadge == null) {
+                    buildShowBadgeLocked();
+                }
+            }
+            Boolean showBadge = mShowBadge.get(key);
+            return showBadge == null ? false : showBadge.booleanValue();
         }
 
         // Locked by 'this'
@@ -1544,11 +1566,11 @@ public abstract class NotificationListenerService extends Service {
         }
 
         // Locked by 'this'
-        private void buildOverrideChannelsLocked() {
-            Bundle overrideChannels = mRankingUpdate.getOverrideChannels();
-            mOverrideChannels = new ArrayMap<>(overrideChannels.size());
-            for (String key : overrideChannels.keySet()) {
-                mOverrideChannels.put(key, overrideChannels.getParcelable(key));
+        private void buildChannelsLocked() {
+            Bundle channels = mRankingUpdate.getChannels();
+            mChannels = new ArrayMap<>(channels.size());
+            for (String key : channels.keySet()) {
+                mChannels.put(key, channels.getParcelable(key));
             }
         }
 
@@ -1567,6 +1589,15 @@ public abstract class NotificationListenerService extends Service {
             mSnoozeCriteria = new ArrayMap<>(snoozeCriteria.size());
             for (String key : snoozeCriteria.keySet()) {
                 mSnoozeCriteria.put(key, snoozeCriteria.getParcelableArrayList(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildShowBadgeLocked() {
+            Bundle showBadge = mRankingUpdate.getShowBadge();
+            mShowBadge = new ArrayMap<>(showBadge.size());
+            for (String key : showBadge.keySet()) {
+                mShowBadge.put(key, showBadge.getBoolean(key));
             }
         }
 

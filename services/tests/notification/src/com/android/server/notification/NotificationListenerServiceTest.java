@@ -59,6 +59,7 @@ public class NotificationListenerServiceTest {
             assertEquals(getChannel(key, i), ranking.getChannel());
             assertEquals(getPeople(key, i), ranking.getAdditionalPeople());
             assertEquals(getSnoozeCriteria(key, i), ranking.getSnoozeCriteria());
+            assertEquals(getShowBadge(i), ranking.canShowBadge());
         }
     }
 
@@ -68,9 +69,10 @@ public class NotificationListenerServiceTest {
         Bundle overrideGroupKeys = new Bundle();
         Bundle suppressedVisualEffects = new Bundle();
         Bundle explanation = new Bundle();
-        Bundle overrideChannels = new Bundle();
+        Bundle channels = new Bundle();
         Bundle overridePeople = new Bundle();
         Bundle snoozeCriteria = new Bundle();
+        Bundle showBadge = new Bundle();
         int[] importance = new int[mKeys.length];
 
         for (int i = 0; i < mKeys.length; i++) {
@@ -83,14 +85,15 @@ public class NotificationListenerServiceTest {
             suppressedVisualEffects.putInt(key, getSuppressedVisualEffects(i));
             importance[i] = getImportance(i);
             explanation.putString(key, getExplanation(key));
-            overrideChannels.putParcelable(key, getChannel(key, i));
+            channels.putParcelable(key, getChannel(key, i));
             overridePeople.putStringArrayList(key, getPeople(key, i));
             snoozeCriteria.putParcelableArrayList(key, getSnoozeCriteria(key, i));
+            showBadge.putBoolean(key, getShowBadge(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                overrideChannels, overridePeople, snoozeCriteria);
+                channels, overridePeople, snoozeCriteria, showBadge);
         return update;
     }
 
@@ -120,6 +123,10 @@ public class NotificationListenerServiceTest {
 
     private NotificationChannel getChannel(String key, int index) {
         return new NotificationChannel(key, key, getImportance(index));
+    }
+
+    private boolean getShowBadge(int index) {
+        return index % 3 == 0;
     }
 
     private ArrayList<String> getPeople(String key, int index) {

@@ -24,6 +24,7 @@ import android.app.ActivityOptions;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
@@ -1038,6 +1039,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private void bindGuts(final ExpandableNotificationRow row) {
         row.inflateGuts();
         final StatusBarNotification sbn = row.getStatusBarNotification();
+        final NotificationChannel channel = row.getEntry().channel;
         PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
@@ -1077,8 +1079,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                         closeControls(row, guts, v);
                     }
                 };
-        guts.bindNotification(pmUser, iNotificationManager, sbn, onSettingsClick, onDoneClick,
-                mNonBlockablePkgs);
+        guts.bindNotification(pmUser, iNotificationManager, sbn, channel,
+                onSettingsClick, onDoneClick, mNonBlockablePkgs);
     }
 
     private void closeControls(

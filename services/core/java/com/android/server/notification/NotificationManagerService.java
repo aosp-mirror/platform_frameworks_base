@@ -1243,6 +1243,35 @@ public class NotificationManagerService extends SystemService {
         sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
     }
 
+    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,
+            boolean fromAssistant) {
+        if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+            // cancel
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
+                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
+                    null);
+        }
+        if (fromAssistant) {
+            mRankingHelper.updateNotificationChannelFromAssistant(pkg, uid, channel);
+        } else {
+            mRankingHelper.updateNotificationChannel(pkg, uid, channel);
+        }
+
+        synchronized (mNotificationList) {
+            final int N = mNotificationList.size();
+            for (int i = N - 1; i >= 0; --i) {
+                NotificationRecord r = mNotificationList.get(i);
+                if (channel.getId() != null && channel.getId().equals(r.getChannel().getId())) {
+                    r.updateNotificationChannel(mRankingHelper.getNotificationChannel(
+                            r.sbn.getPackageName(), r.getUser().getIdentifier(),
+                            channel.getId(), false));
+                }
+            }
+        }
+        mRankingHandler.requestSort(true);
+        savePolicyFile();
+    }
+
     private ArrayList<ComponentName> getSuppressors() {
         ArrayList<ComponentName> names = new ArrayList<ComponentName>();
         for (int i = mListenersDisablingEffects.size() - 1; i >= 0; --i) {
@@ -1521,6 +1550,19 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean canShowBadge(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mRankingHelper.canShowBadge(pkg, uid);
+        }
+
+        @Override
+        public void setShowBadge(String pkg, int uid, boolean showBadge) {
+            checkCallerIsSystem();
+            mRankingHelper.setShowBadge(pkg, uid, showBadge);
+            savePolicyFile();
+        }
+
+        @Override
         public void createNotificationChannels(String pkg,
                 ParceledListSlice channelsList) throws RemoteException {
             checkCallerIsSystemOrSameApp(pkg);
@@ -1566,15 +1608,8 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelForPackage(String pkg, int uid,
                 NotificationChannel channel) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                // cancel
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                        UserHandle.getUserId(Binder.getCallingUid()), REASON_CHANNEL_BANNED,
-                        null);
-            }
-            mRankingHelper.updateNotificationChannel(pkg, uid, channel);
-            mRankingHandler.requestSort(true);
-            savePolicyFile();
+            Preconditions.checkNotNull(channel);
+            updateNotificationChannelInt(pkg, uid, channel, false);
         }
 
         @Override
@@ -1701,7 +1736,6 @@ public class NotificationManagerService extends SystemService {
                 return new StatusBarNotification(
                         sbn.getPackageName(),
                         sbn.getOpPkg(),
-                        sbn.getNotificationChannel(),
                         sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
                         sbn.getNotification().clone(),
                         sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
@@ -2495,15 +2529,9 @@ public class NotificationManagerService extends SystemService {
         public void updateNotificationChannelFromAssistant(INotificationListener token, String pkg,
                 NotificationChannel channel) throws RemoteException {
             ManagedServiceInfo info = mNotificationAssistants.checkServiceTokenLocked(token);
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                // cancel
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                        info.userid, REASON_CHANNEL_BANNED, null);
-            }
+            Preconditions.checkNotNull(channel);
             int uid = mPackageManager.getPackageUid(pkg, 0, info.userid);
-            mRankingHelper.updateNotificationChannelFromAssistant(pkg, uid, channel);
-            mRankingHandler.requestSort(true);
-            savePolicyFile();
+            updateNotificationChannelInt(pkg, uid, channel, true);
         }
 
         @Override
@@ -2528,7 +2556,7 @@ public class NotificationManagerService extends SystemService {
             final ArrayList<SnoozeCriterion> snoozeCriterionList =
                     adjustment.getSignals().getParcelableArrayList(Adjustment.KEY_SNOOZE_CRITERIA);
             if (!TextUtils.isEmpty(overrideChannelId)) {
-                n.setNotificationChannelOverride(mRankingHelper.getNotificationChannel(
+                n.updateNotificationChannel(mRankingHelper.getNotificationChannel(
                         n.sbn.getPackageName(), n.sbn.getUid(), overrideChannelId,
                         false /* includeDeleted */));
             }
@@ -2610,13 +2638,13 @@ public class NotificationManagerService extends SystemService {
                 final StatusBarNotification summarySbn =
                         new StatusBarNotification(adjustedSbn.getPackageName(),
                                 adjustedSbn.getOpPkg(),
-                                adjustedSbn.getNotificationChannel(),
                                 Integer.MAX_VALUE,
                                 GroupHelper.AUTOGROUP_KEY, adjustedSbn.getUid(),
                                 adjustedSbn.getInitialPid(), summaryNotification,
                                 adjustedSbn.getUser(), GroupHelper.AUTOGROUP_KEY,
                                 System.currentTimeMillis());
-                summaryRecord = new NotificationRecord(getContext(), summarySbn);
+                summaryRecord = new NotificationRecord(getContext(), summarySbn,
+                        notificationRecord.getChannel());
                 summaries.put(pkg, summarySbn.getKey());
             }
         }
@@ -2882,7 +2910,7 @@ public class NotificationManagerService extends SystemService {
         final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
                 callingUid, notification.getChannel(), false /* includeDeleted */);
         final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, channel, id, tag, callingUid, callingPid, notification,
+                pkg, opPkg, id, tag, callingUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
 
         // Limit the number of notifications that any given package except the android
@@ -2946,7 +2974,7 @@ public class NotificationManagerService extends SystemService {
                 Notification.PRIORITY_MAX);
 
         // setup local book-keeping
-        final NotificationRecord r = new NotificationRecord(getContext(), n);
+        final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         synchronized (mNotificationLock) {
             mEnqueuedNotifications.add(r);
         }
@@ -3490,14 +3518,18 @@ public class NotificationManagerService extends SystemService {
         boolean forceUpdate = ((Boolean) msg.obj == null) ? false : (boolean) msg.obj;
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
+            // Any field that can change via one of the extractors or by the assistant
+            // needs to be added here.
             ArrayList<String> orderBefore = new ArrayList<String>(N);
             ArrayList<String> groupOverrideBefore = new ArrayList<>(N);
             int[] visibilities = new int[N];
+            boolean[] showBadges = new boolean[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
                 groupOverrideBefore.add(r.sbn.getGroupKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
+                showBadges[i] = r.canShowBadge();
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -3506,7 +3538,8 @@ public class NotificationManagerService extends SystemService {
                 if (forceUpdate
                         || !orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()
-                        || !groupOverrideBefore.get(i).equals(r.sbn.getGroupKey())) {
+                        || !groupOverrideBefore.get(i).equals(r.sbn.getGroupKey())
+                        || showBadges[i] != r.canShowBadge()) {
                     scheduleSendRankingUpdate();
                     return;
                 }
@@ -4246,9 +4279,10 @@ public class NotificationManagerService extends SystemService {
         Bundle visibilityOverrides = new Bundle();
         Bundle suppressedVisualEffects = new Bundle();
         Bundle explanation = new Bundle();
-        Bundle overrideChannels = new Bundle();
+        Bundle channels = new Bundle();
         Bundle overridePeople = new Bundle();
         Bundle snoozeCriteria = new Bundle();
+        Bundle showBadge = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -4270,9 +4304,10 @@ public class NotificationManagerService extends SystemService {
                 visibilityOverrides.putInt(key, record.getPackageVisibilityOverride());
             }
             overrideGroupKeys.putString(key, record.sbn.getOverrideGroupKey());
-            overrideChannels.putParcelable(key, record.getChannel());
+            channels.putParcelable(key, record.getChannel());
             overridePeople.putStringArrayList(key, record.getPeopleOverride());
             snoozeCriteria.putParcelableArrayList(key, record.getSnoozeCriteria());
+            showBadge.putBoolean(key, record.canShowBadge());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -4283,7 +4318,7 @@ public class NotificationManagerService extends SystemService {
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
-                overrideChannels, overridePeople, snoozeCriteria);
+                channels, overridePeople, snoozeCriteria, showBadge);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {

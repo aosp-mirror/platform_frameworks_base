@@ -25,7 +25,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -114,12 +113,14 @@ public final class NotificationRecord {
     private Uri mSound;
     private long[] mVibration;
     private AudioAttributes mAttributes;
-    private NotificationChannel mOverrideChannel;
+    private NotificationChannel mChannel;
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
+    private boolean mShowBadge;
 
     @VisibleForTesting
-    public NotificationRecord(Context context, StatusBarNotification sbn)
+    public NotificationRecord(Context context, StatusBarNotification sbn,
+            NotificationChannel channel)
     {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
@@ -128,6 +129,7 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
+        mChannel = channel;
         mPreChannelsNotification = isPreChannelsNotification();
         mSound = calculateSound();
         mVibration = calculateVibration();
@@ -154,7 +156,7 @@ public final class NotificationRecord {
     private Uri calculateSound() {
         final Notification n = sbn.getNotification();
 
-        Uri sound = sbn.getNotificationChannel().getSound();
+        Uri sound = mChannel.getSound();
         if (mPreChannelsNotification && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_SOUND) == 0) {
 
@@ -386,7 +388,8 @@ public final class NotificationRecord {
         pw.println(prefix + "  mSound= " + mSound);
         pw.println(prefix + "  mVibration= " + mVibration);
         pw.println(prefix + "  mAttributes= " + mAttributes);
-        pw.println(prefix + "  overrideChannel=" + getChannel());
+        pw.println(prefix + "  mShowBadge=" + mShowBadge);
+        pw.println(prefix + "  channel=" + getChannel());
         if (getPeopleOverride() != null) {
             pw.println(prefix + "  overridePeople= " + TextUtils.join(",", getPeopleOverride()));
         }
@@ -640,14 +643,22 @@ public final class NotificationRecord {
     }
 
     public NotificationChannel getChannel() {
-        return mOverrideChannel == null ? sbn.getNotificationChannel() : mOverrideChannel;
+        return mChannel;
     }
 
-    protected void setNotificationChannelOverride(NotificationChannel channel) {
-        mOverrideChannel = channel;
-        if (mOverrideChannel != null) {
+    protected void updateNotificationChannel(NotificationChannel channel) {
+        if (channel != null) {
+            mChannel = channel;
             calculateImportance();
         }
+    }
+
+    public void setShowBadge(boolean showBadge) {
+        mShowBadge = showBadge;
+    }
+
+    public boolean canShowBadge() {
+        return mShowBadge;
     }
 
     public Uri getSound() {
