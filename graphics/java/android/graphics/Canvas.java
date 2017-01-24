@@ -21,11 +21,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
-import android.text.GraphicsOperations;
-import android.text.SpannableString;
-import android.text.SpannedString;
-import android.text.TextUtils;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
@@ -501,8 +498,10 @@ public class Canvas extends BaseCanvas {
      * an error to call restore() more times than save() was called.
      */
     public void restore() {
-        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
-        nRestore(mNativeCanvasWrapper, throwOnUnderflow);
+        if (!nRestore(mNativeCanvasWrapper)
+                && (!sCompatibilityRestore || !isHardwareAccelerated())) {
+            throw new IllegalStateException("Underflow in restore - more restores than saves");
+        }
     }
 
     /**
@@ -527,8 +526,16 @@ public class Canvas extends BaseCanvas {
      * @param saveCount The save level to restore to.
      */
     public void restoreToCount(int saveCount) {
-        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
-        nRestoreToCount(mNativeCanvasWrapper, saveCount, throwOnUnderflow);
+        if (saveCount < 1) {
+            if (!sCompatibilityRestore || !isHardwareAccelerated()) {
+                // do nothing and throw without restoring
+                throw new IllegalArgumentException(
+                        "Underflow in restoreToCount - more restores than saves");
+            }
+            // compat behavior - restore as far as possible
+            saveCount = 1;
+        }
+        nRestoreToCount(mNativeCanvasWrapper, saveCount);
     }
 
     /**
@@ -643,7 +650,7 @@ public class Canvas extends BaseCanvas {
      */
     @Deprecated
     public void getMatrix(@NonNull Matrix ctm) {
-        nGetCTM(mNativeCanvasWrapper, ctm.native_instance);
+        nGetMatrix(mNativeCanvasWrapper, ctm.native_instance);
     }
 
     /**
@@ -1059,79 +1066,66 @@ public class Canvas extends BaseCanvas {
     // ---------------- @FastNative -------------------
 
     @FastNative
-    private static native void nSetBitmap(long canvasHandle,
-                                                Bitmap bitmap);
+    private static native void nSetBitmap(long canvasHandle, Bitmap bitmap);
+
     @FastNative
+    private static native boolean nGetClipBounds(long nativeCanvas, Rect bounds);
+
+    // ---------------- @CriticalNative -------------------
+
+    @CriticalNative
     private static native boolean nIsOpaque(long canvasHandle);
-    @FastNative
+    @CriticalNative
     private static native void nSetHighContrastText(long renderer, boolean highContrastText);
-    @FastNative
+    @CriticalNative
     private static native int nGetWidth(long canvasHandle);
-    @FastNative
+    @CriticalNative
     private static native int nGetHeight(long canvasHandle);
 
-    @FastNative
+    @CriticalNative
     private static native int nSave(long canvasHandle, int saveFlags);
-    @FastNative
-    private static native int nSaveLayer(long nativeCanvas, float l,
-                                               float t, float r, float b,
-                                               long nativePaint,
-                                               int layerFlags);
-    @FastNative
-    private static native int nSaveLayerAlpha(long nativeCanvas, float l,
-                                                    float t, float r, float b,
-                                                    int alpha, int layerFlags);
-    @FastNative
-    private static native void nRestore(long canvasHandle, boolean tolerateUnderflow);
-    @FastNative
-    private static native void nRestoreToCount(long canvasHandle,
-                                                     int saveCount,
-                                                     boolean tolerateUnderflow);
-    @FastNative
+    @CriticalNative
+    private static native int nSaveLayer(long nativeCanvas, float l, float t, float r, float b,
+            long nativePaint, int layerFlags);
+    @CriticalNative
+    private static native int nSaveLayerAlpha(long nativeCanvas, float l, float t, float r, float b,
+            int alpha, int layerFlags);
+    @CriticalNative
+    private static native boolean nRestore(long canvasHandle);
+    @CriticalNative
+    private static native void nRestoreToCount(long canvasHandle, int saveCount);
+    @CriticalNative
     private static native int nGetSaveCount(long canvasHandle);
 
-    @FastNative
-    private static native void nTranslate(long canvasHandle,
-                                                float dx, float dy);
-    @FastNative
-    private static native void nScale(long canvasHandle,
-                                            float sx, float sy);
-    @FastNative
+    @CriticalNative
+    private static native void nTranslate(long canvasHandle, float dx, float dy);
+    @CriticalNative
+    private static native void nScale(long canvasHandle, float sx, float sy);
+    @CriticalNative
     private static native void nRotate(long canvasHandle, float degrees);
-    @FastNative
-    private static native void nSkew(long canvasHandle,
-                                           float sx, float sy);
-    @FastNative
-    private static native void nConcat(long nativeCanvas,
-                                             long nativeMatrix);
-    @FastNative
-    private static native void nSetMatrix(long nativeCanvas,
-                                                long nativeMatrix);
-    @FastNative
+    @CriticalNative
+    private static native void nSkew(long canvasHandle, float sx, float sy);
+    @CriticalNative
+    private static native void nConcat(long nativeCanvas, long nativeMatrix);
+    @CriticalNative
+    private static native void nSetMatrix(long nativeCanvas, long nativeMatrix);
+    @CriticalNative
     private static native boolean nClipRect(long nativeCanvas,
-                                                  float left, float top,
-                                                  float right, float bottom,
-                                                  int regionOp);
-    @FastNative
-    private static native boolean nClipPath(long nativeCanvas,
-                                                  long nativePath,
-                                                  int regionOp);
-    @FastNative
-    private static native void nSetDrawFilter(long nativeCanvas,
-                                                   long nativeFilter);
-    @FastNative
-    private static native boolean nGetClipBounds(long nativeCanvas,
-                                                       Rect bounds);
-    @FastNative
-    private static native void nGetCTM(long nativeCanvas,
-                                             long nativeMatrix);
-    @FastNative
-    private static native boolean nQuickReject(long nativeCanvas,
-                                                     long nativePath);
-    @FastNative
-    private static native boolean nQuickReject(long nativeCanvas,
-                                                     float left, float top,
-                                                     float right, float bottom);
+            float left, float top, float right, float bottom, int regionOp);
+    @CriticalNative
+    private static native boolean nClipPath(long nativeCanvas, long nativePath, int regionOp);
+    @CriticalNative
+    private static native void nSetDrawFilter(long nativeCanvas, long nativeFilter);
+    @CriticalNative
+    private static native void nGetMatrix(long nativeCanvas, long nativeMatrix);
+    @CriticalNative
+    private static native boolean nQuickReject(long nativeCanvas, long nativePath);
+    @CriticalNative
+    private static native boolean nQuickReject(long nativeCanvas, float left, float top,
+            float right, float bottom);
+
+
+    // ---------------- Draw Methods -------------------
 
     /**
      * <p>
