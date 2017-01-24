@@ -296,7 +296,7 @@ public class SystemImpl implements SystemInterface {
 
     @Override
     public boolean isMultiProcessDefaultEnabled() {
-        return false;
+        return true;
     }
 
     // flags declaring we want extra info from the package manager for webview providers
