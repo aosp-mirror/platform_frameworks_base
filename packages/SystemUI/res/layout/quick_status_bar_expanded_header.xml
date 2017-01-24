@@ -148,7 +148,7 @@
         android:layout_alignParentTop="true"
         android:focusable="true"
         android:gravity="center_vertical"
-        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
         android:paddingTop="6dp"
         android:singleLine="true"
         android:text="@*android:string/emergency_calls_only"
