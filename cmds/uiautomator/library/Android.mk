@@ -36,7 +36,7 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 # Generate the stub source files
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(uiautomator.core_src_files)
-LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries)
+LOCAL_JAVA_LIBRARIES := $(uiautomator.core_java_libraries) legacy-android-test
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/core-src \
 	$(LOCAL_PATH)/testrunner-src
