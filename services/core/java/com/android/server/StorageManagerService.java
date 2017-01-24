@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3267,6 +3268,29 @@ class StorageManagerService extends IStorageManager.Stub
                 res[i] = mRecords.valueAt(i);
             }
             return res;
+        }
+    }
+
+    @Override
+    public long getCacheQuotaBytes(String volumeUuid, int uid) {
+        if (uid != Binder.getCallingUid()) {
+            mContext.enforceCallingPermission(android.Manifest.permission.STORAGE_INTERNAL, TAG);
+        }
+        // TODO: wire up to cache quota once merged
+        return 64 * TrafficStats.MB_IN_BYTES;
+    }
+
+    @Override
+    public long getCacheSizeBytes(String volumeUuid, int uid) {
+        if (uid != Binder.getCallingUid()) {
+            mContext.enforceCallingPermission(android.Manifest.permission.STORAGE_INTERNAL, TAG);
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return mContext.getSystemService(StorageStatsManager.class)
+                    .queryStatsForUid(volumeUuid, uid).getCacheBytes();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

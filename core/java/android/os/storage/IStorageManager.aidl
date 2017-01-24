@@ -291,4 +291,6 @@ interface IStorageManager {
     void fstrim(int flags) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
     ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode) = 74;
+    long getCacheQuotaBytes(String volumeUuid, int uid) = 75;
+    long getCacheSizeBytes(String volumeUuid, int uid) = 76;
 }
