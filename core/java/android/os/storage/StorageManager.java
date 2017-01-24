@@ -24,27 +24,32 @@ import android.annotation.SdkConstant;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.ProxyFileDescriptorCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.AppFuseMount;
@@ -60,6 +65,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1394,6 +1400,222 @@ public class StorageManager {
         synchronized (mFuseAppLoopLock) {
             return mFuseAppLoop != null ? mFuseAppLoop.getMountPointId() : -1;
         }
+    }
+
+    /**
+     * Return quota size in bytes for cached data belonging to the calling app.
+     * <p>
+     * If your app goes above this quota, your cached files will be some of the
+     * first to be deleted when additional disk space is needed. Conversely, if
+     * your app stays under this quota, your cached files will be some of the
+     * last to be deleted when additional disk space is needed.
+     * <p>
+     * This quota may change over time depending on how frequently the user
+     * interacts with your app, and depending on how much disk space is used.
+     * <p>
+     * Cached data tracked by this method always includes
+     * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
+     * it also includes {@link Context#getExternalCacheDir()} if the primary
+     * shared/external storage is hosted on the same storage device as your
+     * private data.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     *
+     * @see #getCacheQuotaBytes()
+     * @see #getCacheSizeBytes()
+     * @see #getExternalCacheQuotaBytes()
+     * @see #getExternalCacheSizeBytes()
+     */
+    public long getCacheQuotaBytes() {
+        try {
+            final ApplicationInfo app = mContext.getApplicationInfo();
+            return mStorageManager.getCacheQuotaBytes(app.volumeUuid, app.uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return total size in bytes of cached data belonging to the calling app.
+     * <p>
+     * Cached data tracked by this method always includes
+     * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
+     * it also includes {@link Context#getExternalCacheDir()} if the primary
+     * shared/external storage is hosted on the same storage device as your
+     * private data.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     *
+     * @see #getCacheQuotaBytes()
+     * @see #getCacheSizeBytes()
+     * @see #getExternalCacheQuotaBytes()
+     * @see #getExternalCacheSizeBytes()
+     */
+    public long getCacheSizeBytes() {
+        try {
+            final ApplicationInfo app = mContext.getApplicationInfo();
+            return mStorageManager.getCacheSizeBytes(app.volumeUuid, app.uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return quota size in bytes for cached data on primary shared/external
+     * storage belonging to the calling app.
+     * <p>
+     * If primary shared/external storage is hosted on the same storage device
+     * as your private data, this method will return -1, since all data stored
+     * under {@link Context#getExternalCacheDir()} will be counted under
+     * {@link #getCacheQuotaBytes()}.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     */
+    public long getExternalCacheQuotaBytes() {
+        final ApplicationInfo app = mContext.getApplicationInfo();
+        final String primaryUuid = getPrimaryStorageUuid();
+        if (Objects.equals(app.volumeUuid, primaryUuid)) {
+            return -1;
+        }
+        try {
+            return mStorageManager.getCacheQuotaBytes(primaryUuid, app.uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return total size in bytes of cached data on primary shared/external
+     * storage belonging to the calling app.
+     * <p>
+     * If primary shared/external storage is hosted on the same storage device
+     * as your private data, this method will return -1, since all data stored
+     * under {@link Context#getExternalCacheDir()} will be counted under
+     * {@link #getCacheQuotaBytes()}.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then cached data for all packages in your shared UID is tracked together
+     * as a single unit.
+     * </p>
+     */
+    public long getExternalCacheSizeBytes() {
+        final ApplicationInfo app = mContext.getApplicationInfo();
+        final String primaryUuid = getPrimaryStorageUuid();
+        if (Objects.equals(app.volumeUuid, primaryUuid)) {
+            return -1;
+        }
+        try {
+            return mStorageManager.getCacheSizeBytes(primaryUuid, app.uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final String XATTR_ATOMIC = "user.atomic";
+    private static final String XATTR_TOMBSTONE = "user.tombstone";
+
+    /** {@hide} */
+    private static void setCacheBehavior(File path, String name, boolean enabled)
+            throws IOException {
+        if (!path.isDirectory()) {
+            throw new IOException("Cache behavior can only be set on directories");
+        }
+        if (enabled) {
+            try {
+                Os.setxattr(path.getAbsolutePath(), name,
+                        "1".getBytes(StandardCharsets.UTF_8), 0);
+            } catch (ErrnoException e) {
+                throw e.rethrowAsIOException();
+            }
+        } else {
+            try {
+                Os.removexattr(path.getAbsolutePath(), name);
+            } catch (ErrnoException e) {
+                if (e.errno != OsConstants.ENODATA) {
+                    throw e.rethrowAsIOException();
+                }
+            }
+        }
+    }
+
+    /** {@hide} */
+    private static boolean isCacheBehavior(File path, String name) throws IOException {
+        try {
+            Os.getxattr(path.getAbsolutePath(), name);
+            return true;
+        } catch (ErrnoException e) {
+            if (e.errno != OsConstants.ENODATA) {
+                throw e.rethrowAsIOException();
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Enable or disable special cache behavior that treats this directory and
+     * its contents as an atomic unit.
+     * <p>
+     * When enabled and this directory is considered for automatic deletion by
+     * the OS, all contained files will either be deleted together, or not at
+     * all. This is useful when you have a directory that contains several
+     * related metadata files that depend on each other, such as movie file and
+     * a subtitle file.
+     * <p>
+     * When enabled, the <em>newest</em> {@link File#lastModified()} value of
+     * any contained files is considered the modified time of the entire
+     * directory.
+     * <p>
+     * This behavior can only be set on a directory, and it applies recursively
+     * to all contained files and directories.
+     */
+    public void setCacheBehaviorAtomic(File path, boolean atomic) throws IOException {
+        setCacheBehavior(path, XATTR_ATOMIC, atomic);
+    }
+
+    /**
+     * Read the current value set by
+     * {@link #setCacheBehaviorAtomic(File, boolean)}.
+     */
+    public boolean isCacheBehaviorAtomic(File path) throws IOException {
+        return isCacheBehavior(path, XATTR_ATOMIC);
+    }
+
+    /**
+     * Enable or disable special cache behavior that leaves deleted cache files
+     * intact as tombstones.
+     * <p>
+     * When enabled and a file contained in this directory is automatically
+     * deleted by the OS, the file will be truncated to have a length of 0 bytes
+     * instead of being fully deleted. This is useful if you need to distinguish
+     * between a file that was deleted versus one that never existed.
+     * <p>
+     * This behavior can only be set on a directory, and it applies recursively
+     * to all contained files and directories.
+     * <p class="note">
+     * Note: this behavior is ignored completely if the user explicitly requests
+     * that all cached data be cleared.
+     * </p>
+     */
+    public void setCacheBehaviorTombstone(File path, boolean tombstone) throws IOException {
+        setCacheBehavior(path, XATTR_TOMBSTONE, tombstone);
+    }
+
+    /**
+     * Read the current value set by
+     * {@link #setCacheBehaviorTombstone(File, boolean)}.
+     */
+    public boolean isCacheBehaviorTombstone(File path) throws IOException {
+        return isCacheBehavior(path, XATTR_TOMBSTONE);
     }
 
     private final Object mFuseAppLoopLock = new Object();

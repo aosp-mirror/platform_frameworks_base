@@ -37,6 +37,7 @@ import android.os.storage.VolumeInfo;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
@@ -45,8 +46,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
 
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
-
-    // TODO: pivot all methods to manual mode when quota isn't supported
 
     public static class Lifecycle extends SystemService {
         private StorageStatsService mService;
@@ -71,11 +70,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final Installer mInstaller;
 
     public StorageStatsService(Context context) {
-        mContext = context;
-        mAppOps = context.getSystemService(AppOpsManager.class);
-        mUser = context.getSystemService(UserManager.class);
-        mPackage = context.getSystemService(PackageManager.class);
-        mStorage = context.getSystemService(StorageManager.class);
+        mContext = Preconditions.checkNotNull(context);
+        mAppOps = Preconditions.checkNotNull(context.getSystemService(AppOpsManager.class));
+        mUser = Preconditions.checkNotNull(context.getSystemService(UserManager.class));
+        mPackage = Preconditions.checkNotNull(context.getPackageManager());
+        mStorage = Preconditions.checkNotNull(context.getSystemService(StorageManager.class));
 
         mInstaller = new Installer(context);
         mInstaller.onStart();
@@ -107,7 +106,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             case AppOpsManager.MODE_ALLOWED:
                 return;
             case AppOpsManager.MODE_DEFAULT:
-                mContext.enforceCallingPermission(
+                mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
                 return;
             default:
