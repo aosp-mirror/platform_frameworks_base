@@ -17,9 +17,11 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.media.VolumeShaper;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -357,6 +359,42 @@ public abstract class PlayerBase {
      * @param rightVolume the right volume to use if muting is false
      */
     abstract void playerSetVolume(boolean muting, float leftVolume, float rightVolume);
+
+    /**
+     * Abstract method to apply a {@link VolumeShaper.Configuration}
+     * and a {@link VolumeShaper.Operation} to the Player.
+     * This should be overridden by the Player to call into the native
+     * VolumeShaper implementation. Multiple {@code VolumeShapers} may be
+     * concurrently active for a given Player, each accessible by the
+     * {@code VolumeShaper} id.
+     *
+     * The {@code VolumeShaper} implementation caches the id returned
+     * when applying a fully specified configuration
+     * from {VolumeShaper.Configuration.Builder} to track later
+     * operation changes requested on it.
+     *
+     * @param configuration a {@code VolumeShaper.Configuration} object
+     *        created by {@link VolumeShaper.Configuration.Builder} or
+     *        an created from a {@code VolumeShaper} id
+     *        by the {@link VolumeShaper.Configuration} constructor.
+     * @param operation a {@code VolumeShaper.Operation}.
+     * @return a negative error status or a
+     *         non-negative {@code VolumeShaper} id on success.
+     */
+    /* package */ abstract int playerApplyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation);
+
+    /**
+     * Abstract method to get the current VolumeShaper state.
+     * @param id the {@code VolumeShaper} id returned from
+     *           sending a fully specified {@code VolumeShaper.Configuration}
+     *           through {@link #playerApplyVolumeShaper}
+     * @return a {@code VolumeShaper.State} object or null if
+     *         there is no {@code VolumeShaper} for the id.
+     */
+    /* package */ abstract @Nullable VolumeShaper.State playerGetVolumeShaperState(int id);
+
     abstract int playerSetAuxEffectSendLevel(boolean muting, float level);
     abstract void playerStart();
     abstract void playerPause();
@@ -395,6 +433,13 @@ public abstract class PlayerBase {
         @Override
         public void setStartDelayMs(int delayMs) {
             baseSetStartDelayMs(delayMs);
+        }
+
+        @Override
+        public void applyVolumeShaper(
+                @NonNull VolumeShaper.Configuration configuration,
+                @NonNull VolumeShaper.Operation operation) {
+            /* void */ playerApplyVolumeShaper(configuration, operation);
         }
     };
 

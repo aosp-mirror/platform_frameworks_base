@@ -1331,6 +1331,24 @@ public class MediaPlayer extends PlayerBase
         stop();
     }
 
+    @Override
+    /* package */ int playerApplyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation) {
+        return native_applyVolumeShaper(configuration, operation);
+    }
+
+    @Override
+    /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
+        return native_getVolumeShaperState(id);
+    }
+
+    private native int native_applyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation);
+
+    private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
+
     /**
      * Set the low-level power management behavior for this MediaPlayer.  This
      * can be used when the MediaPlayer is not playing through a SurfaceHolder
