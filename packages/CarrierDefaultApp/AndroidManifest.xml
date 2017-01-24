@@ -37,5 +37,7 @@
         <activity android:name="com.android.carrierdefaultapp.CaptivePortalLaunchActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"/>
+        <service android:name="com.android.carrierdefaultapp.ProvisionObserver"
+                 android:permission="android.permission.BIND_JOB_SERVICE"/>
     </application>
 </manifest>
