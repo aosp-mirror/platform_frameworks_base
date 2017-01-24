@@ -510,14 +510,13 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      * specification...
      */
     int getOrientation() {
-
-        if (!fillsParent() || !isVisible()) {
-            // Ignore invisible containers or containers that don't completely fills their parents.
+        if (!fillsParent()) {
+            // Ignore containers that don't completely fill their parents.
             return SCREEN_ORIENTATION_UNSET;
         }
 
-        // The container fills its parent so we can use it orientation if it has one specified,
-        // otherwise we prefer to use the orientation of its topmost child that has one
+        // The container fills its parent so we can use it orientation if it has one
+        // specified; otherwise we prefer to use the orientation of its topmost child that has one
         // specified and fall back on this container's unset or unspecified value as a candidate
         // if none of the children have a better candidate for the orientation.
         if (mOrientation != SCREEN_ORIENTATION_UNSET

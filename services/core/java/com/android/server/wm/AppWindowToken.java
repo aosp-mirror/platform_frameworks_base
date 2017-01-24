@@ -1151,10 +1151,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation() {
-        if (hidden || hiddenRequested) {
-            return SCREEN_ORIENTATION_UNSET;
+        if (fillsParent() && (isVisible() || mService.mOpeningApps.contains(this))) {
+            return mOrientation;
         }
-        return mOrientation;
+
+        return SCREEN_ORIENTATION_UNSET;
     }
 
     /** Returns the app's preferred orientation regardless of its currently visibility state. */
