@@ -3563,6 +3563,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 dispatchDirectAudioEvent(event);
                 return -1;
             }
+        } else if (keyCode == KeyEvent.KEYCODE_TAB && event.isMetaPressed()) {
+            // Pass through keyboard navigation keys.
+            return 0;
         }
 
         // Toggle Caps Lock on META-ALT.
