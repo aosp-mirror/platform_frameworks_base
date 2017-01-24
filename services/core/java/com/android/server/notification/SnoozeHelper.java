@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -96,6 +97,26 @@ public class SnoozeHelper {
             mSnoozedNotifications.get(userId).get(pkg).values();
         }
         return Collections.EMPTY_LIST;
+    }
+
+    protected List<NotificationRecord> getSnoozed() {
+        List<NotificationRecord> snoozedForUser = new ArrayList<>();
+        int[] userIds = mUserProfiles.getCurrentProfileIds();
+        final int N = userIds.length;
+        for (int i = 0; i < N; i++) {
+            final ArrayMap<String, ArrayMap<String, NotificationRecord>> snoozedPkgs =
+                    mSnoozedNotifications.get(userIds[i]);
+            if (snoozedPkgs != null) {
+                final int M = snoozedPkgs.size();
+                for (int j = 0; j < M; j++) {
+                    final ArrayMap<String, NotificationRecord> records = snoozedPkgs.valueAt(j);
+                    if (records != null) {
+                        snoozedForUser.addAll(records.values());
+                    }
+                }
+            }
+        }
+        return snoozedForUser;
     }
 
     /**

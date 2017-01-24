@@ -562,43 +562,6 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
-    /**
-     * Inform the notification manager about snoozing a specific notification.
-     * <p>
-     * Use this to snooze a notification for an indeterminate time.  Upon being informed, the
-     * notification manager will actually remove the notification and you will get an
-     * {@link #onNotificationRemoved(StatusBarNotification)} callback. When the
-     * snoozing period expires, you will get a
-     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
-     * notification. Use {@link #unsnoozeNotification(String)} to restore the notification.
-     * @param key The key of the notification to snooze
-     */
-    public final void snoozeNotification(String key) {
-        if (!isBound()) return;
-        try {
-            getNotificationInterface().snoozeNotificationFromListener(mWrapper, key);
-        } catch (android.os.RemoteException ex) {
-            Log.v(TAG, "Unable to contact notification manager", ex);
-        }
-    }
-
-    /**
-     * Inform the notification manager about un-snoozing a specific notification.
-     * <p>
-     * This should only be used for notifications snoozed by this listener using
-     * {@link #snoozeNotification(String)}. Once un-snoozed, you will get a
-     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
-     * notification.
-     * @param key The key of the notification to snooze
-     */
-    public final void unsnoozeNotification(String key) {
-        if (!isBound()) return;
-        try {
-            getNotificationInterface().unsnoozeNotificationFromListener(mWrapper, key);
-        } catch (android.os.RemoteException ex) {
-            Log.v(TAG, "Unable to contact notification manager", ex);
-        }
-    }
 
     /**
      * Inform the notification manager that these notifications have been viewed by the
@@ -663,6 +626,26 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Like {@link #getActiveNotifications()}, but returns the list of currently snoozed
+     * notifications, for all users this listener has access to.
+     *
+     * <p>The service should wait for the {@link #onListenerConnected()} event
+     * before performing this operation.
+     *
+     * @return An array of active notifications, sorted in natural order.
+     */
+    public final StatusBarNotification[] getSnoozedNotifications() {
+        try {
+            ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
+                    .getSnoozedNotificationsFromListener(mWrapper, TRIM_FULL);
+            return cleanUpNotificationList(parceledList);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+        return null;
+    }
+
+    /**
      * Request the list of outstanding notifications (that is, those that are visible to the
      * current user). Useful when you don't know what's already been posted.
      *
@@ -711,34 +694,39 @@ public abstract class NotificationListenerService extends Service {
         try {
             ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
                     .getActiveNotificationsFromListener(mWrapper, keys, trim);
-            List<StatusBarNotification> list = parceledList.getList();
-            ArrayList<StatusBarNotification> corruptNotifications = null;
-            int N = list.size();
-            for (int i = 0; i < N; i++) {
-                StatusBarNotification sbn = list.get(i);
-                Notification notification = sbn.getNotification();
-                try {
-                    // convert icon metadata to legacy format for older clients
-                    createLegacyIconExtras(notification);
-                    // populate remote views for older clients.
-                    maybePopulateRemoteViews(notification);
-                } catch (IllegalArgumentException e) {
-                    if (corruptNotifications == null) {
-                        corruptNotifications = new ArrayList<>(N);
-                    }
-                    corruptNotifications.add(sbn);
-                    Log.w(TAG, "onNotificationPosted: can't rebuild notification from " +
-                            sbn.getPackageName());
-                }
-            }
-            if (corruptNotifications != null) {
-                list.removeAll(corruptNotifications);
-            }
-            return list.toArray(new StatusBarNotification[list.size()]);
+            return cleanUpNotificationList(parceledList);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
         return null;
+    }
+
+    private StatusBarNotification[] cleanUpNotificationList(
+            ParceledListSlice<StatusBarNotification> parceledList) {
+        List<StatusBarNotification> list = parceledList.getList();
+        ArrayList<StatusBarNotification> corruptNotifications = null;
+        int N = list.size();
+        for (int i = 0; i < N; i++) {
+            StatusBarNotification sbn = list.get(i);
+            Notification notification = sbn.getNotification();
+            try {
+                // convert icon metadata to legacy format for older clients
+                createLegacyIconExtras(notification);
+                // populate remote views for older clients.
+                maybePopulateRemoteViews(notification);
+            } catch (IllegalArgumentException e) {
+                if (corruptNotifications == null) {
+                    corruptNotifications = new ArrayList<>(N);
+                }
+                corruptNotifications.add(sbn);
+                Log.w(TAG, "get(Active/Snoozed)Notifications: can't rebuild notification from " +
+                        sbn.getPackageName());
+            }
+        }
+        if (corruptNotifications != null) {
+            list.removeAll(corruptNotifications);
+        }
+        return list.toArray(new StatusBarNotification[list.size()]);
     }
 
     /**

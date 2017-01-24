@@ -361,17 +361,4 @@ public class NotificationManagerServiceTest {
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
     }
-
-    @Test
-    @UiThreadTest
-    public void testSnoozeNotificationImmediatelyAfterEnqueue() throws Exception {
-        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
-        mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",
-                sbn.getId(), sbn.getNotification(), new int[1], sbn.getUserId());
-        mBinderService.snoozeNotificationFromListener(null, sbn.getKey());
-        waitForIdle();
-        StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(sbn.getPackageName());
-        assertEquals(0, notifs.length);
-    }
 }

@@ -75,8 +75,6 @@ interface INotificationManager
 
     void snoozeNotificationUntilContextFromListener(in INotificationListener token, String key, String snoozeCriterionId);
     void snoozeNotificationUntilFromListener(in INotificationListener token, String key, long until);
-    void snoozeNotificationFromListener(in INotificationListener token, String key);
-    void unsnoozeNotificationFromListener(in INotificationListener token, String key);
 
     void requestBindListener(in ComponentName component);
     void requestUnbindListener(in INotificationListener token);
@@ -86,6 +84,7 @@ interface INotificationManager
     void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
+    ParceledListSlice getSnoozedNotificationsFromListener(in INotificationListener token, int trim);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
@@ -100,6 +99,7 @@ interface INotificationManager
     void updateNotificationChannelFromAssistant(in INotificationListener token, String pkg, in NotificationChannel channel);
     void deleteNotificationChannelFromAssistant(in INotificationListener token, String pkg, String channelId);
     ParceledListSlice getNotificationChannelsFromAssistant(in INotificationListener token, String pkg);
+    void unsnoozeNotificationFromAssistant(in INotificationListener token, String key);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
