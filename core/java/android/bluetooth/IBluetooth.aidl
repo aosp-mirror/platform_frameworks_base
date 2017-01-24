@@ -52,6 +52,7 @@ interface IBluetooth
     boolean startDiscovery();
     boolean cancelDiscovery();
     boolean isDiscovering();
+    long getDiscoveryEndMillis();
 
     int getAdapterConnectionState();
     int getProfileConnectionState(int profile);
