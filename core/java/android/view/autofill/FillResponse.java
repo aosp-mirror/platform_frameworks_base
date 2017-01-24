@@ -149,9 +149,9 @@ import java.util.Set;
  * Dataset.Builder#setExtras(Bundle)} methods to pass {@link Bundle}s with service-specific data use
  * to identify this response on future calls (like {@link
  * android.service.autofill.AutoFillService#onSaveRequest(android.app.assist.AssistStructure,
- * Bundle, android.os.CancellationSignal, android.service.autofill.SaveCallback)}) - such bundles
- * will be available as the {@link android.service.autofill.AutoFillService#EXTRA_RESPONSE_EXTRAS}
- * and {@link android.service.autofill.AutoFillService#EXTRA_DATASET_EXTRAS} extras in that method's
+ * Bundle, android.service.autofill.SaveCallback)}) - such bundles will be available as the
+ * {@link android.service.autofill.AutoFillService#EXTRA_RESPONSE_EXTRAS} and
+ * {@link android.service.autofill.AutoFillService#EXTRA_DATASET_EXTRAS} extras in that method's
  * {@code extras} argument.
  */
 public final class FillResponse implements Parcelable {
@@ -369,9 +369,8 @@ public final class FillResponse implements Parcelable {
         /**
          * Adds ids of additional fields that the service would be interested to save (through
          * {@link android.service.autofill.AutoFillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * android.service.autofill.SaveCallback)}) but were not indirectly set through {@link
-         * #addDataset(Dataset)}.
+         * android.app.assist.AssistStructure, Bundle, android.service.autofill.SaveCallback)})
+         * but were not indirectly set through {@link #addDataset(Dataset)}.
          *
          * <p>See {@link FillResponse} for examples.
          */
@@ -386,8 +385,8 @@ public final class FillResponse implements Parcelable {
          * Sets a {@link Bundle} that will be passed to subsequent calls to {@link
          * android.service.autofill.AutoFillService} methods such as {@link
          * android.service.autofill.AutoFillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * android.service.autofill.SaveCallback)}, using {@link
+         * android.app.assist.AssistStructure, Bundle, android.service.autofill.SaveCallback)},
+         * using {@link
          * android.service.autofill.AutoFillService#EXTRA_RESPONSE_EXTRAS} as the key.
          *
          * <p>It can be used when to keep service state in between calls.

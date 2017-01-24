@@ -28,8 +28,7 @@ import android.view.autofill.FillResponse;
  *
  * @hide
  */
-// TODO(b/33197203): rename methods to make them more consistent with a callback, or rename class
-// itself
+// TODO(b/33197203): rename to IAutoFillServerSession
 oneway interface IAutoFillServerCallback {
     // TODO(b/33197203): document methods
     void showResponse(in FillResponse response);

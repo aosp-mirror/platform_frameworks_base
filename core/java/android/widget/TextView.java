@@ -9030,8 +9030,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
             if (afm != null) {
                 if (DEBUG_AUTOFILL) {
-                    Log.v(LOG_TAG, "onFocusChanged(): id=" + getAutoFillViewId() + ", focused= "
-                            + focused);
+                    Log.v(LOG_TAG, "onFocusChanged(false): id=" + getAccessibilityViewId());
                 }
                 afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_HIDE);
             }
@@ -10615,7 +10614,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void viewClicked(InputMethodManager imm) {
         final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
         if (afm != null) {
-            if (DEBUG_AUTOFILL) Log.v(LOG_TAG, "viewClicked(): id=" + getAutoFillViewId());
+            if (DEBUG_AUTOFILL) Log.v(LOG_TAG, "viewClicked(): id=" + getAccessibilityViewId());
 
             // TODO(b/33197203): integrate with onFocus and/or move to view?
             afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_SHOW);

@@ -25,8 +25,7 @@ import android.view.autofill.Dataset;
  *
  * @hide
  */
-// TODO(b/33197203): rename methods to make them more consistent with a callback, or rename class
-// itself
+// TODO(b/33197203): rename IAutoFillAppSession
 oneway interface IAutoFillAppCallback {
     /**
       * Auto-fills the activity with the contents of a dataset.

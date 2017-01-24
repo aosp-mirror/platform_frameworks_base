@@ -1765,12 +1765,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mAccessibilityViewId = NO_ID;
 
-    /**
-     * The stable ID of this view for auto-fill purposes.
-     */
-    private int mAutoFillId = NO_ID;
-
-
     private int mAccessibilityCursorPosition = ACCESSIBILITY_CURSOR_POSITION_UNDEFINED;
 
     SendViewStateChangedAccessibilityEvent mSendViewStateChangedAccessibilityEvent;
@@ -4045,9 +4039,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * input fields and tags (like {@code id}).
      * </ul>
      */
-    // TODO(b/33197203) (b/34078930): improve documentation: mention all cases, show examples, etc.
-    // In particular, be more specific about webview restrictions
-    public static final int AUTO_FILL_FLAG_TYPE_FILL = 0x1;
+    // TODO(b/33197203): cannot conflict with flags defined on AutoFillManager until they're removed
+    // (when save is refactored).
+    public static final int AUTO_FILL_FLAG_TYPE_FILL = 0x10000000;
 
     /**
      * Set when the user explicitly asked a {@link android.service.autofill.AutoFillService} to save
@@ -4057,7 +4051,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * (Personally Identifiable Information). For example, the text of password fields should be
      * included since that's what's typically saved.
      */
-    public static final int AUTO_FILL_FLAG_TYPE_SAVE = 0x2;
+    // TODO(b/33197203): cannot conflict with flags defined on AutoFillManager until they're removed
+    // (when save is refactored).
+    public static final int AUTO_FILL_FLAG_TYPE_SAVE = 0x20000000;
 
     /**
      * Set to true when drawing cache is enabled and cannot be created.
@@ -6940,8 +6936,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (forAutoFill) {
             // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
             // reuse the accessibility id to save space.
-            mAutoFillId = getAccessibilityViewId();
-            structure.setAutoFillId(mAutoFillId);
+            structure.setAutoFillId(getAccessibilityViewId());
             structure.setAutoFillType(getAutoFillType());
         }
 
@@ -7565,20 +7560,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAccessibilityViewId = sNextAccessibilityViewId++;
         }
         return mAccessibilityViewId;
-    }
-
-    /**
-     * Gets the unique identifier of this view for auto-fill purposes.
-     *
-     * <p>It's only set after {@link #onProvideAutoFillStructure(ViewStructure, int)} is called.
-     *
-     * @return The view autofill id or {@link #NO_ID} if
-     * {@link #onProvideAutoFillStructure(ViewStructure, int)}  was not called yet.
-     *
-     * @hide
-     */
-    public int getAutoFillViewId() {
-        return mAutoFillId;
     }
 
     /**

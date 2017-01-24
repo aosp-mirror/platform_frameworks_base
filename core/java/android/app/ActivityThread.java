@@ -2967,7 +2967,7 @@ public final class ActivityThread {
                 if (!forAutoFill) {
                     r.activity.onProvideAssistContent(content);
                 } else if (addAutoFillCallback) {
-                    IAutoFillAppCallback cb = r.activity.getAutoFillCallback().get();
+                    IAutoFillAppCallback cb = r.activity.getAutoFillCallback();
                     if (cb != null) {
                         data.putBinder(AutoFillService.KEY_CALLBACK, cb.asBinder());
                     } else {

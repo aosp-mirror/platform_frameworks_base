@@ -27,8 +27,9 @@ import android.view.autofill.AutoFillId;
  */
 oneway interface IAutoFillManagerService {
 
-    void showAutoFillInput(in AutoFillId id, in Rect boundaries);
+    // Called by AutoFillManager (app).
+    void requestAutoFill(in AutoFillId id, in Rect bounds, int flags);
 
-    // TODO(b/33197203): remove it and refactor onShellCommand
-    void requestAutoFill(IBinder activityToken, int userId, in Bundle extras, int flags);
+    // Called by ShellCommand only.
+    void requestAutoFillForUser(int userId, int flags);
 }
