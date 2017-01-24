@@ -24664,6 +24664,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * To be removed once the support library has stopped using it.
+     *
+     * @deprecated use {@link #setTooltipText} instead
+     */
+    @Deprecated
+    public final void setTooltip(@Nullable CharSequence tooltipText) {
+        setTooltipText(tooltipText);
+    }
+
+    /**
      * Returns the view's tooltip text.
      *
      * @return the tooltip text
@@ -24671,6 +24681,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public final CharSequence getTooltipText() {
         return mTooltipInfo != null ? mTooltipInfo.mTooltipText : null;
+    }
+
+    /**
+     * To be removed once the support library has stopped using it.
+     *
+     * @deprecated use {@link #getTooltipText} instead
+     */
+    @Deprecated
+    @Nullable
+    public final CharSequence getTooltip() {
+        return getTooltipText();
     }
 
     private boolean showTooltip(int x, int y, boolean fromLongClick) {
