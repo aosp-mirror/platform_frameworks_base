@@ -197,7 +197,8 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);
             result.putString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN,
                     AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
-            result.putString(AccountManager.KEY_PASSWORD, "doesn't matter");
+            result.putString(AccountManager.KEY_PASSWORD,
+                    AccountManagerServiceTestFixtures.ACCOUNT_PASSWORD);
             result.putString(AccountManager.KEY_AUTHTOKEN,
                     Integer.toString(mTokenCounter.incrementAndGet()));
         } else if (accountName.equals(
@@ -243,6 +244,8 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
 
         Bundle result = new Bundle();
         if (accountName.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
+            // add sessionBundle into result for verification purpose
+            result.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);
             // fill bundle with a success result.
             result.putString(AccountManager.KEY_ACCOUNT_NAME,
                     AccountManagerServiceTestFixtures.ACCOUNT_NAME);
@@ -288,7 +291,9 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
         } else {
             // fill with error
             fillResultWithError(
-                    result, AccountManager.ERROR_CODE_INVALID_RESPONSE, "Default Error Message");
+                    result,
+                    AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                    AccountManagerServiceTestFixtures.ERROR_MESSAGE);
         }
 
         response.onResult(result);
