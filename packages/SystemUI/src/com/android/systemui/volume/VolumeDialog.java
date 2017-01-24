@@ -127,6 +127,7 @@ public class VolumeDialog implements TunerService.Tunable {
 
     private boolean mShowing;
     private boolean mExpanded;
+    private boolean mShowA11yStream;
 
     private int mActiveStream;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
@@ -244,7 +245,6 @@ public class VolumeDialog implements TunerService.Tunable {
             if (!AudioSystem.isSingleVolume(mContext)) {
                 addRow(AudioManager.STREAM_RING,
                         R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true);
-
                 addRow(AudioManager.STREAM_ALARM,
                         R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
@@ -253,6 +253,8 @@ public class VolumeDialog implements TunerService.Tunable {
                         R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false);
                 addRow(AudioManager.STREAM_SYSTEM,
                         R.drawable.ic_volume_system, R.drawable.ic_volume_system_mute, false);
+                addRow(AudioManager.STREAM_ACCESSIBILITY, R.drawable.ic_volume_accessibility,
+                        R.drawable.ic_volume_accessibility, true);
             }
         } else {
             addExistingRows();
@@ -307,10 +309,24 @@ public class VolumeDialog implements TunerService.Tunable {
     }
 
     private void addRow(int stream, int iconRes, int iconMuteRes, boolean important) {
+        addRow(stream, iconRes, iconMuteRes, important, false);
+    }
+
+    private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
+            boolean dynamic) {
         VolumeRow row = new VolumeRow();
         initRow(row, stream, iconRes, iconMuteRes, important);
-        mDialogRowsView.addView(row.view);
-        mRows.add(row);
+        int rowSize;
+        int viewSize;
+        if (mShowA11yStream && dynamic && (rowSize = mRows.size()) > 1
+                && (viewSize = mDialogRowsView.getChildCount()) > 1) {
+            // A11y Stream should be the last in the list
+            mDialogRowsView.addView(row.view, viewSize - 2);
+            mRows.add(rowSize - 2, row);
+        } else {
+            mDialogRowsView.addView(row.view);
+            mRows.add(row);
+        }
     }
 
     private void addExistingRows() {
@@ -592,6 +608,9 @@ public class VolumeDialog implements TunerService.Tunable {
     }
 
     private boolean shouldBeVisibleH(VolumeRow row, boolean isActive) {
+        if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
+            return mShowA11yStream;
+        }
         return mExpanded && row.view.getVisibility() == View.VISIBLE
                 || (mExpanded && (row.important || isActive))
                 || !mExpanded && isActive;
@@ -644,7 +663,8 @@ public class VolumeDialog implements TunerService.Tunable {
             if (!ss.dynamic) continue;
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                addRow(stream, R.drawable.ic_volume_remote, R.drawable.ic_volume_remote_mute, true);
+                addRow(stream, R.drawable.ic_volume_remote, R.drawable.ic_volume_remote_mute, true,
+                        true);
             }
         }
 
@@ -1008,6 +1028,14 @@ public class VolumeDialog implements TunerService.Tunable {
         @Override
         public void onShowSafetyWarning(int flags) {
             showSafetyWarningH(flags);
+        }
+
+        @Override
+        public void onAccessibilityModeChanged(Boolean showA11yStream) {
+            boolean show = showA11yStream == null ? false : showA11yStream;
+            mShowA11yStream = show;
+            updateRowsH(getActiveRow());
+
         }
     };
 

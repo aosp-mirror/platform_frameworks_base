@@ -75,13 +75,13 @@ public class VolumeDialogController {
         STREAMS.put(AudioSystem.STREAM_BLUETOOTH_SCO, R.string.stream_bluetooth_sco);
         STREAMS.put(AudioSystem.STREAM_DTMF, R.string.stream_dtmf);
         STREAMS.put(AudioSystem.STREAM_MUSIC, R.string.stream_music);
+        STREAMS.put(AudioSystem.STREAM_ACCESSIBILITY, R.string.stream_accessibility);
         STREAMS.put(AudioSystem.STREAM_NOTIFICATION, R.string.stream_notification);
         STREAMS.put(AudioSystem.STREAM_RING, R.string.stream_ring);
         STREAMS.put(AudioSystem.STREAM_SYSTEM, R.string.stream_system);
         STREAMS.put(AudioSystem.STREAM_SYSTEM_ENFORCED, R.string.stream_system_enforced);
         STREAMS.put(AudioSystem.STREAM_TTS, R.string.stream_tts);
         STREAMS.put(AudioSystem.STREAM_VOICE_CALL, R.string.stream_voice_call);
-        STREAMS.put(AudioSystem.STREAM_ACCESSIBILITY, R.string.stream_accessibility);
     }
 
     private final HandlerThread mWorkerThread;
@@ -98,6 +98,7 @@ public class VolumeDialogController {
     private final MediaSessionsCallbacks mMediaSessionsCallbacksW = new MediaSessionsCallbacks();
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
+    private boolean mShowA11yStream;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -204,6 +205,7 @@ public class VolumeDialogController {
         pw.print("  mHasVibrator: "); pw.println(mHasVibrator);
         pw.print("  mRemoteStreams: "); pw.println(mMediaSessionsCallbacksW.mRemoteStreams
                 .values());
+        pw.print("  mShowA11yStream: "); pw.println(mShowA11yStream);
         pw.println();
         mMediaSessions.dump(pw);
     }
@@ -299,6 +301,10 @@ public class VolumeDialogController {
 
     private void onShowSafetyWarningW(int flags) {
         mCallbacks.onShowSafetyWarning(flags);
+    }
+
+    private void onAccessibilityModeChanged(Boolean showA11yStream) {
+        mCallbacks.onAccessibilityModeChanged(showA11yStream);
     }
 
     private boolean checkRoutedToBluetoothW(int stream) {
@@ -570,13 +576,16 @@ public class VolumeDialogController {
             switch (mode) {
                 case VolumePolicy.A11Y_MODE_MEDIA_A11Y_VOLUME:
                     // "legacy" mode
+                    mShowA11yStream = false;
                     break;
                 case VolumePolicy.A11Y_MODE_INDEPENDENT_A11Y_VOLUME:
+                    mShowA11yStream = true;
                     break;
                 default:
                     Log.e(TAG, "Invalid accessibility mode " + mode);
                     break;
             }
+            mWorker.obtainMessage(W.ACCESSIBILITY_MODE_CHANGED, mShowA11yStream).sendToTarget();
         }
     }
 
@@ -595,6 +604,7 @@ public class VolumeDialogController {
         private static final int NOTIFY_VISIBLE = 12;
         private static final int USER_ACTIVITY = 13;
         private static final int SHOW_SAFETY_WARNING = 14;
+        private static final int ACCESSIBILITY_MODE_CHANGED = 15;
 
         W(Looper looper) {
             super(looper);
@@ -617,6 +627,7 @@ public class VolumeDialogController {
                 case NOTIFY_VISIBLE: onNotifyVisibleW(msg.arg1 != 0); break;
                 case USER_ACTIVITY: onUserActivityW(); break;
                 case SHOW_SAFETY_WARNING: onShowSafetyWarningW(msg.arg1); break;
+                case ACCESSIBILITY_MODE_CHANGED: onAccessibilityModeChanged((Boolean) msg.obj);
             }
         }
     }
@@ -739,6 +750,19 @@ public class VolumeDialogController {
                     @Override
                     public void run() {
                         entry.getKey().onShowSafetyWarning(flags);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onAccessibilityModeChanged(Boolean showA11yStream) {
+            boolean show = showA11yStream == null ? false : showA11yStream;
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onAccessibilityModeChanged(show);
                     }
                 });
             }
@@ -1004,6 +1028,7 @@ public class VolumeDialogController {
                         .append('[').append(ss.levelMin).append("..").append(ss.levelMax)
                         .append(']');
                 if (ss.muted) sb.append(" [MUTED]");
+                if (ss.dynamic) sb.append(" [DYNAMIC]");
             }
             sep(sb, indent); sb.append("ringerModeExternal:").append(ringerModeExternal);
             sep(sb, indent); sb.append("ringerModeInternal:").append(ringerModeInternal);
@@ -1037,6 +1062,7 @@ public class VolumeDialogController {
         void onShowSilentHint();
         void onScreenOff();
         void onShowSafetyWarning(int flags);
+        void onAccessibilityModeChanged(Boolean showA11yStream);
     }
 
     public interface UserActivityListener {
