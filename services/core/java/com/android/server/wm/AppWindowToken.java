@@ -375,6 +375,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // affected.
                 mService.getDefaultDisplayContentLocked().getDockedDividerController()
                         .notifyAppVisibilityChanged();
+                mService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
             }
         }
 
@@ -674,7 +675,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // well there is no point now.
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingData");
             startingData = null;
-        } else if (mChildren.size() == 1 && startingSurface != null) {
+        } else if (mChildren.size() == 1 && startingSurface != null && !isRelaunching()) {
             // If this is the last window except for a starting transition window,
             // we need to get rid of the starting transition.
             if (getController() != null) {

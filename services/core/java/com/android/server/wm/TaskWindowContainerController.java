@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -62,7 +63,8 @@ public class TaskWindowContainerController
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
             int stackId, int userId, Rect bounds, Configuration overrideConfig, int resizeMode,
-            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers) {
+            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers,
+            TaskDescription taskDescription) {
         super(listener, WindowManagerService.getInstance());
         mTaskId = taskId;
 
@@ -79,7 +81,7 @@ public class TaskWindowContainerController
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
             final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
-                    homeTask, isOnTopLauncher);
+                    homeTask, isOnTopLauncher, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             stack.addTask(task, position, showForAllUsers, true /* moveParents */);
         }
@@ -88,9 +90,9 @@ public class TaskWindowContainerController
     @VisibleForTesting
     Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean homeTask,
-            boolean isOnTopLauncher) {
+            boolean isOnTopLauncher, TaskDescription taskDescription) {
         return new Task(taskId, stack, userId, mService, bounds, overrideConfig, isOnTopLauncher,
-                resizeMode, homeTask, this);
+                resizeMode, homeTask, taskDescription, this);
     }
 
     @Override
@@ -260,6 +262,16 @@ public class TaskWindowContainerController
                 return;
             }
             mContainer.cancelTaskThumbnailTransition();
+        }
+    }
+
+    public void setTaskDescription(TaskDescription taskDescription) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                Slog.w(TAG_WM, "setTaskDescription: taskId " + mTaskId + " not found.");
+                return;
+            }
+            mContainer.setTaskDescription(taskDescription);
         }
     }
 

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -76,7 +77,7 @@ public class WindowFrameTests {
         final Rect mInsetBounds = new Rect();
         boolean mFullscreenForTest = true;
         TaskWithBounds(Rect bounds) {
-            super(0, mStubStack, 0, sWm, null, null, false, 0, false, null);
+            super(0, mStubStack, 0, sWm, null, null, false, 0, false, new TaskDescription(), null);
             mBounds = bounds;
         }
         @Override

@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
 
 import android.app.ActivityManager.StackId;
+import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -90,9 +91,11 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     // Whether this task is an on-top launcher task, which is determined by the root activity.
     private boolean mIsOnTopLauncher;
 
+    private TaskDescription mTaskDescription;
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode, boolean homeTask,
-            TaskWindowContainerController controller) {
+            TaskDescription taskDescription, TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
@@ -102,6 +105,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         mHomeTask = homeTask;
         setController(controller);
         setBounds(bounds, overrideConfig);
+        mTaskDescription = taskDescription;
     }
 
     DisplayContent getDisplayContent() {
@@ -647,6 +651,14 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         }
     }
 
+    void setTaskDescription(TaskDescription taskDescription) {
+        mTaskDescription = taskDescription;
+    }
+
+    TaskDescription getTaskDescription() {
+        return mTaskDescription;
+    }
+
     @Override
     boolean fillsParent() {
         return mFillsParent || !StackId.isTaskResizeAllowed(mStack.mStackId);
@@ -688,6 +700,5 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
             wtoken.dump(pw, triplePrefix);
         }
-
     }
 }

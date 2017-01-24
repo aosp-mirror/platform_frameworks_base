@@ -56,7 +56,7 @@ public class AppWindowContainerController
     private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
 
     private final IApplicationToken mToken;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
 
     private final Runnable mOnWindowsDrawn = () -> {
         if (mListener == null) {
@@ -186,6 +186,7 @@ public class AppWindowContainerController
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
             WindowManagerService service) {
         super(listener, service);
+        mHandler = new Handler(service.mH.getLooper());
         mToken = token;
         synchronized(mWindowMap) {
             AppWindowToken atoken = mRoot.getAppWindowToken(mToken.asBinder());

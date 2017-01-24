@@ -26,12 +26,16 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.GraphicBuffer;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -43,6 +47,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy.StartingSurface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.view.BaseIWindow;
 
 /**
@@ -61,6 +66,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private final WindowManagerService mService;
     private boolean mHasDrawn;
     private boolean mReportNextDraw;
+    private Paint mFillBackgroundPaint = new Paint();
 
     static TaskSnapshotSurface create(WindowManagerService service, AppWindowToken token,
             GraphicBuffer snapshot) {
@@ -73,6 +79,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final Rect tmpRect = new Rect();
         final Rect tmpFrame = new Rect();
         final Configuration tmpConfiguration = new Configuration();
+        int fillBackgroundColor = Color.WHITE;
         synchronized (service.mWindowMap) {
             layoutParams.type = TYPE_APPLICATION_STARTING;
             layoutParams.format = snapshot.getFormat();
@@ -90,6 +97,12 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             layoutParams.setTitle(String.format(TITLE_FORMAT, token.mTask.mTaskId));
+            if (token.mTask != null) {
+                final TaskDescription taskDescription = token.mTask.getTaskDescription();
+                if (taskDescription != null) {
+                    fillBackgroundColor = taskDescription.getBackgroundColor();
+                }
+            }
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
@@ -103,7 +116,7 @@ class TaskSnapshotSurface implements StartingSurface {
             // Local call.
         }
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surface);
+                surface, fillBackgroundColor);
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, tmpFrame,
@@ -116,11 +129,14 @@ class TaskSnapshotSurface implements StartingSurface {
         return snapshotSurface;
     }
 
-    private TaskSnapshotSurface(WindowManagerService service, Window window, Surface surface) {
+    @VisibleForTesting
+    TaskSnapshotSurface(WindowManagerService service, Window window, Surface surface,
+            int fillBackgroundColor) {
         mService = service;
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = window;
         mSurface = surface;
+        mFillBackgroundPaint.setColor(fillBackgroundColor);
     }
 
     @Override
@@ -136,7 +152,9 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // TODO: Just wrap the buffer here without any copying.
         final Canvas c = mSurface.lockHardwareCanvas();
-        c.drawBitmap(Bitmap.createHardwareBitmap(snapshot), 0, 0, null);
+        final Bitmap b = Bitmap.createHardwareBitmap(snapshot);
+        fillEmptyBackground(c, b);
+        c.drawBitmap(b, 0, 0, null);
         mSurface.unlockCanvasAndPost(c);
         final boolean reportNextDraw;
         synchronized (mService.mWindowMap) {
@@ -147,6 +165,21 @@ class TaskSnapshotSurface implements StartingSurface {
             reportDrawn();
         }
         mSurface.release();
+    }
+
+    @VisibleForTesting
+    void fillEmptyBackground(Canvas c, Bitmap b) {
+        final boolean fillHorizontally = c.getWidth() > b.getWidth();
+        final boolean fillVertically = c.getHeight() > b.getHeight();
+        if (fillHorizontally) {
+            c.drawRect(b.getWidth(), 0, c.getWidth(), fillVertically
+                        ? b.getHeight()
+                        : c.getHeight(),
+                    mFillBackgroundPaint);
+        }
+        if (fillVertically) {
+            c.drawRect(0, b.getHeight(), c.getWidth(), c.getHeight(), mFillBackgroundPaint);
+        }
     }
 
     private void reportDrawn() {
@@ -160,7 +193,7 @@ class TaskSnapshotSurface implements StartingSurface {
         }
     }
 
-    private static Handler sHandler = new Handler() {
+    private static Handler sHandler = new Handler(Looper.getMainLooper()) {
 
         @Override
         public void handleMessage(Message msg) {

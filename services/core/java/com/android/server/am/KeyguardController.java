@@ -29,6 +29,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AW
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_OCCLUDE;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 
 import android.os.IBinder;
@@ -120,6 +121,7 @@ class KeyguardController {
 
                 // Some stack visibility might change (e.g. docked stack)
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                mStackSupervisor.addStartingWindowsForVisibleActivities(true /* taskSwitch */);
                 mWindowManager.executeAppTransition();
             } finally {
                 mWindowManager.continueSurfaceLayout();

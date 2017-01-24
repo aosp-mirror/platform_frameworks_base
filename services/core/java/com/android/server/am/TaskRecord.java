@@ -416,7 +416,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Configuration overrideConfig = getOverrideConfiguration();
         mWindowContainerController = new TaskWindowContainerController(taskId, this, getStackId(),
                 userId, bounds, overrideConfig, mResizeMode, isHomeTask(), isOnTopLauncher(), onTop,
-                showForAllUsers);
+                showForAllUsers, lastTaskDescription);
     }
 
     void removeWindowContainer() {
@@ -1402,6 +1402,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             }
             lastTaskDescription = new TaskDescription(label, null, iconFilename, colorPrimary,
                     colorBackground);
+            if (mWindowContainerController != null) {
+                mWindowContainerController.setTaskDescription(lastTaskDescription);
+            }
             // Update the task affiliation color if we are the parent of the group
             if (taskId == mAffiliatedTaskId) {
                 mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
@@ -1979,6 +1982,15 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         // We don't allow root affinity matching on the pinned stack as no other task should
         // be launching in it based on affinity.
         return rootAffinity != null && getStackId() != PINNED_STACK_ID;
+    }
+
+    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
+        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord r = mActivities.get(activityNdx);
+            if (r.visible) {
+                r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
+            }
+        }
     }
 
     void dump(PrintWriter pw, String prefix) {

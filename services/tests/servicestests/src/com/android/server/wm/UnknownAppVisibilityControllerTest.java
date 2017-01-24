@@ -45,20 +45,18 @@ import org.mockito.invocation.InvocationOnMock;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class UnknownAppVisibilityControllerTest {
+public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     private WindowManagerService mWm;
-    private @Mock ActivityManagerInternal mAm;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        super.setUp();
         final Context context = InstrumentationRegistry.getTargetContext();
-        LocalServices.addService(ActivityManagerInternal.class, mAm);
         doAnswer((InvocationOnMock invocationOnMock) -> {
             invocationOnMock.getArgumentAt(0, Runnable.class).run();
             return null;
-        }).when(mAm).notifyKeyguardFlagsChanged(any());
+        }).when(sMockAm).notifyKeyguardFlagsChanged(any());
         mWm = TestWindowManagerPolicy.getWindowManagerService(context);
     }
 

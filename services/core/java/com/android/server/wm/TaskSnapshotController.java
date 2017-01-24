@@ -26,6 +26,8 @@ import android.os.Environment;
 import android.util.ArraySet;
 import android.view.WindowManagerPolicy.StartingSurface;
 
+import com.google.android.collect.Sets;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
@@ -66,10 +68,27 @@ class TaskSnapshotController {
         if (!ENABLE_TASK_SNAPSHOTS) {
             return;
         }
+        handleClosingApps(mService.mClosingApps);
+    }
+
+
+    /**
+     * Called when the visibility of an app changes outside of the regular app transition flow.
+     */
+    void notifyAppVisibilityChanged(AppWindowToken appWindowToken, boolean visible) {
+        if (!ENABLE_TASK_SNAPSHOTS) {
+            return;
+        }
+        if (!visible) {
+            handleClosingApps(Sets.newArraySet(appWindowToken));
+        }
+    }
+
+    private void handleClosingApps(ArraySet<AppWindowToken> closingApps) {
 
         // We need to take a snapshot of the task if and only if all activities of the task are
         // either closing or hidden.
-        getClosingTasks(mService.mClosingApps, mTmpTasks);
+        getClosingTasks(closingApps, mTmpTasks);
         for (int i = mTmpTasks.size() - 1; i >= 0; i--) {
             final Task task = mTmpTasks.valueAt(i);
             if (!canSnapshotTask(task)) {

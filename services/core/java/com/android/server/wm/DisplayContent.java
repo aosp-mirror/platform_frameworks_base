@@ -2282,7 +2282,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 final boolean foundTargetWs =
                         (w.mAppToken != null && w.mAppToken.token == appToken)
                                 || (mScreenshotApplicationState.appWin != null && wallpaperOnly);
-                if (foundTargetWs && w.isDisplayedLw() && winAnim.getShown()) {
+                if (foundTargetWs && winAnim.getShown()) {
                     mScreenshotApplicationState.screenshotReady = true;
                 }
 

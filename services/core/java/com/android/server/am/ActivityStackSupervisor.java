@@ -3229,6 +3229,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
+    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            final int topStackNdx = stacks.size() - 1;
+            for (int stackNdx = topStackNdx; stackNdx >= 0; --stackNdx) {
+                final ActivityStack stack = stacks.get(stackNdx);
+                stack.addStartingWindowsForVisibleActivities(taskSwitch);
+            }
+        }
+    }
+
     void invalidateTaskLayers() {
         mTaskLayersChanged = true;
     }
