@@ -1252,14 +1252,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusRealDirection {} // Like @FocusDirection, but without forward/backward
 
-    /** @hide */
-    @IntDef({
-            KEYBOARD_NAVIGATION_GROUP_CLUSTER,
-            KEYBOARD_NAVIGATION_GROUP_SECTION
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface KeyboardNavigationGroupType {}
-
     /**
      * Use with {@link #focusSearch(int)}. Move focus to the previous selectable
      * item.
@@ -1291,18 +1283,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Use with {@link #focusSearch(int)}. Move focus down.
      */
     public static final int FOCUS_DOWN = 0x00000082;
-
-    /**
-     * Use with {@link #keyboardNavigationGroupSearch(int, View, int)}. Search for a keyboard
-     * navigation cluster.
-     */
-    public static final int KEYBOARD_NAVIGATION_GROUP_CLUSTER = 1;
-
-    /**
-     * Use with {@link #keyboardNavigationGroupSearch(int, View, int)}. Search for a keyboard
-     * navigation section.
-     */
-    public static final int KEYBOARD_NAVIGATION_GROUP_SECTION = 2;
 
     /**
      * Bits of {@link #getMeasuredWidthAndState()} and
@@ -2500,7 +2480,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
      *                  1                PFLAG3_CLUSTER
-     *                 1                 PFLAG3_SECTION
+     *                 x                 * NO LONGER NEEDED, SHOULD BE REUSED *
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
      *           xxxx                    * NO LONGER NEEDED, SHOULD BE REUSED *
@@ -2708,14 +2688,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setKeyboardNavigationCluster(boolean)
      */
     private static final int PFLAG3_CLUSTER = 0x8000;
-
-    /**
-     * Flag indicating that the view is a root of a keyboard navigation section.
-     *
-     * @see #isKeyboardNavigationSection()
-     * @see #setKeyboardNavigationSection(boolean)
-     */
-    private static final int PFLAG3_SECTION = 0x10000;
 
     /**
      * Indicates that the user is currently touching the screen.
@@ -3807,11 +3779,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mNextClusterForwardId = View.NO_ID;
 
-    /**
-     * User-specified next keyboard navigation section.
-     */
-    int mNextSectionForwardId = View.NO_ID;
-
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
@@ -4622,9 +4589,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_nextClusterForward:
                     mNextClusterForwardId = a.getResourceId(attr, View.NO_ID);
                     break;
-                case R.styleable.View_nextSectionForward:
-                    mNextSectionForwardId = a.getResourceId(attr, View.NO_ID);
-                    break;
                 case R.styleable.View_minWidth:
                     mMinWidth = a.getDimensionPixelSize(attr, 0);
                     break;
@@ -4767,11 +4731,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_keyboardNavigationCluster:
                     if (a.peekValue(attr) != null) {
                         setKeyboardNavigationCluster(a.getBoolean(attr, true));
-                    }
-                    break;
-                case R.styleable.View_keyboardNavigationSection:
-                    if (a.peekValue(attr) != null) {
-                        setKeyboardNavigationSection(a.getBoolean(attr, true));
                     }
                     break;
                 case R.styleable.View_focusedByDefault:
@@ -8043,28 +8002,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the id of the root of the next keyboard navigation section.
-     * @return The next keyboard navigation section ID, or {@link #NO_ID} if the framework should
-     * decide automatically.
-     *
-     * @attr ref android.R.styleable#View_nextSectionForward
-     */
-    public int getNextSectionForwardId() {
-        return mNextSectionForwardId;
-    }
-
-    /**
-     * Sets the id of the view to use as the root of the next keyboard navigation section.
-     * @param nextSectionForwardId The next section ID, or {@link #NO_ID} if the framework should
-     * decide automatically.
-     *
-     * @attr ref android.R.styleable#View_nextSectionForward
-     */
-    public void setNextSectionForwardId(int nextSectionForwardId) {
-        mNextSectionForwardId = nextSectionForwardId;
-    }
-
-    /**
      * Returns the visibility of this view and all of its ancestors
      *
      * @return True if this view and all of its ancestors are {@link #VISIBLE}
@@ -9186,49 +9123,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns whether this View is a root of a keyboard navigation section.
-     *
-     * @return True if this view is a root of a section, or false otherwise.
-     * @attr ref android.R.styleable#View_keyboardNavigationSection
-     */
-    @ViewDebug.ExportedProperty(category = "keyboardNavigationSection")
-    public final boolean isKeyboardNavigationSection() {
-        return (mPrivateFlags3 & PFLAG3_SECTION) != 0;
-    }
-
-    /**
-     * Set whether this view is a root of a keyboard navigation section.
-     *
-     * @param isSection If true, this view is a root of a section.
-     *
-     * @attr ref android.R.styleable#View_keyboardNavigationSection
-     */
-    public void setKeyboardNavigationSection(boolean isSection) {
-        if (isSection) {
-            mPrivateFlags3 |= PFLAG3_SECTION;
-        } else {
-            mPrivateFlags3 &= ~PFLAG3_SECTION;
-        }
-    }
-
-    final boolean isKeyboardNavigationGroupOfType(@KeyboardNavigationGroupType int groupType) {
-        switch (groupType) {
-            case KEYBOARD_NAVIGATION_GROUP_CLUSTER:
-                return isKeyboardNavigationCluster();
-            case KEYBOARD_NAVIGATION_GROUP_SECTION:
-                return isKeyboardNavigationSection();
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown keyboard navigation group type: " + groupType);
-        }
-    }
-
-    /**
      * Returns whether this View should receive focus when the focus is restored for the view
      * hierarchy containing this view.
      * <p>
      * Focus gets restored for a view hierarchy when the root of the hierarchy gets added to a
-     * window or serves as a target of cluster or section navigation.
+     * window or serves as a target of cluster navigation.
      *
      * @see #restoreDefaultFocus(int)
      *
@@ -9245,7 +9144,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * hierarchy containing this view.
      * <p>
      * Focus gets restored for a view hierarchy when the root of the hierarchy gets added to a
-     * window or serves as a target of cluster or section navigation.
+     * window or serves as a target of cluster navigation.
      *
      * @param isFocusedByDefault {@code true} to set this view as the default-focus view,
      *                           {@code false} otherwise.
@@ -9284,35 +9183,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Find the nearest keyboard navigation group in the specified direction. The group type can be
-     * either a cluster or a section.
-     * This does not actually give focus to that group.
+     * Find the nearest keyboard navigation cluster in the specified direction.
+     * This does not actually give focus to that cluster.
      *
-     * @param groupType Type of the keyboard navigation group
-     * @param currentGroup The starting point of the search. Null means the current group is not
-     *                     found yet
+     * @param currentCluster The starting point of the search. Null means the current cluster is not
+     *                       found yet
      * @param direction Direction to look
      *
-     * @return The nearest keyboard navigation group in the specified direction, or null if none
+     * @return The nearest keyboard navigation cluster in the specified direction, or null if none
      *         can be found
      */
-    public View keyboardNavigationGroupSearch(
-            @KeyboardNavigationGroupType int groupType, View currentGroup, int direction) {
-        if (isKeyboardNavigationGroupOfType(groupType)) {
-            currentGroup = this;
+    public View keyboardNavigationClusterSearch(View currentCluster, int direction) {
+        if (isKeyboardNavigationCluster()) {
+            currentCluster = this;
         }
-        if (isRootNamespace()
-                || (groupType == KEYBOARD_NAVIGATION_GROUP_SECTION
-                && isKeyboardNavigationCluster())) {
+        if (isRootNamespace()) {
             // Root namespace means we should consider ourselves the top of the
             // tree for group searching; otherwise we could be group searching
             // into other tabs.  see LocalActivityManager and TabHost for more info.
-            // In addition, a cluster node works as a root for section searches.
-            return FocusFinder.getInstance().findNextKeyboardNavigationGroup(
-                    groupType, this, currentGroup, direction);
+            return FocusFinder.getInstance().findNextKeyboardNavigationCluster(
+                    this, currentCluster, direction);
         } else if (mParent != null) {
-            return mParent.keyboardNavigationGroupSearch(
-                    groupType, currentGroup, direction);
+            return mParent.keyboardNavigationClusterSearch(currentCluster, direction);
         }
         return null;
     }
@@ -9440,19 +9332,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Adds any keyboard navigation group roots that are descendants of this view (possibly
-     * including this view if it is a group root itself) to views. The group type can be either a
-     * cluster or a section.
+     * Adds any keyboard navigation cluster roots that are descendants of this view (possibly
+     * including this view if it is a cluster root itself) to views.
      *
-     * @param groupType Type of the keyboard navigation group
-     * @param views Keyboard navigation group roots found so far
+     * @param views Keyboard navigation cluster roots found so far
      * @param direction Direction to look
      */
-    public void addKeyboardNavigationGroups(
-            @KeyboardNavigationGroupType int groupType,
+    public void addKeyboardNavigationClusters(
             @NonNull Collection<View> views,
             int direction) {
-        if (!(isKeyboardNavigationGroupOfType(groupType))) {
+        if (!(isKeyboardNavigationCluster())) {
             return;
         }
         views.add(this);

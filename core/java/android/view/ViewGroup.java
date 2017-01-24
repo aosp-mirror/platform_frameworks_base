@@ -915,13 +915,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public View focusSearch(View focused, int direction) {
-        if (isRootNamespace()
-                || isKeyboardNavigationCluster()
-                && (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD)) {
+        if (isRootNamespace()) {
             // root namespace means we should consider ourselves the top of the
             // tree for focus searching; otherwise we could be focus searching
             // into other tabs.  see LocalActivityManager and TabHost for more info.
-            // Cluster's root works same way for the forward and backward navigation.
             return FocusFinder.getInstance().findNextFocus(this, focused, direction);
         } else if (mParent != null) {
             return mParent.focusSearch(focused, direction);
@@ -1136,12 +1133,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        if (isKeyboardNavigationCluster()
-                && (direction == FOCUS_FORWARD || direction == FOCUS_BACKWARD) && !hasFocus()) {
-            // A cluster cannot be focus-entered from outside using forward/backward navigation.
-            return;
-        }
-
         final int focusableCount = views.size();
 
         final int descendantFocusability = getDescendantFocusability();
@@ -1175,11 +1166,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void addKeyboardNavigationGroups(
-            @KeyboardNavigationGroupType int groupType, Collection<View> views, int direction) {
+    public void addKeyboardNavigationClusters(Collection<View> views, int direction) {
         final int focusableCount = views.size();
 
-        super.addKeyboardNavigationGroups(groupType, views, direction);
+        super.addKeyboardNavigationClusters(views, direction);
 
         if (focusableCount != views.size()) {
             // No need to look for groups inside a group.
@@ -1195,14 +1185,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         for (int i = 0; i < count; i++) {
             final View child = children[i];
-            if (groupType == KEYBOARD_NAVIGATION_GROUP_SECTION
-                    && child.isKeyboardNavigationCluster()) {
-                // When the current cluster is the default cluster, and we are searching for
-                // sections, ignore sections inside non-default clusters.
-                continue;
-            }
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                child.addKeyboardNavigationGroups(groupType, views, direction);
+                child.addKeyboardNavigationClusters(views, direction);
             }
         }
     }
@@ -3072,8 +3056,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = index; i != end; i += increment) {
             View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
-                    && !child.isKeyboardNavigationCluster()) {
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                 if (child.requestFocus(direction, previouslyFocusedRect)) {
                     return true;
                 }

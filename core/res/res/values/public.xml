@@ -2777,9 +2777,9 @@
         <public name="paddingVertical" />
         <public name="visibleToInstantApps" />
         <public name="keyboardNavigationCluster" />
-        <public name="keyboardNavigationSection" />
+        <public name="__removed0" />
         <public name="nextClusterForward" />
-        <public name="nextSectionForward" />
+        <public name="__removed1" />
         <public name="textColorError" />
         <public name="focusedByDefault" />
         <public name="appCategory" />
