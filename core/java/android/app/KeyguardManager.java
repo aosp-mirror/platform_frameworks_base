@@ -24,24 +24,24 @@ import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.IBinder;
-import android.os.IUserManager;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.IWindowManager;
 import android.view.IOnKeyguardExitResult;
-import android.view.WindowManager;
+import android.view.IWindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
+
+import java.util.List;
 
 /**
  * Class that can be used to lock and unlock the keyboard. Get an instance of this
@@ -100,12 +100,9 @@ public class KeyguardManager {
         Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL);
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            intent.setPackage("com.google.android.apps.wearable.settings");
-        } else {
-            // For security reasons, only allow this to come from system settings.
-            intent.setPackage("com.android.settings");
-        }
+
+        // explicitly set the package for security
+        intent.setPackage(getSettingsPackageForIntent(intent));
         return intent;
     }
 
@@ -126,13 +123,21 @@ public class KeyguardManager {
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
         intent.putExtra(Intent.EXTRA_USER_ID, userId);
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            intent.setPackage("com.google.android.apps.wearable.settings");
-        } else {
-            // For security reasons, only allow this to come from system settings.
-            intent.setPackage("com.android.settings");
-        }
+
+        // explicitly set the package for security
+        intent.setPackage(getSettingsPackageForIntent(intent));
+
         return intent;
+    }
+
+    private String getSettingsPackageForIntent(Intent intent) {
+        List<ResolveInfo> resolveInfos = mContext.getPackageManager()
+                .queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
+        for (int i = 0; i < resolveInfos.size(); i++) {
+            return resolveInfos.get(i).activityInfo.packageName;
+        }
+
+        return "com.android.settings";
     }
 
     /**
