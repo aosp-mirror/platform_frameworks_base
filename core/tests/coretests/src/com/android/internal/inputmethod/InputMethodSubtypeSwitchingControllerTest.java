@@ -33,7 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTestCase {
-    private static final String DUMMY_PACKAGE_NAME = "dymmy package name";
+    private static final String DUMMY_PACKAGE_NAME = "dummy package name";
+    private static final String DUMMY_IME_LABEL = "dummy ime label";
     private static final String DUMMY_SETTING_ACTIVITY_NAME = "";
     private static final boolean DUMMY_IS_AUX_IME = false;
     private static final boolean DUMMY_FORCE_DEFAULT = false;
@@ -86,6 +87,35 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
                         SYSTEM_LOCALE));
             }
         }
+    }
+
+    private static ImeSubtypeListItem createDummyItem(String imeName,
+            String subtypeName, String subtypeLocale, int subtypeIndex, String systemLocale) {
+        final ResolveInfo ri = new ResolveInfo();
+        final ServiceInfo si = new ServiceInfo();
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = DUMMY_PACKAGE_NAME;
+        ai.enabled = true;
+        si.applicationInfo = ai;
+        si.enabled = true;
+        si.packageName = DUMMY_PACKAGE_NAME;
+        si.name = imeName;
+        si.exported = true;
+        si.nonLocalizedLabel = DUMMY_IME_LABEL;
+        ri.serviceInfo = si;
+        ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
+        subtypes.add(new InputMethodSubtypeBuilder()
+                .setSubtypeNameResId(0)
+                .setSubtypeIconResId(0)
+                .setSubtypeLocale(subtypeLocale)
+                .setIsAsciiCapable(true)
+                .build());
+        final InputMethodInfo imi = new InputMethodInfo(ri, DUMMY_IS_AUX_IME,
+                DUMMY_SETTING_ACTIVITY_NAME, subtypes, DUMMY_IS_DEFAULT_RES_ID,
+                DUMMY_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */,
+                false /* supportsDismissingWindow */);
+        return new ImeSubtypeListItem(imeName, subtypeName, imi, subtypeIndex, subtypeLocale,
+                systemLocale);
     }
 
     private static List<ImeSubtypeListItem> createEnabledImeSubtypes() {
@@ -328,5 +358,57 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         assertFalse(item_enn.mIsSystemLocale);
         assertFalse(item_e.mIsSystemLocale);
         assertFalse(item_EN_US.mIsSystemLocale);
+    }
+
+    @SmallTest
+    public void testImeSubtypeListComparator() throws Exception {
+        {
+            final List<ImeSubtypeListItem> items = Arrays.asList(
+                    createDummyItem("X", "A", "en_US", 0, "en_US"),
+                    createDummyItem("X", "A", "en", 1, "en_US"),
+                    createDummyItem("X", "A", "ja", 2, "en_US"),
+                    createDummyItem("X", "Z", "en_US", 3, "en_US"),
+                    createDummyItem("X", "Z", "en", 4, "en_US"),
+                    createDummyItem("X", "Z", "ja", 5, "en_US"),
+                    createDummyItem("X", "", "en_US", 6, "en_US"),
+                    createDummyItem("X", "", "en", 7, "en_US"),
+                    createDummyItem("X", "", "ja", 8, "en_US"),
+                    createDummyItem("Y", "A", "en_US", 9, "en_US"),
+                    createDummyItem("Y", "A", "en", 10, "en_US"),
+                    createDummyItem("Y", "A", "ja", 11, "en_US"),
+                    createDummyItem("Y", "Z", "en_US", 12, "en_US"),
+                    createDummyItem("Y", "Z", "en", 13, "en_US"),
+                    createDummyItem("Y", "Z", "ja", 14, "en_US"),
+                    createDummyItem("Y", "", "en_US", 15, "en_US"),
+                    createDummyItem("Y", "", "en", 16, "en_US"),
+                    createDummyItem("Y", "", "ja", 17, "en_US"),
+                    createDummyItem("", "A", "en_US", 18, "en_US"),
+                    createDummyItem("", "A", "en", 19, "en_US"),
+                    createDummyItem("", "A", "ja", 20, "en_US"),
+                    createDummyItem("", "Z", "en_US", 21, "en_US"),
+                    createDummyItem("", "Z", "en", 22, "en_US"),
+                    createDummyItem("", "Z", "ja", 23, "en_US"),
+                    createDummyItem("", "", "en_US", 24, "en_US"),
+                    createDummyItem("", "", "en", 25, "en_US"),
+                    createDummyItem("", "", "ja", 26, "en_US"));
+
+            for (int i = 0; i < items.size(); ++i) {
+                assertEquals(0, items.get(i).compareTo(items.get(i)));
+                for (int j = i + 1; j < items.size(); ++j) {
+                    assertTrue(items.get(i).compareTo(items.get(j)) < 0);
+                    assertTrue(items.get(j).compareTo(items.get(i)) > 0);
+                }
+            }
+        }
+
+        {
+            // Following two items have the same priority.
+            final ImeSubtypeListItem nonSystemLocale1 =
+                    createDummyItem("X", "A", "ja_JP", 0, "en_us");
+            final ImeSubtypeListItem nonSystemLocale2 =
+                    createDummyItem("X", "A", "hi_IN", 1, "en_us");
+            assertEquals(0, nonSystemLocale1.compareTo(nonSystemLocale2));
+            assertEquals(0, nonSystemLocale2.compareTo(nonSystemLocale1));
+        }
     }
 }

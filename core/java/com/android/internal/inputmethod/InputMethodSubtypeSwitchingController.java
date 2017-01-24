@@ -95,39 +95,32 @@ public class InputMethodSubtypeSwitchingController {
             }
         }
 
+        private static int compareNullableCharSequences(@Nullable CharSequence c1,
+                @Nullable CharSequence c2) {
+            // For historical reasons, an empty text needs to put at the last.
+            final boolean empty1 = TextUtils.isEmpty(c1);
+            final boolean empty2 = TextUtils.isEmpty(c2);
+            if (empty1 || empty2) {
+                return (empty1 ? 1 : 0) - (empty2 ? 1 : 0);
+            }
+            return c1.toString().compareTo(c2.toString());
+        }
+
         @Override
         public int compareTo(ImeSubtypeListItem other) {
-            if (TextUtils.isEmpty(mImeName)) {
-                return 1;
+            int result = compareNullableCharSequences(mImeName, other.mImeName);
+            if (result != 0) {
+                return result;
             }
-            if (TextUtils.isEmpty(other.mImeName)) {
-                return -1;
+            result = compareNullableCharSequences(mSubtypeName, other.mSubtypeName);
+            if (result != 0) {
+                return result;
             }
-            if (!TextUtils.equals(mImeName, other.mImeName)) {
-                return mImeName.toString().compareTo(other.mImeName.toString());
+            result = (mIsSystemLocale ? -1 : 0) - (other.mIsSystemLocale ? -1 : 0);
+            if (result != 0) {
+                return result;
             }
-            if (TextUtils.equals(mSubtypeName, other.mSubtypeName)) {
-                return 0;
-            }
-            if (mIsSystemLocale) {
-                return -1;
-            }
-            if (other.mIsSystemLocale) {
-                return 1;
-            }
-            if (mIsSystemLanguage) {
-                return -1;
-            }
-            if (other.mIsSystemLanguage) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(mSubtypeName)) {
-                return 1;
-            }
-            if (TextUtils.isEmpty(other.mSubtypeName)) {
-                return -1;
-            }
-            return mSubtypeName.toString().compareTo(other.mSubtypeName.toString());
+            return (mIsSystemLanguage ? -1 : 0) - (other.mIsSystemLanguage ? -1 : 0);
         }
 
         @Override
