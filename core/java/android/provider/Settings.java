@@ -8082,6 +8082,16 @@ public final class Settings {
        public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
 
        /**
+        * User setting for ConnectivityManager.getMeteredMultipathPreference(). This value may be
+        * overridden by the system based on device or application state. If null, the value
+        * specified by config_networkMeteredMultipathPreference is used.
+        *
+        * @hide
+        */
+       public static final String NETWORK_METERED_MULTIPATH_PREFERENCE =
+               "network_metered_multipath_preference";
+
+       /**
         * The thresholds of the wifi throughput badging (SD, HD etc.) as a comma-delimited list of
         * colon-delimited key-value pairs. The key is the badging enum value defined in
         * android.net.ScoredNetwork and the value is the minimum sustained network throughput in
