@@ -3331,6 +3331,11 @@ message MetricsEvent {
     // ACTION: Deny "Enable picture-in-picture on hide" for an app
     APP_PICTURE_IN_PICTURE_ON_HIDE_DENY = 814;
 
+    // OPEN: Settings > Language & input > Text-to-speech output -> Speech rate & pitch
+    // CATEGORY: SETTINGS
+    // OS: 8.0
+    TTS_SLIDERS = 815;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
