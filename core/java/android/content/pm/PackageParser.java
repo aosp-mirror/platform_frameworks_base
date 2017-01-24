@@ -3899,6 +3899,9 @@ public class PackageParser {
         a.info.taskAffinity = buildTaskAffinityName(owner.applicationInfo.packageName,
                 owner.applicationInfo.taskAffinity, str, outError);
 
+        a.info.splitName =
+                sa.getNonConfigurationString(R.styleable.AndroidManifestActivity_splitName, 0);
+
         a.info.flags = 0;
         if (sa.getBoolean(
                 R.styleable.AndroidManifestActivity_multiprocess, false)) {
@@ -4520,6 +4523,9 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestProvider_initOrder,
                 0);
 
+        p.info.splitName =
+                sa.getNonConfigurationString(R.styleable.AndroidManifestProvider_splitName, 0);
+
         p.info.flags = 0;
 
         if (sa.getBoolean(
@@ -4815,6 +4821,9 @@ public class PackageParser {
         } else {
             s.info.permission = str.length() > 0 ? str.toString().intern() : null;
         }
+
+        s.info.splitName =
+                sa.getNonConfigurationString(R.styleable.AndroidManifestService_splitName, 0);
 
         s.info.flags = 0;
         if (sa.getBoolean(

@@ -72,6 +72,11 @@ public class ComponentInfo extends PackageItemInfo {
      */
     public boolean directBootAware = false;
 
+    /**
+     * The name of the split that contains the code for this component.
+     */
+    public String splitName;
+
     /** @removed */
     @Deprecated
     public boolean encryptionAware = false;
