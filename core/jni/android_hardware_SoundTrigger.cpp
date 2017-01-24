@@ -509,7 +509,7 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
     sp<MemoryDealer> memoryDealer;
     sp<IMemory> memory;
     size_t size;
-    sound_model_handle_t handle;
+    sound_model_handle_t handle = 0;
     jobject jUuid;
     jstring jUuidString;
     const char *nUuidString;
