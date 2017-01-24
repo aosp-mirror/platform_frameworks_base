@@ -19615,7 +19615,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
         int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
         final boolean uiModeSupportsDialogs = (modeType != Configuration.UI_MODE_TYPE_CAR
-                && !(modeType == Configuration.UI_MODE_TYPE_WATCH && "user".equals(Build.TYPE)));
+                && !(modeType == Configuration.UI_MODE_TYPE_WATCH && "user".equals(Build.TYPE))
+                && modeType != Configuration.UI_MODE_TYPE_TELEVISION);
         return inputMethodExists && uiModeSupportsDialogs && !inVrMode;
     }
 
