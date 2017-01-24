@@ -21143,6 +21143,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    @Override
+    public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("grantDefaultPermissionsToEnabledImsServices");
+        synchronized (mPackages) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToEnabledImsServicesLPr(
+                        packageNames, userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     private static void enforceSystemOrPhoneCaller(String tag) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {
