@@ -2787,6 +2787,7 @@
         <public name="supportsDismissingWindow" />
         <public name="restartOnConfigChanges" />
         <public name="certDigest" />
+        <public name="splitName" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
