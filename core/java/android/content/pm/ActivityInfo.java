@@ -220,6 +220,44 @@ public class ActivityInfo extends ComponentInfo
     public String requestedVrComponent;
 
     /**
+     * Value for {@link #colorMode} indicating that the activity should use the
+     * default color mode (sRGB, low dynamic range).
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_DEFAULT = 0;
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use a
+     * wide color gamut if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_WIDE_COLOR_GAMUT = 1;
+    /**
+     * Value of {@link #colorMode} indicating that the activity should use a
+     * high dynamic range if the presentation display supports it.
+     *
+     * @see android.R.attr#colorMode
+     */
+    public static final int COLOR_MODE_HDR = 2;
+
+    /** @hide */
+    @IntDef({
+        COLOR_MODE_DEFAULT,
+        COLOR_MODE_WIDE_COLOR_GAMUT,
+        COLOR_MODE_HDR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorMode {}
+
+    /**
+     * The color mode requested by this activity. The target display may not be
+     * able to honor the request.
+     */
+    @ColorMode
+    public int colorMode = COLOR_MODE_DEFAULT;
+
+    /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
      * true, the system may instantiate it in the some process as the
@@ -566,7 +604,7 @@ public class ActivityInfo extends ComponentInfo
                     CONFIG_SMALLEST_SCREEN_SIZE,
                     CONFIG_DENSITY,
                     CONFIG_LAYOUT_DIRECTION,
-                    CONFIG_COLORIMETRY,
+                    CONFIG_COLOR_MODE,
                     CONFIG_FONT_SCALE,
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -675,7 +713,7 @@ public class ActivityInfo extends ComponentInfo
      * can itself handle the change to the display color gamut or dynamic
      * range. Set from the {@link android.R.attr#configChanges} attribute.
      */
-    public static final int CONFIG_COLORIMETRY = 0x4000;
+    public static final int CONFIG_COLOR_MODE = 0x4000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
@@ -713,7 +751,7 @@ public class ActivityInfo extends ComponentInfo
         Configuration.NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,   // SMALLEST SCREEN SIZE
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
-        Configuration.NATIVE_CONFIG_COLORIMETRY,            // COLORIMETRY
+        Configuration.NATIVE_CONFIG_COLOR_MODE,             // COLOR_MODE
     };
 
     /**
@@ -770,7 +808,7 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
      * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION} and
-     * {@link #CONFIG_COLORIMETRY}.
+     * {@link #CONFIG_COLOR_MODE}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
@@ -873,6 +911,7 @@ public class ActivityInfo extends ComponentInfo
         resizeMode = orig.resizeMode;
         requestedVrComponent = orig.requestedVrComponent;
         rotationAnimation = orig.rotationAnimation;
+        colorMode = orig.colorMode;
     }
 
     /**
@@ -1055,6 +1094,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(resizeMode);
         dest.writeString(requestedVrComponent);
         dest.writeInt(rotationAnimation);
+        dest.writeInt(colorMode);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -1090,6 +1130,7 @@ public class ActivityInfo extends ComponentInfo
         resizeMode = source.readInt();
         requestedVrComponent = source.readString();
         rotationAnimation = source.readInt();
+        colorMode = source.readInt();
     }
 
     /**

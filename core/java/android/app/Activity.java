@@ -6792,6 +6792,8 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
+
+        mWindow.setColorMode(info.colorMode);
     }
 
     /** @hide */

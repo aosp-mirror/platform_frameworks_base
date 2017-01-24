@@ -187,9 +187,9 @@ TEST(ConfigTest, ScreenIsWideGamut) {
   memset(&defaultConfig, 0, sizeof(defaultConfig));
 
   ResTable_config wideGamutConfig = defaultConfig;
-  wideGamutConfig.colorimetry = ResTable_config::WIDE_COLOR_GAMUT_YES;
+  wideGamutConfig.colorMode = ResTable_config::WIDE_COLOR_GAMUT_YES;
 
-  EXPECT_EQ(defaultConfig.diff(wideGamutConfig), ResTable_config::CONFIG_COLORIMETRY);
+  EXPECT_EQ(defaultConfig.diff(wideGamutConfig), ResTable_config::CONFIG_COLOR_MODE);
 }
 
 TEST(ConfigTest, ScreenIsHdr) {
@@ -197,9 +197,9 @@ TEST(ConfigTest, ScreenIsHdr) {
   memset(&defaultConfig, 0, sizeof(defaultConfig));
 
   ResTable_config hdrConfig = defaultConfig;
-  hdrConfig.colorimetry = ResTable_config::HDR_YES;
+  hdrConfig.colorMode = ResTable_config::HDR_YES;
 
-  EXPECT_EQ(defaultConfig.diff(hdrConfig), ResTable_config::CONFIG_COLORIMETRY);
+  EXPECT_EQ(defaultConfig.diff(hdrConfig), ResTable_config::CONFIG_COLOR_MODE);
 }
 
 }  // namespace android.
