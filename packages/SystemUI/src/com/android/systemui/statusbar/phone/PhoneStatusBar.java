@@ -989,10 +989,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    protected BatteryController createBatteryController() {
-        return new BatteryControllerImpl(mContext);
-    }
-
     private void inflateShelf() {
         mNotificationShelf =
                 (NotificationShelf) LayoutInflater.from(mContext).inflate(
