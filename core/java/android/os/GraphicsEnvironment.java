@@ -44,7 +44,6 @@ public final class GraphicsEnvironment {
         // without significantly disrupting other activity launch work.
         Thread eglInitThread = new Thread(
                 () -> {
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
                     EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
                 },
                 "EGL Init");
