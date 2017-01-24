@@ -170,9 +170,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
 
     // 1 Overdraw, should be blue blended onto white.
-    renderNodes.push_back(whiteNode); //this is the "content" node
-    renderNodes.push_back(whiteNode); //the "content" node above does not cause an overdraw, because
-    //it clips the first "background" node
+    renderNodes.push_back(whiteNode);
     pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned) 0xffd0d0ff);
 
