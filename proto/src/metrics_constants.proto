@@ -3311,6 +3311,16 @@ message MetricsEvent {
     // OS: 8.0
     MANAGE_EXTERNAL_SOURCES = 808;
 
+    // ACTION: Logged when terms activity finishes.
+    // TIME: Indicates time taken by terms activity to finish in MS.
+    PROVISIONING_TERMS_ACTIVITY_TIME_MS = 809;
+
+    // Indicates number of terms displayed on the terms screen.
+    PROVISIONING_TERMS_COUNT = 810;
+
+    // Indicates number of terms read on the terms screen.
+    PROVISIONING_TERMS_READ = 811;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
