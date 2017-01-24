@@ -91,9 +91,11 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
 
     @Override
     public void onUserSwitched(int newUserId) {
-        stopListening();
-        startListening(newUserId);
-        notifyUserChanged();
+        mContentResolver.unregisterContentObserver(mSettingsObserver);
+        mContentResolver.registerContentObserver(mDeviceProvisionedUri, true,
+                mSettingsObserver, 0);
+        mContentResolver.registerContentObserver(mUserSetupUri, true,
+                mSettingsObserver, newUserId);
         notifyUserChanged();
     }
 
