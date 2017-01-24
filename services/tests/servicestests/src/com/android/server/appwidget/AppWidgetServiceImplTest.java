@@ -36,6 +36,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutServiceInternal;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -119,6 +120,18 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         verify(mMockShortcutService, times(1)).requestPinAppWidget(anyString(),
                 providerCaptor.capture(), eq(null), anyInt());
         assertEquals(provider, providerCaptor.getValue().provider);
+    }
+
+    public void testIsRequestPinAppWidgetSupported() {
+        ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
+        // Set up users.
+        when(mMockShortcutService.isRequestPinItemSupported(anyInt(), anyInt()))
+                .thenReturn(true, false);
+        assertTrue(mManager.isRequestPinAppWidgetSupported());
+        assertFalse(mManager.isRequestPinAppWidgetSupported());
+
+        verify(mMockShortcutService, times(2)).isRequestPinItemSupported(anyInt(),
+                eq(LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET));
     }
 
     public void testProviderUpdatesReceived() throws Exception {

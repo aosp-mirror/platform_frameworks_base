@@ -2116,10 +2116,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public boolean isRequestPinShortcutSupported(int callingUserId) {
+    public boolean isRequestPinItemSupported(int callingUserId, int requestType) {
         final long token = injectClearCallingIdentity();
         try {
-            return mShortcutRequestPinProcessor.isRequestPinnedShortcutSupported(callingUserId);
+            return mShortcutRequestPinProcessor
+                    .isRequestPinItemSupported(callingUserId, requestType);
         } finally {
             injectRestoreCallingIdentity(token);
         }
@@ -2619,6 +2620,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 int userId) {
             Preconditions.checkNotNull(appWidget);
             return requestPinItem(callingPackage, userId, null, appWidget, resultIntent);
+        }
+
+        @Override
+        public boolean isRequestPinItemSupported(int callingUserId, int requestType) {
+            return ShortcutService.this.isRequestPinItemSupported(callingUserId, requestType);
         }
     }
 
@@ -3241,16 +3247,19 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Get the {@link LauncherApps#ACTION_CONFIRM_PIN_ITEM} activity in a given package.
+     * Get the {@link LauncherApps#ACTION_CONFIRM_PIN_SHORTCUT} or
+     * {@link LauncherApps#ACTION_CONFIRM_PIN_APPWIDGET} activity in a given package depending on
+     * the requestType.
      */
     @Nullable
     ComponentName injectGetPinConfirmationActivity(@NonNull String launcherPackageName,
-            int launcherUserId) {
+            int launcherUserId, int requestType) {
         Preconditions.checkNotNull(launcherPackageName);
+        String action = requestType == LauncherApps.PinItemRequest.REQUEST_TYPE_SHORTCUT ?
+                LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT :
+                LauncherApps.ACTION_CONFIRM_PIN_APPWIDGET;
 
-        final Intent confirmIntent = new Intent(LauncherApps.ACTION_CONFIRM_PIN_ITEM);
-        confirmIntent.setPackage(launcherPackageName);
-
+        final Intent confirmIntent = new Intent(action).setPackage(launcherPackageName);
         final List<ResolveInfo> candidates = queryActivities(
                 confirmIntent, launcherUserId, /* exportedOnly =*/ false);
         for (ResolveInfo ri : candidates) {

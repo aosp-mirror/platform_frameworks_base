@@ -71,5 +71,5 @@ interface IShortcutService {
 
     void applyRestore(in byte[] payload, int user);
 
-    boolean isRequestPinShortcutSupported(int user);
+    boolean isRequestPinItemSupported(int user, int requestType);
 }

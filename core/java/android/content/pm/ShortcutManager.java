@@ -830,7 +830,8 @@ public class ShortcutManager {
      */
     public boolean isRequestPinShortcutSupported() {
         try {
-            return mService.isRequestPinShortcutSupported(injectMyUserId());
+            return mService.isRequestPinItemSupported(injectMyUserId(),
+                    LauncherApps.PinItemRequest.REQUEST_TYPE_SHORTCUT);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -74,4 +74,6 @@ public abstract class ShortcutServiceInternal {
     public abstract boolean requestPinAppWidget(@NonNull String callingPackage,
             @NonNull AppWidgetProviderInfo appWidget, @Nullable IntentSender resultIntent,
             int userId);
+
+    public abstract boolean isRequestPinItemSupported(int callingUserId, int requestType);
 }

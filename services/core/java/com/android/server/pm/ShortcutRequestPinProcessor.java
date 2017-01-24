@@ -25,7 +25,6 @@ import android.content.pm.IPinItemRequest;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
 import android.content.pm.ShortcutInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Log;
@@ -168,8 +167,8 @@ class ShortcutRequestPinProcessor {
         mLock = lock;
     }
 
-    public boolean isRequestPinnedShortcutSupported(int callingUserId) {
-        return getRequestPinShortcutConfirmationActivity(callingUserId) != null;
+    public boolean isRequestPinItemSupported(int callingUserId, int requestType) {
+        return getRequestPinConfirmationActivity(callingUserId, requestType) != null;
     }
 
     /**
@@ -185,8 +184,10 @@ class ShortcutRequestPinProcessor {
         // First, make sure the launcher supports it.
 
         // Find the confirmation activity in the default launcher.
+        final int requestType = inShortcut != null ?
+                PinItemRequest.REQUEST_TYPE_SHORTCUT : PinItemRequest.REQUEST_TYPE_APPWIDGET;
         final Pair<ComponentName, Integer> confirmActivity =
-                getRequestPinShortcutConfirmationActivity(userId);
+                getRequestPinConfirmationActivity(userId, requestType);
 
         // If the launcher doesn't support it, just return a rejected result and finish.
         if (confirmActivity == null) {
@@ -210,7 +211,8 @@ class ShortcutRequestPinProcessor {
             request = new PinItemRequest(inAppWidget,
                     new PinItemRequestInner(this, resultIntent, launcherUid));
         }
-        return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request);
+        return startRequestConfirmActivity(confirmActivity.first, launcherUserId, request,
+                requestType);
     }
 
     /**
@@ -330,9 +332,13 @@ class ShortcutRequestPinProcessor {
     }
 
     private boolean startRequestConfirmActivity(ComponentName activity, int launcherUserId,
-            PinItemRequest request) {
+            PinItemRequest request, int requestType) {
+        final String action = requestType == LauncherApps.PinItemRequest.REQUEST_TYPE_SHORTCUT ?
+                LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT :
+                LauncherApps.ACTION_CONFIRM_PIN_APPWIDGET;
+
         // Start the activity.
-        final Intent confirmIntent = new Intent(LauncherApps.ACTION_CONFIRM_PIN_ITEM);
+        final Intent confirmIntent = new Intent(action);
         confirmIntent.setComponent(activity);
         confirmIntent.putExtra(LauncherApps.EXTRA_PIN_ITEM_REQUEST, request);
         confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -351,13 +357,13 @@ class ShortcutRequestPinProcessor {
     }
 
     /**
-     * Find the activity that handles {@link LauncherApps#ACTION_CONFIRM_PIN_ITEM} in the
+     * Find the activity that handles {@link LauncherApps#ACTION_CONFIRM_PIN_SHORTCUT} in the
      * default launcher.
      */
     @Nullable
     @VisibleForTesting
-    Pair<ComponentName, Integer> getRequestPinShortcutConfirmationActivity(
-            int callingUserId) {
+    Pair<ComponentName, Integer> getRequestPinConfirmationActivity(
+            int callingUserId, int requestType) {
         // Find the default launcher.
         final int launcherUserId = mService.getParentOrSelfUserId(callingUserId);
         final ComponentName defaultLauncher = mService.getDefaultLauncher(launcherUserId);
@@ -367,7 +373,7 @@ class ShortcutRequestPinProcessor {
             return null;
         }
         final ComponentName activity = mService.injectGetPinConfirmationActivity(
-                defaultLauncher.getPackageName(), launcherUserId);
+                defaultLauncher.getPackageName(), launcherUserId, requestType);
         return (activity == null) ? null : Pair.create(activity, launcherUserId);
     }
 
