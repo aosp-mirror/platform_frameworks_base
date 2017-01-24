@@ -619,7 +619,7 @@ public class TaskStackAnimationHelper {
         postAnimationTrigger.addLastDecrementRunnable(() -> {
             mStackView.getTouchHandler().onChildDismissed(deleteTaskView);
         });
-        deleteTaskView.animate().setDuration(300).scaleX(0).scaleY(0).alpha(0).setListener(
+        deleteTaskView.animate().setDuration(300).scaleX(0.9f).scaleY(0.9f).alpha(0).setListener(
                 new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
