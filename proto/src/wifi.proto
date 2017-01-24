@@ -435,9 +435,28 @@ message SoftApDurationBucket {
 
 // Number of occurrences of a soft AP session return code
 message SoftApReturnCodeCount {
-  // Return code of the soft AP session
-  optional int32 return_code = 1;
+
+  enum SoftApStartResult {
+
+    // SoftApManager return code unknown
+    SOFT_AP_RETURN_CODE_UNKNOWN = 0;
+
+    // SoftAp started successfully
+    SOFT_AP_STARTED_SUCCESSFULLY = 1;
+
+    // Catch all for failures with no specific failure reason
+    SOFT_AP_FAILED_GENERAL_ERROR = 2;
+
+    // SoftAp failed to start due to NO_CHANNEL error
+    SOFT_AP_FAILED_NO_CHANNEL = 3;
+  }
+
+  // Historical, no longer used for writing as of 01/2017.
+  optional int32 return_code = 1 [deprecated = true];
 
   // Occurences of this soft AP return code
   optional int32 count = 2;
+
+  // Result of attempt to start SoftAp
+  optional SoftApStartResult start_result = 3;
 }
