@@ -157,7 +157,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         // Set the light/dark theming on the header status UI to match the current theme.
         SignalClusterView cluster = (SignalClusterView) findViewById(R.id.signal_cluster);
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
-        float intensity = colorForeground / (float) Color.WHITE;
+        float intensity = colorForeground == Color.WHITE ? 0 : 1;
         cluster.setIconTint(colorForeground, intensity, new Rect(0, 0, 0, 0));
         BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
         int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);

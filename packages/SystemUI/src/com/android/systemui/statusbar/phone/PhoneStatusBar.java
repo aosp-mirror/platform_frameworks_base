@@ -3583,7 +3583,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void postQSRunnableDismissingKeyguard(final Runnable runnable) {
         mHandler.post(() -> {
             mLeaveOpenOnKeyguardHide = true;
-            executeRunnableDismissingKeyguard(runnable, null, false, false, false);
+            executeRunnableDismissingKeyguard(() -> mHandler.post(runnable), null, false, false,
+                    false);
         });
     }
 

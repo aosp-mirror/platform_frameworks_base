@@ -799,6 +799,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 MobileSignalController controller = mMobileSignalControllers
                         .values().toArray(new MobileSignalController[0])[slot];
                 controller.getState().dataSim = datatype != null;
+                controller.getState().isDefault = datatype != null;
+                controller.getState().dataConnected = datatype != null;
                 if (datatype != null) {
                     controller.getState().iconGroup =
                             datatype.equals("1x") ? TelephonyIcons.ONE_X :
@@ -811,6 +813,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
                             datatype.equals("roam") ? TelephonyIcons.ROAMING :
+                            datatype.equals("dis") ? TelephonyIcons.DATA_DISABLED :
                             TelephonyIcons.UNKNOWN;
                 }
                 int[][] icons = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH;
@@ -836,9 +839,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private SubscriptionInfo addSignalController(int id, int simSlotIndex) {
         SubscriptionInfo info = new SubscriptionInfo(id, "", simSlotIndex, "", "", 0, 0, "", 0,
                 null, 0, 0, "");
-        mMobileSignalControllers.put(id, new MobileSignalController(mContext,
+        MobileSignalController controller = new MobileSignalController(mContext,
                 mConfig, mHasMobileDataFeature, mPhone, mCallbackHandler, this, info,
-                mSubDefaults, mReceiverHandler.getLooper()));
+                mSubDefaults, mReceiverHandler.getLooper());
+        mMobileSignalControllers.put(id, controller);
+        controller.getState().userSetup = true;
         return info;
     }
 
