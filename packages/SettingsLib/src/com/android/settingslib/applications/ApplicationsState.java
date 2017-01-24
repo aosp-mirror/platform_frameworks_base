@@ -1429,6 +1429,23 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_GAMES = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(ApplicationsState.AppEntry info) {
+            // TODO: Update for the new game category.
+            boolean isGame;
+            synchronized (info.info) {
+                isGame = ((info.info.flags & ApplicationInfo.FLAG_IS_GAME) != 0)
+                        || info.info.category == ApplicationInfo.CATEGORY_GAME;
+            }
+            return isGame;
+        }
+    };
+
     public static class VolumeFilter implements AppFilter {
         private final String mVolumeUuid;
 
