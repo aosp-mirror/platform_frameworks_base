@@ -327,7 +327,6 @@ public final class SystemServer {
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
             mSystemServiceManager.setRuntimeRestarted(mRuntimeRestart);
-            mSystemServiceManager.setFirstBoot(mFirstBoot);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);

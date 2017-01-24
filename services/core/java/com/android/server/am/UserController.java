@@ -46,6 +46,7 @@ import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.IStopUserCallback;
@@ -54,6 +55,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.BatteryStats;
@@ -239,8 +241,10 @@ final class UserController {
             // storage is already unlocked.
             if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
                 getUserManagerInternal().setUserState(userId, uss.state);
-                if (!mService.mSystemServiceManager.isRuntimeRestarted()
-                        && !mService.mSystemServiceManager.isFirstBoot()) {
+                // Do not report secondary users, runtime restarts or first boot/upgrade
+                if (userId == UserHandle.USER_SYSTEM
+                        && !mService.mSystemServiceManager.isRuntimeRestarted()
+                        && !isFirstBootOrUpgrade()) {
                     int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
                     MetricsLogger.histogram(mService.mContext, "framework_locked_boot_completed",
                             uptimeSeconds);
@@ -416,9 +420,10 @@ final class UserController {
             }
 
             Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
-            if (!mService.mSystemServiceManager.isRuntimeRestarted()
-                    && !mService.mSystemServiceManager.isFirstBoot()) {
-
+            // Do not report secondary users, runtime restarts or first boot/upgrade
+            if (userId == UserHandle.USER_SYSTEM
+                    && !mService.mSystemServiceManager.isRuntimeRestarted()
+                    && !isFirstBootOrUpgrade()) {
                 int uptimeSeconds = (int) (SystemClock.elapsedRealtime() / 1000);
                 MetricsLogger
                         .histogram(mService.mContext, "framework_boot_completed", uptimeSeconds);
@@ -430,6 +435,15 @@ final class UserController {
             mService.broadcastIntentLocked(null, null, bootIntent, null, null, 0, null, null,
                     new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
                     AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
+        }
+    }
+
+    private static boolean isFirstBootOrUpgrade() {
+        IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            return pm.isFirstBoot() || pm.isUpgrade();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
