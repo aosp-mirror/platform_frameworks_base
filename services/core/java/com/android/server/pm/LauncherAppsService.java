@@ -219,11 +219,12 @@ public class LauncherAppsService extends SystemService {
         /**
          * Checks if the caller is in the same group as the userToCheck.
          */
-        private void ensureInUserProfiles(UserHandle userToCheck, String message) {
-            ensureInUserProfiles(userToCheck.getIdentifier(), message);
+        private void ensureInUserProfiles(
+                String callingPackage, UserHandle userToCheck, String message) {
+            ensureInUserProfiles(callingPackage, userToCheck.getIdentifier(), message);
         }
 
-        private void ensureInUserProfiles(int targetUserId, String message) {
+        private void ensureInUserProfiles(String callingPackage, int targetUserId, String message) {
             final int callingUserId = injectCallingUserId();
 
             if (targetUserId == callingUserId) return;
@@ -236,8 +237,8 @@ public class LauncherAppsService extends SystemService {
                     // throw new SecurityException(message + " for another profile " + targetUserId);
 
                     // TODO: Report caller package name.
-                    Slog.wtfStack(TAG, message + " for another profile " + targetUserId
-                            + " from " + callingUserId);
+                    Slog.wtfStack(TAG, message + " by " + callingPackage + " for another profile "
+                            + targetUserId + " from " + callingUserId);
                 }
 
                 UserInfo targetUserInfo = mUm.getUserInfo(targetUserId);
@@ -286,9 +287,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ParceledListSlice<ResolveInfo> getLauncherActivities(String packageName, UserHandle user)
+        public ParceledListSlice<ResolveInfo> getLauncherActivities(String callingPackage,
+                String packageName, UserHandle user)
                 throws RemoteException {
-            return queryActivitiesForUser(
+            return queryActivitiesForUser(callingPackage,
                     new Intent(Intent.ACTION_MAIN)
                             .addCategory(Intent.CATEGORY_LAUNCHER)
                             .setPackage(packageName),
@@ -296,9 +298,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ActivityInfo resolveActivity(ComponentName component, UserHandle user)
+        public ActivityInfo resolveActivity(
+                String callingPackage, ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot resolve activity");
+            ensureInUserProfiles(callingPackage, user, "Cannot resolve activity");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -316,15 +319,16 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ParceledListSlice getShortcutConfigActivities(String packageName, UserHandle user)
+        public ParceledListSlice getShortcutConfigActivities(
+                String callingPackage, String packageName, UserHandle user)
                 throws RemoteException {
-            return queryActivitiesForUser(
+            return queryActivitiesForUser(callingPackage,
                     new Intent(Intent.ACTION_CREATE_SHORTCUT).setPackage(packageName), user);
         }
 
-        private ParceledListSlice<ResolveInfo> queryActivitiesForUser(Intent intent,
-                UserHandle user) {
-            ensureInUserProfiles(user, "Cannot retrieve activities");
+        private ParceledListSlice<ResolveInfo> queryActivitiesForUser(String callingPackage,
+                Intent intent, UserHandle user) {
+            ensureInUserProfiles(callingPackage, user, "Cannot retrieve activities");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -363,9 +367,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public boolean isPackageEnabled(String packageName, UserHandle user)
+        public boolean isPackageEnabled(String callingPackage, String packageName, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check package");
+            ensureInUserProfiles(callingPackage, user, "Cannot check package");
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -384,9 +388,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public ApplicationInfo getApplicationInfo(String packageName, int flags, UserHandle user)
+        public ApplicationInfo getApplicationInfo(
+                String callingPackage, String packageName, int flags, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check package");
+            ensureInUserProfiles(callingPackage, user, "Cannot check package");
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -408,7 +413,7 @@ public class LauncherAppsService extends SystemService {
 
         private void ensureShortcutPermission(@NonNull String callingPackage, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(userId, "Cannot access shortcuts");
+            ensureInUserProfiles(callingPackage, userId, "Cannot access shortcuts");
 
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage)) {
@@ -484,7 +489,7 @@ public class LauncherAppsService extends SystemService {
         public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
                 Rect sourceBounds, Bundle startActivityOptions, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(userId, "Cannot start activity");
+            ensureInUserProfiles(callingPackage, userId, "Cannot start activity");
 
             if (!isUserEnabled(userId)) {
                 throw new IllegalStateException("Cannot start a shortcut for disabled profile "
@@ -535,9 +540,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public boolean isActivityEnabled(ComponentName component, UserHandle user)
+        public boolean isActivityEnabled(
+                String callingPackage, ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(user, "Cannot check component");
+            ensureInUserProfiles(callingPackage , user, "Cannot check component");
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -556,9 +562,10 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void startActivityAsUser(ComponentName component, Rect sourceBounds,
+        public void startActivityAsUser(String callingPackage,
+                ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(user, "Cannot start activity");
+            ensureInUserProfiles(callingPackage, user, "Cannot start activity");
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot start activity for disabled profile "  + user);
             }
@@ -609,9 +616,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void showAppDetailsAsUser(ComponentName component, Rect sourceBounds,
-                Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(user, "Cannot show app details");
+        public void showAppDetailsAsUser(String callingPackage, ComponentName component,
+                Rect sourceBounds, Bundle opts, UserHandle user) throws RemoteException {
+            ensureInUserProfiles(callingPackage, user, "Cannot show app details");
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot show app details for disabled profile "
                         + user);

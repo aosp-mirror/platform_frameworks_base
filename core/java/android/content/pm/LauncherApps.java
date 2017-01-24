@@ -407,7 +407,8 @@ public class LauncherApps {
      */
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
         try {
-            return convertToActivityList(mService.getLauncherActivities(packageName, user), user);
+            return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
+                    packageName, user), user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -423,7 +424,8 @@ public class LauncherApps {
      */
     public LauncherActivityInfo resolveActivity(Intent intent, UserHandle user) {
         try {
-            ActivityInfo ai = mService.resolveActivity(intent.getComponent(), user);
+            ActivityInfo ai = mService.resolveActivity(mContext.getPackageName(),
+                    intent.getComponent(), user);
             if (ai != null) {
                 LauncherActivityInfo info = new LauncherActivityInfo(mContext, ai, user);
                 return info;
@@ -448,7 +450,8 @@ public class LauncherApps {
             Log.i(TAG, "StartMainActivity " + component + " " + user.getIdentifier());
         }
         try {
-            mService.startActivityAsUser(component, sourceBounds, opts, user);
+            mService.startActivityAsUser(mContext.getPackageName(),
+                    component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -466,7 +469,8 @@ public class LauncherApps {
     public void startAppDetailsActivity(ComponentName component, UserHandle user,
             Rect sourceBounds, Bundle opts) {
         try {
-            mService.showAppDetailsAsUser(component, sourceBounds, opts, user);
+            mService.showAppDetailsAsUser(mContext.getPackageName(),
+                    component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -486,7 +490,8 @@ public class LauncherApps {
     public List<LauncherActivityInfo> getShortcutConfigActivityList(@Nullable String packageName,
             @NonNull UserHandle user) {
         try {
-            return convertToActivityList(mService.getShortcutConfigActivities(packageName, user),
+            return convertToActivityList(mService.getShortcutConfigActivities(
+                    mContext.getPackageName(), packageName, user),
                     user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -549,7 +554,7 @@ public class LauncherApps {
      */
     public boolean isPackageEnabled(String packageName, UserHandle user) {
         try {
-            return mService.isPackageEnabled(packageName, user);
+            return mService.isPackageEnabled(mContext.getPackageName(), packageName, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -569,7 +574,7 @@ public class LauncherApps {
     public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,
             UserHandle user) {
         try {
-            return mService.getApplicationInfo(packageName, flags, user);
+            return mService.getApplicationInfo(mContext.getPackageName(), packageName, flags, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -585,7 +590,7 @@ public class LauncherApps {
      */
     public boolean isActivityEnabled(ComponentName component, UserHandle user) {
         try {
-            return mService.isActivityEnabled(component, user);
+            return mService.isActivityEnabled(mContext.getPackageName(), component, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
