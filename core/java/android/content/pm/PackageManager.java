@@ -2162,6 +2162,15 @@ public abstract class PackageManager {
     public static final String FEATURE_WATCH = "android.hardware.type.watch";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This is a device for IoT and may not have an UI. An embedded
+     * device is defined as a full stack Android device with or without a display and no
+     * user-installable apps.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports printing.
      */
