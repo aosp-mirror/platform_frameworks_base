@@ -3735,13 +3735,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to set whether auto time is required. If auto time is required the
-     * user cannot set the date and time, but has to use network date and time.
+     * Called by a device or profile owner to set whether auto time is required. If auto time is
+     * required, no user will be able set the date and time and network date and time will be used.
      * <p>
      * Note: if auto time is required the user can still manually set the time zone.
      * <p>
-     * The calling device admin must be a device owner. If it is not, a security exception will be
-     * thrown.
+     * The calling device admin must be a device or profile owner. If it is not, a security
+     * exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.

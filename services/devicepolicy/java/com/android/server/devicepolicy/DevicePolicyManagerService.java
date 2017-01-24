@@ -5574,7 +5574,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Set whether auto time is required by the specified admin (must be device owner).
+     * Set whether auto time is required by the specified admin (must be device or profile owner).
      */
     @Override
     public void setAutoTimeRequired(ComponentName who, boolean required) {
@@ -5585,7 +5585,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (admin.requireAutoTime != required) {
                 admin.requireAutoTime = required;
                 saveSettingsLocked(userHandle);
@@ -5604,7 +5604,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Returns whether or not auto time is required by the device owner.
+     * Returns whether or not auto time is required by the device owner or any profile owner.
      */
     @Override
     public boolean getAutoTimeRequired() {
@@ -5613,7 +5613,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            return (deviceOwner != null) ? deviceOwner.requireAutoTime : false;
+            if (deviceOwner != null && deviceOwner.requireAutoTime) {
+                // If the device owner enforces auto time, we don't need to check the PO's
+                return true;
+            }
+
+            // Now check to see if any profile owner on any user enforces auto time
+            for (Integer userId : mOwners.getProfileOwnerKeys()) {
+                ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+                if (profileOwner != null && profileOwner.requireAutoTime) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
