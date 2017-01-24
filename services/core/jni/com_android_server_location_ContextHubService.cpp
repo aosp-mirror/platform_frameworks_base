@@ -558,7 +558,7 @@ void getHubsCb(const ::android::hardware::hidl_vec<ContextHub>& hubs)  {
 void initContextHubService() {
     db.hubInfo.numHubs = 0;
 
-    db.hubInfo.contextHub = IContexthub::getService("context_hub");
+    db.hubInfo.contextHub = IContexthub::getService();
 
     if (db.hubInfo.contextHub == nullptr) {
         ALOGE("Could not load context hub hal");
