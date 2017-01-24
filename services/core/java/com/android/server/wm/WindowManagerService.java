@@ -2441,6 +2441,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Updates the device orientation from the present app tokens.
+     *
+     * Note: A place this is method called is before an {@link android.app.Activity} starts to
+     * ensure that it is created in the proper orientation. It is imperative that the present
+     * {@link AppWindowToken} specify that they can influence the orientation, accomplished with the
+     * override of {@link WindowContainer#canSpecifyOrientation()}. Visibility changes only will not
+     * guarantee this as other operations (such as freezing the screen) can defer these operations.
+     */
     @Override
     public Configuration updateOrientationFromAppTokens(Configuration currentConfig,
             IBinder freezeThisOneIfNeeded, int displayId) {

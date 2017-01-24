@@ -1899,9 +1899,20 @@ final class ActivityRecord implements AppWindowContainerListener {
                 task.taskId, requestedOrientation);
     }
 
-    // TODO: now used only in one place to address race-condition. Remove when that will be fixed.
-    void setLastReportedConfiguration(@NonNull Configuration config) {
+    /**
+     * Set the last reported global configuration to the client. Should be called whenever a new
+     * global configuration is sent to the client for this activity.
+     */
+    void setLastReportedGlobalConfiguration(@NonNull Configuration config) {
         mLastReportedConfiguration.setTo(config);
+    }
+
+    /**
+     * Set the last reported merged configuration to the client. Should be called whenever a new
+     * merged configuration is sent to the client for this activity.
+     */
+    void setLastReportedMergedOverrideConfiguration(@NonNull Configuration config) {
+        mLastReportedOverrideConfiguration.setTo(config);
     }
 
     /** Call when override config was sent to the Window Manager to update internal records. */
