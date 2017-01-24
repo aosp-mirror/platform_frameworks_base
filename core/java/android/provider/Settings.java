@@ -7608,6 +7608,13 @@ public final class Settings {
        public static final String LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS =
                 "location_background_throttle_interval_ms";
 
+        /**
+         * Packages that are whitelisted for background throttling (throttling will not be applied).
+         * @hide
+         */
+        public static final String LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
+            "location_background_throttle_package_whitelist";
+
        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
