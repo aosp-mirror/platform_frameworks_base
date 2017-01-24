@@ -28,6 +28,10 @@ public class CarrierDefaultBroadcastReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive intent: " + intent.getAction());
+        if (ProvisionObserver.isDeferredForProvision(context, intent)) {
+            Log.d(TAG, "skip carrier actions during provisioning");
+            return;
+        }
         List<Integer> actionList = CustomConfigLoader.loadCarrierActionList(context, intent);
         for (int actionIdx : actionList) {
             Log.d(TAG, "apply carrier action idx: " + actionIdx);
