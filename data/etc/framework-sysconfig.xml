@@ -21,5 +21,6 @@
          delivery restrictions. -->
     <allow-implicit-broadcast action="android.intent.action.SIM_STATE_CHANGED" />
     <allow-implicit-broadcast action="android.intent.action.PACKAGE_CHANGED" />
+    <allow-implicit-broadcast action="android.intent.action.MEDIA_SCANNER_SCAN_FILE" />
 
 </config>
