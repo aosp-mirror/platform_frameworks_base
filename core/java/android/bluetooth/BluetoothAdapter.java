@@ -1184,6 +1184,25 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Get the end time of the latest remote device discovery process.
+     * @return the latest time that the bluetooth adapter was/will be in discovery mode,
+     * in milliseconds since the epoch.
+     * This time can be in the future if {@link #startDiscovery()} has been called recently.
+     * @hide
+     */
+    public long getDiscoveryEndMillis() {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) return mService.getDiscoveryEndMillis();
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return -1;
+    }
+
+    /**
      * Start the remote device discovery process.
      * <p>The discovery process usually involves an inquiry scan of about 12
      * seconds, followed by a page scan of each new device to retrieve its
