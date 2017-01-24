@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.Build;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -45,6 +46,7 @@ import com.android.internal.util.ArrayUtils;
 public class RescueParty {
     private static final String TAG = "RescueParty";
 
+    private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
     private static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
     private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
@@ -60,11 +62,16 @@ public class RescueParty {
     /** Threshold for app crash loops */
     private static SparseArray<Threshold> sApps = new SparseArray<>();
 
+    private static boolean isDisabled() {
+        return Build.IS_ENG || SystemProperties.getBoolean(PROP_DISABLE_RESCUE, false);
+    }
+
     /**
      * Take note of a boot event. If we notice too many of these events
      * happening in rapid succession, we'll send out a rescue party.
      */
     public static void noteBoot(Context context) {
+        if (isDisabled()) return;
         if (sBoot.incrementAndTest()) {
             sBoot.reset();
             incrementRescueLevel(sBoot.uid);
@@ -77,6 +84,7 @@ public class RescueParty {
      * events happening in rapid succession, we'll send out a rescue party.
      */
     public static void notePersistentAppCrash(Context context, int uid) {
+        if (isDisabled()) return;
         Threshold t = sApps.get(uid);
         if (t == null) {
             t = new AppThreshold(uid);
