@@ -81,7 +81,7 @@ static void setLight_native(
 
     // TODO(b/31632518)
     if (gLight == nullptr) {
-        gLight = ILight::getService("light");
+        gLight = ILight::getService();
     }
 
     if (gLight == nullptr) {
