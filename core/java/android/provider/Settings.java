@@ -9461,6 +9461,18 @@ public final class Settings {
          * @hide
          */
         public static final String CELL_ON = "cell_on";
+
+        /**
+         * Whether to show the high temperature warning notification.
+         * @hide
+         */
+        public static final String SHOW_TEMPERATURE_WARNING = "show_temperature_warning";
+
+        /**
+         * Temperature at which the high temperature warning notification should be shown.
+         * @hide
+         */
+        public static final String WARNING_TEMPERATURE = "warning_temperature";
     }
 
     /**
