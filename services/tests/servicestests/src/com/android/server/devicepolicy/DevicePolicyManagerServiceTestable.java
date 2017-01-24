@@ -37,6 +37,7 @@ import android.view.IWindowManager;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -261,6 +262,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         void powerManagerReboot(String reason) {
             context.powerManager.reboot(reason);
+        }
+
+        @Override
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force)
+                throws IOException {
+            context.recoverySystem.rebootWipeUserData(shutdown, reason, force);
         }
 
         @Override

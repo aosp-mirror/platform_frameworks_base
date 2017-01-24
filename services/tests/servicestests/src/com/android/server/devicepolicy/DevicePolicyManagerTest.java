@@ -82,6 +82,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -3231,6 +3232,140 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             fail("SecurityException not thrown");
         } catch (SecurityException expected) {
         }
+    }
+
+    public void testWipeDataDeviceOwner() throws Exception {
+        setDeviceOwner();
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserHandle.SYSTEM))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+
+        dpm.wipeData(0);
+        verify(mContext.recoverySystem).rebootWipeUserData(
+                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true));
+    }
+
+    public void testWipeDataDeviceOwnerDisallowed() throws Exception {
+        setDeviceOwner();
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserHandle.SYSTEM))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+        try {
+            // The DO is not allowed to wipe the device if the user restriction was set
+            // by the system
+            dpm.wipeData(0);
+            fail("SecurityException not thrown");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    public void testMaximumFailedPasswordAttemptsReachedManagedProfile() throws Exception {
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 19436);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Even if the caller is the managed profile, the current user is the user 0
+        when(mContext.iactivityManager.getCurrentUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                UserHandle.of(MANAGED_PROFILE_USER_ID)))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_PROFILE_OWNER);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        dpm.setMaximumFailedPasswordsForWipe(admin1, 3);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+        // Failed password attempts on the parent user are taken into account, as there isn't a
+        // separate work challenge.
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+
+        // The profile should be wiped even if DISALLOW_REMOVE_MANAGED_PROFILE is enabled, because
+        // both the user restriction and the policy were set by the PO.
+        verify(mContext.userManagerInternal).removeUserEvenWhenDisallowed(
+                MANAGED_PROFILE_USER_ID);
+        verifyZeroInteractions(mContext.recoverySystem);
+    }
+
+    public void testMaximumFailedPasswordAttemptsReachedManagedProfileDisallowed()
+            throws Exception {
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 19436);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+
+        // Even if the caller is the managed profile, the current user is the user 0
+        when(mContext.iactivityManager.getCurrentUser())
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                UserHandle.of(MANAGED_PROFILE_USER_ID)))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        dpm.setMaximumFailedPasswordsForWipe(admin1, 3);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+        // Failed password attempts on the parent user are taken into account, as there isn't a
+        // separate work challenge.
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+
+        // DISALLOW_REMOVE_MANAGED_PROFILE was set by the system, not the PO, so the profile is
+        // not wiped.
+        verify(mContext.userManagerInternal, never())
+                .removeUserEvenWhenDisallowed(anyInt());
+        verifyZeroInteractions(mContext.recoverySystem);
+    }
+
+    public void testMaximumFailedPasswordAttemptsReachedDeviceOwner() throws Exception {
+        setDeviceOwner();
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserHandle.SYSTEM))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+
+        dpm.setMaximumFailedPasswordsForWipe(admin1, 3);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+
+        // The device should be wiped even if DISALLOW_FACTORY_RESET is enabled, because both the
+        // user restriction and the policy were set by the DO.
+        verify(mContext.recoverySystem).rebootWipeUserData(
+                /*shutdown=*/ eq(false), anyString(), /*force=*/ eq(true));
+    }
+
+    public void testMaximumFailedPasswordAttemptsReachedDeviceOwnerDisallowed() throws Exception {
+        setDeviceOwner();
+        when(mContext.userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserHandle.SYSTEM))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_SYSTEM);
+
+        dpm.setMaximumFailedPasswordsForWipe(admin1, 3);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.callerPermissions.add(permission.BIND_DEVICE_ADMIN);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+        dpm.reportFailedPasswordAttempt(UserHandle.USER_SYSTEM);
+
+        // DISALLOW_FACTORY_RESET was set by the system, not the DO, so the device is not wiped.
+        verifyZeroInteractions(mContext.recoverySystem);
+        verify(mContext.userManagerInternal, never())
+                .removeUserEvenWhenDisallowed(anyInt());
     }
 
     public void testGetPermissionGrantState() throws Exception {

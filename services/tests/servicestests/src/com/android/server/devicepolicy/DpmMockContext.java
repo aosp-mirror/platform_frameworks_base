@@ -55,6 +55,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,6 +152,12 @@ public class DpmMockContext extends MockContext {
         }
 
         public void reboot(String reason) {
+        }
+    }
+
+    public static class RecoverySystemForMock {
+        public void rebootWipeUserData(
+                boolean shutdown, String reason, boolean force) throws IOException {
         }
     }
 
@@ -263,6 +270,7 @@ public class DpmMockContext extends MockContext {
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
     public final PowerManagerInternal powerManagerInternal;
+    public final RecoverySystemForMock recoverySystem;
     public final NotificationManager notificationManager;
     public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
@@ -308,6 +316,7 @@ public class DpmMockContext extends MockContext {
         packageManagerInternal = mock(PackageManagerInternal.class);
         powerManager = mock(PowerManagerForMock.class);
         powerManagerInternal = mock(PowerManagerInternal.class);
+        recoverySystem = mock(RecoverySystemForMock.class);
         notificationManager = mock(NotificationManager.class);
         iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);

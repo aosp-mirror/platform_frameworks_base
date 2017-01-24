@@ -1609,6 +1609,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mContext.getSystemService(PowerManager.class).reboot(reason);
         }
 
+        void recoverySystemRebootWipeUserData(boolean shutdown, String reason, boolean force)
+                throws IOException {
+            RecoverySystem.rebootWipeUserData(mContext, shutdown, reason, force);
+        }
+
         boolean systemPropertiesGetBoolean(String key, boolean def) {
             return SystemProperties.getBoolean(key, def);
         }
@@ -4869,7 +4874,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void wipeDataNoLock(boolean wipeExtRequested, String reason, boolean force) {
+    private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason) {
         wtfIfInLock();
 
         if (wipeExtRequested) {
@@ -4878,9 +4883,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             sm.wipeAdoptableDisks();
         }
         try {
-            RecoverySystem.rebootWipeUserData(mContext, false /* shutdown */, reason, force);
+            mInjector.recoverySystemRebootWipeUserData(
+                    /*shutdown=*/ false, reason, /*force=*/ true);
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
+        }
+    }
+
+    private void forceWipeUser(int userId) {
+        try {
+            IActivityManager am = mInjector.getIActivityManager();
+            if (am.getCurrentUser().id == userId) {
+                am.switchUser(UserHandle.USER_SYSTEM);
+            }
+
+            boolean userRemoved = mUserManagerInternal.removeUserEvenWhenDisallowed(userId);
+            if (!userRemoved) {
+                Slog.w(LOG_TAG, "Couldn't remove user " + userId);
+            } else if (isManagedProfile(userId)) {
+                sendWipeProfileNotification();
+            }
+        } catch (RemoteException re) {
+            // Shouldn't happen
         }
     }
 
@@ -4889,83 +4913,57 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        final int userHandle = mInjector.userHandleGetCallingUserId();
-        enforceFullCrossUsersPermission(userHandle);
+        enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
-        final String source;
+        final ActiveAdmin admin;
         synchronized (this) {
-            // This API can only be called by an active device admin,
-            // so try to retrieve it to check that the caller is one.
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
-                    DeviceAdminInfo.USES_POLICY_WIPE_DATA);
-            source = admin.info.getComponent().flattenToShortString();
-
-            long ident = mInjector.binderClearCallingIdentity();
-            try {
-                final String restriction;
-                if (userHandle == UserHandle.USER_SYSTEM) {
-                    restriction = UserManager.DISALLOW_FACTORY_RESET;
-                } else if (isManagedProfile(userHandle)) {
-                    restriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
-                } else {
-                    restriction = UserManager.DISALLOW_REMOVE_USER;
-                }
-                if (isAdminAffectedByRestriction(
-                        admin.info.getComponent(), restriction, userHandle)) {
-                    throw new SecurityException("Cannot wipe data. " + restriction
-                            + " restriction is set for user " + userHandle);
-                }
-
-                if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-                    if (!isDeviceOwner(admin.info.getComponent(), userHandle)) {
-                        throw new SecurityException(
-                               "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
-                    }
-                    PersistentDataBlockManager manager = (PersistentDataBlockManager)
-                            mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                    if (manager != null) {
-                        manager.wipe();
-                    }
-                }
-
-            } finally {
-                mInjector.binderRestoreCallingIdentity(ident);
-            }
+            admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
-        final boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
-        wipeDeviceNoLock(wipeExtRequested, userHandle,
-                "DevicePolicyManager.wipeData() from " + source, /*force=*/ true);
+        String reason = "DevicePolicyManager.wipeData() from "
+                + admin.info.getComponent().flattenToShortString();
+        wipeDataNoLock(
+                admin.info.getComponent(), flags, reason, admin.getUserHandle().getIdentifier());
     }
 
-    private void wipeDeviceNoLock(
-            boolean wipeExtRequested, final int userHandle, String reason, boolean force) {
+    private void wipeDataNoLock(ComponentName admin, int flags, String reason, int userId) {
         wtfIfInLock();
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            // TODO If split user is enabled and the device owner is set in the primary user (rather
-            // than system), we should probably trigger factory reset. Current code just remove
-            // that user (but still clears FRP...)
-            if (userHandle == UserHandle.USER_SYSTEM) {
-                wipeDataNoLock(wipeExtRequested, reason, force);
+            // First check whether the admin is allowed to wipe the device/user/profile.
+            final String restriction;
+            if (userId == UserHandle.USER_SYSTEM) {
+                restriction = UserManager.DISALLOW_FACTORY_RESET;
+            } else if (isManagedProfile(userId)) {
+                restriction = UserManager.DISALLOW_REMOVE_MANAGED_PROFILE;
             } else {
-                try {
-                    IActivityManager am = mInjector.getIActivityManager();
-                    if (am.getCurrentUser().id == userHandle) {
-                        am.switchUser(UserHandle.USER_SYSTEM);
-                    }
+                restriction = UserManager.DISALLOW_REMOVE_USER;
+            }
+            if (isAdminAffectedByRestriction(admin, restriction, userId)) {
+                throw new SecurityException("Cannot wipe data. " + restriction
+                        + " restriction is set for user " + userId);
+            }
 
-                    boolean userRemoved = force
-                            ? mUserManagerInternal.removeUserEvenWhenDisallowed(userHandle)
-                            : mUserManager.removeUser(userHandle);
-                    if (!userRemoved) {
-                        Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
-                    } else if (isManagedProfile(userHandle)) {
-                        sendWipeProfileNotification();
-                    }
-                } catch (RemoteException re) {
-                    // Shouldn't happen
+            if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
+                if (!isDeviceOwner(admin, userId)) {
+                    throw new SecurityException(
+                            "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
                 }
+                PersistentDataBlockManager manager = (PersistentDataBlockManager)
+                        mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+                if (manager != null) {
+                    manager.wipe();
+                }
+            }
+
+            // TODO If split user is enabled and the device owner is set in the primary user
+            // (rather than system), we should probably trigger factory reset. Current code just
+            // removes that user (but still clears FRP...)
+            if (userId == UserHandle.USER_SYSTEM) {
+                forceWipeDeviceNoLock(/*wipeExtRequested=*/ (flags & WIPE_EXTERNAL_STORAGE) != 0,
+                        reason);
+            } else {
+                forceWipeUser(userId);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
@@ -5105,25 +5103,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
+        boolean wipeData = false;
+        ActiveAdmin strictestAdmin = null;
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            boolean wipeData = false;
-            int identifier = 0;
             synchronized (this) {
                 DevicePolicyData policy = getUserData(userHandle);
                 policy.mFailedPasswordAttempts++;
                 saveSettingsLocked(userHandle);
                 if (mHasFeature) {
-                    ActiveAdmin strictestAdmin = getAdminWithMinimumFailedPasswordsForWipeLocked(
+                    strictestAdmin = getAdminWithMinimumFailedPasswordsForWipeLocked(
                             userHandle, /* parent */ false);
                     int max = strictestAdmin != null
                             ? strictestAdmin.maximumFailedPasswordsForWipe : 0;
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
-                        // Wipe the user/profile associated with the policy that was violated. This
-                        // is not necessarily calling user: if the policy that fired was from a
-                        // managed profile rather than the main user profile, we wipe former only.
                         wipeData = true;
-                        identifier = strictestAdmin.getUserHandle().getIdentifier();
                     }
 
                     sendAdminCommandForLockscreenPoliciesLocked(
@@ -5131,12 +5125,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
                 }
             }
-            if (wipeData) {
-                // Call without holding lock.
-                wipeDeviceNoLock(false, identifier, "reportFailedPasswordAttempt()", false);
-            }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
+        }
+
+        if (wipeData && strictestAdmin != null) {
+            final int userId = strictestAdmin.getUserHandle().getIdentifier();
+            Slog.i(LOG_TAG, "Max failed password attempts policy reached for admin: "
+                    + strictestAdmin.info.getComponent().flattenToShortString()
+                    + ". Calling wipeData for user " + userId);
+
+            // Attempt to wipe the device/user/profile associated with the admin, as if the
+            // admin had called wipeData(). That way we can check whether the admin is actually
+            // allowed to wipe the device (e.g. a regular device admin shouldn't be able to wipe the
+            // device if the device owner has set DISALLOW_FACTORY_RESET, but the DO should be
+            // able to do so).
+            // IMPORTANT: Call without holding the lock to prevent deadlock.
+            try {
+                wipeDataNoLock(strictestAdmin.info.getComponent(),
+                        /*flags=*/ 0,
+                        /*reason=*/ "reportFailedPasswordAttempt()",
+                        userId);
+            } catch (SecurityException e) {
+                Slog.w(LOG_TAG, "Failed to wipe user " + userId
+                        + " after max failed password attempts reached.", e);
+            }
         }
 
         if (mInjector.securityLogIsLoggingEnabled()) {
