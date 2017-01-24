@@ -89,6 +89,7 @@ public class NotificationContentView extends FrameLayout {
     private StatusBarNotification mStatusBarNotification;
     private NotificationGroupManager mGroupManager;
     private RemoteInputController mRemoteInputController;
+    private Runnable mExpandedVisibleListener;
 
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -712,9 +713,19 @@ public class NotificationContentView extends FrameLayout {
         forceUpdateVisibility(VISIBLE_TYPE_HEADSUP, mHeadsUpChild, mHeadsUpWrapper);
         forceUpdateVisibility(VISIBLE_TYPE_SINGLELINE, mSingleLineView, mSingleLineView);
         forceUpdateVisibility(VISIBLE_TYPE_AMBIENT, mAmbientChild, mAmbientWrapper);
+        fireExpandedVisibleListenerIfVisible();
         // forceUpdateVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = UNDEFINED;
+    }
+
+    private void fireExpandedVisibleListenerIfVisible() {
+        if (mExpandedVisibleListener != null && mExpandedChild != null && isShown()
+                && mExpandedChild.getVisibility() == VISIBLE) {
+            Runnable listener = mExpandedVisibleListener;
+            mExpandedVisibleListener = null;
+            listener.run();
+        }
     }
 
     private void forceUpdateVisibility(int type, View view, TransformableView wrapper) {
@@ -770,6 +781,7 @@ public class NotificationContentView extends FrameLayout {
                 mSingleLineView, mSingleLineView);
         updateViewVisibility(visibleType, VISIBLE_TYPE_AMBIENT,
                 mAmbientChild, mAmbientWrapper);
+        fireExpandedVisibleListenerIfVisible();
         // updateViewVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = UNDEFINED;
@@ -801,6 +813,7 @@ public class NotificationContentView extends FrameLayout {
                 mAnimationStartVisibleType = UNDEFINED;
             }
         });
+        fireExpandedVisibleListenerIfVisible();
     }
 
     private void transferRemoteInputFocus(int visibleType) {
@@ -1302,6 +1315,24 @@ public class NotificationContentView extends FrameLayout {
                 header.getIcon().setForceHidden(!mIconsVisible);
             }
         }
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        if (isVisible) {
+            fireExpandedVisibleListenerIfVisible();
+        }
+    }
+
+    /**
+     * Sets a one-shot listener for when the expanded view becomes visible.
+     *
+     * This will fire the listener immediately if the expanded view is already visible.
+     */
+    public void setOnExpandedVisibleListener(Runnable r) {
+        mExpandedVisibleListener = r;
+        fireExpandedVisibleListenerIfVisible();
     }
 
     public void setIsLowPriority(boolean isLowPriority) {
