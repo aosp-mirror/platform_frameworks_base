@@ -106,7 +106,7 @@ public class UsageStatsService extends SystemService implements
     private static final long FLUSH_INTERVAL = COMPRESS_TIME ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
-    private static final boolean ENABLE_KERNEL_UPDATES = false;
+    private static final boolean ENABLE_KERNEL_UPDATES = true;
     private static final File KERNEL_COUNTER_FILE = new File("/proc/uid_procstat/set");
 
     long mAppIdleScreenThresholdMillis;
