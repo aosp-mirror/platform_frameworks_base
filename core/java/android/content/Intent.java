@@ -1628,6 +1628,19 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
     /**
+     * Activity Action: Launch application uninstaller.
+     * <p>
+     * Input: The data must be a package: URI whose scheme specific part is
+     * the package name of the current installed package to be uninstalled.
+     * You can optionally supply {@link #EXTRA_RETURN_RESULT}.
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CLEAR_PACKAGE = "android.intent.action.CLEAR_PACKAGE";
+
+    /**
      * Specify whether the package should be uninstalled for all users.
      * @hide because these should not be part of normal application flow.
      */
