@@ -535,6 +535,7 @@ LOCAL_STATIC_JAVA_LIBRARIES :=                          \
     framework-protos                                    \
     android.hardware.thermal@1.0-java-constants         \
     android.hardware.health@1.0-java-constants          \
+    android.hardware.usb@1.0-java-constants             \
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := stream
 LOCAL_PROTOC_FLAGS := \
