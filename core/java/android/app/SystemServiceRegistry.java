@@ -119,7 +119,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.FontManager;
-import android.text.TextClassificationManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -128,6 +127,7 @@ import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.app.IAppOpsService;
@@ -228,10 +228,10 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.TEXT_CLASSIFICATION_SERVICE, TextClassificationManager.class,
-                new StaticServiceFetcher<TextClassificationManager>() {
+                new CachedServiceFetcher<TextClassificationManager>() {
             @Override
-            public TextClassificationManager createService() {
-                return new TextClassificationManager();
+            public TextClassificationManager createService(ContextImpl ctx) {
+                return new TextClassificationManager(ctx);
             }});
 
         registerService(Context.CLIPBOARD_SERVICE, ClipboardManager.class,
