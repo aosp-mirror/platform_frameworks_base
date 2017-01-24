@@ -1944,31 +1944,16 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Allow an INotificationListener to snooze a single notification.
+         * Allows the notification assistant to un-snooze a single notification.
          *
-         * @param token The binder for the listener, to check that the caller is allowed
+         * @param token The binder for the assistant, to check that the caller is allowed
          */
         @Override
-        public void snoozeNotificationFromListener(INotificationListener token, String key) {
+        public void unsnoozeNotificationFromAssistant(INotificationListener token, String key) {
             long identity = Binder.clearCallingIdentity();
             try {
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                snoozeNotificationInt(key, SNOOZE_UNTIL_UNSPECIFIED, null, info);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        /**
-         * Allow an INotificationListener to un-snooze a single notification.
-         *
-         * @param token The binder for the listener, to check that the caller is allowed
-         */
-        @Override
-        public void unsnoozeNotificationFromListener(INotificationListener token, String key) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                final ManagedServiceInfo info =
+                        mNotificationAssistants.checkServiceTokenLocked(token);
                 unsnoozeNotificationInt(key, info);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2036,6 +2021,36 @@ public class NotificationManagerService extends SystemService {
                     list.add(sbnToSend);
                 }
                 return new ParceledListSlice<StatusBarNotification>(list);
+            }
+        }
+
+        /**
+         * Allow an INotificationListener to request the list of outstanding snoozed notifications
+         * seen by the current user. Useful when starting up, after which point the listener
+         * callbacks should be used.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         * @returns The return value will contain the notifications specified in keys, in that
+         *      order, or if keys is null, all the notifications, in natural order.
+         */
+        @Override
+        public ParceledListSlice<StatusBarNotification> getSnoozedNotificationsFromListener(
+                INotificationListener token, int trim) {
+            synchronized (mNotificationLock) {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                List<NotificationRecord> snoozedRecords = mSnoozeHelper.getSnoozed();
+                final int N = snoozedRecords.size();
+                final ArrayList<StatusBarNotification> list = new ArrayList<>(N);
+                for (int i=0; i < N; i++) {
+                    final NotificationRecord r = snoozedRecords.get(i);
+                    if (r == null) continue;
+                    StatusBarNotification sbn = r.sbn;
+                    if (!isVisibleToListener(sbn, info)) continue;
+                    StatusBarNotification sbnToSend =
+                            (trim == TRIM_FULL) ? sbn : sbn.cloneLight();
+                    list.add(sbnToSend);
+                }
+                return new ParceledListSlice<>(list);
             }
         }
 
@@ -3982,13 +3997,13 @@ public class NotificationManagerService extends SystemService {
     void snoozeNotificationInt(String key, long until, String snoozeCriterionId,
             ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
+        if (until < System.currentTimeMillis() && snoozeCriterionId == null) {
+            return;
+        }
         // TODO: write to event log
         if (DBG) {
             Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, until, snoozeCriterionId,
                     listenerName));
-        }
-        if (until != SNOOZE_UNTIL_UNSPECIFIED && until < System.currentTimeMillis()) {
-            return;
         }
         // Needs to post so that it can cancel notifications not yet enqueued.
         mHandler.post(new Runnable() {
@@ -4002,8 +4017,6 @@ public class NotificationManagerService extends SystemService {
                         if (snoozeCriterionId != null) {
                             mNotificationAssistants.notifyAssistantSnoozedLocked(r.sbn,
                                     snoozeCriterionId);
-                        }
-                        if (until == SNOOZE_UNTIL_UNSPECIFIED) {
                             mSnoozeHelper.snooze(r);
                         } else {
                             mSnoozeHelper.snooze(r, until);

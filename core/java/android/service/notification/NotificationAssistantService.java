@@ -119,6 +119,24 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     /**
+     * Inform the notification manager about un-snoozing a specific notification.
+     * <p>
+     * This should only be used for notifications snoozed by this listener using
+     * {@link #snoozeNotification(String, String)}. Once un-snoozed, you will get a
+     * {@link #onNotificationPosted(StatusBarNotification, RankingMap)} callback for the
+     * notification.
+     * @param key The key of the notification to snooze
+     */
+    public final void unsnoozeNotification(String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().unsnoozeNotificationFromAssistant(mWrapper, key);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Creates a notification channel that notifications can be posted to for a given package.
      *
      * @param pkg The package to create a channel for.
