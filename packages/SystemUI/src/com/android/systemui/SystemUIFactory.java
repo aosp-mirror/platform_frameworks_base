@@ -30,9 +30,11 @@ import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -113,6 +115,11 @@ public class SystemUIFactory {
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
             PhoneStatusBar phoneStatusBar) {
         return new NotificationIconAreaController(context, phoneStatusBar);
+    }
+
+    public KeyguardIndicationController createKeyguardIndicationController(Context context,
+            ViewGroup indicationArea, LockIcon lockIcon) {
+        return new KeyguardIndicationController(context, indicationArea, lockIcon);
     }
 
     public QSTileHost createQSTileHost(Context context, PhoneStatusBar statusBar,
