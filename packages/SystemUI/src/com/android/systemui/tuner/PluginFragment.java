@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.PreferenceCategory;
@@ -30,9 +31,9 @@ import android.support.v7.preference.PreferenceScreen;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginPrefs;
-import com.android.systemui.R;
 
 import java.util.List;
 import java.util.Set;
@@ -146,6 +147,12 @@ public class PluginFragment extends PreferenceFragment {
                             new ComponentName(result.activityInfo.packageName,
                                     result.activityInfo.name)));
                 }
+            });
+            holder.itemView.setOnLongClickListener(v -> {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(Uri.fromParts("package", mComponent.getPackageName(), null));
+                getContext().startActivity(intent);
+                return true;
             });
         }
     }
