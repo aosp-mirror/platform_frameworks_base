@@ -72,6 +72,7 @@ public class CarStatusBar extends PhoneStatusBar implements
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         registerPackageChangeReceivers();
 
+        createBatteryController();
         mCarBatteryController.startListening();
         mConnectedDeviceSignalController.startListening();
     }
@@ -113,8 +114,7 @@ public class CarStatusBar extends PhoneStatusBar implements
         return statusBarView;
     }
 
-    @Override
-    protected BatteryController createBatteryController() {
+    private BatteryController createBatteryController() {
         mCarBatteryController = new CarBatteryController(mContext);
         mCarBatteryController.addBatteryViewHandler(this);
         return mCarBatteryController;
