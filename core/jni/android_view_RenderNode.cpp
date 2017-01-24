@@ -88,7 +88,6 @@ void onRenderNodeRemoved(JNIEnv* env, RenderNode* node) {
         return;
     }
 
-    node->setStagingDisplayList(nullptr, nullptr);
     // Update the valid field, since native has already removed
     // the staging DisplayList
     env->SetBooleanField(jnode, gRenderNode_validFieldID, false);
