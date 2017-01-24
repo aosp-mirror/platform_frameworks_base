@@ -587,6 +587,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean listSystem = false, listThirdParty = false;
         boolean listInstaller = false;
         boolean showUid = false;
+        boolean showVersionCode = false;
         int uid = -1;
         int userId = UserHandle.USER_SYSTEM;
         try {
@@ -619,6 +620,9 @@ class PackageManagerShellCommand extends ShellCommand {
                         break;
                     case "-3":
                         listThirdParty = true;
+                        break;
+                    case "--show-versioncode":
+                        showVersionCode = true;
                         break;
                     case "--user":
                         userId = UserHandle.parseUserArg(getNextArgRequired());
@@ -664,8 +668,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     pw.print(info.applicationInfo.sourceDir);
                     pw.print("=");
                 }
-                pw.print(info.packageName); pw.print( " versionCode:"
-                        + info.applicationInfo.versionCode);
+                pw.print(info.packageName);
+                if (showVersionCode) {
+                    pw.print(" versionCode:");
+                    pw.print(info.applicationInfo.versionCode);
+                }
                 if (listInstaller) {
                     pw.print("  installer=");
                     pw.print(mInterface.getInstallerPackageName(info.packageName));
