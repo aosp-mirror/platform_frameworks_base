@@ -317,6 +317,13 @@ public final class TvInputManager {
      */
     public static final String ACTION_SETUP_INPUTS = "android.media.tv.action.SETUP_INPUTS";
 
+    /**
+     * Activity action to display the recording schedules. When invoked, the system will display an
+     * appropriate UI to browse the schedules.
+     */
+    public static final String ACTION_VIEW_RECORDING_SCHEDULES =
+            "android.media.tv.action.VIEW_RECORDING_SCHEDULES";
+
     private final ITvInputManager mService;
 
     private final Object mLock = new Object();
