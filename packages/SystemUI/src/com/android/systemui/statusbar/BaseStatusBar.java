@@ -42,6 +42,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -52,6 +53,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -317,9 +319,16 @@ public abstract class BaseStatusBar extends SystemUI implements
     };
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
+        private final int[] mTmpInt2 = new int[2];
+
         @Override
         public boolean onClickHandler(
                 final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
+            view.getLocationInWindow(mTmpInt2);
+            wakeUpIfDozing(SystemClock.uptimeMillis(), new PointF(
+                    mTmpInt2[0] + view.getWidth() / 2, mTmpInt2[1] + view.getHeight() / 2));
+
+
             if (handleRemoteInput(view, pendingIntent, fillInIntent)) {
                 return true;
             }
@@ -1787,12 +1796,21 @@ public abstract class BaseStatusBar extends SystemUI implements
         return false;
     }
 
+    public void wakeUpIfDozing(long time, PointF where) {
+    }
+
     private final class NotificationClicker implements View.OnClickListener {
+        private final int[] mTmpInt2 = new int[2];
+
         public void onClick(final View v) {
             if (!(v instanceof ExpandableNotificationRow)) {
                 Log.e(TAG, "NotificationClicker called on a view that is not a notification row.");
                 return;
             }
+
+            v.getLocationInWindow(mTmpInt2);
+            wakeUpIfDozing(SystemClock.uptimeMillis(),
+                    new PointF(mTmpInt2[0] + v.getWidth() / 2, mTmpInt2[1] + v.getHeight() / 2));
 
             final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             final StatusBarNotification sbn = row.getStatusBarNotification();
