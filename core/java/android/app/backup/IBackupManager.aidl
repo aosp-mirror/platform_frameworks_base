@@ -19,8 +19,10 @@ package android.app.backup;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.app.backup.ISelectBackupTransportCallback;
 import android.os.ParcelFileDescriptor;
 import android.content.Intent;
+import android.content.ComponentName;
 
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
@@ -217,6 +219,8 @@ interface IBackupManager {
      */
     String[] listAllTransports();
 
+    ComponentName[] listAllTransportComponents();
+
     /**
      * Retrieve the list of whitelisted transport components.  Callers do </i>not</i> need
      * any special permission.
@@ -236,6 +240,21 @@ interface IBackupManager {
      *   the current transport setting and the method returns null.
      */
     String selectBackupTransport(String transport);
+
+    /**
+     * Specify the current backup transport and get notified when the transport is ready to be used.
+     * This method is async because BackupManager might need to bind to the specified transport
+     * which is in a separate process.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param transport ComponentName of the service hosting the transport. This is different from
+     *                  the transport's name that is returned by {@link BackupTransport#name()}.
+     * @param listener A listener object to get a callback on the transport being selected.
+     *
+     * @hide
+     */
+    void selectBackupTransportAsync(in ComponentName transport, ISelectBackupTransportCallback listener);
 
     /**
      * Get the configuration Intent, if any, from the given transport.  Callers must

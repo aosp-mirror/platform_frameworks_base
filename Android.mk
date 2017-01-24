@@ -107,6 +107,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/backup/IFullBackupRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \
+	core/java/android/app/backup/ISelectBackupTransportCallback.aidl \
 	core/java/android/app/usage/IStorageStatsManager.aidl \
 	core/java/android/app/usage/IUsageStatsManager.aidl \
 	core/java/android/bluetooth/IBluetooth.aidl \
