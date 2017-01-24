@@ -1025,16 +1025,19 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         }
 
         for (int i = size - 1; i > 0; i--) {
-            T v = array[0];
-            int prio = priority[0];
-            int insertOrder = insertionOrder[0];
+            final T tmpSpan =  array[0];
             array[0] = array[i];
+            array[i] = tmpSpan;
+
+            final int tmpPriority =  priority[0];
             priority[0] = priority[i];
+            priority[i] = tmpPriority;
+
+            final int tmpOrder =  insertionOrder[0];
             insertionOrder[0] = insertionOrder[i];
+            insertionOrder[i] = tmpOrder;
+
             siftDown(0, array, i, priority, insertionOrder);
-            array[i] = v;
-            priority[i] = prio;
-            insertionOrder[i] = insertOrder;
         }
     }
 
@@ -1050,10 +1053,6 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      */
     private final <T> void siftDown(int index, T[] array, int size, int[] priority,
                                     int[] insertionOrder) {
-        T v = array[index];
-        int prio = priority[index];
-        int insertOrder = insertionOrder[index];
-
         int left = 2 * index + 1;
         while (left < size) {
             if (left < size - 1 && compareSpans(left, left + 1, priority, insertionOrder) < 0) {
@@ -1062,15 +1061,22 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             if (compareSpans(index, left, priority, insertionOrder) >= 0) {
                 break;
             }
+
+            final T tmpSpan =  array[index];
             array[index] = array[left];
+            array[left] = tmpSpan;
+
+            final int tmpPriority =  priority[index];
             priority[index] = priority[left];
+            priority[left] = tmpPriority;
+
+            final int tmpOrder =  insertionOrder[index];
             insertionOrder[index] = insertionOrder[left];
+            insertionOrder[left] = tmpOrder;
+
             index = left;
             left = 2 * index + 1;
         }
-        array[index] = v;
-        priority[index] = prio;
-        insertionOrder[index] = insertOrder;
     }
 
     /**
