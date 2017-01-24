@@ -113,6 +113,11 @@ public final class CreateInfo implements ICreateInfo {
     }
 
     @Override
+    public String[] getPromotedClasses() {
+        return PROMOTED_CLASSES;
+    }
+
+    @Override
     public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
         return INJECTED_METHODS;
     }
@@ -341,6 +346,13 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.drawable.VectorDrawable#mVectorState",
         "android.view.Choreographer#mLastFrameTimeNanos",
         "android.graphics.FontFamily#mBuilderPtr"
+    };
+
+    /**
+     * List of classes to be promoted to public visibility. Prefer using PROMOTED_FIELDS to this
+     * if possible.
+     */
+    private final static String[] PROMOTED_CLASSES = new String[] {
     };
 
     /**
