@@ -17549,6 +17549,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Not backing this app up any more; reset its OOM adjustment
                 final ProcessRecord proc = mBackupTarget.app;
                 updateOomAdjLocked(proc);
+                proc.inFullBackup = false;
 
                 // If the app crashed during backup, 'thread' will be null here
                 if (proc.thread != null) {
