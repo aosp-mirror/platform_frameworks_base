@@ -20,7 +20,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class NotificationActionClickedParserTest extends ParserTest {
@@ -49,12 +49,12 @@ public class NotificationActionClickedParserTest extends ParserTest {
         validateGoodData(t, mTag, index, objects);
     }
 
-    private LogBuilder validateGoodData(int t, String tag, int index, Object[] objects) {
+    private LogMaker validateGoodData(int t, String tag, int index, Object[] objects) {
         mParser.parseEvent(mLogger, t, objects);
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_ITEM_ACTION, proto.getCategory());
         assertEquals(mKeyPackage, proto.getPackageName());
@@ -69,7 +69,7 @@ public class NotificationActionClickedParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testWrongType() throws Throwable {
@@ -79,7 +79,7 @@ public class NotificationActionClickedParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testBadKey() throws Throwable {
@@ -89,7 +89,7 @@ public class NotificationActionClickedParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testMncTimestamps() throws Throwable {
@@ -102,7 +102,7 @@ public class NotificationActionClickedParserTest extends ParserTest {
         objects[3] = mSinceUpdateMillis;
         objects[4] = mSinceVisibleMillis;
 
-        LogBuilder proto = validateGoodData(t, "", index, objects);
+        LogMaker proto = validateGoodData(t, "", index, objects);
         validateNotificationTimes(proto, mSinceCreationMillis, mSinceUpdateMillis,
                 mSinceVisibleMillis);
     }

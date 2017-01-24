@@ -23,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class SysuiActionParserTest extends ParserTest {
@@ -47,7 +47,7 @@ public class SysuiActionParserTest extends ParserTest {
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(view, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_ACTION, proto.getType());
@@ -66,7 +66,7 @@ public class SysuiActionParserTest extends ParserTest {
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(view, proto.getCategory());
         assertEquals(packageName, proto.getPackageName());
@@ -117,7 +117,7 @@ public class SysuiActionParserTest extends ParserTest {
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(view, proto.getCategory());
         assertEquals(expectedValue, proto.getSubtype());
@@ -130,7 +130,7 @@ public class SysuiActionParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 
@@ -141,7 +141,7 @@ public class SysuiActionParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 
@@ -151,7 +151,7 @@ public class SysuiActionParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
         verify(mLogger, never()).incrementBy(anyString(), anyInt());
     }
 

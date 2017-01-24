@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.logging;
+package android.metrics;
+
+import android.annotation.SystemApi;
 
 import com.android.internal.logging.legacy.LegacyConversionLogger;
 import com.android.internal.logging.legacy.EventLogCollector;
@@ -22,10 +24,12 @@ import java.util.Queue;
 
 /**
  * Read platform logs.
+ * @hide
  */
+@SystemApi
 public class MetricsReader {
     private EventLogCollector mReader;
-    private Queue<LogBuilder> mEventQueue;
+    private Queue<LogMaker> mEventQueue;
     private long mLastEventMs;
     private long mCheckpointMs;
 
@@ -57,7 +61,7 @@ public class MetricsReader {
     }
 
     /* Next entry in the current log session. */
-    public LogBuilder next() {
+    public LogMaker next() {
         return mEventQueue == null ? null : mEventQueue.remove();
     }
 

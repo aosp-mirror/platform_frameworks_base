@@ -17,8 +17,8 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
+import android.metrics.LogMaker;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.LogBuilder;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -58,7 +58,7 @@ public class NotificationAlertParser extends TagParser {
                 final boolean blink = ((Integer) operands[3]) == 1;
 
                 if (mKey.parse(keyString)) {
-                    LogBuilder proto = logger.obtain();
+                    LogMaker proto = logger.obtain();
                     proto.setCategory(MetricsEvent.NOTIFICATION_ALERT);
                     proto.setType(MetricsEvent.TYPE_OPEN);
                     proto.setSubtype((buzz ? BUZZ : 0) | (beep ? BEEP : 0) | (blink ? BLINK : 0));

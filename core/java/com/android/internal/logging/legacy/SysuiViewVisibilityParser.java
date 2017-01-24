@@ -17,7 +17,7 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -41,7 +41,7 @@ public class SysuiViewVisibilityParser extends TagParser {
                 int category = ((Integer) operands[0]).intValue();
                 boolean visibility = ((Integer) operands[1]).intValue() != 0;
 
-                LogBuilder proto = logger.obtain();
+                LogMaker proto = logger.obtain();
                 proto.setCategory(category);
                 proto.setType(visibility ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE);
                 proto.setTimestamp(eventTimeMs);

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.internal.logging;
+package android.metrics;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import junit.framework.TestCase;
 
-public class LogBuilderTest extends TestCase {
+public class LogMakerTest extends TestCase {
 
     public void testSerialize() {
-        LogBuilder builder = new LogBuilder(0);
+        LogMaker builder = new LogMaker(0);
         builder.addTaggedData(1, "one");
         builder.addTaggedData(2, "two");
         Object[] out = builder.serialize();
@@ -41,7 +41,7 @@ public class LogBuilderTest extends TestCase {
         int bucket = 13;
         int value = 14;
 
-        LogBuilder builder = new LogBuilder(category);
+        LogMaker builder = new LogMaker(category);
         builder.setType(type);
         builder.setSubtype(subtype);
         builder.setTimestamp(timestamp);
@@ -53,7 +53,7 @@ public class LogBuilderTest extends TestCase {
         builder.addTaggedData(2, "two");
 
         Object[] out = builder.serialize();
-        LogBuilder parsed = new LogBuilder(out);
+        LogMaker parsed = new LogMaker(out);
 
         assertEquals(category, parsed.getCategory());
         assertEquals(type, parsed.getType());
@@ -68,7 +68,7 @@ public class LogBuilderTest extends TestCase {
     }
 
     public void testIntBucket() {
-        LogBuilder builder = new LogBuilder(0);
+        LogMaker builder = new LogMaker(0);
         builder.setCounterBucket(100);
         assertEquals(100, builder.getCounterBucket());
         assertEquals(false, builder.isLongCounterBucket());
@@ -76,14 +76,14 @@ public class LogBuilderTest extends TestCase {
 
     public void testLongBucket() {
         long longBucket = Long.MAX_VALUE;
-        LogBuilder builder = new LogBuilder(0);
+        LogMaker builder = new LogMaker(0);
         builder.setCounterBucket(longBucket);
         assertEquals(longBucket, builder.getCounterBucket());
         assertEquals(true, builder.isLongCounterBucket());
     }
 
     public void testInvalidInputThrows() {
-        LogBuilder builder = new LogBuilder(0);
+        LogMaker builder = new LogMaker(0);
         boolean threw = false;
         try {
             builder.addTaggedData(0, new Object());
@@ -95,7 +95,7 @@ public class LogBuilderTest extends TestCase {
     }
 
     public void testValidInputTypes() {
-        LogBuilder builder = new LogBuilder(0);
+        LogMaker builder = new LogMaker(0);
         builder.addTaggedData(1, "onetwothree");
         builder.addTaggedData(2, 123);
         builder.addTaggedData(3, 123L);
@@ -108,20 +108,20 @@ public class LogBuilderTest extends TestCase {
     }
 
     public void testCategoryDefault() {
-        LogBuilder builder = new LogBuilder(10);
+        LogMaker builder = new LogMaker(10);
         Object[] out = builder.serialize();
         assertEquals(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY, out[0]);
         assertEquals(10, out[1]);
     }
 
     public void testGiantLogOmitted() {
-        LogBuilder badBuilder = new LogBuilder(0);
+        LogMaker badBuilder = new LogMaker(0);
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < 4000; i++) {
             b.append("test, " + i);
         }
         badBuilder.addTaggedData(100, b.toString());
-        assertTrue(badBuilder.serialize().length < LogBuilder.MAX_SERIALIZED_SIZE);
+        assertTrue(badBuilder.serialize().length < LogMaker.MAX_SERIALIZED_SIZE);
     }
 
 }

@@ -15,7 +15,7 @@
  */
 package com.android.internal.logging.legacy;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 
 /**
  * An entity that knows how to log events and counters.
@@ -34,12 +34,12 @@ public interface TronLogger {
     void incrementLongHistogram(String counterName, long bucket);
 
     /** Obtain a SystemUiEvent proto, must release this with dispose() or addEvent(). */
-    LogBuilder obtain();
+    LogMaker obtain();
 
-    void dispose(LogBuilder proto);
+    void dispose(LogMaker proto);
 
     /** Submit an event to be logged. Logger will dispose of proto. */
-    void addEvent(LogBuilder proto);
+    void addEvent(LogMaker proto);
 
     /** Get a config flag. */
     boolean getConfig(String configName);

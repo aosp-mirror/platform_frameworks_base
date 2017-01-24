@@ -21,10 +21,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
-import java.util.List;
 
 public class NotificationCanceledParserTest extends ParserTest {
 
@@ -57,7 +55,7 @@ public class NotificationCanceledParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_ITEM, proto.getCategory());
         assertEquals(mKeyPackage, proto.getPackageName());
@@ -108,7 +106,7 @@ public class NotificationCanceledParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         validateNotificationTimes(proto, life, freshness, exposure);
     }
 
@@ -121,7 +119,7 @@ public class NotificationCanceledParserTest extends ParserTest {
         mParser.parseEvent(mLogger, 0, objects);
 
         if (intentional) {
-            verify(mLogger, times(1)).addEvent((LogBuilder) anyObject());
+            verify(mLogger, times(1)).addEvent((LogMaker) anyObject());
         }
     }
 
@@ -164,7 +162,7 @@ public class NotificationCanceledParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testWrongType() throws Throwable {
@@ -174,7 +172,7 @@ public class NotificationCanceledParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testBadKey() throws Throwable {
@@ -184,7 +182,7 @@ public class NotificationCanceledParserTest extends ParserTest {
 
         mParser.parseEvent(mLogger, 0, objects);
 
-        verify(mLogger, never()).addEvent((LogBuilder) anyObject());
+        verify(mLogger, never()).addEvent((LogMaker) anyObject());
     }
 
     public void testIgnoreUnexpectedData() throws Throwable {

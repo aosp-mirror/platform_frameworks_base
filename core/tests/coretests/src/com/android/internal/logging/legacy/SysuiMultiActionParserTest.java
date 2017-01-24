@@ -15,16 +15,11 @@
  */
 package com.android.internal.logging.legacy;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import android.metrics.LogMaker;
 
 public class SysuiMultiActionParserTest extends ParserTest {
 
@@ -41,7 +36,7 @@ public class SysuiMultiActionParserTest extends ParserTest {
         String counterName = "sheep";
         int bucket = 13;
         int value = 14;
-        LogBuilder builder = new LogBuilder(category);
+        LogMaker builder = new LogMaker(category);
         builder.setType(type);
         builder.setSubtype(subtype);
         builder.setPackageName(packageName);
@@ -57,7 +52,7 @@ public class SysuiMultiActionParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(category, proto.getCategory());
         assertEquals(type, proto.getType());
         assertEquals(subtype, proto.getSubtype());

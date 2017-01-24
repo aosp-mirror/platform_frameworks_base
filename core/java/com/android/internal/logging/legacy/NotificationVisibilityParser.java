@@ -17,7 +17,7 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -53,7 +53,7 @@ public class NotificationVisibilityParser extends TagParser {
                 }
 
                 if (mKey.parse(keyString)) {
-                    LogBuilder proto = logger.obtain();
+                    LogMaker proto = logger.obtain();
                     proto.setCategory(MetricsEvent.NOTIFICATION_ITEM);
                     proto.setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE);
                     proto.setTimestamp(eventTimeMs);

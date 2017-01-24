@@ -15,7 +15,7 @@
  */
 package com.android.internal.logging.legacy;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import static org.mockito.Matchers.any;
@@ -39,8 +39,8 @@ public class ParserTest extends TestCase {
 
     protected TagParser mParser;
 
-    protected LogBuilder[] mProto;
-    protected ArgumentCaptor<LogBuilder> mProtoCaptor;
+    protected LogMaker[] mProto;
+    protected ArgumentCaptor<LogMaker> mProtoCaptor;
     protected ArgumentCaptor<String> mNameCaptor;
     protected ArgumentCaptor<Integer> mCountCaptor;
     protected String mKey = "0|com.android.example.notificationshowcase|31338|null|10090";
@@ -54,9 +54,9 @@ public class ParserTest extends TestCase {
 
 
     public ParserTest() {
-        mProto = new LogBuilder[5];
+        mProto = new LogMaker[5];
         for (int i = 0; i < mProto.length; i++) {
-            mProto[i] = new LogBuilder(MetricsEvent.VIEW_UNKNOWN);
+            mProto[i] = new LogMaker(MetricsEvent.VIEW_UNKNOWN);
         }
     }
 
@@ -66,19 +66,19 @@ public class ParserTest extends TestCase {
 
         MockitoAnnotations.initMocks(this);
 
-        mProtoCaptor = ArgumentCaptor.forClass(LogBuilder.class);
+        mProtoCaptor = ArgumentCaptor.forClass(LogMaker.class);
         mNameCaptor = ArgumentCaptor.forClass(String.class);
         mCountCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        OngoingStubbing<LogBuilder> stub = when(mLogger.obtain()).thenReturn(mProto[0]);
+        OngoingStubbing<LogMaker> stub = when(mLogger.obtain()).thenReturn(mProto[0]);
         for (int i = 1; i < mProto.length; i++) {
             stub.thenReturn(mProto[i]);
         }
-        doNothing().when(mLogger).addEvent(any(LogBuilder.class));
+        doNothing().when(mLogger).addEvent(any(LogMaker.class));
         doNothing().when(mLogger).incrementBy(anyString(), anyInt());
     }
 
-    protected void validateNotificationTimes(LogBuilder proto, int life, int freshness,
+    protected void validateNotificationTimes(LogMaker proto, int life, int freshness,
             int exposure) {
         validateNotificationTimes(proto, life, freshness);
         if (exposure != 0) {
@@ -89,7 +89,7 @@ public class ParserTest extends TestCase {
         }
     }
 
-    protected void validateNotificationTimes(LogBuilder proto, int life, int freshness) {
+    protected void validateNotificationTimes(LogMaker proto, int life, int freshness) {
         if (life != 0) {
             assertEquals(life,
                 proto.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS));
@@ -104,7 +104,7 @@ public class ParserTest extends TestCase {
         }
     }
 
-    protected void validateNotificationIdAndTag(LogBuilder proto, int id, String tag) {
+    protected void validateNotificationIdAndTag(LogMaker proto, int id, String tag) {
         assertEquals(tag, proto.getTaggedData(MetricsEvent.NOTIFICATION_TAG));
         assertEquals(id, proto.getTaggedData(MetricsEvent.NOTIFICATION_ID));
     }

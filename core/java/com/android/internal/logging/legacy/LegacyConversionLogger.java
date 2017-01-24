@@ -15,9 +15,7 @@
  */
 package com.android.internal.logging.legacy;
 
-import android.os.Bundle;
-
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.HashMap;
@@ -34,20 +32,20 @@ public class LegacyConversionLogger implements TronLogger {
     public static final int TYPE_HISTOGRAM = 2;
     public static final int TYPE_EVENT = 3;
 
-    private final Queue<LogBuilder> mQueue;
+    private final Queue<LogMaker> mQueue;
     private HashMap<String, Boolean> mConfig;
 
     public LegacyConversionLogger() {
         mQueue = new LinkedList<>();
     }
 
-    public Queue<LogBuilder> getEvents() {
+    public Queue<LogMaker> getEvents() {
         return mQueue;
     }
 
     @Override
     public void increment(String counterName) {
-        LogBuilder b = new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
+        LogMaker b = new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
                 .setCounterName(counterName)
                 .setCounterValue(1);
         mQueue.add(b);
@@ -55,7 +53,7 @@ public class LegacyConversionLogger implements TronLogger {
 
     @Override
     public void incrementBy(String counterName, int value) {
-        LogBuilder b = new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
+        LogMaker b = new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER)
                 .setCounterName(counterName)
                 .setCounterValue(value);
         mQueue.add(b);
@@ -63,7 +61,7 @@ public class LegacyConversionLogger implements TronLogger {
 
     @Override
     public void incrementIntHistogram(String counterName, int bucket) {
-        LogBuilder b = new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
+        LogMaker b = new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
                 .setCounterName(counterName)
                 .setCounterBucket(bucket)
                 .setCounterValue(1);
@@ -72,7 +70,7 @@ public class LegacyConversionLogger implements TronLogger {
 
     @Override
     public void incrementLongHistogram(String counterName, long bucket) {
-        LogBuilder b = new LogBuilder(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
+        LogMaker b = new LogMaker(MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM)
                 .setCounterName(counterName)
                 .setCounterBucket(bucket)
                 .setCounterValue(1);
@@ -80,16 +78,16 @@ public class LegacyConversionLogger implements TronLogger {
     }
 
     @Override
-    public LogBuilder obtain() {
-        return new LogBuilder(MetricsEvent.VIEW_UNKNOWN);
+    public LogMaker obtain() {
+        return new LogMaker(MetricsEvent.VIEW_UNKNOWN);
     }
 
     @Override
-    public void dispose(LogBuilder proto) {
+    public void dispose(LogMaker proto) {
     }
 
     @Override
-    public void addEvent(LogBuilder proto) {
+    public void addEvent(LogMaker proto) {
         mQueue.add(proto);
     }
 

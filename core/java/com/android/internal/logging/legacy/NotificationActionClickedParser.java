@@ -17,7 +17,7 @@ package com.android.internal.logging.legacy;
 
 import android.util.Log;
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
@@ -47,7 +47,7 @@ public class NotificationActionClickedParser extends TagParser {
                 if (mKey.parse((String) operands[0])) {
                     int index = (Integer) operands[1];
                     parseTimes(operands, 2);
-                    LogBuilder proto = logger.obtain();
+                    LogMaker proto = logger.obtain();
                     proto.setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION);
                     proto.setType(MetricsEvent.TYPE_ACTION);
                     proto.setSubtype(index);

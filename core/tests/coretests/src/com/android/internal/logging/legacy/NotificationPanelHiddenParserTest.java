@@ -19,7 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-import com.android.internal.logging.LogBuilder;
+import android.metrics.LogMaker;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 public class NotificationPanelHiddenParserTest extends ParserTest {
@@ -48,7 +48,7 @@ public class NotificationPanelHiddenParserTest extends ParserTest {
 
         verify(mLogger, times(1)).addEvent(mProtoCaptor.capture());
 
-        LogBuilder proto = mProtoCaptor.getValue();
+        LogMaker proto = mProtoCaptor.getValue();
         assertEquals(t, proto.getTimestamp());
         assertEquals(MetricsEvent.NOTIFICATION_PANEL, proto.getCategory());
         assertEquals(MetricsEvent.TYPE_CLOSE, proto.getType());
