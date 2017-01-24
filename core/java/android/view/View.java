@@ -857,22 +857,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static boolean sCascadedDragDrop;
 
-    /**
-     * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
-     * calling setFlags.
-     */
-    private static final int NOT_FOCUSABLE = 0x00000000;
+    /** @hide */
+    @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Focusable {}
 
     /**
-     * This view wants keystrokes. Use with TAKES_FOCUS_MASK when calling
-     * setFlags.
+     * This view does not want keystrokes.
+     * <p>
+     * Use with {@link #setFocusable(int)} and <a href="#attr_android:focusable">{@code
+     * android:focusable}.
      */
-    private static final int FOCUSABLE = 0x00000001;
+    public static final int NOT_FOCUSABLE = 0x00000000;
+
+    /**
+     * This view wants keystrokes.
+     * <p>
+     * Use with {@link #setFocusable(int)} and <a href="#attr_android:focusable">{@code
+     * android:focusable}.
+     */
+    public static final int FOCUSABLE = 0x00000001;
+
+    /**
+     * This view determines focusability automatically. This is the default.
+     * <p>
+     * Use with {@link #setFocusable(int)} and <a href="#attr_android:focusable">{@code
+     * android:focusable}.
+     */
+    public static final int FOCUSABLE_AUTO = 0x00000010;
 
     /**
      * Mask for use with setFlags indicating bits used for focus.
      */
-    private static final int FOCUSABLE_MASK = 0x00000001;
+    private static final int FOCUSABLE_MASK = 0x00000011;
 
     /**
      * This view will adjust its padding to fit sytem windows (e.g. status bar)
@@ -4136,7 +4153,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
-        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
+        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | FOCUSABLE_AUTO;
         // Set some flags defaults
         mPrivateFlags2 =
                 (LAYOUT_DIRECTION_DEFAULT << PFLAG2_LAYOUT_DIRECTION_MASK_SHIFT) |
@@ -4322,6 +4339,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
+        // Set default values.
+        viewFlagValues |= FOCUSABLE_AUTO;
+        viewFlagMasks |= FOCUSABLE_AUTO;
+
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
@@ -4434,8 +4455,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     break;
                 case com.android.internal.R.styleable.View_focusable:
-                    if (a.getBoolean(attr, false)) {
-                        viewFlagValues |= FOCUSABLE;
+                    viewFlagValues = (viewFlagValues & ~FOCUSABLE_MASK) | getFocusableAttribute(a);
+                    if ((viewFlagValues & FOCUSABLE_AUTO) == 0) {
                         viewFlagMasks |= FOCUSABLE_MASK;
                     }
                     break;
@@ -5006,7 +5027,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             case GONE: out.append('G'); break;
             default: out.append('.'); break;
         }
-        out.append((mViewFlags&FOCUSABLE_MASK) == FOCUSABLE ? 'F' : '.');
+        out.append((mViewFlags & FOCUSABLE) == FOCUSABLE ? 'F' : '.');
         out.append((mViewFlags&ENABLED_MASK) == ENABLED ? 'E' : '.');
         out.append((mViewFlags&DRAW_MASK) == WILL_NOT_DRAW ? '.' : 'D');
         out.append((mViewFlags&SCROLLBARS_HORIZONTAL) != 0 ? 'H' : '.');
@@ -8453,20 +8474,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Set whether this view can receive the focus.
-     *
+     * <p>
      * Setting this to false will also ensure that this view is not focusable
      * in touch mode.
      *
      * @param focusable If true, this view can receive the focus.
      *
      * @see #setFocusableInTouchMode(boolean)
+     * @see #setFocusable(int)
      * @attr ref android.R.styleable#View_focusable
      */
     public void setFocusable(boolean focusable) {
-        if (!focusable) {
+        setFocusable(focusable ? FOCUSABLE : NOT_FOCUSABLE);
+    }
+
+    /**
+     * Sets whether this view can receive focus.
+     * <p>
+     * Setting this to {@link #FOCUSABLE_AUTO} tells the framework to determine focusability
+     * automatically based on the view's interactivity. This is the default.
+     * <p>
+     * Setting this to NOT_FOCUSABLE will ensure that this view is also not focusable
+     * in touch mode.
+     *
+     * @param focusable One of {@link #NOT_FOCUSABLE}, {@link #FOCUSABLE},
+     *                  or {@link #FOCUSABLE_AUTO}.
+     * @see #setFocusableInTouchMode(boolean)
+     * @attr ref android.R.styleable#View_focusable
+     */
+    public void setFocusable(@Focusable int focusable) {
+        if ((focusable & (FOCUSABLE_AUTO | FOCUSABLE)) == 0) {
             setFlags(0, FOCUSABLE_IN_TOUCH_MODE);
         }
-        setFlags(focusable ? FOCUSABLE : NOT_FOCUSABLE, FOCUSABLE_MASK);
+        setFlags(focusable, FOCUSABLE_MASK);
     }
 
     /**
@@ -9056,14 +9096,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
 
     /**
-     * Returns whether this View is able to take focus.
+     * Returns whether this View is currently able to take focus.
      *
      * @return True if this view can take focus, or false otherwise.
-     * @attr ref android.R.styleable#View_focusable
      */
     @ViewDebug.ExportedProperty(category = "focus")
     public final boolean isFocusable() {
-        return FOCUSABLE == (mViewFlags & FOCUSABLE_MASK);
+        return FOCUSABLE == (mViewFlags & FOCUSABLE);
+    }
+
+    /**
+     * Returns the focusable setting for this view.
+     *
+     * @return One of {@link #NOT_FOCUSABLE}, {@link #FOCUSABLE}, or {@link #FOCUSABLE_AUTO}.
+     * @attr ref android.R.styleable#View_focusable
+     */
+    @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = NOT_FOCUSABLE, to = "NOT_FOCUSABLE"),
+            @ViewDebug.IntToString(from = FOCUSABLE, to = "FOCUSABLE"),
+            @ViewDebug.IntToString(from = FOCUSABLE_AUTO, to = "FOCUSABLE_AUTO")
+            })
+    @Focusable
+    public int getFocusable() {
+        return (mViewFlags & FOCUSABLE_AUTO) > 0 ? FOCUSABLE_AUTO : mViewFlags & FOCUSABLE;
     }
 
     /**
@@ -9615,8 +9670,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private boolean requestFocusNoSearch(int direction, Rect previouslyFocusedRect) {
         // need to be focusable
-        if ((mViewFlags & FOCUSABLE_MASK) != FOCUSABLE ||
-                (mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+        if ((mViewFlags & FOCUSABLE) != FOCUSABLE
+                || (mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
 
@@ -11970,14 +12025,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         int privateFlags = mPrivateFlags;
 
+        // If focusable is auto, update the FOCUSABLE bit.
+        if (((mViewFlags & FOCUSABLE_AUTO) != 0)
+                && (changed & (FOCUSABLE_MASK | CLICKABLE | FOCUSABLE_IN_TOUCH_MODE)) != 0) {
+            int newFocus = NOT_FOCUSABLE;
+            if ((mViewFlags & (CLICKABLE | FOCUSABLE_IN_TOUCH_MODE)) != 0) {
+                newFocus = FOCUSABLE;
+            } else {
+                mViewFlags = (mViewFlags & ~FOCUSABLE_IN_TOUCH_MODE);
+            }
+            mViewFlags = (mViewFlags & ~FOCUSABLE) | newFocus;
+            int focusChanged = (old & FOCUSABLE) ^ (newFocus & FOCUSABLE);
+            changed = (changed & ~FOCUSABLE) | focusChanged;
+        }
+
         /* Check if the FOCUSABLE bit has changed */
-        if (((changed & FOCUSABLE_MASK) != 0) &&
-                ((privateFlags & PFLAG_HAS_BOUNDS) !=0)) {
-            if (((old & FOCUSABLE_MASK) == FOCUSABLE)
+        if (((changed & FOCUSABLE) != 0) && ((privateFlags & PFLAG_HAS_BOUNDS) != 0)) {
+            if (((old & FOCUSABLE) == FOCUSABLE)
                     && ((privateFlags & PFLAG_FOCUSED) != 0)) {
                 /* Give up focus if we are no longer focusable */
                 clearFocus();
-            } else if (((old & FOCUSABLE_MASK) == NOT_FOCUSABLE)
+            } else if (((old & FOCUSABLE) == NOT_FOCUSABLE)
                     && ((privateFlags & PFLAG_FOCUSED) == 0)) {
                 /*
                  * Tell the view system that we are now available to take focus
@@ -12120,7 +12188,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (accessibilityEnabled) {
-            if ((changed & FOCUSABLE_MASK) != 0 || (changed & VISIBILITY_MASK) != 0
+            if ((changed & FOCUSABLE) != 0 || (changed & VISIBILITY_MASK) != 0
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
                     || (changed & CONTEXT_CLICKABLE) != 0) {
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
@@ -18045,7 +18113,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static String printFlags(int flags) {
         String output = "";
         int numFlags = 0;
-        if ((flags & FOCUSABLE_MASK) == FOCUSABLE) {
+        if ((flags & FOCUSABLE) == FOCUSABLE) {
             output += "TAKES_FOCUS";
             numFlags++;
         }
@@ -24668,6 +24736,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeCallbacks(mTooltipInfo.mHideTooltipRunnable);
         postDelayed(mTooltipInfo.mHideTooltipRunnable,
                 ViewConfiguration.getLongPressTooltipHideTimeout());
+    }
+
+    private int getFocusableAttribute(TypedArray attributes) {
+        TypedValue val = new TypedValue();
+        if (attributes.getValue(com.android.internal.R.styleable.View_focusable, val)) {
+            if (val.type == TypedValue.TYPE_INT_BOOLEAN) {
+                return (val.data == 0 ? NOT_FOCUSABLE : FOCUSABLE);
+            } else {
+                return val.data;
+            }
+        } else {
+            return FOCUSABLE_AUTO;
+        }
     }
 
     /**

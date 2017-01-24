@@ -2274,13 +2274,16 @@
         <!-- Sets the padding, in pixels, of the end edge; see {@link android.R.attr#padding}. -->
         <attr name="paddingEnd" format="dimension" />
 
-        <!-- Boolean that controls whether a view can take focus.  By default the user can not
-             move focus to a view; by setting this attribute to true the view is
-             allowed to take focus.  This value does not impact the behavior of
+        <!-- Controls whether a view can take focus.  By default, this is "auto" which lets the
+             framework determine whether a user can move focus to a view.  By setting this attribute
+             to true the view is allowed to take focus. By setting it to "false" the view will not
+             take focus. This value does not impact the behavior of
              directly calling {@link android.view.View#requestFocus}, which will
              always request focus regardless of this view.  It only impacts where
              focus navigation will try to move focus. -->
-        <attr name="focusable" format="boolean" />
+        <attr name="focusable" format="boolean|enum">
+            <enum name="auto" value="0x00000010" />
+        </attr>
 
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
@@ -7912,7 +7915,6 @@
         <attr name="queryBackground" format="reference" />
         <!-- Background for the section containing the action (e.g. voice search) -->
         <attr name="submitBackground" format="reference" />
-        <attr name="focusable" />
     </declare-styleable>
 
     <declare-styleable name="Switch">
