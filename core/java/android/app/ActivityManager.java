@@ -520,17 +520,17 @@ public class ActivityManager {
     /** @hide Flag for registerUidObserver: report uid has become active. */
     public static final int UID_OBSERVER_ACTIVE = 1<<3;
 
-    /** @hide Mode for {@link IActivityManager#getAppStartMode}: normal free-to-run operation. */
+    /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: normal free-to-run operation. */
     public static final int APP_START_MODE_NORMAL = 0;
 
-    /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later. */
+    /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: delay running until later. */
     public static final int APP_START_MODE_DELAYED = 1;
 
-    /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later, with
+    /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: delay running until later, with
      * rigid errors (throwing exception). */
     public static final int APP_START_MODE_DELAYED_RIGID = 2;
 
-    /** @hide Mode for {@link IActivityManager#getAppStartMode}: disable/cancel pending
+    /** @hide Mode for {@link IActivityManager#isAppStartModeDisabled}: disable/cancel pending
      * launches; this is the mode for ephemeral apps. */
     public static final int APP_START_MODE_DISABLED = 3;
 

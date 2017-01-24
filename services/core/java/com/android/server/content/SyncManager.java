@@ -1019,8 +1019,7 @@ public class SyncManager {
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
         try {
-            if (ActivityManager.getService().getAppStartMode(owningUid,
-                    owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
+            if (ActivityManager.getService().isAppStartModeDisabled(owningUid, owningPackage)) {
                 Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
                         + syncAdapterInfo.componentName
                         + " -- package not allowed to start");

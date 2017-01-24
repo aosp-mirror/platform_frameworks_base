@@ -592,22 +592,6 @@ public final class BroadcastQueue {
                     + " (uid " + r.callingUid + ")");
             skip = true;
         }
-        if (!skip) {
-            final int allowed = mService.checkAllowBackgroundLocked(filter.receiverList.uid,
-                    filter.packageName, -1, false);
-            if (false && allowed == ActivityManager.APP_START_MODE_DISABLED) {
-                // XXX should we really not allow this?  It means that while we are
-                // keeping an ephemeral app cached, its registered receivers will stop
-                // receiving broadcasts after it goes idle...  so if it comes back to
-                // the foreground, it won't know what the current state of those broadcasts is.
-                Slog.w(TAG, "Background execution not allowed: receiving "
-                        + r.intent
-                        + " to " + filter.receiverList.app
-                        + " (pid=" + filter.receiverList.pid
-                        + ", uid=" + filter.receiverList.uid + ")");
-                skip = true;
-            }
-        }
 
         if (!mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
                 r.callingPid, r.resolvedType, filter.receiverList.uid)) {
@@ -1156,13 +1140,14 @@ public final class BroadcastQueue {
                     info.activityInfo.applicationInfo.uid, false);
 
             if (!skip) {
-                final int allowed = mService.checkAllowBackgroundLocked(
-                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName, -1, true);
+                final int allowed = mService.getAppStartModeLocked(
+                        info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
+                        info.activityInfo.applicationInfo.targetSdkVersion, -1, true, false);
                 if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                     // We won't allow this receiver to be launched if the app has been
                     // completely disabled from launches, or it was not explicitly sent
                     // to it and the app is in a state that should not receive it
-                    // (depending on how checkAllowBackgroundLocked has determined that).
+                    // (depending on how getAppStartModeLocked has determined that).
                     if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
                         Slog.w(TAG, "Background execution disabled: receiving "
                                 + r.intent + " to "

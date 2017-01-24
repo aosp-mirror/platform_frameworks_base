@@ -475,7 +475,7 @@ interface IActivityManager {
     void suppressResizeConfigChanges(boolean suppress);
     void moveTasksToFullscreenStack(int fromStackId, boolean onTop);
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);
-    int getAppStartMode(int uid, in String packageName);
+    boolean isAppStartModeDisabled(int uid, in String packageName);
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
     boolean isInMultiWindowMode(in IBinder token);

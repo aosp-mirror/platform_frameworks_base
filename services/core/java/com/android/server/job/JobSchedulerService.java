@@ -566,8 +566,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             String tag) {
         JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
         try {
-            if (ActivityManager.getService().getAppStartMode(uId,
-                    job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
+            if (ActivityManager.getService().isAppStartModeDisabled(uId,
+                    job.getService().getPackageName())) {
                 Slog.w(TAG, "Not scheduling job " + uId + ":" + job.toString()
                         + " -- package not allowed to start");
                 return JobScheduler.RESULT_FAILURE;
@@ -1201,9 +1201,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             public void process(JobStatus job) {
                 if (isReadyToBeExecutedLocked(job)) {
                     try {
-                        if (ActivityManager.getService().getAppStartMode(job.getUid(),
-                                job.getJob().getService().getPackageName())
-                                == ActivityManager.APP_START_MODE_DISABLED) {
+                        if (ActivityManager.getService().isAppStartModeDisabled(job.getUid(),
+                                job.getJob().getService().getPackageName())) {
                             Slog.w(TAG, "Aborting job " + job.getUid() + ":"
                                     + job.getJob().toString() + " -- package not allowed to start");
                             mHandler.obtainMessage(MSG_STOP_JOB, job).sendToTarget();
