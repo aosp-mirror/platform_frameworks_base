@@ -706,6 +706,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     boolean mFirstBoot;
 
+    PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
+
     // System configuration read by SystemConfig.
     final int[] mGlobalGids;
     final SparseArray<ArraySet<String>> mSystemPermissions;
@@ -22830,6 +22832,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public String getSetupWizardPackageName() {
             return mSetupWizardPackage;
         }
+
+        public void setExternalSourcesPolicy(ExternalSourcesPolicy policy) {
+            if (policy != null) {
+                mExternalSourcesPolicy = policy;
+            }
+        }
     }
 
     @Override
@@ -22918,5 +22926,39 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
         return PackageManager.INSTALL_REASON_UNKNOWN;
+    }
+
+    @Override
+    public boolean canRequestPackageInstalls(String packageName, int userId) {
+        int callingUid = Binder.getCallingUid();
+        int uid = getPackageUid(packageName, 0, userId);
+        if (callingUid != uid && callingUid != Process.ROOT_UID
+                && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "Caller uid " + callingUid + " does not own package " + packageName);
+        }
+        ApplicationInfo info = getApplicationInfo(packageName, 0, userId);
+        if (info == null) {
+            return false;
+        }
+        if (info.targetSdkVersion < Build.VERSION_CODES.O) {
+            throw new UnsupportedOperationException(
+                    "Operation only supported on apps targeting Android O or higher");
+        }
+        String appOpPermission = Manifest.permission.REQUEST_INSTALL_PACKAGES;
+        String[] packagesDeclaringPermission = getAppOpPermissionPackages(appOpPermission);
+        if (!ArrayUtils.contains(packagesDeclaringPermission, packageName)) {
+            throw new SecurityException("Need to declare " + appOpPermission + " to call this api");
+        }
+        if (sUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)) {
+            return false;
+        }
+        if (mExternalSourcesPolicy != null) {
+            int isTrusted = mExternalSourcesPolicy.getPackageTrustedToInstallApps(packageName, uid);
+            if (isTrusted != PackageManagerInternal.ExternalSourcesPolicy.USER_DEFAULT) {
+                return isTrusted == PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
+            }
+        }
+        return checkUidPermission(appOpPermission, uid) == PERMISSION_GRANTED;
     }
 }

@@ -220,6 +220,11 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean canRequestPackageInstalls() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
         throw new UnsupportedOperationException();
     }

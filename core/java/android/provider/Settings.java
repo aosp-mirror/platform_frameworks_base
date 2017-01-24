@@ -295,7 +295,6 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_EXTERNAL_SOURCES =
@@ -5148,6 +5147,9 @@ public final class Settings {
          *
          * <p>1 = permit app installation via the system package installer intent
          * <p>0 = do not allow use of the package installer
+         * @deprecated Starting from {@link android.os.Build.VERSION_CODES#O}, apps should use
+         * {@link PackageManager#canRequestPackageInstalls()}
+         * @see PackageManager#canRequestPackageInstalls()
          */
         public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
 
