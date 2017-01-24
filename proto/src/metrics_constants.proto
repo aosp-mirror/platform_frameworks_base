@@ -3321,6 +3321,16 @@ message MetricsEvent {
     // Indicates number of terms read on the terms screen.
     PROVISIONING_TERMS_READ = 811;
 
+    // Logs that the user has edited the picture-in-picture settings.
+    // CATEGORY: SETTINGS
+    SETTINGS_MANAGE_PICTURE_IN_PICTURE = 812;
+
+    // ACTION: Allow "Enable picture-in-picture on hide" for an app
+    APP_PICTURE_IN_PICTURE_ON_HIDE_ALLOW = 813;
+
+    // ACTION: Deny "Enable picture-in-picture on hide" for an app
+    APP_PICTURE_IN_PICTURE_ON_HIDE_DENY = 814;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.

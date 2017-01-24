@@ -1334,6 +1334,19 @@ public final class Settings {
             = "android.settings.VR_LISTENER_SETTINGS";
 
     /**
+     * Activity Action: Show Picture-in-picture settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PICTURE_IN_PICTURE_SETTINGS
+            = "android.settings.PICTURE_IN_PICTURE_SETTINGS";
+
+    /**
      * Activity Action: Show Storage Manager settings.
      * <p>
      * Input: Nothing.

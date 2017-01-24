@@ -245,8 +245,10 @@ public class AppOpsManager {
     public static final int OP_READ_PHONE_NUMBER = 65;
     /** @hide Request package installs through package installer */
     public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
+    /** @hide Enter picture-in-picture when hidden. */
+    public static final int OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE = 67;
     /** @hide */
-    public static final int _NUM_OP = 67;
+    public static final int _NUM_OP = 68;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -464,6 +466,7 @@ public class AppOpsManager {
             OP_AUDIO_ACCESSIBILITY_VOLUME,
             OP_READ_PHONE_NUMBER,
             OP_REQUEST_INSTALL_PACKAGES,
+            OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE,
     };
 
     /**
@@ -538,6 +541,7 @@ public class AppOpsManager {
             null, // OP_AUDIO_ACCESSIBILITY_VOLUME
             OPSTR_READ_PHONE_NUMBER,
             null, // OP_REQUEST_INSTALL_PACKAGES
+            null,
     };
 
     /**
@@ -612,6 +616,7 @@ public class AppOpsManager {
             "AUDIO_ACCESSIBILITY_VOLUME",
             "READ_PHONE_NUMBER",
             "REQUEST_INSTALL_PACKAGES",
+            "OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE",
     };
 
     /**
@@ -686,6 +691,7 @@ public class AppOpsManager {
             null, // no permission for changing accessibility volume
             Manifest.permission.READ_PHONE_NUMBER,
             Manifest.permission.REQUEST_INSTALL_PACKAGES,
+            null, // no permission for entering picture-in-picture on hide
     };
 
     /**
@@ -761,6 +767,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
             null, // READ_PHONE_NUMBER
             null, // REQUEST_INSTALL_PACKAGES
+            null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
     };
 
     /**
@@ -835,6 +842,7 @@ public class AppOpsManager {
             false, // AUDIO_ACCESSIBILITY_VOLUME
             false, // READ_PHONE_NUMBER
             false, // REQUEST_INSTALL_PACKAGES
+            false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
     };
 
     /**
@@ -908,6 +916,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_DEFAULT, // OP_REQUEST_INSTALL_PACKAGES
+            AppOpsManager.MODE_ALLOWED,  // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
     };
 
     /**
@@ -985,6 +994,7 @@ public class AppOpsManager {
             false, // OP_AUDIO_ACCESSIBILITY_VOLUME
             false,
             false, // OP_REQUEST_INSTALL_PACKAGES
+            false, // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
     };
 
     /**
