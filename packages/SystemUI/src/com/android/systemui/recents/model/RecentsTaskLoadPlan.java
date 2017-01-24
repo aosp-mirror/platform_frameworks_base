@@ -197,7 +197,7 @@ public class RecentsTaskLoadPlan {
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
                     activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
-                    t.isDockable, t.bounds, t.taskDescription, t.resizeMode, t.topActivity,
+                    t.supportsSplitScreenMultiWindow, t.bounds, t.taskDescription, t.resizeMode, t.topActivity,
                     isLocked);
 
             allTasks.add(task);

@@ -82,6 +82,10 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     private int mResizeMode;
 
+    // Whether the task supports picture-in-picture.
+    // See {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE}
+    private boolean mSupportsPictureInPicture;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -94,14 +98,16 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     private TaskDescription mTaskDescription;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode, boolean homeTask,
-            TaskDescription taskDescription, TaskWindowContainerController controller) {
+            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
+            boolean supportsPictureInPicture, boolean homeTask, TaskDescription taskDescription,
+            TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
         mIsOnTopLauncher = isOnTopLauncher;
         mResizeMode = resizeMode;
+        mSupportsPictureInPicture = supportsPictureInPicture;
         mHomeTask = homeTask;
         setController(controller);
         setBounds(bounds, overrideConfig);
@@ -327,7 +333,8 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     boolean isResizeable() {
-        return ActivityInfo.isResizeableMode(mResizeMode) || mService.mForceResizableTasks;
+        return ActivityInfo.isResizeableMode(mResizeMode) || mSupportsPictureInPicture
+                || mService.mForceResizableTasks;
     }
 
     /**

@@ -177,10 +177,14 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_RESIZEABLE = 2;
     /**
-     * Activity is resizeable and supported picture-in-picture mode.
+     * Activity is resizeable and supported picture-in-picture mode.  This flag is now deprecated
+     * since activities do not need to be resizeable to support picture-in-picture.
+     * See {@link #FLAG_SUPPORTS_PICTURE_IN_PICTURE}.
+     *
      * @hide
+     * @deprecated
      */
-    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
+    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED = 3;
     /**
      * Activity does not support resizing, but we are forcing it to be resizeable. Only affects
      * certain pre-N apps where we force them to be resizeable.
@@ -367,6 +371,13 @@ public class ActivityInfo extends ComponentInfo
      * @hide
      */
     public static final int FLAG_VISIBLE_TO_EPHEMERAL = 0x100000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity supports picture-in-picture mode.
+     * See {@link android.R.attr#supportsPictureInPicture}.
+     * @hide
+     */
+    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x200000;
 
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
@@ -926,10 +937,17 @@ public class ActivityInfo extends ComponentInfo
                 || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT;
     }
 
+    /**
+     * Returns true if the activity supports picture-in-picture.
+     * @hide
+     */
+    public boolean supportsPictureInPicture() {
+        return (flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
+    }
+
     /** @hide */
     public static boolean isResizeableMode(int mode) {
         return mode == RESIZE_MODE_RESIZEABLE
-                || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
                 || mode == RESIZE_MODE_FORCE_RESIZEABLE
                 || mode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
                 || mode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
@@ -953,8 +971,6 @@ public class ActivityInfo extends ComponentInfo
                 return "RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION";
             case RESIZE_MODE_RESIZEABLE:
                 return "RESIZE_MODE_RESIZEABLE";
-            case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
-                return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
             case RESIZE_MODE_FORCE_RESIZEABLE:
                 return "RESIZE_MODE_FORCE_RESIZEABLE";
             case RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY:

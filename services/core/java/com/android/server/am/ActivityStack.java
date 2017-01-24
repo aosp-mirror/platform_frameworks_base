@@ -62,7 +62,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
-import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
@@ -73,7 +72,6 @@ import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN_BEHIND;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
 import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1545,7 +1543,7 @@ final class ActivityStack extends ConfigurationContainer {
             // home task even though it's not resizable.
             final ActivityRecord r = focusedStack.topRunningActivityLocked();
             final TaskRecord task = r != null ? r.task : null;
-            return task == null || task.canGoInDockedStack() || task.isHomeTask() ? STACK_VISIBLE
+            return task == null || task.supportsSplitScreen() || task.isHomeTask() ? STACK_VISIBLE
                     : STACK_INVISIBLE;
         }
 
@@ -4665,7 +4663,7 @@ final class ActivityStack extends ConfigurationContainer {
             }
             ci.numActivities = numActivities;
             ci.numRunning = numRunning;
-            ci.isDockable = task.canGoInDockedStack();
+            ci.supportsSplitScreenMultiWindow = task.supportsSplitScreen();
             ci.resizeMode = task.mResizeMode;
             list.add(ci);
         }

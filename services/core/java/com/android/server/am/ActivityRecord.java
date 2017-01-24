@@ -39,7 +39,6 @@ import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
@@ -66,7 +65,6 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import android.annotation.NonNull;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
-import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.PictureInPictureArgs;
 import android.app.ResultInfo;
@@ -78,7 +76,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -454,6 +451,7 @@ final class ActivityRecord implements AppWindowContainerListener {
         }
         if (info != null) {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
+            pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
         }
         pw.println(prefix + "supportsPictureInPictureWhilePausing: "
                 + supportsPictureInPictureWhilePausing);
@@ -879,24 +877,50 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     boolean isResizeable() {
-        return ActivityInfo.isResizeableMode(info.resizeMode);
+        return ActivityInfo.isResizeableMode(info.resizeMode) || info.supportsPictureInPicture();
     }
 
-    boolean isResizeableOrForced() {
-        return !isHomeActivity() && (isResizeable() || service.mForceResizableActivities);
-    }
-
-    boolean isNonResizableOrForced() {
+    /**
+     * @return whether this activity is non-resizeable or forced to be resizeable
+     */
+    boolean isNonResizableOrForcedResizable() {
         return info.resizeMode != RESIZE_MODE_RESIZEABLE
-                && info.resizeMode != RESIZE_MODE_RESIZEABLE_AND_PIPABLE
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
 
     /**
-     * @return whether this activity's resize mode supports PIP.
+     * @return whether this activity supports PiP multi-window and can be put in the pinned stack.
      */
     boolean supportsPictureInPicture() {
-        return !isHomeActivity() && info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+        return service.mSupportsPictureInPicture && !isHomeActivity()
+                && info.supportsPictureInPicture();
+    }
+
+    /**
+     * @return whether this activity supports split-screen multi-window and can be put in the docked
+     *         stack.
+     */
+    boolean supportsSplitScreen() {
+        // An activity can not be docked even if it is considered resizeable because it only
+        // supports picture-in-picture mode but has a non-resizeable resizeMode
+        return service.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+    }
+
+    /**
+     * @return whether this activity supports freeform multi-window and can be put in the freeform
+     *         stack.
+     */
+    boolean supportsFreeform() {
+        return service.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
+    }
+
+    /**
+     * @return whether this activity supports non-PiP multi-window.
+     */
+    private boolean supportsResizeableMultiWindow() {
+        return service.mSupportsMultiWindow && !isHomeActivity()
+                && (ActivityInfo.isResizeableMode(info.resizeMode)
+                        || service.mForceResizableActivities);
     }
 
     /**
@@ -943,10 +967,6 @@ final class ActivityRecord implements AppWindowContainerListener {
             // Local call
         }
         return false;
-    }
-
-    boolean canGoInDockedStack() {
-        return !isHomeActivity() && isResizeableOrForced();
     }
 
     boolean isAlwaysFocusable() {

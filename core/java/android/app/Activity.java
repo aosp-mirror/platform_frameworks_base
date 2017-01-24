@@ -3108,7 +3108,7 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void enterPictureInPictureModeIfPossible() {
-        if (mActivityInfo.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE) {
+        if (mActivityInfo.supportsPictureInPicture()) {
             enterPictureInPictureMode();
         }
     }

@@ -9341,7 +9341,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (tr.mBounds != null) {
             rti.bounds = new Rect(tr.mBounds);
         }
-        rti.isDockable = tr.canGoInDockedStack();
+        rti.supportsSplitScreenMultiWindow = tr.supportsSplitScreen();
         rti.resizeMode = tr.mResizeMode;
 
         ActivityRecord base = null;
@@ -13404,13 +13404,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (supportsMultiWindow || forceResizable) {
                 mSupportsMultiWindow = true;
                 mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
-                mSupportsPictureInPicture = supportsPictureInPicture || forceResizable;
             } else {
                 mSupportsMultiWindow = false;
                 mSupportsFreeformWindowManagement = false;
-                mSupportsPictureInPicture = false;
             }
             mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
+            mSupportsPictureInPicture = supportsPictureInPicture;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             // This happens before any activities are started, so we can change global configuration
