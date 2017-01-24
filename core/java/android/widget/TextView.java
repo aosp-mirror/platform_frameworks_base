@@ -6635,7 +6635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public boolean handleBackInTextActionModeIfNeeded(KeyEvent event) {
         // Do nothing unless mEditor is in text action mode.
-        if (mEditor == null || mEditor.mTextActionMode == null) {
+        if (mEditor == null || mEditor.getTextActionMode() == null) {
             return false;
         }
 
@@ -6819,7 +6819,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Has to be done on key down (and not on key up) to correctly be intercepted.
             case KeyEvent.KEYCODE_BACK:
-                if (mEditor != null && mEditor.mTextActionMode != null) {
+                if (mEditor != null && mEditor.getTextActionMode() != null) {
                     stopTextActionMode();
                     return KEY_EVENT_HANDLED;
                 }
@@ -9012,7 +9012,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (mEditor != null) {
                     mEditor.refreshTextActionMode();
-                    if (!hasSelection() && mEditor.mTextActionMode == null && hasTransientState()) {
+                    if (!hasSelection()
+                            && mEditor.getTextActionMode() == null && hasTransientState()) {
                         // User generated selection has been removed.
                         setHasTransientState(false);
                     }
@@ -10009,7 +10010,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         Selection.setSelection((Spannable) text, start, end);
                         // Make sure selection mode is engaged.
                         if (mEditor != null) {
-                            mEditor.startSelectionActionMode(null);
+                            mEditor.startSelectionActionModeAsync();
                         }
                         return true;
                     }
