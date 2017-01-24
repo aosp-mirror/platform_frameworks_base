@@ -131,6 +131,7 @@ package android {
     field public static final java.lang.String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final java.lang.String READ_RUNTIME_PROFILES = "android.permission.READ_RUNTIME_PROFILES";
     field public static final java.lang.String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
+    field public static final java.lang.String READ_SYSTEM_UPDATE_INFO = "android.permission.READ_SYSTEM_UPDATE_INFO";
     field public static final java.lang.String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
@@ -760,6 +761,7 @@ package android.content {
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final java.lang.String STATS_MANAGER = "stats";
+    field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final java.lang.String VR_SERVICE = "vrmanager";
     field public static final java.lang.String WIFI_RTT_SERVICE = "rttmanager";
     field public static final java.lang.String WIFI_SCANNING_SERVICE = "wifiscanner";
@@ -3485,6 +3487,22 @@ package android.os {
 
   public static abstract interface RemoteCallback.OnResultListener {
     method public abstract void onResult(android.os.Bundle);
+  }
+
+  public class SystemUpdateManager {
+    method public android.os.Bundle retrieveSystemUpdateInfo();
+    method public void updateSystemUpdateInfo(android.os.PersistableBundle);
+    field public static final java.lang.String KEY_IS_SECURITY_UPDATE = "is_security_update";
+    field public static final java.lang.String KEY_STATUS = "status";
+    field public static final java.lang.String KEY_TARGET_BUILD_FINGERPRINT = "target_build_fingerprint";
+    field public static final java.lang.String KEY_TARGET_SECURITY_PATCH_LEVEL = "target_security_patch_level";
+    field public static final java.lang.String KEY_TITLE = "title";
+    field public static final int STATUS_IDLE = 1; // 0x1
+    field public static final int STATUS_IN_PROGRESS = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_WAITING_DOWNLOAD = 2; // 0x2
+    field public static final int STATUS_WAITING_INSTALL = 4; // 0x4
+    field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
   }
 
   public class UpdateEngine {
