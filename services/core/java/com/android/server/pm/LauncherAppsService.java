@@ -232,7 +232,12 @@ public class LauncherAppsService extends SystemService {
             try {
                 UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
                 if (callingUserInfo.isManagedProfile()) {
-                    throw new SecurityException(message + " for another profile " + targetUserId);
+                    // TODO: Make it SecurityException.  See b/34650921
+                    // throw new SecurityException(message + " for another profile " + targetUserId);
+
+                    // TODO: Report caller package name.
+                    Slog.wtfStack(TAG, message + " for another profile " + targetUserId
+                            + " from " + callingUserId);
                 }
 
                 UserInfo targetUserInfo = mUm.getUserInfo(targetUserId);
