@@ -259,7 +259,16 @@ class AppErrors {
         }
     }
 
-    void scheduleAppCrashLocked(int uid, int initialPid, String packageName,
+    /**
+     * Induce a crash in the given app.
+     *
+     * @param uid if nonnegative, the required matching uid of the target to crash
+     * @param initialPid fast-path match for the target to crash
+     * @param packageName fallback match if the stated pid is not found or doesn't match uid
+     * @param userId If nonnegative, required to identify a match by package name
+     * @param message
+     */
+    void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
             String message) {
         ProcessRecord proc = null;
 
@@ -270,14 +279,15 @@ class AppErrors {
         synchronized (mService.mPidsSelfLocked) {
             for (int i=0; i<mService.mPidsSelfLocked.size(); i++) {
                 ProcessRecord p = mService.mPidsSelfLocked.valueAt(i);
-                if (p.uid != uid) {
+                if (uid >= 0 && p.uid != uid) {
                     continue;
                 }
                 if (p.pid == initialPid) {
                     proc = p;
                     break;
                 }
-                if (p.pkgList.containsKey(packageName)) {
+                if (p.pkgList.containsKey(packageName)
+                        && (userId < 0 || p.userId == userId)) {
                     proc = p;
                 }
             }
@@ -286,7 +296,8 @@ class AppErrors {
         if (proc == null) {
             Slog.w(TAG, "crashApplication: nothing for uid=" + uid
                     + " initialPid=" + initialPid
-                    + " packageName=" + packageName);
+                    + " packageName=" + packageName
+                    + " userId=" + userId);
             return;
         }
 
