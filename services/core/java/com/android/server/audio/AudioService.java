@@ -6502,6 +6502,35 @@ public class AudioService extends IAudioService.Stub
         return mRecordMonitor.getActiveRecordingConfigurations();
     }
 
+    public void disableRingtoneSync() {
+        final int callingUserId = UserHandle.getCallingUserId();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            UserManager userManager = UserManager.get(mContext);
+
+            // Disable the sync setting
+            Settings.Secure.putIntForUser(mContentResolver,
+                    Settings.Secure.SYNC_PARENT_SOUNDS, 0 /* false */, callingUserId);
+
+            UserInfo parentInfo = userManager.getProfileParent(callingUserId);
+            if (parentInfo != null && parentInfo.id != callingUserId) {
+                // This is a managed profile, so we clone the ringtones from the parent profile
+                cloneRingtoneSetting(callingUserId, parentInfo.id, Settings.System.RINGTONE);
+                cloneRingtoneSetting(callingUserId, parentInfo.id,
+                        Settings.System.NOTIFICATION_SOUND);
+                cloneRingtoneSetting(callingUserId, parentInfo.id, Settings.System.ALARM_ALERT);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private void cloneRingtoneSetting(int userId, int parentId, String ringtoneSetting) {
+        String parentSetting = Settings.System.getStringForUser(mContentResolver, ringtoneSetting,
+                parentId);
+        Settings.System.putStringForUser(mContentResolver, ringtoneSetting, parentSetting, userId);
+    }
+
     //======================
     // Audio playback notification
     //======================

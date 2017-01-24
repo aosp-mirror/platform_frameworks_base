@@ -33,8 +33,11 @@ import android.database.Cursor;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
@@ -849,6 +852,18 @@ public class RingtoneManager {
      */
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
         final ContentResolver resolver = context.getContentResolver();
+
+        if (Settings.Secure.getString(resolver, Settings.Secure.SYNC_PARENT_SOUNDS).equals("1")) {
+            // Sync is enabled, so we need to disable it
+            IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+            IAudioService audioService = IAudioService.Stub.asInterface(b);
+            try {
+                audioService.disableRingtoneSync();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to disable ringtone sync.");
+                return;
+            }
+        }
 
         String setting = getSettingForType(type);
         if (setting == null) return;

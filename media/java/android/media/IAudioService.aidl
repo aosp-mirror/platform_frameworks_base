@@ -192,5 +192,7 @@ interface IAudioService {
 
     oneway void releasePlayer(in int piid);
 
+    void disableRingtoneSync();
+
     // WARNING: read warning at top of file, it is recommended to add new methods at the end
 }
