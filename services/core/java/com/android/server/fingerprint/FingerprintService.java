@@ -41,6 +41,7 @@ import android.os.IHwBinder;
 import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.security.KeyStore;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemClock;
@@ -63,7 +64,6 @@ import org.json.JSONObject;
 
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
-
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
@@ -276,8 +276,18 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         }
     }
 
-    protected void handleAuthenticated(long deviceId, int fingerId, int groupId) {
+    protected void handleAuthenticated(long deviceId, int fingerId, int groupId,
+            ArrayList<Byte> token) {
         ClientMonitor client = mCurrentClient;
+        if (fingerId != 0) {
+            // Ugh...
+            final byte[] byteToken = new byte[token.size()];
+            for (int i = 0; i < token.size(); i++) {
+                byteToken[i] = token.get(i);
+            }
+            // Send to Keystore
+            KeyStore.getInstance().addAuthToken(byteToken);
+        }
         if (client != null && client.onAuthenticated(fingerId, groupId)) {
             removeClient(client);
         }
@@ -721,11 +731,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         }
 
         @Override
-        public void onAuthenticated(final long deviceId, final int fingerId, final int groupId) {
+        public void onAuthenticated(final long deviceId, final int fingerId, final int groupId,
+                ArrayList<Byte> token) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    handleAuthenticated(deviceId, fingerId, groupId);
+                    handleAuthenticated(deviceId, fingerId, groupId, token);
                 }
             });
         }
