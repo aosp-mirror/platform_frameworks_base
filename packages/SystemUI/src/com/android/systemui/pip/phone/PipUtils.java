@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -29,14 +30,23 @@ public class PipUtils {
     private static final String TAG = "PipUtils";
 
     /**
-     * @return the ComponentName of the top activity in the pinned stack, or null if none exists.
+     * @return the ComponentName of the top non-SystemUI activity in the pinned stack, or null if
+     *         none exists.
      */
-    public static ComponentName getTopPinnedActivity(IActivityManager activityManager) {
+    public static ComponentName getTopPinnedActivity(Context context,
+            IActivityManager activityManager) {
         try {
-            StackInfo pinnedStackInfo = activityManager.getStackInfo(PINNED_STACK_ID);
+            final String sysUiPackageName = context.getPackageName();
+            final StackInfo pinnedStackInfo = activityManager.getStackInfo(PINNED_STACK_ID);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
-                return pinnedStackInfo.topActivity;
+                for (int i = pinnedStackInfo.taskNames.length - 1; i >= 0; i--) {
+                    ComponentName cn = ComponentName.unflattenFromString(
+                            pinnedStackInfo.taskNames[i]);
+                    if (cn != null && !cn.getPackageName().equals(sysUiPackageName)) {
+                        return cn;
+                    }
+                }
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to get pinned stack.");

@@ -86,9 +86,12 @@ public class PipManager {
             // another package than the top activity in the stack
             boolean expandPipToFullscreen = true;
             if (sourceComponent != null) {
-                ComponentName topActivity = PipUtils.getTopPinnedActivity(mActivityManager);
-                expandPipToFullscreen = topActivity != null && topActivity.getPackageName().equals(
-                        sourceComponent.getPackageName());
+                ComponentName topActivity = PipUtils.getTopPinnedActivity(mContext,
+                        mActivityManager);
+                if (topActivity != null && topActivity.getPackageName().equals(
+                        sourceComponent.getPackageName())) {
+                    expandPipToFullscreen = false;
+                }
             }
             if (expandPipToFullscreen) {
                 mTouchHandler.expandPinnedStackToFullscreen();
