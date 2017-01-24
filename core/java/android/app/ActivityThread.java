@@ -91,7 +91,6 @@ import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.service.autofill.AutoFillService;
 import android.service.autofill.IAutoFillAppCallback;
-import android.service.voice.VoiceInteractionSession;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -641,7 +640,6 @@ public final class ActivityThread {
         IBinder requestToken;
         int requestType;
         int sessionId;
-        int flags;
     }
 
     static final class ActivityConfigChangeData {
@@ -1249,13 +1247,12 @@ public final class ActivityThread {
 
         @Override
         public void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
-                int requestType, int sessionId, int flags) {
+                int requestType, int sessionId) {
             RequestAssistContextExtras cmd = new RequestAssistContextExtras();
             cmd.activityToken = activityToken;
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
             cmd.sessionId = sessionId;
-            cmd.flags = flags;
             sendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
         }
 
@@ -2905,9 +2902,7 @@ public final class ActivityThread {
         // - it does not need an AssistContent
         // - it does not call onProvideAssistData()
         // - it needs an IAutoFillCallback
-        // - it sets the flags so views can provide autofill-specific data (such as passwords)
-        boolean forAutoFill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL
-                || cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL_SAVE;
+        boolean forAutoFill = cmd.requestType == ActivityManager.ASSIST_CONTEXT_AUTO_FILL;
 
         // TODO(b/33197203): decide if lastSessionId logic applies to auto-fill sessions
         if (mLastSessionId != cmd.sessionId) {
@@ -2934,11 +2929,8 @@ public final class ActivityThread {
                 referrer = r.activity.onProvideReferrer();
             }
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutoFill) {
-                structure = new AssistStructure(r.activity, cmd.flags);
+                structure = new AssistStructure(r.activity, forAutoFill);
                 Intent activityIntent = r.activity.getIntent();
-                if (forAutoFill) {
-                    data.putInt(VoiceInteractionSession.KEY_FLAGS, cmd.flags);
-                }
                 boolean addAutoFillCallback = false;
                 // TODO(b/33197203): re-evaluate conditions below for auto-fill. In particular,
                 // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
@@ -2979,6 +2971,7 @@ public final class ActivityThread {
         if (structure == null) {
             structure = new AssistStructure();
         }
+
         // TODO(b/33197203): decide if lastSessionId logic applies to auto-fill sessions
         mLastAssistStructures.add(new WeakReference<>(structure));
         IActivityManager mgr = ActivityManager.getService();

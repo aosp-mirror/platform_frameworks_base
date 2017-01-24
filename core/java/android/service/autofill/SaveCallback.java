@@ -57,23 +57,18 @@ public final class SaveCallback implements Dumpable {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
+     * {@link AutoFillService#onSaveRequest (android.app.assist.AssistStructure, Bundle,
      * SaveCallback)} was successfully fulfilled by the service.
-     *
-     * @param ids ids ({@link ViewNode#getAutoFillId()}) of the fields that were saved.
      *
      * @throws RuntimeException if an error occurred while calling the Android System.
      */
-    public void onSuccess(AutoFillId[] ids) {
-        if (DEBUG) Log.d(TAG, "onSuccess(): ids=" + ((ids == null) ? "null" : ids.length));
-
-        Preconditions.checkArgument(ids != null, "ids cannot be null");
-        Preconditions.checkArgument(ids.length > 0, "ids cannot be empty");
+    public void onSuccess() {
+        if (DEBUG) Log.d(TAG, "onSuccess()");
 
         synchronized (mCallback) {
             checkNotRepliedYetLocked();
             try {
-                mCallback.highlightSavedFields(ids);
+                mCallback.onSaved();
             } catch (RemoteException e) {
                 e.rethrowAsRuntimeException();
             } finally {
@@ -93,8 +88,6 @@ public final class SaveCallback implements Dumpable {
      */
     public void onFailure(CharSequence message) {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
-
-        Preconditions.checkArgument(message != null, "message cannot be null");
 
         synchronized (mCallback) {
             checkNotRepliedYetLocked();

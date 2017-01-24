@@ -32,6 +32,7 @@ import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutoFillType;
@@ -562,6 +563,13 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+        structure.setAutoFillValue(AutoFillValue.forToggle(isChecked()));
+        // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+    }
 
     @Override
     public void autoFill(AutoFillValue value) {

@@ -19,6 +19,7 @@ package android.service.autofill;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 
 /**
  * Mediator between apps being auto-filled and auto-fill service implementations.
@@ -30,6 +31,12 @@ oneway interface IAutoFillManagerService {
     // Called by AutoFillManager (app).
     void requestAutoFill(in AutoFillId id, in Rect bounds, int flags);
 
+    // Called by AutoFillManager (app).
+    void onValueChanged(in AutoFillId id, in AutoFillValue value);
+
     // Called by ShellCommand only.
-    void requestAutoFillForUser(int userId, int flags);
+    void requestAutoFillForUser(int userId);
+
+    // Called by ShellCommand only.
+    void requestSaveForUser(int userId);
 }

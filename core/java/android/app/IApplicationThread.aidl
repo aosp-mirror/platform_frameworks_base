@@ -134,7 +134,7 @@ oneway interface IApplicationThread {
     void dumpDbInfo(in ParcelFileDescriptor fd, in String[] args);
     void unstableProviderDied(IBinder provider);
     void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
-            int requestType, int sessionId, int flags);
+            int requestType, int sessionId);
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout);
     void setProcessState(int state);
     void scheduleInstallProvider(in ProviderInfo provider);

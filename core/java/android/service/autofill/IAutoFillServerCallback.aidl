@@ -33,7 +33,7 @@ oneway interface IAutoFillServerCallback {
     // TODO(b/33197203): document methods
     void showResponse(in FillResponse response);
     void showError(CharSequence message);
-    void highlightSavedFields(in AutoFillId[] ids);
+    void onSaved();
     void unlockFillResponse(int flags);
     void unlockDataset(in Dataset dataset, int flags);
 }

@@ -93,39 +93,38 @@ final class AutoFillUI {
     }
 
     /**
-     * Highlights in the {@link Activity} the fields saved by the service.
-     */
-    void highlightSavedFields(AutoFillId[] ids) {
-        // TODO(b/33197203): proper implementation (must be handled by activity)
-        UiThread.getHandler().runWithScissors(() -> {
-            Toast.makeText(mContext, "AutoFill: service saved ids " + Arrays.toString(ids),
-                    Toast.LENGTH_LONG).show();
-        }, 0);
-    }
-
-    /**
      * Hides the fill UI.
+     * Shows the options from a {@link FillResponse} so the user can pick up the proper
+     * {@link Dataset} (when the response has one) for a given view (identified by
+     * {@code autoFillId}).
      */
     void hideFillUi() {
         UiThread.getHandler().runWithScissors(() -> {
-            if (mFillWindow != null) {
-                if (DEBUG) Slog.d(TAG, "remove FillUi remove " + mFillWindow);
-                mFillWindow.hide();
-            }
-
-            mViewState = null;
-            mBounds = null;
-            mFilterText = null;
-            mFillView = null;
-            mFillWindow = null;
+            hideFillUiLocked();
         }, 0);
     }
+
+    // Must be called in inside UI Thread
+    private void hideFillUiLocked() {
+        if (mFillWindow != null) {
+            if (DEBUG) Slog.d(TAG, "hideFillUiLocked(): hide" + mFillWindow);
+
+            mFillWindow.hide();
+        }
+
+        mViewState = null;
+        mBounds = null;
+        mFilterText = null;
+        mFillView = null;
+        mFillWindow = null;
+    }
+
 
     /**
      * Shows the fill UI, removing the previous fill UI if the has changed.
      *
      * @param viewState the view state, compared by reference to know if new UI should be shown
-     * @param response the response to show, not used if viewState is the same
+     * @param datasets the datasets to show, not used if viewState is the same
      * @param bounds bounds of the view to be filled, used if changed
      * @param filterText text of the view to be filled, used if changed
      */
@@ -142,7 +141,6 @@ final class AutoFillUI {
                         (dataset) -> {
                             mSession.autoFillApp(dataset);
                             hideFillUi();
-                            showSaveUi();
                         });
                 mFillWindow = new AnchoredWindow(
                         mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -204,6 +202,7 @@ final class AutoFillUI {
             public void onSaveClick() {
                 hideSnackbar();
 
+                // TODO(b/33197203): add MetricsLogger call
                 mSession.requestSave();
             }
             @Override
@@ -227,6 +226,18 @@ final class AutoFillUI {
                 Toast.makeText(mContext, "AutoFill: fingerprint failed", Toast.LENGTH_LONG).show();
             }, 0);
         }
+    }
+
+    /**
+     * Closes all UI affordances.
+     */
+    void closeAll() {
+        if (DEBUG) Slog.d(TAG, "closeAll()");
+
+        UiThread.getHandler().runWithScissors(() -> {
+            hideSnackbarLocked();
+            hideFillUiLocked();
+        }, 0);
     }
 
     void dump(PrintWriter pw) {
@@ -261,11 +272,16 @@ final class AutoFillUI {
 
     private void hideSnackbar() {
         UiThread.getHandler().runWithScissors(() -> {
-            if (mSnackbar != null) {
-                mWm.removeView(mSnackbar);
-                mSnackbar = null;
-            }
+            hideSnackbarLocked();
         }, 0);
+    }
+
+    // Must be called in inside UI Thread
+    private void hideSnackbarLocked() {
+        if (mSnackbar != null) {
+            mWm.removeView(mSnackbar);
+            mSnackbar = null;
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////////

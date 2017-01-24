@@ -15,9 +15,7 @@
  */
 package android.service.autofill;
 
-import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
-import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
-
+import android.annotation.CallSuper;
 import android.annotation.SdkConstant;
 import android.app.Activity;
 import android.app.Service;
@@ -28,8 +26,8 @@ import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Log;
-import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 
@@ -127,14 +125,22 @@ public abstract class AutoFillService extends Service {
     private static final int MSG_AUTO_FILL_ACTIVITY = 3;
     private static final int MSG_AUTHENTICATE_FILL_RESPONSE = 4;
     private static final int MSG_AUTHENTICATE_DATASET = 5;
+    private static final int MSG_SAVE = 6;
 
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
 
         @Override
-        public void autoFill(AssistStructure structure, IAutoFillServerCallback callback,
-                int flags) {
+        public void autoFill(AssistStructure structure, IAutoFillServerCallback callback) {
             mHandlerCaller
-                    .obtainMessageIOO(MSG_AUTO_FILL_ACTIVITY, flags, structure, callback)
+                    .obtainMessageOO(MSG_AUTO_FILL_ACTIVITY, structure, callback)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void save(AssistStructure structure, IAutoFillServerCallback callback,
+                Bundle extras) throws RemoteException {
+            mHandlerCaller
+                    .obtainMessageOOO(MSG_SAVE, structure, callback, extras)
                     .sendToTarget();
         }
 
@@ -175,10 +181,26 @@ public abstract class AutoFillService extends Service {
                     break;
                 } case MSG_AUTO_FILL_ACTIVITY: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    final int flags = msg.arg1;
-                    final AssistStructure structure = (AssistStructure) args.arg1;
-                    final IAutoFillServerCallback callback = (IAutoFillServerCallback) args.arg2;
-                    requestAutoFill(callback, structure, flags);
+                    try {
+                        final AssistStructure structure = (AssistStructure) args.arg1;
+                        final IAutoFillServerCallback callback =
+                                (IAutoFillServerCallback) args.arg2;
+                        handleAutoFill(structure, callback);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                } case MSG_SAVE: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        final AssistStructure structure = (AssistStructure) args.arg1;
+                        final IAutoFillServerCallback callback =
+                                (IAutoFillServerCallback) args.arg2;
+                        final Bundle extras = (Bundle) args.arg3;
+                        handleSave(structure, callback, extras);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
                 } case MSG_AUTHENTICATE_FILL_RESPONSE: {
                     final int flags = msg.arg1;
@@ -258,7 +280,7 @@ public abstract class AutoFillService extends Service {
      * Called when user requests service to save the fields of an {@link Activity}.
      *
      * <p>Service must call one of the {@link SaveCallback} methods (like
-     * {@link SaveCallback#onSuccess(AutoFillId[])} or {@link SaveCallback#onFailure(CharSequence)})
+     * {@link SaveCallback#onSuccess()} or {@link SaveCallback#onFailure(CharSequence)})
      * to notify the result of the request.
      *
      * @param structure {@link Activity}'s view structure.
@@ -313,9 +335,8 @@ public abstract class AutoFillService extends Service {
         if (DEBUG) Log.d(TAG, "onDatasetAuthenticationRequest(): flags=" + flags);
     }
 
-    // TODO(b/33197203): make it final and create another method classes could extend so it's
-    // guaranteed to dump the pending callbacks?
     @Override
+    @CallSuper
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mPendingCallbacks != null) {
             pw.print("Number of pending callbacks: "); pw.println(mPendingCallbacks.size());
@@ -331,29 +352,23 @@ public abstract class AutoFillService extends Service {
         }
     }
 
-    private void requestAutoFill(IAutoFillServerCallback callback, AssistStructure structure,
-            int flags) {
-        if (DEBUG) Log.d(TAG, "requestAutoFill(): flags=" + flags);
-
-        if ((flags & AUTO_FILL_FLAG_TYPE_FILL) != 0) {
-            final FillCallback fillCallback = new FillCallback(callback);
-            if (DEBUG_PENDING_CALLBACKS) {
-                addPendingCallback(fillCallback);
-            }
-            // TODO(b/33197203): hook up the cancelationSignal
-            onFillRequest(structure, null, new CancellationSignal(), fillCallback);
-            return;
+    private void handleAutoFill(AssistStructure structure, IAutoFillServerCallback callback) {
+        final FillCallback fillCallback = new FillCallback(callback);
+        if (DEBUG_PENDING_CALLBACKS) {
+            addPendingCallback(fillCallback);
         }
-        if ((flags & AUTO_FILL_FLAG_TYPE_SAVE) != 0) {
-            final SaveCallback saveCallback = new SaveCallback(callback);
-            if (DEBUG_PENDING_CALLBACKS) {
-                addPendingCallback(saveCallback);
-            }
-            onSaveRequest(structure, null, saveCallback);
-            return;
-        }
+        // TODO(b/33197203): hook up the cancelationSignal
+        onFillRequest(structure, null, new CancellationSignal(), fillCallback);
+        return;
+    }
 
-        Log.w(TAG, "invalid flags on requestAutoFill(): " + flags);
+    private void handleSave(AssistStructure structure, IAutoFillServerCallback callback,
+            Bundle extras) {
+        final SaveCallback saveCallback = new SaveCallback(callback);
+        if (DEBUG_PENDING_CALLBACKS) {
+            addPendingCallback(saveCallback);
+        }
+        onSaveRequest(structure, extras, saveCallback);
     }
 
     private void addPendingCallback(CallbackHelper.Dumpable callback) {

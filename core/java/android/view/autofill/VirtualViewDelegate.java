@@ -27,9 +27,10 @@ import android.view.ViewStructure;
  *
  * <p>The view hierarchy is typically created through the
  * {@link View#onProvideAutoFillVirtualStructure(android.view.ViewStructure, int)} call and client
- * add virtual children by calling {@link ViewStructure#newChild(int, int)} or
- * {@link ViewStructure#asyncNewChild(int, int)}, where the client provides the {@code virtualId}
- * of the children - the same {@code virtualId} is used in the methods of this class.
+ * add virtual children by calling {@link ViewStructure#newChild(int, int, int)} or
+ * {@link ViewStructure#asyncNewChild(int, int, int)}, where the client provides the
+ * {@code virtualId} of the children - the same {@code virtualId} is used in the methods of this
+ * class.
  *
  * <p>Objects of this class are typically created by overriding
  * {@link View#getAutoFillVirtualViewDelegate(Callback)} and saving the passed callback, which must
