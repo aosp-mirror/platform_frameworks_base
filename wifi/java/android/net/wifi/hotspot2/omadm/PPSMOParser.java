@@ -24,6 +24,9 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -147,11 +150,21 @@ public final class PPSMOParser {
      * Fields under Credential subtree.
      */
     private static final String NODE_CREDENTIAL = "Credential";
+    private static final String NODE_CREATION_DATE = "CreationDate";
+    private static final String NODE_EXPIRATION_DATE = "ExpirationDate";
     private static final String NODE_USERNAME_PASSWORD = "UsernamePassword";
     private static final String NODE_USERNAME = "Username";
     private static final String NODE_PASSWORD = "Password";
+    private static final String NODE_MACHINE_MANAGED = "MachineManaged";
+    private static final String NODE_SOFT_TOKEN_APP = "SoftTokenApp";
+    private static final String NODE_ABLE_TO_SHARE = "AbleToShare";
     private static final String NODE_EAP_METHOD = "EAPMethod";
     private static final String NODE_EAP_TYPE = "EAPType";
+    private static final String NODE_VENDOR_ID = "VendorId";
+    private static final String NODE_VENDOR_TYPE = "VendorType";
+    private static final String NODE_INNER_EAP_TYPE = "InnerEAPType";
+    private static final String NODE_INNER_VENDOR_ID = "InnerVendorID";
+    private static final String NODE_INNER_VENDOR_TYPE = "InnerVendorType";
     private static final String NODE_INNER_METHOD = "InnerMethod";
     private static final String NODE_DIGITAL_CERTIFICATE = "DigitalCertificate";
     private static final String NODE_CERTIFICATE_TYPE = "CertificateType";
@@ -159,6 +172,7 @@ public final class PPSMOParser {
     private static final String NODE_REALM = "Realm";
     private static final String NODE_SIM = "SIM";
     private static final String NODE_SIM_IMSI = "IMSI";
+    private static final String NODE_CHECK_AAA_SERVER_CERT_STATUS = "CheckAAAServerCertStatus";
 
     /**
      * URN (Unique Resource Name) for PerProviderSubscription Management Object Tree.
@@ -812,6 +826,12 @@ public final class PPSMOParser {
         Credential credential = new Credential();
         for (PPSNode child: node.getChildren()) {
             switch (child.getName()) {
+                case NODE_CREATION_DATE:
+                    credential.creationTimeInMs = parseDate(getPpsNodeValue(child));
+                    break;
+                case NODE_EXPIRATION_DATE:
+                    credential.expirationTimeInMs = parseDate(getPpsNodeValue(child));
+                    break;
                 case NODE_USERNAME_PASSWORD:
                     credential.userCredential = parseUserCredential(child);
                     break;
@@ -820,6 +840,10 @@ public final class PPSMOParser {
                     break;
                 case NODE_REALM:
                     credential.realm = getPpsNodeValue(child);
+                    break;
+                case NODE_CHECK_AAA_SERVER_CERT_STATUS:
+                    credential.checkAAAServerCertStatus =
+                            Boolean.parseBoolean(getPpsNodeValue(child));
                     break;
                 case NODE_SIM:
                     credential.simCredential = parseSimCredential(child);
@@ -855,6 +879,15 @@ public final class PPSMOParser {
                 case NODE_PASSWORD:
                     userCred.password = getPpsNodeValue(child);
                     break;
+                case NODE_MACHINE_MANAGED:
+                    userCred.machineManaged = Boolean.parseBoolean(getPpsNodeValue(child));
+                    break;
+                case NODE_SOFT_TOKEN_APP:
+                    userCred.softTokenApp = getPpsNodeValue(child);
+                    break;
+                case NODE_ABLE_TO_SHARE:
+                    userCred.ableToShare = Boolean.parseBoolean(getPpsNodeValue(child));
+                    break;
                 case NODE_EAP_METHOD:
                     parseEAPMethod(child, userCred);
                     break;
@@ -888,6 +921,15 @@ public final class PPSMOParser {
                     break;
                 case NODE_INNER_METHOD:
                     userCred.nonEapInnerMethod = getPpsNodeValue(child);
+                    break;
+                case NODE_VENDOR_ID:
+                case NODE_VENDOR_TYPE:
+                case NODE_INNER_EAP_TYPE:
+                case NODE_INNER_VENDOR_ID:
+                case NODE_INNER_VENDOR_TYPE:
+                    // Only EAP-TTLS is currently supported for user credential, which doesn't
+                    // use any of these parameters.
+                    Log.d(TAG, "Ignore unsupported EAP method parameter: " + child.getName());
                     break;
                 default:
                     throw new ParsingException("Unknown node under EAPMethod: " + child.getName());
@@ -978,6 +1020,22 @@ public final class PPSMOParser {
           }
         }
         return result;
+    }
+
+    /**
+     * Convert a date string to the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @param dateStr String in the format of yyyy-MM-dd'T'HH:mm:ss'Z'
+     * @return number of milliseconds
+     * @throws ParsingException
+     */
+    private static long parseDate(String dateStr) throws ParsingException {
+        try {
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            return format.parse(dateStr).getTime();
+        } catch (ParseException pe) {
+            throw new ParsingException("Badly formatted time: " + dateStr);
+        }
     }
 
     /**
