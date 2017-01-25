@@ -63,7 +63,10 @@ import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
 import android.net.Uri;
 import android.net.WifiKey;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiSsid;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,6 +85,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.devicepolicy.MockUtils;
 
+import com.google.android.collect.Lists;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,9 +101,12 @@ import org.mockito.stubbing.Answer;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * Tests for {@link NetworkScoreService}.
@@ -106,19 +114,27 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class NetworkScoreServiceTest {
+    private static final String SSID = "ssid";
+    private static final String SSID_2 = "ssid_2";
+    private static final String SSID_3 = "ssid_3";
     private static final ScoredNetwork SCORED_NETWORK =
-            new ScoredNetwork(new NetworkKey(new WifiKey("\"ssid\"", "00:00:00:00:00:00")),
+            new ScoredNetwork(new NetworkKey(new WifiKey(quote(SSID), "00:00:00:00:00:00")),
+                    null /* rssiCurve*/);
+    private static final ScoredNetwork SCORED_NETWORK_2 =
+            new ScoredNetwork(new NetworkKey(new WifiKey(quote(SSID_2), "00:00:00:00:00:00")),
                     null /* rssiCurve*/);
     private static final NetworkScorerAppData NEW_SCORER =
         new NetworkScorerAppData("newPackageName", 1, "newScoringServiceClass");
 
-    @Mock private PackageManager mPackageManager;
     @Mock private NetworkScorerAppManager mNetworkScorerAppManager;
     @Mock private Context mContext;
     @Mock private Resources mResources;
     @Mock private INetworkScoreCache.Stub mNetworkScoreCache, mNetworkScoreCache2;
     @Mock private IBinder mIBinder, mIBinder2;
     @Mock private INetworkRecommendationProvider mRecommendationProvider;
+    @Mock private Function<List<ScoredNetwork>, List<ScoredNetwork>> mCurrentNetworkFilter;
+    @Mock private Function<List<ScoredNetwork>, List<ScoredNetwork>> mScanResultsFilter;
+    @Mock private WifiInfo mWifiInfo;
     @Captor private ArgumentCaptor<List<ScoredNetwork>> mScoredNetworkCaptor;
 
     private ContentResolver mContentResolver;
@@ -127,6 +143,11 @@ public class NetworkScoreServiceTest {
     private RemoteCallback mRemoteCallback;
     private OnResultListener mOnResultListener;
     private HandlerThread mHandlerThread;
+    private List<ScanResult> mScanResults;
+
+    private static String quote(String str) {
+        return String.format("\"%s\"", str);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -136,6 +157,8 @@ public class NetworkScoreServiceTest {
         mContentResolver = InstrumentationRegistry.getContext().getContentResolver();
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getResources()).thenReturn(mResources);
+        when(mWifiInfo.getSSID()).thenReturn(SCORED_NETWORK.networkKey.wifiKey.ssid);
+        when(mWifiInfo.getBSSID()).thenReturn(SCORED_NETWORK.networkKey.wifiKey.bssid);
         mHandlerThread = new HandlerThread("NetworkScoreServiceTest");
         mHandlerThread.start();
         mNetworkScoreService = new NetworkScoreService(mContext, mNetworkScorerAppManager,
@@ -150,6 +173,21 @@ public class NetworkScoreServiceTest {
         Settings.Global.putLong(mContentResolver,
                 Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS, -1L);
         mNetworkScoreService.refreshRecommendationRequestTimeoutMs();
+        populateScanResults();
+    }
+
+    private void populateScanResults() {
+        mScanResults = new ArrayList<>();
+        mScanResults.add(createScanResult(SSID, SCORED_NETWORK.networkKey.wifiKey.bssid));
+        mScanResults.add(createScanResult(SSID_2, SCORED_NETWORK_2.networkKey.wifiKey.bssid));
+        mScanResults.add(createScanResult(SSID_3, "10:10:00:00:10:10"));
+    }
+
+    private ScanResult createScanResult(String ssid, String bssid) {
+        ScanResult result = new ScanResult();
+        result.wifiSsid = WifiSsid.createFromAsciiEncoded(ssid);
+        result.BSSID = bssid;
+        return result;
     }
 
     @After
@@ -620,6 +658,173 @@ public class NetworkScoreServiceTest {
         mNetworkScoreService.systemRunning();
 
         assertEquals(NEW_SCORER.packageName, mNetworkScoreService.getActiveScorerPackage());
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_nullFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList = Lists.newArrayList(SCORED_NETWORK);
+        NetworkScoreService.FilteringCacheUpdatingConsumer consumer =
+                new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                        new ArrayList<>(scoredNetworkList), NetworkKey.TYPE_WIFI,
+                        mCurrentNetworkFilter, mScanResultsFilter);
+
+        consumer.accept(mNetworkScoreCache, null /*cookie*/);
+
+        verify(mNetworkScoreCache).updateScores(scoredNetworkList);
+        verifyZeroInteractions(mCurrentNetworkFilter, mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_noneFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList = Lists.newArrayList(SCORED_NETWORK);
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                new ArrayList<>(scoredNetworkList),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_NONE);
+
+        verify(mNetworkScoreCache).updateScores(scoredNetworkList);
+        verifyZeroInteractions(mCurrentNetworkFilter, mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_unknownFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList = Lists.newArrayList(SCORED_NETWORK);
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                new ArrayList<>(scoredNetworkList),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        consumer.accept(mNetworkScoreCache, -1 /*cookie*/);
+
+        verify(mNetworkScoreCache).updateScores(scoredNetworkList);
+        verifyZeroInteractions(mCurrentNetworkFilter, mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_nonIntFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList = Lists.newArrayList(SCORED_NETWORK);
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                new ArrayList<>(scoredNetworkList),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        consumer.accept(mNetworkScoreCache, "not an int" /*cookie*/);
+
+        verify(mNetworkScoreCache).updateScores(scoredNetworkList);
+        verifyZeroInteractions(mCurrentNetworkFilter, mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_emptyScoreList() throws Exception {
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                Collections.emptyList(),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_NONE);
+
+        verifyZeroInteractions(mNetworkScoreCache, mCurrentNetworkFilter, mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_currentNetworkFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList =
+                Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2);
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                new ArrayList<>(scoredNetworkList),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        List<ScoredNetwork> filteredList = new ArrayList<>(scoredNetworkList);
+        filteredList.remove(SCORED_NETWORK);
+        when(mCurrentNetworkFilter.apply(scoredNetworkList)).thenReturn(filteredList);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
+
+        verify(mNetworkScoreCache).updateScores(filteredList);
+        verifyZeroInteractions(mScanResultsFilter);
+    }
+
+    @Test
+    public void testCacheUpdatingConsumer_scanResultsFilter() throws Exception {
+        List<ScoredNetwork> scoredNetworkList =
+                Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2);
+        NetworkScoreService.FilteringCacheUpdatingConsumer
+                consumer = new NetworkScoreService.FilteringCacheUpdatingConsumer(mContext,
+                new ArrayList<>(scoredNetworkList),
+                NetworkKey.TYPE_WIFI, mCurrentNetworkFilter, mScanResultsFilter);
+
+        List<ScoredNetwork> filteredList = new ArrayList<>(scoredNetworkList);
+        filteredList.remove(SCORED_NETWORK);
+        when(mScanResultsFilter.apply(scoredNetworkList)).thenReturn(filteredList);
+        consumer.accept(mNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS);
+
+        verify(mNetworkScoreCache).updateScores(filteredList);
+        verifyZeroInteractions(mCurrentNetworkFilter);
+    }
+
+    @Test
+    public void testCurrentNetworkScoreCacheFilter_nullWifiInfo() throws Exception {
+        NetworkScoreService.CurrentNetworkScoreCacheFilter cacheFilter =
+                new NetworkScoreService.CurrentNetworkScoreCacheFilter(() -> null /*WifiInfo*/);
+
+        List<ScoredNetwork> actualList =
+                cacheFilter.apply(Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2));
+
+        assertTrue(actualList.isEmpty());
+    }
+
+    @Test
+    public void testCurrentNetworkScoreCacheFilter_scoreFiltered() throws Exception {
+        NetworkScoreService.CurrentNetworkScoreCacheFilter cacheFilter =
+                new NetworkScoreService.CurrentNetworkScoreCacheFilter(() -> mWifiInfo);
+
+        List<ScoredNetwork> actualList =
+                cacheFilter.apply(Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2));
+
+        List<ScoredNetwork> expectedList = Collections.singletonList(SCORED_NETWORK);
+        assertEquals(expectedList, actualList);
+    }
+
+    @Test
+    public void testCurrentNetworkScoreCacheFilter_currentNetworkNotInList() throws Exception {
+        when(mWifiInfo.getSSID()).thenReturn("\"notInList\"");
+        NetworkScoreService.CurrentNetworkScoreCacheFilter cacheFilter =
+                new NetworkScoreService.CurrentNetworkScoreCacheFilter(() -> mWifiInfo);
+
+        List<ScoredNetwork> actualList =
+                cacheFilter.apply(Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2));
+
+        assertTrue(actualList.isEmpty());
+    }
+
+    @Test
+    public void testScanResultsScoreCacheFilter_emptyScanResults() throws Exception {
+        NetworkScoreService.ScanResultsScoreCacheFilter cacheFilter =
+                new NetworkScoreService.ScanResultsScoreCacheFilter(Collections::emptyList);
+
+        List<ScoredNetwork> actualList =
+                cacheFilter.apply(Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2));
+
+        assertTrue(actualList.isEmpty());
+    }
+
+    @Test
+    public void testScanResultsScoreCacheFilter_scoresFiltered() throws Exception {
+        NetworkScoreService.ScanResultsScoreCacheFilter cacheFilter =
+                new NetworkScoreService.ScanResultsScoreCacheFilter(() -> mScanResults);
+
+        ScoredNetwork unmatchedScore =
+                new ScoredNetwork(new NetworkKey(new WifiKey(quote("newSsid"),
+                        "00:00:00:00:00:00")), null /* rssiCurve*/);
+
+        List<ScoredNetwork> actualList =
+                cacheFilter.apply(Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2,
+                        unmatchedScore));
+
+        List<ScoredNetwork> expectedList = Lists.newArrayList(SCORED_NETWORK, SCORED_NETWORK_2);
+        assertEquals(expectedList, actualList);
     }
 
     // "injects" the mock INetworkRecommendationProvider into the NetworkScoreService.
