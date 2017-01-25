@@ -159,8 +159,7 @@ public class NotificationComparator
     }
 
     private boolean isMediaNotification(NotificationRecord record) {
-        return record.getNotification().extras.getParcelable(
-                Notification.EXTRA_MEDIA_SESSION) != null;
+        return record.getNotification().hasMediaSession();
     }
 
     private boolean isCall(NotificationRecord record) {

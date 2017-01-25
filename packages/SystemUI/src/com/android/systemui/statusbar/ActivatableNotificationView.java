@@ -105,7 +105,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDimmed;
     private boolean mDark;
 
-    private int mBgTint = NO_COLOR;
+    protected int mBgTint = NO_COLOR;
     private float mBgAlpha = 1f;
 
     /**

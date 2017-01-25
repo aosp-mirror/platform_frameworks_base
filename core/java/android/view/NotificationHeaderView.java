@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
-    public static final int NO_COLOR = -1;
+    public static final int NO_COLOR = Notification.COLOR_INVALID;
     private final int mChildMinWidth;
     private final int mContentEndMargin;
     private View mAppName;
