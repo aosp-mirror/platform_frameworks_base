@@ -944,9 +944,9 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     /**
      * @return whether this activity is currently allowed to enter PIP, throwing an exception if
-     *         the activity is not currently visible.
+     *         the activity is not currently visible and {@param noThrow} is not set.
      */
-    boolean checkEnterPictureInPictureState(String caller) {
+    boolean checkEnterPictureInPictureState(String caller, boolean noThrow) {
         boolean isKeyguardLocked = service.isKeyguardLocked();
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
         switch (state) {
@@ -969,9 +969,13 @@ final class ActivityRecord implements AppWindowContainerListener {
                             && checkEnterPictureInPictureOnHideAppOpsState();
                 }
             default:
-                throw new IllegalStateException(caller
-                        + ": Current activity is not visible (state=" + state.name() + ") "
-                        + "r=" + this);
+                if (noThrow) {
+                    return false;
+                } else {
+                    throw new IllegalStateException(caller
+                            + ": Current activity is not visible (state=" + state.name() + ") "
+                            + "r=" + this);
+                }
         }
     }
 
@@ -1669,7 +1673,8 @@ final class ActivityRecord implements AppWindowContainerListener {
                 if (!idle) {
                     // Instead of doing the full stop routine here, let's just hide any activities
                     // we now can, and let them stop when the normal idle happens.
-                    mStackSupervisor.processStoppingActivitiesLocked(false);
+                    mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
+                            false /* remove */, true /* processPausingActivities */);
                 } else {
                     // If this activity was already idle, then we now need to make sure we perform
                     // the full stop of any activities that are waiting to do so. This is because
@@ -2139,7 +2144,7 @@ final class ActivityRecord implements AppWindowContainerListener {
             // if the app is relaunched when it's stopped, and we're not resuming,
             // put it back into stopped state.
             if (stopped) {
-                getStack().addToStopping(this, true /* immediate */);
+                getStack().addToStopping(this, true /* scheduleIdle */, false /* idleDelayed */);
             }
         }
 

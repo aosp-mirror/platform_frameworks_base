@@ -1705,7 +1705,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
-            Configuration config) {
+            boolean processPausingActivities, Configuration config) {
         if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
 
         ArrayList<ActivityRecord> finishes = null;
@@ -1761,7 +1761,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Atomically retrieve all of the other things to do.
-        final ArrayList<ActivityRecord> stops = processStoppingActivitiesLocked(true);
+        final ArrayList<ActivityRecord> stops = processStoppingActivitiesLocked(r,
+                true /* remove */, processPausingActivities);
         NS = stops != null ? stops.size() : 0;
         if ((NF = mFinishingActivities.size()) > 0) {
             finishes = new ArrayList<>(mFinishingActivities);
@@ -2689,6 +2690,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Reset the paused activity on the previous stack
         if (wasPaused) {
             prevStack.mPausingActivity = null;
+            prevStack.removeTimeoutsForActivityLocked(r);
         }
 
         // If the task had focus before (or we're requested to move focus),
@@ -3367,7 +3369,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return mService.mUserController.isCurrentProfileLocked(userId);
     }
 
-    final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {
+    final ArrayList<ActivityRecord> processStoppingActivitiesLocked(ActivityRecord idleActivity,
+            boolean remove, boolean processPausingActivities) {
         ArrayList<ActivityRecord> stops = null;
 
         final boolean nowVisible = allResumedActivitiesVisible();
@@ -3392,6 +3395,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
             }
             if ((!waitingVisible || mService.isSleepingOrShuttingDownLocked()) && remove) {
+                if (!processPausingActivities && s.state == PAUSING) {
+                    // Defer processing pausing activities in this iteration and reschedule
+                    // a delayed idle to reprocess it again
+                    removeTimeoutsForActivityLocked(idleActivity);
+                    scheduleIdleTimeoutLocked(idleActivity);
+                    continue;
+                }
+
                 if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<>();
@@ -4113,9 +4124,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             super(looper);
         }
 
-        void activityIdleInternal(ActivityRecord r) {
+        void activityIdleInternal(ActivityRecord r, boolean processPausingActivities) {
             synchronized (mService) {
-                activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
+                activityIdleInternalLocked(r != null ? r.appToken : null, true /* fromTimeout */,
+                        processPausingActivities, null);
             }
         }
 
@@ -4150,11 +4162,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
-                    activityIdleInternal((ActivityRecord)msg.obj);
+                    activityIdleInternal((ActivityRecord) msg.obj,
+                            true /* processPausingActivities */);
                 } break;
                 case IDLE_NOW_MSG: {
                     if (DEBUG_IDLE) Slog.d(TAG_IDLE, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
-                    activityIdleInternal((ActivityRecord)msg.obj);
+                    activityIdleInternal((ActivityRecord) msg.obj,
+                            false /* processPausingActivities */);
                 } break;
                 case RESUME_TOP_ACTIVITY_MSG: {
                     synchronized (mService) {

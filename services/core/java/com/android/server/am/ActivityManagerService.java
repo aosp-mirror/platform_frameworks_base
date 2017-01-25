@@ -6730,7 +6730,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
                 ActivityRecord r =
-                        mStackSupervisor.activityIdleInternalLocked(token, false, config);
+                        mStackSupervisor.activityIdleInternalLocked(token, false /* fromTimeout */,
+                                false /* processPausingActivities */, config);
                 if (stopProfiling) {
                     if ((mProfileProc == r.app) && (mProfileFd != null)) {
                         try {
@@ -7610,7 +7611,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Activity supports picture-in-picture, now check that we can enter PiP at this
                 // point, if it is
-                if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode")) {
+                if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
+                        false /* noThrow */)) {
                     return false;
                 }
 
