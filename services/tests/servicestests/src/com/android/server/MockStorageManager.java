@@ -32,6 +32,8 @@ import android.os.storage.VolumeRecord;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.internal.os.AppFuseMount;
+
 import junit.framework.AssertionFailedError;
 
 import java.util.ArrayList;
@@ -463,12 +465,28 @@ public class MockStorageManager implements IStorageManager {
     }
 
     @Override
-    public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
+    public void fstrim(int flags) throws RemoteException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void fstrim(int flags) throws RemoteException {
+    public AppFuseMount mountProxyFileDescriptorBridge() throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode)
+            throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getCacheQuotaBytes(String volumeUuid, int uid) throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getCacheSizeBytes(String volumeUuid, int uid) throws RemoteException {
         throw new UnsupportedOperationException();
     }
 
