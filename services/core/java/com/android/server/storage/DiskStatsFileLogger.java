@@ -18,6 +18,7 @@ package com.android.server.storage;
 
 import android.content.pm.PackageStats;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -118,7 +119,7 @@ public class DiskStatsFileLogger {
         long appSizeSum = 0L;
         long cacheSizeSum = 0L;
         boolean isExternal = Environment.isExternalStorageEmulated();
-        for (Map.Entry<String, PackageStats> entry : mergePackagesAcrossUsers().entrySet()) {
+        for (Map.Entry<String, PackageStats> entry : filterOnlyPrimaryUser().entrySet()) {
             PackageStats stat = entry.getValue();
             long appSize = stat.codeSize + stat.dataSize;
             long cacheSize = stat.cacheSize;
@@ -141,14 +142,17 @@ public class DiskStatsFileLogger {
     }
 
     /**
-     * A given package may exist for multiple users with distinct sizes. This function merges
-     * the duplicated packages together and sums up their sizes to get the actual totals for the
-     * package.
+     * A given package may exist for multiple users with distinct sizes. This function filters
+     * the packages that do not belong to user 0 out to ensure that we get good stats for a subset.
      * @return A mapping of package name to merged package stats.
      */
-    private ArrayMap<String, PackageStats> mergePackagesAcrossUsers() {
+    private ArrayMap<String, PackageStats> filterOnlyPrimaryUser() {
         ArrayMap<String, PackageStats> packageMap = new ArrayMap<>();
         for (PackageStats stat : mPackageStats) {
+            if (stat.userHandle != UserHandle.USER_SYSTEM) {
+                continue;
+            }
+
             PackageStats existingStats = packageMap.get(stat.packageName);
             if (existingStats != null) {
                 existingStats.cacheSize += stat.cacheSize;
