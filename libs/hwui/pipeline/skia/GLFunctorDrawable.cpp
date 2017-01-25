@@ -59,8 +59,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     SkImageInfo canvasInfo = canvas->imageInfo();
     SkMatrix44 mat4(canvas->getTotalMatrix());
 
-    SkIRect ibounds;
-    canvas->getClipDeviceBounds(&ibounds);
+    SkIRect ibounds = canvas->getDeviceClipBounds();
 
     DrawGlInfo info;
     info.clipLeft = ibounds.fLeft;

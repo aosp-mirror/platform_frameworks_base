@@ -367,7 +367,7 @@ void SkiaCanvas::translate(float dx, float dy) {
 // (see https://code.google.com/p/skia/issues/detail?id=1303)
 bool SkiaCanvas::getClipBounds(SkRect* outRect) const {
     SkIRect ibounds;
-    if (!mCanvas->getClipDeviceBounds(&ibounds)) {
+    if (!mCanvas->getDeviceClipBounds(&ibounds)) {
         return false;
     }
 
