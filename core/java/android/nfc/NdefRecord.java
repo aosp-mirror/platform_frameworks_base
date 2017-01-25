@@ -805,7 +805,7 @@ public final class NdefRecord implements Parcelable {
 
                 if (!mb && records.size() == 0 && !inChunk && !ignoreMbMe) {
                     throw new FormatException("expected MB flag");
-                } else if (mb && records.size() != 0 && !ignoreMbMe) {
+                } else if (mb && (records.size() != 0 || inChunk) && !ignoreMbMe) {
                     throw new FormatException("unexpected MB flag");
                 } else if (inChunk && il) {
                     throw new FormatException("unexpected IL flag in non-leading chunk");
@@ -839,6 +839,9 @@ public final class NdefRecord implements Parcelable {
 
                 if (cf && !inChunk) {
                     // first chunk
+                    if (typeLength == 0) {
+                        throw new FormatException("expected non-zero type length in first chunk");
+                    }
                     chunks.clear();
                     chunkTnf = tnf;
                 }
