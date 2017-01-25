@@ -34,7 +34,7 @@
     <bool name="config_keyguardUserSwitcher">true</bool>
 
     <!-- Nav bar button default ordering/layout -->
-    <string name="config_navBarLayout" translatable="false">space;back,home,recent;menu_ime</string>
+    <string name="config_navBarLayout" translatable="false">left;back,home,recent;right</string>
 
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">290</integer>

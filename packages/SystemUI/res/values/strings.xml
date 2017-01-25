@@ -1523,29 +1523,56 @@
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
 
-    <!-- SysUI Tuner: Group of buttons that show on the start of the screen [CHAR LIMIT=30] -->
-    <string name="start">Start</string>
-    <!-- SysUI Tuner: Group of buttons that show on the center of the screen [CHAR LIMIT=30] -->
-    <string name="center">Center</string>
-    <!-- SysUI Tuner: Group of buttons that show on the end of the screen [CHAR LIMIT=30] -->
-    <string name="end">End</string>
-    <!-- SysUI Tuner: Name of space used in custom navigation bar layouts [CHAR LIMIT=30] -->
-    <string name="space">Spacer</string>
+    <!-- SysUI Tuner: Button that controls layout of navigation bar [CHAR LIMIT=60] -->
+    <string name="nav_bar_layout">Layout</string>
+
+    <!-- SysUI Tuner: Label for section of settings about the left nav button [CHAR LIMIT=60] -->
+    <string name="nav_bar_left">Left</string>
+
+    <!-- SysUI Tuner: Label for section of settings about the right nav button [CHAR LIMIT=60] -->
+    <string name="nav_bar_right">Right</string>
+
+    <!-- SysUI Tuner: Setting for button type in nav bar [CHAR LIMIT=60] -->
+    <string name="nav_bar_button_type">Button type</string>
+
+    <!-- SysUI Tuner: Added to nav bar option to indicate it is the default [CHAR LIMIT=60] -->
+    <string name="nav_bar_default"> (default)</string>
+
+    <!-- SysUI Tuner: Labels for different types of navigation bar buttons [CHAR LIMIT=60] -->
+    <string-array name="nav_bar_buttons">
+        <item>Clipboard</item>
+        <item>Keycode</item>
+        <item>Menu / Keyboard Switcher</item>
+        <item>None</item>
+    </string-array>
+    <string-array name="nav_bar_button_values" translatable="false">
+        <item>clipboard</item>
+        <item>key</item>
+        <item>menu_ime</item>
+        <item>space</item>
+    </string-array>
+
+    <!-- SysUI Tuner: Labels for different types of navigation bar layouts [CHAR LIMIT=60] -->
+    <string-array name="nav_bar_layouts">
+        <item>Divided (default)</item>
+        <item>Centered</item>
+        <item>Left-aligned</item>
+        <item>Right-aligned</item>
+    </string-array>
+
+    <string-array name="nav_bar_layouts_values" translatable="false">
+        <item>default</item>
+        <item>left;back,home,recent;right</item>
+        <item>left,back,home,recent,right;space;space</item>
+        <item>space;space;left,back,home,recent,right</item>
+    </string-array>
+
     <!-- SysUI Tuner: Name of Combination Menu / Keyboard Switcher button [CHAR LIMIT=30] -->
     <string name="menu_ime">Menu / Keyboard Switcher</string>
-    <!-- SysUI Tuner: Title for dialog to add a button [CHAR LIMIT=30] -->
-    <string name="select_button">Select button to add</string>
-    <!-- SysUI Tuner: Button to add a button [CHAR LIMIT=30] -->
-    <string name="add_button">Add button</string>
     <!-- SysUI Tuner: Save the current settings [CHAR LIMIT=30] -->
     <string name="save">Save</string>
     <!-- SysUI Tuner: Reset to default settings [CHAR LIMIT=30] -->
     <string name="reset">Reset</string>
-
-    <!-- SysUI Tuner: Title of no home warning dialog [CHAR LIMIT=30] -->
-    <string name="no_home_title">No home button found</string>
-    <!-- SysUI Tuner: Message of no home warning dialog [CHAR LIMIT=NONE] -->
-    <string name="no_home_message">A home button is required to be able to navigate this device. Please add a home button before saving.</string>
 
     <!-- SysUI Tuner: Adjust button width dialog title [CHAR LIMIT=60] -->
     <string name="adjust_button_width">Adjust button width</string>
@@ -1553,26 +1580,14 @@
     <!-- SysUI Tuner: Nav bar button that holds the clipboard [CHAR LIMIT=30] -->
     <string name="clipboard">Clipboard</string>
 
-    <!-- SysUI Tuner: Description of nav bar button that holds the clipboard [CHAR LIMIT=NONE] -->
-    <string name="clipboard_description">The Clipboard allows items to be dragged directly to the clipboard. Items can also be dragged directly out of the clipboard when present.</string>
-
     <!-- SysUI Tuner: Accessibility description for custom nav key [CHAR LIMIT=NONE] -->
     <string name="accessibility_key">Custom navigation button</string>
 
     <!-- SysUI Tuner: Nav bar button that emulates a keycode [CHAR LIMIT=30] -->
     <string name="keycode">Keycode</string>
 
-    <!-- SysUI Tuner: Description of nav bar button that emulates a keycode [CHAR LIMIT=NONE] -->
-    <string name="keycode_description">Keycode buttons allow keyboard keys to
-        be added to the Navigation Bar. When pressed they emulate the selected
-        keyboard key. First the key must be selected for the button, followed
-        by an image to be shown on the button.</string>
-
-    <!-- SysUI Tuner: Title of dialog to select which key to emulate [CHAR LIMIT=60] -->
-    <string name="select_keycode">Select Keyboard Button</string>
-
-    <!-- SysUI Tuner: Label for preview area in navigation bar tuner [CHAR LIMIT=NONE] -->
-    <string name="preview">Preview</string>
+    <!-- SysUI Tuner: Settings to change nav bar icon [CHAR LIMIT=30] -->
+    <string name="icon">Icon</string>
 
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
     <string name="drag_to_add_tiles">Drag to add tiles</string>
