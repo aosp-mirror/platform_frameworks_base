@@ -177,10 +177,12 @@ public class UserManagerTest extends AndroidTestCase {
         UserInfo userInfo = createProfileForUser("Profile",
                 UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
         assertNotNull(userInfo);
-
+        assertNull(mUserManager.getProfileParent(primaryUserId));
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
         assertNotNull(parentProfileInfo);
         assertEquals(parentProfileInfo.id, primaryUserId);
+        removeUser(userInfo.id);
+        assertNull(mUserManager.getProfileParent(primaryUserId));
     }
 
     // Make sure only one managed profile can be created
