@@ -4421,14 +4421,12 @@ public final class ViewRootImpl implements ViewParent,
 
             int groupNavigationDirection = 0;
 
-            if (event.getAction() == KeyEvent.ACTION_DOWN && event.isCtrlPressed()) {
-                final int character =
-                        event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_CTRL_MASK);
-                if (character == '+') {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getKeyCode() == KeyEvent.KEYCODE_TAB) {
+                if (KeyEvent.metaStateHasModifiers(event.getMetaState(), KeyEvent.META_META_ON)) {
                     groupNavigationDirection = View.FOCUS_FORWARD;
-                }
-
-                if (character == '_') {
+                } else if (KeyEvent.metaStateHasModifiers(event.getMetaState(),
+                        KeyEvent.META_META_ON | KeyEvent.META_SHIFT_ON)) {
                     groupNavigationDirection = View.FOCUS_BACKWARD;
                 }
             }
