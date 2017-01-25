@@ -237,6 +237,7 @@ public class Typeface {
                 IoUtils.closeQuietly(fd);
             }
         }
+        fontFamily.freeze();
         callback.onTypefaceRetrieved(Typeface.createFromFamiliesWithDefault(
                 new FontFamily[] {fontFamily}));
     }
