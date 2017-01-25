@@ -48,6 +48,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -3854,10 +3855,24 @@ public class Notification implements Parcelable
          *   3. Standard template view
          */
         public RemoteViews createContentView() {
+            return createContentView(false /* increasedheight */ );
+        }
+
+        /**
+         * Construct a RemoteViews for the smaller content view.
+         *
+         *   @param increasedHeight true if this layout be created with an increased height. Some
+         *   styles may support showing more then just that basic 1U size
+         *   and the system may decide to render important notifications
+         *   slightly bigger even when collapsed.
+         *
+         *   @hide
+         */
+        public RemoteViews createContentView(boolean increasedHeight) {
             if (mN.contentView != null && (mStyle == null || !mStyle.displayCustomViewInline())) {
                 return mN.contentView;
             } else if (mStyle != null) {
-                final RemoteViews styleView = mStyle.makeContentView();
+                final RemoteViews styleView = mStyle.makeContentView(increasedHeight);
                 if (styleView != null) {
                     return styleView;
                 }
@@ -4487,6 +4502,19 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @return the style class of this notification
+     * @hide
+     */
+    public Class<? extends Notification.Style> getNotificationStyle() {
+        String templateClass = extras.getString(Notification.EXTRA_TEMPLATE);
+
+        if (!TextUtils.isEmpty(templateClass)) {
+            return Notification.getNotificationStyleClass(templateClass);
+        }
+        return null;
+    }
+
+    /**
      * @return true if this notification is colorized. This also factors in wheather the
      * notification is ongoing.
      *
@@ -4607,11 +4635,13 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a Style-specific RemoteViews for the final 1U notification layout.
+         * Construct a Style-specific RemoteViews for the collapsed notification layout.
          * The default implementation has nothing additional to add.
+         *
+         * @param increasedHeight true if this layout be created with an increased height.
          * @hide
          */
-        public RemoteViews makeContentView() {
+        public RemoteViews makeContentView(boolean increasedHeight) {
             return null;
         }
 
@@ -4957,6 +4987,23 @@ public class Notification implements Parcelable
         }
 
         /**
+         * @param increasedHeight true if this layout be created with an increased height.
+         *
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            if (increasedHeight) {
+                ArrayList<Action> actions = mBuilder.mActions;
+                mBuilder.mActions = new ArrayList<>();
+                RemoteViews remoteViews = makeBigContentView();
+                mBuilder.mActions = actions;
+                return remoteViews;
+            }
+            return super.makeContentView(increasedHeight);
+        }
+
+        /**
          * @hide
          */
         public RemoteViews makeBigContentView() {
@@ -5220,17 +5267,25 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView() {
-            Message m = findLatestIncomingMessage();
-            CharSequence title = mConversationTitle != null
-                    ? mConversationTitle
-                    : (m == null) ? null : m.mSender;
-            CharSequence text = (m == null)
-                    ? null
-                    : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            if (!increasedHeight) {
+                Message m = findLatestIncomingMessage();
+                CharSequence title = mConversationTitle != null
+                        ? mConversationTitle
+                        : (m == null) ? null : m.mSender;
+                CharSequence text = (m == null)
+                        ? null
+                        : mConversationTitle != null ? makeMessageLine(m, mBuilder) : m.mText;
 
-            return mBuilder.applyStandardTemplateWithActions(mBuilder.getBaseLayoutResource(),
-                    mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
+                return mBuilder.applyStandardTemplate(mBuilder.getBaseLayoutResource(),
+                        mBuilder.mParams.reset().hasProgress(false).title(title).text(text));
+            } else {
+                ArrayList<Action> actions = mBuilder.mActions;
+                mBuilder.mActions = new ArrayList<>();
+                RemoteViews remoteViews = makeBigContentView();
+                mBuilder.mActions = actions;
+                return remoteViews;
+            }
         }
 
         private Message findLatestIncomingMessage() {
@@ -5795,7 +5850,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView() {
+        public RemoteViews makeContentView(boolean increasedHeight) {
             return makeMediaContentView();
         }
 
@@ -5971,7 +6026,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView() {
+        public RemoteViews makeContentView(boolean increasedHeight) {
             return makeStandardTemplateWithCustomContent(mBuilder.mN.contentView);
         }
 
@@ -6085,8 +6140,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView() {
-            RemoteViews remoteViews = super.makeContentView();
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            RemoteViews remoteViews = super.makeContentView(false /* increasedHeight */);
             return buildIntoRemoteView(remoteViews, R.id.notification_content_container,
                     mBuilder.mN.contentView);
         }
@@ -6108,7 +6163,7 @@ public class Notification implements Parcelable
                 return buildIntoRemoteView(remoteViews, R.id.notification_main_column,
                         customRemoteView);
             } else if (customRemoteView != mBuilder.mN.contentView){
-                remoteViews = super.makeContentView();
+                remoteViews = super.makeContentView(false /* increasedHeight */);
                 return buildIntoRemoteView(remoteViews, R.id.notification_content_container,
                         customRemoteView);
             } else {

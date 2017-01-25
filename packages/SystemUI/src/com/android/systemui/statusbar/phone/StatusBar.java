@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -112,6 +114,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.NotificationMessagingUtil;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -701,6 +704,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    private NotificationMessagingUtil mMessagingUtil;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
@@ -763,6 +767,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 Context.DEVICE_POLICY_SERVICE);
 
         mNotificationData = new NotificationData(this);
+        mMessagingUtil = new NotificationMessagingUtil(mContext);
 
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -6318,8 +6323,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         final StatusBarNotification sbn = entry.notification;
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
+        boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(sbn,
+                mNotificationData.getImportance(sbn.getKey()));
         try {
-            entry.cacheContentViews(mContext, null, isLowPriority);
+            entry.cacheContentViews(mContext, null, isLowPriority, useIncreasedCollapsedHeight);
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             return false;
@@ -6489,6 +6496,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
+        row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         row.onNotificationUpdated(entry);
         return true;
     }
@@ -6978,10 +6986,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         Notification n = notification.getNotification();
         mNotificationData.updateRanking(ranking);
 
+        boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(notification,
+                mNotificationData.getImportance(notification.getKey()));
+        entry.row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         boolean applyInPlace;
         try {
             applyInPlace = entry.cacheContentViews(mContext, notification.getNotification(),
-                    mNotificationData.isAmbient(key));
+                    mNotificationData.isAmbient(key), useIncreasedCollapsedHeight);
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             applyInPlace = false;
