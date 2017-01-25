@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.MemoryFile;
 import android.os.MessageQueue;
 import android.util.Log;
 import android.util.SparseArray;
@@ -56,6 +57,13 @@ public class SystemSensorManager extends SensorManager {
             Sensor sensor, int index);
     private static native void nativeGetDynamicSensors(long nativeInstance, List<Sensor> list);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
+
+    private static native int nativeCreateDirectChannel(
+            long nativeInstance, long size, int channelType, long [] channelData);
+    private static native void nativeDestroyDirectChannel(
+            long nativeInstance, int channelHandle);
+    private static native int nativeConfigDirectChannel(
+            long nativeInstance, int channelHandle, int sensorHandle, int rate);
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
@@ -482,6 +490,71 @@ public class SystemSensorManager extends SensorManager {
             }
         }
         return changed;
+    }
+
+    /** @hide */
+    protected int configureDirectChannelImpl(
+            SensorDirectChannel channel, Sensor sensor, int rate) {
+        if (channel == null) throw new IllegalArgumentException("channel cannot be null");
+
+        if (!channel.isValid()) {
+            throw new IllegalStateException("channel is invalid");
+        }
+
+        if (rate < SensorDirectChannel.RATE_STOP
+                || rate > SensorDirectChannel.RATE_VERY_FAST) {
+            throw new IllegalArgumentException("rate parameter invalid");
+        }
+
+        if (sensor == null && rate != SensorDirectChannel.RATE_STOP) {
+            // the stop all sensors case
+            throw new IllegalArgumentException(
+                    "when sensor is null, rate can only be DIRECT_RATE_STOP");
+        }
+
+        int sensorHandle = (sensor == null) ? -1 : sensor.getHandle();
+
+        int ret = nativeConfigDirectChannel(
+                mNativeInstance, channel.getNativeHandle(), sensorHandle, rate);
+
+        if (rate == SensorDirectChannel.RATE_STOP) {
+            return (ret == 0) ? 1 : 0;
+        } else {
+            return (ret > 0) ? ret : 0;
+        }
+    }
+
+    /** @hide */
+    protected SensorDirectChannel createDirectChannelImpl(long size,
+            MemoryFile ashmemFile, HardwareBuffer grallocMemObject) {
+        SensorDirectChannel ch = null;
+
+        if (size <= 0) throw new IllegalArgumentException("size has to be greater than 0");
+
+        if (ashmemFile != null) {
+            if (size != ashmemFile.length()) {
+                throw new IllegalArgumentException("size has to match MemoryFile.length()");
+            }
+            int id = nativeCreateDirectChannel(
+                    mNativeInstance, size, SensorDirectChannel.TYPE_ASHMEM,
+                    SensorDirectChannel.encodeData(ashmemFile));
+            if (id > 0) {
+                ch = new SensorDirectChannel(this, id, SensorDirectChannel.TYPE_ASHMEM, size);
+            }
+        } else if (grallocMemObject != null) {
+            Log.wtf(TAG, "Implement GRALLOC or remove GRALLOC support entirely");
+        } else {
+            throw new IllegalArgumentException("Invalid parameter");
+        }
+
+        return ch;
+    }
+
+    /** @hide */
+    protected void destroyDirectChannelImpl(SensorDirectChannel channel) {
+        if (channel != null) {
+            nativeDestroyDirectChannel(mNativeInstance, channel.getNativeHandle());
+        }
     }
 
     /*

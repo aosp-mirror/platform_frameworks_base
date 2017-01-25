@@ -19,6 +19,7 @@ package android.hardware;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Handler;
+import android.os.MemoryFile;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -879,6 +880,104 @@ public abstract class SensorManager {
     /** @hide */
     protected abstract boolean flushImpl(SensorEventListener listener);
 
+
+    /**
+     * Create a sensor direct channel backed by shared memory wrapped by MemoryFile object.
+     *
+     * Use the returned {@link android.hardware.SensorDirectChannel} object to configure direct
+     * report of sensor events. After use, call {@link android.hardware.SensorDirectChannel#close()}
+     * to free up resource in sensor system associated with the direct channel.
+     *
+     * @param mem A {@link android.os.MemoryFile} shared memory object.
+     * @return A {@link android.hardware.SensorDirectChannel} object if successful, null otherwise.
+     * @throws IllegalArgumentException when mem is null.
+     * @see SensorDirectChannel#close()
+     * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
+     */
+    public SensorDirectChannel createDirectChannel(MemoryFile mem) {
+        return createDirectChannelImpl(mem.length(), mem, null);
+    }
+
+    /**
+     * Create a sensor direct channel backed by shared memory wrapped by HardwareBuffer object.
+     *
+     * Use the returned {@link android.hardware.SensorDirectChannel} object to configure direct
+     * report of sensor events. After use, call {@link android.hardware.SensorDirectChannel#close()}
+     * to free up resource in sensor system associated with the direct channel.
+     *
+     * @param mem A {@link android.hardware.HardwareBuffer} shared memory object.
+     * @return A {@link android.hardware.SensorDirectChannel} object if successful,
+     *         null otherwise.
+     * @throws IllegalArgumentException when mem is null.
+     * @see SensorDirectChannel#close()
+     * @see #configureDirectChannel(SensorDirectChannel, Sensor, int)
+     */
+    public SensorDirectChannel createDirectChannel(HardwareBuffer mem) {
+        return null;
+    }
+
+    /** @hide */
+    protected abstract SensorDirectChannel createDirectChannelImpl(long size,
+            MemoryFile ashmemFile, HardwareBuffer hardwareBuffer);
+
+    /** @hide */
+    void destroyDirectChannel(SensorDirectChannel channel) {
+        destroyDirectChannelImpl(channel);
+    }
+
+    /** @hide */
+    protected abstract void destroyDirectChannelImpl(SensorDirectChannel channel);
+
+    /**
+     * Configure sensor rate or stop sensor report on a direct report channel specified.
+     *
+     * To start event report of a sensor, or change rate of existing report, call this function with
+     * rateLevel other than {@link android.hardware.SensorDirectChannel#RATE_STOP}. Sensor events
+     * will be added into a queue formed by the shared memory used in creation of direction channel.
+     * Each element of the queue has size of 104 bytes and represents a sensor event. Data
+     * structure of an element (all fields in little-endian):
+     *
+     *   offset   type                    name
+     *-  ---------------------------------------------
+     *   0x0000   int32_t                 size (always 104)
+     *   0x0004   int32_t                 sensor report token
+     *   0x0008   int32_t                 type (see SensorType)
+     *   0x000C   uint32_t                atomic counter
+     *   0x0010   int64_t                 timestamp (see Event)
+     *   0x0018   float[16]/int64_t[8]    data (data type depends on sensor type)
+     *   0x0058   int32_t[4]              reserved (set to zero)
+     *
+     * There is no head or tail pointers. The sequence and frontier of new sensor events is
+     * determined by the atomic counter, which counts from 1 after creation of direct channel and
+     * increments 1 for each new event. The writer in sensor system will wrap around from to
+     * start of shared memory region when it reaches the end. If size of memory region is not
+     * a multiple of size of element (104 bytes), the residual is not used at the end.
+     * Function returns a positive sensor report token on success. This token can be used for
+     * differentiate sensor events from multiple sensor of the same type. For example, if there are
+     * two accelerometer in the system A and B, it is guaranteed different report tokens will be
+     * returned when starting sensor A and B.
+     *
+     * To stop a sensor, call this function with rateLevel equal {@link
+     * android.hardware.SensorDirectChannel#RATE_STOP}. If the sensor parameter is left to be null,
+     * this will stop all active sensor report associated with the direct channel specified.
+     * Function return 1 on success or 0 on failure.
+     *
+     * @param channel A {@link android.hardware.SensorDirectChannel} object representing direct
+     *                channel to be configured.
+     * @param sensor A {@link android.hardware.Sensor} object to denote sensor to be operated.
+     * @param rateLevel rate level defined in {@link android.hardware.SensorDirectChannel}.
+     * @return starting report or changing rate: positive sensor report token on success, 0 on failure;
+     *         stopping report: 1 on success, 0 on failure.
+     * @throws IllegalArgumentException when SensorDirectChannel is null.
+     */
+    public int configureDirectChannel(SensorDirectChannel channel, Sensor sensor,
+            @SensorDirectChannel.RateLevel int rateLevel) {
+        return configureDirectChannelImpl(channel, sensor, rateLevel);
+    }
+
+    /** @hide */
+    protected abstract int configureDirectChannelImpl(
+            SensorDirectChannel channel, Sensor s, int rate);
 
     /**
      * Used for receiving notifications from the SensorManager when dynamic sensors are connected or
