@@ -39,27 +39,60 @@
 
 namespace android {
 
-static jlong FontFamily_create(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
-    if (lang == NULL) {
-        return (jlong)new minikin::FontFamily(variant);
+struct NativeFamilyBuilder {
+    uint32_t langId;
+    int variant;
+    std::vector<minikin::Font> fonts;
+};
+
+static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
+    NativeFamilyBuilder* builder = new NativeFamilyBuilder();
+    if (lang != nullptr) {
+        ScopedUtfChars str(env, lang);
+        builder->langId = minikin::FontStyle::registerLanguageList(str.c_str());
+    } else {
+        builder->langId = minikin::FontStyle::registerLanguageList("");
     }
-    ScopedUtfChars str(env, lang);
-    uint32_t langId = minikin::FontStyle::registerLanguageList(str.c_str());
-    return (jlong)new minikin::FontFamily(langId, variant);
+    builder->variant = variant;
+    return reinterpret_cast<jlong>(builder);
 }
 
-static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
+static jlong FontFamily_create(jlong builderPtr) {
+    if (builderPtr == 0) {
+        return 0;
+    }
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    minikin::FontFamily* family = new minikin::FontFamily(
+            builder->langId, builder->variant, std::move(builder->fonts));
+    delete builder;
+    return reinterpret_cast<jlong>(family);
+}
+
+static void FontFamily_abort(jlong builderPtr) {
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    minikin::Font::clearElementsWithLock(&builder->fonts);
+    delete builder;
+}
+
+static void FontFamily_unref(jlong familyPtr) {
     minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     fontFamily->Unref();
 }
 
-static jboolean addSkTypeface(minikin::FontFamily* family, sk_sp<SkTypeface> face,
-        const void* fontData, size_t fontSize, int ttcIndex) {
+static void addSkTypeface(jlong builderPtr, sk_sp<SkTypeface> face, const void* fontData,
+        size_t fontSize, int ttcIndex) {
     minikin::MinikinFont* minikinFont =
             new MinikinFontSkia(std::move(face), fontData, fontSize, ttcIndex);
-    bool result = family->addFont(minikinFont);
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    int weight;
+    bool italic;
+    if (!minikin::FontFamily::analyzeStyle(minikinFont, &weight, &italic)) {
+        ALOGE("analyzeStyle failed. Using default style");
+        weight = 400;
+        italic = false;
+    }
+    builder->fonts.push_back(minikin::Font(minikinFont, minikin::FontStyle(weight / 100, italic)));
     minikinFont->Unref();
-    return result;
 }
 
 static void release_global_ref(const void* /*data*/, void* context) {
@@ -85,7 +118,7 @@ static void release_global_ref(const void* /*data*/, void* context) {
     }
 }
 
-static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, jobject bytebuf,
+static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong builderPtr, jobject bytebuf,
         jint ttcIndex) {
     NPE_CHECK_RETURN_ZERO(env, bytebuf);
     const void* fontPtr = env->GetDirectBufferAddress(bytebuf);
@@ -112,8 +145,8 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
         ALOGE("addFont failed to create font");
         return false;
     }
-    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, std::move(face), fontPtr, (size_t)fontSize, ttcIndex);
+    addSkTypeface(builderPtr, std::move(face), fontPtr, (size_t)fontSize, ttcIndex);
+    return true;
 }
 
 static struct {
@@ -126,7 +159,7 @@ static struct {
     jfieldID mStyleValue;
 } gAxisClassInfo;
 
-static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong familyPtr,
+static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong builderPtr,
         jobject font, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
     NPE_CHECK_RETURN_ZERO(env, font);
 
@@ -178,10 +211,11 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         ALOGE("addFont failed to create font, invalid request");
         return false;
     }
-    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(std::move(face), fontPtr, (size_t)fontSize, ttcIndex);
-    fontFamily->addFont(minikinFont, minikin::FontStyle(weight / 100, isItalic));
+            new MinikinFontSkia(std::move(face), fontPtr, fontSize, ttcIndex);
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    builder->fonts.push_back(minikin::Font(minikinFont,
+            minikin::FontStyle(weight / 100, isItalic)));
     minikinFont->Unref();
     return true;
 }
@@ -190,7 +224,7 @@ static void releaseAsset(const void* ptr, void* context) {
     delete static_cast<Asset*>(context);
 }
 
-static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong familyPtr,
+static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong builderPtr,
         jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset) {
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
@@ -233,14 +267,17 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong f
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;
     }
-    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, std::move(face), buf, bufSize, /* ttcIndex */ 0);
+
+    addSkTypeface(builderPtr, std::move(face), buf, bufSize, 0 /* ttc index */);
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyMethods[] = {
-    { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
+    { "nInitBuilder",          "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
+    { "nCreateFamily",         "(J)J", (void*)FontFamily_create },
+    { "nAbort",                "(J)V", (void*)FontFamily_abort },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/nio/ByteBuffer;I)Z", (void*)FontFamily_addFont },
     { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;ILjava/util/List;IZ)Z",

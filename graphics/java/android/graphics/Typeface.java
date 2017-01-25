@@ -373,10 +373,13 @@ public class Typeface {
 
                 FontFamily fontFamily = new FontFamily();
                 if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */)) {
+                    fontFamily.freeze();
                     FontFamily[] families = { fontFamily };
                     typeface = createFromFamiliesWithDefault(families);
                     sDynamicTypefaceCache.put(key, typeface);
                     return typeface;
+                } else {
+                    fontFamily.abortCreation();
                 }
             }
         }
@@ -422,8 +425,11 @@ public class Typeface {
         if (sFallbackFonts != null) {
             FontFamily fontFamily = new FontFamily();
             if (fontFamily.addFont(path, 0 /* ttcIndex */)) {
+                fontFamily.freeze();
                 FontFamily[] families = { fontFamily };
                 return createFromFamiliesWithDefault(families);
+            } else {
+                fontFamily.abortCreation();
             }
         }
         throw new RuntimeException("Font not found " + path);
@@ -492,6 +498,7 @@ public class Typeface {
                 Log.e(TAG, "Error creating font " + font.getFontName() + "#" + font.getTtcIndex());
             }
         }
+        fontFamily.freeze();
         return fontFamily;
     }
 
