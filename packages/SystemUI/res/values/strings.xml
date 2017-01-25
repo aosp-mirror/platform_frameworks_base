@@ -1752,5 +1752,19 @@
     <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
     <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
 
+    <!-- SysUI Tuner: Group of settings for left lock screen affordance [CHAR LIMIT=60] -->
+    <string name="lockscreen_left">Left</string>
+
+    <!-- SysUI Tuner: Group of settings for right lock screen affordance [CHAR LIMIT=60] -->
+    <string name="lockscreen_right">Right</string>
+
+    <!-- SysUI Tuner: Switch controlling whether to customize lock screen button [CHAR LIMIT=60] -->
+    <string name="lockscreen_customize">Customize shortcut</string>
+
+    <!-- SysUI Tuner: Button to select lock screen shortcut [CHAR LIMIT=60] -->
+    <string name="lockscreen_shortcut">Shortcut</string>
+
+    <!-- SysUI Tuner: Switch to control if device gets unlocked [CHAR LIMIT=60] -->
+    <string name="lockscreen_unlock">Prompt for password</string>
 
 </resources>
