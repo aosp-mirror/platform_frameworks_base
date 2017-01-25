@@ -58,9 +58,14 @@ interface IUiModeManager {
     void setTheme(String theme);
 
     /**
-     * Gets whith theme overlays to use within /vendor/overlay.
+     * Gets which theme overlays to use within /vendor/overlay.
      */
     String getTheme();
+
+    /**
+     * Gets the themes available in /vendor/overlay.
+     */
+    String[] getAvailableThemes();
 
     /**
      * Tells if UI mode is locked or not.

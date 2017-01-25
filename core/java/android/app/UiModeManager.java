@@ -271,6 +271,21 @@ public class UiModeManager {
     }
 
     /**
+     * Gets the valid inputs to {@link #setTheme(String)}.
+     * @hide
+     */
+    public String[] getAvailableThemes() {
+        if (mService != null) {
+            try {
+                return mService.getAvailableThemes();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the currently configured night mode.
      * <p>
      * May be one of:

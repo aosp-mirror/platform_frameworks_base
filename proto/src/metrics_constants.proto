@@ -3336,6 +3336,9 @@ message MetricsEvent {
     // OS: 8.0
     TTS_SLIDERS = 815;
 
+    // ACTION: Settings -> Display -> Theme
+    ACTION_THEME = 816;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.

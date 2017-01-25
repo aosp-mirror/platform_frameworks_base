@@ -45,12 +45,16 @@ import android.provider.Settings;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
@@ -340,6 +344,28 @@ final class UiModeManagerService extends SystemService {
                 return null;
             }
             return SystemProperties.get("persist.vendor.overlay.theme");
+        }
+
+        @Override
+        public String[] getAvailableThemes() {
+            if (getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_THEME_OVERLAY)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.e(TAG, "getAvailableThemes requires MODIFY_THEME_OVERLAY permission");
+                return null;
+            }
+            String def = SystemProperties.get("ro.boot.vendor.overlay.theme");
+            if (TextUtils.isEmpty(def)) {
+                def = null;
+            }
+            String[] fileList = new File("/vendor/overlay").list();
+            if (fileList == null) return new String[0];
+            ArrayList<String> options = new ArrayList(fileList.length + 1);
+            Collections.addAll(options, fileList);
+            if (!options.contains(def)) {
+                options.add(0, def);
+            }
+            return options.toArray(new String[options.size()]);
         }
 
         @Override
