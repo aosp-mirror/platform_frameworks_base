@@ -71,31 +71,6 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
-// TODO: Clean this up, it's a bit odd to need to call over to
-// rendernode's jni layer. Probably means RootRenderNode should be pulled
-// into HWUI with appropriate callbacks for the various JNI hooks so
-// that RenderNode's JNI layer can handle its own thing
-void onRenderNodeRemoved(JNIEnv* env, RenderNode* node);
-
-class ScopedRemovedRenderNodeObserver : public TreeObserver {
-public:
-    explicit ScopedRemovedRenderNodeObserver(JNIEnv* env) : mEnv(env) {}
-    ~ScopedRemovedRenderNodeObserver() {
-        for (auto& node : mMaybeRemovedNodes) {
-            if (node->hasParents()) continue;
-            onRenderNodeRemoved(mEnv, node.get());
-        }
-    }
-
-    virtual void onMaybeRemovedFromTree(RenderNode* node) override {
-        mMaybeRemovedNodes.insert(sp<RenderNode>(node));
-    }
-
-private:
-    JNIEnv* mEnv;
-    std::set< sp<RenderNode> > mMaybeRemovedNodes;
-};
-
 class OnFinishedEvent {
 public:
     OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
@@ -715,18 +690,16 @@ static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject c
             "Mismatched size expectations, given %d expected %d",
             frameInfoSize, UI_THREAD_FRAME_INFO_SIZE);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    ScopedRemovedRenderNodeObserver observer(env);
     env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
-    return proxy->syncAndDrawFrame(&observer);
+    return proxy->syncAndDrawFrame();
 }
 
 static void android_view_ThreadedRenderer_destroy(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong rootNodePtr) {
-    ScopedRemovedRenderNodeObserver observer(env);
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
     rootRenderNode->destroy();
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroy(&observer);
+    proxy->destroy();
 }
 
 static void android_view_ThreadedRenderer_registerAnimatingRenderNode(JNIEnv* env, jobject clazz,
@@ -758,10 +731,9 @@ static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobje
 
 static void android_view_ThreadedRenderer_buildLayer(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong nodePtr) {
-    ScopedRemovedRenderNodeObserver observer(env);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     RenderNode* node = reinterpret_cast<RenderNode*>(nodePtr);
-    proxy->buildLayer(node, &observer);
+    proxy->buildLayer(node);
 }
 
 static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
@@ -796,9 +768,8 @@ static void android_view_ThreadedRenderer_detachSurfaceTexture(JNIEnv* env, jobj
 
 static void android_view_ThreadedRenderer_destroyHardwareResources(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
-    ScopedRemovedRenderNodeObserver observer(env);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroyHardwareResources(&observer);
+    proxy->destroyHardwareResources();
 }
 
 static void android_view_ThreadedRenderer_trimMemory(JNIEnv* env, jobject clazz,

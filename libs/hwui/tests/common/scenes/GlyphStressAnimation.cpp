@@ -60,6 +60,6 @@ public:
                     0, 100 * (i + 2), minikin::kBidi_Force_LTR, paint, nullptr);
         }
 
-        container->setStagingDisplayList(canvas->finishRecording(), nullptr);
+        container->setStagingDisplayList(canvas->finishRecording());
     }
 };

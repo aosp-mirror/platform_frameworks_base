@@ -22,6 +22,7 @@
 #include "OpDumper.h"
 #include "RecordedOp.h"
 #include "TreeInfo.h"
+#include "utils/FatVector.h"
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
@@ -39,6 +40,20 @@
 namespace android {
 namespace uirenderer {
 
+// Used for tree mutations that are purely destructive.
+// Generic tree mutations should use MarkAndSweepObserver instead
+class ImmediateRemoved : public TreeObserver {
+public:
+    explicit ImmediateRemoved(TreeInfo* info) : mTreeInfo(info) {}
+
+    void onMaybeRemovedFromTree(RenderNode* node) override {
+        node->onRemovedFromTree(mTreeInfo);
+    }
+
+private:
+    TreeInfo* mTreeInfo;
+};
+
 RenderNode::RenderNode()
         : mDirtyPropertyFields(0)
         , mNeedsDisplayListSync(false)
@@ -49,20 +64,17 @@ RenderNode::RenderNode()
 }
 
 RenderNode::~RenderNode() {
-    deleteDisplayList(nullptr);
+    ImmediateRemoved observer(nullptr);
+    deleteDisplayList(observer);
     delete mStagingDisplayList;
     LOG_ALWAYS_FATAL_IF(hasLayer(), "layer missed detachment!");
 }
 
-void RenderNode::setStagingDisplayList(DisplayList* displayList, TreeObserver* observer) {
+void RenderNode::setStagingDisplayList(DisplayList* displayList) {
+    mValid = (displayList != nullptr);
     mNeedsDisplayListSync = true;
     delete mStagingDisplayList;
     mStagingDisplayList = displayList;
-    // If mParentCount == 0 we are the sole reference to this RenderNode,
-    // so immediately free the old display list
-    if (!mParentCount && !mStagingDisplayList) {
-        deleteDisplayList(observer);
-    }
 }
 
 /**
@@ -187,12 +199,13 @@ int RenderNode::getDebugSize() {
 void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
+    MarkAndSweepRemoved observer(&info);
 
     // The OpenGL renderer reserves the stencil buffer for overdraw debugging.  Functors
     // will need to be drawn in a layer.
     bool functorsNeedLayer = Properties::debugOverdraw && !Properties::isSkiaEnabled();
 
-    prepareTreeImpl(info, functorsNeedLayer);
+    prepareTreeImpl(observer, info, functorsNeedLayer);
 }
 
 void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
@@ -283,7 +296,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
  * While traversing down the tree, functorsNeedLayer flag is set to true if anything that uses the
  * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
  */
-void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
+void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
     info.damageAccumulator->pushTransform(this);
 
     if (info.mode == TreeInfo::MODE_FULL) {
@@ -309,14 +322,14 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
 
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
-        pushStagingDisplayListChanges(info);
+        pushStagingDisplayListChanges(observer, info);
     }
 
     if (mDisplayList) {
         info.out.hasFunctors |= mDisplayList->hasFunctor();
-        bool isDirty = mDisplayList->prepareListAndChildren(info, childFunctorsNeedLayer,
-                [](RenderNode* child, TreeInfo& info, bool functorsNeedLayer) {
-            child->prepareTreeImpl(info, functorsNeedLayer);
+        bool isDirty = mDisplayList->prepareListAndChildren(observer, info, childFunctorsNeedLayer,
+                [](RenderNode* child, TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
+            child->prepareTreeImpl(observer, info, functorsNeedLayer);
         });
         if (isDirty) {
             damageSelf(info);
@@ -353,7 +366,7 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     }
 }
 
-void RenderNode::syncDisplayList(TreeInfo* info) {
+void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
@@ -361,7 +374,7 @@ void RenderNode::syncDisplayList(TreeInfo* info) {
             child->incParentRefCount();
         });
     }
-    deleteDisplayList(info ? info->observer : nullptr, info);
+    deleteDisplayList(observer, info);
     mDisplayList = mStagingDisplayList;
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
@@ -369,20 +382,20 @@ void RenderNode::syncDisplayList(TreeInfo* info) {
     }
 }
 
-void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
+void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info) {
     if (mNeedsDisplayListSync) {
         mNeedsDisplayListSync = false;
         // Damage with the old display list first then the new one to catch any
         // changes in isRenderable or, in the future, bounds
         damageSelf(info);
-        syncDisplayList(&info);
+        syncDisplayList(observer, &info);
         damageSelf(info);
     }
 }
 
-void RenderNode::deleteDisplayList(TreeObserver* observer, TreeInfo* info) {
+void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
-        mDisplayList->updateChildren([observer, info](RenderNode* child) {
+        mDisplayList->updateChildren([&observer, info](RenderNode* child) {
             child->decParentRefCount(observer, info);
         });
         if (!mDisplayList->reuseDisplayList(this, info ? &info->canvasContext : nullptr)) {
@@ -392,38 +405,53 @@ void RenderNode::deleteDisplayList(TreeObserver* observer, TreeInfo* info) {
     mDisplayList = nullptr;
 }
 
-void RenderNode::destroyHardwareResources(TreeObserver* observer, TreeInfo* info) {
+void RenderNode::destroyHardwareResources(TreeInfo* info) {
+    ImmediateRemoved observer(info);
+    destroyHardwareResourcesImpl(observer, info);
+}
+
+void RenderNode::destroyHardwareResourcesImpl(TreeObserver& observer, TreeInfo* info) {
     if (hasLayer()) {
         renderthread::CanvasContext::destroyLayer(this);
     }
     if (mDisplayList) {
-        mDisplayList->updateChildren([observer, info](RenderNode* child) {
-            child->destroyHardwareResources(observer, info);
+        mDisplayList->updateChildren([&observer, info](RenderNode* child) {
+            child->destroyHardwareResourcesImpl(observer, info);
         });
-        if (mNeedsDisplayListSync) {
-            // Next prepare tree we are going to push a new display list, so we can
-            // drop our current one now
-            deleteDisplayList(observer, info);
+        setStagingDisplayList(nullptr);
+        deleteDisplayList(observer, info);
+    }
+}
+
+void RenderNode::destroyLayers() {
+    if (hasLayer()) {
+        renderthread::CanvasContext::destroyLayer(this);
+    }
+    if (mDisplayList) {
+        mDisplayList->updateChildren([](RenderNode* child) {
+            child->destroyLayers();
+        });
+    }
+}
+
+void RenderNode::decParentRefCount(TreeObserver& observer, TreeInfo* info) {
+    LOG_ALWAYS_FATAL_IF(!mParentCount, "already 0!");
+    mParentCount--;
+    if (!mParentCount) {
+        observer.onMaybeRemovedFromTree(this);
+        if (CC_UNLIKELY(mPositionListener.get())) {
+            mPositionListener->onPositionLost(*this, info);
         }
     }
 }
 
-void RenderNode::decParentRefCount(TreeObserver* observer, TreeInfo* info) {
-    LOG_ALWAYS_FATAL_IF(!mParentCount, "already 0!");
-    mParentCount--;
-    if (!mParentCount) {
-        if (observer) {
-            observer->onMaybeRemovedFromTree(this);
-        }
-        if (CC_UNLIKELY(mPositionListener.get())) {
-            mPositionListener->onPositionLost(*this, info);
-        }
-        // If a child of ours is being attached to our parent then this will incorrectly
-        // destroy its hardware resources. However, this situation is highly unlikely
-        // and the failure is "just" that the layer is re-created, so this should
-        // be safe enough
-        destroyHardwareResources(observer, info);
-    }
+void RenderNode::onRemovedFromTree(TreeInfo* info) {
+    destroyHardwareResources(info);
+}
+
+void RenderNode::clearRoot() {
+    ImmediateRemoved observer(nullptr);
+    decParentRefCount(observer);
 }
 
 /**

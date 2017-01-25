@@ -51,8 +51,9 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     }
 }
 
-bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
-        std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
+bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info,
+        bool functorsNeedLayer,
+        std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
     // If the prepare tree is triggered by the UI thread and no previous call to
     // pinImages has failed then we must pin all mutable images in the GPU cache
     // until the next UI thread draw.
@@ -74,7 +75,7 @@ bool SkiaDisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLa
         info.damageAccumulator->pushTransform(&mat4);
         // TODO: a layer is needed if the canvas is rotated or has a non-rect clip
         info.hasBackwardProjectedNodes = false;
-        childFn(childNode, info, functorsNeedLayer);
+        childFn(childNode, observer, info, functorsNeedLayer);
         hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
         info.damageAccumulator->popTransform();
     }

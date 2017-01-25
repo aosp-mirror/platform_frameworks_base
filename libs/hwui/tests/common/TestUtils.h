@@ -156,6 +156,11 @@ public:
         int* mSignal;
     };
 
+    class MockTreeObserver : public TreeObserver {
+    public:
+        virtual void onMaybeRemovedFromTree(RenderNode* node) {}
+    };
+
     static bool matricesAreApproxEqual(const Matrix4& a, const Matrix4& b) {
         for (int i = 0; i < 16; i++) {
             if (!MathUtils::areEqual(a[i], b[i])) {
@@ -215,7 +220,7 @@ public:
             std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(props.getWidth(),
                     props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording(), nullptr);
+            node->setStagingDisplayList(canvas->finishRecording());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
@@ -236,7 +241,7 @@ public:
         if (setup) {
             RecordingCanvasType canvas(props.getWidth(), props.getHeight());
             setup(props, canvas);
-            node->setStagingDisplayList(canvas.finishRecording(), nullptr);
+            node->setStagingDisplayList(canvas.finishRecording());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
@@ -247,7 +252,7 @@ public:
        std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
             node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
        contentCallback(*canvas.get());
-       node.setStagingDisplayList(canvas->finishRecording(), nullptr);
+       node.setStagingDisplayList(canvas->finishRecording());
     }
 
     static sp<RenderNode> createSkiaNode(int left, int top, int right, int bottom,
@@ -265,14 +270,14 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (displayList) {
-            node->setStagingDisplayList(displayList, nullptr);
+            node->setStagingDisplayList(displayList);
         }
         if (setup) {
             std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
                 new skiapipeline::SkiaRecordingCanvas(nullptr,
                 props.getWidth(), props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording(), nullptr);
+            node->setStagingDisplayList(canvas->finishRecording());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
@@ -350,8 +355,9 @@ public:
 
 private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
+        MarkAndSweepRemoved observer(nullptr);
         node->syncProperties();
-        node->syncDisplayList(nullptr);
+        node->syncDisplayList(observer, nullptr);
         auto displayList = node->getDisplayList();
         if (displayList) {
             for (auto&& childOp : displayList->getChildren()) {

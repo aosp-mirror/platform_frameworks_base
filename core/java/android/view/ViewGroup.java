@@ -4597,6 +4597,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         clearCachedLayoutMode();
     }
 
+    /** @hide */
+    @Override
+    protected void destroyHardwareResources() {
+        super.destroyHardwareResources();
+        int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            getChildAt(i).destroyHardwareResources();
+        }
+    }
+
     /**
      * Adds a view during layout. This is useful if in your onLayout() method,
      * you need to add more views (as does the list view for example).

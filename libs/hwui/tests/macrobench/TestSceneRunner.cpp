@@ -151,7 +151,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
         UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
-        proxy->syncAndDrawFrame(nullptr);
+        proxy->syncAndDrawFrame();
     }
 
     proxy->resetProfileInfo();
@@ -167,7 +167,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
             ATRACE_NAME("UI-Draw Frame");
             UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
             scene->doFrame(i);
-            proxy->syncAndDrawFrame(nullptr);
+            proxy->syncAndDrawFrame();
         }
         if (opts.reportFrametimeWeight) {
             proxy->fence();

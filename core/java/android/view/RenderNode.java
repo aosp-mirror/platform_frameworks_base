@@ -139,9 +139,6 @@ public class RenderNode {
                 RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
     }
 
-    // Note: written by native when display lists are detached
-    private boolean mValid;
-
     // Do not access directly unless you are ThreadedRenderer
     final long mNativeRenderNode;
     private final View mOwningView;
@@ -233,7 +230,6 @@ public class RenderNode {
         long displayList = canvas.finishRecording();
         nSetDisplayList(mNativeRenderNode, displayList);
         canvas.recycle();
-        mValid = true;
     }
 
     /**
@@ -242,10 +238,7 @@ public class RenderNode {
      * obsolete resources after related resources are gone.
      */
     public void discardDisplayList() {
-        if (!mValid) return;
-
         nSetDisplayList(mNativeRenderNode, 0);
-        mValid = false;
     }
 
     /**
@@ -254,10 +247,12 @@ public class RenderNode {
      *
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
-    public boolean isValid() { return mValid; }
+    public boolean isValid() {
+        return nIsValid(mNativeRenderNode);
+    }
 
     long getNativeDisplayList() {
-        if (!mValid) {
+        if (!isValid()) {
             throw new IllegalStateException("The display list is not valid.");
         }
         return mNativeRenderNode;
@@ -827,8 +822,7 @@ public class RenderNode {
     // Regular JNI methods
     ///////////////////////////////////////////////////////////////////////////
 
-    // Intentionally not static because it acquires a reference to 'this'
-    private native long nCreate(String name);
+    private static native long nCreate(String name);
 
     private static native long nGetNativeFinalizer();
     private static native void nOutput(long renderNode);
@@ -852,6 +846,9 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
     // @CriticalNative methods
     ///////////////////////////////////////////////////////////////////////////
+
+    @CriticalNative
+    private static native boolean nIsValid(long renderNode);
 
     // Matrix
 

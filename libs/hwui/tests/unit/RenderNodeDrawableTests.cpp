@@ -321,7 +321,6 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
     parent->prepareTree(info);
 
     //parent(A)             -> (receiverBackground, child)
@@ -437,7 +436,6 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
     parent->prepareTree(info);
 
     int drawCounter = 0;
@@ -527,7 +525,6 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionChildScroll) {
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
     parent->prepareTree(info);
 
     std::unique_ptr<ProjectionChildScrollTestCanvas> canvas(new ProjectionChildScrollTestCanvas());
@@ -545,7 +542,6 @@ static int drawNode(RenderThread& renderThread, const sp<RenderNode>& renderNode
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
     renderNode->prepareTree(info);
 
     //create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection

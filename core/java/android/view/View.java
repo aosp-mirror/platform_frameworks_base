@@ -16593,11 +16593,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     protected void destroyHardwareResources() {
-        // Although the Layer will be destroyed by RenderNode, we want to release
-        // the staging display list, which is also a signal to RenderNode that it's
-        // safe to free its copy of the display list as it knows that we will
-        // push an updated DisplayList if we try to draw again
-        resetDisplayList();
+        if (mOverlay != null) {
+            mOverlay.getOverlayView().destroyHardwareResources();
+        }
+        if (mGhostView != null) {
+            mGhostView.destroyHardwareResources();
+        }
     }
 
     /**
@@ -16768,11 +16769,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void resetDisplayList() {
-        if (mRenderNode.isValid()) {
-            mRenderNode.discardDisplayList();
-        }
-
-        if (mBackgroundRenderNode != null && mBackgroundRenderNode.isValid()) {
+        mRenderNode.discardDisplayList();
+        if (mBackgroundRenderNode != null) {
             mBackgroundRenderNode.discardDisplayList();
         }
     }

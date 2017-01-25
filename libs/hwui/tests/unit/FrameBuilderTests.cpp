@@ -322,10 +322,14 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, deferRenderNodeScene) {
     }
 
     for (auto& node : nodes) {
+        EXPECT_TRUE(node->isValid());
         EXPECT_FALSE(node->nothingToDraw());
-        node->setStagingDisplayList(nullptr, nullptr);
-        node->destroyHardwareResources(nullptr);
+        node->setStagingDisplayList(nullptr);
+        EXPECT_FALSE(node->isValid());
+        EXPECT_FALSE(node->nothingToDraw());
+        node->destroyHardwareResources();
         EXPECT_TRUE(node->nothingToDraw());
+        EXPECT_FALSE(node->isValid());
     }
 
     {

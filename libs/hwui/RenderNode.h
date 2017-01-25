@@ -34,6 +34,7 @@
 #include "RenderProperties.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaLayer.h"
+#include "utils/FatVector.h"
 
 #include <vector>
 
@@ -101,7 +102,7 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    ANDROID_API void setStagingDisplayList(DisplayList* newData, TreeObserver* observer);
+    ANDROID_API void setStagingDisplayList(DisplayList* newData);
 
     void computeOrdering();
 
@@ -164,6 +165,10 @@ public:
         return mStagingProperties;
     }
 
+    bool isValid() {
+        return mValid;
+    }
+
     int getWidth() const {
         return properties().getWidth();
     }
@@ -173,7 +178,8 @@ public:
     }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
-    void destroyHardwareResources(TreeObserver* observer, TreeInfo* info = nullptr);
+    void destroyHardwareResources(TreeInfo* info = nullptr);
+    void destroyLayers();
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
@@ -232,24 +238,35 @@ public:
         return mParentCount;
     }
 
+    void onRemovedFromTree(TreeInfo* info);
+
+    // Called by CanvasContext to promote a RenderNode to be a root node
+    void makeRoot() {
+        incParentRefCount();
+    }
+
+    // Called by CanvasContext when it drops a RenderNode from being a root node
+    void clearRoot();
+
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
             std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     void syncProperties();
-    void syncDisplayList(TreeInfo* info);
+    void syncDisplayList(TreeObserver& observer, TreeInfo* info);
 
-    void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
+    void prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
-    void pushStagingDisplayListChanges(TreeInfo& info);
+    void pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void deleteDisplayList(TreeObserver* observer, TreeInfo* info = nullptr);
+    void deleteDisplayList(TreeObserver& observer, TreeInfo* info = nullptr);
+    void destroyHardwareResourcesImpl(TreeObserver& observer, TreeInfo* info = nullptr);
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
-    void decParentRefCount(TreeObserver* observer, TreeInfo* info = nullptr);
+    void decParentRefCount(TreeObserver& observer, TreeInfo* info = nullptr);
     void output(std::ostream& output, uint32_t level);
 
     String8 mName;
@@ -258,6 +275,10 @@ private:
     uint32_t mDirtyPropertyFields;
     RenderProperties mProperties;
     RenderProperties mStagingProperties;
+
+    // Owned by UI. Set when DL is set, cleared when DL cleared or when node detached
+    // (likely by parent re-record/removal)
+    bool mValid = false;
 
     bool mNeedsDisplayListSync;
     // WARNING: Do not delete this directly, you must go through deleteDisplayList()!
@@ -360,6 +381,29 @@ private:
      */
     std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
 }; // class RenderNode
+
+class MarkAndSweepRemoved : public TreeObserver {
+PREVENT_COPY_AND_ASSIGN(MarkAndSweepRemoved);
+
+public:
+    explicit MarkAndSweepRemoved(TreeInfo* info) : mTreeInfo(info) {}
+
+    void onMaybeRemovedFromTree(RenderNode* node) override {
+        mMarked.emplace_back(node);
+    }
+
+    ~MarkAndSweepRemoved() {
+        for (auto& node : mMarked) {
+            if (!node->hasParents()) {
+                node->onRemovedFromTree(mTreeInfo);
+            }
+        }
+    }
+
+private:
+    FatVector<sp<RenderNode>, 10> mMarked;
+    TreeInfo* mTreeInfo;
+};
 
 } /* namespace uirenderer */
 } /* namespace android */

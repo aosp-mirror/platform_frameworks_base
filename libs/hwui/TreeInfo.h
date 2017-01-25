@@ -47,9 +47,9 @@ public:
     // Due to the unordered nature of tree pushes, once prepareTree
     // is finished it is possible that the node was "resurrected" and has
     // a non-zero parent count.
-    virtual void onMaybeRemovedFromTree(RenderNode* node) {}
+    virtual void onMaybeRemovedFromTree(RenderNode* node) = 0;
 protected:
-    ~TreeObserver() {}
+    virtual ~TreeObserver() {}
 };
 
 // This would be a struct, but we want to PREVENT_COPY_AND_ASSIGN
@@ -90,10 +90,6 @@ public:
 
     LayerUpdateQueue* layerUpdateQueue = nullptr;
     ErrorHandler* errorHandler = nullptr;
-
-    // Optional, may be nullptr. Used to allow things to observe interesting
-    // tree state changes
-    TreeObserver* observer = nullptr;
 
     int32_t windowInsetLeft = 0;
     int32_t windowInsetTop = 0;
