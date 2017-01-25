@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SubscriptionInfo;
+import android.view.View;
+
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.DemoMode;
@@ -68,13 +70,27 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
 
     public static class IconState {
         public final boolean visible;
+
         public final int icon;
+
+        /**
+         * Optional iconOverlay resource id.
+         *
+         * <p>Set to -1 if not present.
+         */
+        public final int iconOverlay;
+
         public final String contentDescription;
 
-        public IconState(boolean visible, int icon, String contentDescription) {
+        public IconState(boolean visible, int icon, int iconOverlay, String contentDescription) {
             this.visible = visible;
             this.icon = icon;
+            this.iconOverlay = iconOverlay;
             this.contentDescription = contentDescription;
+        }
+
+        public IconState(boolean visible, int icon, String contentDescription) {
+            this(visible, icon, -1 /* iconOverlay */, contentDescription);
         }
 
         public IconState(boolean visible, int icon, int contentDescription,

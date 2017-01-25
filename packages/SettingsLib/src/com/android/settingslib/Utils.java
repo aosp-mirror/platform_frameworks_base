@@ -21,6 +21,8 @@ import android.net.ScoredNetwork;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
+import android.view.View;
+
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 
@@ -32,7 +34,7 @@ public class Utils {
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
 
-    static final int[] WIFI_PIE_FOR_BADGING = {
+    public static final int[] WIFI_PIE_FOR_BADGING = {
           com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
           com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
           com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
@@ -288,8 +290,15 @@ public class Utils {
                 });
     }
 
-    private static int getWifiBadgeResource(int badge) {
+    /**
+     * Returns the resource id for the given badge or {@link View.NO_ID} if no badge is to be shown.
+     *
+     * @throws IllegalArgumentException if the given badge value is not supported.
+     */
+    public static int getWifiBadgeResource(int badge) {
         switch (badge) {
+            case ScoredNetwork.BADGING_NONE:
+                return View.NO_ID;
             case ScoredNetwork.BADGING_SD:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
             case ScoredNetwork.BADGING_HD:
