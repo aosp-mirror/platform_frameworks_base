@@ -22,6 +22,8 @@ import android.app.RetailDemoModeServiceInternal;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
@@ -32,6 +34,7 @@ import android.hardware.input.InputManagerInternal;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Handler;
@@ -401,6 +404,10 @@ final class Notifier {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                        log.setType(MetricsEvent.TYPE_OPEN);
+                        log.setSubtype(0); // not user initiated
+                        MetricsLogger.action(log);
                         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
                         mPolicy.startedWakingUp();
                     }
@@ -457,6 +464,10 @@ final class Notifier {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                        log.setType(MetricsEvent.TYPE_CLOSE);
+                        log.setSubtype(why);
+                        MetricsLogger.action(log);
                         EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, why, 0, 0);
                         mPolicy.finishedGoingToSleep(why);
                     }
