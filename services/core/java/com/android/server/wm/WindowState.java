@@ -3199,8 +3199,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (task == null) {
             return false;
         }
+        if (!StackId.isStackAffectedByDragResizing(getStackId())) {
+            return false;
+        }
         if (mAttrs.width != MATCH_PARENT || mAttrs.height != MATCH_PARENT) {
-
             // Floating windows never enter drag resize mode.
             return false;
         }

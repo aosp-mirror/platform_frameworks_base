@@ -698,6 +698,13 @@ public class ActivityManager {
         }
 
         /**
+         * Returns true if the input stack is affected by drag resizing.
+         */
+        public static boolean isStackAffectedByDragResizing(int stackId) {
+            return isStaticStack(stackId) && stackId != PINNED_STACK_ID;
+        }
+
+        /**
          * Returns true if the windows of tasks being moved to the target stack from the source
          * stack should be replaced, meaning that window manager will keep the old window around
          * until the new is ready.
