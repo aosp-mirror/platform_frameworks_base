@@ -514,6 +514,7 @@
     <!-- Added in O -->
     <!-- TODO: temporary broadcast used by AutoFillManagerServiceImpl; will be removed -->
     <protected-broadcast android:name="com.android.internal.autofill.action.REQUEST_AUTOFILL" />
+    <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

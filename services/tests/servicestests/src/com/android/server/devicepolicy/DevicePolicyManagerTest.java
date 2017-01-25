@@ -68,6 +68,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
+import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
@@ -1128,6 +1131,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetGetApplicationRestriction() {
         setAsProfileOwner(admin1);
+        mContext.packageName = admin1.getPackageName();
 
         {
             Bundle rest = new Bundle();
@@ -1159,29 +1163,131 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg2").size());
     }
 
+    /**
+     * Setup a package in the package manager mock. Useful for faking installed applications.
+     *
+     * @param packageName the name of the package to be setup
+     * @param appId the application ID to be given to the package
+     * @return the UID of the package as known by the mock package manager
+     */
+    private int setupPackageInPackageManager(final String packageName, final int appId)
+            throws Exception {
+        // Make the PackageManager return the package instead of throwing a NameNotFoundException
+        final PackageInfo pi = new PackageInfo();
+        pi.applicationInfo = new ApplicationInfo();
+        pi.applicationInfo.flags = ApplicationInfo.FLAG_HAS_CODE;
+        doReturn(pi).when(mContext.ipackageManager).getPackageInfo(
+                eq(packageName),
+                anyInt(),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+        // Setup application UID with the PackageManager
+        final int uid = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, appId);
+        doReturn(uid).when(mContext.packageManager).getPackageUidAsUser(
+                eq(packageName),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+        // Associate packageName to uid
+        doReturn(packageName).when(mContext.ipackageManager).getNameForUid(eq(uid));
+        doReturn(new String[]{packageName})
+            .when(mContext.ipackageManager).getPackagesForUid(eq(uid));
+        return uid;
+    }
+
+    /**
+     * Simple test for delegate set/get and general delegation. Tests verifying that delegated
+     * privileges can acually be exercised by a delegate are not covered here.
+     */
+    public void testDelegation() throws Exception {
+        setAsProfileOwner(admin1);
+
+        final int userHandle = DpmMockContext.CALLER_USER_HANDLE;
+
+        // Given two packages
+        final String CERT_DELEGATE = "com.delegate.certs";
+        final String RESTRICTIONS_DELEGATE = "com.delegate.apprestrictions";
+        final int CERT_DELEGATE_UID = setupPackageInPackageManager(CERT_DELEGATE, 20988);
+        final int RESTRICTIONS_DELEGATE_UID = setupPackageInPackageManager(RESTRICTIONS_DELEGATE,
+                20989);
+
+        // On delegation
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
+        dpm.setCertInstallerPackage(admin1, CERT_DELEGATE);
+        dpm.setApplicationRestrictionsManagingPackage(admin1, RESTRICTIONS_DELEGATE);
+
+        // DPMS correctly stores and retrieves the delegates
+        DevicePolicyManagerService.DevicePolicyData policy = dpms.mUserData.get(userHandle);
+        assertEquals(2, policy.mDelegationMap.size());
+        MoreAsserts.assertContentsInAnyOrder(policy.mDelegationMap.get(CERT_DELEGATE),
+            DELEGATION_CERT_INSTALL);
+        MoreAsserts.assertContentsInAnyOrder(dpm.getDelegatedScopes(admin1, CERT_DELEGATE),
+            DELEGATION_CERT_INSTALL);
+        assertEquals(CERT_DELEGATE, dpm.getCertInstallerPackage(admin1));
+        MoreAsserts.assertContentsInAnyOrder(policy.mDelegationMap.get(RESTRICTIONS_DELEGATE),
+            DELEGATION_APP_RESTRICTIONS);
+        MoreAsserts.assertContentsInAnyOrder(dpm.getDelegatedScopes(admin1, RESTRICTIONS_DELEGATE),
+            DELEGATION_APP_RESTRICTIONS);
+        assertEquals(RESTRICTIONS_DELEGATE, dpm.getApplicationRestrictionsManagingPackage(admin1));
+
+        // On calling install certificate APIs from an unauthorized process
+        mContext.binder.callingUid = RESTRICTIONS_DELEGATE_UID;
+        mContext.packageName = RESTRICTIONS_DELEGATE;
+
+        // DPMS throws a SecurityException
+        try {
+            dpm.installCaCert(null, null);
+            fail("Didn't throw SecurityException on unauthorized access");
+        } catch (SecurityException expected) {
+        }
+
+        // On calling install certificate APIs from an authorized process
+        mContext.binder.callingUid = CERT_DELEGATE_UID;
+        mContext.packageName = CERT_DELEGATE;
+
+        // DPMS executes without a SecurityException
+        try {
+            dpm.installCaCert(null, null);
+        } catch (SecurityException unexpected) {
+            fail("Threw SecurityException on authorized access");
+        } catch (NullPointerException expected) {
+        }
+
+        // On removing a delegate
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
+        dpm.setCertInstallerPackage(admin1, null);
+
+        // DPMS does not allow access to ex-delegate
+        mContext.binder.callingUid = CERT_DELEGATE_UID;
+        mContext.packageName = CERT_DELEGATE;
+        try {
+            dpm.installCaCert(null, null);
+            fail("Didn't throw SecurityException on unauthorized access");
+        } catch (SecurityException expected) {
+        }
+
+        // But still allows access to other existing delegates
+        mContext.binder.callingUid = RESTRICTIONS_DELEGATE_UID;
+        mContext.packageName = RESTRICTIONS_DELEGATE;
+        try {
+            dpm.getApplicationRestrictions(null, "pkg");
+        } catch (SecurityException expected) {
+            fail("Threw SecurityException on authorized access");
+        }
+    }
+
     public void testApplicationRestrictionsManagingApp() throws Exception {
         setAsProfileOwner(admin1);
 
         final String nonExistAppRestrictionsManagerPackage = "com.google.app.restrictions.manager2";
         final String appRestrictionsManagerPackage = "com.google.app.restrictions.manager";
         final int appRestrictionsManagerAppId = 20987;
-        final int appRestrictionsManagerUid = UserHandle.getUid(
-                DpmMockContext.CALLER_USER_HANDLE, appRestrictionsManagerAppId);
-        doReturn(appRestrictionsManagerUid).when(mContext.packageManager).getPackageUidAsUser(
-                eq(appRestrictionsManagerPackage),
-                eq(DpmMockContext.CALLER_USER_HANDLE));
-        mContext.binder.callingUid = appRestrictionsManagerUid;
-
-        final PackageInfo pi = new PackageInfo();
-        pi.applicationInfo = new ApplicationInfo();
-        pi.applicationInfo.flags = ApplicationInfo.FLAG_HAS_CODE;
-        doReturn(pi).when(mContext.ipackageManager).getPackageInfo(
-                eq(appRestrictionsManagerPackage),
-                anyInt(),
-                eq(DpmMockContext.CALLER_USER_HANDLE));
+        final int appRestrictionsManagerUid = setupPackageInPackageManager(
+                appRestrictionsManagerPackage, appRestrictionsManagerAppId);
 
         // appRestrictionsManager package shouldn't be able to manage restrictions as the PO hasn't
         // delegated that permission yet.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
         Bundle rest = new Bundle();
         rest.putString("KEY_STRING", "Foo1");
@@ -1190,18 +1296,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             fail("Didn't throw expected SecurityException");
         } catch (SecurityException expected) {
             MoreAsserts.assertContainsRegex(
-                    "caller cannot manage application restrictions", expected.getMessage());
+                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
+                    expected.getMessage());
         }
         try {
             dpm.getApplicationRestrictions(null, "pkg1");
             fail("Didn't throw expected SecurityException");
         } catch (SecurityException expected) {
             MoreAsserts.assertContainsRegex(
-                    "caller cannot manage application restrictions", expected.getMessage());
+                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
+                    expected.getMessage());
         }
 
         // Check via the profile owner that no restrictions were set.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
 
         // Check the API does not allow setting a non-existent package
@@ -1221,6 +1330,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Now that package should be able to set and retrieve app restrictions.
         mContext.binder.callingUid = appRestrictionsManagerUid;
+        mContext.packageName = appRestrictionsManagerPackage;
         assertTrue(dpm.isCallerApplicationRestrictionsManagingPackage());
         dpm.setApplicationRestrictions(null, "pkg1", rest);
         Bundle returned = dpm.getApplicationRestrictions(null, "pkg1");
@@ -1236,12 +1346,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             fail("Didn't throw expected SecurityException");
         } catch (SecurityException expected) {
             MoreAsserts.assertContainsRegex(
-                    "caller cannot manage application restrictions", expected.getMessage());
+                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
+                    expected.getMessage());
         }
 
         // The DPM is still able to manage app restrictions, even if it allowed another app to do it
         // too.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
         assertEquals(returned, dpm.getApplicationRestrictions(admin1, "pkg1"));
         dpm.setApplicationRestrictions(admin1, "pkg1", null);
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
@@ -1250,13 +1362,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setApplicationRestrictionsManagingPackage(admin1, null);
         assertNull(dpm.getApplicationRestrictionsManagingPackage(admin1));
         mContext.binder.callingUid = appRestrictionsManagerUid;
+        mContext.packageName = appRestrictionsManagerPackage;
         assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
         try {
             dpm.setApplicationRestrictions(null, "pkg1", null);
             fail("Didn't throw expected SecurityException");
         } catch (SecurityException expected) {
             MoreAsserts.assertContainsRegex(
-                    "caller cannot manage application restrictions", expected.getMessage());
+                    "Caller with uid \\d+ is not a delegate of scope delegation-app-restrictions.",
+                    expected.getMessage());
         }
     }
 
