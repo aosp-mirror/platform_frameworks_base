@@ -833,6 +833,7 @@ public abstract class LayoutInflater {
 
         final int depth = parser.getDepth();
         int type;
+        boolean pendingRequestFocus = false;
 
         while (((type = parser.next()) != XmlPullParser.END_TAG ||
                 parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
@@ -844,7 +845,8 @@ public abstract class LayoutInflater {
             final String name = parser.getName();
 
             if (TAG_REQUEST_FOCUS.equals(name)) {
-                parseRequestFocus(parser, parent);
+                pendingRequestFocus = true;
+                consumeChildElements(parser);
             } else if (TAG_TAG.equals(name)) {
                 parseViewTag(parser, parent, attrs);
             } else if (TAG_INCLUDE.equals(name)) {
@@ -863,20 +865,13 @@ public abstract class LayoutInflater {
             }
         }
 
+        if (pendingRequestFocus) {
+            parent.restoreDefaultFocus();
+        }
+
         if (finishInflate) {
             parent.onFinishInflate();
         }
-    }
-
-    /**
-     * Parses a <code>&lt;request-focus&gt;</code> element and requests focus on
-     * the containing View.
-     */
-    private void parseRequestFocus(XmlPullParser parser, View view)
-            throws XmlPullParserException, IOException {
-        view.requestFocus();
-
-        consumeChildElements(parser);
     }
 
     /**

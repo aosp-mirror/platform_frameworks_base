@@ -163,6 +163,17 @@ public final class ViewRootImpl implements ViewParent,
     static final ArrayList<ComponentCallbacks> sConfigCallbacks = new ArrayList();
 
     /**
+     * Signals that compatibility booleans have been initialized according to
+     * target SDK versions.
+     */
+    private static boolean sCompatibilityDone = false;
+
+    /**
+     * Always assign focus if a focusable View is available.
+     */
+    private static boolean sAlwaysAssignFocus;
+
+    /**
      * This list must only be modified by the main thread, so a lock is only needed when changing
      * the list or when accessing the list from a non-main thread.
      */
@@ -450,6 +461,13 @@ public final class ViewRootImpl implements ViewParent,
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+
+        if (!sCompatibilityDone) {
+            sAlwaysAssignFocus = mTargetSdkVersion < Build.VERSION_CODES.O;
+
+            sCompatibilityDone = true;
+        }
+
         loadSystemProperties();
     }
 
@@ -2179,7 +2197,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        if (mFirst) {
+        if (mFirst && sAlwaysAssignFocus) {
             // handle first focus request
             if (DEBUG_INPUT_RESIZE) Log.v(mTag, "First: mView.hasFocus()="
                     + mView.hasFocus());
@@ -3281,7 +3299,9 @@ public final class ViewRootImpl implements ViewParent,
         checkThread();
         if (mView != null) {
             if (!mView.hasFocus()) {
-                v.requestFocus();
+                if (sAlwaysAssignFocus) {
+                    v.requestFocus();
+                }
             } else {
                 // the one case where will transfer focus away from the current one
                 // is if the current view is a view group that prefers to give focus
@@ -4454,9 +4474,7 @@ public final class ViewRootImpl implements ViewParent,
                         return true;
                     }
                 } else {
-                    // find the best view to give focus to in this non-touch-mode with no-focus
-                    View v = focusSearch(null, direction);
-                    if (v != null && v.requestFocus(direction)) {
+                    if (mView.restoreDefaultFocus()) {
                         return true;
                     }
                 }
@@ -4466,9 +4484,10 @@ public final class ViewRootImpl implements ViewParent,
 
         private boolean performKeyboardGroupNavigation(int direction) {
             final View focused = mView.findFocus();
-            View cluster = focused != null
-                    ? focused.keyboardNavigationClusterSearch(null, direction)
-                    : keyboardNavigationClusterSearch(null, direction);
+            if (focused == null && mView.restoreDefaultFocus()) {
+                return true;
+            }
+            View cluster = focused.keyboardNavigationClusterSearch(null, direction);
 
             // Since requestFocus only takes "real" focus directions (and therefore also
             // restoreFocusInCluster), convert forward/backward focus into FOCUS_DOWN.
