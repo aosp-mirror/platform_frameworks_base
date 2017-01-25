@@ -654,7 +654,7 @@ public final class TvContract {
          *
          * <p>This is used to indicate the broadcast standard (e.g. ATSC, DVB or ISDB) the current
          * channel conforms to. Use {@link #TYPE_OTHER} for streaming-based channels, which is the
-         * default channel type. The value should match to one of the followings:
+         * default channel type. The value should match one of the followings:
          * {@link #TYPE_1SEG},
          * {@link #TYPE_ATSC_C},
          * {@link #TYPE_ATSC_M_H},
@@ -1086,6 +1086,78 @@ public final class TvContract {
 
         /** The MIME type of a single TV program. */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
+
+        /**
+         * The interaction type for "listens".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_LISTENS = "INTERACTION_TYPE_LISTENS";
+
+        /**
+         * The interaction type for "followers".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_FOLLOWERS = "INTERACTION_TYPE_FOLLOWERS";
+
+        /**
+         * The interaction type for "fans".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_FANS = "INTERACTION_TYPE_FANS";
+
+        /**
+         * The interaction type for "likes".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_LIKES = "INTERACTION_TYPE_LIKES";
+
+        /**
+         * The interaction type for "thumbs".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_THUMBS = "INTERACTION_TYPE_THUMBS";
+
+        /**
+         * The interaction type for "views".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_VIEWS = "INTERACTION_TYPE_VIEWS";
+
+        /**
+         * The interaction type for "viewers".
+         *
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String INTERACTION_TYPE_VIEWERS = "INTERACTION_TYPE_VIEWERS";
+
+        /**
+         * The review rating style for five star rating.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        public static final String REVIEW_RATING_STYLE_STARS = "REVIEW_RATING_STYLE_STARS";
+
+        /**
+         * The review rating style for thumbs-up and thumbs-down rating.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        public static final String REVIEW_RATING_STYLE_THUMPS_UP_DOWN =
+                "REVIEW_RATING_STYLE_THUMPS_UP_DOWN";
+
+        /**
+         * The review rating style for 0 to 100 point system.
+         *
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        public static final String REVIEW_RATING_STYLE_PERCENTAGE =
+                "REVIEW_RATING_STYLE_PERCENTAGE";
 
         /**
          * The ID of the TV channel that provides this TV program.
@@ -1534,6 +1606,67 @@ public final class TvContract {
          */
         @SystemApi
         public static final String COLUMN_TRANSIENT = "transient";
+
+        /**
+         * The type of interaction for this TV program.
+         *
+         * <p> The value should match one of the followings:
+         * {@link #INTERACTION_TYPE_LISTENS},
+         * {@link #INTERACTION_TYPE_FOLLOWERS},
+         * {@link #INTERACTION_TYPE_FANS},
+         * {@link #INTERACTION_TYPE_LIKES},
+         * {@link #INTERACTION_TYPE_THUMBS},
+         * {@link #INTERACTION_TYPE_VIEWS}, and
+         * {@link #INTERACTION_TYPE_VIEWERS}.
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_INTERACTION_COUNT
+         */
+        public static final String COLUMN_INTERACTION_TYPE = "interaction_type";
+
+        /**
+         * The interaction count for this program.
+         *
+         * <p>This indicates the number of times interaction has happened.
+         *
+         * <p>Type: INTEGER
+         * @see #COLUMN_INTERACTION_TYPE
+         */
+        public static final String COLUMN_INTERACTION_COUNT = "interaction_count";
+
+        /**
+         * The author or artist of this content.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_AUTHOR = "author";
+
+        /**
+         * The review rating score style used for {@link #COLUMN_REVIEW_RATING}.
+         *
+         * <p> The value should match one of the followings: {@link #REVIEW_RATING_STYLE_STARS},
+         * {@link #REVIEW_RATING_STYLE_THUMPS_UP_DOWN}, and {@link #REVIEW_RATING_STYLE_PERCENTAGE}.
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_REVIEW_RATING
+         */
+        public static final String COLUMN_REVIEW_RATING_STYLE = "review_rating_style";
+
+        /**
+         * The review rating score for this program.
+         *
+         * <p>The format of the value is dependent on {@link #COLUMN_REVIEW_RATING_STYLE}. If the
+         * style is {@link #REVIEW_RATING_STYLE_STARS}, the value should be a real number between
+         * 0.0 and 5.0. (e.g. "4.5") If the style is {@link #REVIEW_RATING_STYLE_THUMPS_UP_DOWN},
+         * the value should be two integers, one for thumbs-up count and the other for thumbs-down
+         * count, with a comma between them. (e.g. "200,40") If the style is
+         * {@link #REVIEW_RATING_STYLE_PERCENTAGE}, the value shoule be a real number between 0 and
+         * 100. (e.g. "99.9")
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_REVIEW_RATING_STYLE
+         */
+        public static final String COLUMN_REVIEW_RATING = "review_rating";
 
         private Programs() {}
 
