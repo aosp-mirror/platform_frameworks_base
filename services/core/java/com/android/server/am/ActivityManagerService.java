@@ -761,11 +761,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     ProcessRecord mHeavyWeightProcess = null;
 
     /**
-     * Are we enforcing background restrictions?
-     */
-    final boolean mEnforceBackgroundCheck;
-
-    /**
      * Non-persistent app uid whitelist for background restrictions
      */
     int[] mBackgroundUidWhitelist = new int[] {
@@ -1515,9 +1510,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean mBooted = false;
 
-    int mProcessLimit = ProcessList.MAX_CACHED_APPS;
-    int mProcessLimitOverride = -1;
-
     WindowManagerService mWindowManager;
     final ActivityThread mSystemThread;
 
@@ -1638,6 +1630,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final UiHandler mUiHandler;
+
+    final ActivityManagerConstants mConstants;
 
     PackageManagerInternal mPackageManagerInt;
 
@@ -2620,10 +2614,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPermissionReviewRequired = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
-        mEnforceBackgroundCheck = SystemProperties.getBoolean("debug.bgcheck", false);
         mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
         if (DEBUG_BACKGROUND_CHECK) {
-            Slog.d(TAG, "Enforcing O+ bg restrictions: " + mEnforceBackgroundCheck);
+            Slog.d(TAG, "Enforcing O+ bg restrictions: " + mConstants.ENFORCE_BG_CHECK);
             StringBuilder sb = new StringBuilder(200);
             sb.append("  ");
             for (String a : mBackgroundLaunchBroadcasts) {
@@ -2638,6 +2631,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
         mUiHandler = new UiHandler();
+
+        mConstants = new ActivityManagerConstants(this, mHandler);
 
         /* static; one-time init here */
         if (sKillHandler == null) {
@@ -7276,9 +7271,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /**
      * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
-     *
-     * <p>{@code callerUid} must be allowed to request such whitelist by calling
-     * {@link #addTempPowerSaveWhitelistGrantorUid(int)}.
      */
     void tempWhitelistAppForPowerSave(int callerPid, int callerUid, int targetUid, long duration) {
         if (DEBUG_WHITELISTS) {
@@ -7470,8 +7462,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
                 "setProcessLimit()");
         synchronized (this) {
-            mProcessLimit = max < 0 ? ProcessList.MAX_CACHED_APPS : max;
-            mProcessLimitOverride = max;
+            mConstants.setOverrideMaxCachedProcesses(max);
         }
         trimApplications();
     }
@@ -7479,7 +7470,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int getProcessLimit() {
         synchronized (this) {
-            return mProcessLimitOverride;
+            return mConstants.getOverrideMaxCachedProcesses();
         }
     }
 
@@ -8034,7 +8025,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Unified app-op and target sdk check
     int appRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
-        if (mEnforceBackgroundCheck && packageTargetSdk >= Build.VERSION_CODES.O) {
+        if (mConstants.ENFORCE_BG_CHECK && packageTargetSdk >= Build.VERSION_CODES.O) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, restricted");
             }
@@ -11559,6 +11550,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mSystemThread.installSystemProviders(providers);
         }
 
+        mConstants.start(mContext.getContentResolver());
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mFontScaleSettingObserver = new FontScaleSettingObserver();
 
@@ -14493,6 +14485,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     dumpAssociationsLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
+            } else if ("settings".equals(cmd)) {
+                synchronized (this) {
+                    mConstants.dump(pw);
+                }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 if (dumpClient) {
                     ActiveServices.ServiceDumper dumper;
@@ -14533,6 +14529,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         } else if (dumpClient) {
             ActiveServices.ServiceDumper sdumper;
             synchronized (this) {
+                mConstants.dump(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
                 dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
                 if (dumpAll) {
@@ -14591,6 +14592,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         } else {
             synchronized (this) {
+                mConstants.dump(pw);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
                 dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
                 if (dumpAll) {
@@ -21392,17 +21398,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mNewNumServiceProcs = 0;
         mNewNumAServiceProcs = 0;
 
-        final int emptyProcessLimit;
-        final int cachedProcessLimit;
-        if (mProcessLimit <= 0) {
-            emptyProcessLimit = cachedProcessLimit = 0;
-        } else if (mProcessLimit == 1) {
-            emptyProcessLimit = 1;
-            cachedProcessLimit = 0;
-        } else {
-            emptyProcessLimit = ProcessList.computeEmptyProcessLimit(mProcessLimit);
-            cachedProcessLimit = mProcessLimit - emptyProcessLimit;
-        }
+        final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
+        final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES - emptyProcessLimit;
 
         // Let's determine how many processes we have running vs.
         // how many slots we have for background processes; we may want
@@ -21510,7 +21507,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                         break;
                     case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
-                        if (numEmpty > ProcessList.TRIM_EMPTY_APPS
+                        if (numEmpty > mConstants.CUR_TRIM_EMPTY_PROCESSES
                                 && app.lastActivityTime < oldTime) {
                             app.kill("empty for "
                                     + ((oldTime + ProcessList.MAX_EMPTY_TIME - app.lastActivityTime)
@@ -21563,8 +21560,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // memory they want.
         final int numCachedAndEmpty = numCached + numEmpty;
         int memFactor;
-        if (numCached <= ProcessList.TRIM_CACHED_APPS
-                && numEmpty <= ProcessList.TRIM_EMPTY_APPS) {
+        if (numCached <= mConstants.CUR_TRIM_CACHED_PROCESSES
+                && numEmpty <= mConstants.CUR_TRIM_EMPTY_PROCESSES) {
             if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
                 memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
             } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
