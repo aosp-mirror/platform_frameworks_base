@@ -7161,7 +7161,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if caption is displayed on content, false if it pushes the content down.
      *
-     * @see {@link #setOverlayWithDecorCaptionEnabled(boolean)}
+     * @see #setOverlayWithDecorCaptionEnabled(boolean)
      */
     public boolean isOverlayWithDecorCaptionEnabled() {
         return mWindow.isOverlayWithDecorCaptionEnabled();
