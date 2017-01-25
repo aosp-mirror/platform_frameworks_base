@@ -89,6 +89,12 @@ int AHardwareBuffer_allocate(const AHardwareBuffer_Desc* desc,
         return BAD_VALUE;
     }
 
+    if (desc->format == AHARDWAREBUFFER_FORMAT_BLOB && desc->height != 1) {
+        ALOGE("Height must be 1 when using the AHARDWAREBUFFER_FORMAT_BLOB "
+                "format");
+        return BAD_VALUE;
+    }
+
     status_t err;
     uint32_t usage = android_hardware_HardwareBuffer_convertToGrallocUsageBits(
             desc->usage0, desc->usage1);
