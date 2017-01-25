@@ -864,9 +864,8 @@
         <flag name="density" value="0x1000" />
         <!-- The layout direction has changed. For example going from LTR to RTL. -->
         <flag name="layoutDirection" value="0x2000" />
-        <!-- The colorimetry capabilities of the screen have changed (color gamut
-             or dynamic range). -->
-        <flag name="colorimetry" value="0x4000" />
+        <!-- The color mode of the screen has changed (color gamut or dynamic range). -->
+        <flag name="colorMode" value="0x4000" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
@@ -2043,6 +2042,16 @@
         <attr name="visibleToInstantApps" />
         <!-- The code for this component is located in the given split. -->
         <attr name="splitName" />
+        <!-- Specify the color mode the activity desires. The requested color mode may be ignored
+             depending on the capabilities of the display the activity is displayed on. -->
+        <attr name="colorMode">
+            <!-- The default color mode (typically sRGB, low-dynamic range). -->
+            <enum name="default" value="0" />
+            <!-- Wide color gamut color mode. -->
+            <enum name="wideColorGamut" value="1" />
+            <!-- High dynamic range color mode. -->
+            <enum name="hdr" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

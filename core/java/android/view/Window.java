@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1125,6 +1126,28 @@ public abstract class Window {
         if (mCallback != null) {
             mCallback.onWindowAttributesChanged(attrs);
         }
+    }
+
+    /**
+     * <p>Set the color mode of the window. Setting the color mode might
+     * override the window's pixel {@link WindowManager.LayoutParams#format format}.</p>
+     *
+     * <p>The color mode must be one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+     * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.</p>
+     */
+    public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.setColorMode(colorMode);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * Returns the color mode of the window, one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+     * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.
+     */
+    @ActivityInfo.ColorMode
+    public int getColorMode() {
+        return getAttributes().getColorMode();
     }
 
     /**

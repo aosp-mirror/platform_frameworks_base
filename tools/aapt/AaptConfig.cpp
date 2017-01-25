@@ -267,8 +267,8 @@ void applyVersionForCompatibility(ConfigDescription* config) {
     uint16_t minSdk = 0;
     if ((config->uiMode & ResTable_config::MASK_UI_MODE_TYPE)
                 == ResTable_config::UI_MODE_TYPE_VR_HEADSET
-            || config->colorimetry & ResTable_config::MASK_WIDE_COLOR_GAMUT
-            || config->colorimetry & ResTable_config::MASK_HDR) {
+            || config->colorMode & ResTable_config::MASK_WIDE_COLOR_GAMUT
+            || config->colorMode & ResTable_config::MASK_HDR) {
         minSdk = SDK_O;
     } else if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
         minSdk = SDK_MNC;
@@ -451,18 +451,18 @@ bool parseScreenRound(const char* name, ResTable_config* out) {
 
 bool parseWideColorGamut(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
                 | ResTable_config::WIDE_COLOR_GAMUT_ANY;
         return true;
     } else if (strcmp(name, "widecg") == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
                 | ResTable_config::WIDE_COLOR_GAMUT_YES;
         return true;
     } else if (strcmp(name, "nowidecg") == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_WIDE_COLOR_GAMUT)
                 | ResTable_config::WIDE_COLOR_GAMUT_NO;
         return true;
     }
@@ -471,18 +471,18 @@ bool parseWideColorGamut(const char* name, ResTable_config* out) {
 
 bool parseHdr(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_HDR)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
                 | ResTable_config::HDR_ANY;
         return true;
     } else if (strcmp(name, "highdr") == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_HDR)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
                 | ResTable_config::HDR_YES;
         return true;
     } else if (strcmp(name, "lowdr") == 0) {
-        if (out) out->colorimetry =
-                (out->colorimetry&~ResTable_config::MASK_HDR)
+        if (out) out->colorMode =
+                (out->colorMode&~ResTable_config::MASK_HDR)
                 | ResTable_config::HDR_NO;
         return true;
     }

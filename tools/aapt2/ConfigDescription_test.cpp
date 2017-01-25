@@ -106,13 +106,13 @@ TEST(ConfigDescriptionTest, TestWideColorGamutQualifier) {
   ConfigDescription config;
   EXPECT_TRUE(TestParse("widecg", &config));
   EXPECT_EQ(android::ResTable_config::WIDE_COLOR_GAMUT_YES,
-            config.colorimetry & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
+            config.colorMode & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
   EXPECT_EQ(SDK_O, config.sdkVersion);
   EXPECT_EQ(std::string("widecg-v26"), config.toString().string());
 
   EXPECT_TRUE(TestParse("nowidecg", &config));
   EXPECT_EQ(android::ResTable_config::WIDE_COLOR_GAMUT_NO,
-            config.colorimetry & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
+            config.colorMode & android::ResTable_config::MASK_WIDE_COLOR_GAMUT);
   EXPECT_EQ(SDK_O, config.sdkVersion);
   EXPECT_EQ(std::string("nowidecg-v26"), config.toString().string());
 }
@@ -121,13 +121,13 @@ TEST(ConfigDescriptionTest, TestHdrQualifier) {
   ConfigDescription config;
   EXPECT_TRUE(TestParse("highdr", &config));
   EXPECT_EQ(android::ResTable_config::HDR_YES,
-            config.colorimetry & android::ResTable_config::MASK_HDR);
+            config.colorMode & android::ResTable_config::MASK_HDR);
   EXPECT_EQ(SDK_O, config.sdkVersion);
   EXPECT_EQ(std::string("highdr-v26"), config.toString().string());
 
   EXPECT_TRUE(TestParse("lowdr", &config));
   EXPECT_EQ(android::ResTable_config::HDR_NO,
-            config.colorimetry & android::ResTable_config::MASK_HDR);
+            config.colorMode & android::ResTable_config::MASK_HDR);
   EXPECT_EQ(SDK_O, config.sdkVersion);
   EXPECT_EQ(std::string("lowdr-v26"), config.toString().string());
 }

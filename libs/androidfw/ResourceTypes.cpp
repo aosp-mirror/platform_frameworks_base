@@ -1907,7 +1907,7 @@ int ResTable_config::compare(const ResTable_config& o) const {
     if (diff != 0) return diff;
     diff = (int32_t)(screenLayout2 - o.screenLayout2);
     if (diff != 0) return diff;
-    diff = (int32_t)(colorimetry - o.colorimetry);
+    diff = (int32_t)(colorMode - o.colorMode);
     if (diff != 0) return diff;
     diff = (int32_t)(uiMode - o.uiMode);
     if (diff != 0) return diff;
@@ -1969,8 +1969,8 @@ int ResTable_config::compareLogical(const ResTable_config& o) const {
     if (screenLayout2 != o.screenLayout2) {
         return screenLayout2 < o.screenLayout2 ? -1 : 1;
     }
-    if (colorimetry != o.colorimetry) {
-        return colorimetry < o.colorimetry ? -1 : 1;
+    if (colorMode != o.colorMode) {
+        return colorMode < o.colorMode ? -1 : 1;
     }
     if (uiMode != o.uiMode) {
         return uiMode < o.uiMode ? -1 : 1;
@@ -1997,8 +1997,8 @@ int ResTable_config::diff(const ResTable_config& o) const {
     if ((screenLayout & MASK_LAYOUTDIR) != (o.screenLayout & MASK_LAYOUTDIR)) diffs |= CONFIG_LAYOUTDIR;
     if ((screenLayout & ~MASK_LAYOUTDIR) != (o.screenLayout & ~MASK_LAYOUTDIR)) diffs |= CONFIG_SCREEN_LAYOUT;
     if ((screenLayout2 & MASK_SCREENROUND) != (o.screenLayout2 & MASK_SCREENROUND)) diffs |= CONFIG_SCREEN_ROUND;
-    if ((colorimetry & MASK_WIDE_COLOR_GAMUT) != (o.colorimetry & MASK_WIDE_COLOR_GAMUT)) diffs |= CONFIG_COLORIMETRY;
-    if ((colorimetry & MASK_HDR) != (o.colorimetry & MASK_HDR)) diffs |= CONFIG_COLORIMETRY;
+    if ((colorMode & MASK_WIDE_COLOR_GAMUT) != (o.colorMode & MASK_WIDE_COLOR_GAMUT)) diffs |= CONFIG_COLOR_MODE;
+    if ((colorMode & MASK_HDR) != (o.colorMode & MASK_HDR)) diffs |= CONFIG_COLOR_MODE;
     if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
     if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
     if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
@@ -2110,14 +2110,14 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
         }
     }
 
-    if (colorimetry || o.colorimetry) {
-        if (((colorimetry^o.colorimetry) & MASK_HDR) != 0) {
-            if (!(colorimetry & MASK_HDR)) return false;
-            if (!(o.colorimetry & MASK_HDR)) return true;
+    if (colorMode || o.colorMode) {
+        if (((colorMode^o.colorMode) & MASK_HDR) != 0) {
+            if (!(colorMode & MASK_HDR)) return false;
+            if (!(o.colorMode & MASK_HDR)) return true;
         }
-        if (((colorimetry^o.colorimetry) & MASK_WIDE_COLOR_GAMUT) != 0) {
-            if (!(colorimetry & MASK_WIDE_COLOR_GAMUT)) return false;
-            if (!(o.colorimetry & MASK_WIDE_COLOR_GAMUT)) return true;
+        if (((colorMode^o.colorMode) & MASK_WIDE_COLOR_GAMUT) != 0) {
+            if (!(colorMode & MASK_WIDE_COLOR_GAMUT)) return false;
+            if (!(o.colorMode & MASK_WIDE_COLOR_GAMUT)) return true;
         }
     }
 
@@ -2408,14 +2408,14 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
             }
         }
 
-        if (colorimetry || o.colorimetry) {
-            if (((colorimetry^o.colorimetry) & MASK_WIDE_COLOR_GAMUT) != 0 &&
-                    (requested->colorimetry & MASK_WIDE_COLOR_GAMUT)) {
-                return colorimetry & MASK_WIDE_COLOR_GAMUT;
+        if (colorMode || o.colorMode) {
+            if (((colorMode^o.colorMode) & MASK_WIDE_COLOR_GAMUT) != 0 &&
+                    (requested->colorMode & MASK_WIDE_COLOR_GAMUT)) {
+                return colorMode & MASK_WIDE_COLOR_GAMUT;
             }
-            if (((colorimetry^o.colorimetry) & MASK_HDR) != 0 &&
-                    (requested->colorimetry & MASK_HDR)) {
-                return colorimetry & MASK_HDR;
+            if (((colorMode^o.colorMode) & MASK_HDR) != 0 &&
+                    (requested->colorMode & MASK_HDR)) {
+                return colorMode & MASK_HDR;
             }
         }
 
@@ -2669,14 +2669,14 @@ bool ResTable_config::match(const ResTable_config& settings) const {
             return false;
         }
 
-        const int hdr = colorimetry & MASK_HDR;
-        const int setHdr = settings.colorimetry & MASK_HDR;
+        const int hdr = colorMode & MASK_HDR;
+        const int setHdr = settings.colorMode & MASK_HDR;
         if (hdr != 0 && hdr != setHdr) {
             return false;
         }
 
-        const int wideColorGamut = colorimetry & MASK_WIDE_COLOR_GAMUT;
-        const int setWideColorGamut = settings.colorimetry & MASK_WIDE_COLOR_GAMUT;
+        const int wideColorGamut = colorMode & MASK_WIDE_COLOR_GAMUT;
+        const int setWideColorGamut = settings.colorMode & MASK_WIDE_COLOR_GAMUT;
         if (wideColorGamut != 0 && wideColorGamut != setWideColorGamut) {
             return false;
         }
@@ -3000,9 +3000,9 @@ String8 ResTable_config::toString() const {
                 break;
         }
     }
-    if ((colorimetry&MASK_HDR) != 0) {
+    if ((colorMode&MASK_HDR) != 0) {
         if (res.size() > 0) res.append("-");
-        switch (colorimetry&MASK_HDR) {
+        switch (colorMode&MASK_HDR) {
             case ResTable_config::HDR_NO:
                 res.append("lowdr");
                 break;
@@ -3010,13 +3010,13 @@ String8 ResTable_config::toString() const {
                 res.append("highdr");
                 break;
             default:
-                res.appendFormat("hdr=%d", dtohs(colorimetry&MASK_HDR));
+                res.appendFormat("hdr=%d", dtohs(colorMode&MASK_HDR));
                 break;
         }
     }
-    if ((colorimetry&MASK_WIDE_COLOR_GAMUT) != 0) {
+    if ((colorMode&MASK_WIDE_COLOR_GAMUT) != 0) {
         if (res.size() > 0) res.append("-");
-        switch (colorimetry&MASK_WIDE_COLOR_GAMUT) {
+        switch (colorMode&MASK_WIDE_COLOR_GAMUT) {
             case ResTable_config::WIDE_COLOR_GAMUT_NO:
                 res.append("nowidecg");
                 break;
@@ -3024,7 +3024,7 @@ String8 ResTable_config::toString() const {
                 res.append("widecg");
                 break;
             default:
-                res.appendFormat("wideColorGamut=%d", dtohs(colorimetry&MASK_WIDE_COLOR_GAMUT));
+                res.appendFormat("wideColorGamut=%d", dtohs(colorMode&MASK_WIDE_COLOR_GAMUT));
                 break;
         }
     }

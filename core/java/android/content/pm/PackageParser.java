@@ -4026,6 +4026,9 @@ public class PackageParser {
 
             a.info.rotationAnimation =
                 sa.getInt(R.styleable.AndroidManifestActivity_rotationAnimation, ROTATION_ANIMATION_ROTATE);
+
+            a.info.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
+                    ActivityInfo.COLOR_MODE_DEFAULT);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;

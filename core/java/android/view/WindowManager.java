@@ -22,7 +22,6 @@ import android.app.KeyguardManager;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -1577,7 +1576,8 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The desired bitmap format.  May be one of the constants in
-         * {@link android.graphics.PixelFormat}.  Default is OPAQUE.
+         * {@link android.graphics.PixelFormat}. The choice of format
+         * might be overridden by {@link #setColorMode(int)}. Default is OPAQUE.
          */
         public int format;
 
@@ -1833,6 +1833,17 @@ public interface WindowManager extends ViewManager {
          */
         public long hideTimeoutMilliseconds = -1;
 
+        /**
+         * The color mode requested by this window. The target display may
+         * not be able to honor the request. When the color mode is not set
+         * to {@link ActivityInfo#COLOR_MODE_DEFAULT}, it might override the
+         * pixel format specified in {@link #format}.
+         *
+         * @hide
+         */
+        @ActivityInfo.ColorMode
+        private int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -1910,6 +1921,31 @@ public interface WindowManager extends ViewManager {
             }
             hasManualSurfaceInsets = manual;
             preservePreviousSurfaceInsets = preservePrevious;
+        }
+
+        /**
+         * <p>Set the color mode of the window. Setting the color mode might
+         * override the window's pixel {@link WindowManager.LayoutParams#format format}.</p>
+         *
+         * <p>The color mode must be one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+         * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or
+         * {@link ActivityInfo#COLOR_MODE_HDR}.</p>
+         *
+         * @see #getColorMode()
+         */
+        public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+            mColorMode = colorMode;
+        }
+
+        /**
+         * Returns the color mode of the window, one of {@link ActivityInfo#COLOR_MODE_DEFAULT},
+         * {@link ActivityInfo#COLOR_MODE_WIDE_COLOR_GAMUT} or {@link ActivityInfo#COLOR_MODE_HDR}.
+         *
+         * @see #setColorMode(int)
+         */
+        @ActivityInfo.ColorMode
+        public int getColorMode() {
+            return mColorMode;
         }
 
         /** @hide */
@@ -2268,9 +2304,11 @@ public interface WindowManager extends ViewManager {
             sb.append(',');
             sb.append(y);
             sb.append(")(");
-            sb.append((width== MATCH_PARENT ?"fill":(width==WRAP_CONTENT?"wrap":width)));
+            sb.append((width == MATCH_PARENT ? "fill" : (width == WRAP_CONTENT
+                    ? "wrap" : String.valueOf(width))));
             sb.append('x');
-            sb.append((height== MATCH_PARENT ?"fill":(height==WRAP_CONTENT?"wrap":height)));
+            sb.append((height == MATCH_PARENT ? "fill" : (height == WRAP_CONTENT
+                    ? "wrap" : String.valueOf(height))));
             sb.append(")");
             if (horizontalMargin != 0) {
                 sb.append(" hm=");
@@ -2367,6 +2405,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(" needsMenuKey=");
                 sb.append(needsMenuKey);
             }
+            sb.append(" colorMode=").append(mColorMode);
             sb.append('}');
             return sb.toString();
         }
