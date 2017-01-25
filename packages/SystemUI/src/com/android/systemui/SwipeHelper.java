@@ -286,7 +286,7 @@ public class SwipeHelper implements Gefingerpoken {
                                         final int x = (int) ev.getRawX() - mTmpPos[0];
                                         final int y = (int) ev.getRawY() - mTmpPos[1];
                                         mLongPressListener.onLongPress(mCurrView, x, y,
-                                                NotificationMenuRow.getSettingsMenuItem(mContext));
+                                                NotificationMenuRow.getLongpressMenuItem(mContext));
                                     }
                                 }
                             };

@@ -85,7 +85,7 @@ public class NotificationMenuRow extends FrameLayout
         PluginManager.getInstance(getContext()).addPluginListener(
                 NotificationMenuRowProvider.ACTION, this,
                 NotificationMenuRowProvider.VERSION, false /* Allow multiple */);
-        mMenuItems.add(getSettingsMenuItem(context));
+        mMenuItems.addAll(getDefaultNotificationMenuItems());
     }
 
     @Override
@@ -99,13 +99,34 @@ public class NotificationMenuRow extends FrameLayout
         updateMenu(false /* notify */);
     }
 
-    public static MenuItem getSettingsMenuItem(Context context) {
-        Drawable d = context.getResources().getDrawable(R.drawable.ic_settings);
-        String s = context.getResources().getString(R.string.notification_menu_gear_description);
-        NotificationInfo content = (NotificationInfo) LayoutInflater.from(context).inflate(
+    public static MenuItem getLongpressMenuItem(Context context) {
+        Resources res = context.getResources();
+        Drawable settingsIcon = res.getDrawable(R.drawable.ic_settings);
+        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
+        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(context).inflate(
                 R.layout.notification_info, null, false);
-        MenuItem settings = new MenuItem(d, s, content);
+        MenuItem settings = new MenuItem(settingsIcon, settingsDescription, settingsContent);
         return settings;
+    }
+
+    public ArrayList<MenuItem> getDefaultNotificationMenuItems() {
+        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+        Resources res = getResources();
+
+        Drawable snoozeIcon = res.getDrawable(R.drawable.ic_snooze);
+        NotificationSnooze content = (NotificationSnooze) LayoutInflater.from(mContext)
+                .inflate(R.layout.notification_snooze, null, false);
+        String snoozeDescription = res.getString(R.string.notification_menu_snooze_description);
+        MenuItem snooze = new MenuItem(snoozeIcon, snoozeDescription, content);
+        items.add(snooze);
+
+        Drawable settingsIcon = res.getDrawable(R.drawable.ic_settings);
+        String settingsDescription = res.getString(R.string.notification_menu_gear_description);
+        NotificationInfo settingsContent = (NotificationInfo) LayoutInflater.from(mContext).inflate(
+                R.layout.notification_info, null, false);
+        MenuItem settings = new MenuItem(settingsIcon, settingsDescription, settingsContent);
+        items.add(settings);
+        return items;
     }
 
     private void updateMenu(boolean notify) {
@@ -114,7 +135,7 @@ public class NotificationMenuRow extends FrameLayout
         if (mMenuProvider != null) {
             mMenuItems.addAll(mMenuProvider.getMenuItems(getContext()));
         }
-        mMenuItems.add(getSettingsMenuItem(getContext()));
+        mMenuItems.addAll(getDefaultNotificationMenuItems());
         for (int i = 0; i < mMenuItems.size(); i++) {
             final View v = createMenuView(mMenuItems.get(i));
             mMenuItems.get(i).menuView = v;
