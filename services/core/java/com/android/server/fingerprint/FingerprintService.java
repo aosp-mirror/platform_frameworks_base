@@ -482,7 +482,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         UserManager um = UserManager.get(mContext);
 
         // Allow current user or profiles of the current user...
-        for (int profileId : um.getEnabledProfileIds(userId)) {
+        for (int profileId : um.getEnabledProfileIds(mCurrentUserId)) {
             if (profileId == userId) {
                 return true;
             }
