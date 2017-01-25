@@ -99,6 +99,10 @@ public class DpmMockContext extends MockContext {
      */
     public static final int SYSTEM_PID = 11111;
 
+    public static final String ANOTHER_PACKAGE_NAME = "com.another.package.name";
+
+    public static final int ANOTHER_UID = UserHandle.getUid(UserHandle.USER_SYSTEM, 18434);
+
     public static class MockBinder {
         public int callingUid = CALLER_UID;
         public int callingPid = CALLER_PID;

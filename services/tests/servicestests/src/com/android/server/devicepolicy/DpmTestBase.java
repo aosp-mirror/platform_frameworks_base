@@ -45,6 +45,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
     public ComponentName admin1;
     public ComponentName admin2;
     public ComponentName admin3;
+    public ComponentName adminAnotherPackage;
     public ComponentName adminNoPerm;
 
     @Override
@@ -59,6 +60,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
         admin1 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin1.class);
         admin2 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin2.class);
         admin3 = new ComponentName(mRealTestContext, DummyDeviceAdmins.Admin3.class);
+        adminAnotherPackage = new ComponentName(DpmMockContext.ANOTHER_PACKAGE_NAME,
+                "whatever.random.class");
         adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
     }
 
