@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * This is the superclass for classes which provide basic support for animations which can be
  * started, ended, and have <code>AnimatorListeners</code> added to them.
  */
-public abstract class Animator implements Cloneable {
+public abstract class Animator implements Cloneable, AnimationHandler.AnimationFrameCallback {
 
     /**
      * The value used to indicate infinite duration (e.g. when Animators repeat infinitely).
@@ -465,11 +465,102 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public boolean doAnimationFrame(long frameTime) {
+        // TODO: Need to find a better signal than this
+        return getDuration() + getStartDelay() >= frameTime;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void commitAnimationFrame(long frameTime) {}
+
+
+    /**
+     * Internal use only.
+     * This call starts the animation in regular or reverse direction without requiring them to
+     * register frame callbacks. The caller will be responsible for all the subsequent animation
+     * pulses. Specifically, the caller needs to call doAnimationFrame(...) for the animation on
+     * every frame.
+     *
+     * @param inReverse whether the animation should play in reverse direction
+     */
+    void startWithoutPulsing(boolean inReverse) {
+        if (inReverse) {
+            reverse();
+        } else {
+            start();
+        }
+    }
+
+    /**
+     * Internal use only.
+     * Skips the animation value to end/start, depending on whether the play direction is forward
+     * or backward.
+     *
+     * @param inReverse whether the end value is based on a reverse direction. If yes, this is
+     *                  equivalent to skip to start value in a forward playing direction.
+     */
+    void skipToEndValue(boolean inReverse) {}
+
+
+    /**
+     * Internal use only.
+     *
+     * Returns whether the animation has start/end values setup. For most of the animations, this
+     * should always be true. For ObjectAnimators, the start values are setup in the initialization
+     * of the animation.
+     */
+    boolean isInitialized() {
+        return true;
+    }
+
+    /**
+     * Internal use only.
+     */
+    void animateBasedOnPlayTime(long currentPlayTime, long lastPlayTime, boolean inReverse) {}
+
+    /**
      * <p>An animation listener receives notifications from an animation.
      * Notifications indicate animation related events, such as the end or the
      * repetition of the animation.</p>
      */
     public static interface AnimatorListener {
+
+        /**
+         * <p>Notifies the start of the animation as well as the animation's overall play direction.
+         * This method's default behavior is to call {@link #onAnimationStart(Animator)}. This
+         * method can be overridden, though not required, to get the additional play direction info
+         * when an animation starts. Skipping calling super when overriding this method results in
+         * {@link #onAnimationStart(Animator)} not getting called.
+         *
+         * @param animation The started animation.
+         * @param isReverse Whether the animation is playing in reverse.
+         */
+        default void onAnimationStart(Animator animation, boolean isReverse) {
+            onAnimationStart(animation);
+        }
+
+        /**
+         * <p>Notifies the end of the animation. This callback is not invoked
+         * for animations with repeat count set to INFINITE.</p>
+         *
+         * <p>This method's default behavior is to call {@link #onAnimationEnd(Animator)}. This
+         * method can be overridden, though not required, to get the additional play direction info
+         * when an animation ends. Skipping calling super when overriding this method results in
+         * {@link #onAnimationEnd(Animator)} not getting called.
+         *
+         * @param animation The animation which reached its end.
+         * @param isReverse Whether the animation is playing in reverse.
+         */
+        default void onAnimationEnd(Animator animation, boolean isReverse) {
+            onAnimationEnd(animation);
+        }
+
         /**
          * <p>Notifies the start of the animation.</p>
          *
