@@ -43,6 +43,7 @@ interface IUserManager {
     void setUserEnabled(int userHandle);
     void evictCredentialEncryptionKey(int userHandle);
     boolean removeUser(int userHandle);
+    boolean removeUserEvenWhenDisallowed(int userHandle);
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);
     ParcelFileDescriptor getUserIcon(int userHandle);

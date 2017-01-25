@@ -2082,6 +2082,22 @@ public class UserManager {
     }
 
     /**
+     * Similar to {@link #removeUser(int)} except bypassing the checking of
+     * {@link UserManager#DISALLOW_REMOVE_USER}
+     * or {@link UserManager#DISALLOW_REMOVE_MANAGED_PROFILE}.
+     *
+     * @see {@link #removeUser(int)}
+     * @hide
+     */
+    public boolean removeUserEvenWhenDisallowed(@UserIdInt int userHandle) {
+        try {
+            return mService.removeUserEvenWhenDisallowed(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the user's name.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *

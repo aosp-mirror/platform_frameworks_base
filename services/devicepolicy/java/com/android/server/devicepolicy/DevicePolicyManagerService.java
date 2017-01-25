@@ -6146,6 +6146,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean isProfileOwnerPackage(String packageName, int userId) {
+        synchronized (this) {
+            return mOwners.hasProfileOwner(userId)
+                    && mOwners.getProfileOwnerPackage(userId).equals(packageName);
+        }
+    }
+
     public boolean isProfileOwner(ComponentName who, int userId) {
         final ComponentName profileOwner = getProfileOwner(userId);
         return who != null && who.equals(profileOwner);
@@ -9119,21 +9126,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final long ident = mInjector.binderClearCallingIdentity();
         try {
             final UserHandle callingUserHandle = UserHandle.of(callingUserId);
-            if (mUserManager.hasUserRestriction(
-                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserHandle)) {
-                // The DO can initiate provisioning if the restriction was set by the DO.
-                if (!isDeviceOwnerPackage(packageName, callingUserId)
-                        || isAdminAffectedByRestriction(mOwners.getDeviceOwnerComponent(),
-                                UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
-                    // Caller is not DO or the restriction was set by the system.
+            final ComponentName ownerAdmin = getOwnerComponent(packageName, callingUserId);
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                    callingUserHandle)) {
+                // An admin can initiate provisioning if it has set the restriction.
+                if (ownerAdmin == null || isAdminAffectedByRestriction(ownerAdmin,
+                        UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserId)) {
                     return CODE_ADD_MANAGED_PROFILE_DISALLOWED;
                 }
             }
-
-            // TODO: Allow it if the caller is the DO? DO could just call removeUser() before
-            // provisioning, so not strictly required...
-            boolean canRemoveProfile = !mUserManager.hasUserRestriction(
-                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, callingUserHandle);
+            boolean canRemoveProfile = true;
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                    callingUserHandle)) {
+                // We can remove a profile if the admin itself has set the restriction.
+                if (ownerAdmin == null || isAdminAffectedByRestriction(ownerAdmin,
+                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                        callingUserId)) {
+                    canRemoveProfile = false;
+                }
+            }
             if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
@@ -9141,6 +9152,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mInjector.binderRestoreCallingIdentity(ident);
         }
         return CODE_OK;
+    }
+
+    private ComponentName getOwnerComponent(String packageName, int userId) {
+        if (isDeviceOwnerPackage(packageName, userId)) {
+            return mOwners.getDeviceOwnerComponent();
+        }
+        if (isProfileOwnerPackage(packageName, userId)) {
+            return mOwners.getProfileOwnerComponent(userId);
+        }
+        return null;
     }
 
     private int checkManagedUserProvisioningPreCondition(int callingUserId) {

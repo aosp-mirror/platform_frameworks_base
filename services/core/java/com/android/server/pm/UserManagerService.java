@@ -2345,6 +2345,12 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean removeUserEvenWhenDisallowed(@UserIdInt int userHandle) {
+        checkManageOrCreateUsersPermission("Only the system can remove users");
+        return removeUserUnchecked(userHandle);
+    }
+
+    @Override
     public UserInfo createUser(String name, int flags) {
         checkManageOrCreateUsersPermission(flags);
         return createUserInternal(name, flags, UserHandle.USER_NULL);
