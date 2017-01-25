@@ -38,16 +38,18 @@ public class TestSystemImpl implements SystemInterface {
     private final int mNumRelros;
     private final boolean mIsDebuggable;
     private int mMultiProcessSetting;
+    private final boolean mMultiProcessDefault;
 
     public static final int PRIMARY_USER_ID = 0;
 
     public TestSystemImpl(WebViewProviderInfo[] packageConfigs, boolean fallbackLogicEnabled,
-            int numRelros, boolean isDebuggable) {
+            int numRelros, boolean isDebuggable, boolean multiProcessDefault) {
         mPackageConfigs = packageConfigs;
         mFallbackLogicEnabled = fallbackLogicEnabled;
         mNumRelros = numRelros;
         mIsDebuggable = isDebuggable;
         mUsers.add(PRIMARY_USER_ID);
+        mMultiProcessDefault = multiProcessDefault;
     }
 
     public void addUser(int userId) {
@@ -187,4 +189,9 @@ public class TestSystemImpl implements SystemInterface {
 
     @Override
     public void notifyZygote(boolean enableMultiProcess) {}
+
+    @Override
+    public boolean isMultiProcessDefaultEnabled() {
+        return mMultiProcessDefault;
+    }
 }

@@ -240,12 +240,31 @@ public class WebViewUpdateServiceImpl {
     }
 
     boolean isMultiProcessEnabled() {
-        return mSystemInterface.getMultiProcessSetting(mContext) != 0;
+        PackageInfo current = getCurrentWebViewPackage();
+        if (current == null) return false;
+        int currentVersion = current.versionCode;
+        int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
+        if (mSystemInterface.isMultiProcessDefaultEnabled()) {
+            // Multiprocess should be enabled unless the user has turned it off manually for this
+            // version or newer, as we want to re-enable it when it's updated to get fresh
+            // bug reports.
+            return settingValue > -currentVersion;
+        } else {
+            // Multiprocess should not be enabled, unless the user has turned it on manually for
+            // any version.
+            return settingValue > 0;
+        }
     }
 
     void enableMultiProcess(boolean enable) {
+        // The value we store for the setting is the version code of the current package, if it's
+        // enabled, or the negation of the version code of the current package, if it's disabled.
+        // Users who have a setting from before this scheme was implemented will have it set to 0 or
+        // 1 instead.
         PackageInfo current = getCurrentWebViewPackage();
-        mSystemInterface.setMultiProcessSetting(mContext, enable ? 1 : 0);
+        int currentVersion = current != null ? current.versionCode : 1;
+        mSystemInterface.setMultiProcessSetting(mContext,
+                                                enable ? currentVersion : -currentVersion);
         mSystemInterface.notifyZygote(enable);
         if (current != null) {
             mSystemInterface.killPackageDependents(current.packageName);
