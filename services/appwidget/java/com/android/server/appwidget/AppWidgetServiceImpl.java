@@ -71,6 +71,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.service.appwidget.AppWidgetServiceDumpProto;
+import android.service.appwidget.WidgetProto;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -83,6 +85,7 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -717,34 +720,78 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                                 + ", uid=" + Binder.getCallingUid());
 
         synchronized (mLock) {
-            int N = mProviders.size();
-            pw.println("Providers:");
-            for (int i = 0; i < N; i++) {
-                dumpProvider(mProviders.get(i), i, pw);
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                dumpProto(fd);
+            } else {
+                dumpInternal(pw);
             }
+        }
+    }
 
-            N = mWidgets.size();
-            pw.println(" ");
-            pw.println("Widgets:");
-            for (int i = 0; i < N; i++) {
-                dumpWidget(mWidgets.get(i), i, pw);
-            }
+    private void dumpProto(FileDescriptor fd) {
+        Slog.i(TAG, "dump proto for " + mWidgets.size() + " widgets");
 
-            N = mHosts.size();
-            pw.println(" ");
-            pw.println("Hosts:");
-            for (int i = 0; i < N; i++) {
-                dumpHost(mHosts.get(i), i, pw);
-            }
+        ProtoOutputStream proto = new ProtoOutputStream(fd);
+        int N = mWidgets.size();
+        for (int i=0; i < N; i++) {
+            dumpProtoWidget(proto, mWidgets.get(i));
+        }
+        proto.flush();
+    }
 
+    private void dumpProtoWidget(ProtoOutputStream proto, Widget widget) {
+        if (widget.host == null || widget.provider == null) {
+            Slog.d(TAG, "skip dumping widget because host or provider is null: widget.host="
+                + widget.host + " widget.provider="  + widget.provider);
+            return;
+        }
+        long token = proto.start(AppWidgetServiceDumpProto.WIDGETS);
+        proto.write(WidgetProto.IS_CROSS_PROFILE,
+            widget.host.getUserId() != widget.provider.getUserId());
+        proto.write(WidgetProto.IS_HOST_STOPPED, widget.host.callbacks == null);
+        proto.write(WidgetProto.HOST_PACKAGE, widget.host.id.packageName);
+        proto.write(WidgetProto.PROVIDER_PACKAGE, widget.provider.id.componentName.getPackageName());
+        proto.write(WidgetProto.PROVIDER_CLASS, widget.provider.id.componentName.getClassName());
+        if (widget.options != null) {
+            proto.write(WidgetProto.MIN_WIDTH,
+                widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0));
+            proto.write(WidgetProto.MIN_HEIGHT,
+                widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0));
+            proto.write(WidgetProto.MAX_WIDTH,
+                widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0));
+            proto.write(WidgetProto.MAX_HEIGHT,
+                widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0));
+        }
+        proto.end(token);
+    }
 
-            N = mPackagesWithBindWidgetPermission.size();
-            pw.println(" ");
-            pw.println("Grants:");
-            for (int i = 0; i < N; i++) {
-                Pair<Integer, String> grant = mPackagesWithBindWidgetPermission.valueAt(i);
-                dumpGrant(grant, i, pw);
-            }
+    private void dumpInternal(PrintWriter pw) {
+        int N = mProviders.size();
+        pw.println("Providers:");
+        for (int i = 0; i < N; i++) {
+            dumpProvider(mProviders.get(i), i, pw);
+        }
+
+        N = mWidgets.size();
+        pw.println(" ");
+        pw.println("Widgets:");
+        for (int i = 0; i < N; i++) {
+            dumpWidget(mWidgets.get(i), i, pw);
+        }
+
+        N = mHosts.size();
+        pw.println(" ");
+        pw.println("Hosts:");
+        for (int i = 0; i < N; i++) {
+            dumpHost(mHosts.get(i), i, pw);
+        }
+
+        N = mPackagesWithBindWidgetPermission.size();
+        pw.println(" ");
+        pw.println("Grants:");
+        for (int i = 0; i < N; i++) {
+            Pair<Integer, String> grant = mPackagesWithBindWidgetPermission.valueAt(i);
+            dumpGrant(grant, i, pw);
         }
     }
 
