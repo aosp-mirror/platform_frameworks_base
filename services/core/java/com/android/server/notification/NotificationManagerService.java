@@ -32,6 +32,7 @@ import static android.service.notification.NotificationListenerService.REASON_PA
 import static android.service.notification.NotificationListenerService.REASON_PACKAGE_SUSPENDED;
 import static android.service.notification.NotificationListenerService.REASON_PROFILE_TURNED_OFF;
 import static android.service.notification.NotificationListenerService.REASON_SNOOZED;
+import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
@@ -50,6 +51,7 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -165,6 +167,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -229,6 +232,12 @@ public class NotificationManagerService extends SystemService {
 
     private static final long DELAY_FOR_ASSISTANT_TIME = 100;
 
+    private static final String ACTION_NOTIFICATION_TIMEOUT =
+            NotificationManagerService.class.getSimpleName() + ".TIMEOUT";
+    private static final int REQUEST_CODE_TIMEOUT = 1;
+    private static final String SCHEME_TIMEOUT = "timeout";
+    private static final String EXTRA_KEY = "key";
+
     private IActivityManager mAm;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
@@ -237,6 +246,7 @@ public class NotificationManagerService extends SystemService {
     @Nullable StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
     private WindowManagerInternal mWindowManagerInternal;
+    private AlarmManager mAlarmManager;
 
     final IBinder mForegroundToken = new Binder();
     private Handler mHandler;
@@ -682,6 +692,29 @@ public class NotificationManagerService extends SystemService {
         updateLightsLocked();
     }
 
+    private final BroadcastReceiver mNotificationTimeoutReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+            if (ACTION_NOTIFICATION_TIMEOUT.equals(action)) {
+                final NotificationRecord record;
+                synchronized (mNotificationLock) {
+                    record = findNotificationByKeyLocked(intent.getStringExtra(EXTRA_KEY));
+                }
+                if (record != null) {
+                    cancelNotification(record.sbn.getUid(), record.sbn.getInitialPid(),
+                            record.sbn.getPackageName(), record.sbn.getTag(),
+                            record.sbn.getId(), 0,
+                            Notification.FLAG_FOREGROUND_SERVICE, true, record.getUserId(),
+                            REASON_TIMEOUT, null);
+                }
+            }
+        }
+    };
+
     private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -966,6 +999,7 @@ public class NotificationManagerService extends SystemService {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -1131,6 +1165,10 @@ public class NotificationManagerService extends SystemService {
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, sdFilter, null,
                 null);
+
+        IntentFilter timeoutFilter = new IntentFilter(ACTION_NOTIFICATION_TIMEOUT);
+        timeoutFilter.addDataScheme(SCHEME_TIMEOUT);
+        getContext().registerReceiver(mNotificationTimeoutReceiver, timeoutFilter);
 
         mSettingsObserver = new SettingsObserver(mHandler);
 
@@ -3011,6 +3049,7 @@ public class NotificationManagerService extends SystemService {
         public void run() {
             synchronized (mNotificationLock) {
                 mEnqueuedNotifications.add(r);
+                scheduleTimeoutLocked(r);
 
                 if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
                     // TODO: log to event log
@@ -3237,6 +3276,22 @@ public class NotificationManagerService extends SystemService {
         // notification was a summary and its group key changed.
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
             cancelGroupChildrenLocked(old, callingUid, callingPid, null, false /* sendDelete */);
+        }
+    }
+
+    @VisibleForTesting
+    void scheduleTimeoutLocked(NotificationRecord record) {
+        if (record.getNotification().getTimeout() > System.currentTimeMillis()) {
+            final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
+                    REQUEST_CODE_TIMEOUT,
+                    new Intent(ACTION_NOTIFICATION_TIMEOUT)
+                            .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
+                                    .appendPath(record.getKey()).build())
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                            .putExtra(EXTRA_KEY, record.getKey()),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            mAlarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP, record.getNotification().getTimeout(), pi);
         }
     }
 

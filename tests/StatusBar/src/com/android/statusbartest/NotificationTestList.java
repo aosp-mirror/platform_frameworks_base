@@ -424,6 +424,17 @@ public class NotificationTestList extends TestActivity
                     mNM.notify("secret", 7012, n);
                 }
             },
+            new Test("1 minute timeout") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("timeout in a minute")
+                            .setTimeout(System.currentTimeMillis() + (1000 * 60))
+                            .build();
+                    mNM.notify("timeout_min", 7013, n);
+                }
+            },
         new Test("Off") {
             public void run() {
                 PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE);

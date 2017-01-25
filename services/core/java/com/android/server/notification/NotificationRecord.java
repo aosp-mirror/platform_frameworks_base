@@ -41,6 +41,7 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
@@ -318,6 +319,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
         pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
                 notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+        pw.println(prefix + "  timeout=" + TimeUtils.formatForLogging(notification.getTimeout()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "  actions={");
             final int N = notification.actions.length;

@@ -183,8 +183,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CHANNEL_BANNED = 17;
     /** Notification was snoozed. */
     public static final int REASON_SNOOZED = 18;
-    /** Notification no longer visible because of user switch */
-    public static final int REASON_USER_SWITCH = 19;
+    /** Notification was canceled due to timeout */
+    public static final int REASON_TIMEOUT = 19;
 
     /**
      * The full trim of the StatusBarNotification including all its features.
