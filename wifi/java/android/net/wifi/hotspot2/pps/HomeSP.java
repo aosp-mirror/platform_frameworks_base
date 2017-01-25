@@ -52,17 +52,35 @@ public final class HomeSP implements Parcelable {
     /**
      * FQDN (Fully Qualified Domain Name) of this home service provider.
      */
-    public String fqdn = null;
+    private String mFqdn = null;
+    public void setFqdn(String fqdn) {
+        mFqdn = fqdn;
+    }
+    public String getFqdn() {
+        return mFqdn;
+    }
 
     /**
      * Friendly name of this home service provider.
      */
-    public String friendlyName = null;
+    private String mFriendlyName = null;
+    public void setFriendlyName(String friendlyName) {
+        mFriendlyName = friendlyName;
+    }
+    public String getFriendlyName() {
+        return mFriendlyName;
+    }
 
     /**
      * Icon URL of this home service provider.
      */
-    public String iconUrl = null;
+    private String mIconUrl = null;
+    public void setIconUrl(String iconUrl) {
+        mIconUrl = iconUrl;
+    }
+    public String getIconUrl() {
+        return mIconUrl;
+    }
 
     /**
      * <SSID, HESSID> duple of the networks that are consider home networks.
@@ -71,7 +89,13 @@ public final class HomeSP implements Parcelable {
      * all nodes in the PSS MO are encoded using UTF-8 unless stated otherwise.  Thus, the SSID
      * string is assumed to be encoded using UTF-8.
      */
-    public Map<String, Long> homeNetworkIds = null;
+    private Map<String, Long> mHomeNetworkIds = null;
+    public void setHomeNetworkIds(Map<String, Long> homeNetworkIds) {
+        mHomeNetworkIds = homeNetworkIds;
+    }
+    public Map<String, Long> getHomeNetworkIds() {
+        return mHomeNetworkIds;
+    }
 
     /**
      * Used for determining if this provider is a member of a given Hotspot provider.
@@ -83,7 +107,13 @@ public final class HomeSP implements Parcelable {
      * Refer to HomeSP/HomeOIList subtree in PerProviderSubscription (PPS) Management Object
      * (MO) tree for more detail.
      */
-    public long[] matchAllOIs = null;
+    private long[] mMatchAllOIs = null;
+    public void setMatchAllOIs(long[] matchAllOIs) {
+        mMatchAllOIs = matchAllOIs;
+    }
+    public long[] getMatchAllOIs() {
+        return mMatchAllOIs;
+    }
 
     /**
      * Used for determining if this provider is a member of a given Hotspot provider.
@@ -92,13 +122,19 @@ public final class HomeSP implements Parcelable {
      * of that Hotspot provider (e.g. successful authentication with such Hotspot
      * is possible).
      *
-     * {@link #matchAllOIs} will have precedence over this one, meaning this list will
-     * only be used for matching if {@link #matchAllOIs} is null or empty.
+     * {@link #mMatchAllOIs} will have precedence over this one, meaning this list will
+     * only be used for matching if {@link #mMatchAllOIs} is null or empty.
      *
      * Refer to HomeSP/HomeOIList subtree in PerProviderSubscription (PPS) Management Object
      * (MO) tree for more detail.
      */
-    public long[] matchAnyOIs = null;
+    private long[] mMatchAnyOIs = null;
+    public void setMatchAnyOIs(long[] matchAnyOIs) {
+        mMatchAnyOIs = matchAnyOIs;
+    }
+    public long[] getMatchAnysOIs() {
+        return mMatchAnyOIs;
+    }
 
     /**
      * List of FQDN (Fully Qualified Domain Name) of partner providers.
@@ -106,13 +142,25 @@ public final class HomeSP implements Parcelable {
      * This relationship is most likely achieved via a commercial agreement or
      * operator merges between the providers.
      */
-    public String[] otherHomePartners = null;
+    private String[] mOtherHomePartners = null;
+    public void setOtherHomePartners(String[] otherHomePartners) {
+        mOtherHomePartners = otherHomePartners;
+    }
+    public String[] getOtherHomePartners() {
+        return mOtherHomePartners;
+    }
 
     /**
      * List of Organization Identifiers (OIs) identifying a roaming consortium of
      * which this provider is a member.
      */
-    public long[] roamingConsortiumOIs = null;
+    private long[] mRoamingConsortiumOIs = null;
+    public void setRoamingConsortiumOIs(long[] roamingConsortiumOIs) {
+        mRoamingConsortiumOIs = roamingConsortiumOIs;
+    }
+    public long[] getRoamingConsortiumOIs() {
+        return mRoamingConsortiumOIs;
+    }
 
     /**
      * Constructor for creating HomeSP with default values.
@@ -128,25 +176,25 @@ public final class HomeSP implements Parcelable {
         if (source == null) {
             return;
         }
-        fqdn = source.fqdn;
-        friendlyName = source.friendlyName;
-        iconUrl = source.iconUrl;
-        if (source.homeNetworkIds != null) {
-            homeNetworkIds = Collections.unmodifiableMap(source.homeNetworkIds);
+        mFqdn = source.mFqdn;
+        mFriendlyName = source.mFriendlyName;
+        mIconUrl = source.mIconUrl;
+        if (source.mHomeNetworkIds != null) {
+            mHomeNetworkIds = Collections.unmodifiableMap(source.mHomeNetworkIds);
         }
-        if (source.matchAllOIs != null) {
-            matchAllOIs = Arrays.copyOf(source.matchAllOIs, source.matchAllOIs.length);
+        if (source.mMatchAllOIs != null) {
+            mMatchAllOIs = Arrays.copyOf(source.mMatchAllOIs, source.mMatchAllOIs.length);
         }
-        if (source.matchAnyOIs != null) {
-            matchAnyOIs = Arrays.copyOf(source.matchAnyOIs, source.matchAnyOIs.length);
+        if (source.mMatchAnyOIs != null) {
+            mMatchAnyOIs = Arrays.copyOf(source.mMatchAnyOIs, source.mMatchAnyOIs.length);
         }
-        if (source.otherHomePartners != null) {
-            otherHomePartners = Arrays.copyOf(source.otherHomePartners,
-                    source.otherHomePartners.length);
+        if (source.mOtherHomePartners != null) {
+            mOtherHomePartners = Arrays.copyOf(source.mOtherHomePartners,
+                    source.mOtherHomePartners.length);
         }
-        if (source.roamingConsortiumOIs != null) {
-            roamingConsortiumOIs = Arrays.copyOf(source.roamingConsortiumOIs,
-                    source.roamingConsortiumOIs.length);
+        if (source.mRoamingConsortiumOIs != null) {
+            mRoamingConsortiumOIs = Arrays.copyOf(source.mRoamingConsortiumOIs,
+                    source.mRoamingConsortiumOIs.length);
         }
     }
 
@@ -157,14 +205,14 @@ public final class HomeSP implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(fqdn);
-        dest.writeString(friendlyName);
-        dest.writeString(iconUrl);
-        writeHomeNetworkIds(dest, homeNetworkIds);
-        dest.writeLongArray(matchAllOIs);
-        dest.writeLongArray(matchAnyOIs);
-        dest.writeStringArray(otherHomePartners);
-        dest.writeLongArray(roamingConsortiumOIs);
+        dest.writeString(mFqdn);
+        dest.writeString(mFriendlyName);
+        dest.writeString(mIconUrl);
+        writeHomeNetworkIds(dest, mHomeNetworkIds);
+        dest.writeLongArray(mMatchAllOIs);
+        dest.writeLongArray(mMatchAnyOIs);
+        dest.writeStringArray(mOtherHomePartners);
+        dest.writeLongArray(mRoamingConsortiumOIs);
     }
 
     @Override
@@ -177,15 +225,15 @@ public final class HomeSP implements Parcelable {
         }
         HomeSP that = (HomeSP) thatObject;
 
-        return TextUtils.equals(fqdn, that.fqdn)
-                && TextUtils.equals(friendlyName, that.friendlyName)
-                && TextUtils.equals(iconUrl, that.iconUrl)
-                && (homeNetworkIds == null ? that.homeNetworkIds == null
-                        : homeNetworkIds.equals(that.homeNetworkIds))
-                && Arrays.equals(matchAllOIs, that.matchAllOIs)
-                && Arrays.equals(matchAnyOIs, that.matchAnyOIs)
-                && Arrays.equals(otherHomePartners, that.otherHomePartners)
-                && Arrays.equals(roamingConsortiumOIs, that.roamingConsortiumOIs);
+        return TextUtils.equals(mFqdn, that.mFqdn)
+                && TextUtils.equals(mFriendlyName, that.mFriendlyName)
+                && TextUtils.equals(mIconUrl, that.mIconUrl)
+                && (mHomeNetworkIds == null ? that.mHomeNetworkIds == null
+                        : mHomeNetworkIds.equals(that.mHomeNetworkIds))
+                && Arrays.equals(mMatchAllOIs, that.mMatchAllOIs)
+                && Arrays.equals(mMatchAnyOIs, that.mMatchAnyOIs)
+                && Arrays.equals(mOtherHomePartners, that.mOtherHomePartners)
+                && Arrays.equals(mRoamingConsortiumOIs, that.mRoamingConsortiumOIs);
     }
 
     /**
@@ -194,17 +242,17 @@ public final class HomeSP implements Parcelable {
      * @return true on success or false on failure
      */
     public boolean validate() {
-        if (TextUtils.isEmpty(fqdn)) {
+        if (TextUtils.isEmpty(mFqdn)) {
             Log.d(TAG, "Missing FQDN");
             return false;
         }
-        if (TextUtils.isEmpty(friendlyName)) {
+        if (TextUtils.isEmpty(mFriendlyName)) {
             Log.d(TAG, "Missing friendly name");
             return false;
         }
         // Verify SSIDs specified in the NetworkID
-        if (homeNetworkIds != null) {
-            for (Map.Entry<String, Long> entry : homeNetworkIds.entrySet()) {
+        if (mHomeNetworkIds != null) {
+            for (Map.Entry<String, Long> entry : mHomeNetworkIds.entrySet()) {
                 if (entry.getKey() == null ||
                         entry.getKey().getBytes(StandardCharsets.UTF_8).length > MAX_SSID_BYTES) {
                     Log.d(TAG, "Invalid SSID in HomeNetworkIDs");
@@ -220,14 +268,14 @@ public final class HomeSP implements Parcelable {
             @Override
             public HomeSP createFromParcel(Parcel in) {
                 HomeSP homeSp = new HomeSP();
-                homeSp.fqdn = in.readString();
-                homeSp.friendlyName = in.readString();
-                homeSp.iconUrl = in.readString();
-                homeSp.homeNetworkIds = readHomeNetworkIds(in);
-                homeSp.matchAllOIs = in.createLongArray();
-                homeSp.matchAnyOIs = in.createLongArray();
-                homeSp.otherHomePartners = in.createStringArray();
-                homeSp.roamingConsortiumOIs = in.createLongArray();
+                homeSp.setFqdn(in.readString());
+                homeSp.setFriendlyName(in.readString());
+                homeSp.setIconUrl(in.readString());
+                homeSp.setHomeNetworkIds(readHomeNetworkIds(in));
+                homeSp.setMatchAllOIs(in.createLongArray());
+                homeSp.setMatchAnyOIs(in.createLongArray());
+                homeSp.setOtherHomePartners(in.createStringArray());
+                homeSp.setRoamingConsortiumOIs(in.createLongArray());
                 return homeSp;
             }
 

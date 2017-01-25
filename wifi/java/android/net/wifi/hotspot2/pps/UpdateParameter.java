@@ -88,45 +88,93 @@ public final class UpdateParameter implements Parcelable {
      *
      * Using Long.MIN_VALUE to indicate unset value.
      */
-    public long updateIntervalInMinutes = Long.MIN_VALUE;
+    private long mUpdateIntervalInMinutes = Long.MIN_VALUE;
+    public void setUpdateIntervalInMinutes(long updateIntervalInMinutes) {
+        mUpdateIntervalInMinutes = updateIntervalInMinutes;
+    }
+    public long getUpdateIntervalInMinutes() {
+        return mUpdateIntervalInMinutes;
+    }
 
     /**
      * The method used to update the policy.  Permitted values are "OMA-DM-ClientInitiated"
      * and "SPP-ClientInitiated".
      */
-    public String updateMethod = null;
+    private String mUpdateMethod = null;
+    public void setUpdateMethod(String updateMethod) {
+        mUpdateMethod = updateMethod;
+    }
+    public String getUpdateMethod() {
+        return mUpdateMethod;
+    }
 
     /**
      * This specifies the hotspots at which the subscription update is permitted.  Permitted
      * values are "HomeSP", "RoamingPartner", or "Unrestricted";
      */
-    public String restriction = null;
+    private String mRestriction = null;
+    public void setRestriction(String restriction) {
+        mRestriction = restriction;
+    }
+    public String getRestriction() {
+        return mRestriction;
+    }
 
     /**
      * The URI of the update server.
      */
-    public String serverUri = null;
+    private String mServerUri = null;
+    public void setServerUri(String serverUri) {
+        mServerUri = serverUri;
+    }
+    public String getServerUri() {
+        return mServerUri;
+    }
 
     /**
      * Username used to authenticate with the policy server.
      */
-    public String username = null;
+    private String mUsername = null;
+    public void setUsername(String username) {
+        mUsername = username;
+    }
+    public String getUsername() {
+        return mUsername;
+    }
 
     /**
      * Base64 encoded password used to authenticate with the policy server.
      */
-    public String base64EncodedPassword = null;
+    private String mBase64EncodedPassword = null;
+    public void setBase64EncodedPassword(String password) {
+        mBase64EncodedPassword = password;
+    }
+    public String getBase64EncodedPassword() {
+        return mBase64EncodedPassword;
+    }
 
     /**
      * HTTPS URL for retrieving certificate for trust root.  The trust root is used to validate
      * policy server's identity.
      */
-    public String trustRootCertUrl = null;
+    private String mTrustRootCertUrl = null;
+    public void setTrustRootCertUrl(String trustRootCertUrl) {
+        mTrustRootCertUrl = trustRootCertUrl;
+    }
+    public String getTrustRootCertUrl() {
+        return mTrustRootCertUrl;
+    }
 
     /**
      * SHA-256 fingerprint of the certificate located at {@link #trustRootCertUrl}
      */
-    public byte[] trustRootCertSha256Fingerprint = null;
+    private byte[] mTrustRootCertSha256Fingerprint = null;
+    public void setTrustRootCertSha256Fingerprint(byte[] fingerprint) {
+        mTrustRootCertSha256Fingerprint = fingerprint;
+    }
+    public byte[] getTrustRootCertSha256Fingerprint() {
+        return mTrustRootCertSha256Fingerprint;
+    }
 
     /**
      * Constructor for creating Policy with default values.
@@ -142,16 +190,16 @@ public final class UpdateParameter implements Parcelable {
         if (source == null) {
             return;
         }
-        updateIntervalInMinutes = source.updateIntervalInMinutes;
-        updateMethod = source.updateMethod;
-        restriction = source.restriction;
-        serverUri = source.serverUri;
-        username = source.username;
-        base64EncodedPassword = source.base64EncodedPassword;
-        trustRootCertUrl = source.trustRootCertUrl;
-        if (source.trustRootCertSha256Fingerprint != null) {
-            trustRootCertSha256Fingerprint = Arrays.copyOf(source.trustRootCertSha256Fingerprint,
-                    source.trustRootCertSha256Fingerprint.length);
+        mUpdateIntervalInMinutes = source.mUpdateIntervalInMinutes;
+        mUpdateMethod = source.mUpdateMethod;
+        mRestriction = source.mRestriction;
+        mServerUri = source.mServerUri;
+        mUsername = source.mUsername;
+        mBase64EncodedPassword = source.mBase64EncodedPassword;
+        mTrustRootCertUrl = source.mTrustRootCertUrl;
+        if (source.mTrustRootCertSha256Fingerprint != null) {
+            mTrustRootCertSha256Fingerprint = Arrays.copyOf(source.mTrustRootCertSha256Fingerprint,
+                    source.mTrustRootCertSha256Fingerprint.length);
         }
     }
 
@@ -162,14 +210,14 @@ public final class UpdateParameter implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(updateIntervalInMinutes);
-        dest.writeString(updateMethod);
-        dest.writeString(restriction);
-        dest.writeString(serverUri);
-        dest.writeString(username);
-        dest.writeString(base64EncodedPassword);
-        dest.writeString(trustRootCertUrl);
-        dest.writeByteArray(trustRootCertSha256Fingerprint);
+        dest.writeLong(mUpdateIntervalInMinutes);
+        dest.writeString(mUpdateMethod);
+        dest.writeString(mRestriction);
+        dest.writeString(mServerUri);
+        dest.writeString(mUsername);
+        dest.writeString(mBase64EncodedPassword);
+        dest.writeString(mTrustRootCertUrl);
+        dest.writeByteArray(mTrustRootCertSha256Fingerprint);
     }
 
     @Override
@@ -182,15 +230,15 @@ public final class UpdateParameter implements Parcelable {
         }
         UpdateParameter that = (UpdateParameter) thatObject;
 
-        return updateIntervalInMinutes == that.updateIntervalInMinutes
-                && TextUtils.equals(updateMethod, that.updateMethod)
-                && TextUtils.equals(restriction, that.restriction)
-                && TextUtils.equals(serverUri, that.serverUri)
-                && TextUtils.equals(username, that.username)
-                && TextUtils.equals(base64EncodedPassword, that.base64EncodedPassword)
-                && TextUtils.equals(trustRootCertUrl, that.trustRootCertUrl)
-                && Arrays.equals(trustRootCertSha256Fingerprint,
-                        that.trustRootCertSha256Fingerprint);
+        return mUpdateIntervalInMinutes == that.mUpdateIntervalInMinutes
+                && TextUtils.equals(mUpdateMethod, that.mUpdateMethod)
+                && TextUtils.equals(mRestriction, that.mRestriction)
+                && TextUtils.equals(mServerUri, that.mServerUri)
+                && TextUtils.equals(mUsername, that.mUsername)
+                && TextUtils.equals(mBase64EncodedPassword, that.mBase64EncodedPassword)
+                && TextUtils.equals(mTrustRootCertUrl, that.mTrustRootCertUrl)
+                && Arrays.equals(mTrustRootCertSha256Fingerprint,
+                        that.mTrustRootCertSha256Fingerprint);
     }
 
     /**
@@ -199,81 +247,81 @@ public final class UpdateParameter implements Parcelable {
      * @return true on success
      */
     public boolean validate() {
-        if (updateIntervalInMinutes == Long.MIN_VALUE) {
+        if (mUpdateIntervalInMinutes == Long.MIN_VALUE) {
             Log.d(TAG, "Update interval not specified");
             return false;
         }
         // Update not applicable.
-        if (updateIntervalInMinutes == UPDATE_CHECK_INTERVAL_NEVER) {
+        if (mUpdateIntervalInMinutes == UPDATE_CHECK_INTERVAL_NEVER) {
             return true;
         }
 
-        if (!TextUtils.equals(updateMethod, UPDATE_METHOD_OMADM)
-                && !TextUtils.equals(updateMethod, UPDATE_METHOD_SSP)) {
-            Log.d(TAG, "Unknown update method: " + updateMethod);
+        if (!TextUtils.equals(mUpdateMethod, UPDATE_METHOD_OMADM)
+                && !TextUtils.equals(mUpdateMethod, UPDATE_METHOD_SSP)) {
+            Log.d(TAG, "Unknown update method: " + mUpdateMethod);
             return false;
         }
 
-        if (!TextUtils.equals(restriction, UPDATE_RESTRICTION_HOMESP)
-                && !TextUtils.equals(restriction, UPDATE_RESTRICTION_ROAMING_PARTNER)
-                && !TextUtils.equals(restriction, UPDATE_RESTRICTION_UNRESTRICTED)) {
-            Log.d(TAG, "Unknown restriction: " + restriction);
+        if (!TextUtils.equals(mRestriction, UPDATE_RESTRICTION_HOMESP)
+                && !TextUtils.equals(mRestriction, UPDATE_RESTRICTION_ROAMING_PARTNER)
+                && !TextUtils.equals(mRestriction, UPDATE_RESTRICTION_UNRESTRICTED)) {
+            Log.d(TAG, "Unknown restriction: " + mRestriction);
             return false;
         }
 
-        if (TextUtils.isEmpty(serverUri)) {
+        if (TextUtils.isEmpty(mServerUri)) {
             Log.d(TAG, "Missing update server URI");
             return false;
         }
-        if (serverUri.getBytes(StandardCharsets.UTF_8).length > MAX_URI_BYTES) {
+        if (mServerUri.getBytes(StandardCharsets.UTF_8).length > MAX_URI_BYTES) {
             Log.d(TAG, "URI bytes exceeded the max: "
-                    + serverUri.getBytes(StandardCharsets.UTF_8).length);
+                    + mServerUri.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
 
-        if (TextUtils.isEmpty(username)) {
+        if (TextUtils.isEmpty(mUsername)) {
             Log.d(TAG, "Missing username");
             return false;
         }
-        if (username.getBytes(StandardCharsets.UTF_8).length > MAX_USERNAME_BYTES) {
+        if (mUsername.getBytes(StandardCharsets.UTF_8).length > MAX_USERNAME_BYTES) {
             Log.d(TAG, "Username bytes exceeded the max: "
-                    + username.getBytes(StandardCharsets.UTF_8).length);
+                    + mUsername.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
 
-        if (TextUtils.isEmpty(base64EncodedPassword)) {
+        if (TextUtils.isEmpty(mBase64EncodedPassword)) {
             Log.d(TAG, "Missing username");
             return false;
         }
-        if (base64EncodedPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
+        if (mBase64EncodedPassword.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
             Log.d(TAG, "Password bytes exceeded the max: "
-                    + base64EncodedPassword.getBytes(StandardCharsets.UTF_8).length);
+                    + mBase64EncodedPassword.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
         try {
-            Base64.decode(base64EncodedPassword, Base64.DEFAULT);
+            Base64.decode(mBase64EncodedPassword, Base64.DEFAULT);
         } catch (IllegalArgumentException e) {
-            Log.d(TAG, "Invalid encoding for password: " + base64EncodedPassword);
+            Log.d(TAG, "Invalid encoding for password: " + mBase64EncodedPassword);
             return false;
         }
 
-        if (TextUtils.isEmpty(trustRootCertUrl)) {
+        if (TextUtils.isEmpty(mTrustRootCertUrl)) {
             Log.d(TAG, "Missing trust root certificate URL");
             return false;
         }
-        if (trustRootCertUrl.getBytes(StandardCharsets.UTF_8).length > MAX_URL_BYTES) {
+        if (mTrustRootCertUrl.getBytes(StandardCharsets.UTF_8).length > MAX_URL_BYTES) {
             Log.d(TAG, "Trust root cert URL bytes exceeded the max: "
-                    + trustRootCertUrl.getBytes(StandardCharsets.UTF_8).length);
+                    + mTrustRootCertUrl.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
 
-        if (trustRootCertSha256Fingerprint == null) {
+        if (mTrustRootCertSha256Fingerprint == null) {
             Log.d(TAG, "Missing trust root certificate SHA-256 fingerprint");
             return false;
         }
-        if (trustRootCertSha256Fingerprint.length != CERTIFICATE_SHA256_BYTES) {
+        if (mTrustRootCertSha256Fingerprint.length != CERTIFICATE_SHA256_BYTES) {
             Log.d(TAG, "Incorrect size of trust root certificate SHA-256 fingerprint: "
-                    + trustRootCertSha256Fingerprint.length);
+                    + mTrustRootCertSha256Fingerprint.length);
             return false;
         }
         return true;
@@ -284,14 +332,14 @@ public final class UpdateParameter implements Parcelable {
             @Override
             public UpdateParameter createFromParcel(Parcel in) {
                 UpdateParameter updateParam = new UpdateParameter();
-                updateParam.updateIntervalInMinutes = in.readLong();
-                updateParam.updateMethod = in.readString();
-                updateParam.restriction = in.readString();
-                updateParam.serverUri = in.readString();
-                updateParam.username = in.readString();
-                updateParam.base64EncodedPassword = in.readString();
-                updateParam.trustRootCertUrl = in.readString();
-                updateParam.trustRootCertSha256Fingerprint = in.createByteArray();
+                updateParam.setUpdateIntervalInMinutes(in.readLong());
+                updateParam.setUpdateMethod(in.readString());
+                updateParam.setRestriction(in.readString());
+                updateParam.setServerUri(in.readString());
+                updateParam.setUsername(in.readString());
+                updateParam.setBase64EncodedPassword(in.readString());
+                updateParam.setTrustRootCertUrl(in.readString());
+                updateParam.setTrustRootCertSha256Fingerprint(in.createByteArray());
                 return updateParam;
             }
 

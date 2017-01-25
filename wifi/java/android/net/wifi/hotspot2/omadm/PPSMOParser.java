@@ -450,7 +450,7 @@ public final class PPSMOParser {
             }
         }
         if (config != null && updateIdentifier != Integer.MIN_VALUE) {
-            config.updateIdentifier = updateIdentifier;
+            config.setUpdateIdentifier(updateIdentifier);
         }
         return config;
     }
@@ -606,25 +606,25 @@ public final class PPSMOParser {
         for (PPSNode child : root.getChildren()) {
             switch(child.getName()) {
                 case NODE_HOMESP:
-                    config.homeSp = parseHomeSP(child);
+                    config.setHomeSp(parseHomeSP(child));
                     break;
                 case NODE_CREDENTIAL:
-                    config.credential = parseCredential(child);
+                    config.setCredential(parseCredential(child));
                     break;
                 case NODE_POLICY:
-                    config.policy = parsePolicy(child);
+                    config.setPolicy(parsePolicy(child));
                     break;
                 case NODE_AAA_SERVER_TRUST_ROOT:
-                    config.trustRootCertList = parseAAAServerTrustRootList(child);
+                    config.setTrustRootCertList(parseAAAServerTrustRootList(child));
                     break;
                 case NODE_SUBSCRIPTION_UPDATE:
-                    config.subscriptionUpdate = parseUpdateParameter(child);
+                    config.setSubscriptionUpdate(parseUpdateParameter(child));
                     break;
                 case NODE_SUBSCRIPTION_PARAMETER:
                     parseSubscriptionParameter(child, config);
                     break;
                 case NODE_CREDENTIAL_PRIORITY:
-                    config.credentialPriority = parseInteger(getPpsNodeValue(child));
+                    config.setCredentialPriority(parseInteger(getPpsNodeValue(child)));
                     break;
                 default:
                     throw new ParsingException("Unknown node: " + child.getName());
@@ -649,28 +649,28 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_FQDN:
-                    homeSp.fqdn = getPpsNodeValue(child);
+                    homeSp.setFqdn(getPpsNodeValue(child));
                     break;
                 case NODE_FRIENDLY_NAME:
-                    homeSp.friendlyName = getPpsNodeValue(child);
+                    homeSp.setFriendlyName(getPpsNodeValue(child));
                     break;
                 case NODE_ROAMING_CONSORTIUM_OI:
-                    homeSp.roamingConsortiumOIs =
-                            parseRoamingConsortiumOI(getPpsNodeValue(child));
+                    homeSp.setRoamingConsortiumOIs(
+                            parseRoamingConsortiumOI(getPpsNodeValue(child)));
                     break;
                 case NODE_ICON_URL:
-                    homeSp.iconUrl = getPpsNodeValue(child);
+                    homeSp.setIconUrl(getPpsNodeValue(child));
                     break;
                 case NODE_NETWORK_ID:
-                    homeSp.homeNetworkIds = parseNetworkIds(child);
+                    homeSp.setHomeNetworkIds(parseNetworkIds(child));
                     break;
                 case NODE_HOME_OI_LIST:
                     Pair<List<Long>, List<Long>> homeOIs = parseHomeOIList(child);
-                    homeSp.matchAllOIs = convertFromLongList(homeOIs.first);
-                    homeSp.matchAnyOIs = convertFromLongList(homeOIs.second);
+                    homeSp.setMatchAllOIs(convertFromLongList(homeOIs.first));
+                    homeSp.setMatchAnyOIs(convertFromLongList(homeOIs.second));
                     break;
                 case NODE_OTHER_HOME_PARTNERS:
-                    homeSp.otherHomePartners = parseOtherHomePartners(child);
+                    homeSp.setOtherHomePartners(parseOtherHomePartners(child));
                     break;
                 default:
                     throw new ParsingException("Unknown node under HomeSP: " + child.getName());
@@ -894,26 +894,26 @@ public final class PPSMOParser {
         for (PPSNode child: node.getChildren()) {
             switch (child.getName()) {
                 case NODE_CREATION_DATE:
-                    credential.creationTimeInMs = parseDate(getPpsNodeValue(child));
+                    credential.setCreationTimeInMs(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_EXPIRATION_DATE:
-                    credential.expirationTimeInMs = parseDate(getPpsNodeValue(child));
+                    credential.setExpirationTimeInMs(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_USERNAME_PASSWORD:
-                    credential.userCredential = parseUserCredential(child);
+                    credential.setUserCredential(parseUserCredential(child));
                     break;
                 case NODE_DIGITAL_CERTIFICATE:
-                    credential.certCredential = parseCertificateCredential(child);
+                    credential.setCertCredential(parseCertificateCredential(child));
                     break;
                 case NODE_REALM:
-                    credential.realm = getPpsNodeValue(child);
+                    credential.setRealm(getPpsNodeValue(child));
                     break;
                 case NODE_CHECK_AAA_SERVER_CERT_STATUS:
-                    credential.checkAAAServerCertStatus =
-                            Boolean.parseBoolean(getPpsNodeValue(child));
+                    credential.setCheckAAAServerCertStatus(
+                            Boolean.parseBoolean(getPpsNodeValue(child)));
                     break;
                 case NODE_SIM:
-                    credential.simCredential = parseSimCredential(child);
+                    credential.setSimCredential(parseSimCredential(child));
                     break;
                 default:
                     throw new ParsingException("Unknown node under Credential: " +
@@ -941,19 +941,19 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_USERNAME:
-                    userCred.username = getPpsNodeValue(child);
+                    userCred.setUsername(getPpsNodeValue(child));
                     break;
                 case NODE_PASSWORD:
-                    userCred.password = getPpsNodeValue(child);
+                    userCred.setPassword(getPpsNodeValue(child));
                     break;
                 case NODE_MACHINE_MANAGED:
-                    userCred.machineManaged = Boolean.parseBoolean(getPpsNodeValue(child));
+                    userCred.setMachineManaged(Boolean.parseBoolean(getPpsNodeValue(child)));
                     break;
                 case NODE_SOFT_TOKEN_APP:
-                    userCred.softTokenApp = getPpsNodeValue(child);
+                    userCred.setSoftTokenApp(getPpsNodeValue(child));
                     break;
                 case NODE_ABLE_TO_SHARE:
-                    userCred.ableToShare = Boolean.parseBoolean(getPpsNodeValue(child));
+                    userCred.setAbleToShare(Boolean.parseBoolean(getPpsNodeValue(child)));
                     break;
                 case NODE_EAP_METHOD:
                     parseEAPMethod(child, userCred);
@@ -984,10 +984,10 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch(child.getName()) {
                 case NODE_EAP_TYPE:
-                    userCred.eapType = parseInteger(getPpsNodeValue(child));
+                    userCred.setEapType(parseInteger(getPpsNodeValue(child)));
                     break;
                 case NODE_INNER_METHOD:
-                    userCred.nonEapInnerMethod = getPpsNodeValue(child);
+                    userCred.setNonEapInnerMethod(getPpsNodeValue(child));
                     break;
                 case NODE_VENDOR_ID:
                 case NODE_VENDOR_TYPE:
@@ -1022,10 +1022,10 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_CERTIFICATE_TYPE:
-                    certCred.certType = getPpsNodeValue(child);
+                    certCred.setCertType(getPpsNodeValue(child));
                     break;
                 case NODE_CERT_SHA256_FINGERPRINT:
-                    certCred.certSha256FingerPrint = parseHexString(getPpsNodeValue(child));
+                    certCred.setCertSha256Fingerprint(parseHexString(getPpsNodeValue(child)));
                     break;
                 default:
                     throw new ParsingException("Unknown node under DigitalCertificate: " +
@@ -1053,10 +1053,10 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_SIM_IMSI:
-                    simCred.imsi = getPpsNodeValue(child);
+                    simCred.setImsi(getPpsNodeValue(child));
                     break;
                 case NODE_EAP_TYPE:
-                    simCred.eapType = parseInteger(getPpsNodeValue(child));
+                    simCred.setEapType(parseInteger(getPpsNodeValue(child)));
                     break;
                 default:
                     throw new ParsingException("Unknown node under SIM: " + child.getName());
@@ -1081,22 +1081,22 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_PREFERRED_ROAMING_PARTNER_LIST:
-                    policy.preferredRoamingPartnerList = parsePreferredRoamingPartnerList(child);
+                    policy.setPreferredRoamingPartnerList(parsePreferredRoamingPartnerList(child));
                     break;
                 case NODE_MIN_BACKHAUL_THRESHOLD:
                     parseMinBackhaulThreshold(child, policy);
                     break;
                 case NODE_POLICY_UPDATE:
-                    policy.policyUpdate = parseUpdateParameter(child);
+                    policy.setPolicyUpdate(parseUpdateParameter(child));
                     break;
                 case NODE_SP_EXCLUSION_LIST:
-                    policy.excludedSsidList = parseSpExclusionList(child);
+                    policy.setExcludedSsidList(parseSpExclusionList(child));
                     break;
                 case NODE_REQUIRED_PROTO_PORT_TUPLE:
-                    policy.requiredProtoPortMap = parseRequiredProtoPortTuple(child);
+                    policy.setRequiredProtoPortMap(parseRequiredProtoPortTuple(child));
                     break;
                 case NODE_MAXIMUM_BSS_LOAD_VALUE:
-                    policy.maximumBssLoadValue = parseInteger(getPpsNodeValue(child));
+                    policy.setMaximumBssLoadValue(parseInteger(getPpsNodeValue(child)));
                     break;
                 default:
                     throw new ParsingException("Unknown node under Policy: " + child.getName());
@@ -1154,20 +1154,20 @@ public final class PPSMOParser {
                     if (fqdnMatchArray.length != 2) {
                         throw new ParsingException("Invalid FQDN_Match: " + fqdnMatch);
                     }
-                    roamingPartner.fqdn = fqdnMatchArray[0];
+                    roamingPartner.setFqdn(fqdnMatchArray[0]);
                     if (TextUtils.equals(fqdnMatchArray[1], "exactMatch")) {
-                        roamingPartner.fqdnExactMatch = true;
+                        roamingPartner.setFqdnExactMatch(true);
                     } else if (TextUtils.equals(fqdnMatchArray[1], "includeSubdomains")) {
-                        roamingPartner.fqdnExactMatch = false;
+                        roamingPartner.setFqdnExactMatch(false);
                     } else {
                         throw new ParsingException("Invalid FQDN_Match: " + fqdnMatch);
                     }
                     break;
                 case NODE_PRIORITY:
-                    roamingPartner.priority = parseInteger(getPpsNodeValue(child));
+                    roamingPartner.setPriority(parseInteger(getPpsNodeValue(child)));
                     break;
                 case NODE_COUNTRY:
-                    roamingPartner.countries = getPpsNodeValue(child);
+                    roamingPartner.setCountries(getPpsNodeValue(child));
                     break;
                 default:
                     throw new ParsingException("Unknown node under PreferredRoamingPartnerList "
@@ -1234,11 +1234,11 @@ public final class PPSMOParser {
         }
 
         if (TextUtils.equals(networkType, "home")) {
-            policy.minHomeDownlinkBandwidth = downlinkBandwidth;
-            policy.minHomeUplinkBandwidth = uplinkBandwidth;
+            policy.setMinHomeDownlinkBandwidth(downlinkBandwidth);
+            policy.setMinHomeUplinkBandwidth(uplinkBandwidth);
         } else if (TextUtils.equals(networkType, "roaming")) {
-            policy.minRoamingDownlinkBandwidth = downlinkBandwidth;
-            policy.minRoamingUplinkBandwidth = uplinkBandwidth;
+            policy.setMinRoamingDownlinkBandwidth(downlinkBandwidth);
+            policy.setMinRoamingUplinkBandwidth(uplinkBandwidth);
         } else {
             throw new ParsingException("Invalid network type: " + networkType);
         }
@@ -1264,26 +1264,26 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch(child.getName()) {
                 case NODE_UPDATE_INTERVAL:
-                    updateParam.updateIntervalInMinutes = parseLong(getPpsNodeValue(child), 10);
+                    updateParam.setUpdateIntervalInMinutes(parseLong(getPpsNodeValue(child), 10));
                     break;
                 case NODE_UPDATE_METHOD:
-                    updateParam.updateMethod = getPpsNodeValue(child);
+                    updateParam.setUpdateMethod(getPpsNodeValue(child));
                     break;
                 case NODE_RESTRICTION:
-                    updateParam.restriction = getPpsNodeValue(child);
+                    updateParam.setRestriction(getPpsNodeValue(child));
                     break;
                 case NODE_URI:
-                    updateParam.serverUri = getPpsNodeValue(child);
+                    updateParam.setServerUri(getPpsNodeValue(child));
                     break;
                 case NODE_USERNAME_PASSWORD:
                     Pair<String, String> usernamePassword = parseUpdateUserCredential(child);
-                    updateParam.username = usernamePassword.first;
-                    updateParam.base64EncodedPassword = usernamePassword.second;
+                    updateParam.setUsername(usernamePassword.first);
+                    updateParam.setBase64EncodedPassword(usernamePassword.second);
                     break;
                 case NODE_TRUST_ROOT:
                     Pair<String, byte[]> trustRoot = parseTrustRoot(child);
-                    updateParam.trustRootCertUrl = trustRoot.first;
-                    updateParam.trustRootCertSha256Fingerprint = trustRoot.second;
+                    updateParam.setTrustRootCertUrl(trustRoot.first);
+                    updateParam.setTrustRootCertSha256Fingerprint(trustRoot.second);
                     break;
                 case NODE_OTHER:
                     Log.d(TAG, "Ignore unsupported paramter: " + child.getName());
@@ -1508,13 +1508,13 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_CREATION_DATE:
-                    config.subscriptionCreationTimeInMs = parseDate(getPpsNodeValue(child));
+                    config.setSubscriptionCreationTimeInMs(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_EXPIRATION_DATE:
-                    config.subscriptionExpirationTimeInMs = parseDate(getPpsNodeValue(child));
+                    config.setSubscriptionExpirationTimeInMs(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_TYPE_OF_SUBSCRIPTION:
-                    config.subscriptionType = getPpsNodeValue(child);
+                    config.setSubscriptionType(getPpsNodeValue(child));
                     break;
                 case NODE_USAGE_LIMITS:
                     parseUsageLimits(child, config);
@@ -1543,17 +1543,17 @@ public final class PPSMOParser {
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_DATA_LIMIT:
-                    config.usageLimitDataLimit = parseLong(getPpsNodeValue(child), 10);
+                    config.setUsageLimitDataLimit(parseLong(getPpsNodeValue(child), 10));
                     break;
                 case NODE_START_DATE:
-                    config.usageLimitStartTimeInMs = parseDate(getPpsNodeValue(child));
+                    config.setUsageLimitStartTimeInMs(parseDate(getPpsNodeValue(child)));
                     break;
                 case NODE_TIME_LIMIT:
-                    config.usageLimitTimeLimitInMinutes = parseLong(getPpsNodeValue(child), 10);
+                    config.setUsageLimitTimeLimitInMinutes(parseLong(getPpsNodeValue(child), 10));
                     break;
                 case NODE_USAGE_TIME_PERIOD:
-                    config.usageLimitUsageTimePeriodInMinutes =
-                            parseLong(getPpsNodeValue(child), 10);
+                    config.setUsageLimitUsageTimePeriodInMinutes(
+                            parseLong(getPpsNodeValue(child), 10));
                     break;
                 default:
                     throw new ParsingException("Unknown node under UsageLimits"
