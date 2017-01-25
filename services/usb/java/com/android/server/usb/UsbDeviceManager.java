@@ -109,9 +109,8 @@ public class UsbDeviceManager {
     private static final int MSG_SYSTEM_READY = 3;
     private static final int MSG_BOOT_COMPLETED = 4;
     private static final int MSG_USER_SWITCHED = 5;
-    private static final int MSG_SET_USB_DATA_UNLOCKED = 6;
-    private static final int MSG_UPDATE_USER_RESTRICTIONS = 7;
-    private static final int MSG_UPDATE_HOST_STATE = 8;
+    private static final int MSG_UPDATE_USER_RESTRICTIONS = 6;
+    private static final int MSG_UPDATE_HOST_STATE = 7;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -288,7 +287,7 @@ public class UsbDeviceManager {
 
         if (functions != null) {
             mAccessoryModeRequestTime = SystemClock.elapsedRealtime();
-            setCurrentFunctions(functions);
+            setCurrentFunctions(functions, false);
         }
     }
 
@@ -337,14 +336,22 @@ public class UsbDeviceManager {
                 // Restore default functions.
                 mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
                         UsbManager.USB_FUNCTION_NONE);
-                if (UsbManager.USB_FUNCTION_NONE.equals(mCurrentFunctions)) {
-                    mCurrentFunctions = UsbManager.USB_FUNCTION_MTP;
-                }
                 mCurrentFunctionsApplied = mCurrentFunctions.equals(
                         SystemProperties.get(USB_STATE_PROPERTY));
                 mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
                         UsbManager.USB_FUNCTION_ADB);
-                setEnabledFunctions(null, false);
+
+                /**
+                 * Remove MTP from persistent config, to bring usb to a good state
+                 * after fixes to b/31814300. This block can be removed after the update
+                 */
+                String persisted = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY);
+                if (UsbManager.containsFunction(persisted, UsbManager.USB_FUNCTION_MTP)) {
+                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY,
+                            UsbManager.removeFunction(persisted, UsbManager.USB_FUNCTION_MTP));
+                }
+
+                setEnabledFunctions(null, false, false);
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
@@ -373,6 +380,14 @@ public class UsbDeviceManager {
             removeMessages(what);
             Message m = Message.obtain(this, what);
             m.obj = arg;
+            sendMessage(m);
+        }
+
+        public void sendMessage(int what, Object arg, boolean arg1) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.obj = arg;
+            m.arg1 = (arg1 ? 1 : 0);
             sendMessage(m);
         }
 
@@ -440,29 +455,24 @@ public class UsbDeviceManager {
             return waitForState(config);
         }
 
-        private void setUsbDataUnlocked(boolean enable) {
-            if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked: " + enable);
-            mUsbDataUnlocked = enable;
-            updateUsbNotification();
-            updateUsbStateBroadcastIfNeeded();
-            setEnabledFunctions(mCurrentFunctions, true);
-        }
-
         private void setAdbEnabled(boolean enable) {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
+                String oldFunctions = mCurrentFunctions;
 
-                // Due to the persist.sys.usb.config property trigger, changing adb state requires
-                // persisting default function
-                String oldFunctions = getDefaultFunctions();
-                String newFunctions = applyAdbFunction(oldFunctions);
-                if (!oldFunctions.equals(newFunctions)) {
-                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunctions);
+                // Persist the adb setting
+                String newFunction = applyAdbFunction(SystemProperties.get(
+                            USB_PERSISTENT_CONFIG_PROPERTY, UsbManager.USB_FUNCTION_NONE));
+                SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunction);
+
+                // Remove mtp from the config if file transfer is not enabled
+                if (oldFunctions.equals(UsbManager.USB_FUNCTION_MTP) &&
+                        !mUsbDataUnlocked && enable) {
+                    oldFunctions = UsbManager.USB_FUNCTION_NONE;
                 }
 
-                // After persisting them use the lock-down aware function set
-                setEnabledFunctions(mCurrentFunctions, false);
+                setEnabledFunctions(oldFunctions, true, mUsbDataUnlocked);
                 updateAdbNotification();
             }
 
@@ -474,9 +484,16 @@ public class UsbDeviceManager {
         /**
          * Evaluates USB function policies and applies the change accordingly.
          */
-        private void setEnabledFunctions(String functions, boolean forceRestart) {
+        private void setEnabledFunctions(String functions, boolean forceRestart,
+                boolean usbDataUnlocked) {
             if (DEBUG) Slog.d(TAG, "setEnabledFunctions functions=" + functions + ", "
                     + "forceRestart=" + forceRestart);
+
+            if (usbDataUnlocked != mUsbDataUnlocked) {
+                mUsbDataUnlocked = usbDataUnlocked;
+                updateUsbNotification();
+                forceRestart = true;
+            }
 
             // Try to set the enabled functions.
             final String oldFunctions = mCurrentFunctions;
@@ -514,7 +531,8 @@ public class UsbDeviceManager {
         }
 
         private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
-            if (functions == null) {
+            if (functions == null || applyAdbFunction(functions)
+                    .equals(UsbManager.USB_FUNCTION_NONE)) {
                 functions = getDefaultFunctions();
             }
             functions = applyAdbFunction(functions);
@@ -579,7 +597,7 @@ public class UsbDeviceManager {
                 // make sure accessory mode is off
                 // and restore default functions
                 Slog.d(TAG, "exited USB accessory mode");
-                setEnabledFunctions(null, false);
+                setEnabledFunctions(null, false, false);
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
@@ -596,10 +614,6 @@ public class UsbDeviceManager {
             if (mBroadcastedIntent == null) {
                 for (String key : keySet) {
                     if (intent.getBooleanExtra(key, false)) {
-                        // MTP function is enabled by default.
-                        if (UsbManager.USB_FUNCTION_MTP.equals(key)) {
-                            continue;
-                        }
                         return true;
                     }
                 }
@@ -712,10 +726,7 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
-                    if (!mConnected) {
-                        // When a disconnect occurs, relock access to sensitive user data
-                        mUsbDataUnlocked = false;
-                    }
+
                     updateUsbNotification();
                     updateAdbNotification();
                     if (UsbManager.containsFunction(mCurrentFunctions,
@@ -723,7 +734,7 @@ public class UsbDeviceManager {
                         updateCurrentAccessory();
                     } else if (!mConnected) {
                         // restore defaults when USB is disconnected
-                        setEnabledFunctions(null, false);
+                        setEnabledFunctions(null, false, false);
                     }
                     if (mBootCompleted) {
                         updateUsbStateBroadcastIfNeeded();
@@ -746,13 +757,10 @@ public class UsbDeviceManager {
                     break;
                 case MSG_SET_CURRENT_FUNCTIONS:
                     String functions = (String)msg.obj;
-                    setEnabledFunctions(functions, false);
+                    setEnabledFunctions(functions, false, msg.arg1 == 1);
                     break;
                 case MSG_UPDATE_USER_RESTRICTIONS:
-                    setEnabledFunctions(mCurrentFunctions, false);
-                    break;
-                case MSG_SET_USB_DATA_UNLOCKED:
-                    setUsbDataUnlocked(msg.arg1 == 1);
+                    setEnabledFunctions(mCurrentFunctions, false, mUsbDataUnlocked);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
@@ -780,8 +788,7 @@ public class UsbDeviceManager {
                             Slog.v(TAG, "Current user switched to " + mCurrentUser
                                     + "; resetting USB host stack for MTP or PTP");
                             // avoid leaking sensitive data from previous user
-                            mUsbDataUnlocked = false;
-                            setEnabledFunctions(mCurrentFunctions, true);
+                            setEnabledFunctions(mCurrentFunctions, true, false);
                         }
                         mCurrentUser = msg.arg1;
                     }
@@ -965,14 +972,10 @@ public class UsbDeviceManager {
         return UsbManager.containsFunction(SystemProperties.get(USB_CONFIG_PROPERTY), function);
     }
 
-    public void setCurrentFunctions(String functions) {
-        if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ")");
-        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions);
-    }
-
-    public void setUsbDataUnlocked(boolean unlocked) {
-        if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked(" + unlocked + ")");
-        mHandler.sendMessage(MSG_SET_USB_DATA_UNLOCKED, unlocked);
+    public void setCurrentFunctions(String functions, boolean usbDataUnlocked) {
+        if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ", " +
+				usbDataUnlocked + ")");
+        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, usbDataUnlocked);
     }
 
     private void readOemUsbOverrideConfig() {
