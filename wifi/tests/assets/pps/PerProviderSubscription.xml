@@ -23,6 +23,66 @@
           <NodeName>RoamingConsortiumOI</NodeName>
           <Value>112233,445566</Value>
         </Node>
+        <Node>
+          <NodeName>IconURL</NodeName>
+          <Value>icon.test.com</Value>
+        </Node>
+        <Node>
+          <NodeName>NetworkID</NodeName>
+          <Node>
+            <NodeName>n001</NodeName>
+            <Node>
+              <NodeName>SSID</NodeName>
+              <Value>TestSSID</Value>
+            </Node>
+            <Node>
+              <NodeName>HESSID</NodeName>
+              <Value>12345678</Value>
+            </Node>
+          </Node>
+          <Node>
+            <NodeName>n002</NodeName>
+            <Node>
+              <NodeName>SSID</NodeName>
+              <Value>NullHESSID</Value>
+            </Node>
+          </Node>
+        </Node>
+        <Node>
+          <NodeName>HomeOIList</NodeName>
+          <Node>
+            <NodeName>h001</NodeName>
+            <Node>
+              <NodeName>HomeOI</NodeName>
+              <Value>11223344</Value>
+            </Node>
+            <Node>
+              <NodeName>HomeOIRequired</NodeName>
+              <Value>true</Value>
+            </Node>
+          </Node>
+          <Node>
+            <NodeName>h002</NodeName>
+            <Node>
+              <NodeName>HomeOI</NodeName>
+              <Value>55667788</Value>
+            </Node>
+            <Node>
+              <NodeName>HomeOIRequired</NodeName>
+              <Value>false</Value>
+            </Node>
+          </Node>
+        </Node>
+        <Node>
+          <NodeName>OtherHomePartners</NodeName>
+          <Node>
+            <NodeName>o001</NodeName>
+            <Node>
+              <NodeName>FQDN</NodeName>
+              <Value>other.fqdn.com</Value>
+            </Node>
+          </Node>
+        </Node>
       </Node>
       <Node>
         <NodeName>Credential</NodeName>
