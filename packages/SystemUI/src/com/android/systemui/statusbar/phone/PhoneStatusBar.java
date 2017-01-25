@@ -142,6 +142,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.ActivityStarter;
 import com.android.systemui.plugins.qs.QS.BaseStatusBarHeader;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeOption;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -4866,7 +4867,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void snoozeNotification(StatusBarNotification sbn, long snoozeUntil) {
-        setNotificationSnoozed(sbn, snoozeUntil);
+    public void snoozeNotification(StatusBarNotification sbn, SnoozeOption snoozeOption) {
+        setNotificationSnoozed(sbn, snoozeOption);
     }
 }
