@@ -37,9 +37,9 @@ class GLFunctorDrawable : public SkDrawable {
 public:
     GLFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
             : mFunctor(functor)
-            , mListener(listener) {
-        canvas->getClipBounds(&mBounds);
-    }
+            , mListener(listener)
+            , mBounds(canvas->getLocalClipBounds())
+    {}
     virtual ~GLFunctorDrawable();
 
     void syncFunctor() const;
@@ -51,7 +51,7 @@ public:
  private:
      Functor* mFunctor;
      sp<GlFunctorLifecycleListener> mListener;
-     SkRect mBounds;
+     const SkRect mBounds;
 };
 
 }; // namespace skiapipeline
