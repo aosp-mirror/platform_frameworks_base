@@ -37,6 +37,17 @@ import org.junit.Test;
  */
 @SmallTest
 public class CredentialTest {
+    /**
+     * Helper function for generating Credential for testing.
+     *
+     * @param userCred Instance of UserCredential
+     * @param certCred Instance of CertificateCredential
+     * @param simCred Instance of SimCredential
+     * @param caCert CA certificate
+     * @param clientCertificateChain Chain of client certificates
+     * @param clientPrivateKey Client private key
+     * @return {@link Credential}
+     */
     private static Credential createCredential(Credential.UserCredential userCred,
                                                Credential.CertificateCredential certCred,
                                                Credential.SimCredential simCred,
@@ -44,7 +55,10 @@ public class CredentialTest {
                                                X509Certificate[] clientCertificateChain,
                                                PrivateKey clientPrivateKey) {
         Credential cred = new Credential();
+        cred.creationTimeInMs = 123455L;
+        cred.expirationTimeInMs = 2310093L;
         cred.realm = "realm";
+        cred.checkAAAServerCertStatus = true;
         cred.userCredential = userCred;
         cred.certCredential = certCred;
         cred.simCredential = simCred;
@@ -54,6 +68,11 @@ public class CredentialTest {
         return cred;
     }
 
+    /**
+     * Helper function for generating certificate credential for testing.
+     *
+     * @return {@link Credential}
+     */
     private static Credential createCredentialWithCertificateCredential() {
         Credential.CertificateCredential certCred = new Credential.CertificateCredential();
         certCred.certType = "x509v3";
@@ -62,6 +81,11 @@ public class CredentialTest {
                 new X509Certificate[] {FakeKeys.CLIENT_CERT}, FakeKeys.RSA_KEY1);
     }
 
+    /**
+     * Helper function for generating SIM credential for testing.
+     *
+     * @return {@link Credential}
+     */
     private static Credential createCredentialWithSimCredential() {
         Credential.SimCredential simCred = new Credential.SimCredential();
         simCred.imsi = "1234*";
@@ -69,10 +93,18 @@ public class CredentialTest {
         return createCredential(null, null, simCred, null, null, null);
     }
 
+    /**
+     * Helper function for generating user credential for testing.
+     *
+     * @return {@link Credential}
+     */
     private static Credential createCredentialWithUserCredential() {
         Credential.UserCredential userCred = new Credential.UserCredential();
         userCred.username = "username";
         userCred.password = "password";
+        userCred.machineManaged = true;
+        userCred.ableToShare = true;
+        userCred.softTokenApp = "TestApp";
         userCred.eapType = EAPConstants.EAP_TTLS;
         userCred.nonEapInnerMethod = "MS-CHAP";
         return createCredential(userCred, null, null, FakeKeys.CA_CERT0,

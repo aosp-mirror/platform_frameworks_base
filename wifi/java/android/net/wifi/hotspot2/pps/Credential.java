@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -41,8 +42,6 @@ import java.util.Set;
  * In addition to the fields in the Credential subtree, this will also maintain necessary
  * information for the private key and certificates associated with this credential.
  *
- * Currently we only support the nodes that are used by Hotspot 2.0 Release 1.
- *
  * @hide
  */
 public final class Credential implements Parcelable {
@@ -52,7 +51,21 @@ public final class Credential implements Parcelable {
      * Max string length for realm.  Refer to Credential/Realm node in Hotspot 2.0 Release 2
      * Technical Specification Section 9.1 for more info.
      */
-    private static final int MAX_REALM_LENGTH = 253;
+    private static final int MAX_REALM_BYTES = 253;
+
+    /**
+     * The time this credential is created. It is in the format of number
+     * of milliseconds since January 1, 1970, 00:00:00 GMT.
+     * Using Long.MIN_VALUE to indicate unset value.
+     */
+    public long creationTimeInMs = Long.MIN_VALUE;
+
+    /**
+     * The time this credential will expire. It is in the format of number
+     * of milliseconds since January 1, 1970, 00:00:00 GMT.
+    * Using Long.MIN_VALUE to indicate unset value.
+     */
+    public long expirationTimeInMs = Long.MIN_VALUE;
 
     /**
      * The realm associated with this credential.  It will be used to determine
@@ -60,6 +73,13 @@ public final class Credential implements Parcelable {
      * comparing the realm specified in that hotspot's ANQP element.
      */
     public String realm = null;
+
+    /**
+     * When set to true, the device should check AAA (Authentication, Authorization,
+     * and Accounting) server's certificate during EAP (Extensible Authentication
+     * Protocol) authentication.
+     */
+    public boolean checkAAAServerCertStatus = false;
 
     /**
      * Username-password based credential.
@@ -70,13 +90,13 @@ public final class Credential implements Parcelable {
          * Maximum string length for username.  Refer to Credential/UsernamePassword/Username
          * node in Hotspot 2.0 Release 2 Technical Specification Section 9.1 for more info.
          */
-        private static final int MAX_USERNAME_LENGTH = 63;
+        private static final int MAX_USERNAME_BYTES = 63;
 
         /**
          * Maximum string length for password.  Refer to Credential/UsernamePassword/Password
          * in Hotspot 2.0 Release 2 Technical Specification Section 9.1 for more info.
          */
-        private static final int MAX_PASSWORD_LENGTH = 255;
+        private static final int MAX_PASSWORD_BYTES = 255;
 
         /**
          * Supported Non-EAP inner methods.  Refer to
@@ -95,6 +115,21 @@ public final class Credential implements Parcelable {
          * Base64-encoded password.
          */
         public String password = null;
+
+        /**
+         * Flag indicating if the password is machine managed.
+         */
+        public boolean machineManaged = false;
+
+        /**
+         * The name of the application used to generate the password.
+         */
+        public String softTokenApp = null;
+
+        /**
+         * Flag indicating if this credential is usable on other mobile devices as well.
+         */
+        public boolean ableToShare = false;
 
         /**
          * EAP (Extensible Authentication Protocol) method type.
@@ -123,6 +158,9 @@ public final class Credential implements Parcelable {
             if (source != null) {
                 username = source.username;
                 password = source.password;
+                machineManaged = source.machineManaged;
+                softTokenApp = source.softTokenApp;
+                ableToShare = source.ableToShare;
                 eapType = source.eapType;
                 nonEapInnerMethod = source.nonEapInnerMethod;
             }
@@ -137,6 +175,9 @@ public final class Credential implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(username);
             dest.writeString(password);
+            dest.writeInt(machineManaged ? 1 : 0);
+            dest.writeString(softTokenApp);
+            dest.writeInt(ableToShare ? 1 : 0);
             dest.writeInt(eapType);
             dest.writeString(nonEapInnerMethod);
         }
@@ -151,10 +192,13 @@ public final class Credential implements Parcelable {
             }
 
             UserCredential that = (UserCredential) thatObject;
-            return TextUtils.equals(username, that.username) &&
-                    TextUtils.equals(password, that.password) &&
-                    eapType == that.eapType &&
-                    TextUtils.equals(nonEapInnerMethod, that.nonEapInnerMethod);
+            return TextUtils.equals(username, that.username)
+                    && TextUtils.equals(password, that.password)
+                    && machineManaged == that.machineManaged
+                    && TextUtils.equals(softTokenApp, that.softTokenApp)
+                    && ableToShare == that.ableToShare
+                    && eapType == that.eapType
+                    && TextUtils.equals(nonEapInnerMethod, that.nonEapInnerMethod);
         }
 
         /**
@@ -167,8 +211,9 @@ public final class Credential implements Parcelable {
                 Log.d(TAG, "Missing username");
                 return false;
             }
-            if (username.length() > MAX_USERNAME_LENGTH) {
-                Log.d(TAG, "username exceeding maximum length: " + username.length());
+            if (username.getBytes(StandardCharsets.UTF_8).length > MAX_USERNAME_BYTES) {
+                Log.d(TAG, "username exceeding maximum length: "
+                        + username.getBytes(StandardCharsets.UTF_8).length);
                 return false;
             }
 
@@ -176,8 +221,9 @@ public final class Credential implements Parcelable {
                 Log.d(TAG, "Missing password");
                 return false;
             }
-            if (password.length() > MAX_PASSWORD_LENGTH) {
-                Log.d(TAG, "password exceeding maximum length: " + password.length());
+            if (password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
+                Log.d(TAG, "password exceeding maximum length: "
+                        + password.getBytes(StandardCharsets.UTF_8).length);
                 return false;
             }
 
@@ -202,6 +248,9 @@ public final class Credential implements Parcelable {
                     UserCredential userCredential = new UserCredential();
                     userCredential.username = in.readString();
                     userCredential.password = in.readString();
+                    userCredential.machineManaged = in.readInt() != 0;
+                    userCredential.softTokenApp = in.readString();
+                    userCredential.ableToShare = in.readInt() != 0;
                     userCredential.eapType = in.readInt();
                     userCredential.nonEapInnerMethod = in.readString();
                     return userCredential;
@@ -281,8 +330,8 @@ public final class Credential implements Parcelable {
             }
 
             CertificateCredential that = (CertificateCredential) thatObject;
-            return TextUtils.equals(certType, that.certType) &&
-                    Arrays.equals(certSha256FingerPrint, that.certSha256FingerPrint);
+            return TextUtils.equals(certType, that.certType)
+                    && Arrays.equals(certSha256FingerPrint, that.certSha256FingerPrint);
         }
 
         /**
@@ -295,8 +344,8 @@ public final class Credential implements Parcelable {
                 Log.d(TAG, "Unsupported certificate type: " + certType);
                 return false;
             }
-            if (certSha256FingerPrint == null ||
-                    certSha256FingerPrint.length != CERT_SHA256_FINGER_PRINT_LENGTH) {
+            if (certSha256FingerPrint == null
+                    || certSha256FingerPrint.length != CERT_SHA256_FINGER_PRINT_LENGTH) {
                 Log.d(TAG, "Invalid SHA-256 fingerprint");
                 return false;
             }
@@ -378,8 +427,8 @@ public final class Credential implements Parcelable {
             }
 
             SimCredential that = (SimCredential) thatObject;
-            return TextUtils.equals(imsi, that.imsi) &&
-                    eapType == that.eapType;
+            return TextUtils.equals(imsi, that.imsi)
+                    && eapType == that.eapType;
         }
 
         @Override
@@ -400,8 +449,8 @@ public final class Credential implements Parcelable {
             if (!verifyImsi()) {
                 return false;
             }
-            if (eapType != EAPConstants.EAP_SIM && eapType != EAPConstants.EAP_AKA &&
-                    eapType != EAPConstants.EAP_AKA_PRIME) {
+            if (eapType != EAPConstants.EAP_SIM && eapType != EAPConstants.EAP_AKA
+                    && eapType != EAPConstants.EAP_AKA_PRIME) {
                 Log.d(TAG, "Invalid EAP Type for SIM credential: " + eapType);
                 return false;
             }
@@ -490,7 +539,10 @@ public final class Credential implements Parcelable {
      */
     public Credential(Credential source) {
         if (source != null) {
+            creationTimeInMs = source.creationTimeInMs;
+            expirationTimeInMs = source.expirationTimeInMs;
             realm = source.realm;
+            checkAAAServerCertStatus = source.checkAAAServerCertStatus;
             if (source.userCredential != null) {
                 userCredential = new UserCredential(source.userCredential);
             }
@@ -516,7 +568,10 @@ public final class Credential implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(creationTimeInMs);
+        dest.writeLong(expirationTimeInMs);
         dest.writeString(realm);
+        dest.writeInt(checkAAAServerCertStatus ? 1 : 0);
         dest.writeParcelable(userCredential, flags);
         dest.writeParcelable(certCredential, flags);
         dest.writeParcelable(simCredential, flags);
@@ -535,16 +590,19 @@ public final class Credential implements Parcelable {
         }
 
         Credential that = (Credential) thatObject;
-        return TextUtils.equals(realm, that.realm) &&
-                (userCredential == null ? that.userCredential == null :
-                    userCredential.equals(that.userCredential)) &&
-                (certCredential == null ? that.certCredential == null :
-                    certCredential.equals(that.certCredential)) &&
-                (simCredential == null ? that.simCredential == null :
-                    simCredential.equals(that.simCredential)) &&
-                isX509CertificateEquals(caCertificate, that.caCertificate) &&
-                isX509CertificatesEquals(clientCertificateChain, that.clientCertificateChain) &&
-                isPrivateKeyEquals(clientPrivateKey, that.clientPrivateKey);
+        return TextUtils.equals(realm, that.realm)
+                && creationTimeInMs == that.creationTimeInMs
+                && expirationTimeInMs == that.expirationTimeInMs
+                && checkAAAServerCertStatus == that.checkAAAServerCertStatus
+                && (userCredential == null ? that.userCredential == null
+                    : userCredential.equals(that.userCredential))
+                && (certCredential == null ? that.certCredential == null
+                    : certCredential.equals(that.certCredential))
+                && (simCredential == null ? that.simCredential == null
+                    : simCredential.equals(that.simCredential))
+                && isX509CertificateEquals(caCertificate, that.caCertificate)
+                && isX509CertificatesEquals(clientCertificateChain, that.clientCertificateChain)
+                && isPrivateKeyEquals(clientPrivateKey, that.clientPrivateKey);
     }
 
     /**
@@ -557,8 +615,9 @@ public final class Credential implements Parcelable {
             Log.d(TAG, "Missing realm");
             return false;
         }
-        if (realm.length() > MAX_REALM_LENGTH) {
-            Log.d(TAG, "realm exceeding maximum length: " + realm.length());
+        if (realm.getBytes(StandardCharsets.UTF_8).length > MAX_REALM_BYTES) {
+            Log.d(TAG, "realm exceeding maximum length: "
+                    + realm.getBytes(StandardCharsets.UTF_8).length);
             return false;
         }
 
@@ -588,7 +647,10 @@ public final class Credential implements Parcelable {
             @Override
             public Credential createFromParcel(Parcel in) {
                 Credential credential = new Credential();
+                credential.creationTimeInMs = in.readLong();
+                credential.expirationTimeInMs = in.readLong();
                 credential.realm = in.readString();
+                credential.checkAAAServerCertStatus = in.readInt() != 0;
                 credential.userCredential = in.readParcelable(null);
                 credential.certCredential = in.readParcelable(null);
                 credential.simCredential = in.readParcelable(null);
