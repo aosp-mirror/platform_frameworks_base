@@ -19,7 +19,6 @@ package android.telephony;
 import android.os.Binder;
 import android.os.Parcel;
 import android.content.res.Resources;
-import android.hardware.radio.V1_0.CdmaSmsMessage;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.GsmAlphabet;
@@ -145,7 +144,10 @@ public class SmsMessage {
 
     }
 
-    private SmsMessage(SmsMessageBase smb) {
+    /**
+     * @hide
+     */
+    public SmsMessage(SmsMessageBase smb) {
         mWrappedSmsMessage = smb;
     }
 
@@ -233,15 +235,6 @@ public class SmsMessage {
             Rlog.e(LOG_TAG, "newFromCMT(): wrappedMessage is null");
             return null;
         }
-    }
-
-    /** @hide */
-    public static SmsMessage newCdmaSmsFromRil(CdmaSmsMessage msg) {
-        // received SMS in 3GPP2 format
-        SmsMessageBase wrappedMessage =
-                com.android.internal.telephony.cdma.SmsMessage.newFromRil(msg);
-
-        return new SmsMessage(wrappedMessage);
     }
 
     /**
