@@ -40,7 +40,7 @@ RENDERTHREAD_TEST(CanvasContext, create) {
 
     ASSERT_FALSE(canvasContext->hasSurface());
 
-    canvasContext->destroy(nullptr);
+    canvasContext->destroy();
 }
 
 RENDERTHREAD_TEST(CanvasContext, invokeFunctor) {

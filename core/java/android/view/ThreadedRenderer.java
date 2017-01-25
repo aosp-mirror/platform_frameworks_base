@@ -496,15 +496,6 @@ public final class ThreadedRenderer {
 
     private static void destroyResources(View view) {
         view.destroyHardwareResources();
-
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-
-            int count = group.getChildCount();
-            for (int i = 0; i < count; i++) {
-                destroyResources(group.getChildAt(i));
-            }
-        }
     }
 
     /**

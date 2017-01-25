@@ -66,6 +66,70 @@ TEST(RenderNode, hasParents) {
     EXPECT_FALSE(parent->hasParents()) << "Root node shouldn't have any parents";
 }
 
+TEST(RenderNode, validity) {
+    auto child = TestUtils::createNode(0, 0, 200, 400,
+            [](RenderProperties& props, Canvas& canvas) {
+        canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
+    });
+    auto parent = TestUtils::createNode(0, 0, 200, 400,
+            [&child](RenderProperties& props, Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_TRUE(parent->nothingToDraw());
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent->nothingToDraw());
+
+    TestUtils::recordNode(*parent, [](Canvas& canvas) {
+        canvas.drawColor(Color::Amber_500, SkBlendMode::kSrcOver);
+    });
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent->nothingToDraw());
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+
+    EXPECT_FALSE(child->isValid());
+    EXPECT_TRUE(parent->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_FALSE(parent->nothingToDraw());
+
+    TestUtils::recordNode(*child, [](Canvas& canvas) {
+        canvas.drawColor(Color::Amber_500, SkBlendMode::kSrcOver);
+    });
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+
+    TestUtils::recordNode(*parent, [&child](Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent->nothingToDraw());
+
+    parent->destroyHardwareResources();
+
+    EXPECT_FALSE(child->isValid());
+    EXPECT_FALSE(parent->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_TRUE(parent->nothingToDraw());
+}
+
 TEST(RenderNode, releasedCallback) {
     class DecRefOnReleased : public GlFunctorLifecycleListener {
     public:
@@ -112,7 +176,6 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
 
     {
         auto nonNullDLNode = TestUtils::createNode(0, 0, 200, 400,
@@ -131,7 +194,7 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
         nullDLNode->prepareTree(info);
     }
 
-    canvasContext->destroy(nullptr);
+    canvasContext->destroy();
 }
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
@@ -151,7 +214,6 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
     LayerUpdateQueue layerUpdateQueue;
     info.damageAccumulator = &damageAccumulator;
     info.layerUpdateQueue = &layerUpdateQueue;
-    info.observer = nullptr;
 
     // Put node on HW layer
     rootNode->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
@@ -165,5 +227,5 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
     EXPECT_FALSE(info.layerUpdateQueue->entries().empty());
     EXPECT_EQ(rootNode.get(), info.layerUpdateQueue->entries().at(0).renderNode);
     EXPECT_EQ(uirenderer::Rect(0, 0, 200, 400), info.layerUpdateQueue->entries().at(0).damage);
-    canvasContext->destroy(nullptr);
+    canvasContext->destroy();
 }

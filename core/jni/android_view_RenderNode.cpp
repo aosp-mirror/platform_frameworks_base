@@ -43,57 +43,6 @@ using namespace uirenderer;
         ? (reinterpret_cast<RenderNode*>(renderNodePtr)->setPropertyFieldsDirty(dirtyFlag), true) \
         : false)
 
-static JNIEnv* getenv(JavaVM* vm) {
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
-    }
-    return env;
-}
-
-static jfieldID gRenderNode_validFieldID;
-
-class RenderNodeContext : public VirtualLightRefBase {
-public:
-    RenderNodeContext(JNIEnv* env, jobject jobjRef) {
-        env->GetJavaVM(&mVm);
-        // This holds a weak ref because otherwise there's a cyclic global ref
-        // with this holding a strong global ref to the view which holds
-        // a strong ref to RenderNode which holds a strong ref to this.
-        mWeakRef = env->NewWeakGlobalRef(jobjRef);
-    }
-
-    virtual ~RenderNodeContext() {
-        JNIEnv* env = getenv(mVm);
-        env->DeleteWeakGlobalRef(mWeakRef);
-    }
-
-    jobject acquireLocalRef(JNIEnv* env) {
-        return env->NewLocalRef(mWeakRef);
-    }
-
-private:
-    JavaVM* mVm;
-    jweak mWeakRef;
-};
-
-// Called by ThreadedRenderer's JNI layer
-void onRenderNodeRemoved(JNIEnv* env, RenderNode* node) {
-    auto context = reinterpret_cast<RenderNodeContext*>(node->getUserContext());
-    if (!context) return;
-    jobject jnode = context->acquireLocalRef(env);
-    if (!jnode) {
-        // The owning node has been GC'd, release the context
-        node->setUserContext(nullptr);
-        return;
-    }
-
-    // Update the valid field, since native has already removed
-    // the staging DisplayList
-    env->SetBooleanField(jnode, gRenderNode_validFieldID, false);
-    env->DeleteLocalRef(jnode);
-}
-
 // ----------------------------------------------------------------------------
 // DisplayList view properties
 // ----------------------------------------------------------------------------
@@ -108,8 +57,7 @@ static jint android_view_RenderNode_getDebugSize(JNIEnv* env, jobject clazz, jlo
     return renderNode->getDebugSize();
 }
 
-static jlong android_view_RenderNode_create(JNIEnv* env, jobject thiz,
-        jstring name) {
+static jlong android_view_RenderNode_create(JNIEnv* env, jobject, jstring name) {
     RenderNode* renderNode = new RenderNode();
     renderNode->incStrong(0);
     if (name != NULL) {
@@ -117,7 +65,6 @@ static jlong android_view_RenderNode_create(JNIEnv* env, jobject thiz,
         renderNode->setName(textArray);
         env->ReleaseStringUTFChars(name, textArray);
     }
-    renderNode->setUserContext(new RenderNodeContext(env, thiz));
     return reinterpret_cast<jlong>(renderNode);
 }
 
@@ -132,22 +79,13 @@ static jlong android_view_RenderNode_getNativeFinalizer(JNIEnv* env,
 
 static void android_view_RenderNode_setDisplayList(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jlong displayListPtr) {
-    class RemovedObserver : public TreeObserver {
-    public:
-        virtual void onMaybeRemovedFromTree(RenderNode* node) override {
-            maybeRemovedNodes.insert(sp<RenderNode>(node));
-        }
-        std::set< sp<RenderNode> > maybeRemovedNodes;
-    };
-
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     DisplayList* newData = reinterpret_cast<DisplayList*>(displayListPtr);
-    RemovedObserver observer;
-    renderNode->setStagingDisplayList(newData, &observer);
-    for (auto& node : observer.maybeRemovedNodes) {
-        if (node->hasParents()) continue;
-        onRenderNodeRemoved(env, node.get());
-    }
+    renderNode->setStagingDisplayList(newData);
+}
+
+static jboolean android_view_RenderNode_isValid(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->isValid();
 }
 
 // ----------------------------------------------------------------------------
@@ -621,6 +559,7 @@ static const JNINativeMethod gMethods[] = {
 // ----------------------------------------------------------------------------
 // Critical JNI via @CriticalNative annotation in RenderNode.java
 // ----------------------------------------------------------------------------
+    { "nIsValid",              "(J)Z",   (void*) android_view_RenderNode_isValid },
     { "nSetLayerType",         "(JI)Z",  (void*) android_view_RenderNode_setLayerType },
     { "nSetLayerPaint",        "(JJ)Z",  (void*) android_view_RenderNode_setLayerPaint },
     { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
@@ -691,8 +630,6 @@ int register_android_view_RenderNode(JNIEnv* env) {
             "updateWindowPosition_renderWorker", "(JIIII)V");
     gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
             "windowPositionLost_uiRtSync", "(J)V");
-    clazz = FindClassOrDie(env, "android/view/RenderNode");
-    gRenderNode_validFieldID = GetFieldIDOrDie(env, clazz, "mValid", "Z");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

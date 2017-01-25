@@ -113,8 +113,8 @@ public:
      *       to subclass from DisplayList
      */
 
-    bool prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
-            std::function<void(RenderNode*, TreeInfo&, bool)> childFn) override;
+    bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) override;
 
     /**
      *  Calls the provided function once for each child of this DisplayList

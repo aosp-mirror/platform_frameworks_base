@@ -132,17 +132,17 @@ public:
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             int64_t syncQueued, RenderNode* target);
     void draw();
-    void destroy(TreeObserver* observer);
+    void destroy();
 
     // IFrameCallback, Choreographer-driven frame callback entry point
     virtual void doFrame() override;
     void prepareAndDraw(RenderNode* node);
 
-    void buildLayer(RenderNode* node, TreeObserver* observer);
+    void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
-    void destroyHardwareResources(TreeObserver* observer);
+    void destroyHardwareResources();
     static void trimMemory(RenderThread& thread, int level);
 
     DeferredLayerUpdater* createTextureLayer();
@@ -160,15 +160,8 @@ public:
 
     void serializeDisplayListTree();
 
-    void addRenderNode(RenderNode* node, bool placeFront) {
-        int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
-        mRenderNodes.emplace(mRenderNodes.begin() + pos, node);
-    }
-
-    void removeRenderNode(RenderNode* node) {
-        mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
-                mRenderNodes.end());
-    }
+    void addRenderNode(RenderNode* node, bool placeFront);
+    void removeRenderNode(RenderNode* node);
 
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
@@ -213,7 +206,7 @@ private:
 
     void setSurface(Surface* window);
 
-    void freePrefetchedLayers(TreeObserver* observer);
+    void freePrefetchedLayers();
 
     bool isSwapChainStuffed();
 

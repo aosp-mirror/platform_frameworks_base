@@ -146,21 +146,38 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mProfiler(mFrames)
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
+    rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
 
 CanvasContext::~CanvasContext() {
-    destroy(nullptr);
+    destroy();
     mRenderThread.renderState().unregisterCanvasContext(this);
+    for (auto& node : mRenderNodes) {
+        node->clearRoot();
+    }
+    mRenderNodes.clear();
 }
 
-void CanvasContext::destroy(TreeObserver* observer) {
+void CanvasContext::addRenderNode(RenderNode* node, bool placeFront) {
+    int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
+    node->makeRoot();
+    mRenderNodes.emplace(mRenderNodes.begin() + pos, node);
+}
+
+void CanvasContext::removeRenderNode(RenderNode* node) {
+    node->clearRoot();
+    mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
+            mRenderNodes.end());
+}
+
+void CanvasContext::destroy() {
     stopDrawing();
     setSurface(nullptr);
-    freePrefetchedLayers(observer);
-    destroyHardwareResources(observer);
+    freePrefetchedLayers();
+    destroyHardwareResources();
     mAnimationContext->destroy();
 }
 
@@ -320,7 +337,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     mAnimationContext->runRemainingAnimations(info);
     GL_CHECKPOINT(MODERATE);
 
-    freePrefetchedLayers(info.observer);
+    freePrefetchedLayers();
     GL_CHECKPOINT(MODERATE);
 
     mIsDirty = true;
@@ -504,19 +521,19 @@ void CanvasContext::markLayerInUse(RenderNode* node) {
     }
 }
 
-void CanvasContext::freePrefetchedLayers(TreeObserver* observer) {
+void CanvasContext::freePrefetchedLayers() {
     if (mPrefetchedLayers.size()) {
         for (auto& node : mPrefetchedLayers) {
             ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...",
                     node->getName());
-            node->destroyHardwareResources(observer);
-            node->decStrong(observer);
+            node->destroyLayers();
+            node->decStrong(nullptr);
         }
         mPrefetchedLayers.clear();
     }
 }
 
-void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
+void CanvasContext::buildLayer(RenderNode* node) {
     ATRACE_CALL();
     if (!mRenderPipeline->isContextReady()) return;
 
@@ -525,7 +542,6 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
 
     TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
-    info.observer = observer;
     info.layerUpdateQueue = &mLayerUpdateQueue;
     info.runAnimations = false;
     node->prepareTree(info);
@@ -545,12 +561,12 @@ bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap)
     return mRenderPipeline->copyLayerInto(layer, bitmap);
 }
 
-void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
+void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mRenderPipeline->isContextReady()) {
-        freePrefetchedLayers(observer);
+        freePrefetchedLayers();
         for (const sp<RenderNode>& node : mRenderNodes) {
-            node->destroyHardwareResources(observer);
+            node->destroyHardwareResources();
         }
         mRenderPipeline->onDestroyHardwareResources();
     }

@@ -104,15 +104,15 @@ void DisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) {
     }
 }
 
-bool DisplayList::prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
-        std::function<void(RenderNode*, TreeInfo&, bool)> childFn) {
+bool DisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+        std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
     info.prepareTextures = info.canvasContext.pinImages(bitmapResources);
 
     for (auto&& op : children) {
         RenderNode* childNode = op->renderNode;
         info.damageAccumulator->pushTransform(&op->localMatrix);
         bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
-        childFn(childNode, info, childFunctorsNeedLayer);
+        childFn(childNode, observer, info, childFunctorsNeedLayer);
         info.damageAccumulator->popTransform();
     }
 

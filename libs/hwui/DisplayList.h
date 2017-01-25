@@ -125,8 +125,8 @@ public:
 
     virtual void syncContents();
     virtual void updateChildren(std::function<void(RenderNode*)> updateFn);
-    virtual bool prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
-            std::function<void(RenderNode*, TreeInfo&, bool)> childFn);
+    virtual bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
 
 protected:
     // allocator into which all ops and LsaVector arrays allocated

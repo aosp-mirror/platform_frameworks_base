@@ -532,7 +532,7 @@ static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
     UiFrameInfoBuilder(proxy->frameInfo())
             .setVsync(vsync, vsync)
             .addFlag(FrameInfoFlags::SurfaceCanvas);
-    proxy->syncAndDrawFrame(nullptr);
+    proxy->syncAndDrawFrame();
 }
 
 static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {

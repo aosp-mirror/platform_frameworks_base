@@ -126,7 +126,6 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
-    info.observer = nullptr;
 
     SkiaDisplayList skiaDL(SkRect::MakeWH(200, 200));
 
@@ -137,7 +136,9 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
 
     ASSERT_FALSE(cleanVD.isDirty());
     ASSERT_FALSE(cleanVD.getPropertyChangeWillBeConsumed());
-    ASSERT_FALSE(skiaDL.prepareListAndChildren(info, false, [](RenderNode*, TreeInfo&, bool) {}));
+    TestUtils::MockTreeObserver observer;
+    ASSERT_FALSE(skiaDL.prepareListAndChildren(observer, info, false,
+            [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
     ASSERT_TRUE(cleanVD.getPropertyChangeWillBeConsumed());
 
     // prepare again this time adding a dirty VD
@@ -146,7 +147,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
 
     ASSERT_TRUE(dirtyVD.isDirty());
     ASSERT_FALSE(dirtyVD.getPropertyChangeWillBeConsumed());
-    ASSERT_TRUE(skiaDL.prepareListAndChildren(info, false, [](RenderNode*, TreeInfo&, bool) {}));
+    ASSERT_TRUE(skiaDL.prepareListAndChildren(observer, info, false,
+            [](RenderNode*, TreeObserver&, TreeInfo&, bool) {}));
     ASSERT_TRUE(dirtyVD.getPropertyChangeWillBeConsumed());
 
     // prepare again this time adding a RenderNode and a callback
@@ -155,8 +157,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     SkCanvas dummyCanvas;
     skiaDL.mChildNodes.emplace_back(renderNode.get(), &dummyCanvas);
     bool hasRun = false;
-    ASSERT_TRUE(skiaDL.prepareListAndChildren(info, false,
-            [&hasRun, renderNode, infoPtr](RenderNode* n, TreeInfo& i, bool r) {
+    ASSERT_TRUE(skiaDL.prepareListAndChildren(observer, info, false,
+            [&hasRun, renderNode, infoPtr](RenderNode* n, TreeObserver& observer, TreeInfo& i, bool r) {
         hasRun = true;
         ASSERT_EQ(renderNode.get(), n);
         ASSERT_EQ(infoPtr, &i);
@@ -164,7 +166,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     }));
     ASSERT_TRUE(hasRun);
 
-    canvasContext->destroy(nullptr);
+    canvasContext->destroy();
 }
 
 TEST(SkiaDisplayList, updateChildren) {
