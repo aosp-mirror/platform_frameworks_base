@@ -38,6 +38,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.IIpConnectivityMetrics;
+import android.net.Uri;
 import android.content.pm.UserInfo;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
@@ -3769,6 +3770,145 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.lockPatternUtils.removeEscrowToken(eq(handle), eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.clearResetPasswordToken(admin1));
+    }
+  
+    public void testIsDefaultInputMethodSetByOwnerForDeviceOwner() throws Exception {
+        final String defaultIme = Settings.Secure.DEFAULT_INPUT_METHOD;
+        final Uri defaultImeUri = Settings.Secure.getUriFor(defaultIme);
+        final UserHandle firstUser = UserHandle.SYSTEM;
+        final UserHandle secondUser = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
+
+        // Set up a Device Owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        // First and second user set default IMEs manually.
+        final long ident = mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Device Owner changes default IME for first user.
+        when(mContext.settings.settingsSecureGetStringForUser(defaultIme, UserHandle.USER_SYSTEM))
+                .thenReturn("ime1");
+        dpm.setSecureSetting(admin1, defaultIme, "ime2");
+        verify(mContext.settings).settingsSecurePutStringForUser(defaultIme, "ime2",
+                UserHandle.USER_SYSTEM);
+        reset(mContext.settings);
+        dpms.notifyChangeToContentObserver(defaultImeUri, UserHandle.USER_SYSTEM);
+        mContext.binder.clearCallingIdentity();
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Second user changes default IME manually.
+        dpms.notifyChangeToContentObserver(defaultImeUri, DpmMockContext.CALLER_USER_HANDLE);
+        mContext.binder.clearCallingIdentity();
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // First user changes default IME manually.
+        dpms.notifyChangeToContentObserver(defaultImeUri, UserHandle.USER_SYSTEM);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Device Owner changes default IME for first user again.
+        when(mContext.settings.settingsSecureGetStringForUser(defaultIme, UserHandle.USER_SYSTEM))
+                .thenReturn("ime2");
+        dpm.setSecureSetting(admin1, defaultIme, "ime3");
+        verify(mContext.settings).settingsSecurePutStringForUser(defaultIme, "ime3",
+                UserHandle.USER_SYSTEM);
+        dpms.notifyChangeToContentObserver(defaultImeUri, UserHandle.USER_SYSTEM);
+        mContext.binder.clearCallingIdentity();
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+
+        // Restarting the DPMS should not lose information.
+        initializeDpms();
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Device Owner can find out whether it set the default IME itself.
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(firstUser));
+
+        // Removing the Device Owner should clear the information that it set the default IME.
+        clearDeviceOwner();
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+    }
+
+    public void testIsDefaultInputMethodSetByOwnerForProfileOwner() throws Exception {
+        final String defaultIme = Settings.Secure.DEFAULT_INPUT_METHOD;
+        final Uri defaultImeUri = Settings.Secure.getUriFor(defaultIme);
+        final UserHandle firstUser = UserHandle.SYSTEM;
+        final UserHandle secondUser = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
+
+        // Set up a profile owner.
+        setupProfileOwner();
+
+        // First and second user set default IMEs manually.
+        final long ident = mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Profile Owner changes default IME for second user.
+        when(mContext.settings.settingsSecureGetStringForUser(defaultIme,
+                DpmMockContext.CALLER_USER_HANDLE)).thenReturn("ime1");
+        dpm.setSecureSetting(admin1, defaultIme, "ime2");
+        verify(mContext.settings).settingsSecurePutStringForUser(defaultIme, "ime2",
+                DpmMockContext.CALLER_USER_HANDLE);
+        reset(mContext.settings);
+        dpms.notifyChangeToContentObserver(defaultImeUri, DpmMockContext.CALLER_USER_HANDLE);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // First user changes default IME manually.
+        dpms.notifyChangeToContentObserver(defaultImeUri, UserHandle.USER_SYSTEM);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Second user changes default IME manually.
+        dpms.notifyChangeToContentObserver(defaultImeUri, DpmMockContext.CALLER_USER_HANDLE);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Profile Owner changes default IME for second user again.
+        when(mContext.settings.settingsSecureGetStringForUser(defaultIme,
+                DpmMockContext.CALLER_USER_HANDLE)).thenReturn("ime2");
+        dpm.setSecureSetting(admin1, defaultIme, "ime3");
+        verify(mContext.settings).settingsSecurePutStringForUser(defaultIme, "ime3",
+                DpmMockContext.CALLER_USER_HANDLE);
+        dpms.notifyChangeToContentObserver(defaultImeUri, DpmMockContext.CALLER_USER_HANDLE);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(secondUser));
+
+        // Restarting the DPMS should not lose information.
+        initializeDpms();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(secondUser));
+        mContext.binder.restoreCallingIdentity(ident);
+
+        // Profile Owner can find out whether it set the default IME itself.
+        assertTrue(dpm.isDefaultInputMethodSetByOwner(secondUser));
+
+        // Removing the Profile Owner should clear the information that it set the default IME.
+        dpm.clearProfileOwner(admin1);
+        mContext.binder.clearCallingIdentity();
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(firstUser));
+        assertFalse(dpm.isDefaultInputMethodSetByOwner(secondUser));
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {

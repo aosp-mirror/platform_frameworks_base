@@ -161,6 +161,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -237,6 +238,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String TAG_LAST_NETWORK_LOG_RETRIEVAL = "last-network-log-retrieval";
 
     private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
+
+    private static final String TAG_DEFAULT_INPUT_METHOD_SET = "default-ime-set";
 
     private static final String ATTR_ID = "id";
 
@@ -402,6 +405,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private final AtomicBoolean mRemoteBugreportServiceIsActive = new AtomicBoolean();
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
 
+    private SetupContentObserver mSetupContentObserver;
+
     private final Runnable mRemoteBugreportTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -503,6 +508,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long mLastBugReportRequestTime = -1;
 
         long mLastNetworkLogsRetrievalTime = -1;
+
+        boolean mDefaultInputMethodSet = false;
 
         // Used for initialization of users created by createAndManageUsers.
         boolean mAdminBroadcastPending = false;
@@ -1701,6 +1708,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     name, def, userHandle);
         }
 
+        String settingsSecureGetStringForUser(String name, int userHandle) {
+            return Settings.Secure.getStringForUser(mContext.getContentResolver(), name,
+                    userHandle);
+        }
+
         void settingsSecurePutIntForUser(String name, int value, int userHandle) {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     name, value, userHandle);
@@ -1816,6 +1828,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
 
         LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
+
+        mSetupContentObserver = new SetupContentObserver(mHandler);
     }
 
     /**
@@ -2568,6 +2582,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_PASSWORD_TOKEN_HANDLE);
             }
 
+            if (policy.mDefaultInputMethodSet) {
+                out.startTag(null, TAG_DEFAULT_INPUT_METHOD_SET);
+                out.endTag(null, TAG_DEFAULT_INPUT_METHOD_SET);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -2777,6 +2796,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
                     policy.mPasswordTokenHandle = Long.parseLong(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DEFAULT_INPUT_METHOD_SET.equals(tag)) {
+                    policy.mDefaultInputMethodSet = true;
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -2897,8 +2918,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         onStartUser(UserHandle.USER_SYSTEM);
 
-        // Register an observer for watching for user setup complete.
-        new SetupContentObserver(mHandler).register();
+        // Register an observer for watching for user setup complete and settings changes.
+        mSetupContentObserver.register();
         // Initialize the user setup state, to handle the upgrade case.
         updateUserSetupCompleteAndPaired();
 
@@ -6561,12 +6582,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.forceEphemeralUsers = false;
             admin.isNetworkLoggingEnabled = false;
             mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
-            final DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);
-            policyData.mLastSecurityLogRetrievalTime = -1;
-            policyData.mLastBugReportRequestTime = -1;
-            policyData.mLastNetworkLogsRetrievalTime = -1;
-            saveSettingsLocked(UserHandle.USER_SYSTEM);
         }
+        final DevicePolicyData policyData = getUserData(userId);
+        policyData.mDefaultInputMethodSet = false;
+        saveSettingsLocked(userId);
+        final DevicePolicyData systemPolicyData = getUserData(UserHandle.USER_SYSTEM);
+        systemPolicyData.mLastSecurityLogRetrievalTime = -1;
+        systemPolicyData.mLastBugReportRequestTime = -1;
+        systemPolicyData.mLastNetworkLogsRetrievalTime = -1;
+        saveSettingsLocked(UserHandle.USER_SYSTEM);
         clearUserPoliciesLocked(userId);
 
         mOwners.clearDeviceOwner();
@@ -6650,6 +6674,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.userRestrictions = null;
             admin.defaultEnabledRestrictionsAlreadySet.clear();
         }
+        final DevicePolicyData policyData = getUserData(userId);
+        policyData.mDefaultInputMethodSet = false;
+        saveSettingsLocked(userId);
         clearUserPoliciesLocked(userId);
         mOwners.removeProfileOwner(userId);
         mOwners.writeProfileOwner(userId);
@@ -8700,6 +8727,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
+                if (Settings.Secure.DEFAULT_INPUT_METHOD.equals(setting)) {
+                    final String currentValue = mInjector.settingsSecureGetStringForUser(
+                            Settings.Secure.DEFAULT_INPUT_METHOD, callingUserId);
+                    if (!TextUtils.equals(currentValue, value)) {
+                        // Tell the content observer that the next change will be due to the owner
+                        // changing the value. There is a small race condition here that we cannot
+                        // avoid: Change notifications are sent asynchronously, so it is possible
+                        // that there are prior notifications queued up before the one we are about
+                        // to trigger. This is a corner case that will have no impact in practice.
+                        mSetupContentObserver.addPendingChangeByOwnerLocked(callingUserId);
+                    }
+                    getUserData(callingUserId).mDefaultInputMethodSet = true;
+                    saveSettingsLocked(callingUserId);
+                }
                 mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
@@ -8840,12 +8881,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private class SetupContentObserver extends ContentObserver {
-
         private final Uri mUserSetupComplete = Settings.Secure.getUriFor(
                 Settings.Secure.USER_SETUP_COMPLETE);
         private final Uri mDeviceProvisioned = Settings.Global.getUriFor(
                 Settings.Global.DEVICE_PROVISIONED);
         private final Uri mPaired = Settings.Secure.getUriFor(Settings.Secure.DEVICE_PAIRED);
+        private final Uri mDefaultImeChanged = Settings.Secure.getUriFor(
+                Settings.Secure.DEFAULT_INPUT_METHOD);
+
+        @GuardedBy("DevicePolicyManagerService.this")
+        private Set<Integer> mUserIdsWithPendingChangesByOwner = new ArraySet<>();
 
         public SetupContentObserver(Handler handler) {
             super(handler);
@@ -8857,10 +8902,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mIsWatch) {
                 mInjector.registerContentObserver(mPaired, false, this, UserHandle.USER_ALL);
             }
+            mInjector.registerContentObserver(mDefaultImeChanged, false, this, UserHandle.USER_ALL);
+        }
+
+        private void addPendingChangeByOwnerLocked(int userId) {
+            mUserIdsWithPendingChangesByOwner.add(userId);
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, Uri uri, int userId) {
             if (mUserSetupComplete.equals(uri) || (mIsWatch && mPaired.equals(uri))) {
                 updateUserSetupCompleteAndPaired();
             } else if (mDeviceProvisioned.equals(uri)) {
@@ -8868,6 +8918,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
                     // is delayed until device is marked as provisioned.
                     setDeviceOwnerSystemPropertyLocked();
+                }
+            } else if (mDefaultImeChanged.equals(uri)) {
+                synchronized (DevicePolicyManagerService.this) {
+                    if (mUserIdsWithPendingChangesByOwner.contains(userId)) {
+                        // This change notification was triggered by the owner changing the default
+                        // IME. Ignore it.
+                        mUserIdsWithPendingChangesByOwner.remove(userId);
+                    } else {
+                        // This change notification was triggered by the user manually changing the
+                        // default IME.
+                        getUserData(userId).mDefaultInputMethodSet = false;
+                        saveSettingsLocked(userId);
+                    }
                 }
             }
         }
@@ -10746,5 +10809,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isDefaultInputMethodSetByOwner(@NonNull UserHandle user) {
+        final int userId = user.getIdentifier();
+        enforceProfileOwnerOrSystemUser(null);
+        if (!isCallerWithSystemUid() && mInjector.userHandleGetCallingUserId() != userId) {
+            throw new SecurityException(
+                    "Only the system can use this method to query information about another user");
+        }
+        return getUserData(userId).mDefaultInputMethodSet;
     }
 }

@@ -201,6 +201,10 @@ public class DpmMockContext extends MockContext {
             return 0;
         }
 
+        public String settingsSecureGetStringForUser(String name, int userHandle) {
+            return null;
+        }
+
         public void settingsSecurePutIntForUser(String name, int value, int userHandle) {
         }
 
