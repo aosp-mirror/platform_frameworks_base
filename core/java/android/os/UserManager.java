@@ -66,6 +66,8 @@ public class UserManager {
     private final IUserManager mService;
     private final Context mContext;
 
+    private Boolean mIsManagedProfileCached;
+
     /**
      * @hide
      * No user restriction.
@@ -970,8 +972,14 @@ public class UserManager {
      */
     @SystemApi
     public boolean isManagedProfile() {
+        // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
+        // Worst case we might end up calling the AIDL method multiple times but that's fine.
+        if (mIsManagedProfileCached != null) {
+            return mIsManagedProfileCached;
+        }
         try {
-            return mService.isManagedProfile(UserHandle.myUserId());
+            mIsManagedProfileCached = mService.isManagedProfile(UserHandle.myUserId());
+            return mIsManagedProfileCached;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -987,6 +995,9 @@ public class UserManager {
      */
     @SystemApi
     public boolean isManagedProfile(@UserIdInt int userId) {
+        if (userId == UserHandle.myUserId()) {
+            return isManagedProfile();
+        }
         try {
             return mService.isManagedProfile(userId);
         } catch (RemoteException re) {
