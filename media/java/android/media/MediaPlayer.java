@@ -45,6 +45,7 @@ import android.view.SurfaceHolder;
 import android.widget.VideoView;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
+import android.media.BufferingParams;
 import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
 import android.media.PlaybackParams;
@@ -479,6 +480,11 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
+ * <tr><td>setBufferingParams</p></td>
+ *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted, Error}</p></td>
+ *     <td>{Idle} </p></td>
+ *     <td>This method does not change the object state.
+ *         </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
  *     <td>{Initialized, Prepared, Started, Paused, PlaybackCompleted, Error}</p></td>
  *     <td>{Idle, Stopped} </p></td>
@@ -1388,6 +1394,45 @@ public class MediaPlayer extends PlayerBase
      * initialized or has been released.
      */
     public native boolean isPlaying();
+
+    /**
+     * Gets the default buffering management params.
+     * Calling it only after {@code setDataSource} has been called.
+     * Each type of data source might have different set of default params.
+     *
+     * @return the default buffering management params supported by the source component.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized, or {@code setDataSource} has not been called.
+     */
+    @NonNull
+    public native BufferingParams getDefaultBufferingParams();
+
+    /**
+     * Gets the current buffering management params used by the source component.
+     * Calling it only after {@code setDataSource} has been called.
+     *
+     * @return the current buffering management params used by the source component.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized, or {@code setDataSource} has not been called.
+     */
+    @NonNull
+    public native BufferingParams getBufferingParams();
+
+    /**
+     * Sets buffering management params.
+     * The object sets its internal BufferingParams to the input, except that the input is
+     * invalid or not supported.
+     * Call it only after {@code setDataSource} has been called.
+     * Users should only use supported mode returned by {@link #getDefaultBufferingParams()}
+     * or its downsized version as described in {@link BufferingParams}.
+     *
+     * @param params the buffering management params.
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized or has been released, or {@code setDataSource} has not been called.
+     * @throws IllegalArgumentException if params is invalid or not supported.
+     */
+    public native void setBufferingParams(@NonNull BufferingParams params);
 
     /**
      * Change playback speed of audio by resampling the audio.
