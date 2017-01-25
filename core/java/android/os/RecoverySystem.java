@@ -623,7 +623,8 @@ public class RecoverySystem {
         final ConditionVariable condition = new ConditionVariable();
 
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         context.sendOrderedBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.MASTER_CLEAR,
                 new BroadcastReceiver() {
