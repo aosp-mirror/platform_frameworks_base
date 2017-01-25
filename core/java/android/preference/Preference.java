@@ -145,6 +145,8 @@ public class Preference implements Comparable<Preference> {
 
     private List<Preference> mDependents;
 
+    private PreferenceGroup mParentGroup;
+
     private boolean mBaseMethodCalled;
 
     /**
@@ -1238,6 +1240,16 @@ public class Preference implements Comparable<Preference> {
         registerDependency();
     }
 
+    /**
+     * Assigns a {@link PreferenceGroup} as the parent of this Preference. Set null to remove
+     * the current parent.
+     *
+     * @param parentGroup Parent preference group of this Preference or null if none.
+     */
+    void assignParent(@Nullable PreferenceGroup parentGroup) {
+        mParentGroup = parentGroup;
+    }
+
     private void registerDependency() {
 
         if (TextUtils.isEmpty(mDependencyKey)) return;
@@ -1398,6 +1410,17 @@ public class Preference implements Comparable<Preference> {
      */
     public String getDependency() {
         return mDependencyKey;
+    }
+
+    /**
+     * Returns the {@link PreferenceGroup} which is this Preference assigned to or null if this
+     * preference is not assigned to any group or is a root Preference.
+     *
+     * @return The parent PreferenceGroup or null if not attached to any.
+     */
+    @Nullable
+    public PreferenceGroup getParent() {
+        return mParentGroup;
     }
 
     /**
