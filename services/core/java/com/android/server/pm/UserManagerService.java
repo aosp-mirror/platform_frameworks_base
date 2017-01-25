@@ -33,12 +33,10 @@ import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -3133,8 +3131,6 @@ public class UserManagerService extends IUserManager.Stub {
                 applyUserRestrictionsLR(userId);
             }
         }
-
-        maybeInitializeDemoMode(userId);
     }
 
     /**
@@ -3171,29 +3167,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
         userData.info.lastLoggedInFingerprint = Build.FINGERPRINT;
         scheduleWriteUser(userData);
-    }
-
-    private void maybeInitializeDemoMode(int userId) {
-        if (UserManager.isDeviceInDemoMode(mContext) && userId != UserHandle.USER_SYSTEM) {
-            String demoLauncher =
-                    mContext.getResources().getString(
-                            com.android.internal.R.string.config_demoModeLauncherComponent);
-            if (!TextUtils.isEmpty(demoLauncher)) {
-                ComponentName componentToEnable = ComponentName.unflattenFromString(demoLauncher);
-                String demoLauncherPkg = componentToEnable.getPackageName();
-                try {
-                    final IPackageManager iPm = AppGlobals.getPackageManager();
-                    iPm.setComponentEnabledSetting(componentToEnable,
-                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
-                            /* userId= */ userId);
-                    iPm.setApplicationEnabledSetting(demoLauncherPkg,
-                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
-                            /* userId= */ userId, null);
-                } catch (RemoteException re) {
-                    // Internal, shouldn't happen
-                }
-            }
-        }
     }
 
     /**
