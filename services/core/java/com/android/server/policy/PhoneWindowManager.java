@@ -5896,9 +5896,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 && (result & ACTION_PASS_TO_USER) == 0) {
                             // If we are in call but we decided not to pass the key to
                             // the application, just pass it to the session service.
-
-                            MediaSessionLegacyHelper.getHelper(mContext)
-                                    .sendVolumeKeyEvent(event, false);
+                            MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
+                                    event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                             break;
                         }
                     }
@@ -5911,8 +5910,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // If we aren't passing to the user and no one else
                     // handled it send it to the session manager to
                     // figure out.
-                    MediaSessionLegacyHelper.getHelper(mContext)
-                            .sendVolumeKeyEvent(event, true);
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(
+                            event, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                 }
                 break;
             }

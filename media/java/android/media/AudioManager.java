@@ -730,61 +730,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     */
-    public void handleKeyDown(KeyEvent event, int stream) {
-        int keyCode = event.getKeyCode();
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                /*
-                 * Adjust the volume in on key down since it is more
-                 * responsive to the user.
-                 */
-                adjustSuggestedStreamVolume(
-                        keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                ? ADJUST_RAISE
-                                : ADJUST_LOWER,
-                        stream,
-                        FLAG_SHOW_UI | FLAG_VIBRATE);
-                break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                if (event.getRepeatCount() == 0) {
-                    MediaSessionLegacyHelper.getHelper(getContext())
-                            .sendVolumeKeyEvent(event, false);
-                }
-                break;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void handleKeyUp(KeyEvent event, int stream) {
-        int keyCode = event.getKeyCode();
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                /*
-                 * Play a sound. This is done on key up since we don't want the
-                 * sound to play when a user holds down volume down to mute.
-                 */
-                if (mUseVolumeKeySounds) {
-                    adjustSuggestedStreamVolume(
-                            ADJUST_SAME,
-                            stream,
-                            FLAG_PLAY_SOUND);
-                }
-                mVolumeKeyUpTime = SystemClock.uptimeMillis();
-                break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                MediaSessionLegacyHelper.getHelper(getContext())
-                        .sendVolumeKeyEvent(event, false);
-                break;
-        }
-    }
-
-    /**
      * Indicates if the device implements a fixed volume policy.
      * <p>Some devices may not have volume control and may operate at a fixed volume,
      * and may not enable muting or changing the volume of audio streams.
