@@ -100,6 +100,7 @@ public class LogMakerTest extends TestCase {
         builder.addTaggedData(2, 123);
         builder.addTaggedData(3, 123L);
         builder.addTaggedData(4, 123.0F);
+        builder.addTaggedData(5, null);
         Object[] out = builder.serialize();
         assertEquals("onetwothree", out[1]);
         assertEquals(123, out[3]);

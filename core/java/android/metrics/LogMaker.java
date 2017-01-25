@@ -106,7 +106,7 @@ public class LogMaker {
      * @return
      */
     public LogMaker addTaggedData(int tag, Object value) {
-        if (isValidValue(value)) {
+        if (!isValidValue(value)) {
             throw new IllegalArgumentException(
                     "Value must be loggable type - int, long, float, String");
         }
@@ -119,10 +119,14 @@ public class LogMaker {
     }
 
     public boolean isValidValue(Object value) {
-        return !(value instanceof Integer ||
+        if (value == null) {
+            Log.i("LogBuilder", "Logging a null value.");
+            return true;
+        }
+        return value instanceof Integer ||
             value instanceof String ||
             value instanceof Long ||
-            value instanceof Float);
+            value instanceof Float;
     }
 
     public Object getTaggedData(int tag) {
