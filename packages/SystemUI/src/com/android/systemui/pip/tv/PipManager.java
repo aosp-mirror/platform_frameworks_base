@@ -377,16 +377,18 @@ public class PipManager {
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
-        try {
-            int animationDurationMs = -1;
-            if (wasRecentsShown
-                    && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
-                animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
+        if (mCurrentPipBounds != null) {
+            try {
+                int animationDurationMs = -1;
+                if (wasRecentsShown
+                        && (mState == STATE_PIP_RECENTS || mState == STATE_PIP_RECENTS_FOCUSED)) {
+                    animationDurationMs = mRecentsFocusChangedAnimationDurationMs;
+                }
+                mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
+                        true, true, true, animationDurationMs);
+            } catch (RemoteException e) {
+                Log.e(TAG, "resizeStack failed", e);
             }
-            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
-                    true, true, true, animationDurationMs);
-        } catch (RemoteException e) {
-            Log.e(TAG, "resizeStack failed", e);
         }
     }
 
