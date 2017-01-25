@@ -69,14 +69,14 @@ public class ResolverListController {
     }
 
     @VisibleForTesting
-    ResolveInfo getLastChosen() throws RemoteException {
+    public ResolveInfo getLastChosen() throws RemoteException {
         return AppGlobals.getPackageManager().getLastChosenActivity(
                 mTargetIntent, mTargetIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 PackageManager.MATCH_DEFAULT_ONLY);
     }
 
     @VisibleForTesting
-    void setLastChosen(Intent intent, IntentFilter filter, int match)
+    public void setLastChosen(Intent intent, IntentFilter filter, int match)
             throws RemoteException {
         AppGlobals.getPackageManager().setLastChosenActivity(intent,
                 intent.resolveType(mContext.getContentResolver()),
