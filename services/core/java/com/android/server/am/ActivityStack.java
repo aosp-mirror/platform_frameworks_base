@@ -557,6 +557,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
     void getWindowContainerBounds(Rect outBounds) {
         if (mWindowContainerController != null) {
             mWindowContainerController.getBounds(outBounds);
+            return;
         }
         outBounds.setEmpty();
     }
