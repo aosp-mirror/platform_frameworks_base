@@ -40,6 +40,7 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
         mContext.putComponent(PhoneStatusBar.class, mock(PhoneStatusBar.class));
         mContext.putComponent(Recents.class, mock(Recents.class));
         mContext.putComponent(Divider.class, mock(Divider.class));
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
     }
 
     @Test

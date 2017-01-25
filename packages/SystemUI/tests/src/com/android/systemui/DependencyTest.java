@@ -15,6 +15,7 @@
 package com.android.systemui;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,8 @@ import android.os.Looper;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
 import org.junit.Test;
+
+import java.io.PrintWriter;
 
 public class DependencyTest extends SysuiTestCase {
 
@@ -46,8 +49,8 @@ public class DependencyTest extends SysuiTestCase {
         Dumpable d = mock(Dumpable.class);
         injectTestDependency("test", d);
         Dependency.get("test");
-        mDependency.dump(null, null, null);
-        verify(d).dump(eq(null), eq(null), eq(null));
+        mDependency.dump(null, mock(PrintWriter.class), null);
+        verify(d).dump(eq(null), any(), eq(null));
     }
 
     @Test

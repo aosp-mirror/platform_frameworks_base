@@ -60,7 +60,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private AlertDialog mDialog;
     private QSTileHost mHost;
-    protected Handler mHandler;
+    protected H mHandler;
 
     private boolean mIsVisible;
     private boolean mIsIconVisible;
@@ -83,7 +83,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         mMainHandler = new Handler(Looper.getMainLooper());
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
-        mHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
+        mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     }
 
     public void setHostEnvironment(QSTileHost host) {

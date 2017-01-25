@@ -162,6 +162,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
         int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
         battery.setRawColors(colorForeground, colorSecondary);
+
+        mNextAlarmController = Dependency.get(NextAlarmController.class);
+        mUserInfoController = Dependency.get(UserInfoController.class);
+        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     @Override
@@ -257,14 +261,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateAlarmVisibilities();
 
         mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mNextAlarmController = Dependency.get(NextAlarmController.class);
-        mUserInfoController = Dependency.get(UserInfoController.class);
-        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     @Override
