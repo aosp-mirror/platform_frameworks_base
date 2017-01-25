@@ -1683,6 +1683,9 @@ public class NotificationManagerService extends SystemService {
         /**
          * Public API for getting a list of current notifications for the calling package/uid.
          *
+         * Note that since notification posting is done asynchronously, this will not return
+         * notifications that are in the process of being posted.
+         *
          * @returns A list of all the package's notifications, in natural order.
          */
         @Override
@@ -2990,9 +2993,6 @@ public class NotificationManagerService extends SystemService {
 
         // setup local book-keeping
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
-        synchronized (mNotificationLock) {
-            mEnqueuedNotifications.add(r);
-        }
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
@@ -3010,6 +3010,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             synchronized (mNotificationLock) {
+                mEnqueuedNotifications.add(r);
+
                 if (mSnoozeHelper.isSnoozed(userId, r.sbn.getPackageName(), r.getKey())) {
                     // TODO: log to event log
                     if (DBG) {
