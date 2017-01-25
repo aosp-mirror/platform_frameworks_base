@@ -23,10 +23,5 @@
             android:key="power_notification_controls"
             android:title="@string/tuner_full_importance_settings"
             android:fragment="com.android.systemui.tuner.PowerNotificationControlsFragment"/>
-e
-    <com.android.systemui.tuner.ThemePreference
-        android:key="theme"
-        android:title="@string/theme"
-        android:summary="%s" />
 
 </PreferenceScreen>
