@@ -62,6 +62,7 @@ import android.widget.ImageView;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.util.NotificationChannels;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -178,6 +179,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // The public notification will show similar info but with the actual screenshot omitted
         mPublicNotificationBuilder = new Notification.Builder(context)
+                .setChannel(NotificationChannels.SCREENSHOTS)
                 .setContentTitle(r.getString(R.string.screenshot_saving_title))
                 .setContentText(r.getString(R.string.screenshot_saving_text))
                 .setSmallIcon(R.drawable.stat_notify_image)
@@ -189,6 +191,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
 
         mNotificationBuilder = new Notification.Builder(context)
+            .setChannel(NotificationChannels.SCREENSHOTS)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
@@ -332,6 +335,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             // Update the text and the icon for the existing notification
             mPublicNotificationBuilder
+                    .setChannel(NotificationChannels.SCREENSHOTS)
                     .setContentTitle(r.getString(R.string.screenshot_saved_title))
                     .setContentText(r.getString(R.string.screenshot_saved_text))
                     .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
@@ -340,6 +344,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     .setColor(context.getColor(
                             com.android.internal.R.color.system_notification_accent_color));
             mNotificationBuilder
+                .setChannel(NotificationChannels.SCREENSHOTS)
                 .setContentTitle(r.getString(R.string.screenshot_saved_title))
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))

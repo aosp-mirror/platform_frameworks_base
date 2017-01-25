@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.SystemBars;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.usb.StorageNotification;
+import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.VolumeUI;
 
 import java.util.HashMap;
@@ -66,6 +67,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             Dependency.class,
             FragmentService.class,
             TunerService.class,
+            NotificationChannels.class,
             CommandQueue.CommandQueueStart.class,
             KeyguardViewMediator.class,
             Recents.class,

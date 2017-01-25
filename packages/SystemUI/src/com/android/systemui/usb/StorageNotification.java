@@ -43,6 +43,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SystemUI;
+import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
 
@@ -206,6 +207,7 @@ public class StorageNotification extends SystemUI {
                         .setStyle(new Notification.BigTextStyle().bigText(text))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setLocalOnly(true)
+                        .setChannel(NotificationChannels.STORAGE)
                         .setCategory(Notification.CATEGORY_SYSTEM)
                         .setDeleteIntent(buildSnoozeIntent(fsUuid));
                 SystemUI.overrideNotificationAppName(mContext, builder);
@@ -225,6 +227,7 @@ public class StorageNotification extends SystemUI {
                     R.string.ext_media_unsupported_notification_message, disk.getDescription());
 
             Notification.Builder builder = new Notification.Builder(mContext)
+                    .setChannel(NotificationChannels.STORAGE)
                     .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
                     .setColor(mContext.getColor(R.color.system_notification_accent_color))
                     .setContentTitle(title)
@@ -331,7 +334,6 @@ public class StorageNotification extends SystemUI {
 
         return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setPriority(Notification.PRIORITY_LOW)
                 .setOngoing(true)
                 .build();
     }
@@ -360,7 +362,6 @@ public class StorageNotification extends SystemUI {
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(initIntent)
                     .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
-                    .setCategory(Notification.CATEGORY_SYSTEM)
                     .build();
 
         } else {
@@ -377,8 +378,7 @@ public class StorageNotification extends SystemUI {
                             mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(browseIntent)
-                    .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setPriority(Notification.PRIORITY_LOW);
+                    .setCategory(Notification.CATEGORY_SYSTEM);
             // Non-adoptable disks can't be snoozed.
             if (disk.isAdoptable()) {
                 builder.setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()));
@@ -402,7 +402,6 @@ public class StorageNotification extends SystemUI {
 
         return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setPriority(Notification.PRIORITY_LOW)
                 .setOngoing(true)
                 .build();
     }
@@ -485,8 +484,8 @@ public class StorageNotification extends SystemUI {
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setLocalOnly(true)
+                .setChannel(NotificationChannels.STORAGE)
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setPriority(Notification.PRIORITY_LOW)
                 .setProgress(100, status, false)
                 .setOngoing(true);
         SystemUI.overrideNotificationAppName(mContext, builder);
@@ -537,7 +536,7 @@ public class StorageNotification extends SystemUI {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setLocalOnly(true)
                 .setCategory(Notification.CATEGORY_SYSTEM)
-                .setPriority(Notification.PRIORITY_LOW)
+                .setChannel(NotificationChannels.STORAGE)
                 .setAutoCancel(true);
         SystemUI.overrideNotificationAppName(mContext, builder);
 
@@ -564,6 +563,7 @@ public class StorageNotification extends SystemUI {
     private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
             CharSequence text) {
         Notification.Builder builder = new Notification.Builder(mContext)
+                .setChannel(NotificationChannels.STORAGE)
                 .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)

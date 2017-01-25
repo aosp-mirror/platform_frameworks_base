@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.util.NotificationChannels;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -882,7 +883,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     .setSmallIcon(R.drawable.ic_android)
                     .setContentTitle(mContext.getString(R.string.hidden_notifications_title))
                     .setContentText(mContext.getString(R.string.hidden_notifications_text))
-                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setChannel(NotificationChannels.SECURITY)
                     .setOngoing(true)
                     .setColor(mContext.getColor(colorRes))
                     .setContentIntent(setupIntent)

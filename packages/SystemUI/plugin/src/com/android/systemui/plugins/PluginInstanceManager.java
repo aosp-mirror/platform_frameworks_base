@@ -51,6 +51,9 @@ public class PluginInstanceManager<T extends Plugin> {
     private static final String TAG = "PluginInstanceManager";
     private static final String PLUGIN_PERMISSION = "com.android.systemui.permission.PLUGIN";
 
+    // must be one of the channels created in NotificationChannels.java
+    private static final String NOTIFICATION_CHANNEL_ID = "ALR";
+
     private final Context mContext;
     private final PluginListener<T> mListener;
     private final String mAction;
@@ -312,7 +315,7 @@ public class PluginInstanceManager<T extends Plugin> {
                             .setSmallIcon(icon)
                             .setWhen(0)
                             .setShowWhen(false)
-                            .setPriority(Notification.PRIORITY_MAX)
+                            .setChannel(NOTIFICATION_CHANNEL_ID)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setColor(mContext.getColor(color));
                     String label = cls;
