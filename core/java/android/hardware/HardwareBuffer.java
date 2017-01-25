@@ -40,7 +40,7 @@ import libcore.util.NativeAllocationRegistry;
 public final class HardwareBuffer implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RGBA_8888, RGBA_FP16, RGBX_8888, RGB_888, RGB_565})
+    @IntDef({RGBA_8888, RGBA_FP16, RGBX_8888, RGB_888, RGB_565, BLOB})
     public @interface Format {};
 
     /** Format: 8 bits each red, green, blue, alpha */
@@ -52,7 +52,9 @@ public final class HardwareBuffer implements Parcelable {
     /** Format: 5 bits each red and blue, 6 bits green, no alpha */
     public static final int RGB_565     = 4;
     /** Format: 16 bits each red, green, blue, alpha */
-    public static final int RGBA_FP16   = 5;
+    public static final int RGBA_FP16   = 0x16;
+    /** Format: opaque format used for raw data transfer; must have a height of 1 */
+    public static final int BLOB        = 0x21;
 
     // Note: do not rename, this field is used by native code
     private long mNativeObject;
@@ -134,6 +136,9 @@ public final class HardwareBuffer implements Parcelable {
         }
         if (layers <= 0) {
             throw new IllegalArgumentException("Invalid layer count " + layers);
+        }
+        if (format == BLOB && height != 1) {
+            throw new IllegalArgumentException("Height must be 1 when using the BLOB format");
         }
         long nativeObject = nCreateHardwareBuffer(width, height, format, layers, usage);
         if (nativeObject == 0) {
@@ -295,6 +300,7 @@ public final class HardwareBuffer implements Parcelable {
             case RGBX_8888:
             case RGB_565:
             case RGB_888:
+            case BLOB:
                 return true;
         }
         return false;

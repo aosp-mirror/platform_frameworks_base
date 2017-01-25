@@ -223,16 +223,18 @@ jobject android_hardware_HardwareBuffer_createFromAHardwareBuffer(
 
 uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(uint32_t format) {
     switch (format) {
-        case PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBA_8888:
             return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-        case PIXEL_FORMAT_RGBX_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
             return AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
-        case PIXEL_FORMAT_RGB_565:
+        case HAL_PIXEL_FORMAT_RGB_565:
             return AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM;
-        case PIXEL_FORMAT_RGB_888:
+        case HAL_PIXEL_FORMAT_RGB_888:
             return AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM;
-        case PIXEL_FORMAT_RGBA_FP16:
+        case HAL_PIXEL_FORMAT_RGBA_FP16:
             return AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT;
+        case HAL_PIXEL_FORMAT_BLOB:
+            return AHARDWAREBUFFER_FORMAT_BLOB;
         default:
             ALOGE("Unknown pixel format %u", format);
             return 0;
@@ -242,15 +244,17 @@ uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(uint32_t format)
 uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format) {
     switch (format) {
         case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
-            return PIXEL_FORMAT_RGBA_8888;
+            return HAL_PIXEL_FORMAT_RGBA_8888;
         case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
-            return PIXEL_FORMAT_RGBX_8888;
+            return HAL_PIXEL_FORMAT_RGBX_8888;
         case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
-            return PIXEL_FORMAT_RGB_565;
+            return HAL_PIXEL_FORMAT_RGB_565;
         case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
-            return PIXEL_FORMAT_RGB_888;
+            return HAL_PIXEL_FORMAT_RGB_888;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT:
-            return PIXEL_FORMAT_RGBA_FP16;
+            return HAL_PIXEL_FORMAT_RGBA_FP16;
+        case AHARDWAREBUFFER_FORMAT_BLOB:
+            return HAL_PIXEL_FORMAT_BLOB;
         default:
             ALOGE("Unknown AHardwareBuffer format %u", format);
             return 0;
