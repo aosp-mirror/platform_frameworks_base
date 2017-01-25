@@ -223,6 +223,8 @@ void usage(void)
         "       localization\n"
         "   --no-version-vectors\n"
         "       Do not automatically generate versioned copies of vector XML resources.\n"
+        "   --no-version-transitions\n"
+        "       Do not automatically generate versioned copies of transition XML resources.\n"
         "   --private-symbols\n"
         "       Java package name to use when generating R.java for private resources.\n",
         gDefaultIgnoreAssets);
@@ -704,6 +706,8 @@ int main(int argc, char* const argv[])
                     bundle.setPseudolocalize(PSEUDO_ACCENTED | PSEUDO_BIDI);
                 } else if (strcmp(cp, "-no-version-vectors") == 0) {
                     bundle.setNoVersionVectors(true);
+                } else if (strcmp(cp, "-no-version-transitions") == 0) {
+                    bundle.setNoVersionTransitions(true);
                 } else if (strcmp(cp, "-private-symbols") == 0) {
                     argc--;
                     argv++;

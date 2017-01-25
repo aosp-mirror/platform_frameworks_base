@@ -80,6 +80,7 @@ struct LinkOptions {
   // Optimizations/features.
   bool no_auto_version = false;
   bool no_version_vectors = false;
+  bool no_version_transitions = false;
   bool no_resource_deduping = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
@@ -250,6 +251,7 @@ static std::unique_ptr<xml::XmlResource> LoadXml(const std::string& path,
 struct ResourceFileFlattenerOptions {
   bool no_auto_version = false;
   bool no_version_vectors = false;
+  bool no_version_transitions = false;
   bool no_xml_namespaces = false;
   bool keep_raw_values = false;
   bool do_not_compress_anything = false;
@@ -306,6 +308,23 @@ uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
   return ArchiveEntry::kCompress;
 }
 
+static bool IsTransitionElement(const std::string& name) {
+  return
+    name == "fade" ||
+    name == "changeBounds" ||
+    name == "slide" ||
+    name == "explode" ||
+    name == "changeImageTransform" ||
+    name == "changeTransform" ||
+    name == "changeClipBounds" ||
+    name == "autoTransition" ||
+    name == "recolor" ||
+    name == "changeScroll" ||
+    name == "transitionSet" ||
+    name == "transition" ||
+    name == "transitionManager";
+}
+
 bool ResourceFileFlattener::LinkAndVersionXmlFile(
     ResourceTable* table, FileOperation* file_op,
     std::queue<FileOperation>* out_file_op_queue) {
@@ -339,6 +358,17 @@ bool ResourceFileFlattener::LinkAndVersionXmlFile(
       xml::Element* el = xml::FindRootElement(doc);
       if (el && el->namespace_uri.empty()) {
         if (el->name == "vector" || el->name == "animated-vector") {
+          // We are NOT going to version this file.
+          file_op->skip_version = true;
+          return true;
+        }
+      }
+    }
+    if (options_.no_version_transitions) {
+      // Skip this if it is a transition resource.
+      xml::Element* el = xml::FindRootElement(doc);
+      if (el && el->namespace_uri.empty()) {
+        if (IsTransitionElement(el->name)) {
           // We are NOT going to version this file.
           file_op->skip_version = true;
           return true;
@@ -1384,6 +1414,7 @@ class LinkCommand {
         options_.extensions_to_not_compress;
     file_flattener_options.no_auto_version = options_.no_auto_version;
     file_flattener_options.no_version_vectors = options_.no_version_vectors;
+    file_flattener_options.no_version_transitions = options_.no_version_transitions;
     file_flattener_options.no_xml_namespaces = options_.no_xml_namespaces;
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
@@ -1863,6 +1894,11 @@ int Link(const std::vector<StringPiece>& args) {
                           "Use this only\n"
                           "when building with vector drawable support library",
                           &options.no_version_vectors)
+          .OptionalSwitch("--no-version-transitions",
+                          "Disables automatic versioning of transition resources. "
+                          "Use this only\n"
+                          "when building with transition support library",
+                          &options.no_version_transitions)
           .OptionalSwitch("--no-resource-deduping",
                           "Disables automatic deduping of resources with\n"
                           "identical values across compatible configurations.",
@@ -2104,6 +2140,7 @@ int Link(const std::vector<StringPiece>& args) {
   if (options.static_lib) {
     options.no_auto_version = true;
     options.no_version_vectors = true;
+    options.no_version_transitions = true;
   }
 
   LinkCommand cmd(&context, options);

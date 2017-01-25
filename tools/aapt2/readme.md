@@ -1,5 +1,10 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.5
+### `aapt2 link ...`
+- Transition XML versioning: Adds a new flag `--no-version-transitions` to disable automatic
+  versioning of Transition XML resources.
+
 ## Version 2.4
 ### `aapt2 link ...`
 - Supports `<meta-data>` tags in `<manifest>`.
