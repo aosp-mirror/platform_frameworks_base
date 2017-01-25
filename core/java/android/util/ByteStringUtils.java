@@ -33,7 +33,7 @@ public final class ByteStringUtils {
    * @param bytes Byte array to encode.
    * @return Hex encoded string representation of bytes.
    */
-  public static String toString(byte[] bytes) {
+  public static String toHexString(byte[] bytes) {
     if (bytes == null || bytes.length == 0 || bytes.length % 2 != 0) {
       return null;
     }
@@ -55,7 +55,7 @@ public final class ByteStringUtils {
    * @param str Hex encoded string to decode.
    * @return Decoded byte array representation of str.
    */
-  public static byte[] toByteArray(String str) {
+  public static byte[] fromHexToByteArray(String str) {
     if (str == null || str.length() == 0 || str.length() % 2 != 0) {
       return null;
     }
