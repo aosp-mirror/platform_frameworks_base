@@ -30,6 +30,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
+import android.app.NotificationChannel;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -1274,11 +1275,41 @@ public final class Settings {
     /**
      * Activity Action: Show notification settings for a single app.
      *
+     * Input: Optionally, {@link #EXTRA_CHANNEL_ID}, to highlight that channel.
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_NOTIFICATION_SETTINGS
             = "android.settings.APP_NOTIFICATION_SETTINGS";
+
+    /**
+     * Activity Action: Show notification settings for a single {@link NotificationChannel}.
+     * <p>
+     * Must be called from an activity.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel to display.
+     *     Input: {@link #EXTRA_CHANNEL_ID}, the id of the channel to display.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CHANNEL_NOTIFICATION_SETTINGS
+            = "android.settings.CHANNEL_NOTIFICATION_SETTINGS";
+
+    /**
+     * Activity Extra: The package owner of the notification channel settings to display.
+     * <p>
+     * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
+     */
+    public static final String EXTRA_APP_PACKAGE = "android.provider.extra.APP_PACKAGE";
+
+    /**
+     * Activity Extra: The {@link NotificationChannel#getId()} of the notification channel settings
+     * to display.
+     * <p>
+     * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
+     */
+    public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
 
     /**
      * Activity Action: Show notification redaction settings.
@@ -1290,7 +1321,6 @@ public final class Settings {
             = "android.settings.ACTION_APP_NOTIFICATION_REDACTION";
 
     /** @hide */ public static final String EXTRA_APP_UID = "app_uid";
-    /** @hide */ public static final String EXTRA_APP_PACKAGE = "app_package";
 
     /**
      * Activity Action: Show a dialog with disabled by policy message.
