@@ -433,6 +433,20 @@ public class Installer extends SystemService {
         }
     }
 
+    public boolean reconcileSecondaryDexFile(String apkPath, String packageName, int uid,
+            String[] isas, @Nullable String volumeUuid, int flags) throws InstallerException {
+        for (int i = 0; i < isas.length; i++) {
+            assertValidInstructionSet(isas[i]);
+        }
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.reconcileSecondaryDexFile(apkPath, packageName, uid, isas,
+                    volumeUuid, flags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     private static void assertValidInstructionSet(String instructionSet)
             throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {

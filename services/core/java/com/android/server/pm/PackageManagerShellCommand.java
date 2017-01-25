@@ -110,6 +110,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallWrite();
                 case "compile":
                     return runCompile();
+                case "reconcile-secondary-dex-files":
+                    return runreconcileSecondaryDexFiles();
                 case "dump-profiles":
                     return runDumpProfiles();
                 case "list":
@@ -414,6 +416,12 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println();
             return 1;
         }
+    }
+
+    private int runreconcileSecondaryDexFiles() throws RemoteException {
+        String packageName = getNextArg();
+        mInterface.reconcileSecondaryDexFiles(packageName);
+        return 0;
     }
 
     private int runDumpProfiles() throws RemoteException {
@@ -1468,6 +1476,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
         pw.println("      -u: also include uninstalled packages");
+        pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
+        pw.println("    Reconciles the package secondary dex files with the generated oat files.");
         pw.println("  list permission-groups");
         pw.println("    Prints all known permission groups.");
         pw.println("  list permissions [-g] [-f] [-d] [-u] [GROUP]");
