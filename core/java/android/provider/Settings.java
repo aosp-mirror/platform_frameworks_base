@@ -58,6 +58,7 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.speech.tts.TextToSpeech;
@@ -162,13 +163,13 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
      * <p>
-     * Input: {@link ConnectivityManager.EXTRA_TETHER_TYPE} should be included to specify which type
-     * of tethering should be checked. {@link ConnectivityManager.EXTRA_PROVISION_CALLBACK} should
+     * Input: {@link ConnectivityManager#EXTRA_TETHER_TYPE} should be included to specify which type
+     * of tethering should be checked. {@link ConnectivityManager#EXTRA_PROVISION_CALLBACK} should
      * contain a {@link ResultReceiver} which will be called back with a tether result code.
      * <p>
      * Output: The result of the provisioning check.
-     * {@link ConnectivityManager.TETHER_ERROR_NO_ERROR} if successful,
-     * {@link ConnectivityManager.TETHER_ERROR_PROVISION_FAILED} for failure.
+     * {@link ConnectivityManager#TETHER_ERROR_NO_ERROR} if successful,
+     * {@link ConnectivityManager#TETHER_ERROR_PROVISION_FAILED} for failure.
      *
      * @hide
      */
@@ -8742,6 +8743,26 @@ public final class Settings {
                 BLUETOOTH_PAN_PRIORITY_PREFIX = "bluetooth_pan_priority_";
 
         /**
+         * Activity manager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "enforce_bg_check=true,max_cached_processes=24"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * enforce_bg_check                     (boolean)
+         * max_cached_processes                 (int)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.am.ActivityManagerConstants
+         */
+        public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
+
+        /**
          * Device Idle (Doze) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -8805,6 +8826,25 @@ public final class Settings {
          * @see com.android.server.usage.UsageStatsService.SettingsObserver
          */
         public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
+
+        /**
+         * Power manager specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "no_cached_wake_locks=1"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * no_cached_wake_locks                 (boolean)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.power.PowerManagerConstants
+         */
+        public static final String POWER_MANAGER_CONSTANTS = "power_manager_constants";
 
         /**
          * Alarm manager specific settings.
@@ -9355,7 +9395,7 @@ public final class Settings {
         /**
          * WFC mode on roaming network.
          * <p>
-         * Type: int - see {@link WFC_IMS_MODE} for values
+         * Type: int - see {@link #WFC_IMS_MODE} for values
          *
          * @hide
          */

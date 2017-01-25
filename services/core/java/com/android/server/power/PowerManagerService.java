@@ -57,6 +57,7 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -522,6 +523,65 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
+    /**
+     * All times are in milliseconds. These constants are kept synchronized with the system
+     * global Settings. Any access to this class or its fields should be done while
+     * holding the PowerManagerService.mLock lock.
+     */
+    private final class Constants extends ContentObserver {
+        // Key names stored in the settings value.
+        private static final String KEY_NO_CACHED_WAKE_LOCKS = "no_cached_wake_locks";
+
+        private static final boolean DEFAULT_NO_CACHED_WAKE_LOCKS = true;
+
+        // Prevent processes that are cached from holding wake locks?
+        public boolean NO_CACHED_WAKE_LOCKS = DEFAULT_NO_CACHED_WAKE_LOCKS;
+
+        private ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public Constants(Handler handler) {
+            super(handler);
+        }
+
+        public void start(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.POWER_MANAGER_CONSTANTS), false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (mLock) {
+                try {
+                    mParser.setString(Settings.Global.getString(mResolver,
+                            Settings.Global.POWER_MANAGER_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad alarm manager settings", e);
+                }
+
+                NO_CACHED_WAKE_LOCKS = mParser.getBoolean(KEY_NO_CACHED_WAKE_LOCKS,
+                        DEFAULT_NO_CACHED_WAKE_LOCKS);
+            }
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println("  Settings " + Settings.Global.POWER_MANAGER_CONSTANTS + ":");
+
+            pw.print("    "); pw.print(KEY_NO_CACHED_WAKE_LOCKS); pw.print("=");
+            pw.println(NO_CACHED_WAKE_LOCKS);
+        }
+    }
+
+    final Constants mConstants;
+
     private native void nativeInit();
 
     private static native void nativeAcquireSuspendBlocker(String name);
@@ -538,6 +598,7 @@ public final class PowerManagerService extends SystemService
                 Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
+        mConstants = new Constants(mHandler);
 
         synchronized (mLock) {
             mWakeLockSuspendBlocker = createSuspendBlockerLocked("PowerManagerService.WakeLocks");
@@ -616,6 +677,9 @@ public final class PowerManagerService extends SystemService
                     mAppOps, createSuspendBlockerLocked("PowerManagerService.Broadcasts"),
                     mPolicy);
 
+            final ContentResolver resolver = mContext.getContentResolver();
+            mConstants.start(resolver);
+
             mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
                     createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"),
                     mHandler);
@@ -629,7 +693,6 @@ public final class PowerManagerService extends SystemService
                     mDisplayPowerCallbacks, mHandler, sensorManager);
 
             // Register for settings changes.
-            final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SCREENSAVER_ENABLED),
                     false, mSettingsObserver, UserHandle.USER_ALL);
@@ -2795,7 +2858,7 @@ public final class PowerManagerService extends SystemService
                             state.mProcState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                         disabled = true;
                     }
-                } else {
+                } else if (mConstants.NO_CACHED_WAKE_LOCKS) {
                     disabled = !wakeLock.mUidState.mActive &&
                             wakeLock.mUidState.mProcState
                                     != ActivityManager.PROCESS_STATE_NONEXISTENT &&
@@ -3005,6 +3068,7 @@ public final class PowerManagerService extends SystemService
         final WirelessChargerDetector wcd;
         synchronized (mLock) {
             pw.println("Power Manager State:");
+            mConstants.dump(pw);
             pw.println("  mDirty=0x" + Integer.toHexString(mDirty));
             pw.println("  mWakefulness=" + PowerManagerInternal.wakefulnessToString(mWakefulness));
             pw.println("  mWakefulnessChanging=" + mWakefulnessChanging);
