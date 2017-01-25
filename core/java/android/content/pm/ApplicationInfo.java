@@ -827,6 +827,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int networkSecurityConfigRes;
 
     /**
+     * Version of the sandbox the application wants to run in.
+     * @hide
+     */
+    public int targetSandboxVersion;
+
+    /**
      * The category of this app. Categories are used to cluster multiple apps
      * together into meaningful groups, such as when summarizing battery,
      * network, or disk usage. Apps should only define this value when they fit
@@ -1007,7 +1013,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "enabled=" + enabled
                 + " minSdkVersion=" + minSdkVersion
                 + " targetSdkVersion=" + targetSdkVersion
-                + " versionCode=" + versionCode);
+                + " versionCode=" + versionCode
+                + " targetSandboxVersion=" + targetSandboxVersion);
         if ((flags&DUMP_FLAG_DETAILS) != 0) {
             if (manageSpaceActivityName != null) {
                 pw.println(prefix + "manageSpaceActivityName=" + manageSpaceActivityName);
@@ -1122,6 +1129,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         fullBackupContent = orig.fullBackupContent;
         networkSecurityConfigRes = orig.networkSecurityConfigRes;
         category = orig.category;
+        targetSandboxVersion = orig.targetSandboxVersion;
     }
 
     public String toString() {
@@ -1182,6 +1190,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(fullBackupContent);
         dest.writeInt(networkSecurityConfigRes);
         dest.writeInt(category);
+        dest.writeInt(targetSandboxVersion);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1242,6 +1251,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         fullBackupContent = source.readInt();
         networkSecurityConfigRes = source.readInt();
         category = source.readInt();
+        targetSandboxVersion = source.readInt();
     }
 
     /**
@@ -1310,6 +1320,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         } else {
             dataDir = credentialProtectedDataDir;
         }
+        // TODO: modify per-user ephemerality
     }
 
     /**

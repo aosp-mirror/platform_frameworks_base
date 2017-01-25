@@ -296,6 +296,7 @@ public class PackageParser {
     private static boolean sCompatibilityModeEnabled = true;
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+    private static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
 
     static class ParsePackageItemArgs {
         final Package owner;
@@ -1996,6 +1997,10 @@ public class PackageParser {
                 PARSE_DEFAULT_INSTALL_LOCATION);
         pkg.applicationInfo.installLocation = pkg.installLocation;
 
+        final int targetSandboxVersion = sa.getInteger(
+                com.android.internal.R.styleable.AndroidManifest_targetSandboxVersion,
+                PARSE_DEFAULT_TARGET_SANDBOX);
+        pkg.applicationInfo.targetSandboxVersion = targetSandboxVersion;
 
         /* Set the global "forward lock" flag */
         if ((flags & PARSE_FORWARD_LOCK) != 0) {

@@ -2790,6 +2790,7 @@
         <public name="splitName" />
         <public name="colorMode" />
         <public name="isolatedSplits" />
+        <public name="targetSandboxVersion" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
