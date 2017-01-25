@@ -2842,4 +2842,21 @@
   <!-- Accessibility fingerprint gestures -->
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
   <java-symbol type="string" name="capability_desc_canCaptureFingerprintGestures" />
+
+  <!-- Time picker -->
+  <java-symbol type="id" name="toggle_mode"/>
+  <java-symbol type="id" name="input_mode"/>
+  <java-symbol type="id" name="input_header"/>
+  <java-symbol type="id" name="input_separator"/>
+  <java-symbol type="id" name="input_hour"/>
+  <java-symbol type="id" name="input_minute"/>
+  <java-symbol type="id" name="am_pm_spinner"/>
+  <java-symbol type="id" name="label_hour"/>
+  <java-symbol type="id" name="label_minute"/>
+  <java-symbol type="id" name="label_error"/>
+  <java-symbol type="layout" name="time_picker_text_input_material"/>
+  <java-symbol type="drawable" name="btn_keyboard_key_material"/>
+  <java-symbol type="drawable" name="btn_event_material"/>
+  <java-symbol type="string" name="time_picker_text_input_mode_description"/>
+  <java-symbol type="string" name="time_picker_radial_mode_description"/>
 </resources>

@@ -475,9 +475,6 @@
 
     <dimen name="chooser_grid_padding">0dp</dimen>
 
-    <item type="dimen" format="integer" name="time_picker_column_start_material">0</item>
-    <item type="dimen" format="integer" name="time_picker_column_end_material">1</item>
-
     <item type="dimen" name="aerr_padding_list_top">15dp</item>
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 

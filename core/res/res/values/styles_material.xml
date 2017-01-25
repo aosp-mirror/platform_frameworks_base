@@ -426,6 +426,21 @@ please see styles_device_defaults.xml.
         <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
+    <style name="TextAppearance.Material.TimePicker.InputHeader" parent="TextAppearance.Material">
+        <item name="textSize">@dimen/text_size_display_1_material</item>
+        <item name="textColor">@color/white</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Material.TimePicker.InputField" parent="TextAppearance.Material">
+        <item name="textSize">@dimen/timepicker_edit_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Material.TimePicker.PromptLabel" parent="TextAppearance.Material">
+        <item name="textSize">@dimen/timepicker_text_size_normal</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
         <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="textSize">@dimen/date_picker_year_label_size</item>
