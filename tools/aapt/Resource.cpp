@@ -1223,6 +1223,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     sp<ResourceTypeSet> colors;
     sp<ResourceTypeSet> menus;
     sp<ResourceTypeSet> mipmaps;
+    sp<ResourceTypeSet> fonts;
 
     ASSIGN_IT(drawable);
     ASSIGN_IT(layout);
@@ -1235,6 +1236,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     ASSIGN_IT(color);
     ASSIGN_IT(menu);
     ASSIGN_IT(mipmap);
+    ASSIGN_IT(font);
 
     assets->setResources(resources);
     // now go through any resource overlays and collect their files
@@ -1257,6 +1259,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             !applyFileOverlay(bundle, assets, &raws, "raw") ||
             !applyFileOverlay(bundle, assets, &colors, "color") ||
             !applyFileOverlay(bundle, assets, &menus, "menu") ||
+            !applyFileOverlay(bundle, assets, &fonts, "font") ||
             !applyFileOverlay(bundle, assets, &mipmaps, "mipmap")) {
         return UNKNOWN_ERROR;
     }
@@ -1287,6 +1290,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                 hasErrors = true;
             }
         } else {
+            hasErrors = true;
+        }
+    }
+
+    if (fonts != NULL) {
+        err = makeFileResources(bundle, assets, &table, fonts, "font");
+        if (err != NO_ERROR) {
             hasErrors = true;
         }
     }
@@ -1540,6 +1550,26 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                 checkForIds(src, block);
             } else {
                 hasErrors = true;
+            }
+        }
+
+        if (err < NO_ERROR) {
+            hasErrors = true;
+        }
+        err = NO_ERROR;
+    }
+
+    if (fonts != NULL) {
+        ResourceDirIterator it(fonts, String8("font"));
+        while ((err=it.next()) == NO_ERROR) {
+            // fonts can be resources other than xml.
+            if (it.getFile()->getPath().getPathExtension() == ".xml") {
+                String8 src = it.getFile()->getPrintableSource();
+                err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
+                        it.getFile(), &table, xmlFlags);
+                if (err != NO_ERROR) {
+                    hasErrors = true;
+                }
             }
         }
 
