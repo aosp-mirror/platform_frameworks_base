@@ -23,7 +23,6 @@
     android:layout_gravity="top|center_horizontal">
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/icon"
-        android:contentDescription="@string/recents_app_info_button_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
