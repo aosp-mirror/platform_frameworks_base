@@ -6110,7 +6110,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 // TODO Send to system too?
                 mContext.sendBroadcastAsUser(
-                        new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
+                        new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED)
+                                .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
                         UserHandle.of(userId));
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
@@ -6260,6 +6261,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 clearDeviceOwnerLocked(admin, deviceOwnerUserId);
                 removeActiveAdminLocked(deviceOwnerComponent, deviceOwnerUserId);
                 Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 mContext.sendBroadcastAsUser(intent, UserHandle.of(deviceOwnerUserId));
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
