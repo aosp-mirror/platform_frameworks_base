@@ -358,7 +358,12 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("Exceeds maximum number of surfaces");
         }
 
-        if (!mConfiguredSize.equals(SurfaceUtils.getSurfaceSize(surface))) {
+        // TODO: b/34697112. This needs to be reverted once app fix is merged.
+        // Do not throw exception for below case:
+        // - OutputConfiguration(Size(0, 0), klass)
+        // - addSurface(surface)
+        if ((mConfiguredSize.getWidth() != 0 || mConfiguredSize.getHeight() != 0) &&
+                !mConfiguredSize.equals(SurfaceUtils.getSurfaceSize(surface))) {
             throw new IllegalArgumentException("The size of added surface doesn't match");
         }
         if (mConfiguredDataspace != SurfaceUtils.getSurfaceDataspace(surface)) {
