@@ -19,10 +19,6 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
 import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
-import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
-
-import static com.android.server.autofill.AutoFillUI.MSG_SHOW_ALL_NOTIFICATIONS;
-import static com.android.server.autofill.AutoFillUI.SHOW_ALL_NOTIFICATIONS_DELAY_MS;
 
 import android.Manifest;
 import android.app.AppGlobals;
@@ -32,11 +28,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -51,9 +49,12 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.view.autofill.AutoFillId;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
@@ -70,13 +71,12 @@ import java.io.PrintWriter;
 public final class AutoFillManagerService extends SystemService {
 
     private static final String TAG = "AutoFillManagerService";
-    static final boolean DEBUG = true; // TODO: change to false once stable
+    static final boolean DEBUG = true; // TODO(b/33197203): change to false once stable
 
     private static final long SERVICE_BINDING_LIFETIME_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
 
-    private static final int ARG_NOT_USED = 0;
-
     protected static final int MSG_UNBIND = 1;
+    protected static final int MSG_SHOW_AUTO_FILL = 2;
 
     private final AutoFillManagerServiceStub mServiceStub;
     private final AutoFillUI mUi;
@@ -85,22 +85,27 @@ public final class AutoFillManagerService extends SystemService {
 
     private final Object mLock = new Object();
 
-    private final Handler mHandler = new Handler() {
+    private final HandlerCaller.Callback mHandlerCallback = new HandlerCaller.Callback() {
+
         @Override
-        public void handleMessage(Message msg) {
+        public void executeMessage(Message msg) {
             switch (msg.what) {
-                case MSG_UNBIND:
+                case MSG_UNBIND: {
                     removeStaleServiceForUser(msg.arg1);
                     return;
-                case MSG_SHOW_ALL_NOTIFICATIONS:
-                    mUi.showAllNotifications();
+                } case MSG_SHOW_AUTO_FILL: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    showAutoFillInput(msg.arg1, (AutoFillId) args.arg1, (Rect) args.arg2);
                     return;
-                default:
+                } default: {
                     Slog.w(TAG, "Invalid message: " + msg);
+                }
             }
         }
 
     };
+
+    private HandlerCaller mHandlerCaller;
 
     /**
      * Cache of {@link AutoFillManagerServiceImpl} per user id.
@@ -122,6 +127,8 @@ public final class AutoFillManagerService extends SystemService {
     public AutoFillManagerService(Context context) {
         super(context);
 
+        mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(), mHandlerCallback, true);
+
         mContext = context;
         mUi = new AutoFillUI(context, this, mLock);
         mResolver = context.getContentResolver();
@@ -138,14 +145,6 @@ public final class AutoFillManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             new SettingsObserver(BackgroundThread.getHandler());
-        }
-        if (phase == PHASE_BOOT_COMPLETED) {
-            // TODO: if sent right away, the notification is not displayed. Since the notification
-            // mechanism is a temporary approach anyways, just delay it..
-            if (DEBUG)
-                Slog.d(TAG, "Showing notifications in " + SHOW_ALL_NOTIFICATIONS_DELAY_MS + "ms");
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ALL_NOTIFICATIONS),
-                    SHOW_ALL_NOTIFICATIONS_DELAY_MS);
         }
     }
 
@@ -200,7 +199,7 @@ public final class AutoFillManagerService extends SystemService {
         }
         // Keep service connection alive for a while, in case user needs to interact with it
         // (for example, to save the data that was inputted in)
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_UNBIND, userId, ARG_NOT_USED),
+        mHandlerCaller.sendMessageDelayed(mHandlerCaller.obtainMessageI(MSG_UNBIND, userId),
                 SERVICE_BINDING_LIFETIME_MS);
         return service;
     }
@@ -245,7 +244,33 @@ public final class AutoFillManagerService extends SystemService {
 
     }
 
+
+    private void requestAutoFillLocked(IBinder activityToken, int userId, Bundle extras,
+            int flags) {
+        final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+        if (service != null) {
+            service.requestAutoFill(activityToken, extras, flags);
+        }
+    }
+
+    private void showAutoFillInput(int userId, AutoFillId id, Rect rect) {
+        if (DEBUG) Slog.d(TAG, "handler.showAutoFillInput(): id=" + id + ", rect=" + rect);
+
+        synchronized (mLock) {
+            requestAutoFillLocked(null, userId, null, AUTO_FILL_FLAG_TYPE_FILL);
+        }
+    }
+
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
+
+        @Override
+        public void showAutoFillInput(AutoFillId id, Rect boundaries) {
+            if (DEBUG) Slog.d(TAG, "showAutoFillInput(): id=" + id + ", boundaries=" + boundaries);
+
+            // TODO(b/33197203): fail if it's not called by same uid as the top activity
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(MSG_SHOW_AUTO_FILL,
+                    UserHandle.getCallingUserId(), id, boundaries));
+        }
 
         @Override
         public void requestAutoFill(IBinder activityToken, int userId, Bundle extras, int flags) {
@@ -253,10 +278,7 @@ public final class AutoFillManagerService extends SystemService {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
-                if (service != null) {
-                    service.requestAutoFill(activityToken, extras, flags);
-                }
+                requestAutoFillLocked(activityToken, userId, extras, flags);
             }
         }
 
@@ -307,7 +329,6 @@ public final class AutoFillManagerService extends SystemService {
             if (DEBUG) Slog.d(TAG, "settings (" + uri + " changed for " + userId);
             synchronized (mLock) {
                 removeCachedServiceForUserLocked(userId);
-                mUi.updateNotification(userId);
             }
         }
     }

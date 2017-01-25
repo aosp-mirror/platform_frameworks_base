@@ -21,7 +21,6 @@ import static android.service.autofill.AutoFillService.DEBUG;
 import android.app.Activity;
 import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.autofill.AutoFillId;

@@ -15,8 +15,6 @@
  */
 package android.service.autofill;
 
-import static android.service.voice.VoiceInteractionSession.KEY_FLAGS;
-import static android.service.voice.VoiceInteractionSession.KEY_STRUCTURE;
 import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
 import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
 
@@ -30,13 +28,11 @@ import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.FillResponse;
 
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 
 // TODO(b/33197203): improve javadoc (of both class and methods); in particular, make sure the
@@ -49,8 +45,8 @@ import com.android.internal.os.SomeArgs;
  */
 public abstract class AutoFillService extends Service {
 
-    static final String TAG = "AutoFillService";
-    static final boolean DEBUG = true; // TODO: set to false once stable
+    private static final String TAG = "AutoFillService";
+    static final boolean DEBUG = true; // TODO(b/33197203): set to false once stable
 
     /**
      * The {@link Intent} that must be declared as handled by the service.

@@ -16,40 +16,29 @@
 package com.android.server.autofill;
 
 import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
-import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
 
 import static com.android.server.autofill.AutoFillManagerService.DEBUG;
 
 import android.app.Activity;
-import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.UserManager;
-import android.provider.Settings;
 import android.service.autofill.AutoFillService;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.view.autofill.Dataset;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 import android.widget.Toast;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.UiThread;
 
 import java.util.Arrays;
@@ -69,9 +58,10 @@ final class AutoFillUI {
 
     AutoFillUI(Context context, AutoFillManagerService service, Object lock) {
         mContext = context;
-        mResolver = context.getContentResolver();
         mService = service;
         mLock = lock;
+
+        setNotificationListener();
     }
 
     /**
@@ -121,56 +111,60 @@ final class AutoFillUI {
     private static final String EXTRA_FILL_RESPONSE = "fill_response";
     private static final String EXTRA_DATASET = "dataset";
 
-    private static final String TYPE_EMULATE = "emulate";
     private static final String TYPE_OPTIONS = "options";
     private static final String TYPE_DELETE_CALLBACK = "delete_callback";
     private static final String TYPE_PICK_DATASET = "pick_dataset";
     private static final String TYPE_SAVE = "save";
 
-    static final int MSG_SHOW_ALL_NOTIFICATIONS = 42;
-    static final int SHOW_ALL_NOTIFICATIONS_DELAY_MS = 5000;
-
+    @GuardedBy("mLock")
     private BroadcastReceiver mNotificationReceiver;
-    private final ContentResolver mResolver;
+    @GuardedBy("mLock")
     private final AutoFillManagerService mService;
     private final Object mLock;
 
     // Hack used to generate unique pending intents
     static int sResultCode = 0;
 
+    private void setNotificationListener() {
+        synchronized (mLock) {
+            if (mNotificationReceiver == null) {
+                mNotificationReceiver = new NotificationReceiver();
+                mContext.registerReceiver(mNotificationReceiver,
+                        new IntentFilter(NOTIFICATION_AUTO_FILL_INTENT));
+            }
+        }
+    }
+
     final class NotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final int userId = intent.getIntExtra(EXTRA_USER_ID, -1);
 
-            final AutoFillManagerServiceImpl service = mService.getServiceForUserLocked(userId);
-            if (service == null) {
-                Slog.w(TAG, "no auto-fill service for user " + userId);
-                return;
-            }
-
-            final int callbackId = intent.getIntExtra(EXTRA_CALLBACK_ID, -1);
-            final String type = intent.getStringExtra(EXTRA_NOTIFICATION_TYPE);
-            if (type == null) {
-                Slog.wtf(TAG, "No extra " + EXTRA_NOTIFICATION_TYPE + " on intent " + intent);
-                return;
-            }
-            final FillResponse fillData = intent.getParcelableExtra(EXTRA_FILL_RESPONSE);
-            final Dataset dataset = intent.getParcelableExtra(EXTRA_DATASET);
-            final Bundle datasetArgs = dataset == null ? null : dataset.getExtras();
-            final Bundle fillDataArgs = fillData == null ? null : fillData.getExtras();
-
-            // Bundle sent on AutoFillService methods - only set if service provided a bundle
-            final Bundle extras = (datasetArgs == null && fillDataArgs == null)
-                    ? null : new Bundle();
-
-            if (DEBUG) Slog.d(TAG, "Notification received: type=" + type + ", userId=" + userId
-                    + ", callbackId=" + callbackId);
             synchronized (mLock) {
+                final AutoFillManagerServiceImpl service = mService.getServiceForUserLocked(userId);
+                if (service == null) {
+                    Slog.w(TAG, "no auto-fill service for user " + userId);
+                    return;
+                }
+
+                final int callbackId = intent.getIntExtra(EXTRA_CALLBACK_ID, -1);
+                final String type = intent.getStringExtra(EXTRA_NOTIFICATION_TYPE);
+                if (type == null) {
+                    Slog.wtf(TAG, "No extra " + EXTRA_NOTIFICATION_TYPE + " on intent " + intent);
+                    return;
+                }
+                final FillResponse fillData = intent.getParcelableExtra(EXTRA_FILL_RESPONSE);
+                final Dataset dataset = intent.getParcelableExtra(EXTRA_DATASET);
+                final Bundle datasetArgs = dataset == null ? null : dataset.getExtras();
+                final Bundle fillDataArgs = fillData == null ? null : fillData.getExtras();
+
+                // Bundle sent on AutoFillService methods - only set if service provided a bundle
+                final Bundle extras = (datasetArgs == null && fillDataArgs == null)
+                        ? null : new Bundle();
+
+                if (DEBUG) Slog.d(TAG, "Notification received: type=" + type + ", userId=" + userId
+                        + ", callbackId=" + callbackId);
                 switch (type) {
-                    case TYPE_EMULATE:
-                        service.requestAutoFill(null, extras, AUTO_FILL_FLAG_TYPE_FILL);
-                        break;
                     case TYPE_SAVE:
                         if (datasetArgs != null) {
                             if (DEBUG) Log.d(TAG, "filldata args on save notificataion: " +
@@ -210,54 +204,6 @@ final class AutoFillUI {
         }
     }
 
-    private ComponentName getProviderForUser(int userId) {
-        ComponentName serviceComponent = null;
-        ServiceInfo serviceInfo = null;
-        final String componentName = Settings.Secure.getStringForUser(
-                mResolver, Settings.Secure.AUTO_FILL_SERVICE, userId);
-        if (!TextUtils.isEmpty(componentName)) {
-            try {
-                serviceComponent = ComponentName.unflattenFromString(componentName);
-                serviceInfo =
-                        AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0, userId);
-            } catch (RuntimeException | RemoteException e) {
-                Slog.wtf(TAG, "Bad auto-fill service name " + componentName, e);
-                return null;
-            }
-        }
-
-        if (DEBUG) Slog.d(TAG, "getServiceComponentForUser(" + userId + "): component="
-                + serviceComponent + ", info: " + serviceInfo);
-        if (serviceInfo == null) {
-            Slog.w(TAG, "no service info for " + serviceComponent);
-            return null;
-        }
-        return serviceComponent;
-    }
-
-    void showAllNotifications() {
-        final UserManager userManager =
-                (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-
-        final List<UserInfo> allUsers = userManager.getUsers(true);
-
-        for (UserInfo user : allUsers) {
-            final ComponentName serviceComponent = getProviderForUser(user.id);
-            if (serviceComponent != null) {
-                showMainNotification(serviceComponent, user.id);
-            }
-        }
-    }
-
-    void updateNotification(int userId) {
-        final ComponentName serviceComponent = getProviderForUser(userId);
-        if (serviceComponent == null) {
-            cancelMainNotification(userId);
-        } else {
-            showMainNotification(serviceComponent, userId);
-        }
-    }
-
     private static Intent newNotificationIntent(int userId, String type) {
         final Intent intent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
         intent.putExtra(EXTRA_USER_ID, userId);
@@ -293,65 +239,6 @@ final class AutoFillUI {
                     ? Arrays.toString((Objects[]) value) : value);
         }
         return builder.append(']').toString();
-    }
-
-    /**
-     * Shows a permanent notification that triggers the auto-fill workflow for the given user.
-     *
-     * <p>It emulates calling the auto-fill service when the IME is shown.
-     */
-    private void showMainNotification(ComponentName serviceComponent, int userId) {
-        if (DEBUG) Log.d(TAG, "showNotification() for " + userId + ": " + serviceComponent);
-
-        synchronized (mLock) {
-            if (mNotificationReceiver == null) {
-                mNotificationReceiver = new NotificationReceiver();
-                mContext.registerReceiver(mNotificationReceiver,
-                        new IntentFilter(NOTIFICATION_AUTO_FILL_INTENT));
-            }
-        }
-
-        final Intent fillIntent = newNotificationIntent(userId, TYPE_EMULATE);
-        final PendingIntent fillPendingIntent = PendingIntent.getBroadcast(mContext,
-                -1, fillIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        final String packageName = serviceComponent.getPackageName();
-        String providerName = null;
-        final PackageManager pm = mContext.getPackageManager();
-        try {
-            final ApplicationInfo info = pm.getApplicationInfoAsUser(packageName, 0, userId);
-            if (info != null) {
-                providerName = pm.getApplicationLabel(info).toString();
-            }
-        } catch (Exception e) {
-            providerName = packageName;
-        }
-        final String title = "AutoFill IME Emulation";
-        final String subTitle = "Tap notification to start auto-fill workflow (by '" + providerName
-                + "' on top activity on user " + userId + ".\n"
-                + "Once provider replies, a new notification will show your options.";
-
-        final Notification notification = new Notification.Builder(mContext)
-                .setCategory(Notification.CATEGORY_SYSTEM)
-                .setOngoing(true)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                .setLocalOnly(true)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setStyle(new Notification.BigTextStyle().bigText(subTitle))
-                .setContentIntent(fillPendingIntent)
-                .build();
-        NotificationManager.from(mContext).notify(TYPE_EMULATE, userId, notification);
-    }
-
-    /**
-     * Cancels the permament notification created by
-     * {@link #showMainNotification(ComponentName, int)}.
-     */
-    private void cancelMainNotification(int userId) {
-        if (DEBUG) Log.d(TAG, "cancelNotificationLocked(): " + userId);
-        NotificationManager.from(mContext).cancel(TYPE_EMULATE, userId);
     }
 
     /**

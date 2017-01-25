@@ -169,8 +169,6 @@ public class EditText extends TextView {
             Log.w(VIEW_LOG_TAG, "EditText.autoFill(): no text on AutoFillValue");
             return;
         }
-        // TODO(b/33197203): once auto-fill is triggered by the IME, we'll need a new setText()
-        // or setAutoFillText() method on TextView to avoid re-triggering it.
         setText(text);
     }
 

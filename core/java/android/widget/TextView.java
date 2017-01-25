@@ -136,6 +136,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.autofill.AutoFillManager;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -264,6 +265,7 @@ import java.util.Locale;
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
+    static final boolean DEBUG_AUTOFILL = false;
 
     // Enum for the "typeface" XML parameter.
     // TODO: How can we get this from the XML instead of hardcoding it here?
@@ -9024,6 +9026,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Spannable sp = (Spannable) mText;
                 MetaKeyKeyListener.resetMetaState(sp);
             }
+        } else {
+            final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+            if (afm != null) {
+                if (DEBUG_AUTOFILL) {
+                    Log.v(LOG_TAG, "onFocusChanged(): id=" + getAutoFillViewId() + ", focused= "
+                            + focused);
+                }
+                afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_HIDE);
+            }
         }
 
         startStopMarquee(focused);
@@ -10602,6 +10613,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     protected void viewClicked(InputMethodManager imm) {
+        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+        if (afm != null) {
+            if (DEBUG_AUTOFILL) Log.v(LOG_TAG, "viewClicked(): id=" + getAutoFillViewId());
+
+            // TODO(b/33197203): integrate with onFocus and/or move to view?
+            afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_SHOW);
+        }
+
         if (imm != null) {
             imm.viewClicked(this);
         }
