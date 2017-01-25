@@ -65,7 +65,7 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
 
         AssetManager assets = new AssetManager();
         try {
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
             loadApkIntoAssetManager(assets, mBaseCodePath, mFlags);
 

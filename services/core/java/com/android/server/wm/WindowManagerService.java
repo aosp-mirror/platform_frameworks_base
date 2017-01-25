@@ -4826,6 +4826,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDisplayMetrics, dw, dh, displayId);
         config.densityDpi = displayInfo.logicalDensityDpi;
 
+        config.colorMode =
+                (displayInfo.isHdr()
+                        ? Configuration.COLOR_MODE_HDR_YES
+                        : Configuration.COLOR_MODE_HDR_NO)
+                | (displayInfo.isWideColorGamut()
+                        ? Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES
+                        : Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO);
+
         // Update the configuration based on available input devices, lid switch,
         // and platform configuration.
         config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;

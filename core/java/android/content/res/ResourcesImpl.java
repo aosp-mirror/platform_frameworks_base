@@ -420,7 +420,7 @@ public class ResourcesImpl {
                         mConfiguration.smallestScreenWidthDp,
                         mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                         mConfiguration.screenLayout, mConfiguration.uiMode,
-                        Build.VERSION.RESOURCES_SDK_INT);
+                        mConfiguration.colorMode, Build.VERSION.RESOURCES_SDK_INT);
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "

@@ -681,7 +681,7 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
                                                           jint smallestScreenWidthDp,
                                                           jint screenWidthDp, jint screenHeightDp,
                                                           jint screenLayout, jint uiMode,
-                                                          jint sdkVersion)
+                                                          jint colorMode, jint sdkVersion)
 {
     AssetManager* am = assetManagerForJavaObject(env, clazz);
     if (am == NULL) {
@@ -712,6 +712,7 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
     config.screenHeightDp = (uint16_t)screenHeightDp;
     config.screenLayout = (uint8_t)screenLayout;
     config.uiMode = (uint8_t)uiMode;
+    config.colorMode = (uint8_t)colorMode;
     config.sdkVersion = (uint16_t)sdkVersion;
     config.minorVersion = 0;
 
@@ -1691,7 +1692,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
         (void*) android_content_AssetManager_getSizeConfigurations },
     // @FastNative
-    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIII)V",
+    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
     // @FastNative
     { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",

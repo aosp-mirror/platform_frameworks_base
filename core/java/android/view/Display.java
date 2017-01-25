@@ -777,8 +777,7 @@ public final class Display {
     public boolean isHdr() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            int[] types = mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
-            return types != null && types.length > 0;
+            return mDisplayInfo.isHdr();
         }
     }
 
@@ -788,12 +787,7 @@ public final class Display {
     public boolean isWideColorGamut() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            for (int colorMode : mDisplayInfo.supportedColorModes) {
-                if (colorMode == COLOR_MODE_DCI_P3 || colorMode > COLOR_MODE_SRGB) {
-                    return true;
-                }
-            }
-            return false;
+            return mDisplayInfo.isWideColorGamut();
         }
     }
 
