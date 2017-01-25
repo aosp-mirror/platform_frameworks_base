@@ -46,6 +46,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
@@ -2427,6 +2428,9 @@ public class Notification implements Parcelable
 
         private static final int MAX_ACTION_BUTTONS = 3;
 
+        private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
+                SystemProperties.getBoolean("notifications.only_title", true);
+
         private Context mContext;
         private Notification mN;
         private Bundle mUserExtras = new Bundle();
@@ -3760,7 +3764,7 @@ public class Notification implements Parcelable
             } else if (mActions.size() != 0) {
                 result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
             }
-            adaptNotificationHeaderForBigContentView(result);
+            makeHeaderExpanded(result);
             return result;
         }
 
@@ -3795,7 +3799,12 @@ public class Notification implements Parcelable
             }
         }
 
-        private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
+        /**
+         * Adapt the Notification header if this view is used as an expanded view.
+         *
+         * @hide
+         */
+        public static void makeHeaderExpanded(RemoteViews result) {
             if (result != null) {
                 result.setBoolean(R.id.notification_header, "setExpanded", true);
             }
@@ -3855,7 +3864,57 @@ public class Notification implements Parcelable
             return publicView;
         }
 
+        /**
+         * Construct a content view for the display when low - priority
+         *
+         * @param useRegularSubtext uses the normal subtext set if there is one available. Otherwise
+         *                          a new subtext is created consisting of the content of the
+         *                          notification.
+         * @hide
+         */
+        public RemoteViews makeLowPriorityContentView(boolean useRegularSubtext) {
+            int color = mN.color;
+            mN.color = COLOR_DEFAULT;
+            CharSequence summary = mN.extras.getCharSequence(EXTRA_SUB_TEXT);
+            if (!useRegularSubtext || TextUtils.isEmpty(summary)) {
+                CharSequence newSummary = createSummaryText();
+                if (!TextUtils.isEmpty(newSummary)) {
+                    mN.extras.putCharSequence(EXTRA_SUB_TEXT, newSummary);
+                }
+            }
+            RemoteViews header = makeNotificationHeader();
+            if (summary != null) {
+                mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);
+            } else {
+                mN.extras.remove(EXTRA_SUB_TEXT);
+            }
+            mN.color = color;
+            return header;
+        }
 
+        private CharSequence createSummaryText() {
+            CharSequence titleText = mN.extras.getCharSequence(Notification.EXTRA_TITLE);
+            if (USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY) {
+                return titleText;
+            }
+            SpannableStringBuilder summary = new SpannableStringBuilder();
+            if (titleText == null) {
+                titleText = mN.extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
+            }
+            BidiFormatter bidi = BidiFormatter.getInstance();
+            if (titleText != null) {
+                summary.append(bidi.unicodeWrap(titleText));
+            }
+            CharSequence contentText = mN.extras.getCharSequence(Notification.EXTRA_TEXT);
+            if (titleText != null && contentText != null) {
+                summary.append(bidi.unicodeWrap(mContext.getText(
+                        R.string.notification_header_divider_symbol_with_spaces)));
+            }
+            if (contentText != null) {
+                summary.append(bidi.unicodeWrap(contentText));
+            }
+            return summary;
+        }
 
         private RemoteViews generateActionButton(Action action, boolean emphazisedMode,
                 boolean oddAction, boolean ambient) {

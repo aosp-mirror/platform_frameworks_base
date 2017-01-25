@@ -129,6 +129,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mHeadsUpAnimatingAway;
     private boolean mIconsVisible;
     private int mClipBottomAmount;
+    private boolean mIsLowPriority;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -163,20 +164,31 @@ public class NotificationContentView extends FrameLayout {
         if (mExpandedChild != null) {
             int size = Math.min(maxSize, mNotificationMaxHeight);
             ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
+            boolean useExactly = false;
             if (layoutParams.height >= 0) {
                 // An actual height is set
                 size = Math.min(maxSize, layoutParams.height);
+                useExactly = true;
             }
             int spec = size == Integer.MAX_VALUE
                     ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-                    : MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
+                    : MeasureSpec.makeMeasureSpec(size, useExactly
+                            ? MeasureSpec.EXACTLY
+                            : MeasureSpec.AT_MOST);
             mExpandedChild.measure(widthMeasureSpec, spec);
             maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
         }
         if (mContractedChild != null) {
             int heightSpec;
             int size = Math.min(maxSize, mSmallHeight);
-            if (shouldContractedBeFixedSize()) {
+            ViewGroup.LayoutParams layoutParams = mContractedChild.getLayoutParams();
+            boolean useExactly = false;
+            if (layoutParams.height >= 0) {
+                // An actual height is set
+                size = Math.min(size, layoutParams.height);
+                useExactly = true;
+            }
+            if (shouldContractedBeFixedSize() || useExactly) {
                 heightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
             } else {
                 heightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
@@ -202,12 +214,15 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             int size = Math.min(maxSize, mHeadsUpHeight);
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
+            boolean useExactly = false;
             if (layoutParams.height >= 0) {
                 // An actual height is set
                 size = Math.min(size, layoutParams.height);
+                useExactly = true;
             }
             mHeadsUpChild.measure(widthMeasureSpec,
-                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
+                    MeasureSpec.makeMeasureSpec(size, useExactly ? MeasureSpec.EXACTLY
+                            : MeasureSpec.AT_MOST));
             maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
         }
         if (mSingleLineView != null) {
@@ -225,12 +240,15 @@ public class NotificationContentView extends FrameLayout {
         if (mAmbientChild != null) {
             int size = Math.min(maxSize, mNotificationAmbientHeight);
             ViewGroup.LayoutParams layoutParams = mAmbientChild.getLayoutParams();
+            boolean useExactly = false;
             if (layoutParams.height >= 0) {
                 // An actual height is set
                 size = Math.min(size, layoutParams.height);
+                useExactly = true;
             }
             mAmbientChild.measure(widthMeasureSpec,
-                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
+                    MeasureSpec.makeMeasureSpec(size, useExactly ? MeasureSpec.EXACTLY
+                            : MeasureSpec.AT_MOST));
             maxChildHeight = Math.max(maxChildHeight, mAmbientChild.getMeasuredHeight());
         }
         int ownHeight = Math.min(maxChildHeight, maxSize);
@@ -606,7 +624,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMinHeight(boolean likeGroupExpanded) {
-        if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded()) {
+        if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded() || mIsLowPriority) {
             return mContractedChild.getHeight();
         } else {
             return mSingleLineView.getHeight();
@@ -868,7 +886,7 @@ public class NotificationContentView extends FrameLayout {
                 height = mContentHeight;
             }
             int expandedVisualType = getVisualTypeForHeight(height);
-            int collapsedVisualType = mIsChildInGroup && !isGroupExpanded()
+            int collapsedVisualType = mIsChildInGroup && !isGroupExpanded() && !mIsLowPriority
                     ? VISIBLE_TYPE_SINGLELINE
                     : getVisualTypeForHeight(mContainingNotification.getCollapsedHeight());
             return mTransformationStartVisibleType == collapsedVisualType
@@ -889,7 +907,7 @@ public class NotificationContentView extends FrameLayout {
         if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
-        if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded()) {
+        if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded() && !mIsLowPriority) {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
@@ -976,16 +994,16 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
         applyRemoteInput(entry);
         if (mContractedChild != null) {
-            mContractedWrapper.notifyContentUpdated(entry.notification);
+            mContractedWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.notifyContentUpdated(entry.notification);
+            mExpandedWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.notifyContentUpdated(entry.notification);
+            mHeadsUpWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
         if (mAmbientChild != null) {
-            mAmbientWrapper.notifyContentUpdated(entry.notification);
+            mAmbientWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
         updateShowingLegacyBackground();
         mForceSelectNextLayout = true;
@@ -1281,5 +1299,9 @@ public class NotificationContentView extends FrameLayout {
                 header.getIcon().setForceHidden(!mIconsVisible);
             }
         }
+    }
+
+    public void setIsLowPriority(boolean isLowPriority) {
+        mIsLowPriority = isLowPriority;
     }
 }

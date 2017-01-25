@@ -1524,8 +1524,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.notification.getUser().getIdentifier());
 
         final StatusBarNotification sbn = entry.notification;
+        boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         try {
-            entry.cacheContentViews(mContext, null);
+            entry.cacheContentViews(mContext, null, isLowPriority);
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             return false;
@@ -1597,6 +1598,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         workAroundBadLayerDrawableOpacity(row);
         bindDismissRunnable(row);
+        row.setIsLowPriority(isLowPriority);
 
         // NB: the large icon is now handled entirely by the template
 
@@ -2283,7 +2285,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         boolean applyInPlace;
         try {
-            applyInPlace = entry.cacheContentViews(mContext, notification.getNotification());
+            applyInPlace = entry.cacheContentViews(mContext, notification.getNotification(),
+                    mNotificationData.isAmbient(key));
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             applyInPlace = false;

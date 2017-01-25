@@ -78,6 +78,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private NotificationHeaderUtil mHeaderUtil;
     private ViewState mHeaderViewState;
     private int mClipBottomAmount;
+    private boolean mIsLowPriority;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -246,10 +247,13 @@ public class NotificationChildrenContainer extends ViewGroup {
         return mChildren.size();
     }
 
-    public void recreateNotificationHeader(OnClickListener listener, StatusBarNotification notification) {
+    public void recreateNotificationHeader(OnClickListener listener,
+            StatusBarNotification notification) {
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 mNotificationParent.getStatusBarNotification().getNotification());
-        final RemoteViews header = builder.makeNotificationHeader();
+        final RemoteViews header = mIsLowPriority
+                ? builder.makeLowPriorityContentView(true /* useRegularSubtext */)
+                : builder.makeNotificationHeader();
         if (mNotificationHeader == null) {
             mNotificationHeader = (NotificationHeaderView) header.apply(getContext(), this);
             final View expandButton = mNotificationHeader.findViewById(
@@ -262,7 +266,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             invalidate();
         } else {
             header.reapply(getContext(), mNotificationHeader);
-            mNotificationHeaderWrapper.notifyContentUpdated(notification);
+            mNotificationHeaderWrapper.notifyContentUpdated(notification, mIsLowPriority);
         }
         updateChildrenHeaderAppearance();
     }
@@ -367,6 +371,9 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @return the intrinsic size of this children container, i.e the natural fully expanded state
      */
     public int getIntrinsicHeight() {
+        if (mIsLowPriority && !mChildrenExpanded) {
+            return mNotificationHeader.getHeight();
+        }
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren();
         return getIntrinsicHeight(maxAllowedVisibleChildren);
     }
@@ -480,7 +487,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.clipTopAmount = 0;
             childState.alpha = 0;
             if (i < firstOverflowIndex) {
-                childState.alpha = 1;
+                childState.alpha = mIsLowPriority && !mChildrenExpanded ? expandFactor : 1.0f;
             } else if (expandFactor == 1.0f && i <= lastVisibleIndex) {
                 childState.alpha = (mActualHeight - childState.yTranslation) / childState.height;
                 childState.alpha = Math.max(0.0f, Math.min(1.0f, childState.alpha));
@@ -828,6 +835,9 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     private int getMinHeight(int maxAllowedVisibleChildren) {
+        if (mIsLowPriority && !mChildrenExpanded) {
+            return mNotificationHeader.getHeight();
+        }
         int minExpandHeight = mNotificationHeaderMargin;
         int visibleChildren = 0;
         boolean firstChild = true;
@@ -921,5 +931,9 @@ public class NotificationChildrenContainer extends ViewGroup {
     public void setClipBottomAmount(int clipBottomAmount) {
         mClipBottomAmount = clipBottomAmount;
         updateChildrenClipping();
+    }
+
+    public void setIsLowPriority(boolean isLowPriority) {
+        mIsLowPriority = isLowPriority;
     }
 }
