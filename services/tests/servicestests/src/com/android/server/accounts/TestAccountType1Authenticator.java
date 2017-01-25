@@ -240,8 +240,11 @@ public class TestAccountType1Authenticator extends AbstractAccountAuthenticator 
             String[] features) throws NetworkErrorException {
         Bundle result = new Bundle();
         if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_SUCCESS)) {
-            // fill bundle with a success result.
+            // fill bundle with true.
             result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
+        } else if (account.name.equals(AccountManagerServiceTestFixtures.ACCOUNT_NAME_INTERVENE)) {
+            // fill bundle with false.
+            result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
         } else {
             // return null for error
             result = null;

@@ -380,8 +380,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 null); // optionsIn
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -398,8 +397,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     null); // optionsIn
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -678,8 +676,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 null); // optionsIn
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -695,8 +692,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 null); // optionsIn
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -863,8 +859,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -880,8 +875,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1156,8 +1150,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1171,8 +1164,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 AccountManagerServiceTestFixtures.ACCOUNT_STATUS_TOKEN);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1186,8 +1178,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 null);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1237,8 +1228,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1253,8 +1243,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1269,10 +1258,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
-
     }
 
     @SmallTest
@@ -1290,8 +1277,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 "testPackage"); // opPackageName
             fail("SecurityException expected. But no exception was thrown.");
         } catch (SecurityException e) {
-        } catch(Exception e){
-            fail(String.format("Expect SecurityException, but got %s.", e));
+            // SecurityException is expected.
         }
     }
 
@@ -1339,8 +1325,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1355,8 +1340,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1373,8 +1357,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("SecurityException expected. But no exception was thrown.");
         } catch (SecurityException e) {
-        } catch(Exception e){
-            fail(String.format("Expect SecurityException, but got %s.", e));
+            // SecurityException is expected.
         }
     }
 
@@ -1504,8 +1487,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 "authTokenType");
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1519,8 +1501,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 null); // authTokenType
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1537,8 +1518,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     createGetAuthTokenOptions());
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1595,8 +1575,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     createGetAuthTokenOptions());
             fail("SecurityException expected. But no exception was thrown.");
         } catch (SecurityException e) {
-        } catch(Exception e){
-            fail(String.format("Expect SecurityException, but got %s.", e));
+            // SecurityException is expected.
         }
     }
 
@@ -1767,8 +1746,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -1786,8 +1764,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2036,8 +2013,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2053,8 +2029,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 UserHandle.USER_SYSTEM);
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2170,8 +2145,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 new Bundle()); // options
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2187,8 +2161,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 new Bundle()); // options
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2305,8 +2278,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 false); // expectActivityLaunch
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2320,8 +2292,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 false); // expectActivityLaunch
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
-        } catch(Exception e){
-            fail(String.format("Expect IllegalArgumentException, but got %s.", e));
+            // IllegalArgumentException is expected.
         }
     }
 
@@ -2337,8 +2308,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 false); // expectActivityLaunch
             fail("SecurityException expected. But no exception was thrown.");
         } catch (SecurityException e) {
-        } catch(Exception e){
-            fail(String.format("Expect SecurityException, but got %s.", e));
+            // SecurityException is expected.
         }
     }
 
@@ -2362,6 +2332,129 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 result.getString(AccountManager.KEY_ACCOUNT_NAME));
         assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
                 result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesWithNullResponse() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.getAccountsByFeatures(
+                null, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is expected.
+        }
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesWithNullAccountType() throws Exception {
+        unlockSystemUser();
+        try {
+            mAms.getAccountsByFeatures(
+                mMockAccountManagerResponse, // response
+                null, // accountType
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+            fail("IllegalArgumentException expected. But no exception was thrown.");
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is expected.
+        }
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesAccountNotVisible() throws Exception {
+        unlockSystemUser();
+
+        when(mMockContext.checkCallingOrSelfPermission(anyString())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+        when(mMockPackageManager.checkSignatures(anyInt(), anyInt()))
+                    .thenReturn(PackageManager.SIGNATURE_NO_MATCH);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.getAccountsByFeatures(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Account[] accounts = (Account[]) result.getParcelableArray(AccountManager.KEY_ACCOUNTS);
+        assertTrue(accounts.length == 0);
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesNullFeatureReturnsAllAccounts() throws Exception {
+        unlockSystemUser();
+
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p12", null);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.getAccountsByFeatures(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                null, // features
+                "testpackage"); // opPackageName
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Account[] accounts = (Account[]) result.getParcelableArray(AccountManager.KEY_ACCOUNTS);
+        Arrays.sort(accounts, new AccountSorter());
+        assertEquals(2, accounts.length);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, accounts[0]);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[1]);
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesReturnsAccountsWithFeaturesOnly() throws Exception {
+        unlockSystemUser();
+
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_INTERVENE, "p12", null);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.getAccountsByFeatures(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
+        Bundle result = mBundleCaptor.getValue();
+        Account[] accounts = (Account[]) result.getParcelableArray(AccountManager.KEY_ACCOUNTS);
+        assertEquals(1, accounts.length);
+        assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, accounts[0]);
+    }
+
+    @SmallTest
+    public void testGetAccountsByFeaturesError() throws Exception {
+        unlockSystemUser();
+
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p11", null);
+        mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_ERROR, "p12", null);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        Response response = new Response(latch, mMockAccountManagerResponse);
+        mAms.getAccountsByFeatures(
+                response, // response
+                AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1, // accountType
+                AccountManagerServiceTestFixtures.ACCOUNT_FEATURES,
+                "testpackage"); // opPackageName
+        waitForLatch(latch);
+
+        verify(mMockAccountManagerResponse).onError(
+                eq(AccountManager.ERROR_CODE_INVALID_RESPONSE), anyString());
+        verify(mMockAccountManagerResponse, never()).onResult(any(Bundle.class));
     }
 
     private void waitForLatch(CountDownLatch latch) {
