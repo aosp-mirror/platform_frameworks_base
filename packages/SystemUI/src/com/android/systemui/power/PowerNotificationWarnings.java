@@ -217,8 +217,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
         mTempWarning = false;
-        mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP,
-                UserHandle.ALL);
+        dismissTemperatureWarningInternal();
+    }
+
+    /**
+     * Internal only version of {@link #dismissTemperatureWarning()} that simply dismisses
+     * the notification. As such, the notification will not show again until
+     * {@link #dismissTemperatureWarning()} is called.
+     */
+    private void dismissTemperatureWarningInternal() {
+        mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, UserHandle.ALL);
     }
 
     @Override
@@ -390,10 +398,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
                 dismissLowBatteryWarning();
             } else if (ACTION_CLICKED_TEMP_WARNING.equals(action)) {
-                dismissTemperatureWarning();
+                dismissTemperatureWarningInternal();
                 showTemperatureDialog();
             } else if (ACTION_DISMISSED_TEMP_WARNING.equals(action)) {
-                dismissTemperatureWarning();
+                dismissTemperatureWarningInternal();
             }
         }
     }
