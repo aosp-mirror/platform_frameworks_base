@@ -295,6 +295,15 @@ public class Installer extends SystemService {
         }
     }
 
+    public void removeIdmap(String overlayApkPath) throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.removeIdmap(overlayApkPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     public void rmdex(String codePath, String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
