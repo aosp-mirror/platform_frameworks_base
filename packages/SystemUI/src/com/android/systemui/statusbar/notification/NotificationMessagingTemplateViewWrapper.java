@@ -44,11 +44,16 @@ public class NotificationMessagingTemplateViewWrapper extends NotificationTempla
                 && ((MessagingLinearLayout) container).getChildCount() > 0) {
             MessagingLinearLayout messagingContainer = (MessagingLinearLayout) container;
 
-            // Only consider the first child - transforming to a position other than the first
-            // looks bad because we have to move across other messages that are fading in.
-            View child = messagingContainer.getChildAt(0);
-            if (child.getId() == messagingContainer.getContractedChildId()) {
-                mContractedMessage = child;
+            // Only consider the first visible child - transforming to a position other than the
+            // first looks bad because we have to move across other messages that are fading in.
+            int childCount = messagingContainer.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = messagingContainer.getChildAt(i);
+                if (child.getId() == messagingContainer.getContractedChildId()) {
+                    mContractedMessage = child;
+                } else if (child.getVisibility() == View.VISIBLE) {
+                    break;
+                }
             }
         }
     }

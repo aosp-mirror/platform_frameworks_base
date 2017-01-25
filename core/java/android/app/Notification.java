@@ -972,6 +972,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_MESSAGES = "android.messages";
 
     /**
+     * {@link #extras} key: an array of
+     * {@link android.app.Notification.MessagingStyle#addHistoricMessage historic}
+     * {@link android.app.Notification.MessagingStyle.Message} bundles provided by a
+     * {@link android.app.Notification.MessagingStyle} notification. This extra is a parcelable
+     * array of bundles.
+     */
+    public static final String EXTRA_HISTORIC_MESSAGES = "android.messages.historic";
+
+    /**
      * {@link #extras} key: the user that built the notification.
      *
      * @hide
@@ -4809,6 +4818,7 @@ public class Notification implements Parcelable
         CharSequence mUserDisplayName;
         CharSequence mConversationTitle;
         List<Message> mMessages = new ArrayList<>();
+        List<Message> mHistoricMessages = new ArrayList<>();
 
         MessagingStyle() {
         }
@@ -4865,15 +4875,15 @@ public class Notification implements Parcelable
          * @return this object for method chaining
          */
         public MessagingStyle addMessage(CharSequence text, long timestamp, CharSequence sender) {
-            mMessages.add(new Message(text, timestamp, sender));
-            if (mMessages.size() > MAXIMUM_RETAINED_MESSAGES) {
-                mMessages.remove(0);
-            }
-            return this;
+            return addMessage(new Message(text, timestamp, sender));
         }
 
         /**
          * Adds a {@link Message} for display in this notification.
+         *
+         * <p>The messages should be added in chronologic order, i.e. the oldest first,
+         * the newest last.
+         *
          * @param message The {@link Message} to be displayed
          * @return this object for method chaining
          */
@@ -4886,10 +4896,38 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Adds a {@link Message} for historic context in this notification.
+         *
+         * <p>Messages should be added as historic if they are not the main subject of the
+         * notification but may give context to a conversation. The system may choose to present
+         * them only when relevant, e.g. when replying to a message through a {@link RemoteInput}.
+         *
+         * <p>The messages should be added in chronologic order, i.e. the oldest first,
+         * the newest last.
+         *
+         * @param message The historic {@link Message} to be added
+         * @return this object for method chaining
+         */
+        public MessagingStyle addHistoricMessage(Message message) {
+            mHistoricMessages.add(message);
+            if (mHistoricMessages.size() > MAXIMUM_RETAINED_MESSAGES) {
+                mHistoricMessages.remove(0);
+            }
+            return this;
+        }
+
+        /**
          * Gets the list of {@code Message} objects that represent the notification
          */
         public List<Message> getMessages() {
             return mMessages;
+        }
+
+        /**
+         * Gets the list of historic {@code Message}s in the notification.
+         */
+        public List<Message> getHistoricMessages() {
+            return mHistoricMessages;
         }
 
         /**
@@ -4906,6 +4944,9 @@ public class Notification implements Parcelable
             }
             if (!mMessages.isEmpty()) { extras.putParcelableArray(EXTRA_MESSAGES,
                     Message.getBundleArrayForMessages(mMessages));
+            }
+            if (!mHistoricMessages.isEmpty()) { extras.putParcelableArray(EXTRA_HISTORIC_MESSAGES,
+                    Message.getBundleArrayForMessages(mHistoricMessages));
             }
 
             fixTitleAndTextExtras(extras);
@@ -4946,11 +4987,16 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             mMessages.clear();
+            mHistoricMessages.clear();
             mUserDisplayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
-            Parcelable[] parcelables = extras.getParcelableArray(EXTRA_MESSAGES);
-            if (parcelables != null && parcelables instanceof Parcelable[]) {
-                mMessages = Message.getMessagesFromBundleArray(parcelables);
+            Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (messages != null && messages instanceof Parcelable[]) {
+                mMessages = Message.getMessagesFromBundleArray(messages);
+            }
+            Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            if (histMessages != null && histMessages instanceof Parcelable[]) {
+                mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             }
         }
 
@@ -5035,6 +5081,21 @@ public class Notification implements Parcelable
 
             int contractedChildId = View.NO_ID;
             Message contractedMessage = findLatestIncomingMessage();
+            int firstHistoricMessage = Math.max(0, mHistoricMessages.size()
+                    - (rowIds.length - mMessages.size()));
+            while (firstHistoricMessage + i < mHistoricMessages.size() && i < rowIds.length) {
+                Message m = mHistoricMessages.get(firstHistoricMessage + i);
+                int rowId = rowIds[i];
+
+                contentView.setTextViewText(rowId, makeMessageLine(m));
+
+                if (contractedMessage == m) {
+                    contractedChildId = rowId;
+                }
+
+                i++;
+            }
+
             int firstMessage = Math.max(0, mMessages.size() - rowIds.length);
             while (firstMessage + i < mMessages.size() && i < rowIds.length) {
                 Message m = mMessages.get(firstMessage + i);
@@ -5049,6 +5110,14 @@ public class Notification implements Parcelable
 
                 i++;
             }
+            // Clear the remaining views for reapply. Ensures that historic message views can
+            // reliably be identified as being GONE and having non-null text.
+            while (i < rowIds.length) {
+                int rowId = rowIds[i];
+                contentView.setTextViewText(rowId, null);
+                i++;
+            }
+
             // Record this here to allow transformation between the contracted and expanded views.
             contentView.setInt(R.id.notification_messaging, "setContractedChildId",
                     contractedChildId);
