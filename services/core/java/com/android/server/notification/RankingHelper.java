@@ -23,6 +23,7 @@ import com.android.internal.util.Preconditions;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -59,6 +60,7 @@ public class RankingHelper implements RankingConfig {
     private static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_CHANNEL = "channel";
+    private static final String TAG_GROUP = "channelGroup";
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
@@ -174,7 +176,6 @@ public class RankingHelper implements RankingConfig {
                                 safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                                 safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
 
-                        // Channels
                         final int innerDepth = parser.getDepth();
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                                 && (type != XmlPullParser.END_TAG
@@ -184,6 +185,17 @@ public class RankingHelper implements RankingConfig {
                             }
 
                             String tagName = parser.getName();
+                            // Channel groups
+                            if (TAG_GROUP.equals(tagName)) {
+                                String id = parser.getAttributeValue(null, ATT_ID);
+                                CharSequence groupName = parser.getAttributeValue(null, ATT_NAME);
+                                if (!TextUtils.isEmpty(id)) {
+                                    final NotificationChannelGroup group =
+                                            new NotificationChannelGroup(id, groupName);
+                                    r.groups.put(id, group);
+                                }
+                            }
+                            // Channels
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
@@ -302,7 +314,8 @@ public class RankingHelper implements RankingConfig {
             }
             final boolean hasNonDefaultSettings = r.importance != DEFAULT_IMPORTANCE
                     || r.priority != DEFAULT_PRIORITY || r.visibility != DEFAULT_VISIBILITY
-                    || r.showBadge != DEFAULT_SHOW_BADGE || r.channels.size() > 0;
+                    || r.showBadge != DEFAULT_SHOW_BADGE || r.channels.size() > 0
+                    || r.groups.size() > 0;
             if (hasNonDefaultSettings) {
                 out.startTag(null, TAG_PACKAGE);
                 out.attribute(null, ATT_NAME, r.pkg);
@@ -319,6 +332,10 @@ public class RankingHelper implements RankingConfig {
 
                 if (!forBackup) {
                     out.attribute(null, ATT_UID, Integer.toString(r.uid));
+                }
+
+                for (NotificationChannelGroup group : r.groups.values()) {
+                    group.writeXml(out);
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
@@ -441,6 +458,21 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
+    public void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
+            boolean fromTargetApp) {
+        Preconditions.checkNotNull(pkg);
+        Preconditions.checkNotNull(group);
+        Preconditions.checkNotNull(group.getId());
+        Preconditions.checkNotNull(group.getName());
+        Record r = getOrCreateRecord(pkg, uid);
+        if (r == null) {
+            throw new IllegalArgumentException("Invalid package");
+        }
+        r.groups.put(group.getId(), group);
+        updateConfig();
+    }
+
+    @Override
     public void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp) {
         Preconditions.checkNotNull(pkg);
@@ -454,6 +486,10 @@ public class RankingHelper implements RankingConfig {
         if (IMPORTANCE_NONE == r.importance) {
             throw new IllegalArgumentException("Package blocked");
         }
+        if (channel.getGroup() != null && !r.groups.containsKey(channel.getGroup())) {
+            throw new IllegalArgumentException("NotificationChannelGroup doesn't exist");
+        }
+
         NotificationChannel existing = r.channels.get(channel.getId());
         // Keep existing settings
         if (existing != null) {
@@ -549,8 +585,9 @@ public class RankingHelper implements RankingConfig {
             channel.setShowBadge(updatedChannel.canShowBadge());
         }
         if (updatedChannel.isDeleted()) {
-            updatedChannel.setDeleted(true);
+            channel.setDeleted(true);
         }
+        // Assistant cannot change the group
 
         r.channels.put(channel.getId(), channel);
         updateConfig();
@@ -629,6 +666,36 @@ public class RankingHelper implements RankingConfig {
                 r.channels.remove(key);
             }
         }
+    }
+
+    @Override
+    public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+            int uid, boolean includeDeleted) {
+        Preconditions.checkNotNull(pkg);
+        List<NotificationChannelGroup> groups = new ArrayList<>();
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return ParceledListSlice.emptyList();
+        }
+        NotificationChannelGroup nonGrouped = new NotificationChannelGroup(null, null);
+        int N = r.channels.size();
+        for (int i = 0; i < N; i++) {
+            final NotificationChannel nc = r.channels.valueAt(i);
+            if (includeDeleted || !nc.isDeleted()) {
+                if (nc.getGroup() != null) {
+                    // lazily populate channel list
+                    NotificationChannelGroup ncg = r.groups.get(nc.getGroup());
+                    ncg.addChannel(nc);
+                } else {
+                    nonGrouped.addChannel(nc);
+                }
+            }
+        }
+        groups.addAll(r.groups.values());
+        if (nonGrouped.getChannels().size() > 0) {
+            groups.add(nonGrouped);
+        }
+        return new ParceledListSlice<>(groups);
     }
 
     @Override
@@ -723,6 +790,12 @@ public class RankingHelper implements RankingConfig {
                     pw.print("  ");
                     pw.println(channel);
                 }
+                for (NotificationChannelGroup group : r.groups.values()) {
+                    pw.print(prefix);
+                    pw.print("  ");
+                    pw.print("  ");
+                    pw.println(group);
+                }
             }
         }
     }
@@ -757,6 +830,9 @@ public class RankingHelper implements RankingConfig {
                     }
                     for (NotificationChannel channel : r.channels.values()) {
                         record.put("channel", channel.toJson());
+                    }
+                    for (NotificationChannelGroup group : r.groups.values()) {
+                        record.put("group", group.toJson());
                     }
                 } catch (JSONException e) {
                    // pass
@@ -871,5 +947,6 @@ public class RankingHelper implements RankingConfig {
         boolean showBadge = DEFAULT_SHOW_BADGE;
 
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
+        ArrayMap<String, NotificationChannelGroup> groups = new ArrayMap<>();
    }
 }

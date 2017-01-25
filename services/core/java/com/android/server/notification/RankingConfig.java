@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.content.pm.ParceledListSlice;
 
 public interface RankingConfig {
@@ -25,6 +26,10 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
 
+    void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
+            boolean fromTargetApp);
+    ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+            int uid, boolean includeDeleted);
     void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel);
