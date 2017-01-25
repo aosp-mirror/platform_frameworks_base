@@ -382,6 +382,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
     }
 
+    TaskStack getStackById(int stackId) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final DisplayContent dc = mChildren.get(i);
+            final TaskStack stack = dc.getStackById(stackId);
+            if (stack != null) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
     void setSecureSurfaceState(int userId, boolean disabled) {
         forAllWindows((w) -> {
             if (w.mHasSurface && userId == UserHandle.getUserId(w.mOwnerUid)) {
@@ -535,18 +546,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
-            for (i = displayContent.mExitingTokens.size() - 1; i >= 0; i--) {
-                displayContent.mExitingTokens.get(i).hasVisible = false;
-            }
-        }
-
-        for (int stackNdx = mService.mStackIdToStack.size() - 1; stackNdx >= 0; --stackNdx) {
-            // Initialize state of exiting applications.
-            final AppTokenList exitingAppTokens =
-                    mService.mStackIdToStack.valueAt(stackNdx).mExitingAppTokens;
-            for (int tokenNdx = exitingAppTokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                exitingAppTokens.get(tokenNdx).hasVisible = false;
-            }
+            displayContent.setExitingTokensHasVisible(false);
         }
 
         mHoldScreen = null;
@@ -681,33 +681,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         // Time to remove any exiting tokens?
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
-            ArrayList<WindowToken> exitingTokens = displayContent.mExitingTokens;
-            for (i = exitingTokens.size() - 1; i >= 0; i--) {
-                WindowToken token = exitingTokens.get(i);
-                if (!token.hasVisible) {
-                    exitingTokens.remove(i);
-                }
-            }
-        }
-
-        // Time to remove any exiting applications?
-        for (int stackNdx = mService.mStackIdToStack.size() - 1; stackNdx >= 0; --stackNdx) {
-            // Initialize state of exiting applications.
-            final AppTokenList exitingAppTokens =
-                    mService.mStackIdToStack.valueAt(stackNdx).mExitingAppTokens;
-            for (i = exitingAppTokens.size() - 1; i >= 0; i--) {
-                final AppWindowToken token = exitingAppTokens.get(i);
-                if (!token.hasVisible && !mService.mClosingApps.contains(token) &&
-                        (!token.mIsExiting || token.isEmpty())) {
-                    // Make sure there is no animation running on this token, so any windows
-                    // associated with it will be removed as soon as their animations are complete
-                    token.mAppAnimator.clearAnimation();
-                    token.mAppAnimator.animating = false;
-                    if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
-                            "performLayout: App token exiting now removed" + token);
-                    token.removeIfPossible();
-                }
-            }
+            displayContent.removeExistingTokensIfPossible();
         }
 
         if (wallpaperDestroyed) {

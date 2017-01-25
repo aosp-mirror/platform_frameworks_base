@@ -27,7 +27,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
 
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManager.TaskDescription;
@@ -567,11 +566,10 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (setBounds(mTmpRect2, getOverrideConfiguration()) != BOUNDS_CHANGE_NONE) {
-            // Post message to inform activity manager of the bounds change simulating a one-way
-            // call. We do this to prevent a deadlock between window manager lock and activity
-            // manager lock been held.
-            mService.mH.obtainMessage(RESIZE_TASK, mTaskId,
-                    RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds).sendToTarget();
+            final TaskWindowContainerController controller = getController();
+            if (controller != null) {
+                controller.requestResize(mBounds, RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
+            }
         }
     }
 

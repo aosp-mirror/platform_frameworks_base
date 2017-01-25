@@ -119,6 +119,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
         assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, sWm.mLastOrientation);
         assertTrue(appWindow.resizeReported);
+        appWindow.removeImmediately();
     }
 
     @Test
@@ -148,5 +149,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
         sWm.updateRotation(false, false);
         sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
         assertTrue(appWindow.resizeReported);
+        appWindow.removeImmediately();
     }
 }

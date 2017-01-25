@@ -340,12 +340,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Rect getBoundsForNewConfiguration(int stackId) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void setScreenCaptureDisabled(int userId, boolean disabled) {
         // TODO Auto-generated method stub
     }

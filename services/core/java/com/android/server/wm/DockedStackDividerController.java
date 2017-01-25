@@ -457,8 +457,7 @@ public class DockedStackDividerController implements DimLayerUser {
     void registerDockedStackListener(IDockedStackListener listener) {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());
-        notifyDockedStackExistsChanged(
-                mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID) != null);
+        notifyDockedStackExistsChanged(mDisplayContent.getDockedStackIgnoringVisibility() != null);
         notifyDockedStackMinimizedChanged(mMinimizedDock, 0 /* animDuration */);
         notifyAdjustedForImeChanged(mAdjustedForIme, 0 /* animDuration */);
 
@@ -466,7 +465,7 @@ public class DockedStackDividerController implements DimLayerUser {
 
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
         mService.openSurfaceTransaction();
-        final TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(targetStackId);
+        final TaskStack stack = mDisplayContent.getStackById(targetStackId);
         final TaskStack dockedStack = mDisplayContent.getDockedStackLocked();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
         if (visibleAndValid) {
@@ -544,8 +543,8 @@ public class DockedStackDividerController implements DimLayerUser {
         if (homeTask == null || !isWithinDisplay(homeTask)) {
             return;
         }
-        final TaskStack fullscreenStack
-                = mService.mStackIdToStack.get(FULLSCREEN_WORKSPACE_STACK_ID);
+        final TaskStack fullscreenStack =
+                mDisplayContent.getStackById(FULLSCREEN_WORKSPACE_STACK_ID);
         final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
         final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisible())
                 || (homeStack.hasMultipleTaskWithHomeTaskNotTop());
@@ -739,7 +738,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        final TaskStack stack = mDisplayContent.getStackById(DOCKED_STACK_ID);
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;

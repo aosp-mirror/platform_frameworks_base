@@ -27,6 +27,8 @@ import android.util.EventLog;
 import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.ref.WeakReference;
+
 import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
@@ -43,43 +45,38 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 public class TaskWindowContainerController
         extends WindowContainerController<Task, TaskWindowContainerListener> {
 
-    private static final int REPORT_SNAPSHOT_CHANGED = 0;
-
     private final int mTaskId;
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case REPORT_SNAPSHOT_CHANGED:
-                    if (mListener != null) {
-                        mListener.onSnapshotChanged((TaskSnapshot) msg.obj);
-                    }
-                    break;
-            }
-        }
-    };
+    private final H mHandler;
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
-            int stackId, int userId, Rect bounds, Configuration overrideConfig, int resizeMode,
-            boolean supportsPictureInPicture, boolean homeTask, boolean isOnTopLauncher,
-            boolean toTop, boolean showForAllUsers, TaskDescription taskDescription) {
-        super(listener, WindowManagerService.getInstance());
+            StackWindowController stackController, int userId, Rect bounds,
+            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
+            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers,
+            TaskDescription taskDescription) {
+        this(taskId, listener, stackController, userId, bounds, overrideConfig, resizeMode,
+                supportsPictureInPicture, homeTask, isOnTopLauncher, toTop, showForAllUsers,
+                taskDescription, WindowManagerService.getInstance());
+    }
+
+    public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
+            StackWindowController stackController, int userId, Rect bounds,
+            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
+            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers,
+            TaskDescription taskDescription, WindowManagerService service) {
+        super(listener, service);
         mTaskId = taskId;
+        mHandler = new H(new WeakReference<>(this), service.mH.getLooper());
 
         synchronized(mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "TaskWindowContainerController: taskId=" + taskId
-                    + " stackId=" + stackId + " bounds=" + bounds);
+                    + " stack=" + stackController + " bounds=" + bounds);
 
-            // TODO: Pass controller for the stack to get the container object when stack is
-            // switched to use controller.
-            final TaskStack stack = mService.mStackIdToStack.get(stackId);
+            final TaskStack stack = stackController.mContainer;
             if (stack == null) {
-                throw new IllegalArgumentException("TaskWindowContainerController: invalid stackId="
-                        + stackId);
+                throw new IllegalArgumentException("TaskWindowContainerController: invalid stack="
+                        + stackController);
             }
-            EventLog.writeEvent(WM_TASK_CREATED, taskId, stackId);
+            EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
             final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
                     supportsPictureInPicture, homeTask, isOnTopLauncher, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
@@ -124,21 +121,22 @@ public class TaskWindowContainerController
         }
     }
 
-    public void reparent(int stackId, int position) {
+    public void reparent(StackWindowController stackController, int position) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "reparent: moving taskId=" + mTaskId
-                    + " to stackId=" + stackId + " at " + position);
+                    + " to stack=" + stackController + " at " + position);
             if (mContainer == null) {
                 if (DEBUG_STACK) Slog.i(TAG_WM,
                         "reparent: could not find taskId=" + mTaskId);
                 return;
             }
-            final TaskStack stack = mService.mStackIdToStack.get(stackId);
+            final TaskStack stack = stackController.mContainer;
             if (stack == null) {
-                throw new IllegalArgumentException("reparent: could not find stackId=" + stackId);
+                throw new IllegalArgumentException("reparent: could not find stack="
+                        + stackController);
             }
             mContainer.reparent(stack, position);
-            mService.mWindowPlacerLocked.performSurfacePlacement();
+            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
         }
     }
 
@@ -158,65 +156,8 @@ public class TaskWindowContainerController
             }
 
             if (mContainer.resizeLocked(bounds, overrideConfig, forced) && relayout) {
-                mContainer.getDisplayContent().setLayoutNeeded();
-                mService.mWindowPlacerLocked.performSurfacePlacement();
+                mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
             }
-        }
-    }
-
-    // TODO: Move to positionChildAt() in stack controller once we have a stack controller.
-    public void positionAt(int position, Rect bounds, Configuration overrideConfig) {
-        synchronized (mWindowMap) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "positionChildAt: positioning taskId=" + mTaskId
-                    + " at " + position);
-            if (mContainer == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionAt: could not find taskId=" + mTaskId);
-                return;
-            }
-            final TaskStack stack = mContainer.mStack;
-            if (stack == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM,
-                        "positionAt: could not find stack for task=" + mContainer);
-                return;
-            }
-            mContainer.positionAt(position, bounds, overrideConfig);
-            final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.setLayoutNeeded();
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-        }
-    }
-
-    // TODO: Replace with moveChildToTop in stack controller?
-    public void moveToTop(boolean includingParents) {
-        synchronized(mWindowMap) {
-            if (mContainer == null) {
-                Slog.e(TAG_WM, "moveToTop: taskId=" + mTaskId + " not found");
-                return;
-            }
-            final TaskStack stack = mContainer.mStack;
-            stack.positionChildAt(POSITION_TOP, mContainer, includingParents);
-
-            if (mService.mAppTransition.isTransitionSet()) {
-                mContainer.setSendingToBottom(false);
-            }
-            stack.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-        }
-    }
-
-    // TODO: Replace with moveChildToBottom in stack controller?
-    public void moveToBottom() {
-        synchronized(mWindowMap) {
-            if (mContainer == null) {
-                Slog.e(TAG_WM, "moveTaskToBottom: taskId=" + mTaskId + " not found");
-                return;
-            }
-            final TaskStack stack = mContainer.mStack;
-            stack.positionChildAt(POSITION_BOTTOM, mContainer, false /* includingParents */);
-            if (mService.mAppTransition.isTransitionSet()) {
-                mContainer.setSendingToBottom(true);
-            }
-            stack.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
         }
     }
 
@@ -276,11 +217,46 @@ public class TaskWindowContainerController
     }
 
     void reportSnapshotChanged(TaskSnapshot snapshot) {
-        mHandler.obtainMessage(REPORT_SNAPSHOT_CHANGED, snapshot).sendToTarget();
+        mHandler.obtainMessage(H.REPORT_SNAPSHOT_CHANGED, snapshot).sendToTarget();
+    }
+
+    void requestResize(Rect bounds, int resizeMode) {
+        mHandler.obtainMessage(H.REQUEST_RESIZE, resizeMode, 0, bounds).sendToTarget();
     }
 
     @Override
     public String toString() {
         return "{TaskWindowContainerController taskId=" + mTaskId + "}";
+    }
+
+    private static final class H extends Handler {
+
+        static final int REPORT_SNAPSHOT_CHANGED = 0;
+        static final int REQUEST_RESIZE = 1;
+
+        private final WeakReference<TaskWindowContainerController> mController;
+
+        H(WeakReference<TaskWindowContainerController> controller, Looper looper) {
+            super(looper);
+            mController = controller;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final TaskWindowContainerController controller = mController.get();
+            final TaskWindowContainerListener listener = (controller != null)
+                    ? controller.mListener : null;
+            if (listener == null) {
+                return;
+            }
+            switch (msg.what) {
+                case REPORT_SNAPSHOT_CHANGED:
+                    listener.onSnapshotChanged((TaskSnapshot) msg.obj);
+                    break;
+                case REQUEST_RESIZE:
+                    listener.requestResize((Rect) msg.obj, msg.arg1);
+                    break;
+            }
+        }
     }
 }

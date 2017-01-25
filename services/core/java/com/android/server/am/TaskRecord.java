@@ -421,9 +421,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
         final Rect bounds = updateOverrideConfigurationFromLaunchBounds();
         final Configuration overrideConfig = getOverrideConfiguration();
-        mWindowContainerController = new TaskWindowContainerController(taskId, this, getStackId(),
-                userId, bounds, overrideConfig, mResizeMode, mSupportsPictureInPicture,
-                isHomeTask(), isOnTopLauncher(), onTop, showForAllUsers, lastTaskDescription);
+        mWindowContainerController = new TaskWindowContainerController(taskId, this,
+                getStack().getWindowContainerController(), userId, bounds, overrideConfig,
+                mResizeMode, mSupportsPictureInPicture, isHomeTask(), isOnTopLauncher(),
+                onTop, showForAllUsers, lastTaskDescription);
     }
 
     void removeWindowContainer() {
@@ -455,6 +456,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     void setTaskDockedResizing(boolean resizing) {
         mWindowContainerController.setTaskDockedResizing(resizing);
+    }
+
+    // TODO: Consolidate this with the resize() method below.
+    @Override
+    public void requestResize(Rect bounds, int resizeMode) {
+        mService.resizeTask(taskId, bounds, resizeMode);
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
@@ -527,25 +534,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
                 false /* forced */);
     }
 
-    // TODO: Remove once we have a stack controller.
-    void positionWindowContainerAt(int position) {
-        mWindowContainerController.positionAt(position, mBounds, getOverrideConfiguration());
-    }
-
-    // TODO: Replace with moveChildToTop?
-    void moveWindowContainerToTop(boolean includingParents) {
-        if (mWindowContainerController != null) {
-            mWindowContainerController.moveToTop(includingParents);
-        }
-    }
-
-    // TODO: Replace with moveChildToBottom?
-    void moveWindowContainerToBottom() {
-        if (mWindowContainerController != null) {
-            mWindowContainerController.moveToBottom();
-        }
-    }
-
     void getWindowContainerBounds(Rect bounds) {
         mWindowContainerController.getBounds(bounds);
     }
@@ -563,7 +551,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
             // Must reparent first in window manager to avoid a situation where AM can delete the
             // we are coming from in WM before we reparent because it became empty.
-            mWindowContainerController.reparent(stackId, position);
+            mWindowContainerController.reparent(newStack.getWindowContainerController(), position);
 
             final ActivityStack prevStack = mStack;
             prevStack.removeTask(this, reason, REMOVE_TASK_MODE_MOVING);

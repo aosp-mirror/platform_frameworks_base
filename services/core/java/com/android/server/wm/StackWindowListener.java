@@ -16,18 +16,14 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Rect;
 
 /**
- * Interface used by the creator of {@link TaskWindowContainerController} to listen to changes with
- * the task container.
+ * Interface used by the creator of {@link StackWindowController} to listen to changes with
+ * the stack container.
  */
-public interface TaskWindowContainerListener extends WindowContainerListener {
+public interface StackWindowListener extends WindowContainerListener {
 
-    /** Called when the snapshot of this task has changed. */
-    void onSnapshotChanged(TaskSnapshot snapshot);
-
-    /** Called when the task container would like its controller to resize. */
-    void requestResize(Rect bounds, int resizeMode);
+    /** Called when the stack container would like its controller to resize. */
+    void requestResize(Rect bounds);
 }
