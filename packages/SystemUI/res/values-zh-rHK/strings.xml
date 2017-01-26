@@ -342,16 +342,11 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"關閉"</string>
+    <string name="recents_accessibility_open" msgid="1651449827614876864">"開啟"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"將分割畫面顯示喺頂部"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"將分割畫面顯示喺左邊"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"將分割畫面顯示喺右邊"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
