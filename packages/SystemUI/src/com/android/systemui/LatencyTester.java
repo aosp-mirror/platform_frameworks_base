@@ -27,7 +27,7 @@ import android.os.SystemClock;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LatencyTracker;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Class that only runs on debuggable builds that listens to broadcasts that simulate actions in the
@@ -72,7 +72,7 @@ public class LatencyTester extends SystemUI {
     }
 
     private void fakeWakeAndUnlock() {
-        FingerprintUnlockController fingerprintUnlockController = getComponent(PhoneStatusBar.class)
+        FingerprintUnlockController fingerprintUnlockController = getComponent(StatusBar.class)
                 .getFingerprintUnlockController();
         fingerprintUnlockController.onFingerprintAcquired();
         fingerprintUnlockController.onFingerprintAuthenticated(

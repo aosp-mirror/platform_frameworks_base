@@ -60,7 +60,7 @@ public abstract class PanelView extends FrameLayout {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
-    protected PhoneStatusBar mStatusBar;
+    protected StatusBar mStatusBar;
     protected HeadsUpManager mHeadsUpManager;
 
     private float mPeekHeight;

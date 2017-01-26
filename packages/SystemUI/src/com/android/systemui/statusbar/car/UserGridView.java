@@ -29,12 +29,12 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.UserUtil;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 public class UserGridView extends GridView {
 
-    private PhoneStatusBar mStatusBar;
+    private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
     private int mPendingUserId = UserHandle.USER_NULL;
@@ -43,7 +43,7 @@ public class UserGridView extends GridView {
         super(context, attrs);
     }
 
-    public void init(PhoneStatusBar statusBar, UserSwitcherController userSwitcherController) {
+    public void init(StatusBar statusBar, UserSwitcherController userSwitcherController) {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);

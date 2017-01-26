@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -90,7 +90,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private final int mStatusBarHeight;
     private final Context mContext;
     private final NotificationGroupManager mGroupManager;
-    private PhoneStatusBar mBar;
+    private StatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
     private HashMap<String, HeadsUpEntry> mHeadsUpEntries = new HashMap<>();
@@ -162,7 +162,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mIsObserving = shouldObserve;
     }
 
-    public void setBar(PhoneStatusBar bar) {
+    public void setBar(StatusBar bar) {
         mBar = bar;
     }
 
@@ -170,7 +170,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mListeners.add(listener);
     }
 
-    public PhoneStatusBar getBar() {
+    public StatusBar getBar() {
         return mBar;
     }
 

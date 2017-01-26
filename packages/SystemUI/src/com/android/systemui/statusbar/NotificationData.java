@@ -35,6 +35,7 @@ import android.widget.RemoteViews;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.PrintWriter;
@@ -518,7 +519,7 @@ public class NotificationData {
         Collections.sort(mSortedAndFiltered, mRankingComparator);
     }
 
-    boolean shouldFilterOut(StatusBarNotification sbn) {
+    public boolean shouldFilterOut(StatusBarNotification sbn) {
         if (!(mEnvironment.isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
@@ -535,7 +536,7 @@ public class NotificationData {
             return true;
         }
 
-        if (!BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+        if (!StatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }

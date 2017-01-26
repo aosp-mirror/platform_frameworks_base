@@ -17,23 +17,29 @@
 package com.android.systemui.statusbar.tv;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService.RankingMap;
-import android.service.notification.StatusBarNotification;
-import android.view.View;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.statusbar.ActivatableNotificationView;
-import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.SystemUI;
 import com.android.systemui.pip.tv.PipManager;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
+
+import java.util.ArrayList;
 
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav
  */
 
-public class TvStatusBar extends BaseStatusBar {
+public class TvStatusBar extends SystemUI implements Callbacks {
+
+    private IStatusBarService mBarService;
 
     @Override
     public void setIcon(String slot, StatusBarIcon icon) {
@@ -43,16 +49,6 @@ public class TvStatusBar extends BaseStatusBar {
     public void removeIcon(String slot) {
     }
 
-    @Override
-    public void addNotification(StatusBarNotification notification, RankingMap ranking,
-            NotificationData.Entry entry) {
-    }
-
-    @Override
-    protected void updateNotificationRanking(RankingMap ranking) {
-    }
-
-    @Override
     public void removeNotification(String key, RankingMap ranking) {
     }
 
@@ -99,50 +95,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void setAreThereNotifications() {
-    }
-
-    @Override
-    protected void updateNotifications() {
-    }
-
-    public View getStatusBarView() {
-        return null;
-    }
-
-    @Override
-    protected boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
-        return false;
-    }
-
-    @Override
-    public void maybeEscalateHeadsUp() {
-    }
-
-    @Override
-    public boolean isPanelFullyCollapsed() {
-        return false;
-    }
-
-    @Override
-    protected int getMaxKeyguardNotifications(boolean recompute) {
-        return 0;
-    }
-
-    @Override
     public void animateExpandSettingsPanel(String subPanel) {
-    }
-
-    @Override
-    protected void createAndAddWindows() {
-    }
-
-    @Override
-    public void onActivated(ActivatableNotificationView view) {
-    }
-
-    @Override
-    public void onActivationReset(ActivatableNotificationView view) {
     }
 
     @Override
@@ -175,19 +128,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldPeek,
-            boolean alertAgain) {
-    }
-
-    @Override
-    protected void setHeadsUpUser(int newUserId) {
-    }
-
-    protected boolean isSnoozedPackage(StatusBarNotification sbn) {
-        return false;
-    }
-
-    @Override
     public void addQsTile(ComponentName tile) {
     }
 
@@ -201,8 +141,23 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void start() {
-        super.start();
         putComponent(TvStatusBar.class, this);
+        CommandQueue commandQueue = getComponent(CommandQueue.class);
+        commandQueue.addCallbacks(this);
+        int[] switches = new int[9];
+        ArrayList<IBinder> binders = new ArrayList<>();
+        ArrayList<String> iconSlots = new ArrayList<>();
+        ArrayList<StatusBarIcon> icons = new ArrayList<>();
+        Rect fullscreenStackBounds = new Rect();
+        Rect dockedStackBounds = new Rect();
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        try {
+            mBarService.registerStatusBar(commandQueue, iconSlots, icons, switches, binders,
+                    fullscreenStackBounds, dockedStackBounds);
+        } catch (RemoteException ex) {
+            // If the system process isn't there we're doomed anyway.
+        }
     }
 
     @Override

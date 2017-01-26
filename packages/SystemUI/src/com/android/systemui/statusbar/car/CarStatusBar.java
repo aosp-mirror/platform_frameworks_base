@@ -39,7 +39,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -47,7 +47,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
-public class CarStatusBar extends PhoneStatusBar implements
+public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
 

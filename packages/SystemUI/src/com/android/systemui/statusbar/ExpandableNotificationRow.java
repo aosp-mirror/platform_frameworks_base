@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
@@ -436,7 +437,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param parent the new parent notification
      */
     public void setIsChildInGroup(boolean isChildInGroup, ExpandableNotificationRow parent) {;
-        boolean childInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
+        boolean childInGroup = StatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         mNotificationParent = childInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(childInGroup);
         resetBackgroundAlpha();
@@ -1420,7 +1421,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void onChildrenCountChanged() {
-        mIsSummaryWithChildren = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+        mIsSummaryWithChildren = StatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mChildrenContainer != null && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() == null) {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener,

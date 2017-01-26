@@ -64,7 +64,7 @@ import android.content.Context;
  *        new PluginListener<OverlayPlugin>() {
  *        @Override
  *        public void onPluginConnected(OverlayPlugin plugin) {
- *            PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
+ *            StatusBar phoneStatusBar = getComponent(StatusBar.class);
  *            if (phoneStatusBar != null) {
  *                plugin.setup(phoneStatusBar.getStatusBarWindow(),
  *                phoneStatusBar.getNavigationBarView());

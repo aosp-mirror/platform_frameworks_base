@@ -20,8 +20,8 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.PhoneStatusBar.DEBUG_WINDOW_STATE;
-import static com.android.systemui.statusbar.phone.PhoneStatusBar.dumpBarTransitions;
+import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
+import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -67,7 +67,6 @@ import com.android.keyguard.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.SystemUIApplication;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
@@ -105,7 +104,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     protected AccessibilityManager mAccessibilityManager;
 
     private int mDisabledFlags1;
-    private PhoneStatusBar mPhoneStatusBar;
+    private StatusBar mStatusBar;
     private Recents mRecents;
     private Divider mDivider;
     private WindowManager mWindowManager;
@@ -128,7 +127,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         super.onCreate(savedInstanceState);
         mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
         mCommandQueue.addCallbacks(this);
-        mPhoneStatusBar = SysUiServiceProvider.getComponent(getContext(), PhoneStatusBar.class);
+        mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
         mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
         mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
@@ -262,7 +261,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (mNavigationBarView != null) {
             mNavigationBarView.setNavigationIconHints(hints);
         }
-        mPhoneStatusBar.checkBarModes();
+        mStatusBar.checkBarModes();
     }
 
     @Override
@@ -300,21 +299,21 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     /**
      * Calls appTransitionStarting for the nav bar regardless of whether keyguard is going away.
-     * public so PhoneStatusBar can force this when needed.
+     * public so StatusBar can force this when needed.
      */
     public void doAppTransitionStarting(long startTime, long duration) {
         mNavigationBarView.getLightTransitionsController().appTransitionStarting(startTime,
                 duration);
     }
 
-    // Injected from PhoneStatusBar at creation.
+    // Injected from StatusBar at creation.
     public void setCurrentSysuiVisibility(int systemUiVisibility) {
         mSystemUiVisibility = systemUiVisibility;
-        mNavigationBarMode = mPhoneStatusBar.computeBarMode(0, mSystemUiVisibility,
+        mNavigationBarMode = mStatusBar.computeBarMode(0, mSystemUiVisibility,
                 View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT,
                 View.NAVIGATION_BAR_TRANSPARENT);
         checkNavBarModes();
-        mPhoneStatusBar.touchAutoHide();
+        mStatusBar.touchAutoHide();
         mLightBarController.onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */,
                 true /* nbModeChanged */, mNavigationBarMode);
     }
@@ -331,7 +330,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
             // update navigation bar mode
             final int nbMode = getView() == null
-                    ? -1 : mPhoneStatusBar.computeBarMode(oldVal, newVal,
+                    ? -1 : mStatusBar.computeBarMode(oldVal, newVal,
                     View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT,
                     View.NAVIGATION_BAR_TRANSPARENT);
             nbModeChanged = nbMode != -1;
@@ -340,7 +339,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     mNavigationBarMode = nbMode;
                     checkNavBarModes();
                 }
-                mPhoneStatusBar.touchAutoHide();
+                mStatusBar.touchAutoHide();
             }
         }
 
@@ -370,7 +369,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private boolean shouldDisableNavbarGestures() {
-        return !mPhoneStatusBar.isDeviceProvisioned()
+        return !mStatusBar.isDeviceProvisioned()
                 || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
@@ -418,7 +417,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 TelecomManager telecomManager =
                         getContext().getSystemService(TelecomManager.class);
                 if (telecomManager != null && telecomManager.isRinging()) {
-                    if (mPhoneStatusBar.isKeyguardShowing()) {
+                    if (mStatusBar.isKeyguardShowing()) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
                         mHomeBlockedThisTouch = true;
@@ -428,18 +427,18 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mPhoneStatusBar.awakenDreams();
+                mStatusBar.awakenDreams();
                 break;
         }
         return false;
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        mPhoneStatusBar.setQsScrimEnabled(!isVertical);
+        mStatusBar.setQsScrimEnabled(!isVertical);
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {
-        mPhoneStatusBar.checkUserAutohide(v, event);
+        mStatusBar.checkUserAutohide(v, event);
         return false;
     }
 
@@ -450,7 +449,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
         MetricsLogger.action(getContext(), MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mAssistManager.startAssist(new Bundle() /* args */);
-        mPhoneStatusBar.awakenDreams();
+        mStatusBar.awakenDreams();
         if (mNavigationBarView != null) {
             mNavigationBarView.abortCurrentGesture();
         }
@@ -478,7 +477,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             LatencyTracker.getInstance(getContext()).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
         }
-        mPhoneStatusBar.awakenDreams();
+        mStatusBar.awakenDreams();
         mCommandQueue.toggleRecentApps();
     }
 
@@ -550,11 +549,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             return false;
         }
 
-        return mPhoneStatusBar.toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
+        return mStatusBar.toggleSplitScreenMode(MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS,
                 MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
     }
 
-    // ----- Methods that PhoneStatusBar talks to (should be minimized) -----
+    // ----- Methods that StatusBar talks to (should be minimized) -----
 
     public void setLightBarController(LightBarController lightBarController) {
         mLightBarController = lightBarController;
@@ -584,7 +583,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     public void checkNavBarModes() {
-        mPhoneStatusBar.checkBarMode(mNavigationBarMode,
+        mStatusBar.checkBarMode(mNavigationBarMode,
                 mNavigationBarWindowState, mNavigationBarView.getBarTransitions());
     }
 

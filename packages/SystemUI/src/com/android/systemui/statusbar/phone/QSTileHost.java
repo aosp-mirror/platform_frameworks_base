@@ -71,7 +71,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     public static final String TILES_SETTING = Secure.QS_TILES;
 
     private final Context mContext;
-    private final PhoneStatusBar mStatusBar;
+    private final StatusBar mStatusBar;
     private final LinkedHashMap<String, QSTile<?>> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final TileServices mServices;
@@ -81,7 +81,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final StatusBarIconController mIconController;
     private int mCurrentUser;
 
-    public QSTileHost(Context context, PhoneStatusBar statusBar,
+    public QSTileHost(Context context, StatusBar statusBar,
             StatusBarIconController iconController) {
         mIconController = iconController;
         mContext = context;

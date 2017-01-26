@@ -27,7 +27,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.BaseStatusBar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,15 +34,15 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class PhoneStatusBarTest extends SysuiTestCase {
+public class StatusBarTest extends SysuiTestCase {
 
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    PhoneStatusBar mPhoneStatusBar;
+    StatusBar mStatusBar;
 
     @Before
     public void setup() {
         mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager.class);
-        mPhoneStatusBar = new TestablePhoneStatusBar(mStatusBarKeyguardViewManager);
+        mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -63,7 +62,7 @@ public class PhoneStatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
 
-        mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class PhoneStatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
-        mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
     @Test
@@ -79,16 +78,16 @@ public class PhoneStatusBarTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
-        mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
+        mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
-    static class TestablePhoneStatusBar extends PhoneStatusBar {
-        public TestablePhoneStatusBar(StatusBarKeyguardViewManager man) {
+    static class TestableStatusBar extends StatusBar {
+        public TestableStatusBar(StatusBarKeyguardViewManager man) {
             mStatusBarKeyguardViewManager = man;
         }
 
         @Override
-        protected BaseStatusBar.H createHandler() {
+        protected H createHandler() {
             return null;
         }
     }

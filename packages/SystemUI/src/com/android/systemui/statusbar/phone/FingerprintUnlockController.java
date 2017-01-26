@@ -16,11 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -98,7 +94,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
-    private PhoneStatusBar mPhoneStatusBar;
+    private StatusBar mStatusBar;
     private final UnlockMethodCache mUnlockMethodCache;
     private final Context mContext;
     private boolean mGoingToSleep;
@@ -109,7 +105,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
             ScrimController scrimController,
-            PhoneStatusBar phoneStatusBar,
+            StatusBar statusBar,
             UnlockMethodCache unlockMethodCache) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
@@ -119,7 +115,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
-        mPhoneStatusBar = phoneStatusBar;
+        mStatusBar = statusBar;
         mUnlockMethodCache = unlockMethodCache;
     }
 
@@ -218,7 +214,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 break;
             case MODE_WAKE_AND_UNLOCK_PULSING:
                 Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
-                mPhoneStatusBar.updateMediaMetaData(false /* metaDataChanged */, 
+                mStatusBar.updateMediaMetaData(false /* metaDataChanged */,
                         true /* allowEnterAnimation */);
                 // Fall through.
                 Trace.endSection();
@@ -228,8 +224,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 mDozeScrimController.abortPulsing();
                 mKeyguardViewMediator.onWakeAndUnlocking();
                 mScrimController.setWakeAndUnlocking();
-                if (mPhoneStatusBar.getNavigationBarView() != null) {
-                    mPhoneStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
+                if (mStatusBar.getNavigationBarView() != null) {
+                    mStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
                 }
                 Trace.endSection();
                 break;
@@ -240,7 +236,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         if (mMode != MODE_WAKE_AND_UNLOCK_PULSING) {
             mStatusBarWindowManager.setForceDozeBrightness(false);
         }
-        mPhoneStatusBar.notifyFpAuthModeChanged();
+        mStatusBar.notifyFpAuthModeChanged();
         Trace.endSection();
     }
 
@@ -309,7 +305,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mMode = MODE_NONE;
         releaseFingerprintWakeLock();
         mStatusBarWindowManager.setForceDozeBrightness(false);
-        mPhoneStatusBar.notifyFpAuthModeChanged();
+        mStatusBar.notifyFpAuthModeChanged();
     }
 
     public void startKeyguardFadingAway() {
@@ -320,14 +316,14 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             public void run() {
                 mStatusBarWindowManager.setForceDozeBrightness(false);
             }
-        }, PhoneStatusBar.FADE_KEYGUARD_DURATION_PULSING);
+        }, StatusBar.FADE_KEYGUARD_DURATION_PULSING);
     }
 
     public void finishKeyguardFadingAway() {
         mMode = MODE_NONE;
-        if (mPhoneStatusBar.getNavigationBarView() != null) {
-            mPhoneStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
+        if (mStatusBar.getNavigationBarView() != null) {
+            mStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
         }
-        mPhoneStatusBar.notifyFpAuthModeChanged();
+        mStatusBar.notifyFpAuthModeChanged();
     }
 }

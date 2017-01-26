@@ -91,11 +91,12 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         super(context, attrs);
     }
 
-    interface OnSettingsClickListener {
+    public interface OnSettingsClickListener {
         void onClick(View v, int appUid);
     }
 
-    void bindNotification(final PackageManager pm, final INotificationManager iNotificationManager,
+    public void bindNotification(final PackageManager pm,
+            final INotificationManager iNotificationManager,
             final StatusBarNotification sbn, final NotificationChannel channel,
             OnSettingsClickListener onSettingsClick,
             OnClickListener onDoneClick, final Set<String> nonBlockablePkgs) {

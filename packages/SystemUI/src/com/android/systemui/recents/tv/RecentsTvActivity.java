@@ -30,6 +30,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.android.systemui.R;
+import com.android.systemui.pip.tv.PipManager;
+import com.android.systemui.pip.tv.PipRecentsOverlayManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -57,9 +59,7 @@ import com.android.systemui.recents.tv.views.RecentsTvView;
 import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
-import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.pip.tv.PipManager;
-import com.android.systemui.pip.tv.PipRecentsOverlayManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -258,7 +258,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             @Override
             public void run() {
                 Recents.getSystemServices().sendCloseSystemWindows(
-                        BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+                        StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
             }
         };
         DismissRecentsToHomeAnimationStarted dismissEvent =

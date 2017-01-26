@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -25,8 +24,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -64,7 +61,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     public static final int DEFAULT_ICON_TINT = Color.WHITE;
 
     private Context mContext;
-    private PhoneStatusBar mPhoneStatusBar;
+    private StatusBar mStatusBar;
     private DemoStatusIcons mDemoStatusIcons;
 
     private LinearLayout mSystemIconArea;
@@ -100,11 +97,11 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
 
     public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
-            PhoneStatusBar phoneStatusBar) {
+            StatusBar phoneStatusBar) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         mContext = context;
-        mPhoneStatusBar = phoneStatusBar;
+        mStatusBar = phoneStatusBar;
         mSystemIconArea = (LinearLayout) statusBar.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout) statusBar.findViewById(R.id.statusIcons);
         mSignalCluster = (SignalClusterView) statusBar.findViewById(R.id.signal_cluster);
@@ -405,11 +402,11 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
                 .withEndAction(null);
 
         // Synchronize the motion with the Keyguard fading if necessary.
-        if (mPhoneStatusBar.isKeyguardFadingAway()) {
+        if (mStatusBar.isKeyguardFadingAway()) {
             v.animate()
-                    .setDuration(mPhoneStatusBar.getKeyguardFadingAwayDuration())
+                    .setDuration(mStatusBar.getKeyguardFadingAwayDuration())
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                    .setStartDelay(mPhoneStatusBar.getKeyguardFadingAwayDelay())
+                    .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
                     .start();
         }
     }

@@ -20,7 +20,6 @@ import android.content.Context;
 import android.view.WindowManager;
 
 import com.android.systemui.FragmentTestCase;
-import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -37,7 +36,7 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
     @Before
     public void setup() {
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
-        mContext.putComponent(PhoneStatusBar.class, mock(PhoneStatusBar.class));
+        mContext.putComponent(StatusBar.class, mock(StatusBar.class));
         mContext.putComponent(Recents.class, mock(Recents.class));
         mContext.putComponent(Divider.class, mock(Divider.class));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));

@@ -36,7 +36,7 @@ import android.util.Log;
 import android.util.Slog;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class PowerUI extends SystemUI {
         mWarnings = new PowerNotificationWarnings(
                 mContext,
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE),
-                getComponent(PhoneStatusBar.class));
+                getComponent(StatusBar.class));
 
         ContentObserver obs = new ContentObserver(mHandler) {
             @Override
@@ -250,8 +250,8 @@ public class PowerUI extends SystemUI {
     }
 
     private void updateTemperatureWarning() {
-        PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
-        if (phoneStatusBar != null && phoneStatusBar.isDeviceInVrMode()) {
+        StatusBar statusBar = getComponent(StatusBar.class);
+        if (statusBar != null && statusBar.isDeviceInVrMode()) {
             // ensure the warning isn't showing, since VR shows its own warning
             mWarnings.dismissTemperatureWarning();
         } else {

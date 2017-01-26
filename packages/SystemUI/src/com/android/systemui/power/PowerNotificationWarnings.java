@@ -41,7 +41,7 @@ import android.util.Slog;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 
@@ -98,7 +98,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private SystemUIDialog mHighTempDialog;
 
     public PowerNotificationWarnings(Context context, NotificationManager notificationManager,
-            PhoneStatusBar phoneStatusBar) {
+            StatusBar statusBar) {
         mContext = context;
         mNoMan = notificationManager;
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);

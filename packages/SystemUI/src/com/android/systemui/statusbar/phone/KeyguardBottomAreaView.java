@@ -18,9 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
-import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
+
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
-import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
 import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNLOCK;
 import static com.android.systemui.tuner.LockscreenFragment.getIntentButton;
 
@@ -36,9 +35,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -95,7 +92,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener,
         Tunable {
 
-    final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
+    final static String TAG = "StatusBar/KeyguardBottomAreaView";
 
     public static final String CAMERA_LAUNCH_SOURCE_AFFORDANCE = "lockscreen_affordance";
     public static final String CAMERA_LAUNCH_SOURCE_WIGGLE = "wiggle_gesture";
@@ -136,7 +133,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private PreviewInflater mPreviewInflater;
     private KeyguardIndicationController mIndicationController;
     private AccessibilityController mAccessibilityController;
-    private PhoneStatusBar mPhoneStatusBar;
+    private StatusBar mStatusBar;
     private KeyguardAffordanceHelper mAffordanceHelper;
 
     private boolean mUserSetupComplete;
@@ -208,7 +205,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public boolean performAccessibilityAction(View host, int action, Bundle args) {
             if (action == ACTION_CLICK) {
                 if (host == mLockIcon) {
-                    mPhoneStatusBar.animateCollapsePanels(
+                    mStatusBar.animateCollapsePanels(
                             CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
                     return true;
                 } else if (host == mRightAffordanceView) {
@@ -326,8 +323,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView.setContentDescription(state.contentDescription);
     }
 
-    public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
-        mPhoneStatusBar = phoneStatusBar;
+    public void setStatusBar(StatusBar statusBar) {
+        mStatusBar = statusBar;
         updateCameraVisibility(); // in case onFinishInflate() was called too early
     }
 
@@ -391,13 +388,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean isCameraDisabledByDpm() {
         final DevicePolicyManager dpm =
                 (DevicePolicyManager) getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null && mPhoneStatusBar != null) {
+        if (dpm != null && mStatusBar != null) {
             try {
                 final int userId = ActivityManager.getService().getCurrentUser().id;
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
                 final  boolean disabledBecauseKeyguardSecure =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                                && mPhoneStatusBar.isKeyguardSecure();
+                                && mStatusBar.isKeyguardSecure();
                 return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't get userId", e);
@@ -433,7 +430,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             if (!mAccessibilityController.isAccessibilityEnabled()) {
                 handleTrustCircleClick();
             } else {
-                mPhoneStatusBar.animateCollapsePanels(
+                mStatusBar.animateCollapsePanels(
                         CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
             }
         }
@@ -570,12 +567,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 mAssistManager.launchVoiceAssistFromKeyguard();
             }
         };
-        if (mPhoneStatusBar.isKeyguardCurrentlySecure()) {
+        if (mStatusBar.isKeyguardCurrentlySecure()) {
             AsyncTask.execute(runnable);
         } else {
             boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
                     && TunerService.get(getContext()).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
-            mPhoneStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
+            mStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
                     dismissShade, false /* afterKeyguardGone */, true /* deferred */);
         }
     }

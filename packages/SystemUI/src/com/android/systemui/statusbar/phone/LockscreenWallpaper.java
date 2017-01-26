@@ -51,7 +51,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     private static final String TAG = "LockscreenWallpaper";
 
-    private final PhoneStatusBar mBar;
+    private final StatusBar mBar;
     private final WallpaperManager mWallpaperManager;
     private final Handler mH;
     private final KeyguardUpdateMonitor mUpdateMonitor;
@@ -64,7 +64,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private UserHandle mSelectedUser;
     private AsyncTask<Void, Void, LoaderResult> mLoader;
 
-    public LockscreenWallpaper(Context ctx, PhoneStatusBar bar, Handler h) {
+    public LockscreenWallpaper(Context ctx, StatusBar bar, Handler h) {
         mBar = bar;
         mH = h;
         mWallpaperManager = (WallpaperManager) ctx.getSystemService(Context.WALLPAPER_SERVICE);

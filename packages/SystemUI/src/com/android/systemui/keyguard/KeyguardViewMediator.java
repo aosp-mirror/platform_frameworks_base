@@ -80,7 +80,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
@@ -1955,11 +1955,11 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.endSection();
     }
 
-    public StatusBarKeyguardViewManager registerStatusBar(PhoneStatusBar phoneStatusBar,
+    public StatusBarKeyguardViewManager registerStatusBar(StatusBar statusBar,
             ViewGroup container, StatusBarWindowManager statusBarWindowManager,
             ScrimController scrimController,
             FingerprintUnlockController fingerprintUnlockController) {
-        mStatusBarKeyguardViewManager.registerStatusBar(phoneStatusBar, container,
+        mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container,
                 statusBarWindowManager, scrimController, fingerprintUnlockController,
                 mDismissCallbackRegistry);
         return mStatusBarKeyguardViewManager;

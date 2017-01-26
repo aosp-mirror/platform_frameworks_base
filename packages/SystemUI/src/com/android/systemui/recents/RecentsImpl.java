@@ -18,7 +18,6 @@ package com.android.systemui.recents;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.app.ActivityManager.StackId.isHomeOrRecentsStack;
 import static android.view.View.MeasureSpec;
 
@@ -77,9 +76,8 @@ import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.stackdivider.DividerView;
-import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 
@@ -229,7 +227,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      */
     public void onStartScreenPinning(Context context, int taskId) {
         SystemUIApplication app = (SystemUIApplication) context;
-        PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
+        StatusBar statusBar = app.getComponent(StatusBar.class);
         if (statusBar != null) {
             statusBar.showScreenPinningRequest(taskId, false);
         }
@@ -351,7 +349,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                         growTarget);
 
                 // Only close the other system windows if we are actually showing recents
-                ssp.sendCloseSystemWindows(BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
+                ssp.sendCloseSystemWindows(StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
                 mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {

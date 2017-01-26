@@ -25,7 +25,6 @@ import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -34,7 +33,6 @@ import android.view.WindowManager;
 
 import com.android.keyguard.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -140,7 +138,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
     private void applyFocusableFlag(State state) {
         boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
         if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
-                || BaseStatusBar.ENABLE_REMOTE_INPUT && state.remoteInputActive) {
+                || StatusBar.ENABLE_REMOTE_INPUT && state.remoteInputActive) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
@@ -385,7 +383,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         boolean backdropShowing;
 
         /**
-         * The {@link BaseStatusBar} state from the status bar.
+         * The {@link StatusBar} state from the status bar.
          */
         int statusBarState;
 

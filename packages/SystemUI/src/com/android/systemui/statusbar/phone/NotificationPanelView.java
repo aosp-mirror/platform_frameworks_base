@@ -219,7 +219,7 @@ public class NotificationPanelView extends PanelView implements
         mFalsingManager = FalsingManager.getInstance(context);
     }
 
-    public void setStatusBar(PhoneStatusBar bar) {
+    public void setStatusBar(StatusBar bar) {
         mStatusBar = bar;
     }
 

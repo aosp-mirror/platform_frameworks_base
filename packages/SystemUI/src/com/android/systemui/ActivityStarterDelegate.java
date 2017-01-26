@@ -19,7 +19,7 @@ import android.content.Intent;
 
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
- * delegates to an actual implementation such as PhoneStatusBar, assuming it exists.
+ * delegates to an actual implementation such as StatusBar, assuming it exists.
  */
 public class ActivityStarterDelegate implements ActivityStarter {
 

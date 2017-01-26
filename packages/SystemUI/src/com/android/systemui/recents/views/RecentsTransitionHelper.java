@@ -51,7 +51,7 @@ import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -170,7 +170,7 @@ public class RecentsTransitionHelper {
             }
         }
         Recents.getSystemServices().sendCloseSystemWindows(
-                BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+                StatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
     }
 
     public IRemoteCallback wrapStartedListener(final OnAnimationStartedListener listener) {

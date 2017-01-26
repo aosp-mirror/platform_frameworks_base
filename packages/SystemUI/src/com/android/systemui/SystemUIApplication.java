@@ -42,8 +42,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.SystemBars;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.util.NotificationChannels;
@@ -210,10 +209,10 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 new PluginListener<OverlayPlugin>() {
             @Override
             public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
-                if (phoneStatusBar != null) {
-                    plugin.setup(phoneStatusBar.getStatusBarWindow(),
-                            phoneStatusBar.getNavigationBarView());
+                StatusBar statusBar = getComponent(StatusBar.class);
+                if (statusBar != null) {
+                    plugin.setup(statusBar.getStatusBarWindow(),
+                            statusBar.getNavigationBarView());
                 }
             }
         }, OverlayPlugin.VERSION, true /* Allow multiple plugins */);

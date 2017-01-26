@@ -79,7 +79,7 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
@@ -251,7 +251,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             return true;
         }
     };
-    private PhoneStatusBar mPhoneStatusBar;
+    private StatusBar mStatusBar;
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
     private HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
@@ -877,7 +877,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
-            mPhoneStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
+            mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
     }
@@ -968,7 +968,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public float getFalsingThresholdFactor() {
-        return mPhoneStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
+        return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
     }
 
     @Override
@@ -3222,7 +3222,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             setOwnScrollY(0);
-            mPhoneStatusBar.resetUserExpandedStates();
+            mStatusBar.resetUserExpandedStates();
 
             // lets make sure nothing is in the overlay / transient anymore
             clearTemporaryViews(this);
@@ -3757,8 +3757,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return max + getStackTranslation();
     }
 
-    public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
-        this.mPhoneStatusBar = phoneStatusBar;
+    public void setStatusBar(StatusBar statusBar) {
+        this.mStatusBar = statusBar;
     }
 
     public void setGroupManager(NotificationGroupManager groupManager) {
@@ -3829,7 +3829,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
-        mPhoneStatusBar.requestNotificationUpdate();
+        mStatusBar.requestNotificationUpdate();
     }
 
     /** @hide */
@@ -3897,7 +3897,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupsChanged() {
-        mPhoneStatusBar.requestNotificationUpdate();
+        mStatusBar.requestNotificationUpdate();
     }
 
     public void generateChildOrderChangedEvent() {
@@ -4367,7 +4367,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         public void closeControlsIfOutsideTouch(MotionEvent ev) {
-            NotificationGuts guts = mPhoneStatusBar.getExposedGuts();
+            NotificationGuts guts = mStatusBar.getExposedGuts();
             View view = null;
             int height = 0;
             if (guts != null) {
@@ -4390,7 +4390,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
                 if (!rect.contains(rx, ry)) {
                     // Touch was outside visible guts / gear notification, close what's visible
-                    mPhoneStatusBar.dismissPopups(-1, -1, true /* resetGear */, true /* animate */);
+                    mStatusBar.dismissPopups(-1, -1, true /* resetGear */, true /* animate */);
                 }
             }
         }
