@@ -2486,9 +2486,23 @@ public class Notification implements Parcelable
          *            A {@link Context} that will be used by the Builder to construct the
          *            RemoteViews. The Context will not be held past the lifetime of this Builder
          *            object.
+         * @param channelId
+         *            The constructed Notification will be posted on this
+         *            {@link NotificationChannel}. To use a NotificationChannel, it must first be
+         *            created using {@link NotificationManager#createNotificationChannel}.
          */
+        public Builder(Context context, String channelId) {
+            this(context, (Notification) null);
+            mN.mChannelId = channelId;
+        }
+
+        /**
+         * @deprecated use {@link Notification.Builder#Notification.Builder(Context, String)}
+         * instead. All posted Notifications must specify a NotificationChannel Id.
+         */
+        @Deprecated
         public Builder(Context context) {
-            this(context, null);
+            this(context, (Notification) null);
         }
 
         /**
