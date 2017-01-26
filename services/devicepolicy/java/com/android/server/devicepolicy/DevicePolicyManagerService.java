@@ -4887,7 +4887,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Set the new delegate in user policies.
             final DevicePolicyData policy = getUserData(userId);
             if (!scopes.isEmpty()) {
-                policy.mDelegationMap.put(delegatePackage, scopes);
+                policy.mDelegationMap.put(delegatePackage, new ArrayList<>(scopes));
             } else {
                 // Remove any delegation info if the given scopes list is empty.
                 policy.mDelegationMap.remove(delegatePackage);
@@ -4902,7 +4902,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             intent.setPackage(delegatePackage);
             // Include the list of delegated scopes as an extra.
             intent.putStringArrayListExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES,
-                (ArrayList<String>) scopes);
+                    (ArrayList<String>) scopes);
             // Send the broadcast.
             mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
 
