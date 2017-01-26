@@ -144,7 +144,6 @@ import java.util.Objects;
  */
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
-            AccessibilityManager.AccessibilityStateChangeListener,
             AccessibilityManager.AccessibilityServicesStateChangeListener {
 
     private static final String TAG = "AudioService";
@@ -5926,25 +5925,13 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     // Accessibility
 
-    /**
-     * Compile-time constant to enable the use of an independent a11y volume:
-     * - set to true to listen to a11y services state changes and read
-     *   the whether any exposes the FLAG_ENABLE_ACCESSIBILITY_VOLUME flag
-     * - set to false to listen to when accessibility services are started (e.g. "TalkBack started")
-     */
-    private static final boolean USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME = false;
-
     private void initA11yMonitoring() {
         final AccessibilityManager accessibilityManager =
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
         updateA11yVolumeAlias(accessibilityManager.isEnabled());
         accessibilityManager.addTouchExplorationStateChangeListener(this);
-        if (USE_FLAG_ENABLE_ACCESSIBILITY_VOLUME) {
-            accessibilityManager.addAccessibilityServicesStateChangeListener(this);
-        } else {
-            accessibilityManager.addAccessibilityStateChangeListener(this);
-        }
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
     }
 
     //---------------------------------------------------------------------------------
@@ -5981,12 +5968,6 @@ public class AudioService extends IAudioService.Stub
     //---------------------------------------------------------------------------------
 
     private static boolean sIndependentA11yVolume = false;
-
-    // implementation of AccessibilityStateChangeListener
-    @Override
-    public void onAccessibilityStateChanged(boolean enabled) {
-        updateA11yVolumeAlias(enabled);
-    }
 
     // implementation of AccessibilityServicesStateChangeListener
     @Override
