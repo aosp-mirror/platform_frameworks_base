@@ -128,13 +128,10 @@ public class TaskWindowContainerControllerTests extends WindowTestsBase {
                 new TestTaskWindowContainerController(stack1Controller);
         final TestTask task1 = (TestTask) taskController.mContainer;
         task1.mOnDisplayChangedCalled = false;
+        assertEquals(sDisplayContent, stack1.getDisplayContent());
 
         // Create second display and put second stack on it.
-        final Display display = new Display(DisplayManagerGlobal.getInstance(),
-                sDisplayContent.getDisplayId() + 1, new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
-        final DisplayContent dc = new DisplayContent(display, sWm, sLayersController,
-                new WallpaperController(sWm));
-        sWm.mRoot.addChild(dc, 1);
+        final DisplayContent dc = createNewDisplay();
         final StackWindowController stack2Controller = createStackControllerOnDisplay(dc);
         final TaskStack stack2 = stack2Controller.mContainer;
         final TestTaskWindowContainerController taskController2 =
