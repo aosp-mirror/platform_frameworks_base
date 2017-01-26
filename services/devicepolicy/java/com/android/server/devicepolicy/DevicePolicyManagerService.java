@@ -4887,7 +4887,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Set the new delegate in user policies.
             final DevicePolicyData policy = getUserData(userId);
             if (!scopes.isEmpty()) {
-                policy.mDelegationMap.put(delegatePackage, new ArrayList<>(scopes));
+                policy.mDelegationMap.put(delegatePackage, scopes);
             } else {
                 // Remove any delegation info if the given scopes list is empty.
                 policy.mDelegationMap.remove(delegatePackage);
@@ -4896,12 +4896,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Notify delegate package of updates.
             final Intent intent = new Intent(
                     DevicePolicyManager.ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED);
-            // Only call receivers registered in the manifest (don’t wake app if not running).
+            // Only call receivers registered with Context#registerReceiver (don’t wake delegate).
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             // Limit components this intent resolves to to the delegate package.
             intent.setPackage(delegatePackage);
             // Include the list of delegated scopes as an extra.
-            intent.putExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES, scopes.toArray());
+            intent.putStringArrayListExtra(DevicePolicyManager.EXTRA_DELEGATION_SCOPES,
+                (ArrayList<String>) scopes);
             // Send the broadcast.
             mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
 
