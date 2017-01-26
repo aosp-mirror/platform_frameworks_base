@@ -7587,8 +7587,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to bind to a service from a profile owner of a managed profile or
-     * vice versa. See {@link #getBindDeviceAdminTargetUsers} for a definition of which
+     * Called by a device owner to bind to a service from a profile owner or vice versa.
+     * See {@link #getBindDeviceAdminTargetUsers} for a definition of which
      * device/profile owners are allowed to bind to services of another profile/device owner.
      * <p>
      * The service must be unexported. Note that the {@link Context} used to obtain this
@@ -7634,14 +7634,10 @@ public class DevicePolicyManager {
      * Returns the list of target users that the calling device or profile owner can use when
      * calling {@link #bindDeviceAdminServiceAsUser}.
      * <p>
-     * A device owner can bind to a service from a profile owner of a managed profile and
-     * vice versa, provided that:
+     * A device owner can bind to a service from a profile owner and vice versa, provided that:
      * <ul>
      * <li>Both belong to the same package name.
-     * <li>The managed profile is a profile of the user where the device owner is set.
-     *     See {@link UserManager#getUserProfiles()}
-     * <li>Both users are affiliated.
-     *     See {@link #setAffiliationIds}.
+     * <li>Both users are affiliated. See {@link #setAffiliationIds}.
      * </ul>
      */
     public @NonNull List<UserHandle> getBindDeviceAdminTargetUsers(@NonNull ComponentName admin) {

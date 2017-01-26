@@ -9906,7 +9906,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean areAllUsersAffiliatedWithDeviceLocked() {
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            final List<UserInfo> userInfos = mUserManager.getUsers();
+            final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
             for (int i = 0; i < userInfos.size(); i++) {
                 int userId = userInfos.get(i).id;
                 if (!isUserAffiliatedWithDeviceLocked(userId)) {
@@ -10314,47 +10314,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return Collections.emptyList();
         }
         Preconditions.checkNotNull(admin);
-        ArrayList<UserHandle> targetUsers = new ArrayList<>();
 
         synchronized (this) {
-            ActiveAdmin callingOwner = getActiveAdminForCallerLocked(
-                    admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             final int callingUserId = mInjector.userHandleGetCallingUserId();
-            final boolean isCallerDeviceOwner = isDeviceOwner(callingOwner);
-            final boolean isCallerManagedProfile = isManagedProfile(callingUserId);
-            if ((!isCallerDeviceOwner && !isCallerManagedProfile)
-                    || !isUserAffiliatedWithDeviceLocked(callingUserId)) {
-                return targetUsers;
-            }
-
             final long callingIdentity = mInjector.binderClearCallingIdentity();
             try {
-                String callingOwnerPackage = callingOwner.info.getComponent().getPackageName();
-                for (int userId : mUserManager.getProfileIdsWithDisabled(callingUserId)) {
-                    if (userId == callingUserId) {
-                        continue;
+                ArrayList<UserHandle> targetUsers = new ArrayList<>();
+                if (!isDeviceOwner(admin, callingUserId)) {
+                    // Profile owners can only bind to the device owner.
+                    if (canUserBindToDeviceOwnerLocked(callingUserId)) {
+                        targetUsers.add(UserHandle.of(mOwners.getDeviceOwnerUserId()));
                     }
-
-                    // We only allow the device owner and a managed profile owner to bind to each
-                    // other.
-                    if ((isCallerManagedProfile && userId == mOwners.getDeviceOwnerUserId())
-                            || (isCallerDeviceOwner && isManagedProfile(userId))) {
-                        String targetOwnerPackage = getOwnerPackageNameForUserLocked(userId);
-
-                        // Both must be the same package and be affiliated in order to bind.
-                        if (callingOwnerPackage.equals(targetOwnerPackage)
-                               && isUserAffiliatedWithDeviceLocked(userId)) {
+                } else {
+                    // Caller is the device owner: Look for profile owners that it can bind to.
+                    final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
+                    for (int i = 0; i < userInfos.size(); i++) {
+                        final int userId = userInfos.get(i).id;
+                        if (userId != callingUserId && canUserBindToDeviceOwnerLocked(userId)) {
                             targetUsers.add(UserHandle.of(userId));
                         }
                     }
                 }
+
+                return targetUsers;
             } finally {
                 mInjector.binderRestoreCallingIdentity(callingIdentity);
             }
         }
+    }
 
-        return targetUsers;
+    private boolean canUserBindToDeviceOwnerLocked(int userId) {
+        // There has to be a device owner, under another user id.
+        if (!mOwners.hasDeviceOwner() || userId == mOwners.getDeviceOwnerUserId()) {
+            return false;
+        }
+
+        // The user must have a profile owner that belongs to the same package as the device owner.
+        if (!mOwners.hasProfileOwner(userId) || !TextUtils.equals(
+                mOwners.getDeviceOwnerPackageName(), mOwners.getProfileOwnerPackage(userId))) {
+            return false;
+        }
+
+        // The user must be affiliated.
+        return isUserAffiliatedWithDeviceLocked(userId);
     }
 
     /**
