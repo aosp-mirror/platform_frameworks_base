@@ -1597,8 +1597,8 @@ public class ExifInterface {
                         final Rational[] rationalArray = new Rational[values.length];
                         for (int j = 0; j < values.length; ++j) {
                             final String[] numbers = values[j].split("/");
-                            rationalArray[j] = new Rational(Long.parseLong(numbers[0]),
-                                    Long.parseLong(numbers[1]));
+                            rationalArray[j] = new Rational((long) Double.parseDouble(numbers[0]),
+                                    (long) Double.parseDouble(numbers[1]));
                         }
                         mAttributes[i].put(tag,
                                 ExifAttribute.createURational(rationalArray, mExifByteOrder));
@@ -1609,8 +1609,8 @@ public class ExifInterface {
                         final Rational[] rationalArray = new Rational[values.length];
                         for (int j = 0; j < values.length; ++j) {
                             final String[] numbers = values[j].split("/");
-                            rationalArray[j] = new Rational(Long.parseLong(numbers[0]),
-                                    Long.parseLong(numbers[1]));
+                            rationalArray[j] = new Rational((long) Double.parseDouble(numbers[0]),
+                                    (long) Double.parseDouble(numbers[1]));
                         }
                         mAttributes[i].put(tag,
                                 ExifAttribute.createSRational(rationalArray, mExifByteOrder));
@@ -3442,8 +3442,8 @@ public class ExifInterface {
             String[] rationalNumber = entryValue.split("/");
             if (rationalNumber.length == 2) {
                 try {
-                    long numerator = Long.parseLong(rationalNumber[0]);
-                    long denominator = Long.parseLong(rationalNumber[1]);
+                    long numerator = (long) Double.parseDouble(rationalNumber[0]);
+                    long denominator = (long) Double.parseDouble(rationalNumber[1]);
                     if (numerator < 0L || denominator < 0L) {
                         return new Pair<>(IFD_FORMAT_SRATIONAL, -1);
                     }
