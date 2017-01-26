@@ -86,9 +86,9 @@ import java.util.Objects;
  * {@link android.app.Activity#setVrModeEnabled)}.  An application may also implement a service to
  * be run while in VR mode by implementing {@link android.service.vr.VrListenerService}.
  *
- * @see {@link android.service.vr.VrListenerService}
- * @see {@link com.android.server.vr.VrManagerInternal}
- * @see {@link com.android.server.vr.VrStateListener}
+ * @see android.service.vr.VrListenerService
+ * @see com.android.server.vr.VrManagerInternal
+ * @see com.android.server.vr.VrStateListener
  *
  * @hide
  */
