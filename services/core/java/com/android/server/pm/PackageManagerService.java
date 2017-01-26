@@ -1866,6 +1866,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     res.removedInfo.args.doPostDeleteLI(true);
                 }
             }
+
+            if (!isEphemeral(res.pkg)) {
+                // Notify DexManager that the package was installed for new users.
+                // The updated users should already be indexed and the package code paths
+                // should not change.
+                // Don't notify the manager for ephemeral apps as they are not expected to
+                // survive long enough to benefit of background optimizations.
+                for (int userId : firstUsers) {
+                    PackageInfo info = getPackageInfo(packageName, /*flags*/ 0, userId);
+                    mDexManager.notifyPackageInstalled(info, userId);
+                }
+            }
         }
 
         // If someone is watching installs - notify them
