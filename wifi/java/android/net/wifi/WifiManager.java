@@ -120,11 +120,7 @@ public class WifiManager {
     public static final String PASSPOINT_ICON_RECEIVED_ACTION =
             "android.net.wifi.PASSPOINT_ICON_RECEIVED";
     /** @hide */
-    public static final String EXTRA_PASSPOINT_ICON_BSSID = "bssid";
-    /** @hide */
     public static final String EXTRA_PASSPOINT_ICON_FILE = "file";
-    /** @hide */
-    public static final String EXTRA_PASSPOINT_ICON_DATA = "icon";
 
     /**
      * Broadcast intent action indicating that the a Passpoint release
@@ -157,6 +153,127 @@ public class WifiManager {
      * Delay in seconds
      * @hide */
     public static final String EXTRA_PASSPOINT_WNM_DELAY = "delay";
+
+    /**
+     * Broadcast intent action indicating that a Passpoint provider icon has been received.
+     *
+     * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
+     */
+    public static final String ACTION_PASSPOINT_ICON =
+            "android.net.wifi.action.PASSPOINT_ICON";
+    /**
+     * BSSID of the sender.
+     *
+     * Type: long
+     */
+    public static final String EXTRA_PASSPOINT_ICON_BSSID =
+            "android.net.wifi.extra.PASSPOINT_ICON_BSSID";
+    /**
+     * Filename of the icon.
+     *
+     * Type: String
+     */
+    public static final String EXTRA_PASSPOINT_ICON_FILENAME =
+            "android.net.wifi.extra.PASSPOINT_ICON_FILENAME";
+    /**
+     * Binary blob of the icon.
+     *
+     * Type: byte[]
+     */
+    public static final String EXTRA_PASSPOINT_ICON_DATA =
+            "android.net.wifi.extra.PASSPOINT_ICON_DATA";
+
+    /**
+     * Broadcast intent action indicating a Passpoint OSU Providers List element has been received.
+     *
+     * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
+     */
+    public static final String ACTION_PASSPOINT_OSU_PROVIDERS_LIST =
+            "android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST";
+    /**
+     * BSSID of the sender.
+     *
+     * Type: long
+     */
+    public static final String EXTRA_PASSPOINT_OSU_PROVIDERS_LIST_BSSID =
+            "android.net.wifi.extra.PASSPOINT_OSU_PROVIDERS_LIST_BSSID";
+    /**
+     * Raw data of OSU Providers List ANQP element.  Refer to Section 4.8 of Hotspot 2.0 Release 2
+     * Technical Specification for the exact data format.
+     *
+     * Type: byte[]
+     */
+    public static final String EXTRA_PASSPOINT_OSU_PROVIDERS_LIST_DATA =
+            "android.net.wifi.extra.PASSPOINT_OSU_PROVIDERS_LIST_DATA";
+
+    /**
+     * Broadcast intent action indicating that a Passpoint Deauth Imminent frame has been received.
+     *
+     * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
+     */
+    public static final String ACTION_PASSPOINT_DEAUTH_IMMINENT =
+            "android.net.wifi.action.PASSPOINT_DEAUTH_IMMINENT";
+    /**
+     * The BSSID of the sender.
+     *
+     * Type: long
+     */
+    public static final String EXTRA_PASSPOINT_DEAUTH_IMMINENT_BSSID =
+            "android.net.wifi.extra.PASSPOINT_DEAUTH_IMMINENT_BSSID";
+    /**
+     * Flag indicating failure at BSS (Basic Service Set) or ESS (Extended Service Set) level.
+     *
+     * Type: boolean
+     */
+    public static final String EXTRA_PASSPOINT_DEAUTH_IMMINENT_ESS =
+            "android.net.wifi.extra.PASSPOINT_DEAUTH_IMMINENT_ESS";
+    /**
+     * Delay in seconds that a device shall wait before attempting re-association to the same BSS
+     * or ESS (as indicated by {@link #EXTRA_PASSPOINT_DEAUTH_IMMINENT_ESS}.
+     *
+     * Type: int
+     */
+    public static final String EXTRA_PASSPOINT_DEAUTH_IMMINENT_REAUTH_DELAY =
+            "android.net.wifi.extra.PASSPOINT_DEAUTH_IMMINENT_REAUTH_DELAY";
+    /**
+     * URL that provides a webpage explaining the deauth reason.
+     *
+     * Type: String
+     */
+    public static final String EXTRA_PASSPOINT_DEAUTH_IMMINENT_REASON_URL =
+            "android.net.wifi.extra.PASSPOINT_DEAUTH_IMMINENT_REASON_URL";
+
+    /**
+     * Broadcast intent action indicating a Passpoint subscription remediation frame has been
+     * received.
+     *
+     * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
+     */
+    public static final String ACTION_PASSPOINT_SUBSCRIPTION_REMEDIATION =
+            "android.net.wifi.action.PASSPOINT_SUBSCRIPTION_REMEDIATION";
+    /**
+     * The BSSID of the sender.
+     *
+     * Type: long
+     */
+    public static final String EXTRA_PASSPOINT_SUBSCRIPTION_REMEDIATION_BSSID =
+            "android.net.wifi.extra.PASSPOINT_SUBSCRIPTION_REMEDIATION_BSSID";
+    /**
+     * The protocol supported by the subscription remediation server. The possible values are:
+     * 0 - OMA DM
+     * 1 - SOAP XML SPP
+     *
+     * Type: int
+     */
+    public static final String EXTRA_PASSPOINT_SUBSCRIPTION_REMEDIATION_SERVER_METHOD =
+            "android.net.wifi.extra.PASSPOINT_SUBSCRIPTION_REMEDIATION_SERVER_METHOD";
+    /**
+     * URL of the subscription remediation server.
+     *
+     * Type: String
+     */
+    public static final String EXTRA_PASSPOINT_SUBSCRIPTION_REMEDIATION_SERVER_URL =
+            "android.net.wifi.extra.PASSPOINT_SUBSCRIPTION_REMEDIATION_SERVER_URL";
 
     /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
@@ -898,10 +1015,10 @@ public class WifiManager {
     }
 
     /**
-     * Query for a Hotspot 2.0 release 2 OSU icon
+     * Query for a Hotspot 2.0 release 2 OSU icon file.
+     *
      * @param bssid The BSSID of the AP
-     * @param fileName Icon file name
-     * @hide
+     * @param fileName File name of the icon to query
      */
     public void queryPasspointIcon(long bssid, String fileName) {
         try {
