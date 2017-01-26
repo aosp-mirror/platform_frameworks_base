@@ -164,4 +164,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public void setContentHeight(int contentHeight, int minHeightHint) {
     }
+
+    public void setRemoteInputVisible(boolean visible) {
+    }
 }

@@ -992,7 +992,6 @@ public class NotificationContentView extends FrameLayout {
         mStatusBarNotification = entry.notification;
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateSingleLineView();
-        applyRemoteInput(entry);
         if (mContractedChild != null) {
             mContractedWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
@@ -1005,6 +1004,7 @@ public class NotificationContentView extends FrameLayout {
         if (mAmbientChild != null) {
             mAmbientWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
+        applyRemoteInput(entry);
         updateShowingLegacyBackground();
         mForceSelectNextLayout = true;
         setDark(mDark, false /* animate */, 0 /* delay */);
@@ -1046,7 +1046,8 @@ public class NotificationContentView extends FrameLayout {
         View bigContentView = mExpandedChild;
         if (bigContentView != null) {
             mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasRemoteInput,
-                    mPreviousExpandedRemoteInputIntent, mCachedExpandedRemoteInput);
+                    mPreviousExpandedRemoteInputIntent, mCachedExpandedRemoteInput,
+                    mExpandedWrapper);
         } else {
             mExpandedRemoteInput = null;
         }
@@ -1060,7 +1061,7 @@ public class NotificationContentView extends FrameLayout {
         View headsUpContentView = mHeadsUpChild;
         if (headsUpContentView != null) {
             mHeadsUpRemoteInput = applyRemoteInput(headsUpContentView, entry, hasRemoteInput,
-                    mPreviousHeadsUpRemoteInputIntent, mCachedHeadsUpRemoteInput);
+                    mPreviousHeadsUpRemoteInputIntent, mCachedHeadsUpRemoteInput, mHeadsUpWrapper);
         } else {
             mHeadsUpRemoteInput = null;
         }
@@ -1074,7 +1075,7 @@ public class NotificationContentView extends FrameLayout {
 
     private RemoteInputView applyRemoteInput(View view, NotificationData.Entry entry,
             boolean hasRemoteInput, PendingIntent existingPendingIntent,
-            RemoteInputView cachedView) {
+            RemoteInputView cachedView, NotificationViewWrapper wrapper) {
         View actionContainerCandidate = view.findViewById(
                 com.android.internal.R.id.actions_container);
         if (actionContainerCandidate instanceof FrameLayout) {
@@ -1112,6 +1113,8 @@ public class NotificationContentView extends FrameLayout {
                 existing.setBackgroundColor(NotificationColorUtil.ensureTextBackgroundColor(color,
                         mContext.getColor(R.color.remote_input_text_enabled),
                         mContext.getColor(R.color.remote_input_hint)));
+
+                existing.setWrapper(wrapper);
 
                 if (existingPendingIntent != null || existing.isActive()) {
                     // The current action could be gone, or the pending intent no longer valid.
