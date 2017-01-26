@@ -132,6 +132,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final String FUSED_LOCATION_SERVICE_ACTION =
             "com.android.location.service.FusedLocationProvider";
 
+    private static final String GMSCORE_PACKAGE = "com.android.google.gms";
+
     private static final int MSG_LOCATION_CHANGED = 1;
 
     private static final long NANOS_PER_MILLI = 1000000L;
@@ -140,7 +142,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final long HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
 
     // default background throttling interval if not overriden in settings
-    private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 1000;
+    private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 10 * 60 * 1000;
 
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
@@ -214,9 +216,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final HashMap<String, Location> mLastLocationCoarseInterval =
             new HashMap<>();
 
-    // all providers that operate over proxy, for authorizing incoming location
+    // all providers that operate over proxy, for authorizing incoming location and whitelisting
+    // throttling
     private final ArrayList<LocationProviderProxy> mProxyProviders =
             new ArrayList<>();
+
+    private String[] mBackgroundThrottlePackageWhitelist = new String[]{};
 
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
@@ -359,6 +364,26 @@ public class LocationManagerService extends ILocationManager.Stub {
                         }
                     }
                 }, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+            Settings.Global.getUriFor(
+                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST),
+            true,
+            new ContentObserver(mLocationHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    synchronized (mLock) {
+                        String setting = Settings.Global.getString(
+                            mContext.getContentResolver(),
+                            Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
+                        if (setting == null) {
+                            setting = "";
+                        }
+
+                        mBackgroundThrottlePackageWhitelist = setting.split(",");
+                        updateProvidersLocked();
+                    }
+                }
+            }, UserHandle.USER_ALL);
         mPackageMonitor.register(mContext, mLocationHandler.getLooper(), true);
 
         // listen for user change
@@ -1066,19 +1091,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mProvidersByName.remove(provider.getName());
     }
 
-    private boolean isOverlayProviderPackageLocked(String packageName) {
-        for (LocationProviderInterface provider : mProviders) {
-            if (provider instanceof LocationProviderProxy) {
-                if (packageName.equals(
-                        ((LocationProviderProxy) provider).getConnectedPackageName())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     /**
      * Returns "true" if access to the specified location provider is allowed by the current
      * user's settings. Access to all location providers is forbidden to non-location-provider
@@ -1542,8 +1554,28 @@ public class LocationManagerService extends ILocationManager.Stub {
         p.setRequest(providerRequest, worksource);
     }
 
-    private boolean isThrottlingExemptLocked(Receiver recevier) {
-        return isOverlayProviderPackageLocked(recevier.mPackageName);
+    private boolean isThrottlingExemptLocked(Receiver receiver) {
+        if (receiver.mUid == Process.SYSTEM_UID) {
+            return true;
+        }
+
+        if (receiver.mPackageName.equals(GMSCORE_PACKAGE)) {
+            return true;
+        }
+
+        for (LocationProviderProxy provider : mProxyProviders) {
+            if (receiver.mPackageName.equals(provider.getConnectedPackageName())) {
+                return true;
+            }
+        }
+
+        for (String whitelistedPackage : mBackgroundThrottlePackageWhitelist) {
+            if (receiver.mPackageName.equals(whitelistedPackage)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private class UpdateRecord {
@@ -1766,7 +1798,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (D) Log.d(TAG, "request " + Integer.toHexString(System.identityHashCode(receiver))
                 + " " + name + " " + request + " from " + packageName + "(" + uid + " "
                 + (record.mIsForegroundUid ? "foreground" : "background")
-                + (isOverlayProviderPackageLocked(receiver.mPackageName) ? " [whitelisted]" : "") + ")");
+                + (isThrottlingExemptLocked(receiver) ? " [whitelisted]" : "") + ")");
 
         UpdateRecord oldRecord = receiver.mUpdateRecords.put(name, record);
         if (oldRecord != null) {
