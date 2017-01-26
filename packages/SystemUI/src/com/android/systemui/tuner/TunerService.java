@@ -33,6 +33,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -124,6 +125,12 @@ public class TunerService extends SystemUI {
 
     public int getValue(String setting, int def) {
         return Settings.Secure.getIntForUser(mContentResolver, setting, def, mCurrentUser);
+    }
+
+    public String getValue(String setting, String def) {
+        String ret = Secure.getStringForUser(mContentResolver, setting, mCurrentUser);
+        if (ret == null) return def;
+        return ret;
     }
 
     public void setValue(String setting, int value) {

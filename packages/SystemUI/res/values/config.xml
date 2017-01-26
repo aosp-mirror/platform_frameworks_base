@@ -286,7 +286,7 @@
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
     <!-- Nav bar button default ordering/layout -->
-    <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
+    <string name="config_navBarLayout" translatable="false">left,back;home;recent,right</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 

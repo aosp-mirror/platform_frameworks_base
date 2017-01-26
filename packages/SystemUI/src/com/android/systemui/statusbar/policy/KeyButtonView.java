@@ -116,18 +116,18 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mOnClickListener = onClickListener;
     }
 
-    public void loadAsync(String uri) {
-        new AsyncTask<String, Void, Drawable>() {
+    public void loadAsync(Icon icon) {
+        new AsyncTask<Icon, Void, Drawable>() {
             @Override
-            protected Drawable doInBackground(String... params) {
-                return Icon.createWithContentUri(params[0]).loadDrawable(mContext);
+            protected Drawable doInBackground(Icon... params) {
+                return params[0].loadDrawable(mContext);
             }
 
             @Override
             protected void onPostExecute(Drawable drawable) {
                 setImageDrawable(drawable);
             }
-        }.execute(uri);
+        }.execute(icon);
     }
 
     @Override

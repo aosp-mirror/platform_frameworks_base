@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.Display;
@@ -47,6 +48,8 @@ public class NavigationBarInflaterView extends FrameLayout
     private static final String TAG = "NavBarInflater";
 
     public static final String NAV_BAR_VIEWS = "sysui_nav_bar";
+    public static final String NAV_BAR_LEFT = "sysui_nav_bar_left";
+    public static final String NAV_BAR_RIGHT = "sysui_nav_bar_right";
 
     public static final String MENU_IME = "menu_ime";
     public static final String BACK = "back";
@@ -55,6 +58,8 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String NAVSPACE = "space";
     public static final String CLIPBOARD = "clipboard";
     public static final String KEY = "key";
+    public static final String LEFT = "left";
+    public static final String RIGHT = "right";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -130,7 +135,8 @@ public class NavigationBarInflaterView extends FrameLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(getContext()).addTunable(this, NAV_BAR_VIEWS);
+        TunerService.get(getContext()).addTunable(this, NAV_BAR_VIEWS, NAV_BAR_LEFT,
+                NAV_BAR_RIGHT);
         PluginManager.getInstance(getContext()).addPluginListener(NavBarButtonProvider.ACTION, this,
                 NavBarButtonProvider.VERSION, true /* Allow multiple */);
     }
@@ -148,6 +154,9 @@ public class NavigationBarInflaterView extends FrameLayout
                 clearViews();
                 inflateLayout(newValue);
             }
+        } else if (NAV_BAR_LEFT.equals(key) || NAV_BAR_RIGHT.equals(key)) {
+            clearViews();
+            inflateLayout(mCurrentLayout);
         }
     }
 
@@ -268,6 +277,13 @@ public class NavigationBarInflaterView extends FrameLayout
             boolean landscape) {
         View v = null;
         String button = extractButton(buttonSpec);
+        if (LEFT.equals(button)) {
+            buttonSpec = TunerService.get(mContext).getValue(NAV_BAR_LEFT, NAVSPACE);
+            button = extractButton(buttonSpec);
+        } else if (RIGHT.equals(button)) {
+            buttonSpec = TunerService.get(mContext).getValue(NAV_BAR_RIGHT, MENU_IME);
+            button = extractButton(buttonSpec);
+        }
         // Let plugins go first so they can override a standard view if they want.
         for (NavBarButtonProvider provider : mPlugins) {
             v = provider.createView(buttonSpec, parent);
@@ -291,7 +307,14 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.custom_key, parent, false);
             ((KeyButtonView) v).setCode(code);
             if (uri != null) {
-                ((KeyButtonView) v).loadAsync(uri);
+                if (uri.contains(":")) {
+                    ((KeyButtonView) v).loadAsync(Icon.createWithContentUri(uri));
+                } else if (uri.contains("/")) {
+                    int index = uri.indexOf('/');
+                    String pkg = uri.substring(0, index);
+                    int id = Integer.parseInt(uri.substring(index + 1));
+                    ((KeyButtonView) v).loadAsync(Icon.createWithResource(pkg, id));
+                }
             }
         }
         return v;
