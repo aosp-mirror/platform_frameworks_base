@@ -323,12 +323,9 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avviso <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modalità Lavoro"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Luminosità notturna"</string>
-    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
-    <skip />
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC non attiva"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC attiva"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Nessun elemento recente"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Hai cancellato tutto"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informazioni sull\'applicazione"</string>
@@ -342,16 +339,11 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisione in orizzontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisione in verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisione personalizzata"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Ignora"</string>
+    <string name="recents_accessibility_open" msgid="1651449827614876864">"Apri"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Schermo diviso in alto"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Schermo diviso a sinistra"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Schermo diviso a destra"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carica"</string>
@@ -432,24 +424,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"Scollega VPN"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Il dispositivo è gestito dall\'app <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> utilizza l\'app <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> per gestire il dispositivo."</string>
-    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
-    <skip />
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"L\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app, dati associati al dispositivo e informazioni sulla posizione del dispositivo."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Ulteriori informazioni"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Apri impostazioni VPN"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico sul dispositivo.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Hai autorizzato l\'app a configurare una connessione VPN.\n\nQuesta app può monitorare il tuo dispositivo e l\'attività di rete, inclusi email, app e siti web."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare la tua attività di rete, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore.\n\nSei inoltre connesso a una VPN, da cui è possibile monitorare la tua attività di rete."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi email, app e siti web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale, inclusi email, app e siti web."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi email, app e siti web.\n\nSei connesso anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ricevi notifiche più velocemente"</string>

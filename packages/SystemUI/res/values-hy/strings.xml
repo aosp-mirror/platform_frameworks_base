@@ -321,12 +321,9 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> զգուշացում"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Աշխատանքային ռեժիմ"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Գիշերային լույս"</string>
-    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
-    <skip />
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC-ն անջատված է"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC-ն միացված է"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Վերջին տարրեր չկան"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Դուք ջնջել եք ամենը"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Հավելվածի մասին"</string>
@@ -340,16 +337,11 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Հորիզոնական տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Ուղղահայաց տրոհում"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Հատուկ տրոհում"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Փակել"</string>
+    <string name="recents_accessibility_open" msgid="1651449827614876864">"Բացել"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Տրոհել էկրանը վերևից"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Տրոհել էկրանը ձախից"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Տրոհել էկրանն աջից"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Լիցքավորված է"</string>
@@ -430,24 +422,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"Անջատել VPN-ը"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Ձեր սարքը կառավարվում է <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> հավելվածի կողմից:"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-ը ձեր սարքը կառավարելու համար օգտագործում է <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> հավելվածը:"</string>
-    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
-    <skip />
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"Ձեր ադմինիստրատորը կարող է վերահսկել և կառավարել ձեր սարքի հետ կապակցված կարգավորումները, կորպորատիվ մուտքը, հավելվածները և տվյալները, ինչպես նաև ձեր սարքի տեղադրության տվյալները:"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Իմանալ ավելին"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Դուք կապակցված եք <xliff:g id="VPN_APP">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործողությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Բացել VPN-ի կարգավորումները"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր սարքի թրաֆիկը։\n\nԼրացուցիչ տեղեկություններ ստանալու համար դիմեք ձեր ադմինիստրատորին։"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Ինչ-որ հավելվածի թույլ եք տվել հաստատել VPN կապակցում:\n\nԱյդ հավելվածը կարող է վերահսկել ձեր սարքի և ցանցի գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Ձեր աշխատանքային պրոֆիլի կառավարիչն է <xliff:g id="ORGANIZATION">%1$s</xliff:g> կազմակերպությունը։\n\nԱդմինիստրատորը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին։\n\nԴուք կապակցված են նաև VPN ցանցին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը։"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցի գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Դուք կապակցված եք <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:"</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"Ձեր աշխատանքային պրոֆիլի կառավարիչն է <xliff:g id="ORGANIZATION">%1$s</xliff:g> կազմակերպությունը։ Այն կապակցված է <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել ձեր ցանցային գործունեությունը, այդ թվում նաև էլփոստը, հավելվածները և կայքերը։\n\nԼրացուցիչ տեղեկությունների համար դիմեք ադմինիստրատորին:"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Աշխատանքային պրոֆիլի կառավարիչն է՝ <xliff:g id="ORGANIZATION">%1$s</xliff:g>: Այն կապակցված է <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԴուք նույնպես կապակցված եք <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները:"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ավելի արագ ստացեք ծանուցումները"</string>
