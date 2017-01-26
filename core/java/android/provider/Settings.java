@@ -9562,6 +9562,14 @@ public final class Settings {
         public static final String CONTACTS_DATABASE_WAL_ENABLED = "contacts_database_wal_enabled";
 
         /**
+         * Flag to enable the link to location permissions in location setting. Set to 0 to disable.
+         *
+         * @hide
+         */
+        public static final String LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED =
+                "location_settings_link_to_permissions_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
