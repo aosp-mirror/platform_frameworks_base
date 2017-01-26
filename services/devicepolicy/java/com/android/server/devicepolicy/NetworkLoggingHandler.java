@@ -16,12 +16,15 @@
 
 package com.android.server.devicepolicy;
 
+import android.app.AlarmManager;
+import android.app.AlarmManager.OnAlarmListener;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.NetworkEvent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -42,11 +45,26 @@ final class NetworkLoggingHandler extends Handler {
     // If this value changes, update DevicePolicyManager#retrieveNetworkLogs() javadoc
     private static final int MAX_EVENTS_PER_BATCH = 1200;
     private static final long BATCH_FINALIZATION_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(90);
+    private static final long BATCH_FINALIZATION_TIMEOUT_ALARM_INTERVAL_MS =
+            TimeUnit.MINUTES.toMillis(30);
 
-    static final int LOG_NETWORK_EVENT_MSG = 1;
-    static final int FINALIZE_BATCH_MSG = 2;
+    private static final String NETWORK_LOGGING_TIMEOUT_ALARM_TAG = "NetworkLogging.batchTimeout";
 
     private final DevicePolicyManagerService mDpm;
+    private final AlarmManager mAlarmManager;
+
+    private final OnAlarmListener mBatchTimeoutAlarmListener = new OnAlarmListener() {
+        @Override
+        public void onAlarm() {
+            Log.d(TAG, "Received a batch finalization timeout alarm, finalizing "
+                    + mNetworkEvents.size() + " pending events.");
+            synchronized (NetworkLoggingHandler.this) {
+                finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
+            }
+        }
+    };
+
+    static final int LOG_NETWORK_EVENT_MSG = 1;
 
     // threadsafe as it's Handler's thread confined
     @GuardedBy("this")
@@ -62,6 +80,7 @@ final class NetworkLoggingHandler extends Handler {
     NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm) {
         super(looper);
         mDpm = dpm;
+        mAlarmManager = mDpm.mInjector.getAlarmManager();
     }
 
     @Override
@@ -77,17 +96,19 @@ final class NetworkLoggingHandler extends Handler {
                 }
                 break;
             }
-            case FINALIZE_BATCH_MSG: {
-                finalizeBatchAndNotifyDeviceOwnerIfNotEmpty();
+            default: {
+                Log.d(TAG, "NetworkLoggingHandler received an unknown of message.");
                 break;
             }
         }
     }
 
     void scheduleBatchFinalization() {
-        removeMessages(FINALIZE_BATCH_MSG);
-        sendMessageDelayed(obtainMessage(FINALIZE_BATCH_MSG), BATCH_FINALIZATION_TIMEOUT_MS);
-        Log.d(TAG, "Scheduled new batch finalization " + BATCH_FINALIZATION_TIMEOUT_MS
+        final long when = SystemClock.elapsedRealtime() + BATCH_FINALIZATION_TIMEOUT_MS;
+        mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, when,
+                BATCH_FINALIZATION_TIMEOUT_ALARM_INTERVAL_MS, NETWORK_LOGGING_TIMEOUT_ALARM_TAG,
+                mBatchTimeoutAlarmListener, this);
+        Log.d(TAG, "Scheduled a new batch finalization alarm " + BATCH_FINALIZATION_TIMEOUT_MS
                 + "ms from now.");
     }
 
