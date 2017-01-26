@@ -553,8 +553,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 }
 
                 @Override
-                public void onDockedStackMinimizedChanged(boolean minimized, long animDuration)
-                        throws RemoteException {
+                public void onDockedStackMinimizedChanged(boolean minimized, long animDuration,
+                        boolean isHomeStackResizable) throws RemoteException {
                 }
 
                 @Override

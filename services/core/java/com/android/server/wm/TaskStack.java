@@ -213,7 +213,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mAdjustedBounds.set(bounds);
         final boolean adjusted = !mAdjustedBounds.isEmpty();
         Rect insetBounds = null;
-        if (adjusted && isAdjustedForMinimizedDock()) {
+        if (adjusted && isAdjustedForMinimizedDockedStack()) {
             insetBounds = mBounds;
         } else if (adjusted && mAdjustedForIme) {
             if (mImeGoingAway) {
@@ -420,9 +420,14 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return true;
     }
 
-    void getBoundsForNewConfiguration(Rect outBounds) {
+    void getBoundsForNewConfiguration(Rect outBounds, Rect outTempBounds) {
         outBounds.set(mBoundsAfterRotation);
         mBoundsAfterRotation.setEmpty();
+        final DockedStackDividerController controller = getDisplayContent()
+                .mDividerControllerLocked;
+        if (controller.isMinimizedDock() && mStackId == DOCKED_STACK_ID) {
+            outTempBounds.set(controller.getMiddlePositionDockedStackRect());
+        }
     }
 
     /**
@@ -482,7 +487,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
-                dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds);
+                dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds,
+                isMinimizedDockAndHomeStackResizable());
         final SnapTarget target = algorithm.calculateNonDismissingSnapTarget(dividerPosition);
 
         // Recalculate the bounds based on the position of the target.
@@ -675,7 +681,18 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         super.onDisplayChanged(dc);
     }
 
-    void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibility) {
+    void getStackDockedModeBoundsLocked(Rect outBounds, Rect outTempBounds,
+            Rect outTempInsetBounds, boolean ignoreVisibility) {
+        if (mStackId == HOME_STACK_ID && findHomeTask().isResizeable()) {
+            // Calculate the home stack bounds when in docked mode
+            getDisplayContent().mDividerControllerLocked
+                    .getHomeStackBoundsInDockedMode(outTempBounds);
+            outTempInsetBounds.set(outTempBounds);
+        } else {
+            outTempBounds.setEmpty();
+            outTempInsetBounds.setEmpty();
+        }
+
         if ((mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId))
                 || mDisplayContent == null) {
             outBounds.set(mBounds);
@@ -789,7 +806,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mService.mDockedStackCreateBounds = null;
 
         final Rect bounds = new Rect();
-        getStackDockedModeBoundsLocked(bounds, true /*ignoreVisibility*/);
+        final Rect tempBounds = new Rect();
+        final Rect tempInsetBounds = new Rect();
+        getStackDockedModeBoundsLocked(bounds, tempBounds, tempInsetBounds, true /*ignoreVisibility*/);
         getController().requestResize(bounds);
     }
 
@@ -946,8 +965,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
     }
 
-    boolean isAdjustedForMinimizedDock() {
-        return mMinimizeAmount != 0f;
+    boolean shouldIgnoreInput() {
+        return isAdjustedForMinimizedDockedStack() || mStackId == DOCKED_STACK_ID &&
+                isMinimizedDockAndHomeStackResizable();
     }
 
     /**
@@ -1073,6 +1093,11 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                             + (1 - minimizeAmount) * mBounds.left);
         }
         return true;
+    }
+
+    private boolean isMinimizedDockAndHomeStackResizable() {
+        return mDisplayContent.mDividerControllerLocked.isMinimizedDock()
+                && mDisplayContent.mDividerControllerLocked.isHomeStackResizable();
     }
 
     /**
@@ -1344,9 +1369,17 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
              * tasks (including the focused).
              *
              * We save the focused task region once we find it, and add it back at the end.
+             *
+             * If the task is home stack and it is resizable in the minimized state, we want to
+             * exclude the docked stack from touch so we need the entire screen area and not just a
+             * small portion which the home stack currently is resized to.
              */
 
-            task.getDimBounds(mTmpRect);
+            if (task.isHomeTask() && isMinimizedDockAndHomeStackResizable()) {
+                mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            } else {
+                task.getDimBounds(mTmpRect);
+            }
 
             if (task == focusedTask) {
                 // Add the focused task rect back into the exclude region once we are done

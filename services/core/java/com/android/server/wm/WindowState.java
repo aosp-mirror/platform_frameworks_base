@@ -1672,11 +1672,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mLastReportedConfiguration.equals(getConfiguration());
     }
 
-    boolean isAdjustedForMinimizedDock() {
-        return mAppToken != null && mAppToken.mTask != null
-                && mAppToken.mTask.mStack.isAdjustedForMinimizedDock();
-    }
-
     void onWindowReplacementTimeout() {
         if (mWillReplaceWindow) {
             // Since the window already timed out, remove it immediately now.
@@ -2365,7 +2360,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mAppToken == null || mAppToken.windowsAreFocusable())
-                && !isAdjustedForMinimizedDock();
+                && !canReceiveTouchInput();
+    }
+
+    /** @return true if this window desires touch events. */
+    boolean canReceiveTouchInput() {
+        return mAppToken != null && mAppToken.mTask != null
+                && mAppToken.mTask.mStack.shouldIgnoreInput();
     }
 
     @Override

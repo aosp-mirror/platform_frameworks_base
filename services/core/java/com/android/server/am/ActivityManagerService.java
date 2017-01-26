@@ -19603,10 +19603,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /** Helper method that requests bounds from WM and applies them to stack. */
     private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
-        final Rect newBounds = mStackSupervisor.getStack(stackId).getBoundsForNewConfiguration();
+        final Rect newStackBounds = new Rect();
+        final Rect newTempTaskBounds = new Rect();
+        mStackSupervisor.getStack(stackId).getBoundsForNewConfiguration(newStackBounds,
+                newTempTaskBounds);
         mStackSupervisor.resizeStackLocked(
-                stackId, newBounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);
+                stackId, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
+                !newTempTaskBounds.isEmpty() ? newTempTaskBounds : null /* tempTaskBounds */,
+                null /* tempTaskInsetBounds */, false /* preserveWindows */,
+                false /* allowResizeInDockedMode */, deferResume);
     }
 
     /**

@@ -488,6 +488,9 @@
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
 
+    <!-- Height of a task when in minimized mode from the top when launcher is resizable. -->
+    <dimen name="task_height_of_minimized_mode">80dp</dimen>
+
     <!-- Minimum "smallest width" of the display for cascading menus to be enabled. -->
     <dimen name="cascading_menus_min_smallest_width">720dp</dimen>
 

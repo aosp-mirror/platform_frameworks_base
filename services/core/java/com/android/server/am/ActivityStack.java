@@ -542,8 +542,10 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         mWindowContainerController.setPictureInPictureAspectRatio(aspectRatio);
     }
 
-    void getStackDockedModeBounds(Rect outBounds, boolean ignoreVisibility) {
-        mWindowContainerController.getStackDockedModeBounds(outBounds, ignoreVisibility);
+    void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds, Rect outTempInsetBounds,
+            boolean ignoreVisibility) {
+        mWindowContainerController.getStackDockedModeBounds(outBounds, outTempBounds,
+                outTempInsetBounds, ignoreVisibility);
     }
 
     void prepareFreezingTaskBounds() {
@@ -562,8 +564,8 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         outBounds.setEmpty();
     }
 
-    Rect getBoundsForNewConfiguration() {
-        return mWindowContainerController.getBoundsForNewConfiguration();
+    void getBoundsForNewConfiguration(Rect outBounds, Rect outTempBounds) {
+        mWindowContainerController.getBoundsForNewConfiguration(outBounds, outTempBounds);
     }
 
     void positionChildWindowContainerAtTop(TaskRecord child) {
