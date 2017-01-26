@@ -7527,6 +7527,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         mDexManager.reconcileSecondaryDexFiles(packageName);
     }
 
+    // TODO(calin): this is only needed for BackgroundDexOptService. Find a cleaner way to inject
+    // a reference there.
+    /*package*/ DexManager getDexManager() {
+        return mDexManager;
+    }
+
     /**
      * Execute the background dexopt job immediately.
      */
