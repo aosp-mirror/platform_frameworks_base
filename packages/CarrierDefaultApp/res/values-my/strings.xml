@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"ဝန်ဆောင်မှုကို စဖွင့်အသုံးပြုရန်"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"ဒေတာချိတ်ဆက်မှုမရှိပါ"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"ဝန်ဆောင်မှုကို စဖွင့်အသုံးပြုရန် တို့ပါ"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"လိုင်းမရှိပါ။ သင့်ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ"</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"captive portal သို့ ချိတ်ဆက်နေသည်..."</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"ချိတ်ဆက်မှု ပြတ်တောက်သွားပါသည်။ ထပ်လုပ်လိုပါသလား။"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"ကွန်ရက်ချိတ်ဆက်မှု မရှိပါ"</string>
+    <string name="quit" msgid="4392968039488794590">"ထွက်ရန်"</string>
+    <string name="wait" msgid="7902715035629500128">"စောင့်ရန်"</string>
+</resources>

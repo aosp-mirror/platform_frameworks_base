@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"ನಿಮ್ಮ ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"ಯಾವುದೇ ಡೇಟಾ ಸೇವೆ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"ನಿಮ್ಮ ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"ಸೇವೆಯು ಲಭ್ಯವಿಲ್ಲ, ನಿಮಗೆ ಸೇವೆ ಒದಗಿಸುವವರನ್ನು ಸಂಪರ್ಕಿಸಿ"</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"ವೈ-ಫೈ ಪ್ರಾರಂಭ ಪೋರ್ಟಲ್‌ಗೆ ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"ನೆಟ್‌ವರ್ಕ್‌ ಕಾಲಾವಧಿ ಮುಗಿದಿದೆ, ನೀವು ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಲು ಬಯಸುವಿರಾ?"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="quit" msgid="4392968039488794590">"ತ್ಯಜಿಸಿ"</string>
+    <string name="wait" msgid="7902715035629500128">"ನಿರೀಕ್ಷಿಸಿ"</string>
+</resources>
