@@ -111,6 +111,8 @@ struct JMediaCodec : public AHandler {
 
     status_t getName(JNIEnv *env, jstring *name) const;
 
+    status_t getMetrics(JNIEnv *env, Parcel *reply) const;
+
     status_t setParameters(const sp<AMessage> &params);
 
     void setVideoScalingMode(int mode);

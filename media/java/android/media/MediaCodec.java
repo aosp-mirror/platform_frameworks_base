@@ -3134,6 +3134,15 @@ final public class MediaCodec {
     public native final String getName();
 
     /**
+     *  Returns Analytics/Metrics data about the current content being
+     *
+     * @return a Bundle containint the set of attributes and values available
+     * for the media being handled by this instance of MediaCodec
+     *
+     */
+    public native Bundle getMetrics();
+
+    /**
      * Change a video encoder's target bitrate on the fly. The value is an
      * Integer object containing the new bitrate in bps.
      */

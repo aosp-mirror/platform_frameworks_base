@@ -21,6 +21,7 @@
 #include "android_media_MediaCodec.h"
 
 #include "android_media_MediaCrypto.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
@@ -616,6 +617,12 @@ status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     *nameStr = env->NewStringUTF(name.c_str());
 
     return OK;
+}
+
+status_t JMediaCodec::getMetrics(JNIEnv *, Parcel *reply) const {
+
+    status_t status = mCodec->getMetrics(reply);
+    return status;
 }
 
 status_t JMediaCodec::setParameters(const sp<AMessage> &msg) {
@@ -1646,6 +1653,37 @@ static jobject android_media_MediaCodec_getName(
     return NULL;
 }
 
+static jobject
+android_media_MediaCodec_getMetrics(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_MediaCodec_getMetrics");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    // get what we have for the metrics from the codec
+    Parcel reply;
+    status_t err = codec->getMetrics(env, &reply);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        return (jobject) NULL;
+    }
+
+    // build and return the Bundle
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(reply);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
 static void android_media_MediaCodec_setParameters(
         JNIEnv *env, jobject thiz, jobjectArray keys, jobjectArray vals) {
     ALOGV("android_media_MediaCodec_setParameters");
@@ -1953,6 +1991,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
+
+    { "getMetrics", "()Landroid/os/Bundle;",
+      (void *)android_media_MediaCodec_getMetrics},
 
     { "setParameters", "([Ljava/lang/String;[Ljava/lang/Object;)V",
       (void *)android_media_MediaCodec_setParameters },
