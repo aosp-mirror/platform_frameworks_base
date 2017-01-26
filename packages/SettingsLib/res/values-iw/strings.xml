@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"נתונים סלולריים פעילים תמיד"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"השבת עוצמת קול מוחלטת"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"‏Codec אודיו ל-Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"‏בחירת ‏Codec אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"‏קצב דגימה של אודיו ל-Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"‏בחירת Codec אודיו ל-Bluetooth‏:\nקצב דגימה"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"‏מספר סיביות לדגימה באודיו ל-Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"‏בחירת codec אודיו ל-Bluetooth:‏\nסיביות לדגימה"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"‏מצב של ערוץ אודיו ל-Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"‏בחירת codec אודיו ל-Bluetooth:‏\nמצב ערוץ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏Codec אודיו LDAC ל-Bluetooth: איכות נגינה"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏בחירת Codec אודיו LDAC ל-Bluetooth:‏\nאיכות נגינה"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏כשתכונה זו מופעלת, Wi-Fi יתנהג בצורה אגרסיבית יותר בעת העברת חיבור הנתונים לרשת הסלולרית כשאות ה-Wi-Fi חלש."</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"עזרה ומשוב"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"תפריט"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"הזן סיסמה כדי לבצע איפוס להגדרות היצרן במצב הדגמה"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"הבא"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"דרושה סיסמה"</string>
 </resources>

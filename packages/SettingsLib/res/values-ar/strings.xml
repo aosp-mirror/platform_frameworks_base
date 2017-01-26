@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"بيانات الجوّال نشطة دائمًا"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"تعطيل مستوى الصوت المطلق"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"اختيار برنامج الترميز لصوت البلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"اختيار برنامج ترميز صوت البلوتوث:\nمعدل العينة"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"وحدات البت لكل عيّنة في صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"اختيار برنامج ترميز صوت البلوتوث:\nوحدات بت لكل عينة"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"وضع قناة صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"اختيار برنامج ترميز صوت البلوتوث:\nوضع القناة"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏برنامج ترميز LDAC لصوت البلوتوث: جودة التشغيل"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏اختيار برنامج ترميز LDAC لصوت البلوتوث:\nجودة التشغيل"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"البث: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏عند تمكينه، سيكون Wi-Fi أكثر حدة في تسليم اتصال البيانات إلى الشبكة الخلوية، وذلك عندما تكون إشارة WiFi منخفضة"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"المساعدة والتعليقات"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"القائمة"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"غرينيتش"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"إدخال كلمة المرور لإعادة الضبط بحسب بيانات المصنع في الوضع التجريبي"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"التالي"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"يلزم توفر كلمة مرور"</string>
 </resources>

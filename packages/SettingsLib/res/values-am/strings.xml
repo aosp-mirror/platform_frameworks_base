@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"የተንቀስቃሽ ስልክ ውሂብ ሁልጊዜ ንቁ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ፍጹማዊ ድምፅን አሰናክል"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"የብሉቱዝ ኦዲዮ ኮዴክ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"የብሉቱዝ ኦዲዮ ኮዴክ ይምረጡ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"የብሉቱዝ ኦዲዮ ናሙና ፍጥነት"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"የብሉቱዝ ኦዲዮ ኮዴክ ይምረጡ፦\nየናሙና ፍጥነት"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"የብሉቱዝ ኦዲዮ ቢት በናሙና"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"የብሉቱዝ ኦዲዮ ኮዴክ ይምረጡ፦\nቢት በናሙና"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"የብሉቱዝ ኦዲዮ ሰርጥ ሁነታ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"የብሉቱዝ ኦዲዮ ኮዴክ ይምረጡ፦\nየሰርጥ ሁነታ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"የብሉቱዝ ኦዲዮ LDAC ኮዴክ ይምረጡ፦ የመልሶ ማጫወት ጥራት"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"የብሉቱዝ ኦዲዮ LDAC ኮዴክ ይምረጡ፦\nየመልሶ ማጫወት ጥራት"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ዥረት፦ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ሲነቃ የWi‑Fi ምልክት ዝቅተኛ ሲሆን Wi‑Fi የውሂብ ግንኙነት ለተንቀሳቃሽ ማስረከብ ላይ ይበልጥ አስገዳጅ ይሆናል"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"እገዛ እና ግብረመልስ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ምናሌ"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"ጂኤምቲ"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"የፋብሪካ ዳግም ማስጀመር በማሳያ ሁነታ ውስጥ ለማከናወን የይለፍ ቃል ያስገቡ"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"ቀጣይ"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"የይለፍ ቃል ያስፈልጋል"</string>
 </resources>

@@ -58,22 +58,66 @@
     <item msgid="3878793616631049349">"HDCP tekshiruvi faqat DRM kontent uchun ishlatilsin"</item>
     <item msgid="45075631231212732">"Har doim HDCP tekshiruvidan foydalanilsin"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:0 (7065842274271279580) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (500463122137421129) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:0 (5062108632402595000) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3093550793512117000) -->
-    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_titles:0 (3093023430402746802) -->
-    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_summaries:0 (3214516120190965356) -->
-    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_titles:0 (2684127272582591429) -->
-    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_summaries:0 (1081159789834584363) -->
-    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_titles:0 (5226878858503393706) -->
-    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_summaries:0 (4118561796005528173) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:0 (3411577996960199959) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:1 (2921767058740704969) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:2 (3682554248829489641) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:0 (7668834469173465015) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:1 (4327143584633311908) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:2 (6155648878105378550) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="4260844283202960798">"aptX"</item>
+    <item msgid="500463122137421129">"aptX HD"</item>
+    <item msgid="2301339338870319651">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="1190434429082395888">"aptX"</item>
+    <item msgid="3093550793512117000">"aptX HD"</item>
+    <item msgid="508106435710925399">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="8895532488906185219">"44.1 kGs"</item>
+    <item msgid="2909915718994807056">"48.0 kGs"</item>
+    <item msgid="3347287377354164611">"88.2 kGs"</item>
+    <item msgid="1234212100239985373">"96.0 kGs"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="4482862757811638365">"44.1 kGs"</item>
+    <item msgid="354495328188724404">"48.0 kGs"</item>
+    <item msgid="7329816882213695083">"88.2 kGs"</item>
+    <item msgid="6967397666254430476">"96.0 kGs"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="5618929009984956469">"16 bit/namuna"</item>
+    <item msgid="3412640499234627248">"24 bit/namuna"</item>
+    <item msgid="121583001492929387">"32 bit/namuna"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="4726688794884191540">"16 bit/namuna"</item>
+    <item msgid="305344756485516870">"24 bit/namuna"</item>
+    <item msgid="244568657919675099">"32 bit/namuna"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="4106832974775067314">"Mono"</item>
+    <item msgid="5571632958424639155">"Stereo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"Tizim tanlovi (birlamchi)"</item>
+    <item msgid="8900559293912978337">"Mono"</item>
+    <item msgid="8883739882299884241">"Stereo"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="3411577996960199959">"Audio sifati uchun moslashtirish (990/909 kbit/s)"</item>
+    <item msgid="2921767058740704969">"Audio sifati balansi va ulanish tezligi (660/606 kbit/s)"</item>
+    <item msgid="3682554248829489641">"Ulanish sifati uchun moslashtirish (330/303 kbit/s)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="7668834469173465015">"Audio sifati uchun moslashtirish"</item>
+    <item msgid="4327143584633311908">"Audio sifati balansi va ulanish tezligi"</item>
+    <item msgid="6155648878105378550">"Ulanish sifati uchun moslashtirish"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"O‘chiq"</item>
     <item msgid="1593289376502312923">"64 KB"</item>
