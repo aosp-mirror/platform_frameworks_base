@@ -1131,7 +1131,7 @@ public class NotificationManager
      * can be used from within background operations like broadcast receivers
      * or scheduled jobs.
      *
-     * @param service Description of the service to be stopped.  The Intent must be either
+     * @param service Description of the service to be started.  The Intent must be either
      *      fully explicit (supplying a component name) or specify a specific package
      *      name it is targeted to.
      * @param id The identifier for this notification as per
