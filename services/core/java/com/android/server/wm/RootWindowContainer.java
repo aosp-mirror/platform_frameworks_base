@@ -213,7 +213,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int displayId = display.getDisplayId();
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
-        addChild(dc, null);
 
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final Rect rect = new Rect();

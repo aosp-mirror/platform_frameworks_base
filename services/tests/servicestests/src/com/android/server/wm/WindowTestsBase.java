@@ -20,7 +20,10 @@ import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,6 +43,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
+import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -65,11 +69,13 @@ class WindowTestsBase {
     static TestWindowManagerPolicy sPolicy = null;
     private final static IWindow sIWindow = new TestIWindow();
     private final static Session sMockSession = mock(Session.class);
+    private static int sNextDisplayId = Display.DEFAULT_DISPLAY + 1;
     static int sNextStackId = FIRST_DYNAMIC_STACK_ID;
     private static int sNextTaskId = 0;
 
     private static boolean sOneTimeSetupDone = false;
     static DisplayContent sDisplayContent;
+    static DisplayInfo sDisplayInfo = new DisplayInfo();
     static WindowLayersController sLayersController;
     static WindowState sWallpaperWindow;
     static WindowState sImeWindow;
@@ -100,9 +106,15 @@ class WindowTestsBase {
         if (sDisplayContent != null) {
             sDisplayContent.removeImmediately();
         }
-        sDisplayContent = new DisplayContent(context.getDisplay(), sWm, sLayersController,
-                new WallpaperController(sWm));
-        sWm.mRoot.addChild(sDisplayContent, 0);
+        // Make sure that display ids don't overlap, so there won't be several displays with same
+        // ids among RootWindowContainer children.
+        for (DisplayContent dc : sWm.mRoot.mChildren) {
+            if (dc.getDisplayId() >= sNextDisplayId) {
+                sNextDisplayId = dc.getDisplayId() + 1;
+            }
+        }
+        context.getDisplay().getDisplayInfo(sDisplayInfo);
+        sDisplayContent = createNewDisplay();
         sWm.mDisplayEnabled = true;
         sWm.mDisplayReady = true;
 
@@ -187,12 +199,20 @@ class WindowTestsBase {
                 true /* onTop */, new Rect(), sWm);
     }
 
-    /**Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
+    /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     static Task createTaskInStack(TaskStack stack, int userId) {
         final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, false, 0,
                 false, false, new TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
+    }
+
+    /** Creates a {@link DisplayContent} and adds it to the system. */
+    DisplayContent createNewDisplay() {
+        final int displayId = sNextDisplayId++;
+        final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
+                sDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
+        return new DisplayContent(display, sWm, sLayersController, new WallpaperController(sWm));
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */

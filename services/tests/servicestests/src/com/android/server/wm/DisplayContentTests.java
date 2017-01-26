@@ -29,6 +29,7 @@ import android.view.DisplayInfo;
 
 import java.util.ArrayList;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
@@ -215,13 +216,8 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testMoveStackBetweenDisplays() throws Exception {
-        // Create second display.
-        final Display display = new Display(DisplayManagerGlobal.getInstance(),
-                sDisplayContent.getDisplayId() + 1, new DisplayInfo(),
-                DEFAULT_DISPLAY_ADJUSTMENTS);
-        final DisplayContent dc = new DisplayContent(display, sWm, sLayersController,
-                new WallpaperController(sWm));
-        sWm.mRoot.addChild(dc, 1);
+        // Create a second display.
+        final DisplayContent dc = createNewDisplay();
 
         // Add stack with activity.
         final TaskStack stack = createTaskStackOnDisplay(dc);
@@ -261,10 +257,31 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Check that override config is applied.
         assertEquals(newOverrideConfig, sDisplayContent.getOverrideConfiguration());
+    }
+
+    /**
+     * This tests global configuration updates when default display config is updated.
+     */
+    @Test
+    public void testDefaultDisplayOverrideConfigUpdate() throws Exception {
+        final Configuration currentOverrideConfig = sDisplayContent.getOverrideConfiguration();
+
+        // Create new, slightly changed override configuration and apply it to the display.
+        final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
+        newOverrideConfig.densityDpi += 120;
+        newOverrideConfig.fontScale += 0.3;
+
+        sWm.setNewDisplayOverrideConfiguration(newOverrideConfig, DEFAULT_DISPLAY);
 
         // Check that global configuration is updated, as we've updated default display's config.
-        final Configuration globalConfig = sWm.mRoot.getConfiguration();
+        Configuration globalConfig = sWm.mRoot.getConfiguration();
         assertEquals(newOverrideConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(newOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
+
+        // Return back to original values.
+        sWm.setNewDisplayOverrideConfiguration(currentOverrideConfig, DEFAULT_DISPLAY);
+        globalConfig = sWm.mRoot.getConfiguration();
+        assertEquals(currentOverrideConfig.densityDpi, globalConfig.densityDpi);
+        assertEquals(currentOverrideConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
     }
 }

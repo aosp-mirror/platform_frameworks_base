@@ -627,6 +627,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     };
 
     /**
+     * Create new {@link DisplayContent} instance, add itself to the root window container and
+     * initialize direct children.
      * @param display May not be null.
      * @param service You know.
      * @param layersController window layer controller used to assign layer to the windows on this
@@ -661,6 +663,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         super.addChild(mTaskStackContainers, null);
         super.addChild(mAboveAppWindowsContainers, null);
         super.addChild(mImeWindowsContainers, null);
+
+        // Add itself as a child to the root container.
+        mService.mRoot.addChild(this, null);
     }
 
     int getDisplayId() {

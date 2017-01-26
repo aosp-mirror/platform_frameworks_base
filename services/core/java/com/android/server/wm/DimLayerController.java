@@ -322,11 +322,19 @@ class DimLayerController {
             }
             mState.remove(dimLayerUser);
         }
+        if (mState.isEmpty()) {
+            mSharedFullScreenDimLayer = null;
+        }
     }
 
     @VisibleForTesting
     boolean hasDimLayerUser(DimLayer.DimLayerUser dimLayerUser) {
         return mState.containsKey(dimLayerUser);
+    }
+
+    @VisibleForTesting
+    boolean hasSharedFullScreenDimLayer() {
+        return mSharedFullScreenDimLayer != null;
     }
 
     void applyDimBehind(DimLayer.DimLayerUser dimLayerUser, WindowStateAnimator animator) {
