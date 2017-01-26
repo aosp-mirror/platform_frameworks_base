@@ -85,7 +85,38 @@ public class PPSMOParserTest {
      * @return {@link PasspointConfiguration}
      */
     private PasspointConfiguration generateConfigurationFromPPSMOTree() throws Exception {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
         PasspointConfiguration config = new PasspointConfiguration();
+        config.updateIdentifier = 12;
+        config.credentialPriority = 99;
+
+        // AAA Server trust root.
+        config.trustRootCertList = new HashMap<>();
+        byte[] certFingerprint = new byte[32];
+        Arrays.fill(certFingerprint, (byte) 0x1f);
+        config.trustRootCertList.put("server1.trust.root.com", certFingerprint);
+
+        // Subscription update.
+        config.subscriptionUpdate = new UpdateParameter();
+        config.subscriptionUpdate.updateIntervalInMinutes = 120;
+        config.subscriptionUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_SSP;
+        config.subscriptionUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER;
+        config.subscriptionUpdate.serverUri = "subscription.update.com";
+        config.subscriptionUpdate.username = "subscriptionUser";
+        config.subscriptionUpdate.base64EncodedPassword = "subscriptionPass";
+        config.subscriptionUpdate.trustRootCertUrl = "subscription.update.cert.com";
+        config.subscriptionUpdate.trustRootCertSha256Fingerprint = new byte[32];
+        Arrays.fill(config.subscriptionUpdate.trustRootCertSha256Fingerprint, (byte) 0x1f);
+
+        // Subscription parameters.
+        config.subscriptionCreationTimeInMs = format.parse("2016-02-01T10:00:00Z").getTime();
+        config.subscriptionExpirationTimeInMs = format.parse("2016-03-01T10:00:00Z").getTime();
+        config.subscriptionType = "Gold";
+        config.usageLimitDataLimit = 921890;
+        config.usageLimitStartTimeInMs = format.parse("2016-12-01T10:00:00Z").getTime();
+        config.usageLimitTimeLimitInMinutes = 120;
+        config.usageLimitUsageTimePeriodInMinutes = 99910;
 
         // HomeSP configuration.
         config.homeSp = new HomeSP();
@@ -101,7 +132,6 @@ public class PPSMOParserTest {
         config.homeSp.otherHomePartners = new String[] {"other.fqdn.com"};
 
         // Credential configuration.
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         config.credential = new Credential();
         config.credential.creationTimeInMs = format.parse("2016-01-01T10:00:00Z").getTime();
         config.credential.expirationTimeInMs = format.parse("2016-02-01T10:00:00Z").getTime();
@@ -161,8 +191,7 @@ public class PPSMOParserTest {
     }
 
     /**
-     * Parse and verify all supported fields under PPS MO tree (currently only fields under
-     * HomeSP and Credential subtree).
+     * Parse and verify all supported fields under PPS MO tree.
      *
      * @throws Exception
      */
