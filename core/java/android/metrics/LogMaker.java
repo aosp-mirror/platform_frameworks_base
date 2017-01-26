@@ -240,6 +240,9 @@ public class LogMaker {
         return out;
     }
 
+    /**
+     * Reconstitute an object from the output of {@link #serialize()}.
+     */
     public void deserialize(Object[] items) {
         int i = 0;
         while (i < items.length) {
@@ -251,5 +254,23 @@ public class LogMaker {
                 Log.i(TAG, "Invalid key " + key.toString());
             }
         }
+    }
+
+    /**
+     * @param that the object to compare to.
+     * @return true if values in that equal values in this, for tags that exist in this.
+     */
+    public boolean isSubsetOf(LogMaker that) {
+        if (that == null) {
+            return false;
+        }
+        for (int i = 0; i < entries.size(); i++) {
+            int key = this.entries.keyAt(i);
+            Object thisValue = this.entries.valueAt(i);
+            Object thatValue = that.entries.get(key);
+            if ((thisValue == null && thatValue != null) || !thisValue.equals(thatValue))
+                return false;
+        }
+        return true;
     }
 }
