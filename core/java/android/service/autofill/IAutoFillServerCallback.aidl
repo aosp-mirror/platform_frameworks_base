@@ -18,14 +18,23 @@ package android.service.autofill;
 
 import java.util.List;
 
+import android.os.Bundle;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 
 /**
+ * Object running in the AutoFillService process and used to communicate back with system_server.
+ *
  * @hide
  */
+// TODO(b/33197203): rename methods to make them more consistent with a callback, or rename class
+// itself
 oneway interface IAutoFillServerCallback {
+    // TODO(b/33197203): document methods
     void showResponse(in FillResponse response);
-    void showError(String message);
+    void showError(CharSequence message);
     void highlightSavedFields(in AutoFillId[] ids);
+    void unlockFillResponse(int flags);
+    void unlockDataset(in Dataset dataset, int flags);
 }

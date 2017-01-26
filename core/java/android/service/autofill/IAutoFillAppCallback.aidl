@@ -21,8 +21,15 @@ import java.util.List;
 import android.view.autofill.Dataset;
 
 /**
+ * Object running in the application process and responsible for auto-filling it.
+ *
  * @hide
  */
+// TODO(b/33197203): rename methods to make them more consistent with a callback, or rename class
+// itself
 oneway interface IAutoFillAppCallback {
+    /**
+      * Auto-fills the activity with the contents of a dataset.
+      */
     void autoFill(in Dataset dataset);
 }

@@ -22,22 +22,33 @@ import android.app.Activity;
 import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.service.autofill.CallbackHelper.Dumpable;
+import android.service.autofill.CallbackHelper.Finalizer;
 import android.util.Log;
 import android.view.autofill.AutoFillId;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+
+import java.io.PrintWriter;
 
 /**
  * Handles save requests from the {@link AutoFillService} into the {@link Activity} being
  * auto-filled.
+ *
+ * <p>This class is thread safe.
  */
-public final class SaveCallback {
+public final class SaveCallback implements Dumpable {
 
     private static final String TAG = "SaveCallback";
 
     private final IAutoFillServerCallback mCallback;
 
+    @GuardedBy("mCallback")
     private boolean mReplied = false;
+
+    @GuardedBy("mCallback")
+    private Finalizer mFinalizer;
 
     /** @hide */
     SaveCallback(IAutoFillServerCallback callback) {
@@ -46,8 +57,8 @@ public final class SaveCallback {
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, SaveCallback)}
-     * was successfully fulfilled by the service.
+     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
+     * android.os.CancellationSignal, SaveCallback)} was successfully fulfilled by the service.
      *
      * @param ids ids ({@link ViewNode#getAutoFillId()}) of the fields that were saved.
      *
@@ -57,21 +68,24 @@ public final class SaveCallback {
         if (DEBUG) Log.d(TAG, "onSuccess(): ids=" + ((ids == null) ? "null" : ids.length));
 
         Preconditions.checkArgument(ids != null, "ids cannot be null");
-        checkNotRepliedYet();
-
         Preconditions.checkArgument(ids.length > 0, "ids cannot be empty");
 
-        try {
-            mCallback.highlightSavedFields(ids);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        synchronized (mCallback) {
+            checkNotRepliedYetLocked();
+            try {
+                mCallback.highlightSavedFields(ids);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            } finally {
+                setRepliedLocked();
+            }
         }
     }
 
     /**
      * Notifies the Android System that an
-     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal, SaveCallback)}
-     * could not be fulfilled by the service.
+     * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
+     * android.os.CancellationSignal, SaveCallback)} could not be fulfilled by the service.
      *
      * @param message error message to be displayed to the user.
      *
@@ -81,18 +95,53 @@ public final class SaveCallback {
         if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
 
         Preconditions.checkArgument(message != null, "message cannot be null");
-        checkNotRepliedYet();
 
-        try {
-            mCallback.showError(message.toString());
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        synchronized (mCallback) {
+            checkNotRepliedYetLocked();
+
+            try {
+                mCallback.showError(message);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            } finally {
+                setRepliedLocked();
+            }
         }
     }
 
+    /** @hide */
+    @Override
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("SaveCallback: mReplied="); pw.println(mReplied);
+    }
+
+    /** @hide */
+    @Override
+    public void setFinalizer(Finalizer f) {
+        synchronized (mCallback) {
+            mFinalizer = f;
+        }
+    }
+
+    @Override
+    public String toString() {
+        if (!DEBUG) return super.toString();
+
+        return "SaveCallback: [mReplied= " + mReplied + "]";
+    }
+
     // There can be only one!!
-    private void checkNotRepliedYet() {
+    private void checkNotRepliedYetLocked() {
         Preconditions.checkState(!mReplied, "already replied");
+    }
+
+    private void setRepliedLocked() {
+        if (DEBUG) Log.d(TAG, "setReplied()");
+
         mReplied = true;
+
+        if (mFinalizer != null) {
+            mFinalizer.gone();
+        }
     }
 }

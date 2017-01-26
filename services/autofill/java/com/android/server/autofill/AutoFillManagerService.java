@@ -102,7 +102,6 @@ public final class AutoFillManagerService extends SystemService {
                 }
             }
         }
-
     };
 
     private HandlerCaller mHandlerCaller;
@@ -313,7 +312,6 @@ public final class AutoFillManagerService extends SystemService {
             (new AutoFillManagerServiceShellCommand(this)).exec(
                     this, in, out, err, args, callback, resultReceiver);
         }
-
     }
 
     private final class SettingsObserver extends ContentObserver {
