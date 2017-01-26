@@ -6059,4 +6059,21 @@ public abstract class PackageManager {
     @TestApi
     public abstract @InstallReason int getInstallReason(String packageName,
             @NonNull UserHandle user);
+
+    /**
+     * Checks whether the calling package is allowed to request package installs through package
+     * installer. Apps are encouraged to call this api before launching the package installer via
+     * intent {@link android.content.Intent#ACTION_INSTALL_PACKAGE}. Starting from Android O, the
+     * user can explicitly choose what external sources they trust to install apps on the device.
+     * If this api returns false, the install request will be blocked by the package installer and
+     * a dialog will be shown to the user with an option to launch settings to change their
+     * preference. An application must target Android O or higher and declare permission
+     * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES} in order to use this api.
+     *
+     * @return true if the calling package is trusted by the user to request install packages on
+     * the device, false otherwise.
+     * @see {@link android.content.Intent#ACTION_INSTALL_PACKAGE}
+     * @see {@link android.provider.Settings#ACTION_MANAGE_EXTERNAL_SOURCES}
+     */
+    public abstract boolean canRequestPackageInstalls();
 }

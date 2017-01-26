@@ -246,4 +246,25 @@ public abstract class PackageManagerInternal {
      * @return The SetupWizard package name.
      */
     public abstract String getSetupWizardPackageName();
+
+    public interface ExternalSourcesPolicy {
+
+        int USER_TRUSTED = 0;   // User has trusted the package to install apps
+        int USER_BLOCKED = 1;   // User has blocked the package to install apps
+        int USER_DEFAULT = 2;   // Default code to use when user response is unavailable
+
+        /**
+         * Checks the user preference for whether a package is trusted to request installs through
+         * package installer
+         *
+         * @param packageName The package to check for
+         * @param uid the uid in which the package is running
+         * @return {@link USER_TRUSTED} if the user has trusted the package, {@link USER_BLOCKED}
+         * if user has blocked requests from the package, {@link USER_DEFAULT} if the user response
+         * is not yet available
+         */
+        int getPackageTrustedToInstallApps(String packageName, int uid);
+    }
+
+    public abstract void setExternalSourcesPolicy(ExternalSourcesPolicy policy);
 }

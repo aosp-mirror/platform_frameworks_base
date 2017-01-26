@@ -2580,4 +2580,13 @@ public class ApplicationPackageManager extends PackageManager {
             return false;
         }
     }
+
+    @Override
+    public boolean canRequestPackageInstalls() {
+        try {
+            return mPM.canRequestPackageInstalls(mContext.getPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }

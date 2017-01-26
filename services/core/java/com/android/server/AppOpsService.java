@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -293,6 +294,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                 scheduleFastWriteLocked();
             }
         }
+
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setExternalSourcesPolicy(
+                new PackageManagerInternal.ExternalSourcesPolicy() {
+                    @Override
+                    public int getPackageTrustedToInstallApps(String packageName, int uid) {
+                        int appOpMode = checkOperation(AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
+                                uid, packageName);
+                        switch (appOpMode) {
+                            case AppOpsManager.MODE_ALLOWED:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
+                            case AppOpsManager.MODE_ERRORED:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_BLOCKED;
+                            default:
+                                return PackageManagerInternal.ExternalSourcesPolicy.USER_DEFAULT;
+                        }
+                    }
+                });
 
         StorageManagerInternal storageManagerInternal = LocalServices.getService(
                 StorageManagerInternal.class);
