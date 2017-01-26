@@ -272,6 +272,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataMiscCeDirectory() {
+        return buildPath(getDataDirectory(), "misc_ce");
+    }
+
+    /** {@hide} */
     public static File getDataMiscCeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc_ce", String.valueOf(userId));
     }

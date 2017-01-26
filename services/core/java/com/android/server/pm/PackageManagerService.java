@@ -21319,9 +21319,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                     FileUtils.deleteContentsAndDir(Environment.getUserSystemDirectory(userId));
                     FileUtils.deleteContentsAndDir(Environment.getDataSystemDeDirectory(userId));
+                    FileUtils.deleteContentsAndDir(Environment.getDataMiscDeDirectory(userId));
                 }
                 if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
                     FileUtils.deleteContentsAndDir(Environment.getDataSystemCeDirectory(userId));
+                    FileUtils.deleteContentsAndDir(Environment.getDataMiscCeDirectory(userId));
                 }
             }
 
@@ -21349,6 +21351,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 .listFilesOrEmpty(Environment.getDataSystemDeDirectory()));
         Collections.addAll(files, FileUtils
                 .listFilesOrEmpty(Environment.getDataSystemCeDirectory()));
+        Collections.addAll(files, FileUtils
+                .listFilesOrEmpty(Environment.getDataMiscCeDirectory()));
         for (File file : files) {
             if (!file.isDirectory()) continue;
 
