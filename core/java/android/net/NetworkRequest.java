@@ -178,6 +178,20 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
+         * Set the {@code NetworkCapabilities} for this builder instance,
+         * overriding any capabilities that had been previously set.
+         *
+         * @param nc The superseding {@code NetworkCapabilities} instance.
+         * @return The builder to facilitate chaining.
+         * @hide
+         */
+        public Builder setCapabilities(NetworkCapabilities nc) {
+            mNetworkCapabilities.clearAll();
+            mNetworkCapabilities.combineCapabilities(nc);
+            return this;
+        }
+
+        /**
          * Completely clears all the {@code NetworkCapabilities} from this builder instance,
          * removing even the capabilities that are set by default when the object is constructed.
          *
