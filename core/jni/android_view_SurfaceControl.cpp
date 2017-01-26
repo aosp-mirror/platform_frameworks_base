@@ -147,8 +147,8 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
     }
     Rect sourceCrop = rectFromObj(env, sourceCropObj);
     if (allLayers) {
-        minLayer = 0;
-        maxLayer = -1;
+        minLayer = INT32_MIN;
+        maxLayer = INT32_MAX;
     }
     sp<GraphicBuffer> buffer;
     status_t res = ScreenshotClient::captureToBuffer(displayToken,
@@ -181,8 +181,8 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     std::unique_ptr<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
     if (allLayers) {
-        minLayer = 0;
-        maxLayer = -1;
+        minLayer = INT32_MIN;
+        maxLayer = INT32_MAX;
     }
 
     res = screenshot->update(displayToken, sourceCrop, width, height,
@@ -254,8 +254,8 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
             Rect sourceCrop(left, top, right, bottom);
 
             if (allLayers) {
-                minLayer = 0;
-                maxLayer = -1;
+                minLayer = INT32_MIN;
+                maxLayer = INT32_MAX;
             }
             ScreenshotClient::capture(displayToken,
                     consumer->getIGraphicBufferProducer(), sourceCrop,
