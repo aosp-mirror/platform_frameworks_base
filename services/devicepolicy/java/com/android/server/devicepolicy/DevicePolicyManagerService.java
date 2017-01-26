@@ -1531,6 +1531,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
         }
 
+        AlarmManager getAlarmManager() {
+            return (AlarmManager) mContext.getSystemService(AlarmManager.class);
+        }
+
         IWindowManager getIWindowManager() {
             return IWindowManager.Stub
                     .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
@@ -2091,7 +2095,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long token = mInjector.binderClearCallingIdentity();
         try {
             int affectedUserHandle = parent ? getProfileParentId(userHandle) : userHandle;
-            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            AlarmManager am = mInjector.getAlarmManager();
             PendingIntent pi = PendingIntent.getBroadcastAsUser(context, REQUEST_EXPIRE_PASSWORD,
                     new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT,
