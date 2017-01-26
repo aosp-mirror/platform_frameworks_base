@@ -248,6 +248,12 @@ public class CarrierConfigManager {
             KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY = "gsm_nonroaming_networks_string_array";
 
     /**
+     * Override the device's configuration for the ImsService to use for this SIM card.
+     */
+    public static final String KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING =
+            "config_ims_package_override_string";
+
+    /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of SIDs to be considered roaming for 3GPP2 RATs.
      */
@@ -1299,6 +1305,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_DIAL_STRING_REPLACE_STRING_ARRAY, null);
