@@ -19,6 +19,8 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.BatteryManager;
+import android.os.BatteryManagerInternal;
 import android.os.Build;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
@@ -65,7 +67,25 @@ public class RescueParty {
     private static SparseArray<Threshold> sApps = new SparseArray<>();
 
     private static boolean isDisabled() {
-        return Build.IS_ENG || SystemProperties.getBoolean(PROP_DISABLE_RESCUE, false);
+        // We're disabled on all engineering devices
+        if (Build.IS_ENG) return true;
+
+        // We're disabled on userdebug devices connected over USB, since that's
+        // a decent signal that someone is actively trying to debug the device,
+        // or that it's in a lab environment.
+        if (Build.IS_USERDEBUG) {
+            try {
+                if (LocalServices.getService(BatteryManagerInternal.class)
+                        .getPlugType() == BatteryManager.BATTERY_PLUGGED_USB) {
+                    return true;
+                } else {
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+
+        // One last-ditch check
+        return SystemProperties.getBoolean(PROP_DISABLE_RESCUE, false);
     }
 
     /**
