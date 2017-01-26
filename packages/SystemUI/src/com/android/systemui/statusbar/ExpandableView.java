@@ -404,7 +404,9 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
-     * @return an amount between 0 and 1 of increased padding that this child needs
+     * @return an amount between -1 and 1 of increased padding that this child needs. 1 means it
+     * needs a full increased padding while -1 means it needs no padding at all. For 0.0f the normal
+     * padding is applied.
      */
     public float getIncreasedPaddingAmount() {
         return 0.0f;

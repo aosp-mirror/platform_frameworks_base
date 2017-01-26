@@ -205,6 +205,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
     private boolean mIsLowPriority;
+    private boolean mIsColorized;
 
     @Override
     public boolean isGroupExpansionChanging() {
@@ -297,6 +298,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(entry);
         }
+        mIsColorized = mStatusBarNotification.getNotification().isColorized();
         mShowingPublicInitialized = false;
         updateNotificationColor();
         if (mIsSummaryWithChildren) {
@@ -1865,8 +1867,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             } else if (isUserLocked()) {
                 return mChildrenContainer.getGroupExpandFraction();
             }
+        } else if (isColorized()) {
+            return -1.0f;
         }
         return 0.0f;
+    }
+
+    private boolean isColorized() {
+        return mIsColorized;
     }
 
     @Override
