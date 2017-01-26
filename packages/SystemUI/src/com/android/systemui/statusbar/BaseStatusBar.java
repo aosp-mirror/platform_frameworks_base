@@ -973,7 +973,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         for (int i = 0; i < activeNotifications.size(); i++) {
             Entry entry = activeNotifications.get(i);
-            boolean exposedGuts = entry.row.getGuts() == mNotificationGutsExposed;
+            boolean exposedGuts = mNotificationGutsExposed != null
+                    && entry.row.getGuts() == mNotificationGutsExposed;
             entry.row.reInflateViews();
             if (exposedGuts) {
                 mNotificationGutsExposed = entry.row.getGuts();
@@ -1081,6 +1082,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mStackScroller.onHeightChanged(row, !isPanelFullyCollapsed() /* needsAnimation */);
             }
             mNotificationGutsExposed = null;
+            mGutsMenuItem = null;
         });
 
         if (item.gutsContent instanceof SnoozeGutsContent) {
