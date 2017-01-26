@@ -1810,7 +1810,8 @@ final class ActivityRecord implements AppWindowContainerListener {
         if (_taskDescription.getIconFilename() == null &&
                 (icon = _taskDescription.getIcon()) != null) {
             final String iconFilename = createImageFilename(createTime, task.taskId);
-            final File iconFile = new File(TaskPersister.getUserImagesDir(userId), iconFilename);
+            final File iconFile = new File(TaskPersister.getUserImagesDir(task.userId),
+                    iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
             service.mRecentTasks.saveImage(icon, iconFilePath);
             _taskDescription.setIconFilename(iconFilePath);
