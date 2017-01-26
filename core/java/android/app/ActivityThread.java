@@ -541,6 +541,7 @@ public final class ActivityThread {
         ParcelFileDescriptor profileFd;
         int samplingInterval;
         boolean autoStopProfiler;
+        boolean streamingOutput;
         boolean profiling;
         boolean handlingProfiling;
         public void setProfiler(ProfilerInfo profilerInfo) {
@@ -566,6 +567,7 @@ public final class ActivityThread {
             profileFd = fd;
             samplingInterval = profilerInfo.samplingInterval;
             autoStopProfiler = profilerInfo.autoStopProfiler;
+            streamingOutput = profilerInfo.streamingOutput;
         }
         public void startProfiling() {
             if (profileFd == null || profiling) {
@@ -574,7 +576,8 @@ public final class ActivityThread {
             try {
                 int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval);
+                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval,
+                        streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile);
@@ -5275,6 +5278,7 @@ public final class ActivityThread {
             mProfiler.profileFd = data.initProfilerInfo.profileFd;
             mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
             mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
+            mProfiler.streamingOutput = data.initProfilerInfo.streamingOutput;
         }
 
         // send up app name; do this *before* waiting for debugger
