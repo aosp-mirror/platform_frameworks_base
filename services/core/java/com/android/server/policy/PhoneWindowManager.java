@@ -261,6 +261,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // No longer recommended for desk docks;
     static final boolean ENABLE_DESK_DOCK_HOME_CAPTURE = false;
 
+    // Whether to allow devices placed in vr headset viewers to have an alternative Home intent.
+    static final boolean ENABLE_VR_HEADSET_HOME_CAPTURE = true;
+
     static final boolean ALTERNATE_CAR_MODE_NAV_SIZE = false;
 
     static final int SHORT_PRESS_POWER_NOTHING = 0;
@@ -684,6 +687,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
+    Intent mVrHeadsetHomeIntent;
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
@@ -1790,6 +1794,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDeskDockIntent =  new Intent(Intent.ACTION_MAIN, null);
         mDeskDockIntent.addCategory(Intent.CATEGORY_DESK_DOCK);
         mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mVrHeadsetHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
+        mVrHeadsetHomeIntent.addCategory(Intent.CATEGORY_VR_HOME);
+        mVrHeadsetHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -7392,6 +7400,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || mDockMode == Intent.EXTRA_DOCK_STATE_LE_DESK)) {
             // Always launch dock home from home when watch is docked, if it exists.
             intent = mDeskDockIntent;
+        } else if (mUiMode == Configuration.UI_MODE_TYPE_VR_HEADSET) {
+            if (ENABLE_VR_HEADSET_HOME_CAPTURE) {
+                intent = mVrHeadsetHomeIntent;
+            }
         }
 
         if (intent == null) {
