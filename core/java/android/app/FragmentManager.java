@@ -1110,10 +1110,25 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                 }
                             }
                         }
+
                         f.mHost = mHost;
                         f.mParentFragment = mParent;
                         f.mFragmentManager = mParent != null
                                 ? mParent.mChildFragmentManager : mHost.getFragmentManagerImpl();
+
+                        // If we have a target fragment, push it along to at least CREATED
+                        // so that this one can rely on it as an initialized dependency.
+                        if (f.mTarget != null) {
+                            if (!mActive.contains(f.mTarget)) {
+                                throw new IllegalStateException("Fragment " + f
+                                        + " declared target fragment " + f.mTarget
+                                        + " that does not belong to this FragmentManager!");
+                            }
+                            if (f.mTarget.mState < Fragment.CREATED) {
+                                moveToState(f.mTarget, Fragment.CREATED, 0, 0, true);
+                            }
+                        }
+
                         dispatchOnFragmentPreAttached(f, mHost.getContext(), false);
                         f.mCalled = false;
                         f.onAttach(mHost.getContext());
