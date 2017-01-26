@@ -150,7 +150,7 @@ public class LayoutAnimationController {
      * Returns the order used to compute the delay of each child's animation.
      *
      * @return one of {@link #ORDER_NORMAL}, {@link #ORDER_REVERSE} or
-     *         {@link #ORDER_RANDOM)
+     *         {@link #ORDER_RANDOM}
      *
      * @attr ref android.R.styleable#LayoutAnimation_animationOrder
      */

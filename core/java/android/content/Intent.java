@@ -8129,7 +8129,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return Returns a bit mask of {@link #FILL_IN_ACTION},
      * {@link #FILL_IN_DATA}, {@link #FILL_IN_CATEGORIES}, {@link #FILL_IN_PACKAGE},
      * {@link #FILL_IN_COMPONENT}, {@link #FILL_IN_SOURCE_BOUNDS},
-     * {@link #FILL_IN_SELECTOR} and {@link #FILL_IN_CLIP_DATA indicating which fields were
+     * {@link #FILL_IN_SELECTOR} and {@link #FILL_IN_CLIP_DATA} indicating which fields were
      * changed.
      */
     @FillInFlags
