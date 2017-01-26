@@ -1333,7 +1333,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         // Sort the list of events in ascending order of their time
         // Create the list including the delay animation.
         mEvents.clear();
-        for (int i = 0; i < mNodes.size(); i++) {
+        for (int i = 1; i < mNodes.size(); i++) {
             Node node = mNodes.get(i);
             mEvents.add(new AnimationEvent(node, AnimationEvent.ANIMATION_START));
             mEvents.add(new AnimationEvent(node, AnimationEvent.ANIMATION_DELAY_ENDED));
@@ -1345,13 +1345,15 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 long t1 = e1.getTime();
                 long t2 = e2.getTime();
                 if (t1 == t2) {
-                    if (e1.mNode == e2.mNode) {
-                        // For the same animation, start event has to happen before end.
+                    // For events that happen at the same time, we need them to be in the sequence
+                    // (end, start, start delay ended)
+                    if (e2.mEvent + e1.mEvent == AnimationEvent.ANIMATION_START
+                            + AnimationEvent.ANIMATION_DELAY_ENDED) {
+                        // Ensure start delay happens after start
                         return e1.mEvent - e2.mEvent;
+                    } else {
+                        return e2.mEvent - e1.mEvent;
                     }
-                    // For different animation, end events need to happen before start, to ensure
-                    // sequential animations finish the previous one before starting the next one.
-                    return e2.mEvent - e1.mEvent;
                 }
                 if (t2 == DURATION_INFINITE) {
                     return -1;
@@ -1364,21 +1366,82 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             }
         });
 
+        int eventSize = mEvents.size();
+        // For the same animation, start event has to happen before end.
+        for (int i = 0; i < eventSize;) {
+            AnimationEvent event = mEvents.get(i);
+            if (event.mEvent == AnimationEvent.ANIMATION_END) {
+                boolean needToSwapStart;
+                if (event.mNode.mStartTime == event.mNode.mEndTime) {
+                    needToSwapStart = true;
+                } else if (event.mNode.mEndTime == event.mNode.mStartTime
+                        + event.mNode.mAnimation.getStartDelay()) {
+                    // Swapping start delay
+                    needToSwapStart = false;
+                } else {
+                    i++;
+                    continue;
+                }
+
+                int startEventId = eventSize;
+                int startDelayEndId = eventSize;
+                for (int j = i + 1; j < eventSize; j++) {
+                    if (startEventId < eventSize && startDelayEndId < eventSize) {
+                        break;
+                    }
+                    if (mEvents.get(j).mNode == event.mNode) {
+                        if (mEvents.get(j).mEvent == AnimationEvent.ANIMATION_START) {
+                            // Found start event
+                            startEventId = j;
+                        } else if (mEvents.get(j).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                            startDelayEndId = j;
+                        }
+                    }
+
+                }
+                if (needToSwapStart && startEventId == mEvents.size()) {
+                    throw new UnsupportedOperationException("Something went wrong, no start is"
+                            + "found after stop for an animation that has the same start and end"
+                            + "time.");
+
+                }
+                if (startDelayEndId == mEvents.size()) {
+                    throw new UnsupportedOperationException("Something went wrong, no start"
+                            + "delay end is found after stop for an animation");
+
+                }
+
+                // We need to make sure start is inserted before start delay ended event,
+                // because otherwise inserting start delay ended events first would change
+                // the start event index.
+                if (needToSwapStart) {
+                    AnimationEvent startEvent = mEvents.remove(startEventId);
+                    mEvents.add(i, startEvent);
+                    i++;
+                }
+
+                AnimationEvent startDelayEndEvent = mEvents.remove(startDelayEndId);
+                mEvents.add(i, startDelayEndEvent);
+                i += 2;
+            } else {
+                i++;
+            }
+        }
+
+        if (!mEvents.isEmpty() && mEvents.get(0).mEvent != AnimationEvent.ANIMATION_START) {
+            throw new UnsupportedOperationException(
+                    "Sorting went bad, the start event should always be at index 0");
+        }
+
+        // Add AnimatorSet's start delay node to the beginning
+        mEvents.add(0, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_START));
+        mEvents.add(1, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_DELAY_ENDED));
+        mEvents.add(2, new AnimationEvent(mRootNode, AnimationEvent.ANIMATION_END));
+
         if (mEvents.get(mEvents.size() - 1).mEvent == AnimationEvent.ANIMATION_START
                 || mEvents.get(mEvents.size() - 1).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
             throw new UnsupportedOperationException(
                     "Something went wrong, the last event is not an end event");
-        }
-        if (mEvents.get(1).mEvent != AnimationEvent.ANIMATION_DELAY_ENDED
-                || mEvents.get(1).mNode != mRootNode) {
-            throw new UnsupportedOperationException(
-                    "Sorting went bad, the root node's start delay end event should always be at"
-                            + " index 1");
-        }
-        if (mEvents.get(2).mEvent != AnimationEvent.ANIMATION_END
-                || mEvents.get(2).mNode != mRootNode) {
-            throw new UnsupportedOperationException(
-                    "Sorting went bad, the start delay end event should always be at index 2");
         }
     }
 
