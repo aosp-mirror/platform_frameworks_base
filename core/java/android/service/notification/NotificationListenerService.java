@@ -785,7 +785,7 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Request that the listener be rebound, after a previous call to (@link requestUnbind).
+     * Request that the listener be rebound, after a previous call to {@link #requestUnbind}.
      *
      * <p>This method will fail for listeners that have
      * not been granted the permission by the user.

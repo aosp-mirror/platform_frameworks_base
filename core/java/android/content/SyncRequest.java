@@ -175,7 +175,7 @@ public class SyncRequest implements Parcelable {
     }
 
     /**
-     * Builder class for a @link SyncRequest. As you build your SyncRequest this class will also
+     * Builder class for a {@link SyncRequest}. As you build your SyncRequest this class will also
      * perform validation.
      */
     public static class Builder {

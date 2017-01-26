@@ -41,7 +41,7 @@ public class UiAutomationShellWrapper {
      * actions such as dialing 911 or posting messages to public forums, etc.
      *
      * @param isSet True to set as monkey test. False to set as regular functional test (default).
-     * @see {@link ActivityManager#isUserAMonkey()}
+     * @see ActivityManager#isUserAMonkey()
      */
     public void setRunAsMonkey(boolean isSet) {
         IActivityManager am = ActivityManagerNative.getDefault();
