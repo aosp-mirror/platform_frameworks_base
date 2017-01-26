@@ -29,6 +29,7 @@ import static android.content.res.Configuration.EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test class for {@link AppWindowContainerController}.
@@ -135,9 +136,50 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         assertHasStartingWindow(controller2.getAppWindowToken());
     }
 
+    @Test
+    public void testReparent() throws Exception {
+        final TestTaskWindowContainerController taskController1 =
+                new TestTaskWindowContainerController(
+                        createStackControllerOnDisplay(sDisplayContent));
+        final TestAppWindowContainerController appWindowController1 = createAppWindowController(
+                taskController1);
+        final TestTaskWindowContainerController taskController2 =
+                new TestTaskWindowContainerController(
+                        createStackControllerOnDisplay(sDisplayContent));
+        final TestAppWindowContainerController appWindowController2 = createAppWindowController(
+                taskController2);
+        final TestTaskWindowContainerController taskController3 =
+                new TestTaskWindowContainerController(
+                        createStackControllerOnDisplay(sDisplayContent));
+
+        try {
+            appWindowController1.reparent(taskController1, 0);
+            fail("Should not be able to reparent to the same parent");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+
+        try {
+            taskController3.setContainer(null);
+            appWindowController1.reparent(taskController3, 0);
+            fail("Should not be able to reparent to a task that doesn't have a container");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+
+        // Reparent the app window and ensure that it is moved
+        appWindowController1.reparent(taskController2, 0);
+        assertEquals(taskController2.mContainer, appWindowController1.mContainer.getParent());
+        assertEquals(0, ((TestAppWindowToken) appWindowController1.mContainer).positionInParent());
+        assertEquals(1, ((TestAppWindowToken) appWindowController2.mContainer).positionInParent());
+    }
+
     private TestAppWindowContainerController createAppWindowController() {
-        final TestTaskWindowContainerController taskController =
-                new TestTaskWindowContainerController();
+        return createAppWindowController(new TestTaskWindowContainerController());
+    }
+
+    private TestAppWindowContainerController createAppWindowController(
+            TestTaskWindowContainerController taskController) {
         return new TestAppWindowContainerController(taskController);
     }
 }

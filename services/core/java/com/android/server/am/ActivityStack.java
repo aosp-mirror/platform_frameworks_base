@@ -3043,8 +3043,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                             + " to task=" + task + ":" + taskInsertionPoint);
                     for (int srcPos = start; srcPos >= i; --srcPos) {
                         final ActivityRecord p = activities.get(srcPos);
-                        p.setTask(task, null);
-                        task.addActivityAtIndex(taskInsertionPoint, p);
+                        p.reparent(task, taskInsertionPoint, "resetAffinityTaskIfNeededLocked");
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
                                 "Removing and adding activity " + p + " to stack at " + task
@@ -5071,12 +5070,17 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
         final boolean wasPaused = prevStack.mPausingActivity == r;
 
+        // Create a new task for the activity to be parented in
         final TaskRecord task = createTaskRecord(
                 mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
                 r.info, r.intent, null, null, true, r.mActivityType);
-        r.setTask(task, null);
-        task.addActivityToTop(r);
+        // This is a new task, so reparenting it to position 0 will move it to the top
+        r.reparent(task, 0 /* position */, "moveActivityToStack");
+
+        // Notify the task actiivties if it was moved to/from a pinned stack
         mStackSupervisor.scheduleReportPictureInPictureModeChangedIfNeeded(task, prevStack);
+
+        // Resume the activity if necessary after it has moved
         moveToFrontAndResumeStateIfNeeded(r, wasFocused, wasResumed, wasPaused,
                 "moveActivityToStack");
         if (wasResumed) {

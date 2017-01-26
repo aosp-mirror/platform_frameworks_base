@@ -850,6 +850,27 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    void reparent(Task task, int position) {
+        if (task == mTask) {
+            throw new IllegalArgumentException(
+                    "window token=" + this + " already child of task=" + mTask);
+        }
+        if (DEBUG_ADD_REMOVE) Slog.i(TAG, "reParentWindowToken: removing window token=" + this
+                + " from task=" + mTask);
+        final DisplayContent prevDisplayContent = getDisplayContent();
+
+        getParent().removeChild(this);
+        task.addChild(this, position);
+
+        // Relayout display(s).
+        final DisplayContent displayContent = task.getDisplayContent();
+        displayContent.setLayoutNeeded();
+        if (prevDisplayContent != displayContent) {
+            onDisplayChanged(displayContent);
+            prevDisplayContent.setLayoutNeeded();
+        }
+    }
+
     private boolean canFreezeBounds() {
         // For freeform windows, we can't freeze the bounds at the moment because this would make
         // the resizing unresponsive.
