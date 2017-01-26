@@ -40,7 +40,9 @@ import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -110,7 +112,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     private static final String KEY_INSTANCE_STATE_EXISTING_ACCOUNTS = "existingAccounts";
     private static final String KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME = "selectedAccountName";
     private static final String KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT = "selectedAddAccount";
-    private static final String KEY_INSTANCE_STATE_ACCOUNT_LIST = "accountList";
+    private static final String KEY_INSTANCE_STATE_ACCOUNT_LIST = "accountAndVisibilityList";
 
     private static final int SELECTED_ITEM_NONE = -1;
 
@@ -120,7 +122,11 @@ public class ChooseTypeAndAccountActivity extends Activity
     private boolean mSelectedAddNewAccount = false;
     private String mDescriptionOverride;
 
-    private ArrayList<Account> mAccounts;
+    private Map<Account, Integer> mAccounts;
+    // TODO Redesign flow to show NOT_VISIBLE accounts
+    // and display a warning if they are selected.
+    // Currently NOT_VISBILE accounts are not shown at all.
+    private ArrayList<Account> mPossiblyVisibleAccounts;
     private int mPendingRequest = REQUEST_NULL;
     private Parcelable[] mExistingAccounts = null;
     private int mSelectedItemIndex;
@@ -164,12 +170,12 @@ public class ChooseTypeAndAccountActivity extends Activity
                     savedInstanceState.getParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS);
 
             // Makes sure that any user selection is preserved across orientation changes.
-            mSelectedAccountName = savedInstanceState.getString(
-                    KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME);
-
-            mSelectedAddNewAccount = savedInstanceState.getBoolean(
-                    KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
-            mAccounts = savedInstanceState.getParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST);
+            mSelectedAccountName =
+                    savedInstanceState.getString(KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME);
+            mSelectedAddNewAccount =
+                    savedInstanceState.getBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
+            mAccounts = (Map<Account, Integer>) savedInstanceState
+                    .getSerializable(KEY_INSTANCE_STATE_ACCOUNT_LIST);
         } else {
             mPendingRequest = REQUEST_NULL;
             mExistingAccounts = null;
@@ -220,9 +226,15 @@ public class ChooseTypeAndAccountActivity extends Activity
             }
         }
 
-        String[] listItems = getListOfDisplayableOptions(mAccounts);
-        mSelectedItemIndex = getItemIndexToSelect(
-            mAccounts, mSelectedAccountName, mSelectedAddNewAccount);
+        mPossiblyVisibleAccounts = new ArrayList<>(mAccounts.size());
+        for (Map.Entry<Account, Integer> entry : mAccounts.entrySet()) {
+            if (AccountManager.VISIBILITY_NOT_VISIBLE != entry.getValue()) {
+                mPossiblyVisibleAccounts.add(entry.getKey());
+            }
+        }
+        String[] listItems = getListOfDisplayableOptions(mPossiblyVisibleAccounts);
+        mSelectedItemIndex = getItemIndexToSelect(mPossiblyVisibleAccounts, mSelectedAccountName,
+                mSelectedAddNewAccount);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_type_and_account);
@@ -250,15 +262,18 @@ public class ChooseTypeAndAccountActivity extends Activity
             outState.putParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS, mExistingAccounts);
         }
         if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-            if (mSelectedItemIndex == mAccounts.size()) {
+            if (mSelectedItemIndex == mPossiblyVisibleAccounts.size()) {
                 outState.putBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, true);
             } else {
                 outState.putBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, false);
                 outState.putString(KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME,
-                        mAccounts.get(mSelectedItemIndex).name);
+                        mPossiblyVisibleAccounts.get(mSelectedItemIndex).name);
             }
         }
-        outState.putParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST, mAccounts);
+        // should be HashMap by default.
+        HashMap<Account, Integer> accountsHashMap = (mAccounts instanceof HashMap)
+                ? (HashMap) mAccounts : new HashMap<Account, Integer>(mAccounts);
+        outState.putSerializable(KEY_INSTANCE_STATE_ACCOUNT_LIST, accountsHashMap);
     }
 
     public void onCancelButtonClicked(View view) {
@@ -266,11 +281,11 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     public void onOkButtonClicked(View view) {
-        if (mSelectedItemIndex == mAccounts.size()) {
+        if (mSelectedItemIndex == mPossiblyVisibleAccounts.size()) {
             // Selected "Add New Account" option
             startChooseAccountTypeActivity();
         } else if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-            onAccountSelected(mAccounts.get(mSelectedItemIndex));
+            onAccountSelected(mPossiblyVisibleAccounts.get(mSelectedItemIndex));
         }
     }
 
@@ -321,6 +336,7 @@ public class ChooseTypeAndAccountActivity extends Activity
                 }
 
                 if (accountName == null || accountType == null) {
+                    // new account was added.
                     Account[] currentAccounts = AccountManager.get(this).getAccountsForPackage(
                             mCallingPackage, mCallingUid);
                     Set<Account> preExistingAccounts = new HashSet<Account>();
@@ -328,6 +344,7 @@ public class ChooseTypeAndAccountActivity extends Activity
                         preExistingAccounts.add((Account) accountParcel);
                     }
                     for (Account account : currentAccounts) {
+                        // New account is visible to the app - return it.
                         if (!preExistingAccounts.contains(account)) {
                             accountName = account.name;
                             accountType = account.type;
@@ -409,13 +426,27 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     private void setResultAndFinish(final String accountName, final String accountType) {
+        // Mark account as visible since user chose it.
+        Account account = new Account(accountName, accountType);
+        Integer oldVisibility = mAccounts.get(account);
+        // oldVisibility is null if new account was added
+        if (oldVisibility == null) {
+            Map<Account, Integer> accountsAndVisibility = AccountManager.get(this)
+                    .getAccountsAndVisibilityForPackage(mCallingPackage, null /* type */);
+            oldVisibility = accountsAndVisibility.get(account);
+        }
+        if (oldVisibility != null
+                && oldVisibility == AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE) {
+            AccountManager.get(this).setAccountVisibility(account, mCallingUid,
+                    AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+        }
         Bundle bundle = new Bundle();
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
         bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: "
-                    + "selected account " + accountName + ", " + accountType);
+            Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: selected account "
+                    + accountName + ", " + accountType);
         }
         finish();
     }
@@ -474,25 +505,28 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     /**
-     * Create a list of Account objects for each account that is acceptable. Filter out
-     * accounts that don't match the allowable types, if provided, or that don't match the
-     * allowable accounts, if provided.
+     * Create a list of Account objects for each account that is acceptable. Filter out accounts
+     * that don't match the allowable types, if provided, or that don't match the allowable
+     * accounts, if provided.
      */
-    private ArrayList<Account> getAcceptableAccountChoices(AccountManager accountManager) {
-      final Account[] accounts = accountManager.getAccountsForPackage(mCallingPackage,
-              mCallingUid);
-      ArrayList<Account> accountsToPopulate = new ArrayList<Account>(accounts.length);
-      for (Account account : accounts) {
-          if (mSetOfAllowableAccounts != null && !mSetOfAllowableAccounts.contains(account)) {
-              continue;
-          }
-          if (mSetOfRelevantAccountTypes != null
-                  && !mSetOfRelevantAccountTypes.contains(account.type)) {
-              continue;
-          }
-          accountsToPopulate.add(account);
-      }
-      return accountsToPopulate;
+    private Map<Account, Integer> getAcceptableAccountChoices(AccountManager accountManager) {
+        Map<Account, Integer> accountsAndVisibility =
+                accountManager.getAccountsAndVisibilityForPackage(mCallingPackage, null /* type */);
+
+        Map<Account, Integer> accountsToPopulate =
+                new HashMap<Account, Integer>(accountsAndVisibility.size());
+        for (Map.Entry<Account, Integer> entry : accountsAndVisibility.entrySet()) {
+            if (mSetOfAllowableAccounts != null
+                    && !mSetOfAllowableAccounts.contains(entry.getKey())) {
+                continue;
+            }
+            if (mSetOfRelevantAccountTypes != null
+                    && !mSetOfRelevantAccountTypes.contains(entry.getKey().type)) {
+                continue;
+            }
+            accountsToPopulate.put(entry.getKey(), entry.getValue());
+        }
+        return accountsToPopulate;
     }
 
     /**

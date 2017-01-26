@@ -108,8 +108,8 @@ interface IAccountManager {
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
 
-    /* Allows Authenticator to get UIDs of packages which registered to receive updates about given account type.*/
-    int[] getRequestingUidsForType(String accountType);
+    /* Returns Map<Integer, Integer> from UID to visibility with all values stored for given account*/
+    Map getUidsAndVisibilityForAccount(in Account account);
 
     boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
             in Map visibility);
@@ -117,7 +117,7 @@ interface IAccountManager {
     boolean setAccountVisibility(in Account a, int uid, int newVisibility);
     int getAccountVisibility(in Account a, int uid);
 
-    /* Type may be null  returns Map <Account, Integer>*/
+    /* Type may be null returns Map <Account, Integer>*/
     Map getAccountsAndVisibilityForPackage(in String packageName, in String accountType);
 
     /* Check if the package in a user can access an account */

@@ -355,7 +355,7 @@ class AccountsDb implements AutoCloseable {
     boolean deleteAuthtokensByAccountIdAndType(long accountId, String authtokenType) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabaseUserIsUnlocked();
         return db.delete(CE_TABLE_AUTHTOKENS,
-                AUTHTOKENS_ACCOUNTS_ID + "=?" + accountId + " AND " + AUTHTOKENS_TYPE + "=?",
+                AUTHTOKENS_ACCOUNTS_ID + "=?" + " AND " + AUTHTOKENS_TYPE + "=?",
                 new String[]{String.valueOf(accountId), authtokenType}) > 0;
     }
 
@@ -946,12 +946,13 @@ class AccountsDb implements AutoCloseable {
     /**
      * Returns a map from uid to visibility value.
      */
-    Map<Integer, Integer> findAccountVisibilityForAccountId(long accountId) {
+    Map<Integer, Integer> findAllVisibilityValuesForAccount(Account account) {
         SQLiteDatabase db = mDeDatabase.getReadableDatabase();
         Map<Integer, Integer> result = new HashMap<>();
-        final Cursor cursor = db.query(TABLE_VISIBILITY,
-                new String[] {VISIBILITY_UID, VISIBILITY_VALUE}, VISIBILITY_ACCOUNTS_ID + "=? ",
-                new String[] {String.valueOf(accountId)}, null, null, null);
+        final Cursor cursor =
+                db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_UID, VISIBILITY_VALUE},
+                        SELECTION_ACCOUNTS_ID_BY_ACCOUNT,
+                        new String[] {account.name, account.type}, null, null, null);
         try {
             while (cursor.moveToNext()) {
                 result.put(cursor.getInt(0), cursor.getInt(1));

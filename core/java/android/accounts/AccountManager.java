@@ -53,9 +53,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.SuppressWarnings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -864,11 +867,17 @@ public class AccountManager {
      *
      * @param account The account for which visibility data should be returned.
      *
-     * @return Map from uid to visibility for given account
+     * @return Map from uid to visibility for given account.
      */
     public Map<Integer, Integer> getUidsAndVisibilityForAccount(Account account) {
-        // TODO implement.
-        return null;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<Integer, Integer> result = (Map<Integer, Integer>) mService
+                    .getUidsAndVisibilityForAccount(account);
+            return result;
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2110,10 +2119,23 @@ public class AccountManager {
                 synchronized (mAccountsUpdatedListeners) {
                     try {
                         if (mAccountsUpdatedListeners.containsKey(listener)) {
-                            listener.onAccountsUpdated(accountsCopy);
+                            Set<String> types = mAccountsUpdatedListenersTypes.get(listener);
+                            if (types != null) {
+                                // filter by account type;
+                                ArrayList<Account> filtered = new ArrayList<>();
+                                for (Account account : accountsCopy) {
+                                    if (types.contains(account.type)) {
+                                        filtered.add(account);
+                                    }
+                                }
+                                listener.onAccountsUpdated(
+                                        filtered.toArray(new Account[filtered.size()]));
+                            } else {
+                                listener.onAccountsUpdated(accountsCopy);
+                            }
                         }
                     } catch (SQLException e) {
-                        // Better luck next time.  If the problem was disk-full,
+                        // Better luck next time. If the problem was disk-full,
                         // the STORAGE_OK intent will re-trigger the update.
                         Log.e(TAG, "Can't update accounts", e);
                     }
@@ -2759,6 +2781,9 @@ public class AccountManager {
     private final HashMap<OnAccountsUpdateListener, Handler> mAccountsUpdatedListeners =
             Maps.newHashMap();
 
+    private final HashMap<OnAccountsUpdateListener, Set<String> > mAccountsUpdatedListenersTypes =
+            Maps.newHashMap();
+
     /**
      * BroadcastReceiver that listens for the LOGIN_ACCOUNTS_CHANGED_ACTION intent
      * so that it can read the updated list of accounts and send them to the listener
@@ -2784,7 +2809,7 @@ public class AccountManager {
      * accounts of any type related to the caller. This method is equivalent to
      * addOnAccountsUpdatedListener(listener, handler, updateImmediately, null)
      *
-     * @see #addOnAccountsUpdatedListener(OnAccountsUpdateListener, Handler, boolean, Handler,
+     * @see #addOnAccountsUpdatedListener(OnAccountsUpdateListener, Handler, boolean,
      *      String[])
      */
     public void addOnAccountsUpdatedListener(final OnAccountsUpdateListener listener,
@@ -2828,7 +2853,10 @@ public class AccountManager {
             final boolean wasEmpty = mAccountsUpdatedListeners.isEmpty();
 
             mAccountsUpdatedListeners.put(listener, handler);
-
+            if (accountTypes != null) {
+                mAccountsUpdatedListenersTypes.put(listener,
+                        new HashSet<String>(Arrays.asList(accountTypes)));
+            }
 
             if (wasEmpty) {
                 // Register a broadcast receiver to monitor account changes
@@ -2870,6 +2898,7 @@ public class AccountManager {
                 return;
             }
             mAccountsUpdatedListeners.remove(listener);
+            mAccountsUpdatedListenersTypes.remove(listener);
             if (mAccountsUpdatedListeners.isEmpty()) {
                 mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
             }

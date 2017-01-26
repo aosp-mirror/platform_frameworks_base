@@ -374,7 +374,7 @@ public class AccountsDbTest {
         mAccountsDb.setAccountVisibility(accId, uid2, 3);
         assertEquals(mAccountsDb.findAccountVisibility(accId, uid2), Integer.valueOf(3));
 
-        Map<Integer, Integer> vis = mAccountsDb.findAccountVisibilityForAccountId(accId);
+        Map<Integer, Integer> vis = mAccountsDb.findAllVisibilityValuesForAccount(account);
         assertEquals(vis.size(), 2);
         assertEquals(vis.get(uid1), Integer.valueOf(1));
         assertEquals(vis.get(uid2), Integer.valueOf(3));
