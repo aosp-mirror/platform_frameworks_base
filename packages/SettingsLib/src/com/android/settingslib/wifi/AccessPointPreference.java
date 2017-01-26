@@ -34,7 +34,9 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.settingslib.R;
+import com.android.settingslib.TronUtils;
 import com.android.settingslib.Utils;
 
 public class AccessPointPreference extends Preference {
@@ -184,7 +186,8 @@ public class AccessPointPreference extends Preference {
         if (level == -1) {
             safeSetDefaultIcon();
         } else {
-           if (mWifiBadge != ScoredNetwork.BADGING_NONE) {
+            TronUtils.logWifiSettingsBadge(context, mWifiBadge);
+            if (mWifiBadge != ScoredNetwork.BADGING_NONE) {
                 // TODO(sghuman): Refactor this to reuse drawable to save memory and add to a
                 // special subclass of AccessPointPreference
                 LayerDrawable drawable = Utils.getBadgedWifiIcon(context, level, mWifiBadge);
