@@ -2041,7 +2041,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Intent.EXTRA_INTENT,
                 callBackPendingIntent.getIntentSender());
         try {
-            ActivityManager.getService().startConfirmDeviceCredentialIntent(newIntent);
+            ActivityManager.getService().startConfirmDeviceCredentialIntent(newIntent,
+                    null /*options*/);
         } catch (RemoteException ex) {
             // ignore
         }

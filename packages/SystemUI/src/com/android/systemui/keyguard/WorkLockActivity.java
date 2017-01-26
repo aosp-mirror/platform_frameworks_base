@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import static android.app.ActivityManager.TaskDescription;
+import static android.app.ActivityManager.StackId;
 
 import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
@@ -31,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -160,9 +162,23 @@ public class WorkLockActivity extends Activity {
 
         credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
         try {
-            ActivityManager.getService().startConfirmDeviceCredentialIntent(credential);
+            ActivityManager.getService().startConfirmDeviceCredentialIntent(credential,
+                    getChallengeOptions().toBundle());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start confirm credential intent", e);
         }
+    }
+
+    private ActivityOptions getChallengeOptions() {
+        // If we are taking up the whole screen, just use the default animation of clipping the
+        // credentials activity into the entire foreground.
+        if (!isInMultiWindowMode()) {
+            return ActivityOptions.makeBasic();
+        }
+
+        // Otherwise, animate the transition from this part of the screen to fullscreen
+        // using our own decor as the starting position.
+        final View view = getWindow().getDecorView();
+        return ActivityOptions.makeScaleUpAnimation(view, 0, 0, view.getWidth(), view.getHeight());
     }
 }

@@ -539,7 +539,7 @@ interface IActivityManager {
      */
     void swapDockedAndFullscreenStack();
     void notifyLockedProfile(int userId);
-    void startConfirmDeviceCredentialIntent(in Intent intent);
+    void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     void sendIdleJobTrigger();
     int sendIntentSender(in IIntentSender target, int code, in Intent intent,
             in String resolvedType, in IIntentReceiver finishedReceiver,
