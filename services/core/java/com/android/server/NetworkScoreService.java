@@ -874,32 +874,37 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     protected void dump(final FileDescriptor fd, final PrintWriter writer, final String[] args) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
-        NetworkScorerAppData currentScorer = mNetworkScorerAppManager.getActiveScorer();
-        if (currentScorer == null) {
-            writer.println("Scoring is disabled.");
-            return;
-        }
-        writer.println("Current scorer: " + currentScorer.packageName);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            NetworkScorerAppData currentScorer = mNetworkScorerAppManager.getActiveScorer();
+            if (currentScorer == null) {
+                writer.println("Scoring is disabled.");
+                return;
+            }
+            writer.println("Current scorer: " + currentScorer.packageName);
 
-        sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
-            @Override
-            public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
-                try {
-                  TransferPipe.dumpAsync(networkScoreCache.asBinder(), fd, args);
-                } catch (IOException | RemoteException e) {
-                  writer.println("Failed to dump score cache: " + e);
+            sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
+                @Override
+                public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
+                    try {
+                        TransferPipe.dumpAsync(networkScoreCache.asBinder(), fd, args);
+                    } catch (IOException | RemoteException e) {
+                        writer.println("Failed to dump score cache: " + e);
+                    }
+                }
+            }, getScoreCacheLists());
+
+            synchronized (mServiceConnectionLock) {
+                if (mServiceConnection != null) {
+                    mServiceConnection.dump(fd, writer, args);
+                } else {
+                    writer.println("ScoringServiceConnection: null");
                 }
             }
-        }, getScoreCacheLists());
-
-        synchronized (mServiceConnectionLock) {
-            if (mServiceConnection != null) {
-                mServiceConnection.dump(fd, writer, args);
-            } else {
-                writer.println("ScoringServiceConnection: null");
-            }
+            writer.flush();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        writer.flush();
     }
 
     /**
