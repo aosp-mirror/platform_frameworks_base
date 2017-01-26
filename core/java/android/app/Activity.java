@@ -4330,7 +4330,7 @@ public class Activity extends ContextThemeWrapper
      * @param requestCode If >= 0, this code will be returned in
      *                    onActivityResult() when the activity exits.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws android.content.ActivityNotFoundException
@@ -4539,7 +4539,7 @@ public class Activity extends ContextThemeWrapper
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.  If options
      * have also been supplied by the IntentSender, options given here will
      * override any that conflict with those given by the IntentSender.
@@ -4624,7 +4624,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intent The intent to start.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws android.content.ActivityNotFoundException
@@ -4673,7 +4673,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param intents The intents to start.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws android.content.ActivityNotFoundException
@@ -4722,7 +4722,7 @@ public class Activity extends ContextThemeWrapper
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.  If options
      * have also been supplied by the IntentSender, options given here will
      * override any that conflict with those given by the IntentSender.
@@ -4782,7 +4782,7 @@ public class Activity extends ContextThemeWrapper
      *         onActivityResult() when the activity exits, as described in
      *         {@link #startActivityForResult}.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @return If a new activity was launched then true is returned; otherwise
@@ -4859,7 +4859,7 @@ public class Activity extends ContextThemeWrapper
      * your own activity; the only changes you can make are to the extras
      * inside of it.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @return Returns a boolean indicating whether there was another Activity
@@ -4914,7 +4914,7 @@ public class Activity extends ContextThemeWrapper
      * @param intent The intent to start.
      * @param requestCode Reply request code.  < 0 if reply is not requested.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws android.content.ActivityNotFoundException
@@ -4967,7 +4967,7 @@ public class Activity extends ContextThemeWrapper
      * @param intent The intent to start.
      * @param requestCode Reply request code.  < 0 if reply is not requested.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws android.content.ActivityNotFoundException

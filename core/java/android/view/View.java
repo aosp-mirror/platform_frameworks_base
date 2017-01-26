@@ -13562,7 +13562,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Any previously attached StateListAnimator will be detached.
      *
      * @param stateListAnimator The StateListAnimator to update the view
-     * @see {@link android.animation.StateListAnimator}
+     * @see android.animation.StateListAnimator
      */
     public void setStateListAnimator(StateListAnimator stateListAnimator) {
         if (mStateListAnimator == stateListAnimator) {

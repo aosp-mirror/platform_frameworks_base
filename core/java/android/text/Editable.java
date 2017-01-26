@@ -94,10 +94,10 @@ extends CharSequence, GetChars, Spannable, Appendable
     public Editable append(char text);
 
     /**
-     * Convenience for replace(0, length(), "", 0, 0)
-     * @see #replace(int, int, CharSequence, int, int)
+     * Convenience for replace(0, length(), "", 0, 0).
      * Note that this clears the text, not the spans;
      * use {@link #clearSpans} if you need that.
+     * @see #replace(int, int, CharSequence, int, int)
      */
     public void clear();
 

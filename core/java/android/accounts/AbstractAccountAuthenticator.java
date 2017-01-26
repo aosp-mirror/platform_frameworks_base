@@ -707,7 +707,7 @@ public abstract class AbstractAccountAuthenticator {
      * @param account the account to clone, will never be null
      * @return a Bundle result or null if the result is to be returned via the response.
      * @throws NetworkErrorException
-     * @see {@link #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)}
+     * @see #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)
      */
     public Bundle getAccountCredentialsForCloning(final AccountAuthenticatorResponse response,
             final Account account) throws NetworkErrorException {
@@ -732,7 +732,7 @@ public abstract class AbstractAccountAuthenticator {
      * provided by {@link #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)}.
      * @return a Bundle result or null if the result is to be returned via the response.
      * @throws NetworkErrorException
-     * @see {@link #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)}
+     * @see #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)
      */
     public Bundle addAccountFromCredentials(final AccountAuthenticatorResponse response,
             Account account,
