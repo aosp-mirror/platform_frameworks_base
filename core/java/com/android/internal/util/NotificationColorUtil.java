@@ -33,6 +33,8 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.VectorDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.Pair;
@@ -184,8 +186,24 @@ public class NotificationColorUtil {
             SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
             for (Object span : spans) {
                 Object resultSpan = span;
-                if (span instanceof TextAppearanceSpan) {
-                    resultSpan = processTextAppearanceSpan((TextAppearanceSpan) span);
+                if (resultSpan instanceof CharacterStyle) {
+                    resultSpan = ((CharacterStyle) span).getUnderlying();
+                }
+                if (resultSpan instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan processedSpan = processTextAppearanceSpan(
+                            (TextAppearanceSpan) span);
+                    if (processedSpan != resultSpan) {
+                        resultSpan = processedSpan;
+                    } else {
+                        // we need to still take the orgininal for wrapped spans
+                        resultSpan = span;
+                    }
+                } else if (resultSpan instanceof ForegroundColorSpan) {
+                    ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                    int foregroundColor = originalSpan.getForegroundColor();
+                    resultSpan = new ForegroundColorSpan(processColor(foregroundColor));
+                } else {
+                    resultSpan = span;
                 }
                 builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
                         ss.getSpanFlags(span));
@@ -414,6 +432,48 @@ public class NotificationColorUtil {
             }
         }
         return color;
+    }
+
+    public static int resolvePrimaryColor(Context context, int backgroundColor) {
+        boolean useDark = shouldUseDark(backgroundColor);
+        if (useDark) {
+            return context.getColor(
+                    com.android.internal.R.color.notification_primary_text_color_light);
+        } else {
+            return context.getColor(
+                    com.android.internal.R.color.notification_primary_text_color_dark);
+        }
+    }
+
+    public static int resolveSecondaryColor(Context context, int backgroundColor) {
+        boolean useDark = shouldUseDark(backgroundColor);
+        if (useDark) {
+            return context.getColor(
+                    com.android.internal.R.color.notification_secondary_text_color_light);
+        } else {
+            return context.getColor(
+                    com.android.internal.R.color.notification_secondary_text_color_dark);
+        }
+    }
+
+    public static int resolveActionBarColor(int backgroundColor) {
+        boolean useDark = shouldUseDark(backgroundColor);
+        final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
+        ColorUtilsFromCompat.colorToLAB(backgroundColor, result);
+        if (useDark && result[0] < 97 || !useDark && result[0] < 4) {
+            result[0] = Math.min(100, result[0] + 7);
+        } else {
+            result[0] = Math.max(0, result[0] - 7);
+        }
+        return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
+    }
+
+    private static boolean shouldUseDark(int backgroundColor) {
+        boolean useDark = backgroundColor == Notification.COLOR_DEFAULT;
+        if (!useDark) {
+            useDark = ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.5;
+        }
+        return useDark;
     }
 
     /**

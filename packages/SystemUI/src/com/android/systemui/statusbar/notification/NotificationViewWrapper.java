@@ -19,12 +19,17 @@ package com.android.systemui.statusbar.notification;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.graphics.ColorUtils;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -40,6 +45,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
     protected boolean mDark;
+    private int mBackgroundColor = 0;
+    protected boolean mShouldInvertDark;
     protected boolean mDarkInitialized = false;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
@@ -85,7 +92,19 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
         mDarkInitialized = false;
-    };
+        Drawable background = mView.getBackground();
+        mBackgroundColor = 0;
+        if (background instanceof ColorDrawable) {
+            mBackgroundColor = ((ColorDrawable) background).getColor();
+            mView.setBackground(null);
+        }
+        mShouldInvertDark = mBackgroundColor == 0 || isColorLight(mBackgroundColor);
+    }
+
+    private boolean isColorLight(int backgroundColor) {
+        return Color.alpha(backgroundColor) == 0
+                || ColorUtils.calculateLuminance(backgroundColor) > 0.5;
+    }
 
 
     protected void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
@@ -156,7 +175,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     public int getCustomBackgroundColor() {
-        return 0;
+        // Parent notifications should always use the normal background color
+        return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
     public void setShowingLegacyBackground(boolean showing) {
