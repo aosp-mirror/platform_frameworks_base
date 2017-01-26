@@ -39,6 +39,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.Config;
 import android.graphics.Movie;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -1604,7 +1605,7 @@ public class Resources {
          *         {@link ActivityInfo}
          * @see ActivityInfo
          */
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mThemeImpl.getChangingConfigurations();
         }
 
