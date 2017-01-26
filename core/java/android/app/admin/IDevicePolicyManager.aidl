@@ -201,6 +201,7 @@ interface IDevicePolicyManager {
     List getPermittedInputMethodsForCurrentUser();
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
+    Intent createAdminSupportIntent(in String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName);
 

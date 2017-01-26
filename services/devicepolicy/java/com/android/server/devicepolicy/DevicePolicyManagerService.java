@@ -8957,18 +8957,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
             if (profileOwner != null) {
-                return createShowAdminSupportIntent(profileOwner, userId);
+                return DevicePolicyManagerService.this
+                        .createShowAdminSupportIntent(profileOwner, userId);
             }
 
             final Pair<Integer, ComponentName> deviceOwner =
                     mOwners.getDeviceOwnerUserIdAndComponent();
             if (deviceOwner != null && deviceOwner.first == userId) {
-                return createShowAdminSupportIntent(deviceOwner.second, userId);
+                return DevicePolicyManagerService.this
+                        .createShowAdminSupportIntent(deviceOwner.second, userId);
             }
 
             // We're not specifying the device admin because there isn't one.
             if (useDefaultIfNoAdmin) {
-                return createShowAdminSupportIntent(null, userId);
+                return DevicePolicyManagerService.this.createShowAdminSupportIntent(null, userId);
             }
             return null;
         }
@@ -8996,11 +8998,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (enforcedByDo && enforcedByPo) {
                 // In this case, we'll show an admin support dialog that does not
                 // specify the admin.
-                return createShowAdminSupportIntent(null, userId);
+                return DevicePolicyManagerService.this.createShowAdminSupportIntent(null, userId);
             } else if (enforcedByPo) {
                 final ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
                 if (profileOwner != null) {
-                    return createShowAdminSupportIntent(profileOwner, userId);
+                    return DevicePolicyManagerService.this
+                            .createShowAdminSupportIntent(profileOwner, userId);
                 }
                 // This could happen if another thread has changed the profile owner since we called
                 // getUserRestrictionSource
@@ -9009,7 +9012,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final Pair<Integer, ComponentName> deviceOwner
                         = mOwners.getDeviceOwnerUserIdAndComponent();
                 if (deviceOwner != null) {
-                    return createShowAdminSupportIntent(deviceOwner.second, deviceOwner.first);
+                    return DevicePolicyManagerService.this
+                            .createShowAdminSupportIntent(deviceOwner.second, deviceOwner.first);
                 }
                 // This could happen if another thread has changed the device owner since we called
                 // getUserRestrictionSource
@@ -9017,15 +9021,57 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return null;
         }
+    }
 
-        private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
-            // This method is called with AMS lock held, so don't take DPMS lock
-            final Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
-            intent.putExtra(Intent.EXTRA_USER_ID, userId);
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            return intent;
+    private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
+        // This method is called with AMS lock held, so don't take DPMS lock
+        final Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
+        intent.putExtra(Intent.EXTRA_USER_ID, userId);
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
+    @Override
+    public Intent createAdminSupportIntent(String restriction) {
+        Preconditions.checkNotNull(restriction);
+        final int uid = mInjector.binderGetCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+        Intent intent = null;
+        if (DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction) ||
+                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) {
+            synchronized(this) {
+                final DevicePolicyData policy = getUserData(userId);
+                final int N = policy.mAdminList.size();
+                for (int i = 0; i < N; i++) {
+                    final ActiveAdmin admin = policy.mAdminList.get(i);
+                    if ((admin.disableCamera &&
+                                DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction)) ||
+                        (admin.disableScreenCapture && DevicePolicyManager
+                                .POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction))) {
+                        intent = createShowAdminSupportIntent(admin.info.getComponent(), userId);
+                        break;
+                    }
+                }
+                // For the camera, a device owner on a different user can disable it globally,
+                // so we need an additional check.
+                if (intent == null
+                        && DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction)) {
+                    final ActiveAdmin admin = getDeviceOwnerAdminLocked();
+                    if (admin != null && admin.disableCamera) {
+                        intent = createShowAdminSupportIntent(admin.info.getComponent(),
+                                mOwners.getDeviceOwnerUserId());
+                    }
+                }
+            }
+        } else {
+            // if valid, |restriction| can only be a user restriction
+            intent = mLocalService.createUserRestrictionSupportIntent(userId, restriction);
         }
+        if (intent != null) {
+            intent.putExtra(DevicePolicyManager.EXTRA_RESTRICTION, restriction);
+        }
+        return intent;
     }
 
     /**

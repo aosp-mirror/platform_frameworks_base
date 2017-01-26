@@ -1950,6 +1950,81 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         }
     }
 
+    public void testCreateAdminSupportIntent() throws Exception {
+        // Setup device owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        // Nonexisting permission returns null
+        Intent intent = dpm.createAdminSupportIntent("disallow_nothing");
+        assertNull(intent);
+
+        // Existing permission that is not set returns null
+        intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
+        assertNull(intent);
+
+        // Existing permission that is not set by device/profile owner returns null
+        when(mContext.userManager.hasUserRestriction(
+                eq(UserManager.DISALLOW_ADJUST_VOLUME),
+                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
+                .thenReturn(true);
+        intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
+        assertNull(intent);
+
+        // Permission that is set by device owner returns correct intent
+        when(mContext.userManager.getUserRestrictionSource(
+                eq(UserManager.DISALLOW_ADJUST_VOLUME),
+                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+        intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
+        assertNotNull(intent);
+        assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, intent.getAction());
+        assertEquals(UserHandle.getUserId(DpmMockContext.CALLER_SYSTEM_USER_UID),
+                intent.getIntExtra(Intent.EXTRA_USER_ID, -1));
+        assertEquals(admin1,
+                (ComponentName) intent.getParcelableExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN));
+        assertEquals(UserManager.DISALLOW_ADJUST_VOLUME,
+                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+
+        // Try with POLICY_DISABLE_CAMERA and POLICY_DISABLE_SCREEN_CAPTURE, which are not
+        // user restrictions
+
+        // Camera is not disabled
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_CAMERA);
+        assertNull(intent);
+
+        // Camera is disabled
+        dpm.setCameraDisabled(admin1, true);
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_CAMERA);
+        assertNotNull(intent);
+        assertEquals(DevicePolicyManager.POLICY_DISABLE_CAMERA,
+                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+
+        // Screen capture is not disabled
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
+        assertNull(intent);
+
+        // Screen capture is disabled
+        dpm.setScreenCaptureDisabled(admin1, true);
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
+        assertNotNull(intent);
+        assertEquals(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE,
+                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+
+        // Same checks for different user
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        // Camera should be disabled by device owner
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_CAMERA);
+        assertNotNull(intent);
+        assertEquals(DevicePolicyManager.POLICY_DISABLE_CAMERA,
+                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+        assertEquals(UserHandle.getUserId(DpmMockContext.CALLER_SYSTEM_USER_UID),
+                intent.getIntExtra(Intent.EXTRA_USER_ID, -1));
+        // ScreenCapture should not be disabled by device owner
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
+        assertNull(intent);
+    }
+
     /**
      * Test for:
      * {@link DevicePolicyManager#setAffiliationIds}
