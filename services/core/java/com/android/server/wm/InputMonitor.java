@@ -77,6 +77,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     // Array of window handles to provide to the input dispatcher.
     private InputWindowHandle[] mInputWindowHandles;
     private int mInputWindowHandleCount;
+    private InputWindowHandle mFocusedInputWindowHandle;
+
     private boolean mAddInputConsumerHandle;
     private boolean mAddPipInputConsumerHandle;
     private boolean mAddWallpaperInputConsumerHandle;
@@ -327,12 +329,16 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     + child + ", " + inputWindowHandle);
         }
         addInputWindowHandle(inputWindowHandle);
+        if (hasFocus) {
+            mFocusedInputWindowHandle = inputWindowHandle;
+        }
     }
 
     private void clearInputWindowHandlesLw() {
         while (mInputWindowHandleCount != 0) {
             mInputWindowHandles[--mInputWindowHandleCount] = null;
         }
+        mFocusedInputWindowHandle = null;
     }
 
     void setUpdateInputWindowsNeededLw() {
@@ -609,7 +615,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
 
             // Send windows to native code.
-            mService.mInputManager.setInputWindows(mInputWindowHandles);
+            mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle);
 
             clearInputWindowHandlesLw();
         }

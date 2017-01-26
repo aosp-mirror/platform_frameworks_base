@@ -574,6 +574,13 @@ public abstract class Window {
          */
         default public void onProvideKeyboardShortcuts(
                 List<KeyboardShortcutGroup> data, @Nullable Menu menu, int deviceId) { };
+
+        /**
+         * Called when pointer capture is enabled or disabled for the current window.
+         *
+         * @param hasCapture True if the window has pointer capture.
+         */
+        default public void onPointerCaptureChanged(boolean hasCapture) { };
     }
 
     /** @hide */

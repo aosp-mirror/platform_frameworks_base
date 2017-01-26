@@ -237,6 +237,14 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_TRACKBALL = 0x00010000 | SOURCE_CLASS_TRACKBALL;
 
     /**
+     * The input source is a mouse device whose relative motions should be interpreted as
+     * navigation events.
+     *
+     * @see #SOURCE_CLASS_TRACKBALL
+     */
+    public static final int SOURCE_MOUSE_RELATIVE = 0x00020000 | SOURCE_CLASS_TRACKBALL;
+
+    /**
      * The input source is a touch pad or digitizer tablet that is not
      * associated with a display (unlike {@link #SOURCE_TOUCHSCREEN}).
      *
@@ -975,6 +983,7 @@ public final class InputDevice implements Parcelable {
         appendSourceDescriptionIfApplicable(description, SOURCE_MOUSE, "mouse");
         appendSourceDescriptionIfApplicable(description, SOURCE_STYLUS, "stylus");
         appendSourceDescriptionIfApplicable(description, SOURCE_TRACKBALL, "trackball");
+        appendSourceDescriptionIfApplicable(description, SOURCE_MOUSE_RELATIVE, "mouse_relative");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHPAD, "touchpad");
         appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK, "joystick");
         appendSourceDescriptionIfApplicable(description, SOURCE_GAMEPAD, "gamepad");

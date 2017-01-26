@@ -1756,6 +1756,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    public boolean dispatchCapturedPointerEvent(MotionEvent event) {
+        if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
+                == (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS)) {
+            if (super.dispatchCapturedPointerEvent(event)) {
+                return true;
+            }
+        } else if (mFocused != null && (mFocused.mPrivateFlags & PFLAG_HAS_BOUNDS)
+                == PFLAG_HAS_BOUNDS) {
+            if (mFocused.dispatchCapturedPointerEvent(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void dispatchPointerCaptureChanged(boolean hasCapture) {
+        exitHoverTargets();
+
+        super.dispatchPointerCaptureChanged(hasCapture);
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchPointerCaptureChanged(hasCapture);
+        }
+    }
+
+    @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
         final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);

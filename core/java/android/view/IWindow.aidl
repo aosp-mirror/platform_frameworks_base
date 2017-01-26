@@ -96,4 +96,9 @@ oneway interface IWindow {
      * Called when Keyboard Shortcuts are requested for the window.
      */
     void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
+
+    /**
+     * Tell the window that it is either gaining or losing pointer capture.
+     */
+    void dispatchPointerCaptureChanged(boolean hasCapture);
 }

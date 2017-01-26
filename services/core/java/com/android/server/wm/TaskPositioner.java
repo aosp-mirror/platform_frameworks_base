@@ -269,7 +269,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mDragApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
+        mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null, null,
                 mDisplay.getDisplayId());
         mDragWindowHandle.name = TAG;
         mDragWindowHandle.inputChannel = mServerChannel;

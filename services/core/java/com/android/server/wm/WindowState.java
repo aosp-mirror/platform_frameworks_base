@@ -657,7 +657,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mYOffset = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, getDisplayId());
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, this, c,
+                    getDisplayId());
     }
 
     void attach() {

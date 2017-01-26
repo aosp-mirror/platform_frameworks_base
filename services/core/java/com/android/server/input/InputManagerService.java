@@ -84,6 +84,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
+import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -180,6 +181,9 @@ public class InputManagerService extends IInputManager.Stub
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
 
+    private IWindow mFocusedWindow;
+    private boolean mFocusedWindowHasCapture;
+
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
     private static native void nativeStart(long ptr);
@@ -226,6 +230,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetPointerIconType(long ptr, int iconId);
     private static native void nativeReloadPointerIcons(long ptr);
     private static native void nativeSetCustomPointerIcon(long ptr, PointerIcon icon);
+    private static native void nativeSetPointerCapture(long ptr, boolean detached);
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -1503,12 +1508,45 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    public void setInputWindows(InputWindowHandle[] windowHandles) {
+    public void setInputWindows(InputWindowHandle[] windowHandles,
+            InputWindowHandle focusedWindowHandle) {
+        final IWindow newFocusedWindow =
+            focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
+        if (mFocusedWindow != newFocusedWindow) {
+            mFocusedWindow = newFocusedWindow;
+            if (mFocusedWindowHasCapture) {
+                setPointerCapture(false);
+            }
+        }
         nativeSetInputWindows(mPtr, windowHandles);
     }
 
     public void setFocusedApplication(InputApplicationHandle application) {
         nativeSetFocusedApplication(mPtr, application);
+    }
+
+    @Override
+    public void requestPointerCapture(IBinder windowToken, boolean enabled) {
+        if (mFocusedWindow == null || mFocusedWindow.asBinder() != windowToken) {
+            Slog.e(TAG, "requestPointerCapture called for a window that has no focus: "
+                    + windowToken);
+            return;
+        }
+        if (mFocusedWindowHasCapture == enabled) {
+            Slog.i(TAG, "requestPointerCapture: already " + (enabled ? "enabled" : "disabled"));
+            return;
+        }
+        setPointerCapture(enabled);
+        try {
+            mFocusedWindow.dispatchPointerCaptureChanged(enabled);
+        } catch (RemoteException ex) {
+            /* ignore */
+        }
+    }
+
+    private void setPointerCapture(boolean enabled) {
+        mFocusedWindowHasCapture = enabled;
+        nativeSetPointerCapture(mPtr, enabled);
     }
 
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
