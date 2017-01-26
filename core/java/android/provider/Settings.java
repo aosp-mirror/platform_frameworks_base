@@ -1275,10 +1275,14 @@ public final class Settings {
 
     /**
      * Activity Action: Show notification settings for a single app.
-     *
-     * Input: Optionally, {@link #EXTRA_CHANNEL_ID}, to highlight that channel.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel to display.
+     *     Input: Optionally, {@link #EXTRA_CHANNEL_ID}, to highlight that channel.
+     * <p>
+     * Output: Nothing.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_NOTIFICATION_SETTINGS
             = "android.settings.APP_NOTIFICATION_SETTINGS";
