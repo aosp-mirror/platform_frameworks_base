@@ -449,6 +449,11 @@ public class RetailDemoModeServiceTest {
         }
 
         @Override
+        File getDataPreloadsFileCacheDirectory() {
+            return new File(mTestPreloadsDir, "file_cache");
+        }
+
+        @Override
         void publishLocalService(RetailDemoModeService service,
                 RetailDemoModeServiceInternal localService) {
         }

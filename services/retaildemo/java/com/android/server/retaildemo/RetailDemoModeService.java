@@ -254,12 +254,9 @@ public class RetailDemoModeService extends SystemService {
                     mInjector.systemPropertiesSet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "0");
 
                     // Run on the bg thread to not block the fg thread
-                    BackgroundThread.getHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!deletePreloadsFolderContents()) {
-                                Slog.w(TAG, "Failed to delete preloads folder contents");
-                            }
+                    BackgroundThread.getHandler().post(() -> {
+                        if (!deletePreloadsFolderContents()) {
+                            Slog.w(TAG, "Failed to delete preloads folder contents");
                         }
                     });
 
@@ -443,8 +440,29 @@ public class RetailDemoModeService extends SystemService {
 
     private boolean deletePreloadsFolderContents() {
         final File dir = mInjector.getDataPreloadsDirectory();
+        final File[] files = FileUtils.listFilesOrEmpty(dir);
+        final File fileCacheDirectory = mInjector.getDataPreloadsFileCacheDirectory();
         Slog.i(TAG, "Deleting contents of " + dir);
-        return FileUtils.deleteContents(dir);
+        boolean success = true;
+        for (File file : files) {
+            if (file.isFile()) {
+                if (!file.delete()) {
+                    success = false;
+                    Slog.w(TAG, "Cannot delete file " + file);
+                }
+            } else {
+                // Do not remove file_cache dir
+                if (!file.equals(fileCacheDirectory)) {
+                    if (!FileUtils.deleteContentsAndDir(file)) {
+                        success = false;
+                        Slog.w(TAG, "Cannot delete dir and its content " + file);
+                    }
+                } else {
+                    Slog.i(TAG, "Skipping directory with file cache " + file);
+                }
+            }
+        }
+        return success;
     }
 
     private void registerBroadcastReceiver() {
@@ -816,6 +834,10 @@ public class RetailDemoModeService extends SystemService {
 
         File getDataPreloadsDirectory() {
             return Environment.getDataPreloadsDirectory();
+        }
+
+        File getDataPreloadsFileCacheDirectory() {
+            return Environment.getDataPreloadsFileCacheDirectory();
         }
 
         void publishLocalService(RetailDemoModeService service,
