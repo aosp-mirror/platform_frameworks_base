@@ -29,6 +29,7 @@ import android.icu.text.NumberFormat;
 import android.os.UserManager;
 import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -55,6 +56,8 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -63,7 +66,7 @@ import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
-        BatteryStateChangeCallback {
+        BatteryStateChangeCallback, SignalCallback {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -106,6 +109,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private boolean mShowFullAlarm;
     private float mDateTimeTranslation;
     private TextView mBatteryLevel;
+    private SparseBooleanArray mRoamingsBySubId = new SparseBooleanArray();
+    private boolean mIsRoaming;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -300,7 +305,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected void updateVisibilities() {
         updateAlarmVisibilities();
         updateDateTimePosition();
-        mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
+        mEmergencyOnly.setVisibility(mExpanded && (mShowEmergencyCallsOnly || mIsRoaming)
                 ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
@@ -311,7 +316,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     private void updateDateTimePosition() {
-        mDateTimeAlarmGroup.setTranslationY(mShowEmergencyCallsOnly
+        mDateTimeAlarmGroup.setTranslationY(mShowEmergencyCallsOnly || mIsRoaming
                 ? mExpansionAmount * mDateTimeTranslation : 0);
     }
 
@@ -321,11 +326,13 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
             mUserInfoController.addCallback(this);
             if (Dependency.get(NetworkController.class).hasVoiceCallingFeature()) {
                 Dependency.get(NetworkController.class).addEmergencyListener(this);
+                Dependency.get(NetworkController.class).addCallback(this);
             }
         } else {
             mNextAlarmController.removeCallback(this);
             mUserInfoController.removeCallback(this);
             Dependency.get(NetworkController.class).removeEmergencyListener(this);
+            Dependency.get(NetworkController.class).removeCallback(this);
         }
     }
 
@@ -404,6 +411,28 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         // Don't care.
+    }
+
+    public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+            int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
+            String description, boolean isWide, int subId, boolean roaming) {
+        mRoamingsBySubId.put(subId, roaming);
+        boolean isRoaming = calculateRoaming();
+        if (mIsRoaming != isRoaming) {
+            mIsRoaming = isRoaming;
+            mEmergencyOnly.setText(mIsRoaming ? R.string.accessibility_data_connection_roaming
+                    : com.android.internal.R.string.emergency_calls_only);
+            if (mExpanded) {
+                updateEverything();
+            }
+        }
+    }
+
+    private boolean calculateRoaming() {
+        for (int i = 0; i < mRoamingsBySubId.size(); i++) {
+            if (mRoamingsBySubId.valueAt(i)) return true;
+        }
+        return false;
     }
 
     @Override
