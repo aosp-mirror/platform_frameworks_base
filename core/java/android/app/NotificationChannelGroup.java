@@ -64,7 +64,7 @@ public final class NotificationChannelGroup implements Parcelable {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        in.readList(mChannels, NotificationChannel.class.getClassLoader());
+        in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
     }
 
     @Override
