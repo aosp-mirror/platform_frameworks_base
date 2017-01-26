@@ -115,6 +115,13 @@ public class LogMakerTest extends TestCase {
         assertEquals(10, out[1]);
     }
 
+    public void testClearData() {
+        LogMaker builder = new LogMaker(0);
+        builder.addTaggedData(1, "onetwothree");
+        builder.clearTaggedData(1);
+        assertEquals(null, builder.getTaggedData(1));
+    }
+
     public void testGiantLogOmitted() {
         LogMaker badBuilder = new LogMaker(0);
         StringBuilder b = new StringBuilder();

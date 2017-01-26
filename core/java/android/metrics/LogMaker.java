@@ -102,10 +102,13 @@ public class LogMaker {
 
     /**
      * @param tag From your MetricsEvent enum.
-     * @param value One of Integer, Long, Float, String
-     * @return
+     * @param value One of Integer, Long, Float, or String; or null to clear the tag.
+     * @return modified LogMaker
      */
     public LogMaker addTaggedData(int tag, Object value) {
+        if (value == null) {
+            return clearTaggedData(tag);
+        }
         if (!isValidValue(value)) {
             throw new IllegalArgumentException(
                     "Value must be loggable type - int, long, float, String");
@@ -118,11 +121,21 @@ public class LogMaker {
         return this;
     }
 
+    /**
+     * Remove a value from the LogMaker.
+     *
+     * @param tag From your MetricsEvent enum.
+     * @return modified LogMaker
+     */
+    public LogMaker clearTaggedData(int tag) {
+        entries.delete(tag);
+        return this;
+    }
+
+    /**
+     * @return true if this object may be added to a LogMaker as a value.
+     */
     public boolean isValidValue(Object value) {
-        if (value == null) {
-            Log.i("LogBuilder", "Logging a null value.");
-            return true;
-        }
         return value instanceof Integer ||
             value instanceof String ||
             value instanceof Long ||
