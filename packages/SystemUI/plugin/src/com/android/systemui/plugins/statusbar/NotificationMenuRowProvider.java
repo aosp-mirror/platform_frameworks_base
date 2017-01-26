@@ -3,6 +3,7 @@ package com.android.systemui.plugins.statusbar;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 
@@ -48,7 +49,7 @@ public interface NotificationMenuRowProvider extends Plugin {
     }
 
     public interface SnoozeListener {
-        public void snoozeNotification(StatusBarNotification sbn, long snoozeUntil);
+        public void snoozeNotification(StatusBarNotification sbn, SnoozeOption snoozeOption);
     }
 
     public static class MenuItem {
@@ -69,6 +70,21 @@ public interface NotificationMenuRowProvider extends Plugin {
 
         public boolean onTouch(View v, int x, int y) {
             return false;
+        }
+    }
+
+    public static class SnoozeOption {
+        public SnoozeCriterion criterion;
+        public int snoozeForMinutes;
+        public CharSequence description;
+        public CharSequence confirmation;
+
+        public SnoozeOption(SnoozeCriterion crit, int minsToSnoozeFor, CharSequence desc,
+                CharSequence confirm) {
+            criterion = crit;
+            snoozeForMinutes = minsToSnoozeFor;
+            description = desc;
+            confirmation = confirm;
         }
     }
 }

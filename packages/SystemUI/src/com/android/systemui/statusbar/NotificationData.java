@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.view.View;
@@ -40,6 +41,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -71,6 +73,7 @@ public class NotificationData {
         public RemoteViews cachedPublicContentView;
         public RemoteViews cachedAmbientContentView;
         public CharSequence remoteInputText;
+        public List<SnoozeCriterion> snoozeCriteria;
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
 
@@ -456,6 +459,14 @@ public class NotificationData {
          return null;
     }
 
+    public List<SnoozeCriterion> getSnoozeCriteria(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getSnoozeCriteria();
+        }
+        return null;
+    }
+
     public NotificationChannel getChannel(String key) {
         if (mRankingMap != null) {
             mRankingMap.getRanking(key, mTmpRanking);
@@ -478,6 +489,7 @@ public class NotificationData {
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
                     entry.channel = getChannel(entry.key);
+                    entry.snoozeCriteria = getSnoozeCriteria(entry.key);
                 }
             }
         }

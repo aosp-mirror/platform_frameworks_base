@@ -105,6 +105,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeGutsContent;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeListener;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowProvider.SnoozeOption;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -120,7 +121,9 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -1053,8 +1056,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
-    protected void setNotificationSnoozed(StatusBarNotification sbn, long snoozeUntil) {
-        mNotificationListener.snoozeNotification(sbn.getKey(), snoozeUntil);
+    protected void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
+        if (snoozeOption.criterion != null) {
+            mNotificationListener.snoozeNotification(sbn.getKey(), snoozeOption.criterion.getId());
+        } else {
+            GregorianCalendar snoozeUntil = new GregorianCalendar();
+            snoozeUntil.add(Calendar.MINUTE, snoozeOption.snoozeForMinutes);
+            mNotificationListener.snoozeNotification(sbn.getKey(), snoozeUntil.getTimeInMillis());
+        }
     }
 
     public SnoozeListener getSnoozeListener() {
@@ -1077,6 +1086,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (item.gutsContent instanceof SnoozeGutsContent) {
             ((SnoozeGutsContent) item.gutsContent).setSnoozeListener(getSnoozeListener());
             ((SnoozeGutsContent) item.gutsContent).setStatusBarNotification(sbn);
+            ((NotificationSnooze) item.gutsContent).setSnoozeOptions(row.getEntry().snoozeCriteria);
         }
 
         if (item.gutsContent instanceof NotificationInfo) {
