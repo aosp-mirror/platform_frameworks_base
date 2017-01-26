@@ -37,15 +37,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
  */
 public final class PlaybackActivityMonitor
-        implements AudioPlaybackConfiguration.PlayerDeathMonitor {
+        implements AudioPlaybackConfiguration.PlayerDeathMonitor, PlayerFocusEnforcer {
 
     public final static String TAG = "AudioService.PlaybackActivityMonitor";
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     private ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
     // a public client is one that needs an anonymized version of the playback configurations, we
@@ -134,11 +135,17 @@ public final class PlaybackActivityMonitor
     }
 
     protected void dump(PrintWriter pw) {
+        // players
         pw.println("\nPlaybackActivityMonitor dump time: "
                 + DateFormat.getTimeInstance().format(new Date()));
         synchronized(mPlayerLock) {
             for (AudioPlaybackConfiguration conf : mPlayers.values()) {
                 conf.dump(pw);
+            }
+            // ducked players
+            pw.println("\n  ducked player piids:");
+            for (int piid : mDuckedPlayers) {
+                pw.println(" " + piid);
             }
         }
     }
@@ -211,13 +218,89 @@ public final class PlaybackActivityMonitor
             List<AudioPlaybackConfiguration> sysConfigs) {
         ArrayList<AudioPlaybackConfiguration> publicConfigs =
                 new ArrayList<AudioPlaybackConfiguration>();
-        // only add active anonymized configurations, 
+        // only add active anonymized configurations,
         for (AudioPlaybackConfiguration config : sysConfigs) {
             if (config.isActive()) {
                 publicConfigs.add(AudioPlaybackConfiguration.anonymizedCopy(config));
             }
         }
         return publicConfigs;
+    }
+
+
+    //=================================================================
+    // PlayerFocusEnforcer implementation
+    private final ArrayList<Integer> mDuckedPlayers = new ArrayList<Integer>();
+
+    @Override
+    public boolean duckPlayers(FocusRequester winner, FocusRequester loser) {
+        if (DEBUG) {
+            Log.v(TAG, String.format("duckPlayers: uids winner=%d loser=%d",
+                    winner.getClientUid(), loser.getClientUid())); }
+        synchronized (mPlayerLock) {
+            if (mPlayers.isEmpty()) {
+                return true;
+            }
+            final Set<Integer> piidSet = mPlayers.keySet();
+            final Iterator<Integer> piidIterator = piidSet.iterator();
+            // find which players to duck
+            while (piidIterator.hasNext()) {
+                final Integer piid = piidIterator.next();
+                final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                if (!winner.hasSameUid(apc.getClientUid())
+                        && loser.hasSameUid(apc.getClientUid())
+                        && apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED)
+                {
+                    if (mDuckedPlayers.contains(piid)) {
+                        if (DEBUG) { Log.v(TAG, "player " + piid + " already ducked"); }
+                    } else if (apc.getAudioAttributes().getContentType() ==
+                            AudioAttributes.CONTENT_TYPE_SPEECH) {
+                        // the player is speaking, ducking will make the speech unintelligible
+                        // so let the app handle it instead
+                        return false;
+                    } else {
+                        try {
+                            if (DEBUG) { Log.v(TAG, "ducking player " + piid); }
+                            //FIXME just a test before we have VolumeShape
+                            apc.getPlayerProxy().setPan(-1.0f);
+                            mDuckedPlayers.add(piid);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error ducking player " + piid, e);
+                            // something went wrong trying to duck, so let the app handle it
+                            // instead, it may know things we don't
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void unduckPlayers(FocusRequester winner) {
+        if (DEBUG) { Log.v(TAG, "unduckPlayers: uids winner=" + winner.getClientUid()); }
+        synchronized (mPlayerLock) {
+            if (mDuckedPlayers.isEmpty()) {
+                return;
+            }
+            for (int piid : mDuckedPlayers) {
+                final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                if (apc != null
+                        && winner.hasSameUid(apc.getClientUid())) {
+                    try {
+                        if (DEBUG) { Log.v(TAG, "unducking player" + piid); }
+                        //FIXME just a test before we have VolumeShape
+                        apc.getPlayerProxy().setPan(0.0f);
+                        mDuckedPlayers.remove(new Integer(piid));
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error unducking player " + piid, e);
+                    }
+                } else {
+                    Log.e(TAG, "Error unducking player " + piid + ", player not found");
+                }
+            }
+        }
     }
 
     //=================================================================

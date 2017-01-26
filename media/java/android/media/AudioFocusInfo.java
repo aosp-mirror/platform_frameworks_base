@@ -29,9 +29,10 @@ import java.util.Objects;
 @SystemApi
 public final class AudioFocusInfo implements Parcelable {
 
-    private AudioAttributes mAttributes;
-    private String mClientId;
-    private String mPackageName;
+    private final AudioAttributes mAttributes;
+    private final int mClientUid;
+    private final String mClientId;
+    private final String mPackageName;
     private int mGainRequest;
     private int mLossReceived;
     private int mFlags;
@@ -47,9 +48,10 @@ public final class AudioFocusInfo implements Parcelable {
      * @param flags
      * @hide
      */
-    public AudioFocusInfo(AudioAttributes aa, String clientId, String packageName,
+    public AudioFocusInfo(AudioAttributes aa, int clientUid, String clientId, String packageName,
             int gainRequest, int lossReceived, int flags) {
         mAttributes = aa == null ? new AudioAttributes.Builder().build() : aa;
+        mClientUid = clientUid;
         mClientId = clientId == null ? "" : clientId;
         mPackageName = packageName == null ? "" : packageName;
         mGainRequest = gainRequest;
@@ -64,6 +66,9 @@ public final class AudioFocusInfo implements Parcelable {
      */
     @SystemApi
     public AudioAttributes getAttributes() { return mAttributes; }
+
+    @SystemApi
+    public int getClientUid() { return mClientUid; }
 
     @SystemApi
     public String getClientId() { return mClientId; }
@@ -111,6 +116,7 @@ public final class AudioFocusInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         mAttributes.writeToParcel(dest, flags);
+        dest.writeInt(mClientUid);
         dest.writeString(mClientId);
         dest.writeString(mPackageName);
         dest.writeInt(mGainRequest);
@@ -121,7 +127,7 @@ public final class AudioFocusInfo implements Parcelable {
     @SystemApi
     @Override
     public int hashCode() {
-        return Objects.hash(mAttributes, mClientId, mPackageName, mGainRequest, mFlags);
+        return Objects.hash(mAttributes, mClientUid, mClientId, mPackageName, mGainRequest, mFlags);
     }
 
     @SystemApi
@@ -135,6 +141,9 @@ public final class AudioFocusInfo implements Parcelable {
             return false;
         AudioFocusInfo other = (AudioFocusInfo) obj;
         if (!mAttributes.equals(other.mAttributes)) {
+            return false;
+        }
+        if (mClientUid != other.mClientUid) {
             return false;
         }
         if (!mClientId.equals(other.mClientId)) {
@@ -161,6 +170,7 @@ public final class AudioFocusInfo implements Parcelable {
         public AudioFocusInfo createFromParcel(Parcel in) {
             return new AudioFocusInfo(
                     AudioAttributes.CREATOR.createFromParcel(in), //AudioAttributes aa
+                    in.readInt(), // int clientUid
                     in.readString(), //String clientId
                     in.readString(), //String packageName
                     in.readInt(), //int gainRequest
