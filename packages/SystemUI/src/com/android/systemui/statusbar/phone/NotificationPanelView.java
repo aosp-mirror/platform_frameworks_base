@@ -92,7 +92,7 @@ public class NotificationPanelView extends PanelView implements
 
     public static final long DOZE_ANIMATION_DURATION = 700;
 
-    private KeyguardAffordanceHelper mAfforanceHelper;
+    private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
     private QS mQs;
@@ -239,8 +239,8 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
-        mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
-        mKeyguardBottomArea.setAffordanceHelper(mAfforanceHelper);
+        mAffordanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mLastOrientation = getResources().getConfiguration().orientation;
 
         mQsFrame = (FrameLayout) findViewById(R.id.qs_frame);
@@ -516,7 +516,7 @@ public class NotificationPanelView extends PanelView implements
         mBlockTouches = false;
         mUnlockIconActive = false;
         if (!mLaunchingAffordance) {
-            mAfforanceHelper.reset(false);
+            mAffordanceHelper.reset(false);
             mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
         }
         closeQs();
@@ -763,7 +763,7 @@ public class NotificationPanelView extends PanelView implements
         if ((!mIsExpanding || mHintAnimationRunning)
                 && !mQsExpanded
                 && mStatusBar.getBarState() != StatusBarState.SHADE) {
-            mAfforanceHelper.onTouchEvent(event);
+            mAffordanceHelper.onTouchEvent(event);
         }
         if (mOnlyAffordanceInThisMotion) {
             return true;
@@ -881,7 +881,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean shouldGestureIgnoreXTouchSlop(float x, float y) {
-        return !mAfforanceHelper.isOnAffordanceIcon(x, y);
+        return !mAffordanceHelper.isOnAffordanceIcon(x, y);
     }
 
     private void onQsTouch(MotionEvent event) {
@@ -1722,7 +1722,7 @@ public class NotificationPanelView extends PanelView implements
         }
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
-            mAfforanceHelper.animateHideLeftRightIcon();
+            mAffordanceHelper.animateHideLeftRightIcon();
         }
         mNotificationStackScroller.onPanelTrackingStarted();
     }
@@ -1739,7 +1739,7 @@ public class NotificationPanelView extends PanelView implements
         if (expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             if (!mHintAnimationRunning) {
-                mAfforanceHelper.reset(true);
+                mAffordanceHelper.reset(true);
             }
         }
         if (!expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
@@ -1785,7 +1785,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mAfforanceHelper.onConfigurationChanged();
+        mAffordanceHelper.onConfigurationChanged();
         if (newConfig.orientation != mLastOrientation) {
             resetVerticalPanelPosition();
         }
@@ -1806,7 +1806,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         if (layoutDirection != mOldLayoutDirection) {
-            mAfforanceHelper.onRtlPropertiesChanged();
+            mAffordanceHelper.onRtlPropertiesChanged();
             mOldLayoutDirection = layoutDirection;
         }
     }
@@ -1938,7 +1938,7 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         mHintAnimationRunning = true;
-        mAfforanceHelper.startHintAnimation(rightIcon, new Runnable() {
+        mAffordanceHelper.startHintAnimation(rightIcon, new Runnable() {
             @Override
             public void run() {
                 mHintAnimationRunning = false;
@@ -2351,7 +2351,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             animate = false;
         }
-        mAfforanceHelper.launchAffordance(animate, getLayoutDirection() == LAYOUT_DIRECTION_RTL);
+        mAffordanceHelper.launchAffordance(animate, getLayoutDirection() == LAYOUT_DIRECTION_RTL);
     }
 
     public void onAffordanceLaunchEnded() {
@@ -2397,7 +2397,7 @@ public class NotificationPanelView extends PanelView implements
                 ? null : resolveInfo.activityInfo.packageName;
         return packageToLaunch != null &&
                (keyguardIsShowing || !isForegroundApp(packageToLaunch)) &&
-               !mAfforanceHelper.isSwipingInProgress();
+               !mAffordanceHelper.isSwipingInProgress();
     }
 
     /**
