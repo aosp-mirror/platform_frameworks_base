@@ -53,12 +53,16 @@ import java.lang.reflect.Array;
      * @param end End index in the source object.
      */
     private final void copySpans(Spanned src, int start, int end) {
-        Object[] spans = src.getSpans(start, end, Object.class);
+        final Object[] spans = src.getSpans(start, end, Object.class);
 
         for (int i = 0; i < spans.length; i++) {
+            if (spans[i] instanceof NoCopySpan) {
+                continue;
+            }
+
             int st = src.getSpanStart(spans[i]);
             int en = src.getSpanEnd(spans[i]);
-            int fl = src.getSpanFlags(spans[i]);
+            final int fl = src.getSpanFlags(spans[i]);
 
             if (st < start)
                 st = start;
@@ -78,33 +82,42 @@ import java.lang.reflect.Array;
      * @param end End index in the source object.
      */
     private final void copySpans(SpannableStringInternal src, int start, int end) {
-        if (start == 0 && end == src.length()) {
+        int count = 0;
+        boolean includesNoCopySpan = false;
+        final int[] srcData = src.mSpanData;
+        final Object[] srcSpans = src.mSpans;
+        final int limit = src.mSpanCount;
+
+        for (int i = 0; i < limit; i++) {
+            int spanStart = srcData[i * COLUMNS + START];
+            int spanEnd = srcData[i * COLUMNS + END];
+            if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+            if (srcSpans[i] instanceof NoCopySpan) {
+                includesNoCopySpan = true;
+                continue;
+            }
+            count++;
+        }
+
+        if (count == 0) return;
+
+        if (!includesNoCopySpan && start == 0 && end == src.length()) {
             mSpans = ArrayUtils.newUnpaddedObjectArray(src.mSpans.length);
             mSpanData = new int[src.mSpanData.length];
             mSpanCount = src.mSpanCount;
             System.arraycopy(src.mSpans, 0, mSpans, 0, src.mSpans.length);
             System.arraycopy(src.mSpanData, 0, mSpanData, 0, mSpanData.length);
         } else {
-            int count = 0;
-            int[] srcData = src.mSpanData;
-            int limit = src.mSpanCount;
-            for (int i = 0; i < limit; i++) {
-                int spanStart = srcData[i * COLUMNS + START];
-                int spanEnd = srcData[i * COLUMNS + END];
-                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
-                count++;
-            }
-
-            if (count == 0) return;
-
-            Object[] srcSpans = src.mSpans;
             mSpanCount = count;
             mSpans = ArrayUtils.newUnpaddedObjectArray(mSpanCount);
             mSpanData = new int[mSpans.length * COLUMNS];
             for (int i = 0, j = 0; i < limit; i++) {
                 int spanStart = srcData[i * COLUMNS + START];
                 int spanEnd = srcData[i * COLUMNS + END];
-                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+                if (isOutOfCopyRange(start, end, spanStart, spanEnd)
+                        || srcSpans[i] instanceof NoCopySpan) {
+                    continue;
+                }
                 if (spanStart < start) spanStart = start;
                 if (spanEnd > end) spanEnd = end;
 
