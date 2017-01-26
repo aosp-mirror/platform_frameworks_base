@@ -31,6 +31,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
@@ -44,6 +45,8 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -118,6 +121,7 @@ public final class NotificationRecord {
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
     private boolean mShowBadge;
+    private LogMaker mLogMaker;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -585,9 +589,16 @@ public final class NotificationRecord {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
+        MetricsLogger.action(getLogMaker(now)
+                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
+        if (visible) {
+            MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
+        }
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
-                (int) (now - mCreationTimeMs),
-                (int) (now - mUpdateTimeMs),
+                getLifespanMs(now),
+                getFreshnessMs(now),
                 0, // exposure time
                 rank);
     }
@@ -689,5 +700,26 @@ public final class NotificationRecord {
 
     protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
         mSnoozeCriteria = snoozeCriteria;
+    }
+
+    public LogMaker getLogMaker(long now) {
+        if (mLogMaker == null) {
+            mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
+                    .setPackageName(sbn.getPackageName())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_ID, sbn.getId())
+                    .addTaggedData(MetricsEvent.NOTIFICATION_TAG, sbn.getTag());
+        }
+        return mLogMaker
+                .setCategory(MetricsEvent.VIEW_UNKNOWN)
+                .setType(MetricsEvent.TYPE_UNKNOWN)
+                .setSubtype(0)
+                .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now));
+    }
+
+    public LogMaker getLogMaker() {
+        return getLogMaker(System.currentTimeMillis());
     }
 }

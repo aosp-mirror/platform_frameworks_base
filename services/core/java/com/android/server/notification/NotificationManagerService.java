@@ -86,6 +86,7 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -132,6 +133,8 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -549,6 +552,9 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
                 final long now = System.currentTimeMillis();
+                MetricsLogger.action(r.getLogMaker(now)
+                        .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                        .setType(MetricsEvent.TYPE_ACTION));
                 EventLogTags.writeNotificationClicked(key,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
 
@@ -570,6 +576,10 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
                 final long now = System.currentTimeMillis();
+                MetricsLogger.action(r.getLogMaker(now)
+                        .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
+                        .setType(MetricsEvent.TYPE_ACTION)
+                        .setSubtype(actionIndex));
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
                 // TODO: Log action click via UsageStats.
@@ -586,6 +596,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onPanelRevealed(boolean clearEffects, int items) {
+            MetricsLogger.visible(getContext(), MetricsEvent.NOTIFICATION_PANEL);
+            MetricsLogger.histogram(getContext(), "notification_load", items);
             EventLogTags.writeNotificationPanelRevealed(items);
             if (clearEffects) {
                 clearEffects();
@@ -594,6 +606,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onPanelHidden() {
+            MetricsLogger.hidden(getContext(), MetricsEvent.NOTIFICATION_PANEL);
             EventLogTags.writeNotificationPanelHidden();
         }
 
@@ -655,6 +668,9 @@ public class NotificationManagerService extends SystemService {
                 if (r != null) {
                     r.stats.onExpansionChanged(userAction, expanded);
                     final long now = System.currentTimeMillis();
+                    MetricsLogger.action(r.getLogMaker(now)
+                            .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                            .setType(MetricsEvent.TYPE_DETAIL));
                     EventLogTags.writeNotificationExpansion(key,
                             userAction ? 1 : 0, expanded ? 1 : 0,
                             r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
@@ -3426,6 +3442,10 @@ public class NotificationManagerService extends SystemService {
                     & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0)) {
                 if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
             } else {
+                MetricsLogger.action(record.getLogMaker()
+                        .setCategory(MetricsEvent.NOTIFICATION_ALERT)
+                        .setType(MetricsEvent.TYPE_OPEN)
+                        .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
                 EventLogTags.writeNotificationAlert(key,
                         buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
                 mHandler.post(mBuzzBeepBlinked);
@@ -3896,6 +3916,10 @@ public class NotificationManagerService extends SystemService {
         mArchive.record(r.sbn);
 
         final long now = System.currentTimeMillis();
+        MetricsLogger.action(r.getLogMaker(now)
+                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                .setType(MetricsEvent.TYPE_DISMISS)
+                .setSubtype(reason));
         EventLogTags.writeNotificationCanceled(canceledKey, reason,
                 r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now));
     }
