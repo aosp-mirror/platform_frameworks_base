@@ -103,6 +103,10 @@
     <color name="notification_guts_icon_tint">#8a000000</color>
     <color name="notification_guts_disabled_icon_tint">#4d000000</color>
 
+    <!-- Colors of the snooze menu reached via snooze icon behind a notification -->
+    <color name="snooze_snackbar_bg">#FF4A4A4A</color>
+	<color name="snooze_snackbar_text">#FFA6BAFF</color>
+
     <color name="assist_orb_color">#ffffff</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>

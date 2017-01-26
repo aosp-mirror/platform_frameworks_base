@@ -383,6 +383,20 @@
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
+    <style name="TextAppearance.SnoozeSnackBar">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">roboto-regular</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.SnoozeSnackBar.Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/snooze_snackbar_text</item>
+    </style>
+
     <style name="edit_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>

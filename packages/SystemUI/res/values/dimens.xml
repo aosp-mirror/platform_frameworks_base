@@ -106,11 +106,20 @@
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>
 
-    <!-- Width of the space containing the gear icon behind a notification -->
-    <dimen name="notification_gear_width">64dp</dimen>
+    <!-- Size of the space to place a notification menu item -->
+    <dimen name="notification_menu_icon_size">64dp</dimen>
 
-    <!-- The space around the gear icon displayed behind a notification  -->
-    <dimen name="notification_gear_padding">20dp</dimen>
+    <!-- The space around a notification menu item  -->
+    <dimen name="notification_menu_icon_padding">20dp</dimen>
+
+    <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
+    <dimen name="snooze_snackbar_min_height">48dp</dimen>
+
+    <!-- The text size of options in the snooze menu. -->
+    <dimen name="snooze_option_text_size">14sp</dimen>
+
+    <!-- The padding around options int the snooze menu. -->
+    <dimen name="snooze_option_padding">8dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">17dp</dimen>
