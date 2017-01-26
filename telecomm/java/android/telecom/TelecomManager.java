@@ -326,6 +326,14 @@ public class TelecomManager {
             "android.telecom.extra.NEW_OUTGOING_CALL_CANCEL_TIMEOUT";
 
     /**
+     * A boolean extra, which when set on the {@link Intent#ACTION_CALL} intent or on the bundle
+     * passed into {@link #placeCall(Uri, Bundle)}, indicates that the call should be initiated with
+     * an RTT session open. See {@link android.telecom.Call.RttCall} for more information on RTT.
+     */
+    public static final String EXTRA_START_CALL_WITH_RTT =
+            "android.telecom.extra.START_CALL_WITH_RTT";
+
+    /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface. Dialer implementations (see {@link #getDefaultDialerPackage()}) which
      * would also like to replace the in-call interface should set this meta-data to {@code true} in

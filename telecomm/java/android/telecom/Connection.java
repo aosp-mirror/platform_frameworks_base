@@ -31,10 +31,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.view.Surface;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -385,8 +389,14 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_SELF_MANAGED = 1<<7;
 
+    /**
+     * When set, indicates that a connection has an active RTT session associated with it.
+     * @hide
+     */
+    public static final int PROPERTY_IS_RTT = 1 << 8;
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<8
+    // Next PROPERTY value: 1<<9
     //**********************************************************************************************
 
     /**
@@ -754,6 +764,65 @@ public abstract class Connection extends Conferenceable {
         /** @hide */
         public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
         public void onAudioRouteChanged(Connection c, int audioRoute) {}
+    }
+
+    /**
+     * Provides methods to read and write RTT data to/from the in-call app.
+     * @hide
+     */
+    public static final class RttTextStream {
+        private static final int READ_BUFFER_SIZE = 1000;
+        private final InputStreamReader mPipeFromInCall;
+        private final OutputStreamWriter mPipeToInCall;
+        private char[] mReadBuffer = new char[READ_BUFFER_SIZE];
+
+        /**
+         * @hide
+         */
+        public RttTextStream(ParcelFileDescriptor toInCall, ParcelFileDescriptor fromInCall) {
+            mPipeFromInCall = new InputStreamReader(
+                    new ParcelFileDescriptor.AutoCloseInputStream(fromInCall));
+            mPipeToInCall = new OutputStreamWriter(
+                    new ParcelFileDescriptor.AutoCloseOutputStream(toInCall));
+        }
+
+        /**
+         * Writes the string {@param input} into the text stream to the UI for this RTT call. Since
+         * RTT transmits text in real-time, this method should be called as often as text snippets
+         * are received from the remote user, even if it is only one character.
+         *
+         * This method is not thread-safe -- calling it from multiple threads simultaneously may
+         * lead to interleaved text.
+         * @param input The message to send to the in-call app.
+         */
+        public void write(String input) throws IOException {
+            mPipeToInCall.write(input);
+            mPipeToInCall.flush();
+        }
+
+
+        /**
+         * Reads a string from the in-call app, blocking if there is no data available. Returns
+         * {@code null} if the RTT conversation has been terminated and there is no further data
+         * to read.
+         *
+         * This method is not thread-safe -- calling it from multiple threads simultaneously may
+         * lead to interleaved text.
+         * @return A string containing text entered by the user, or {@code null} if the
+         * conversation has been terminated or if there was an error while reading.
+         */
+        public String read() {
+            try {
+                int numRead = mPipeFromInCall.read(mReadBuffer, 0, READ_BUFFER_SIZE);
+                if (numRead < 0) {
+                    return null;
+                }
+                return new String(mReadBuffer, 0, numRead);
+            } catch (IOException e) {
+                Log.w(this, "Exception encountered when reading from InputStreamReader: %s", e);
+                return null;
+            }
+        }
     }
 
     /**
