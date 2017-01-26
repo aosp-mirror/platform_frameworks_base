@@ -55,6 +55,7 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
+import android.app.NotificationChannelGroup;
 import android.app.backup.BackupManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
@@ -1601,6 +1602,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void createNotificationChannelGroups(String pkg,
+                ParceledListSlice channelGroupList) throws RemoteException {
+            checkCallerIsSystemOrSameApp(pkg);
+            List<NotificationChannelGroup> groups = channelGroupList.getList();
+            final int groupSize = groups.size();
+            for (int i = 0; i < groupSize; i++) {
+                final NotificationChannelGroup group = groups.get(i);
+                Preconditions.checkNotNull(group, "group in list is null");
+                mRankingHelper.createNotificationChannelGroup(pkg, Binder.getCallingUid(), group,
+                        true /* fromTargetApp */);
+            }
+            savePolicyFile();
+        }
+
+        @Override
         public void createNotificationChannels(String pkg,
                 ParceledListSlice channelsList) throws RemoteException {
             checkCallerIsSystemOrSameApp(pkg);
@@ -1655,6 +1671,13 @@ public class NotificationManagerService extends SystemService {
                 int uid, boolean includeDeleted) {
             checkCallerIsSystem();
             return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted);
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
+                String pkg, int uid, boolean includeDeleted) {
+            checkCallerIsSystem();
+            return mRankingHelper.getNotificationChannelGroups(pkg, uid, includeDeleted);
         }
 
         @Override

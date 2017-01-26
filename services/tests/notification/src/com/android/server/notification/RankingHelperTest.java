@@ -30,12 +30,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Notification;
+import android.app.NotificationChannelGroup;
 import android.content.Context;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
@@ -186,6 +186,7 @@ public class RankingHelperTest {
         assertEquals(expected.getSound(), actual.getSound());
         assertEquals(expected.canBypassDnd(), actual.canBypassDnd());
         assertTrue(Arrays.equals(expected.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(expected.getGroup(), actual.getGroup());
     }
 
     @Test
@@ -240,6 +241,7 @@ public class RankingHelperTest {
 
     @Test
     public void testChannelXml() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("1", "2");
         NotificationChannel channel1 =
                 new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel2 =
@@ -249,8 +251,10 @@ public class RankingHelperTest {
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel2.enableVibration(true);
+        channel2.setGroup(ncg.getId());
         channel2.setVibrationPattern(new long[] {100, 67, 145, 156});
 
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
         mHelper.createNotificationChannel(pkg, uid, channel1, true);
         mHelper.createNotificationChannel(pkg, uid, channel2, false);
 
@@ -274,6 +278,10 @@ public class RankingHelperTest {
                 mHelper.getNotificationChannel(pkg, uid, channel2.getId(), false));
         assertNotNull(mHelper.getNotificationChannel(
                 pkg, uid, NotificationChannel.DEFAULT_CHANNEL_ID, false));
+        assertEquals(ncg.getId(),
+                mHelper.getNotificationChannelGroups(pkg, uid, false).getList().get(0).getId());
+        assertEquals(channel2.getGroup(), mHelper.getNotificationChannelGroups(
+                pkg, uid, false).getList().get(0).getChannels().get(0).getGroup());
     }
 
     @Test
@@ -766,9 +774,110 @@ public class RankingHelperTest {
     }
 
     @Test
+    public void testOnPackageChanged_packageRemoval_importance() throws Exception {
+        mHelper.setImportance(pkg, uid, NotificationManager.IMPORTANCE_HIGH);
+
+        mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{pkg}, new int[]{uid});
+
+        assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(pkg, uid));
+    }
+
+    @Test
+    public void testOnPackageChanged_packageRemoval_groups() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("group2", "name2");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg2, true);
+
+        mHelper.onPackagesChanged(true, UserHandle.USER_SYSTEM, new String[]{pkg}, new int[]{uid});
+
+        assertEquals(0, mHelper.getNotificationChannelGroups(pkg, uid, true).getList().size());
+    }
+
+    @Test
     public void testRecordDefaults() throws Exception {
         assertEquals(NotificationManager.IMPORTANCE_UNSPECIFIED, mHelper.getImportance(pkg, uid));
         assertEquals(true, mHelper.canShowBadge(pkg, uid));
         assertEquals(1, mHelper.getNotificationChannels(pkg, uid, false).getList().size());
+    }
+
+    @Test
+    public void testCreateGroup() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        assertEquals(ncg, mHelper.getNotificationChannelGroups(pkg, uid, false).getList().get(0));
+    }
+
+    @Test
+    public void testCannotCreateChannel_badGroup() throws Exception {
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setGroup("garbage");
+        try {
+            mHelper.createNotificationChannel(pkg, uid, channel1, true);
+            fail("Created a channel with a bad group");
+        } catch (IllegalArgumentException e) {}
+    }
+
+    @Test
+    public void testCannotCreateChannel_goodGroup() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannel(pkg, uid, channel1, true);
+
+        assertEquals(ncg.getId(),
+                mHelper.getNotificationChannel(pkg, uid, channel1.getId(), false).getGroup());
+    }
+
+    @Test
+    public void testGetChannelGroups() throws Exception {
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
+        NotificationChannelGroup ncg2 = new NotificationChannelGroup("group2", "name2");
+        mHelper.createNotificationChannelGroup(pkg, uid, ncg2, true);
+
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannel(pkg, uid, channel1, true);
+        NotificationChannel channel1a =
+                new NotificationChannel("id1a", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel1a.setGroup(ncg.getId());
+        mHelper.createNotificationChannel(pkg, uid, channel1a, true);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("id2", "name1", NotificationManager.IMPORTANCE_HIGH);
+        channel2.setGroup(ncg2.getId());
+        mHelper.createNotificationChannel(pkg, uid, channel2, true);
+
+        NotificationChannel channel3 =
+                new NotificationChannel("id3", "name1", NotificationManager.IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(pkg, uid, channel3, true);
+
+        List<NotificationChannelGroup> actual =
+                mHelper.getNotificationChannelGroups(pkg, uid, true).getList();
+        assertEquals(3, actual.size());
+        for (NotificationChannelGroup group: actual) {
+            if (group.getId() == null) {
+                assertEquals(2, group.getChannels().size()); // misc channel too
+                assertTrue(channel3.getId().equals(group.getChannels().get(0).getId())
+                || channel3.getId().equals(group.getChannels().get(1).getId()));
+            } else if (group.getId().equals(ncg.getId())) {
+                assertEquals(2, group.getChannels().size());
+                if (group.getChannels().get(0).getId().equals(channel1.getId())) {
+                    assertTrue(group.getChannels().get(1).getId().equals(channel1a.getId()));
+                } else if (group.getChannels().get(0).getId().equals(channel1a.getId())) {
+                    assertTrue(group.getChannels().get(1).getId().equals(channel1.getId()));
+                } else {
+                    fail("expected channel not found");
+                }
+            } else if (group.getId().equals(ncg2.getId())) {
+                assertEquals(1, group.getChannels().size());
+                assertEquals(channel2.getId(), group.getChannels().get(0).getId());
+            }
+        }
     }
 }

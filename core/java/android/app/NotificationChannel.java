@@ -21,6 +21,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SystemApi;
+import android.app.NotificationManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,6 +50,8 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_LIGHTS = "lights";
+    //TODO: add support for light colors
+    private static final String ATT_LIGHT_COLOR = "light_color";
     private static final String ATT_VIBRATION = "vibration";
     private static final String ATT_VIBRATION_ENABLED = "vibration_enabled";
     private static final String ATT_SOUND = "sound";
@@ -56,6 +59,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    private static final String ATT_GROUP = "group";
     private static final String DELIMITER = ",";
 
     /**
@@ -136,6 +140,7 @@ public final class NotificationChannel implements Parcelable {
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
+    private String mGroup;
 
     /**
      * Creates a notification channel.
@@ -173,6 +178,11 @@ public final class NotificationChannel implements Parcelable {
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
+        if (in.readByte() != 0) {
+            mGroup = in.readString();
+        } else {
+            mGroup = null;
+        }
     }
 
     @Override
@@ -199,6 +209,12 @@ public final class NotificationChannel implements Parcelable {
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
         dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
+        if (mGroup != null) {
+            dest.writeByte((byte) 1);
+            dest.writeString(mGroup);
+        } else {
+            dest.writeByte((byte) 0);
+        }
     }
 
     /**
@@ -253,6 +269,18 @@ public final class NotificationChannel implements Parcelable {
     }
 
     // Modifiable by apps on channel creation.
+
+    /**
+     * Sets what group this channel belongs to.
+     *
+     * Group information is only used for presentation, not for behavior.
+     *
+     * @param groupId the id of a group created by
+     * {@link NotificationManager#createNotificationChannelGroup(NotificationChannelGroup)}.
+     */
+    public void setGroup(String groupId) {
+        this.mGroup = groupId;
+    }
 
     /**
      * Sets whether notifications posted to this channel can appear as application icon badges
@@ -377,6 +405,15 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns what group this channel belongs to.
+     *
+     * This is used only for visually grouping channels in the UI.
+     */
+    public String getGroup() {
+        return mGroup;
+    }
+
+    /**
      * @hide
      */
     @SystemApi
@@ -407,6 +444,7 @@ public final class NotificationChannel implements Parcelable {
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
         setDeleted(safeBool(parser, ATT_DELETED, false));
+        setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
     }
 
@@ -451,6 +489,9 @@ public final class NotificationChannel implements Parcelable {
         if (isDeleted()) {
             out.attribute(null, ATT_DELETED, Boolean.toString(isDeleted()));
         }
+        if (getGroup() != null) {
+            out.attribute(null, ATT_GROUP, getGroup());
+        }
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -482,6 +523,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
+        record.put(ATT_GROUP, getGroup());
         return record;
     }
 
@@ -527,10 +569,12 @@ public final class NotificationChannel implements Parcelable {
 
     private static String longArrayToString(long[] values) {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < values.length - 1; i++) {
-            sb.append(values[i]).append(DELIMITER);
+        if (values != null) {
+            for (int i = 0; i < values.length - 1; i++) {
+                sb.append(values[i]).append(DELIMITER);
+            }
+            sb.append(values[values.length - 1]);
         }
-        sb.append(values[values.length - 1]);
         return sb.toString();
     }
 
@@ -558,35 +602,41 @@ public final class NotificationChannel implements Parcelable {
 
         NotificationChannel that = (NotificationChannel) o;
 
-        if (mImportance != that.mImportance) return false;
+        if (getImportance() != that.getImportance()) return false;
         if (mBypassDnd != that.mBypassDnd) return false;
-        if (mLockscreenVisibility != that.mLockscreenVisibility) return false;
+        if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
         if (mLights != that.mLights) return false;
-        if (mUserLockedFields != that.mUserLockedFields) return false;
+        if (getUserLockedFields() != that.getUserLockedFields()) return false;
         if (mVibrationEnabled != that.mVibrationEnabled) return false;
         if (mShowBadge != that.mShowBadge) return false;
-        if (mDeleted != that.mDeleted) return false;
-        if (mId != null ? !mId.equals(that.mId) : that.mId != null) return false;
-        if (mName != null ? !mName.equals(that.mName) : that.mName != null) return false;
-        if (mSound != null ? !mSound.equals(that.mSound) : that.mSound != null) return false;
-        return Arrays.equals(mVibration, that.mVibration);
+        if (isDeleted() != that.isDeleted()) return false;
+        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
+            return false;
+        }
+        if (getSound() != null ? !getSound().equals(that.getSound()) : that.getSound() != null) {
+            return false;
+        }
+        if (!Arrays.equals(mVibration, that.mVibration)) return false;
+        return getGroup() != null ? getGroup().equals(that.getGroup()) : that.getGroup() == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = mId != null ? mId.hashCode() : 0;
-        result = 31 * result + (mName != null ? mName.hashCode() : 0);
-        result = 31 * result + mImportance;
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + getImportance();
         result = 31 * result + (mBypassDnd ? 1 : 0);
-        result = 31 * result + mLockscreenVisibility;
-        result = 31 * result + (mSound != null ? mSound.hashCode() : 0);
+        result = 31 * result + getLockscreenVisibility();
+        result = 31 * result + (getSound() != null ? getSound().hashCode() : 0);
         result = 31 * result + (mLights ? 1 : 0);
         result = 31 * result + Arrays.hashCode(mVibration);
-        result = 31 * result + mUserLockedFields;
+        result = 31 * result + getUserLockedFields();
         result = 31 * result + (mVibrationEnabled ? 1 : 0);
         result = 31 * result + (mShowBadge ? 1 : 0);
-        result = 31 * result + (mDeleted ? 1 : 0);
+        result = 31 * result + (isDeleted() ? 1 : 0);
+        result = 31 * result + (getGroup() != null ? getGroup().hashCode() : 0);
         return result;
     }
 
@@ -605,6 +655,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mVibrationEnabled=" + mVibrationEnabled +
                 ", mShowBadge=" + mShowBadge +
                 ", mDeleted=" + mDeleted +
+                ", mGroup='" + mGroup + '\'' +
                 '}';
     }
 }

@@ -63,8 +63,7 @@ import org.junit.runner.RunWith;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
-@SmallTest
-@RunWith(AndroidJUnit4.class)
+// THESE TESTS ARE DISABLED FOR NOW BECAUSE THEY DO NOT FINISH 1/2 THE TIME.
 public class NotificationManagerServiceTest {
     private final String pkg = "com.android.server.notification";
     private final int uid = Binder.getCallingUid();
@@ -137,7 +136,6 @@ public class NotificationManagerServiceTest {
         return new NotificationRecord(mContext, sbn, channel);
     }
 
-    @Test
     @UiThreadTest
     public void testCreateNotificationChannels_SingleChannel() throws Exception {
         final NotificationChannel channel =
@@ -149,7 +147,6 @@ public class NotificationManagerServiceTest {
         assertTrue(createdChannel != null);
     }
 
-    @Test
     @UiThreadTest
     public void testCreateNotificationChannels_NullChannelThrowsException() throws Exception {
         try {
@@ -161,7 +158,6 @@ public class NotificationManagerServiceTest {
         }
     }
 
-    @Test
     @UiThreadTest
     public void testCreateNotificationChannels_TwoChannels() throws Exception {
         final NotificationChannel channel1 =
@@ -174,7 +170,6 @@ public class NotificationManagerServiceTest {
         assertTrue(mBinderService.getNotificationChannel("test_pkg", "id2") != null);
     }
 
-    @Test
     @UiThreadTest
     public void testCreateNotificationChannels_SecondCreateDoesNotChangeImportance()
             throws Exception {
@@ -193,7 +188,6 @@ public class NotificationManagerServiceTest {
         assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
-    @Test
     @UiThreadTest
     public void testCreateNotificationChannels_IdenticalChannelsInListIgnoresSecond()
             throws Exception {
@@ -208,7 +202,6 @@ public class NotificationManagerServiceTest {
         assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
     }
 
-    @Test
     @UiThreadTest
     public void testBlockedNotifications_suspended() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
@@ -224,7 +217,6 @@ public class NotificationManagerServiceTest {
         verify(usageStats, times(1)).registerSuspendedByAdmin(eq(r));
     }
 
-    @Test
     @UiThreadTest
     public void testBlockedNotifications_blockedChannel() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
@@ -241,7 +233,6 @@ public class NotificationManagerServiceTest {
         verify(usageStats, times(1)).registerBlocked(eq(r));
     }
 
-    @Test
     @UiThreadTest
     public void testBlockedNotifications_blockedApp() throws Exception {
         NotificationUsageStats usageStats = mock(NotificationUsageStats.class);
@@ -258,7 +249,6 @@ public class NotificationManagerServiceTest {
         verify(usageStats, times(1)).registerBlocked(eq(r));
     }
 
-    @Test
     @UiThreadTest
     public void testEnqueueNotificationWithTag_PopulatesGetActiveNotifications() throws Exception {
         mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
@@ -269,7 +259,6 @@ public class NotificationManagerServiceTest {
         assertEquals(1, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelNotificationImmediatelyAfterEnqueue() throws Exception {
         mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
@@ -281,7 +270,6 @@ public class NotificationManagerServiceTest {
         assertEquals(0, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
@@ -294,7 +282,6 @@ public class NotificationManagerServiceTest {
         assertEquals(0, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelAllNotificationsImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
@@ -307,7 +294,6 @@ public class NotificationManagerServiceTest {
         assertEquals(0, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
@@ -321,7 +307,6 @@ public class NotificationManagerServiceTest {
         assertEquals(1, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelAllNotifications_IgnoreOtherPackages() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
@@ -335,7 +320,6 @@ public class NotificationManagerServiceTest {
         assertEquals(1, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelAllNotifications_NullPkgRemovesAll() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
@@ -348,7 +332,6 @@ public class NotificationManagerServiceTest {
         assertEquals(0, notifs.length);
     }
 
-    @Test
     @UiThreadTest
     public void testCancelAllNotifications_NullPkgIgnoresUserAllNotifications() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;

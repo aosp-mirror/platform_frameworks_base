@@ -383,7 +383,45 @@ public class NotificationManager
     }
 
     /**
+     * Creates a group container for {@link NotificationChannel} objects.
+     *
+     * This is a no-op for groups that already exist.
+     * <p>
+     *     Group information is only used for presentation, not for behavior. Groups are optional
+     *     for channels, and you can have a mix of channels that belong to groups and channels
+     *     that do not.
+     * </p>
+     * <p>
+     *     For example, if your application supports multiple accounts, and those accounts will
+     *     have similar channels, you can create a group for each account with account specific
+     *     labels instead of appending account information to each channel's label.
+     * </p>
+     *
+     * @param group The group to create
+     */
+    public void createNotificationChannelGroup(@NonNull NotificationChannelGroup group) {
+        createNotificationChannelGroups(Arrays.asList(group));
+    }
+
+    /**
+     * Creates multiple notification channel groups.
+     *
+     * @param groups The list of groups to create
+     */
+    public void createNotificationChannelGroups(@NonNull List<NotificationChannelGroup> groups) {
+        INotificationManager service = getService();
+        try {
+            service.createNotificationChannelGroups(mContext.getPackageName(),
+                    new ParceledListSlice(groups));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a notification channel that notifications can be posted to.
+     *
+     * This is a no-op for channels that already exist.
      *
      * @param channel  the channel to create.  Note that the created channel may differ from this
      *                 value.  If the channel already exists, it will not be modified.
