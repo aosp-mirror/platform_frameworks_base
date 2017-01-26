@@ -5029,7 +5029,9 @@ public final class ActivityThread {
      * @hide
      */
     public void stopProfiling() {
-        mProfiler.stopProfiling();
+        if (mProfiler != null) {
+            mProfiler.stopProfiling();
+        }
     }
 
     static final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
