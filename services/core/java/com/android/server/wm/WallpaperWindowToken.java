@@ -40,8 +40,8 @@ class WallpaperWindowToken extends WindowToken {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperWindowToken" : TAG_WM;
 
     WallpaperWindowToken(WindowManagerService service, IBinder token, boolean explicit,
-            DisplayContent dc) {
-        super(service, token, TYPE_WALLPAPER, explicit, dc);
+            DisplayContent dc, boolean ownerCanManageAppTokens) {
+        super(service, token, TYPE_WALLPAPER, explicit, dc, ownerCanManageAppTokens);
         dc.mWallpaperController.addWallpaperToken(this);
     }
 

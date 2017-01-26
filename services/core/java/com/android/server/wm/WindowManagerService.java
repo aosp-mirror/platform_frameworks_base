@@ -16,13 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -101,7 +102,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -236,7 +236,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -523,7 +522,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSupportsPictureInPicture = false;
 
     int getDragLayerLocked() {
-        return mPolicy.windowTypeToLayerLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
+        return mPolicy.getWindowLayerFromTypeLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
     }
 
     class RotationWatcher {
@@ -1099,6 +1098,8 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId;
         final int callingUid = Binder.getCallingUid();
         final int type = attrs.type;
+        final boolean ownerCanAddInternalSystemWindow =
+                mContext.checkCallingPermission(INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
 
         synchronized(mWindowMap) {
             if (!mDisplayReady) {
@@ -1200,7 +1201,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                     }
                 }
-                token = new WindowToken(this, attrs.token, type, false, displayContent);
+                token = new WindowToken(this, attrs.token, type, false, displayContent,
+                        ownerCanAddInternalSystemWindow);
             } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
                 if (atoken == null) {
@@ -1270,11 +1272,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, null, type, false, displayContent);
+                token = new WindowToken(this, null, type, false, displayContent,
+                        ownerCanAddInternalSystemWindow);
             }
 
-            WindowState win = new WindowState(this, session, client, token, parentWindow,
-                    appOp[0], seq, attrs, viewVisibility, session.mUid);
+            final WindowState win = new WindowState(this, session, client, token, parentWindow,
+                    appOp[0], seq, attrs, viewVisibility, session.mUid,
+                    ownerCanAddInternalSystemWindow);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -2405,9 +2409,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             if (type == TYPE_WALLPAPER) {
-                new WallpaperWindowToken(this, binder, true, dc);
+                new WallpaperWindowToken(this, binder, true, dc,
+                        true /* ownerCanManageAppTokens */);
             } else {
-                new WindowToken(this, binder, type, true, dc);
+                new WindowToken(this, binder, type, true, dc, true /* ownerCanManageAppTokens */);
             }
         }
     }
@@ -3606,7 +3611,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mCircularDisplayMask = new CircularDisplayMask(
                                 getDefaultDisplayContentLocked().getDisplay(),
                                 mFxSession,
-                                mPolicy.windowTypeToLayerLw(
+                                mPolicy.getWindowLayerFromTypeLw(
                                         WindowManager.LayoutParams.TYPE_POINTER)
                                         * TYPE_LAYER_MULTIPLIER + 10, screenOffset, maskThickness);
                     }
@@ -3635,7 +3640,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             mContext,
                             getDefaultDisplayContentLocked().getDisplay(),
                             mFxSession,
-                            mPolicy.windowTypeToLayerLw(
+                            mPolicy.getWindowLayerFromTypeLw(
                                     WindowManager.LayoutParams.TYPE_POINTER)
                                     * TYPE_LAYER_MULTIPLIER + 10);
                 }

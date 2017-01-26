@@ -16,17 +16,24 @@
 
 package com.android.server.policy;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.O;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -63,21 +70,14 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -103,8 +103,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
+import static android.view.WindowManagerGlobal.ADD_OKAY;
+import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -156,7 +159,6 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
@@ -313,12 +315,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED = 0;
     // Nav bar is always translucent when the freeform stack is visible, otherwise always opaque.
     static final int NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE = 1;
-
-    static final int APPLICATION_MEDIA_SUBLAYER = -2;
-    static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
-    static final int APPLICATION_PANEL_SUBLAYER = 1;
-    static final int APPLICATION_SUB_PANEL_SUBLAYER = 2;
-    static final int APPLICATION_ABOVE_SUB_PANEL_SUBLAYER = 3;
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -2315,86 +2311,82 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (type < FIRST_SYSTEM_WINDOW || type > LAST_SYSTEM_WINDOW) {
             // Window manager will make sure these are okay.
-            return WindowManagerGlobal.ADD_OKAY;
+            return ADD_OKAY;
         }
-        String permission = null;
-        switch (type) {
-            case TYPE_TOAST:
-                // XXX right now the app process has complete control over
-                // this...  should introduce a token to let the system
-                // monitor/control what they are doing.
-                outAppOp[0] = AppOpsManager.OP_TOAST_WINDOW;
-                break;
-            case TYPE_DREAM:
-            case TYPE_INPUT_METHOD:
-            case TYPE_WALLPAPER:
-            case TYPE_PRESENTATION:
-            case TYPE_PRIVATE_PRESENTATION:
-            case TYPE_VOICE_INTERACTION:
-            case TYPE_ACCESSIBILITY_OVERLAY:
-            case TYPE_QS_DIALOG:
-                // The window manager will check these.
-                break;
-            case TYPE_PHONE:
-            case TYPE_PRIORITY_PHONE:
-            case TYPE_SYSTEM_ALERT:
-            case TYPE_SYSTEM_ERROR:
-            case TYPE_SYSTEM_OVERLAY:
-                permission = android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-                outAppOp[0] = AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-                break;
+
+        if (!isSystemAlertWindowType(type)) {
+            switch (type) {
+                case TYPE_TOAST:
+                    // Only apps that target older than O SDK can add window without a token, after
+                    // that we require a token so apps cannot add toasts directly as the token is
+                    // added by the notification system.
+                    // Window manager does the checking for this.
+                    outAppOp[0] = OP_TOAST_WINDOW;
+                    return ADD_OKAY;
+                case TYPE_DREAM:
+                case TYPE_INPUT_METHOD:
+                case TYPE_WALLPAPER:
+                case TYPE_PRESENTATION:
+                case TYPE_PRIVATE_PRESENTATION:
+                case TYPE_VOICE_INTERACTION:
+                case TYPE_ACCESSIBILITY_OVERLAY:
+                case TYPE_QS_DIALOG:
+                    // The window manager will check these.
+                    return ADD_OKAY;
+            }
+            return mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
+                    == PERMISSION_GRANTED ? ADD_OKAY : ADD_PERMISSION_DENIED;
+        }
+
+        // Things get a little more interesting for alert windows...
+        outAppOp[0] = OP_SYSTEM_ALERT_WINDOW;
+
+        final int callingUid = Binder.getCallingUid();
+        // system processes will be automatically granted privilege to draw
+        if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
+            return ADD_OKAY;
+        }
+
+        ApplicationInfo appInfo;
+        try {
+            appInfo = mContext.getPackageManager().getApplicationInfo(attrs.packageName,
+                            UserHandle.getUserId(callingUid));
+        } catch (PackageManager.NameNotFoundException e) {
+            appInfo = null;
+        }
+
+        if (appInfo == null || (type != TYPE_APPLICATION_OVERLAY && appInfo.targetSdkVersion >= O)) {
+            /**
+             * Apps targeting >= {@link Build.VERSION_CODES#O} are required to hold
+             * {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} (system signature apps)
+             * permission to add alert windows that aren't
+             * {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY}.
+             */
+            return (mContext.checkCallingPermission(INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED)
+                    ? ADD_OKAY : ADD_PERMISSION_DENIED;
+        }
+
+        // check if user has enabled this operation. SecurityException will be thrown if this app
+        // has not been allowed by the user
+        final int mode = mAppOpsManager.checkOpNoThrow(outAppOp[0], callingUid, attrs.packageName);
+        switch (mode) {
+            case AppOpsManager.MODE_ALLOWED:
+            case AppOpsManager.MODE_IGNORED:
+                // although we return ADD_OKAY for MODE_IGNORED, the added window will
+                // actually be hidden in WindowManagerService
+                return ADD_OKAY;
+            case AppOpsManager.MODE_ERRORED:
+                // Don't crash legacy apps
+                if (appInfo.targetSdkVersion < M) {
+                    return ADD_OKAY;
+                }
+                return ADD_PERMISSION_DENIED;
             default:
-                permission = android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+                // in the default mode, we will make a decision here based on
+                // checkCallingPermission()
+                return (mContext.checkCallingPermission(SYSTEM_ALERT_WINDOW) == PERMISSION_GRANTED)
+                        ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
-        if (permission != null) {
-            if (android.Manifest.permission.SYSTEM_ALERT_WINDOW.equals(permission)) {
-                final int callingUid = Binder.getCallingUid();
-                // system processes will be automatically allowed privilege to draw
-                if (callingUid == Process.SYSTEM_UID) {
-                    return WindowManagerGlobal.ADD_OKAY;
-                }
-
-                // check if user has enabled this operation. SecurityException will be thrown if
-                // this app has not been allowed by the user
-                final int mode = mAppOpsManager.checkOpNoThrow(outAppOp[0], callingUid,
-                        attrs.packageName);
-                switch (mode) {
-                    case AppOpsManager.MODE_ALLOWED:
-                    case AppOpsManager.MODE_IGNORED:
-                        // although we return ADD_OKAY for MODE_IGNORED, the added window will
-                        // actually be hidden in WindowManagerService
-                        return WindowManagerGlobal.ADD_OKAY;
-                    case AppOpsManager.MODE_ERRORED:
-                        try {
-                            ApplicationInfo appInfo = mContext.getPackageManager()
-                                    .getApplicationInfo(attrs.packageName,
-                                            UserHandle.getUserId(callingUid));
-                            // Don't crash legacy apps
-                            if (appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                                return WindowManagerGlobal.ADD_OKAY;
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            /* ignore */
-                        }
-                        return WindowManagerGlobal.ADD_PERMISSION_DENIED;
-                    default:
-                        // in the default mode, we will make a decision here based on
-                        // checkCallingPermission()
-                        if (mContext.checkCallingPermission(permission) !=
-                                PackageManager.PERMISSION_GRANTED) {
-                            return WindowManagerGlobal.ADD_PERMISSION_DENIED;
-                        } else {
-                            return WindowManagerGlobal.ADD_OKAY;
-                        }
-                }
-            }
-
-            if (mContext.checkCallingOrSelfPermission(permission)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return WindowManagerGlobal.ADD_PERMISSION_DENIED;
-            }
-        }
-        return WindowManagerGlobal.ADD_OKAY;
     }
 
     @Override
@@ -2440,9 +2432,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Check if third party app has set window to system window type.
-        return mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-                        != PackageManager.PERMISSION_GRANTED;
+        return mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW) != PERMISSION_GRANTED;
     }
 
     @Override
@@ -2591,130 +2581,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public int windowTypeToLayerLw(int type) {
-        if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
-            return 2;
-        }
-        switch (type) {
-        case TYPE_WALLPAPER:
-            // wallpaper is at the bottom, though the window manager may move it.
-            return 1;
-        case TYPE_PRESENTATION:
-        case TYPE_PRIVATE_PRESENTATION:
-            return 2;
-        case TYPE_DOCK_DIVIDER:
-            return 2;
-        case TYPE_QS_DIALOG:
-            return 2;
-        case TYPE_PHONE:
-            return 3;
-        case TYPE_SEARCH_BAR:
-        case TYPE_VOICE_INTERACTION_STARTING:
-            return 4;
-        case TYPE_VOICE_INTERACTION:
-            // voice interaction layer is almost immediately above apps.
-            return 5;
-        case TYPE_INPUT_CONSUMER:
-            return 6;
-        case TYPE_SYSTEM_DIALOG:
-            return 7;
-        case TYPE_TOAST:
-            // toasts and the plugged-in battery thing
-            return 8;
-        case TYPE_PRIORITY_PHONE:
-            // SIM errors and unlock.  Not sure if this really should be in a high layer.
-            return 9;
-        case TYPE_DREAM:
-            // used for Dreams (screensavers with TYPE_DREAM windows)
-            return 10;
-        case TYPE_SYSTEM_ALERT:
-            // like the ANR / app crashed dialogs
-            return 11;
-        case TYPE_INPUT_METHOD:
-            // on-screen keyboards and other such input method user interfaces go here.
-            return 12;
-        case TYPE_INPUT_METHOD_DIALOG:
-            // on-screen keyboards and other such input method user interfaces go here.
-            return 13;
-        case TYPE_STATUS_BAR_SUB_PANEL:
-            return 15;
-        case TYPE_STATUS_BAR:
-            return 16;
-        case TYPE_STATUS_BAR_PANEL:
-            return 17;
-        case TYPE_KEYGUARD_DIALOG:
-            return 18;
-        case TYPE_VOLUME_OVERLAY:
-            // the on-screen volume indicator and controller shown when the user
-            // changes the device volume
-            return 19;
-        case TYPE_SYSTEM_OVERLAY:
-            // the on-screen volume indicator and controller shown when the user
-            // changes the device volume
-            return 20;
-        case TYPE_NAVIGATION_BAR:
-            // the navigation bar, if available, shows atop most things
-            return 21;
-        case TYPE_NAVIGATION_BAR_PANEL:
-            // some panels (e.g. search) need to show on top of the navigation bar
-            return 22;
-        case TYPE_SCREENSHOT:
-            // screenshot selection layer shouldn't go above system error, but it should cover
-            // navigation bars at the very least.
-            return 23;
-        case TYPE_SYSTEM_ERROR:
-            // system-level error dialogs
-            return 24;
-        case TYPE_MAGNIFICATION_OVERLAY:
-            // used to highlight the magnified portion of a display
-            return 25;
-        case TYPE_DISPLAY_OVERLAY:
-            // used to simulate secondary display devices
-            return 26;
-        case TYPE_DRAG:
-            // the drag layer: input for drag-and-drop is associated with this window,
-            // which sits above all other focusable windows
-            return 27;
-        case TYPE_ACCESSIBILITY_OVERLAY:
-            // overlay put by accessibility services to intercept user interaction
-            return 28;
-        case TYPE_SECURE_SYSTEM_OVERLAY:
-            return 29;
-        case TYPE_BOOT_PROGRESS:
-            return 30;
-        case TYPE_POINTER:
-            // the (mouse) pointer layer
-            return 31;
-        }
-        Log.e(TAG, "Unknown window type: " + type);
-        return 2;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int subWindowTypeToLayerLw(int type) {
-        switch (type) {
-        case TYPE_APPLICATION_PANEL:
-        case TYPE_APPLICATION_ATTACHED_DIALOG:
-            return APPLICATION_PANEL_SUBLAYER;
-        case TYPE_APPLICATION_MEDIA:
-            return APPLICATION_MEDIA_SUBLAYER;
-        case TYPE_APPLICATION_MEDIA_OVERLAY:
-            return APPLICATION_MEDIA_OVERLAY_SUBLAYER;
-        case TYPE_APPLICATION_SUB_PANEL:
-            return APPLICATION_SUB_PANEL_SUBLAYER;
-        case TYPE_APPLICATION_ABOVE_SUB_PANEL:
-            return APPLICATION_ABOVE_SUB_PANEL_SUBLAYER;
-        }
-        Log.e(TAG, "Unknown sub-window type: " + type);
-        return 0;
-    }
-
     @Override
     public int getMaxWallpaperLayer() {
-        return windowTypeToLayerLw(TYPE_STATUS_BAR);
+        return getWindowLayerFromTypeLw(TYPE_STATUS_BAR);
     }
 
     private int getNavigationBarWidth(int rotation, int uiMode) {
@@ -2797,8 +2666,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return false;
             default:
                 // Hide only windows below the keyguard host window.
-                return windowTypeToLayerLw(win.getBaseType())
-                        < windowTypeToLayerLw(TYPE_STATUS_BAR);
+                return getWindowLayerLw(win) < getWindowLayerFromTypeLw(TYPE_STATUS_BAR);
         }
     }
 
@@ -3043,7 +2911,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         "PhoneWindowManager");
                 break;
         }
-        return WindowManagerGlobal.ADD_OKAY;
+        return ADD_OKAY;
     }
 
     /** {@inheritDoc} */
@@ -7837,8 +7705,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         immersiveSticky = (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
         final boolean navAllowedHidden = immersive || immersiveSticky;
 
-        if (hideNavBarSysui && !navAllowedHidden && windowTypeToLayerLw(win.getBaseType())
-                > windowTypeToLayerLw(TYPE_INPUT_CONSUMER)) {
+        if (hideNavBarSysui && !navAllowedHidden
+                && getWindowLayerLw(win) > getWindowLayerFromTypeLw(TYPE_INPUT_CONSUMER)) {
             // We can't hide the navbar from this window otherwise the input consumer would not get
             // the input events.
             vis = (vis & ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);

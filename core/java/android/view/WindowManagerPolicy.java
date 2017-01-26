@@ -16,6 +16,51 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
+import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
+import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -30,6 +75,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -423,6 +469,14 @@ public interface WindowManagerPolicy {
         public boolean isInputMethodWindow();
 
         public int getDisplayId();
+
+        /**
+         * Returns true if the window owner can add internal system windows.
+         * That is, they have {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}.
+         */
+        default boolean canAddInternalSystemWindow() {
+            return false;
+        }
     }
 
     /**
@@ -659,27 +713,181 @@ public interface WindowManagerPolicy {
             int navigationPresence);
 
     /**
-     * Assign a window type to a layer.  Allows you to control how different
+     * Returns the layer assignment for the window state. Allows you to control how different
+     * kinds of windows are ordered on-screen.
+     *
+     * @param win The window state
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
+     */
+    default int getWindowLayerLw(WindowState win) {
+        return getWindowLayerFromTypeLw(win.getBaseType(), win.canAddInternalSystemWindow());
+    }
+
+    /**
+     * Returns the layer assignment for the window type. Allows you to control how different
      * kinds of windows are ordered on-screen.
      *
      * @param type The type of window being assigned.
-     *
-     * @return int An arbitrary integer used to order windows, with lower
-     *         numbers below higher ones.
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
      */
-    public int windowTypeToLayerLw(int type);
+    default int getWindowLayerFromTypeLw(int type) {
+        if (isSystemAlertWindowType(type)) {
+            throw new IllegalArgumentException("Use getWindowLayerFromTypeLw() or"
+                    + " getWindowLayerLw() for alert window types");
+        }
+        return getWindowLayerFromTypeLw(type, false /* canAddInternalSystemWindow */);
+    }
 
     /**
-     * Return how to Z-order sub-windows in relation to the window they are
-     * attached to.  Return positive to have them ordered in front, negative for
-     * behind.
+     * Returns the layer assignment for the window type. Allows you to control how different
+     * kinds of windows are ordered on-screen.
+     *
+     * @param type The type of window being assigned.
+     * @param canAddInternalSystemWindow If the owner window associated with the type we are
+     *        evaluating can add internal system windows. I.e they have
+     *        {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW}. If true, alert window
+     *        types {@link android.view.WindowManager.LayoutParams#isSystemAlertWindowType(int)}
+     *        can be assigned layers greater than the layer for
+     *        {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} Else, their
+     *        layers would be lesser.
+     * @return int An arbitrary integer used to order windows, with lower numbers below higher ones.
+     */
+    default int getWindowLayerFromTypeLw(int type, boolean canAddInternalSystemWindow) {
+        if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
+            return APPLICATION_LAYER;
+        }
+
+        switch (type) {
+            case TYPE_WALLPAPER:
+                // wallpaper is at the bottom, though the window manager may move it.
+                return  1;
+            case TYPE_PRESENTATION:
+            case TYPE_PRIVATE_PRESENTATION:
+                return  APPLICATION_LAYER;
+            case TYPE_DOCK_DIVIDER:
+                return  APPLICATION_LAYER;
+            case TYPE_QS_DIALOG:
+                return  APPLICATION_LAYER;
+            case TYPE_PHONE:
+                return  3;
+            case TYPE_SEARCH_BAR:
+            case TYPE_VOICE_INTERACTION_STARTING:
+                return  4;
+            case TYPE_VOICE_INTERACTION:
+                // voice interaction layer is almost immediately above apps.
+                return  5;
+            case TYPE_INPUT_CONSUMER:
+                return  6;
+            case TYPE_SYSTEM_DIALOG:
+                return  7;
+            case TYPE_TOAST:
+                // toasts and the plugged-in battery thing
+                return  8;
+            case TYPE_PRIORITY_PHONE:
+                // SIM errors and unlock.  Not sure if this really should be in a high layer.
+                return  9;
+            case TYPE_DREAM:
+                // used for Dreams (screensavers with TYPE_DREAM windows)
+                return  10;
+            case TYPE_SYSTEM_ALERT:
+                // like the ANR / app crashed dialogs
+                return  canAddInternalSystemWindow ? 11 : 10;
+            case TYPE_APPLICATION_OVERLAY:
+                return  13;
+            case TYPE_INPUT_METHOD:
+                // on-screen keyboards and other such input method user interfaces go here.
+                return  14;
+            case TYPE_INPUT_METHOD_DIALOG:
+                // on-screen keyboards and other such input method user interfaces go here.
+                return  15;
+            case TYPE_STATUS_BAR_SUB_PANEL:
+                return  17;
+            case TYPE_STATUS_BAR:
+                return  18;
+            case TYPE_STATUS_BAR_PANEL:
+                return  19;
+            case TYPE_KEYGUARD_DIALOG:
+                return  20;
+            case TYPE_VOLUME_OVERLAY:
+                // the on-screen volume indicator and controller shown when the user
+                // changes the device volume
+                return  21;
+            case TYPE_SYSTEM_OVERLAY:
+                // the on-screen volume indicator and controller shown when the user
+                // changes the device volume
+                return  canAddInternalSystemWindow ? 22 : 11;
+            case TYPE_NAVIGATION_BAR:
+                // the navigation bar, if available, shows atop most things
+                return  23;
+            case TYPE_NAVIGATION_BAR_PANEL:
+                // some panels (e.g. search) need to show on top of the navigation bar
+                return  24;
+            case TYPE_SCREENSHOT:
+                // screenshot selection layer shouldn't go above system error, but it should cover
+                // navigation bars at the very least.
+                return  25;
+            case TYPE_SYSTEM_ERROR:
+                // system-level error dialogs
+                return  canAddInternalSystemWindow ? 26 : 10;
+            case TYPE_MAGNIFICATION_OVERLAY:
+                // used to highlight the magnified portion of a display
+                return  27;
+            case TYPE_DISPLAY_OVERLAY:
+                // used to simulate secondary display devices
+                return  28;
+            case TYPE_DRAG:
+                // the drag layer: input for drag-and-drop is associated with this window,
+                // which sits above all other focusable windows
+                return  29;
+            case TYPE_ACCESSIBILITY_OVERLAY:
+                // overlay put by accessibility services to intercept user interaction
+                return  30;
+            case TYPE_SECURE_SYSTEM_OVERLAY:
+                return  31;
+            case TYPE_BOOT_PROGRESS:
+                return  32;
+            case TYPE_POINTER:
+                // the (mouse) pointer layer
+                return  33;
+            default:
+                Slog.e("WindowManager", "Unknown window type: " + type);
+                return APPLICATION_LAYER;
+        }
+    }
+
+    int APPLICATION_LAYER = 2;
+    int APPLICATION_MEDIA_SUBLAYER = -2;
+    int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
+    int APPLICATION_PANEL_SUBLAYER = 1;
+    int APPLICATION_SUB_PANEL_SUBLAYER = 2;
+    int APPLICATION_ABOVE_SUB_PANEL_SUBLAYER = 3;
+
+    /**
+     * Return how to Z-order sub-windows in relation to the window they are attached to.
+     * Return positive to have them ordered in front, negative for behind.
      *
      * @param type The sub-window type code.
      *
      * @return int Layer in relation to the attached window, where positive is
      *         above and negative is below.
      */
-    public int subWindowTypeToLayerLw(int type);
+    default int getSubWindowLayerFromTypeLw(int type) {
+        switch (type) {
+            case TYPE_APPLICATION_PANEL:
+            case TYPE_APPLICATION_ATTACHED_DIALOG:
+                return APPLICATION_PANEL_SUBLAYER;
+            case TYPE_APPLICATION_MEDIA:
+                return APPLICATION_MEDIA_SUBLAYER;
+            case TYPE_APPLICATION_MEDIA_OVERLAY:
+                return APPLICATION_MEDIA_OVERLAY_SUBLAYER;
+            case TYPE_APPLICATION_SUB_PANEL:
+                return APPLICATION_SUB_PANEL_SUBLAYER;
+            case TYPE_APPLICATION_ABOVE_SUB_PANEL:
+                return APPLICATION_ABOVE_SUB_PANEL_SUBLAYER;
+        }
+        Slog.e("WindowManager", "Unknown sub-window type: " + type);
+        return 0;
+    }
 
     /**
      * Get the highest layer (actually one more than) that the wallpaper is

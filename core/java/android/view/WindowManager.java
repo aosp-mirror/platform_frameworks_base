@@ -335,7 +335,9 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.IntToString(from = TYPE_QS_DIALOG,
                         to = "TYPE_QS_DIALOG"),
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
-                        to = "TYPE_SCREENSHOT")
+                        to = "TYPE_SCREENSHOT"),
+                @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
+                        to = "TYPE_APPLICATION_OVERLAY")
         })
         public int type;
 
@@ -462,14 +464,18 @@ public interface WindowManager extends ViewManager {
          * These windows are normally placed above all applications, but behind
          * the status bar.
          * In multiuser systems shows on all users' windows.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_PHONE              = FIRST_SYSTEM_WINDOW+2;
 
         /**
          * Window type: system window, such as low power alert. These windows
          * are always on top of application windows.
          * In multiuser systems shows only on the owning user's window.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+3;
 
         /**
@@ -482,7 +488,9 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: transient notifications.
          * In multiuser systems shows only on the owning user's window.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_TOAST              = FIRST_SYSTEM_WINDOW+5;
 
         /**
@@ -490,7 +498,9 @@ public interface WindowManager extends ViewManager {
          * on top of everything else.  These windows must not take input
          * focus, or they will interfere with the keyguard.
          * In multiuser systems shows only on the owning user's window.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_SYSTEM_OVERLAY     = FIRST_SYSTEM_WINDOW+6;
 
         /**
@@ -498,7 +508,9 @@ public interface WindowManager extends ViewManager {
          * the keyguard is active.  These windows must not take input
          * focus, or they will interfere with the keyguard.
          * In multiuser systems shows on all users' windows.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_PRIORITY_PHONE     = FIRST_SYSTEM_WINDOW+7;
 
         /**
@@ -517,7 +529,9 @@ public interface WindowManager extends ViewManager {
          * Window type: internal system error windows, appear on top of
          * everything they can.
          * In multiuser systems shows only on the owning user's window.
+         * @deprecated for non-system apps. Use {@link #TYPE_APPLICATION_OVERLAY} instead.
          */
+        @Deprecated
         public static final int TYPE_SYSTEM_ERROR       = FIRST_SYSTEM_WINDOW+10;
 
         /**
@@ -703,9 +717,43 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_PRESENTATION = FIRST_SYSTEM_WINDOW + 37;
 
         /**
+         * Window type: Application overlay windows are displayed above all activity windows
+         * (types between {@link #FIRST_APPLICATION_WINDOW} and {@link #LAST_APPLICATION_WINDOW})
+         * but below critical system windows like the status bar or IME.
+         * <p>
+         * The system may change the position, size, or visibility of these windows at anytime
+         * to reduce visual clutter to the user and also manage resources.
+         * <p>
+         * Requires {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission.
+         * <p>
+         * In mult-iuser systems shows only on the owning user's screen.
+         */
+        public static final int TYPE_APPLICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 38;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
+
+        /**
+         * Return true if the window type is an alert window.
+         *
+         * @param type The window type.
+         * @return If the window type is an alert window.
+         * @hide
+         */
+        public static boolean isSystemAlertWindowType(int type) {
+            switch (type) {
+                case TYPE_PHONE:
+                case TYPE_PRIORITY_PHONE:
+                case TYPE_SYSTEM_ALERT:
+                case TYPE_SYSTEM_ERROR:
+                case TYPE_SYSTEM_OVERLAY:
+                case TYPE_APPLICATION_OVERLAY:
+                    return true;
+            }
+            return false;
+        }
 
         /** @deprecated this is ignored, this value is set automatically when needed. */
         @Deprecated

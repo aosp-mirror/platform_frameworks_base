@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
 import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.isLowRamDeviceStatic;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -164,6 +163,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final int mAppOp;
     // UserId and appId of the owner. Don't display windows of non-current user.
     final int mOwnerUid;
+    /** The owner has {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} */
+    final boolean mOwnerCanAddInternalSystemWindow;
     final IWindowId mWindowId;
     WindowToken mToken;
     // The same object as mToken if this is an app window and null for non-app windows.
@@ -561,7 +562,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-           int viewVisibility, int ownerId) {
+           int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
         mService = service;
         mSession = s;
         mClient = c;
@@ -569,6 +570,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mToken = token;
         mAppToken = mToken.asAppWindowToken();
         mOwnerUid = ownerId;
+        mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
         mWindowId = new IWindowId.Stub() {
             @Override
             public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -613,9 +615,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type >= FIRST_SUB_WINDOW && mAttrs.type <= LAST_SUB_WINDOW) {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
-            mBaseLayer = mPolicy.windowTypeToLayerLw(parentWindow.mAttrs.type)
+            mBaseLayer = mPolicy.getWindowLayerLw(parentWindow)
                     * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
-            mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
+            mSubLayer = mPolicy.getSubWindowLayerFromTypeLw(a.type);
             mIsChildWindow = true;
 
             if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + parentWindow);
@@ -629,7 +631,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
-            mBaseLayer = mPolicy.windowTypeToLayerLw(a.type)
+            mBaseLayer = mPolicy.getWindowLayerLw(this)
                     * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
             mSubLayer = 0;
             mIsChildWindow = false;
@@ -674,6 +676,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public String getOwningPackage() {
         return mAttrs.packageName;
+    }
+
+    @Override
+    public boolean canAddInternalSystemWindow() {
+        return mOwnerCanAddInternalSystemWindow;
     }
 
     /**

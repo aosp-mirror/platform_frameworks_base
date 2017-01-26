@@ -369,6 +369,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                         case WindowManager.LayoutParams.TYPE_TOAST:
                         case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
+                        case WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:
                         case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
                         case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
                         case WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG:
@@ -687,7 +688,7 @@ final class AccessibilityController {
                     mSurfaceControl = surfaceControl;
                     mSurfaceControl.setLayerStack(mWindowManager.getDefaultDisplay()
                             .getLayerStack());
-                    mSurfaceControl.setLayer(mWindowManagerService.mPolicy.windowTypeToLayerLw(
+                    mSurfaceControl.setLayer(mWindowManagerService.mPolicy.getWindowLayerFromTypeLw(
                             WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY)
                             * WindowManagerService.TYPE_LAYER_MULTIPLIER);
                     mSurfaceControl.setPosition(0, 0);

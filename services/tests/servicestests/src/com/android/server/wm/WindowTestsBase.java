@@ -181,7 +181,7 @@ class WindowTestsBase {
         attrs.setTitle(name);
 
         final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, 0, 0);
+                0, attrs, 0, 0, false /* ownerCanAddInternalSystemWindow */);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
@@ -223,7 +223,8 @@ class WindowTestsBase {
         }
 
         TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
-            super(sWm, mock(IBinder.class), type, persistOnEmpty, dc);
+            super(sWm, mock(IBinder.class), type, persistOnEmpty, dc,
+                    false /* ownerCanManageAppTokens */);
         }
 
         int getWindowsCount() {
@@ -403,7 +404,8 @@ class WindowTestsBase {
         boolean resizeReported;
 
         TestWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
-            super(sWm, sMockSession, sIWindow, token, null, OP_NONE, 0, attrs, 0, 0);
+            super(sWm, sMockSession, sIWindow, token, null, OP_NONE, 0, attrs, 0, 0,
+                    false /* ownerCanAddInternalSystemWindow */);
         }
 
         @Override

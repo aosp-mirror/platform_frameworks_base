@@ -16,49 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DRAG;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
-import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
-import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
-import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
@@ -70,12 +28,10 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 import android.os.PowerManagerInternal;
@@ -160,127 +116,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     public void adjustConfigurationLw(Configuration config, int keyboardPresence,
             int navigationPresence) {
 
-    }
-
-    @Override
-    public int windowTypeToLayerLw(int type) {
-        // TODO: figure-out a good way to keep this in-sync with PhoneWindowManager...sigh!
-        if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
-            return 2;
-        }
-        switch (type) {
-            case TYPE_PRESENTATION:
-            case TYPE_PRIVATE_PRESENTATION:
-                return 2;
-            case TYPE_WALLPAPER:
-                // wallpaper is at the bottom, though the window manager may move it.
-                return 2;
-            case TYPE_DOCK_DIVIDER:
-                return 2;
-            case TYPE_QS_DIALOG:
-                return 2;
-            case TYPE_PHONE:
-                return 3;
-            case TYPE_SEARCH_BAR:
-            case TYPE_VOICE_INTERACTION_STARTING:
-                return 4;
-            case TYPE_VOICE_INTERACTION:
-                // voice interaction layer is almost immediately above apps.
-                return 5;
-            case TYPE_INPUT_CONSUMER:
-                return 6;
-            case TYPE_SYSTEM_DIALOG:
-                return 7;
-            case TYPE_TOAST:
-                // toasts and the plugged-in battery thing
-                return 8;
-            case TYPE_PRIORITY_PHONE:
-                // SIM errors and unlock.  Not sure if this really should be in a high layer.
-                return 9;
-            case TYPE_DREAM:
-                // used for Dreams (screensavers with TYPE_DREAM windows)
-                return 10;
-            case TYPE_SYSTEM_ALERT:
-                // like the ANR / app crashed dialogs
-                return 11;
-            case TYPE_INPUT_METHOD:
-                // on-screen keyboards and other such input method user interfaces go here.
-                return 12;
-            case TYPE_INPUT_METHOD_DIALOG:
-                // on-screen keyboards and other such input method user interfaces go here.
-                return 13;
-            case TYPE_STATUS_BAR_SUB_PANEL:
-                return 15;
-            case TYPE_STATUS_BAR:
-                return 16;
-            case TYPE_STATUS_BAR_PANEL:
-                return 17;
-            case TYPE_KEYGUARD_DIALOG:
-                return 18;
-            case TYPE_VOLUME_OVERLAY:
-                // the on-screen volume indicator and controller shown when the user
-                // changes the device volume
-                return 19;
-            case TYPE_SYSTEM_OVERLAY:
-                // the on-screen volume indicator and controller shown when the user
-                // changes the device volume
-                return 20;
-            case TYPE_NAVIGATION_BAR:
-                // the navigation bar, if available, shows atop most things
-                return 21;
-            case TYPE_NAVIGATION_BAR_PANEL:
-                // some panels (e.g. search) need to show on top of the navigation bar
-                return 22;
-            case TYPE_SCREENSHOT:
-                // screenshot selection layer shouldn't go above system error, but it should cover
-                // navigation bars at the very least.
-                return 23;
-            case TYPE_SYSTEM_ERROR:
-                // system-level error dialogs
-                return 24;
-            case TYPE_MAGNIFICATION_OVERLAY:
-                // used to highlight the magnified portion of a display
-                return 25;
-            case TYPE_DISPLAY_OVERLAY:
-                // used to simulate secondary display devices
-                return 26;
-            case TYPE_DRAG:
-                // the drag layer: input for drag-and-drop is associated with this window,
-                // which sits above all other focusable windows
-                return 27;
-            case TYPE_ACCESSIBILITY_OVERLAY:
-                // overlay put by accessibility services to intercept user interaction
-                return 28;
-            case TYPE_SECURE_SYSTEM_OVERLAY:
-                return 29;
-            case TYPE_BOOT_PROGRESS:
-                return 30;
-            case TYPE_POINTER:
-                // the (mouse) pointer layer
-                return 31;
-        }
-        Log.e(TAG, "Unknown window type: " + type);
-        return 2;
-    }
-
-    @Override
-    public int subWindowTypeToLayerLw(int type) {
-        // TODO: figure-out a good way to keep this in-sync with PhoneWindowManager...
-        switch (type) {
-            case TYPE_APPLICATION_PANEL:
-            case TYPE_APPLICATION_ATTACHED_DIALOG:
-                return 1;
-            case TYPE_APPLICATION_MEDIA:
-                return -2;
-            case TYPE_APPLICATION_MEDIA_OVERLAY:
-                return -1;
-            case TYPE_APPLICATION_SUB_PANEL:
-                return 2;
-            case TYPE_APPLICATION_ABOVE_SUB_PANEL:
-                return 3;
-        }
-        Log.e(TAG, "Unknown sub-window type: " + type);
-        return 0;
     }
 
     @Override

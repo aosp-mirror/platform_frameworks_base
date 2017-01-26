@@ -239,7 +239,7 @@ class DragState {
     }
 
     int getDragLayerLw() {
-        return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
+        return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_DRAG)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
     }
