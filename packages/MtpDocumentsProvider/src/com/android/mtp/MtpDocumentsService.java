@@ -19,13 +19,12 @@ package com.android.mtp;
 import android.app.Notification;
 import android.app.Service;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
-
-import java.io.IOException;
+import android.service.notification.StatusBarNotification;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Service to manage lifetime of DocumentsProvider's process.
@@ -33,12 +32,10 @@ import java.io.IOException;
  * starts to run when the first MTP device is opened, and stops when the last MTP device is closed.
  */
 public class MtpDocumentsService extends Service {
-    static final String ACTION_OPEN_DEVICE = "com.android.mtp.OPEN_DEVICE";
-    static final String ACTION_CLOSE_DEVICE = "com.android.mtp.CLOSE_DEVICE";
     static final String ACTION_UPDATE_NOTIFICATION = "com.android.mtp.UPDATE_NOTIFICATION";
     static final String EXTRA_DEVICE = "device";
 
-    NotificationManager mNotificationManager;
+    private NotificationManager mNotificationManager;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -67,39 +64,53 @@ public class MtpDocumentsService extends Service {
      */
     private boolean updateForegroundState() {
         final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
-        int notificationId = 0;
-        Notification notification = null;
-        // TODO: Hide notification if the device has already been removed.
+        final Set<Integer> openedNotification = new HashSet<>();
+        boolean hasForegroundNotification = false;
+
+        final StatusBarNotification[] activeNotifications =
+                mNotificationManager.getActiveNotifications();
+
         for (final MtpDeviceRecord record : provider.getOpenedDeviceRecordsCache()) {
-            final String title = getResources().getString(
-                    R.string.accessing_notification_title,
-                    record.name);
-            notificationId = record.deviceId;
-            notification = new Notification.Builder(this)
-                    .setLocalOnly(true)
-                    .setContentTitle(title)
-                    .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
-                    .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .build();
-            mNotificationManager.notify(record.deviceId, notification);
+            openedNotification.add(record.deviceId);
+            if (!hasForegroundNotification) {
+                // Mark this service as foreground with the notification so that the process is not
+                // killed by the system while a MTP device is opened.
+                startForeground(record.deviceId, createNotification(this, record));
+                hasForegroundNotification = true;
+            } else {
+                // Only one notification can be shown as a foreground notification. We need to show
+                // the rest as normal notification.
+                mNotificationManager.notify(record.deviceId, createNotification(this, record));
+            }
         }
 
-        if (notification != null) {
-            startForeground(notificationId, notification);
-            return true;
-        } else {
+        for (final StatusBarNotification notification : activeNotifications) {
+            if (!openedNotification.contains(notification.getId())) {
+                mNotificationManager.cancel(notification.getId());
+            }
+        }
+
+        if (!hasForegroundNotification) {
+            // There is no opened device.
             stopForeground(true /* removeNotification */);
             stopSelf();
             return false;
         }
+
+        return true;
     }
 
-    private static void logErrorMessage(Exception exp) {
-        if (exp.getMessage() != null) {
-            Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
-        } else {
-            Log.e(MtpDocumentsProvider.TAG, exp.toString());
-        }
+    public static Notification createNotification(Context context, MtpDeviceRecord device) {
+        final String title = context.getResources().getString(
+                R.string.accessing_notification_title,
+                device.name);
+        return new Notification.Builder(context)
+                .setLocalOnly(true)
+                .setContentTitle(title)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setFlag(Notification.FLAG_NO_CLEAR, true)
+                .build();
     }
 }

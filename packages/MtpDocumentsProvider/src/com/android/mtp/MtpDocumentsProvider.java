@@ -509,7 +509,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final DeviceToolkit toolkit =
                     new DeviceToolkit(mMtpManager, mResolver, mDatabase, device);
             mDeviceToolkits.put(deviceId, toolkit);
-            mIntentSender.sendUpdateNotificationIntent();
+            mIntentSender.sendUpdateNotificationIntent(device);
             try {
                 mRootScanner.resume().await();
             } catch (InterruptedException error) {
@@ -526,7 +526,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             closeDeviceInternal(deviceId);
         }
         mRootScanner.resume();
-        mIntentSender.sendUpdateNotificationIntent();
+        mIntentSender.sendUpdateNotificationIntent(null);
     }
 
     MtpDeviceRecord[] getOpenedDeviceRecordsCache() {

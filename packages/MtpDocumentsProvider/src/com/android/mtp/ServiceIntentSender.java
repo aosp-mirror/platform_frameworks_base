@@ -16,6 +16,8 @@
 
 package com.android.mtp;
 
+import android.annotation.Nullable;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,9 +32,22 @@ class ServiceIntentSender {
         mContext = context;
     }
 
-    void sendUpdateNotificationIntent() {
+    /**
+     * Notify the change of opened device set.
+     * @param record If a new device is opened, pass the device record. If a device is closed, pass
+     *     null.
+     */
+    void sendUpdateNotificationIntent(@Nullable MtpDeviceRecord record) {
         final Intent intent = new Intent(MtpDocumentsService.ACTION_UPDATE_NOTIFICATION);
         intent.setComponent(new ComponentName(mContext, MtpDocumentsService.class));
-        mContext.startService(intent);
+        final NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+        if (record != null) {
+            manager.startServiceInForeground(
+                    intent,
+                    record.deviceId,
+                    MtpDocumentsService.createNotification(mContext, record));
+        } else {
+            mContext.startService(intent);
+        }
     }
 }
