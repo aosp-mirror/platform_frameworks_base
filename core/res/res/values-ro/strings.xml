@@ -185,8 +185,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplicația de administrare a profilului de serviciu lipsește sau este deteriorată. Prin urmare, profilul de serviciu și datele asociate au fost șterse. Pentru asistență, contactați administratorul."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profilul de serviciu nu mai este disponibil pe acest dispozitiv."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Traficul de rețea este monitorizat"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Atingeți ca să aflați mai multe"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Datele de pe dispozitiv vor fi șterse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplicația de administrare nu poate fi utilizată, deoarece este deteriorată sau îi lipsesc componente. Datele de pe dispozitiv vor fi șterse. Pentru asistență, contactați administratorul."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>

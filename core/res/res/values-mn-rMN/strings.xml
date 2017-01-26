@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ажлын профайлын зохицуулагч аппликейшн алга болсон эсвэл эвдэрсэн байна. Үүний улмаас таны ажлын профайл болон холбогдох мэдээллүүд устсан байна. Тусламж хэрэгтэй байгаа бол админтай холбоо барина уу."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Таны ажлын профайл энэ төхөөрөмж дээр ажиллахгүй болсон байна."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Сүлжээний ачааллыг хянаж байна"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Дэлгэрэнгүй үзэхийн тулд товшино уу"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Таны төхөөрөмж устах болно."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Зохицуулагч аппликейшны зарим нэг хэсэг дутуу эсвэл эвдэрсэн байгаа тул ашиглах боломжгүй байна. Таны төхөөрөмжийг одоо устгах болно. Танд тусламж хэрэгтэй байгаа бол админтайгаа холбоо барина уу."</string>
     <string name="me" msgid="6545696007631404292">"Би"</string>

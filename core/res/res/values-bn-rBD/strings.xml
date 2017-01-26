@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"কাজের প্রোফাইলের প্রশাসক অ্যাপ্লিকেশান হয় অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে৷ এর ফলস্বরূপ আপনার কাজের প্রোফাইল এবং সম্পর্কিত ডেটা মুছে দেওয়া হয়েছে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"আপনার কাজের প্রোফাইল এই ডিভাইসে আর উপলব্ধ নেই।"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"নেটওয়ার্ক ট্রাফিক মনিটর করা হচ্ছে"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"আরো জানতে আলতো চাপুন"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"প্রশাসক অ্যাপকেশানটিতে উপাদান অনুপস্থিত বা ক্ষতিগ্রস্ত হয়েছে এবং ব্যবহার করা যাবে না৷ আপনার ডিভাইস এখন মুছে ফেলা হবে৷ সহায়তার জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="me" msgid="6545696007631404292">"আমাকে"</string>

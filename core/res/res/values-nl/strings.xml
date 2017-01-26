@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met je beheerder."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Je werkprofiel is niet meer beschikbaar op dit apparaat."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Netwerkverkeer wordt bijgehouden"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tik voor meer informatie"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Je apparaat wordt nu gewist. Neem voor hulp contact op met je beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>

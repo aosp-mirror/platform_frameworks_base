@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കപ്പെടുന്നു"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"കൂടുതലറിയുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>

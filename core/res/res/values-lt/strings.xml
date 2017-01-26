@@ -187,8 +187,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Trūksta darbo profilio administratoriaus programos arba ji sugadinta. Todėl darbo profilis ir susiję duomenys buvo ištrinti. Dėl pagalbos susisiekite su administratoriumi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Darbo profilis nebepasiekiamas šiame įrenginyje."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Tinklo srautas stebimas"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Palieskite, kad sužinotumėte daugiau"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Trūksta administratoriaus programos komponentų arba programa sugadinta ir jos negalima naudoti. Dabar įrenginys bus ištrintas. Dėl pagalbos susisiekite su administratoriumi."</string>
     <string name="me" msgid="6545696007631404292">"Aš"</string>

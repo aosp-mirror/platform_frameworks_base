@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Stjórnunarforrit vinnusniðsins vantar eða er skemmt. Vinnusniðinu og gögnum því tengdu hefur því verið eytt. Hafðu samband við kerfisstjórann til að fá frekari aðstoð."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vinnusniðið þitt er ekki lengur í boði á þessu tæki."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Verið er að fylgjast með netumferð"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Ýttu til að fá frekari upplýsingar"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Stjórnunarforritið vantar íhluti eða er skemmt og ekki er hægt að nota það. Þurrkað verður út af tækinu. Hafðu samband við kerfisstjórann til að fá aðstoð."</string>
     <string name="me" msgid="6545696007631404292">"Ég"</string>

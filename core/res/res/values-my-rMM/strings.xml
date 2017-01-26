@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"အလုပ်ပရိုဖိုင် အက်ဒမင် အပလီကေးရှင်းပျောက်နေသည် သို့မဟုတ် ပျက်စီးနေသည်။ ထို့ကြောင့် သင့်အလုပ်ပရိုဖိုင်နှင့် ဆက်စပ်နေသော ဒေတာများအား ပယ်ဖျက်ခြင်းခံရမည်။ အကူအညီတောင်းခံရန် သင့်အက်ဒမင်အား ဆက်သွယ်ပါ။"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ဤစက်ကိရိယာတွင် သင့်အလုပ်ပရိုဖိုင် မရှိတော့ပါ။"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နေပါသည်"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ပိုမိုလေ့လာရန် တို့ပါ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"အက်ဒမင် အက်ပ်၏ အစိတ်အပိုင်းများ ပျောက်နေသည် သို့မဟုတ် ပျက်စီးနေသည်။ သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်။ အကူအညီတောင်းခံရန် သင့်အက်ဒမင်အား ဆက်သွယ်ပါ။"</string>
     <string name="me" msgid="6545696007631404292">"ကျွန်ုပ်"</string>

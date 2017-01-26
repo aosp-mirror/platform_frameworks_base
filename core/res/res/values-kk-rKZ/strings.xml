@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жұмыс профилінің басқару қолданбасы жоқ немесе бүлінген. Нәтижесінде жұмыс профиліңіз және қатысты деректер жойылды. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жұмыс профиліңіз осы құрылғыда енді қолжетімді емес."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Желі трафигі бақылануда"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Толығырақ мәліметтер үшін түртіңіз"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Басқару қолданбасында құрамдастар жетіспейді немесе ол бүлінген және оны пайдалану мүмкін емес. Құрылғыңыздағы деректер қазір өшіріледі. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>

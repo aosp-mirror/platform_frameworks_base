@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाइल व्यवस्थापक अनुप्रयोग या त हराएको या त बिग्रेको छ। फलस्वरूप, तपाईँको कार्य प्रोफाइल र सम्बन्धित डेटा मेटिएको छ। सहयोगको लागि तपाईँको व्यवस्थापकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"यस यन्त्रमा तपाईँको कार्य प्रोफाइल अब उपलब्ध छैन।"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्कको ट्राफिकको अनुगमन गरिँदै छ"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"थप जान्न ट्याप गर्नुहोस्"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"व्यवस्थापक अनुप्रयोगमा कम्पोनेन्टहरू या त हराएको वा भ्रष्ट छन्, र यसैले प्रयोग गर्न सकिँदैन। तपाईंको यन्त्र अब मेटिनेछ। सहयोगको लागि आफ्नो व्यवस्थापकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="me" msgid="6545696007631404292">"मलाई"</string>

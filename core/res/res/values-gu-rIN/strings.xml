@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"કાર્ય પ્રોફાઇલ વ્યવસ્થાપક ઍપ્લિકેશન કાં તો ખૂટે છે અથવા દૂષિત છે. પરિણામે, તમારી કાર્ય પ્રોફાઇલ અને સંબંધિત ડેટા કાઢી નાખવામાં આવ્યો છે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"આ ઉપકરણ પર તમારી કાર્ય પ્રોફાઇલ હવે ઉપલબ્ધ નથી."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"નેટવર્ક ટ્રાફિક મૉનિટર કરવામાં આવી રહ્યું છે"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"વધુ જાણવા માટે ટૅપ કરો"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"તમારું ઉપકરણ કાઢી નાખવામાં આવશે"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"એડમિન એપ્લિકેશનમાં ઘટકો ખૂટે છે અથવા દૂષિત છે અને વાપરી શકાશે નહીં. તમારું ઉપકરણ હવે કાઢી નાખવામાં આવશે. સહાયતા માટે તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="me" msgid="6545696007631404292">"હું"</string>

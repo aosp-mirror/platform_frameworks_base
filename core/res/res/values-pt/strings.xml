@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"O app para administrador do perfil de trabalho não foi encontrado ou está corrompido. Consequentemente, seu perfil de trabalho e os dados relacionados foram excluídos. Entre em contato com seu administrador para receber assistência."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Seu perfil de trabalho não está mais disponível neste dispositivo."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"O tráfego de rede está sendo monitorado"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Toque para saber mais"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seu dispositivo será limpo"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"O app para administrador está sem alguns componentes ou foi corrompido e não pode ser usado. Seu dispositivo será limpo agora. Entre em contato com seu administrador para receber assistência."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>

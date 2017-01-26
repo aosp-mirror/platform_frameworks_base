@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ແອັບ​ບໍ​ລິ​ຫານ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂາດ​ໄປ ຫຼື​ຖືກ​​ເສຍ​ຫາຍ. ດ້ວຍ​ເຫດ​ຜົນ​ນັ້ນ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດວຽກ​ຂອງ​ທ່ານ ແລະ​ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ຈິ່ງ​ຖືກ​ລຶບ​ໄປ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸ​ມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ່ມີໃຫ້ໃຊ້ງານເທິງອຸປະກອນນີ້ອີກຕໍ່ໄປ."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ກຳລັງຕິດຕາມທຣາບຟິກເຄືອຂ່າຍ"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ແອັບ​ບໍ​ລິ​ຫານ​ຂາດ​ອົງ​ປະ​ກອບ​ ຫ​ຼື​ຖືກ​ຂັດ​ຈັງ​ຫວະ, ແລະ​ບໍ່​ສາ​ມາດ​ໃຊ​ໄດ້. ດຽວ​ນີ້​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>

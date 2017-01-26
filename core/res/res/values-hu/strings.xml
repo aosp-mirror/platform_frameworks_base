@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"A munkahelyi profil rendszergazda alkalmazása hiányzik vagy sérült. A rendszer ezért törölte munkahelyi profilját, és az ahhoz kapcsolódó adatokat. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Munkaprofilja már nem érhető el ezen az eszközön."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"A hálózati forgalmat figyelik"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Koppintson, ha további információt szeretne kapni"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"A rendszer törölni fogja eszközét"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"A rendszergazda alkalmazás egyes részei hiányoznak, vagy az alkalmazás sérült, ezért nem használható. A rendszer most törölni fogja eszközét. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="me" msgid="6545696007631404292">"Saját"</string>

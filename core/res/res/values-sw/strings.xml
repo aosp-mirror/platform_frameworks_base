@@ -181,8 +181,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Programu ya msimamizi wa wasifu wa kazini imepotea au ina hitilafu. Kwa sbabu hiyo, wasifu wako wa kazini na data husika imefutwa. Wasiliana na msimamizi wako kwa usaidizi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Wasifu wako wa kazini haupatikani tena kwenye kifaa hiki."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Trafiki ya mtandao inachunguzwa"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Gonga ili upate maelezo zaidi"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Data iliyomo kwenye kifaa chako itafutwa"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Programu ya msimamizi inakosa vipengele au ina hitilafu, na haiwezi kutumika. Data iliyomo kwenye kifaa chako sasa itafutwa. Wasiliana na msimamizi wako kwa usaidizi."</string>
     <string name="me" msgid="6545696007631404292">"Mimi"</string>

@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Աշխատանքային պրոֆիլի ադմինիստրատորի հավելվածը բացակայում է կամ վնասված է: Արդյունքում ձեր աշխատանքային պրոֆիլը և առնչվող տվյալները ջնջվել են: Օգնության համար դիմեք ձեր ադմինիստրատորին:"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Ձեր աշխատանքային պրոֆիլն այս սարքում այլևս հասանելի չէ:"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ցանցային թրաֆիկը վերահսկվում է"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Հպեք՝ ավելին իմանալու համար"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Ձեր սարքը ջնջվելու է"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ադմինիստրատորի հավելվածում բացակայում են բաղադրիչներ կամ այն վնասված է և չի կարող օգտագործվել: Ձեր սարքն այժմ ջնջվելու է: Օգնություն համար դիմեք ձեր ադմինիստրատորին:"</string>
     <string name="me" msgid="6545696007631404292">"Իմ"</string>
