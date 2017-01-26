@@ -204,9 +204,9 @@
 
     <!-- Titles for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=70] -->
     <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-        <item>Optimize for Audio Quality (990kbps/909kbps)</item>
+        <item>Optimized for Audio Quality (990kbps/909kbps)</item>
         <item>Balanced Audio And Connection Quality (660kbps/606kbps)</item>
-        <item>Optimize for Connection Quality (330kbps/303kbps)</item>
+        <item>Optimized for Connection Quality (330kbps/303kbps)</item>
     </string-array>
 
     <!-- Values for Bluetooth Audio Codec LDAC Playback Quaility selection preference. -->
@@ -218,9 +218,9 @@
 
     <!-- Summaries for Bluetooth Audio Codec LDAC Playback Quality selection preference. [CHAR LIMIT=70]-->
     <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries" >
-        <item>Optimize for Audio Quality</item>
+        <item>Optimized for Audio Quality</item>
         <item>Balanced Audio And Connection Quality</item>
-        <item>Optimize for Connection Quality</item>
+        <item>Optimized for Connection Quality</item>
     </string-array>
 
     <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
