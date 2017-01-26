@@ -6121,9 +6121,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             if (mParent != null) {
                 mParent.requestChildFocus(this, this);
-                if (mParent instanceof ViewGroup) {
-                    ((ViewGroup) mParent).setDefaultFocus(this);
-                }
+                setFocusedInCluster();
             }
 
             if (mAttachInfo != null) {
@@ -9160,6 +9158,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets this View as the one which receives focus the next time cluster navigation jumps
+     * to the cluster containing this View. This does NOT change focus even if the cluster
+     * containing this view is current.
+     *
+     * @hide
+     */
+    public void setFocusedInCluster() {
+        if (mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).setFocusInCluster(this);
+        }
+    }
+
+    /**
      * Returns whether this View should receive focus when the focus is restored for the view
      * hierarchy containing this view.
      * <p>
@@ -9205,7 +9216,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (isFocusedByDefault) {
                 ((ViewGroup) mParent).setDefaultFocus(this);
             } else {
-                ((ViewGroup) mParent).cleanDefaultFocus(this);
+                ((ViewGroup) mParent).clearDefaultFocus(this);
             }
         }
     }
@@ -9585,15 +9596,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Public for testing. This will request focus for whichever View was last focused within this
+     * cluster before a focus-jump out of it.
+     *
+     * @hide
+     */
+    public boolean restoreFocusInCluster(@FocusRealDirection int direction) {
+        // Prioritize focusableByDefault over algorithmic focus selection.
+        if (restoreDefaultFocus()) {
+            return true;
+        }
+        return requestFocus(direction);
+    }
+
+    /**
      * Gives focus to the default-focus view in the view hierarchy that has this view as a root.
      * If the default-focus view cannot be found, falls back to calling {@link #requestFocus(int)}.
-     * Nested keyboard navigation clusters are excluded from the hierarchy.
      *
-     * @param direction The direction of the focus
      * @return Whether this view or one of its descendants actually took focus
      */
-    public boolean restoreDefaultFocus(@FocusDirection int direction) {
-        return requestFocus(direction);
+    public boolean restoreDefaultFocus() {
+        return requestFocus(View.FOCUS_DOWN);
     }
 
     /**
