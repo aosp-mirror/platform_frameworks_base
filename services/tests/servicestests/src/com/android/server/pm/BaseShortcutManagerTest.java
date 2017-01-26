@@ -602,12 +602,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final int USER_0 = UserHandle.USER_SYSTEM;
     protected static final int USER_10 = 10;
     protected static final int USER_11 = 11;
-    protected static final int USER_P0 = 20; // profile of user 0
+    protected static final int USER_P0 = 20; // profile of user 0 (MANAGED_PROFILE *not* set)
+    protected static final int USER_P1 = 21; // another profile of user 0 (MANAGED_PROFILE set)
 
     protected static final UserHandle HANDLE_USER_0 = UserHandle.of(USER_0);
     protected static final UserHandle HANDLE_USER_10 = UserHandle.of(USER_10);
     protected static final UserHandle HANDLE_USER_11 = UserHandle.of(USER_11);
     protected static final UserHandle HANDLE_USER_P0 = UserHandle.of(USER_P0);
+    protected static final UserHandle HANDLE_USER_P1 = UserHandle.of(USER_P1);
 
     protected static final UserInfo USER_INFO_0 = withProfileGroupId(
             new UserInfo(USER_0, "user0",
@@ -629,6 +631,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
      */
     protected static final UserInfo USER_INFO_P0 = withProfileGroupId(
             new UserInfo(USER_P0, "userP0", UserInfo.FLAG_INITIALIZED), 0);
+
+    protected static final UserInfo USER_INFO_P1 = withProfileGroupId(
+            new UserInfo(USER_P1, "userP1",
+                    UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE), 0);
 
     protected BiPredicate<String, Integer> mDefaultLauncherChecker =
             (callingPackage, userId) ->
@@ -746,6 +752,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mUserInfos.put(USER_10, USER_INFO_10);
         mUserInfos.put(USER_11, USER_INFO_11);
         mUserInfos.put(USER_P0, USER_INFO_P0);
+        mUserInfos.put(USER_P1, USER_INFO_P1);
 
         // Set up isUserRunning and isUserUnlocked.
         when(mMockUserManager.isUserRunning(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
@@ -775,6 +782,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     assertNotNull(parent);
                     return parent;
                 }));
+        when(mMockUserManager.isManagedProfile(anyInt()))
+                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+                    final int userId = (Integer) inv.getArguments()[0];
+                    final UserInfo ui = mUserInfos.get(userId);
+                    assertNotNull(ui);
+                    return ui.isManagedProfile();
+                }));
 
         when(mMockActivityManagerInternal.getUidProcessState(anyInt())).thenReturn(
                 ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -784,12 +798,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mRunningUsers.put(USER_10, false);
         mRunningUsers.put(USER_11, false);
         mRunningUsers.put(USER_P0, true);
+        mRunningUsers.put(USER_P1, true);
 
         // Unlock all users by default.
         mUnlockedUsers.put(USER_0, true);
         mUnlockedUsers.put(USER_10, true);
         mUnlockedUsers.put(USER_11, true);
         mUnlockedUsers.put(USER_P0, true);
+        mUnlockedUsers.put(USER_P1, true);
 
         // Set up resources
         setUpAppResources();
