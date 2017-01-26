@@ -108,13 +108,14 @@ public final class DisplayManager {
      * </p>
      *
      * <p>
-     * A private virtual display belongs to the application that created it.
-     * Only the a owner of a private virtual display is allowed to place windows upon it.
-     * The private virtual display also does not participate in display mirroring: it will
-     * neither receive mirrored content from another display nor allow its own content to
-     * be mirrored elsewhere.  More precisely, the only processes that are allowed to
-     * enumerate or interact with the private display are those that have the same UID as the
-     * application that originally created the private virtual display.
+     * A private virtual display belongs to the application that created it.  Only the a owner of a
+     * private virtual display and the apps that are already on that display are allowed to place
+     * windows upon it.  The private virtual display also does not participate in display mirroring:
+     * it will neither receive mirrored content from another display nor allow its own content to be
+     * mirrored elsewhere.  More precisely, the only processes that are allowed to enumerate or
+     * interact with the private display are those that have the same UID as the application that
+     * originally created the private virtual display or as the activities that are already on that
+     * display.
      * </p>
      *
      * @see #createVirtualDisplay
@@ -233,6 +234,21 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      */
     public static final int VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR = 1 << 4;
+
+    /**
+     * Virtual display flag: Allows content to be displayed on private virtual displays when
+     * keyguard is shown but is insecure.
+     *
+     * <p>
+     * This flag can only be applied to private displays as defined by the
+     * {@link Display#FLAG_PRIVATE} display flag. It is mutually exclusive with
+     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}. If both flags are specified then this flag's behavior
+     * will not be applied.
+     * </p>
+     *
+     * @see #createVirtualDisplay
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN = 1 << 5;
 
     /** @hide */
     public DisplayManager(Context context) {
