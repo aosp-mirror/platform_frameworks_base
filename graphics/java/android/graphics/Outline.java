@@ -112,7 +112,7 @@ public final class Outline {
      * Currently, only Outlines that can be represented as a rectangle, circle,
      * or round rect support clipping.
      *
-     * @see {@link android.view.View#setClipToOutline(boolean)}
+     * @see android.view.View#setClipToOutline(boolean)
      */
     public boolean canClip() {
         return mMode != MODE_CONVEX_PATH;

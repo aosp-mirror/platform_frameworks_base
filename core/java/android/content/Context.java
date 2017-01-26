@@ -1668,7 +1668,7 @@ public abstract class Context {
      *
      * @param intents An array of Intents to be started.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws ActivityNotFoundException &nbsp;
@@ -1696,7 +1696,7 @@ public abstract class Context {
      * @param intents An array of Intents to be started.
      * @param options Additional options for how the Activity should be started.
      * @param userHandle The user for whom to launch the activities
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
      * @throws ActivityNotFoundException &nbsp;
@@ -1745,7 +1745,7 @@ public abstract class Context {
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
      * @param options Additional options for how the Activity should be started.
-     * See {@link android.content.Context#startActivity(Intent, Bundle)
+     * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.  If options
      * have also been supplied by the IntentSender, options given here will
      * override any that conflict with those given by the IntentSender.
