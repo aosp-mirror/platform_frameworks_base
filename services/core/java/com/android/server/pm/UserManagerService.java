@@ -716,7 +716,7 @@ public class UserManagerService extends IUserManager.Stub {
             return null;
         }
         int parentUserId = profile.profileGroupId;
-        if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
+        if (parentUserId == userHandle || parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
             return null;
         } else {
             return getUserInfoLU(parentUserId);
