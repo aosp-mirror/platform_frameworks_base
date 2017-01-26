@@ -1072,6 +1072,18 @@ public class AppWidgetManager {
     }
 
     /**
+     * Return {@code TRUE} if the default launcher supports
+     * {@link #requestPinAppWidget(ComponentName, PendingIntent)}
+     */
+    public boolean isRequestPinAppWidgetSupported() {
+        try {
+            return mService.isRequestPinAppWidgetSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request to pin an app widget on the current launcher. It's up to the launcher to accept this
      * request (optionally showing a user confirmation). If the request is accepted, the caller will
      * get a confirmation with extra {@link #EXTRA_APPWIDGET_ID}.
@@ -1095,6 +1107,7 @@ public class AppWidgetManager {
      *
      * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
      * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)
+     * @see #isRequestPinAppWidgetSupported()
      *
      * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
      * service or when the user is locked.

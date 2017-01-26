@@ -42,6 +42,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -1544,6 +1545,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 updateAppWidgetInstanceLocked(widget, views, false);
             }
         }
+    }
+
+    @Override
+    public boolean isRequestPinAppWidgetSupported() {
+        return LocalServices.getService(ShortcutServiceInternal.class)
+                .isRequestPinItemSupported(UserHandle.getCallingUserId(),
+                        LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET);
     }
 
     @Override

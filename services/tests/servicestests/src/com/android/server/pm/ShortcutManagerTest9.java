@@ -72,7 +72,7 @@ public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
     }
 
     private void assertPinItemRequestIntent(Intent actualIntent, String expectedPackage) {
-        assertEquals(LauncherApps.ACTION_CONFIRM_PIN_ITEM, actualIntent.getAction());
+        assertEquals(LauncherApps.ACTION_CONFIRM_PIN_APPWIDGET, actualIntent.getAction());
         assertEquals(expectedPackage, actualIntent.getComponent().getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS,
                 actualIntent.getComponent().getClassName());

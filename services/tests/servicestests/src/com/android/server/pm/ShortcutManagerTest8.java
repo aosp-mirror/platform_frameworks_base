@@ -93,21 +93,24 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
 
         Pair<ComponentName, Integer> actual;
         // User 0
-        actual = mProcessor.getRequestPinShortcutConfirmationActivity(USER_0);
+        actual = mProcessor.getRequestPinConfirmationActivity(USER_0,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT);
 
         assertEquals(LAUNCHER_1, actual.first.getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS, actual.first.getClassName());
         assertEquals(USER_0, (int) actual.second);
 
         // User 10
-        actual = mProcessor.getRequestPinShortcutConfirmationActivity(USER_10);
+        actual = mProcessor.getRequestPinConfirmationActivity(USER_10,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT);
 
         assertEquals(LAUNCHER_2, actual.first.getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS, actual.first.getClassName());
         assertEquals(USER_10, (int) actual.second);
 
         // User P0 -> managed profile, return user-0's launcher.
-        actual = mProcessor.getRequestPinShortcutConfirmationActivity(USER_P0);
+        actual = mProcessor.getRequestPinConfirmationActivity(USER_P0,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT);
 
         assertEquals(LAUNCHER_1, actual.first.getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS, actual.first.getClassName());
@@ -133,15 +136,18 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
                         ? null : new ComponentName(packageName, PIN_CONFIRM_ACTIVITY_CLASS);
 
         // User 10 -- still has confirm activity.
-        actual = mProcessor.getRequestPinShortcutConfirmationActivity(USER_10);
+        actual = mProcessor.getRequestPinConfirmationActivity(USER_10,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT);
 
         assertEquals(LAUNCHER_2, actual.first.getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS, actual.first.getClassName());
         assertEquals(USER_10, (int) actual.second);
 
         // But user-0 and user p0 no longer has a confirmation activity.
-        assertNull(mProcessor.getRequestPinShortcutConfirmationActivity(USER_0));
-        assertNull(mProcessor.getRequestPinShortcutConfirmationActivity(USER_P0));
+        assertNull(mProcessor.getRequestPinConfirmationActivity(USER_0,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT));
+        assertNull(mProcessor.getRequestPinConfirmationActivity(USER_P0,
+                PinItemRequest.REQUEST_TYPE_SHORTCUT));
 
         // Check from the public API.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -204,7 +210,7 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     private void assertPinItemRequestIntent(Intent actualIntent, String expectedPackage) {
-        assertEquals(LauncherApps.ACTION_CONFIRM_PIN_ITEM, actualIntent.getAction());
+        assertEquals(LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT, actualIntent.getAction());
         assertEquals(expectedPackage, actualIntent.getComponent().getPackageName());
         assertEquals(PIN_CONFIRM_ACTIVITY_CLASS,
                 actualIntent.getComponent().getClassName());

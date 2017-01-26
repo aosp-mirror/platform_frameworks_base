@@ -93,21 +93,39 @@ public class LauncherApps {
      * @see #EXTRA_PIN_ITEM_REQUEST
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_CONFIRM_PIN_ITEM =
-            "android.content.pm.action.CONFIRM_PIN_ITEM";
+    public static final String ACTION_CONFIRM_PIN_SHORTCUT =
+            "android.content.pm.action.CONFIRM_PIN_SHORTCUT";
 
     /**
-     * An extra for {@link #ACTION_CONFIRM_PIN_ITEM} containing a
-     * {@link ShortcutInfo} of the shortcut the publisher app asked to pin.
+     * Activity Action: For the default launcher to show the confirmation dialog to create
+     * a pinned app widget.
+     *
+     * <p>See the {@link android.appwidget.AppWidgetManager#requestPinAppWidget} javadoc for
+     * details.
+     *
+     * <p>
+     * Use {@link #getPinItemRequest(Intent)} to get a {@link PinItemRequest} object,
+     * and call {@link PinItemRequest#accept(Bundle)}
+     * if the user accepts.  If the user doesn't accept, no further action is required.
+     *
+     * @see #EXTRA_PIN_ITEM_REQUEST
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONFIRM_PIN_APPWIDGET =
+            "android.content.pm.action.CONFIRM_PIN_APPWIDGET";
+
+    /**
+     * An extra for {@link #ACTION_CONFIRM_PIN_SHORTCUT} &amp; {@link #ACTION_CONFIRM_PIN_APPWIDGET}
+     * containing a {@link PinItemRequest} of appropriate type asked to pin.
      *
      * <p>A helper function {@link #getPinItemRequest(Intent)} can be used
      * instead of using this constant directly.
      *
-     * @see #ACTION_CONFIRM_PIN_ITEM
+     * @see #ACTION_CONFIRM_PIN_SHORTCUT
+     * @see #ACTION_CONFIRM_PIN_APPWIDGET
      */
     public static final String EXTRA_PIN_ITEM_REQUEST =
             "android.content.pm.extra.PIN_ITEM_REQUEST";
-
 
     private Context mContext;
     private ILauncherApps mService;
@@ -1208,8 +1226,9 @@ public class LauncherApps {
     }
 
     /**
-     * Represents a "pin shortcut" request made by an app, which is sent with
-     * an {@link #ACTION_CONFIRM_PIN_ITEM} intent to the default launcher app.
+     * Represents a "pin shortcut" or a "pin appwidget" request made by an app, which is sent with
+     * an {@link #ACTION_CONFIRM_PIN_SHORTCUT} or {@link #ACTION_CONFIRM_PIN_APPWIDGET} intent
+     * respectively to the default launcher app.
      *
      * <p>Note the launcher may receive a request to pin a shortcut that is already pinned, because
      * the user may actually want to have multiple icons of the same shortcut on the launcher.
@@ -1217,6 +1236,9 @@ public class LauncherApps {
      * returned by {@link #getShortcutInfo()}.  In this case, calling {@link #accept()} is optional;
      * even if the launcher does not call it, the shortcut is already pinned.  Also in this case,
      * the {@code options} argument to {@link #accept(Bundle)} will be ignored.
+     *
+     * <p>For AppWidget pin requests launcher should send back the appwidget id as an extra for
+     * {@link #accept(Bundle)} as {@link android.appwidget.AppWidgetManager#EXTRA_APPWIDGET_ID}.
      *
      * @see #EXTRA_PIN_ITEM_REQUEST
      * @see #getPinItemRequest(Intent)

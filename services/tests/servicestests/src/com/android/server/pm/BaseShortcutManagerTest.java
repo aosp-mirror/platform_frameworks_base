@@ -398,7 +398,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         ComponentName injectGetPinConfirmationActivity(@NonNull String launcherPackageName,
-                int launcherUserId) {
+                int launcherUserId, int requestType) {
             return mPinConfirmActivityFetcher.apply(launcherPackageName, launcherUserId);
         }
 
