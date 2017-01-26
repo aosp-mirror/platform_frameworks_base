@@ -107,6 +107,7 @@
     <string-array name="bluetooth_a2dp_codec_titles">
         <item>Use System Selection (Default)</item>
         <item>SBC</item>
+        <item>AAC</item>
         <item>aptX</item>
         <item>aptX HD</item>
         <item>LDAC</item>
@@ -119,12 +120,14 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
     </string-array>
 
     <!-- Summaries for Bluetooth Audio Codec selection preference. [CHAR LIMIT=40]-->
     <string-array name="bluetooth_a2dp_codec_summaries" >
         <item>Use System Selection (Default)</item>
         <item>SBC</item>
+        <item>AAC</item>
         <item>aptX</item>
         <item>aptX HD</item>
         <item>LDAC</item>
