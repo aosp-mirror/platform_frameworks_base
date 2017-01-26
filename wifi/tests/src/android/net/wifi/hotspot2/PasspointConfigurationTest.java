@@ -30,7 +30,9 @@ import android.util.Base64;
 
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -38,6 +40,8 @@ import java.util.HashMap;
  */
 @SmallTest
 public class PasspointConfigurationTest {
+    private static final int MAX_URL_BYTES = 1023;
+    private static final int CERTIFICATE_FINGERPRINT_BYTES = 32;
 
     /**
      * Utility function for creating a {@link android.net.wifi.hotspot2.pps.HomeSP}.
@@ -111,11 +115,25 @@ public class PasspointConfigurationTest {
         policy.policyUpdate.base64EncodedPassword =
                 Base64.encodeToString("password".getBytes(), Base64.DEFAULT);
         policy.policyUpdate.trustRootCertUrl = "trust.cert.com";
-        policy.policyUpdate.trustRootCertSha256Fingerprint = new byte[32];
+        policy.policyUpdate.trustRootCertSha256Fingerprint =
+                new byte[CERTIFICATE_FINGERPRINT_BYTES];
 
         return policy;
     }
 
+    private static UpdateParameter createSubscriptionUpdate() {
+        UpdateParameter subUpdate = new UpdateParameter();
+        subUpdate.updateIntervalInMinutes = 9021;
+        subUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_SSP;
+        subUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER;
+        subUpdate.serverUri = "subscription.update.com";
+        subUpdate.username = "subUsername";
+        subUpdate.base64EncodedPassword =
+                Base64.encodeToString("subPassword".getBytes(), Base64.DEFAULT);
+        subUpdate.trustRootCertUrl = "subscription.trust.cert.com";
+        subUpdate.trustRootCertSha256Fingerprint = new byte[CERTIFICATE_FINGERPRINT_BYTES];
+        return subUpdate;
+    }
     /**
      * Helper function for creating a {@link PasspointConfiguration} for testing.
      *
@@ -126,6 +144,21 @@ public class PasspointConfigurationTest {
         config.homeSp = createHomeSp();
         config.credential = createCredential();
         config.policy = createPolicy();
+        config.subscriptionUpdate = createSubscriptionUpdate();
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("trustRoot.cert1.com",
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.trustRootCertList.put("trustRoot.cert2.com",
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.updateIdentifier = 1;
+        config.credentialPriority = 120;
+        config.subscriptionCreationTimeInMs = 231200;
+        config.subscriptionExpirationTimeInMs = 2134232;
+        config.subscriptionType = "Gold";
+        config.usageLimitUsageTimePeriodInMinutes = 3600;
+        config.usageLimitStartTimeInMs = 124214213;
+        config.usageLimitDataLimit = 14121;
+        config.usageLimitTimeLimitInMinutes = 78912;
         return config;
     }
 
@@ -202,6 +235,31 @@ public class PasspointConfigurationTest {
     }
 
     /**
+     * Verify parcel read/write for a configuration that doesn't contain subscription update.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutSubscriptionUpdate() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.subscriptionUpdate = null;
+        verifyParcel(config);
+    }
+
+    /**
+     * Verify parcel read/write for a configuration that doesn't contain trust root certificate
+     * list.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutTrustRootCertList() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.trustRootCertList = null;
+        verifyParcel(config);
+    }
+
+    /**
      * Verify that a default/empty configuration is invalid.
      *
      * @throws Exception
@@ -258,6 +316,60 @@ public class PasspointConfigurationTest {
         PasspointConfiguration config = createConfig();
         config.policy = null;
         assertTrue(config.validate());
+    }
+
+    /**
+     * Verify that a configuration without subscription update is valid, since subscription
+     * update configurations are optional (applied for Hotspot 2.0 Release only).
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithoutSubscriptionUpdate() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.subscriptionUpdate = null;
+        assertTrue(config.validate());
+    }
+
+    /**
+     * Verify that a configuration with a trust root certificate URL exceeding the max size
+     * is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithInvalidTrustRootCertUrl() throws Exception {
+        PasspointConfiguration config = createConfig();
+        byte[] rawUrlBytes = new byte[MAX_URL_BYTES + 1];
+        Arrays.fill(rawUrlBytes, (byte) 'a');
+        config.trustRootCertList.put(new String(rawUrlBytes, StandardCharsets.UTF_8),
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put(null, new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        assertFalse(config.validate());
+    }
+
+    /**
+     * Verify that a configuration with an invalid trust root certificate fingerprint is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithInvalidTrustRootCertFingerprint() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES + 1]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES - 1]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", null);
+        assertFalse(config.validate());
     }
 
     /**
