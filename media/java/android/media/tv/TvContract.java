@@ -1088,6 +1088,111 @@ public final class TvContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
 
         /**
+         * The program type for movie.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_MOVIE = "TYPE_MOVIE";
+
+        /**
+         * The program type for TV series.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_TV_SERIES = "TYPE_TV_SERIES";
+
+        /**
+         * The program type for TV season.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_TV_SEASON = "TYPE_TV_SEASON";
+
+        /**
+         * The program type for TV episode.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_TV_EPISODE = "TYPE_TV_EPISODE";
+
+        /**
+         * The program type for clip.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_CLIP = "TYPE_CLIP";
+
+        /**
+         * The program type for event.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_EVENT = "TYPE_EVENT";
+
+        /**
+         * The program type for channel.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_CHANNEL = "TYPE_CHANNEL";
+
+        /**
+         * The program type for track.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_TRACK = "TYPE_TRACK";
+
+        /**
+         * The program type for album.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_ALBUM = "TYPE_ALBUM";
+
+        /**
+         * The program type for artist.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_ARTIST = "TYPE_ARTIST";
+
+        /**
+         * The program type for playlist.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_PLAYLIST = "TYPE_PLAYLIST";
+
+        /**
+         * The program type for station.
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_STATION = "TYPE_STATION";
+
+        /**
+         * The watch next type for CONTINUE.
+         *
+         * @see #COLUMN_WATCH_NEXT_TYPE
+         */
+        public static final String WATCH_NEXT_TYPE_CONTINUE = "WATCH_NEXT_TYPE_CONTINUE";
+
+        /**
+         * The watch next type for NEXT.
+         *
+         * @see #COLUMN_WATCH_NEXT_TYPE
+         */
+        public static final String WATCH_NEXT_TYPE_NEXT = "WATCH_NEXT_TYPE_NEXT";
+
+        /**
+         * The watch next type for NEW.
+         *
+         * @see #COLUMN_WATCH_NEXT_TYPE
+         */
+        public static final String WATCH_NEXT_TYPE_NEW = "WATCH_NEXT_TYPE_NEW";
+
+        /**
          * The aspect ratio for 16:9.
          *
          * @see #COLUMN_POSTER_ART_ASPECT_RATIO
@@ -1203,8 +1308,8 @@ public final class TvContract {
          *
          * @see #COLUMN_REVIEW_RATING_STYLE
          */
-        public static final String REVIEW_RATING_STYLE_THUMPS_UP_DOWN =
-                "REVIEW_RATING_STYLE_THUMPS_UP_DOWN";
+        public static final String REVIEW_RATING_STYLE_THUMBS_UP_DOWN =
+                "REVIEW_RATING_STYLE_THUMBS_UP_DOWN";
 
         /**
          * The review rating style for 0 to 100 point system.
@@ -1224,6 +1329,44 @@ public final class TvContract {
          * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_CHANNEL_ID = "channel_id";
+
+        /**
+         * The type of this program content.
+         *
+         * <p>The value should match one of the followings:
+         * {@link #TYPE_MOVIE},
+         * {@link #TYPE_TV_SERIES},
+         * {@link #TYPE_TV_SEASON},
+         * {@link #TYPE_TV_EPISODE},
+         * {@link #TYPE_CLIP},
+         * {@link #TYPE_EVENT},
+         * {@link #TYPE_CHANNEL},
+         * {@link #TYPE_TRACK},
+         * {@link #TYPE_ALBUM},
+         * {@link #TYPE_ARTIST},
+         * {@link #TYPE_PLAYLIST}, and
+         * {@link #TYPE_STATION}.
+         *
+         * <p>This is a required field if the program is from a {@link Channels#TYPE_PREVIEW}
+         * channel.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_TYPE = "type";
+
+        /**
+         * The "watch next" type of this program content.
+         *
+         * <p>The value should match one of the followings:
+         * {@link #WATCH_NEXT_TYPE_CONTINUE},
+         * {@link #WATCH_NEXT_TYPE_NEXT}, and
+         * {@link #WATCH_NEXT_TYPE_NEW}.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_WATCH_NEXT_TYPE = "watch_next_type";
 
         /**
          * The title of this TV program.
@@ -1811,7 +1954,7 @@ public final class TvContract {
          * The review rating score style used for {@link #COLUMN_REVIEW_RATING}.
          *
          * <p> The value should match one of the followings: {@link #REVIEW_RATING_STYLE_STARS},
-         * {@link #REVIEW_RATING_STYLE_THUMPS_UP_DOWN}, and {@link #REVIEW_RATING_STYLE_PERCENTAGE}.
+         * {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN}, and {@link #REVIEW_RATING_STYLE_PERCENTAGE}.
          *
          * <p>Type: TEXT
          * @see #COLUMN_REVIEW_RATING
@@ -1823,7 +1966,7 @@ public final class TvContract {
          *
          * <p>The format of the value is dependent on {@link #COLUMN_REVIEW_RATING_STYLE}. If the
          * style is {@link #REVIEW_RATING_STYLE_STARS}, the value should be a real number between
-         * 0.0 and 5.0. (e.g. "4.5") If the style is {@link #REVIEW_RATING_STYLE_THUMPS_UP_DOWN},
+         * 0.0 and 5.0. (e.g. "4.5") If the style is {@link #REVIEW_RATING_STYLE_THUMBS_UP_DOWN},
          * the value should be two integers, one for thumbs-up count and the other for thumbs-down
          * count, with a comma between them. (e.g. "200,40") If the style is
          * {@link #REVIEW_RATING_STYLE_PERCENTAGE}, the value shoule be a real number between 0 and
