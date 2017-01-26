@@ -198,7 +198,7 @@ public class HelpUtils {
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);
             intent.putExtra(feedbackIntentNameKey, packageNameValue);
         }
-        intent.putExtra(EXTRA_THEME, 1 /* Light, dark action bar */);
+        intent.putExtra(EXTRA_THEME, 0 /* Light theme */);
         TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
         intent.putExtra(EXTRA_PRIMARY_COLOR, array.getColor(0, 0));
         array.recycle();
