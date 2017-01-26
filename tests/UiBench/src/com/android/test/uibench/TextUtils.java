@@ -35,10 +35,14 @@ public class TextUtils {
     }
 
     public static String[] buildSimpleStringList() {
+        return buildSimpleStringList(SIMPLE_STRING_LENGTH);
+    }
+
+    public static String[] buildSimpleStringList(int stringLength) {
         String[] strings = new String[STRING_COUNT];
         Random random = new Random(0);
         for (int i = 0; i < strings.length; i++) {
-            strings[i] = randomWord(random, SIMPLE_STRING_LENGTH);
+            strings[i] = randomWord(random, stringLength);
         }
         return strings;
     }
