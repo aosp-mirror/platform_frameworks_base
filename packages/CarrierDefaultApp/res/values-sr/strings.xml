@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"Активирајте услугу"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"Нема услуге преноса података"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"Додирните да бисте активирали услугу"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"Нема услуге. Контактирајте добављача услуге"</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"Повезује се са улазним порталом…"</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"Временско ограничење мреже је истекло. Желите ли да пробате поново?"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"Мрежа није доступна"</string>
+    <string name="quit" msgid="4392968039488794590">"Затвори"</string>
+    <string name="wait" msgid="7902715035629500128">"Чекај"</string>
+</resources>
