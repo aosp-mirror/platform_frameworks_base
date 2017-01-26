@@ -22,16 +22,26 @@ import static org.junit.Assert.assertTrue;
 import android.net.wifi.EAPConstants;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.Policy;
+import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Base64;
 
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.PasspointConfiguration}.
  */
 @SmallTest
 public class PasspointConfigurationTest {
+    private static final int MAX_URL_BYTES = 1023;
+    private static final int CERTIFICATE_FINGERPRINT_BYTES = 32;
 
     /**
      * Utility function for creating a {@link android.net.wifi.hotspot2.pps.HomeSP}.
@@ -66,6 +76,93 @@ public class PasspointConfigurationTest {
     }
 
     /**
+     * Helper function for creating a {@link Policy} for testing.
+     *
+     * @return {@link Policy}
+     */
+    private static Policy createPolicy() {
+        Policy policy = new Policy();
+        policy.minHomeDownlinkBandwidth = 123;
+        policy.minHomeUplinkBandwidth = 345;
+        policy.minRoamingDownlinkBandwidth = 567;
+        policy.minRoamingUplinkBandwidth = 789;
+        policy.maximumBssLoadValue = 12;
+        policy.excludedSsidList = new String[] {"ssid1", "ssid2"};
+        policy.requiredProtoPortMap = new HashMap<>();
+        policy.requiredProtoPortMap.put(12, "23,342,123");
+        policy.requiredProtoPortMap.put(23, "789,372,1235");
+
+        policy.preferredRoamingPartnerList = new ArrayList<>();
+        Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
+        partner1.fqdn = "partner1.com";
+        partner1.fqdnExactMatch = true;
+        partner1.priority = 12;
+        partner1.countries = "us,jp";
+        Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
+        partner2.fqdn = "partner2.com";
+        partner2.fqdnExactMatch = false;
+        partner2.priority = 42;
+        partner2.countries = "ca,fr";
+        policy.preferredRoamingPartnerList.add(partner1);
+        policy.preferredRoamingPartnerList.add(partner2);
+
+        policy.policyUpdate = new UpdateParameter();
+        policy.policyUpdate.updateIntervalInMinutes = 1712;
+        policy.policyUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
+        policy.policyUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
+        policy.policyUpdate.serverUri = "policy.update.com";
+        policy.policyUpdate.username = "username";
+        policy.policyUpdate.base64EncodedPassword =
+                Base64.encodeToString("password".getBytes(), Base64.DEFAULT);
+        policy.policyUpdate.trustRootCertUrl = "trust.cert.com";
+        policy.policyUpdate.trustRootCertSha256Fingerprint =
+                new byte[CERTIFICATE_FINGERPRINT_BYTES];
+
+        return policy;
+    }
+
+    private static UpdateParameter createSubscriptionUpdate() {
+        UpdateParameter subUpdate = new UpdateParameter();
+        subUpdate.updateIntervalInMinutes = 9021;
+        subUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_SSP;
+        subUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER;
+        subUpdate.serverUri = "subscription.update.com";
+        subUpdate.username = "subUsername";
+        subUpdate.base64EncodedPassword =
+                Base64.encodeToString("subPassword".getBytes(), Base64.DEFAULT);
+        subUpdate.trustRootCertUrl = "subscription.trust.cert.com";
+        subUpdate.trustRootCertSha256Fingerprint = new byte[CERTIFICATE_FINGERPRINT_BYTES];
+        return subUpdate;
+    }
+    /**
+     * Helper function for creating a {@link PasspointConfiguration} for testing.
+     *
+     * @return {@link PasspointConfiguration}
+     */
+    private static PasspointConfiguration createConfig() {
+        PasspointConfiguration config = new PasspointConfiguration();
+        config.homeSp = createHomeSp();
+        config.credential = createCredential();
+        config.policy = createPolicy();
+        config.subscriptionUpdate = createSubscriptionUpdate();
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("trustRoot.cert1.com",
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.trustRootCertList.put("trustRoot.cert2.com",
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.updateIdentifier = 1;
+        config.credentialPriority = 120;
+        config.subscriptionCreationTimeInMs = 231200;
+        config.subscriptionExpirationTimeInMs = 2134232;
+        config.subscriptionType = "Gold";
+        config.usageLimitUsageTimePeriodInMinutes = 3600;
+        config.usageLimitStartTimeInMs = 124214213;
+        config.usageLimitDataLimit = 14121;
+        config.usageLimitTimeLimitInMinutes = 78912;
+        return config;
+    }
+
+    /**
      * Verify parcel write and read consistency for the given configuration.
      *
      * @param writeConfig The configuration to verify
@@ -92,39 +189,73 @@ public class PasspointConfigurationTest {
     }
 
     /**
-     * Verify parcel read/write for a configuration that contained both HomeSP and Credential.
+     * Verify parcel read/write for a configuration that contained the full configuration.
      *
      * @throws Exception
      */
     @Test
-    public void verifyParcelWithHomeSPAndCredential() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.homeSp = createHomeSp();
-        config.credential = createCredential();
+    public void verifyParcelWithFullConfiguration() throws Exception {
+        verifyParcel(createConfig());
+    }
+
+    /**
+     * Verify parcel read/write for a configuration that doesn't contain HomeSP.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutHomeSP() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.homeSp = null;
         verifyParcel(config);
     }
 
     /**
-     * Verify parcel read/write for a configuration that contained only HomeSP.
+     * Verify parcel read/write for a configuration that doesn't contain Credential.
      *
      * @throws Exception
      */
     @Test
-    public void verifyParcelWithHomeSPOnly() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.homeSp = createHomeSp();
+    public void verifyParcelWithoutCredential() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.credential = null;
         verifyParcel(config);
     }
 
     /**
-     * Verify parcel read/write for a configuration that contained only Credential.
+     * Verify parcel read/write for a configuration that doesn't contain Policy.
      *
      * @throws Exception
      */
     @Test
-    public void verifyParcelWithCredentialOnly() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.credential = createCredential();
+    public void verifyParcelWithoutPolicy() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.policy = null;
+        verifyParcel(config);
+    }
+
+    /**
+     * Verify parcel read/write for a configuration that doesn't contain subscription update.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutSubscriptionUpdate() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.subscriptionUpdate = null;
+        verifyParcel(config);
+    }
+
+    /**
+     * Verify parcel read/write for a configuration that doesn't contain trust root certificate
+     * list.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutTrustRootCertList() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.trustRootCertList = null;
         verifyParcel(config);
     }
 
@@ -140,40 +271,105 @@ public class PasspointConfigurationTest {
     }
 
     /**
+     * Verify that a configuration contained all fields is valid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateFullConfig() throws Exception {
+        PasspointConfiguration config = createConfig();
+        assertTrue(config.validate());
+    }
+
+    /**
      * Verify that a configuration without Credential is invalid.
      *
      * @throws Exception
      */
     @Test
     public void validateConfigWithoutCredential() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.homeSp = createHomeSp();
+        PasspointConfiguration config = createConfig();
+        config.credential = null;
         assertFalse(config.validate());
     }
 
     /**
-     * Verify that a a configuration without HomeSP is invalid.
+     * Verify that a configuration without HomeSP is invalid.
      *
      * @throws Exception
      */
     @Test
     public void validateConfigWithoutHomeSp() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.credential = createCredential();
+        PasspointConfiguration config = createConfig();
+        config.homeSp = null;
         assertFalse(config.validate());
     }
 
     /**
-     * Verify a valid configuration.
+     * Verify that a configuration without Policy is valid, since Policy configurations
+     * are optional (applied for Hotspot 2.0 Release only).
      *
      * @throws Exception
      */
     @Test
-    public void validateValidConfig() throws Exception {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.homeSp = createHomeSp();
-        config.credential = createCredential();
+    public void validateConfigWithoutPolicy() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.policy = null;
         assertTrue(config.validate());
+    }
+
+    /**
+     * Verify that a configuration without subscription update is valid, since subscription
+     * update configurations are optional (applied for Hotspot 2.0 Release only).
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithoutSubscriptionUpdate() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.subscriptionUpdate = null;
+        assertTrue(config.validate());
+    }
+
+    /**
+     * Verify that a configuration with a trust root certificate URL exceeding the max size
+     * is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithInvalidTrustRootCertUrl() throws Exception {
+        PasspointConfiguration config = createConfig();
+        byte[] rawUrlBytes = new byte[MAX_URL_BYTES + 1];
+        Arrays.fill(rawUrlBytes, (byte) 'a');
+        config.trustRootCertList.put(new String(rawUrlBytes, StandardCharsets.UTF_8),
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put(null, new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        assertFalse(config.validate());
+    }
+
+    /**
+     * Verify that a configuration with an invalid trust root certificate fingerprint is invalid.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateConfigWithInvalidTrustRootCertFingerprint() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES + 1]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES - 1]);
+        assertFalse(config.validate());
+
+        config.trustRootCertList = new HashMap<>();
+        config.trustRootCertList.put("test.cert.com", null);
+        assertFalse(config.validate());
     }
 
     /**
@@ -195,9 +391,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateCopyConstructorWithValidSource() throws Exception {
-        PasspointConfiguration sourceConfig = new PasspointConfiguration();
-        sourceConfig.homeSp = createHomeSp();
-        sourceConfig.credential = createCredential();
+        PasspointConfiguration sourceConfig = createConfig();
         PasspointConfiguration copyConfig = new PasspointConfiguration(sourceConfig);
         assertTrue(copyConfig.equals(sourceConfig));
     }
