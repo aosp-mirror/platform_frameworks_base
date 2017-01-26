@@ -115,6 +115,7 @@ import android.print.PrintManager;
 import android.service.autofill.IAutoFillManagerService;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
+import android.service.vr.IVrManager;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -814,6 +815,14 @@ final class SystemServiceRegistry {
                 IAutoFillManagerService service = IAutoFillManagerService.Stub.asInterface(b);
                 return new AutoFillManager(ctx, service);
             }});
+
+        registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {
+            @Override
+            public VrManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.VR_SERVICE);
+                return new VrManager(IVrManager.Stub.asInterface(b));
+            }
+        });
     }
 
     /**
