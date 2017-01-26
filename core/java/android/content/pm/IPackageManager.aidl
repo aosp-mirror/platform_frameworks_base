@@ -518,6 +518,11 @@ interface IPackageManager {
     void forceDexOpt(String packageName);
 
     /**
+     * Execute the background dexopt job immediately.
+     */
+    boolean runBackgroundDexoptJob();
+
+    /**
      * Reconcile the information we have about the secondary dex files belonging to
      * {@code packagName} and the actual dex files. For all dex files that were
      * deleted, update the internal records and delete the generated oat files.

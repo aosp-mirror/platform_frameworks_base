@@ -8230,6 +8230,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         mDexManager.reconcileSecondaryDexFiles(packageName);
     }
 
+    /**
+     * Execute the background dexopt job immediately.
+     */
+    @Override
+    public boolean runBackgroundDexoptJob() {
+        return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext);
+    }
+
     List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
         if (p.usesLibraries != null || p.usesOptionalLibraries != null
                 || p.usesStaticLibraries != null) {
