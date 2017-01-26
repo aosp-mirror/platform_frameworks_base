@@ -174,6 +174,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      */
     private long mPauseTime = -1;
 
+    // This is to work around a bug in b/34736819. This needs to be removed once play team
+    // fixes their side.
+    private AnimatorListenerAdapter mDummyListener = new AnimatorListenerAdapter() {};
+
     public AnimatorSet() {
         super();
         mNodeMap.put(mDelayAnim, mRootNode);
@@ -1018,6 +1022,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     private void startAnimation() {
+        addDummyListener();
+
         // Register animation callback
         addAnimationCallback(mStartDelay);
 
@@ -1059,6 +1065,20 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             int toId = findLatestEventIdForTime(playTime);
             handleAnimationEvents(-1, toId, playTime);
             mLastEventId = toId;
+        }
+    }
+
+    // This is to work around the issue in b/34736819, as the old behavior in AnimatorSet had
+    // masked a real bug in play movies. TODO: remove this and below once the root cause is fixed.
+    private void addDummyListener() {
+        for (int i = 1; i < mNodes.size(); i++) {
+            mNodes.get(i).mAnimation.addListener(mDummyListener);
+        }
+    }
+
+    private void removeDummyListener() {
+        for (int i = 1; i < mNodes.size(); i++) {
+            mNodes.get(i).mAnimation.removeListener(mDummyListener);
         }
     }
 
@@ -1107,6 +1127,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 tmpListeners.get(i).onAnimationEnd(this, mReversing);
             }
         }
+        removeDummyListener();
         mSelfPulse = true;
         mReversing = false;
     }
