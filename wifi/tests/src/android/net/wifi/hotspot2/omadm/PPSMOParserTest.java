@@ -23,7 +23,10 @@ import android.net.wifi.hotspot2.omadm.PPSMOParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.Policy;
+import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.TextUtils;
 
 import org.junit.Test;
 
@@ -33,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -118,6 +122,41 @@ public class PPSMOParserTest {
         config.credential.simCredential = new Credential.SimCredential();
         config.credential.simCredential.imsi = "imsi";
         config.credential.simCredential.eapType = 24;
+
+        // Policy configuration.
+        config.policy = new Policy();
+        config.policy.preferredRoamingPartnerList = new ArrayList<>();
+        Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
+        partner1.fqdn = "test1.fqdn.com";
+        partner1.fqdnExactMatch = true;
+        partner1.priority = 127;
+        partner1.countries = "us,fr";
+        Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
+        partner2.fqdn = "test2.fqdn.com";
+        partner2.fqdnExactMatch = false;
+        partner2.priority = 200;
+        partner2.countries = "*";
+        config.policy.preferredRoamingPartnerList.add(partner1);
+        config.policy.preferredRoamingPartnerList.add(partner2);
+        config.policy.minHomeDownlinkBandwidth = 23412;
+        config.policy.minHomeUplinkBandwidth = 9823;
+        config.policy.minRoamingDownlinkBandwidth = 9271;
+        config.policy.minRoamingUplinkBandwidth = 2315;
+        config.policy.excludedSsidList = new String[] {"excludeSSID"};
+        config.policy.requiredProtoPortMap = new HashMap<>();
+        config.policy.requiredProtoPortMap.put(12, "34,92,234");
+        config.policy.maximumBssLoadValue = 23;
+        config.policy.policyUpdate = new UpdateParameter();
+        config.policy.policyUpdate.updateIntervalInMinutes = 120;
+        config.policy.policyUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
+        config.policy.policyUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
+        config.policy.policyUpdate.serverUri = "policy.update.com";
+        config.policy.policyUpdate.username = "updateUser";
+        config.policy.policyUpdate.base64EncodedPassword = "updatePass";
+        config.policy.policyUpdate.trustRootCertUrl = "update.cert.com";
+        config.policy.policyUpdate.trustRootCertSha256Fingerprint = new byte[32];
+        Arrays.fill(config.policy.policyUpdate.trustRootCertSha256Fingerprint, (byte) 0x1f);
+
         return config;
     }
 
