@@ -2132,6 +2132,34 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.postRawSensitivityBoost", int.class);
 
     /**
+     * <p>Allow camera device to enable zero-shutter-lag mode for requests with
+     * {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE.</p>
+     * <p>If enableZsl is <code>true</code>, the camera device may enable zero-shutter-lag mode for requests with
+     * STILL_CAPTURE capture intent. The camera device may use images captured in the past to
+     * produce output images for a zero-shutter-lag request. The result metadata including the
+     * {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} reflects the source frames used to produce output images.
+     * Therefore, the contents of the output images and the result metadata may be out of order
+     * compared to previous regular requests. enableZsl does not affect requests with other
+     * capture intents.</p>
+     * <p>For example, when requests are submitted in the following order:
+     *   Request A: enableZsl is ON, {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} is PREVIEW
+     *   Request B: enableZsl is ON, {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} is STILL_CAPTURE</p>
+     * <p>The output images for request B may have contents captured before the output images for
+     * request A, and the result metadata for request B may be older than the result metadata for
+     * request A.</p>
+     * <p>Note that when enableZsl is <code>true</code>, it is not guaranteed to get output images captured in the
+     * past for requests with STILL_CAPTURE capture intent.</p>
+     * <p>The value of enableZsl in capture templates is always <code>false</code> if present.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     * @see CaptureResult#SENSOR_TIMESTAMP
+     */
+    @PublicKey
+    public static final Key<Boolean> CONTROL_ENABLE_ZSL =
+            new Key<Boolean>("android.control.enableZsl", boolean.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
