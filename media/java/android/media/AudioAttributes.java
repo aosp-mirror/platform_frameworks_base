@@ -306,12 +306,26 @@ public final class AudioAttributes implements Parcelable {
      * until there are no glitches.
      * This tuning step should be done while playing silence.
      * This technique provides a compromise between latency and glitch rate.
+     *
+     * @deprecated Use {@link AudioTrack.Builder#setPerformanceMode(int)} with
+     * {@link AudioTrack#PERFORMANCE_MODE_LOW_LATENCY} to control performance.
      */
     public final static int FLAG_LOW_LATENCY = 0x1 << 8;
 
+    /**
+     * @hide
+     * Flag requesting a deep buffer path when creating an {@code AudioTrack}.
+     *
+     * A deep buffer path, if available, may consume less power and is
+     * suitable for media playback where latency is not a concern.
+     * Use {@link AudioTrack.Builder#setPerformanceMode(int)} with
+     * {@link AudioTrack#PERFORMANCE_MODE_POWER_SAVING} to enable.
+     */
+    public final static int FLAG_DEEP_BUFFER = 0x1 << 9;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY;
+            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
@@ -541,6 +555,8 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Sets the combination of flags.
+         *
+         * This is a bitwise OR with the existing flags.
          * @param flags a combination of {@link AudioAttributes#FLAG_AUDIBILITY_ENFORCED},
          *    {@link AudioAttributes#FLAG_HW_AV_SYNC}.
          * @return the same Builder instance.
@@ -548,6 +564,17 @@ public final class AudioAttributes implements Parcelable {
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Replaces flags.
+         * @param flags any combination of {@link AudioAttributes#FLAG_ALL}.
+         * @return the same Builder instance.
+         */
+        public Builder replaceFlags(int flags) {
+            mFlags = flags & AudioAttributes.FLAG_ALL;
             return this;
         }
 
