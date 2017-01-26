@@ -110,7 +110,7 @@ public class WifiTrackerTest {
     private HandlerThread mWorkerThread;
     private Looper mLooper;
     private Looper mMainLooper;
-    private int mOriginalSettingValue;
+    private int mOriginalScoringUiSettingValue;
 
     @Before
     public void setUp() {
@@ -175,19 +175,23 @@ public class WifiTrackerTest {
                   }
                 }).when(mockWifiListener).onAccessPointsChanged();
 
-        mOriginalSettingValue = Settings.Global.getInt(
-            InstrumentationRegistry.getTargetContext().getContentResolver(),
-            Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
-            0 /* disabled */);
-
+        // Turn on Scoring UI features
+        mOriginalScoringUiSettingValue = Settings.Global.getInt(
+                InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                0 /* disabled */);
+        Settings.Global.putInt(
+                InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                1 /* enabled */);
     }
 
     @After
     public void cleanUp() {
         Settings.Global.putInt(
-            InstrumentationRegistry.getTargetContext().getContentResolver(),
-            Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
-            mOriginalSettingValue);
+                InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                mOriginalScoringUiSettingValue);
     }
 
     private static ScanResult buildScanResult1() {
@@ -333,9 +337,18 @@ public class WifiTrackerTest {
 
         WifiNetworkScoreCache scoreCache = mScoreCacheCaptor.getValue();
 
+        CountDownLatch latch = new CountDownLatch(1);
+        doAnswer(
+                (invocation) -> {
+                        latch.countDown();
+                        return null;
+                }).when(mockNetworkScoreManager)
+                        .unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, scoreCache);
+
         // Test unregister
         tracker.stopTracking();
 
+        latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
         verify(mockNetworkScoreManager)
                 .unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, scoreCache);
     }
@@ -385,7 +398,28 @@ public class WifiTrackerTest {
         assertTrue(aps.size() == 2);
         assertEquals(aps.get(0).getSsidStr(), SSID_2);
         assertEquals(aps.get(1).getSsidStr(), SSID_1);
+    }
 
+    @Test
+    public void scoreCacheUpdateScoresShouldNotChangeSortOrderWhenSortingDisabled()
+            throws InterruptedException {
+        Settings.Global.putInt(
+                InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                0 /* disabled */);
+
+        WifiTracker tracker = createTrackerAndInjectInitialScanResults();
+        List<AccessPoint> aps = tracker.getAccessPoints();
+        assertTrue(aps.size() == 2);
+        assertEquals(aps.get(0).getSsidStr(), SSID_1);
+        assertEquals(aps.get(1).getSsidStr(), SSID_2);
+
+        updateScoresAndWaitForAccessPointsChangedCallback();
+
+        aps = tracker.getAccessPoints();
+        assertTrue(aps.size() == 2);
+        assertEquals(aps.get(0).getSsidStr(), SSID_1);
+        assertEquals(aps.get(1).getSsidStr(), SSID_2);
     }
 
     @Test
@@ -400,6 +434,28 @@ public class WifiTrackerTest {
                 assertEquals(BADGE_1, ap.getBadge());
             } else if (ap.getSsidStr().equals(SSID_2)) {
                 assertEquals(BADGE_2, ap.getBadge());
+            }
+        }
+    }
+
+    @Test
+    public void noBadgesShouldBeInsertedIntoAccessPointWhenScoringUiDisabled()
+            throws InterruptedException {
+        Settings.Global.putInt(
+                InstrumentationRegistry.getTargetContext().getContentResolver(),
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                0 /* disabled */);
+
+        WifiTracker tracker = createTrackerAndInjectInitialScanResults();
+        updateScoresAndWaitForAccessPointsChangedCallback();
+
+        List<AccessPoint> aps = tracker.getAccessPoints();
+
+        for (AccessPoint ap : aps) {
+            if (ap.getSsidStr().equals(SSID_1)) {
+                assertEquals(ScoredNetwork.BADGING_NONE, ap.getBadge());
+            } else if (ap.getSsidStr().equals(SSID_2)) {
+                assertEquals(ScoredNetwork.BADGING_NONE, ap.getBadge());
             }
         }
     }

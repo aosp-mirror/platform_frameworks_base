@@ -1,7 +1,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkKey;
@@ -30,7 +29,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -60,8 +58,6 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     private final List<NetworkKey> mRequestedKeys = new ArrayList<>();
     private CountDownLatch mRequestScoresLatch;
 
-    private SettingOverrider mSettingsOverrider;
-
     @Test
     public void testWifiIcon() {
         String testSsid = "Test SSID";
@@ -83,6 +79,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
     @Test
     public void testBadgedWifiIcon() throws Exception {
+        // TODO(sghuman): Refactor this setup code when creating a test for the badged QsIcon.
         int testLevel = 1;
         RssiCurve mockBadgeCurve = mock(RssiCurve.class);
         Bundle attr = new Bundle();
@@ -94,12 +91,16 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                         false /* meteredHint */,
                         attr);
 
-        // Enable scoring
-        mSettingsOverrider = mContext.getSettingsProvider().acquireOverridesBuilder(this)
-                .addSetting("global", Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, "1")
-                .build();
-
+        // Must set the Settings value before instantiating the NetworkControllerImpl due to bugs in
+        // FakeSettingsProvider.
+        SettingOverrider settingsOverrider =
+                mContext.getSettingsProvider().acquireOverridesBuilder(this)
+                        .addSetting("global", Settings.Global.NETWORK_SCORING_UI_ENABLED, "1")
+                        .build();
+        super.setUp(); // re-instantiate NetworkControllImpl now that setting has been updated
         setupNetworkScoreManager();
+
+        // Test Requesting Scores
         mRequestScoresLatch = new CountDownLatch(1);
         setWifiEnabled(true);
         setWifiState(true, TEST_SSID, TEST_BSSID);
@@ -115,23 +116,23 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                 Matchers.anyInt());
         scoreCacheCaptor.getValue().updateScores(Arrays.asList(score));
 
+        //  Test badge is set
         setWifiLevel(testLevel);
-        NetworkController.SignalCallback mockCallback =
-                mock(NetworkController.SignalCallback.class);
-        mNetworkController.addCallback(mockCallback);
 
-        ArgumentCaptor<IconState> iconState = ArgumentCaptor.forClass(IconState.class);
-        Mockito.verify(mockCallback).setWifiIndicators(
-                anyBoolean(), iconState.capture(), any(), anyBoolean(), anyBoolean(), any());
+        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setWifiIndicators(
+                anyBoolean(), iconArg.capture(), any(), anyBoolean(), anyBoolean(),
+                any());
+        IconState iconState = iconArg.getValue();
 
         assertEquals("Badged Wifi Resource is set",
                 Utils.WIFI_PIE_FOR_BADGING[testLevel],
-                iconState.getValue().icon);
+                iconState.icon);
         assertEquals("SD Badge is set",
                 Utils.getWifiBadgeResource(ScoredNetwork.BADGING_SD),
-                iconState.getValue().iconOverlay);
+                iconState.iconOverlay);
 
-        mSettingsOverrider.release();
+        settingsOverrider.release();
     }
 
     private void setupNetworkScoreManager() {

@@ -16,9 +16,11 @@
 package com.android.settingslib.wifi;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -38,6 +40,7 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.WorkerThread;
 import android.util.ArraySet;
 import android.util.Log;
@@ -136,6 +139,8 @@ public class WifiTracker {
     private final NetworkScoreManager mNetworkScoreManager;
     private final WifiNetworkScoreCache mScoreCache;
     private final Set<NetworkKey> mRequestedScores = new ArraySet<>();
+    private boolean mNetworkScoringUiEnabled;
+    private final ContentObserver mObserver;
 
     @VisibleForTesting
     Scanner mScanner;
@@ -215,6 +220,16 @@ public class WifiTracker {
                 Message.obtain(mWorkHandler, WorkHandler.MSG_UPDATE_NETWORK_SCORES).sendToTarget();
             }
         });
+
+        mObserver = new ContentObserver(mWorkHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mNetworkScoringUiEnabled =
+                        Settings.Global.getInt(
+                                mContext.getContentResolver(),
+                                Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
+            }
+        };
     }
 
     /**
@@ -274,6 +289,11 @@ public class WifiTracker {
             }
         });
 
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
+                false /* notifyForDescendants */,
+                mObserver);
+        mObserver.onChange(false /* selfChange */); // Set the initial value for mScoringUiEnabled
 
         resumeScanning();
         if (!mRegistered) {
@@ -327,6 +347,7 @@ public class WifiTracker {
                 unregisterAndClearScoreCache();
             }
         });
+        mContext.getContentResolver().unregisterContentObserver(mObserver);
     }
 
     @WorkerThread
@@ -537,10 +558,11 @@ public class WifiTracker {
             }
         }
 
-
-        requestScoresForNetworkKeys(scoresToRequest);
-        for (AccessPoint ap : accessPoints) {
-            ap.updateScores(mScoreCache);
+        if (mNetworkScoringUiEnabled) {
+            requestScoresForNetworkKeys(scoresToRequest);
+            for (AccessPoint ap : accessPoints) {
+                ap.updateScores(mScoreCache);
+            }
         }
 
         // Pre-sort accessPoints to speed preference insertion
@@ -641,7 +663,7 @@ public class WifiTracker {
             if (ap.update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
                 reorder = true;
             }
-            if (ap.updateScores(mScoreCache)) {
+            if (mNetworkScoringUiEnabled && ap.updateScores(mScoreCache)) {
                 reorder = true;
             }
         }
@@ -657,6 +679,10 @@ public class WifiTracker {
      * <p>Will trigger a resort and notify listeners of changes if applicable.
      */
     private void updateNetworkScores() {
+        if (!mNetworkScoringUiEnabled) {
+            return;
+        }
+
         // Lock required to prevent accidental copying of AccessPoint states while the modification
         // is in progress. see #copyAndNotifyListeners
         long before = System.currentTimeMillis();

@@ -8178,6 +8178,14 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+         * Value to specify whether network quality scores and badging should be shown in the UI.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String NETWORK_SCORING_UI_ENABLED = "network_scoring_ui_enabled";
+
+        /**
          * Value to specify if network recommendations from
          * {@link com.android.server.NetworkScoreService} are enabled.
          *
