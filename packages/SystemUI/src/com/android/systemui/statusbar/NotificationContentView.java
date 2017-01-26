@@ -498,11 +498,6 @@ public class NotificationContentView extends FrameLayout {
                         com.android.internal.R.dimen.notification_action_list_height);
         }
 
-        if (isVisibleOrTransitioning(VISIBLE_TYPE_AMBIENT)) {
-            return mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_action_list_height);
-        }
-
         // Transition between heads-up & expanded, or pinned.
         if (mHeadsUpChild != null && mExpandedChild != null) {
             boolean transitioningBetweenHunAndExpanded =
@@ -522,7 +517,9 @@ public class NotificationContentView extends FrameLayout {
         }
 
         int hint;
-        if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
+        if (mAmbientChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_AMBIENT)) {
+            hint = mAmbientChild.getHeight();
+        } else if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = mHeadsUpChild.getHeight();
         } else if (mExpandedChild != null) {
             hint = mExpandedChild.getHeight();
@@ -684,10 +681,6 @@ public class NotificationContentView extends FrameLayout {
                     visibleView.setVisibility(VISIBLE);
                     transferRemoteInputFocus(visibleType);
                 }
-                NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
-                if (visibleWrapper != null) {
-                    visibleWrapper.setContentHeight(mContentHeight, getMinContentHeightHint());
-                }
 
                 if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
                         || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
@@ -700,6 +693,10 @@ public class NotificationContentView extends FrameLayout {
                 mVisibleType = visibleType;
                 if (changedType) {
                     focusExpandButtonIfNecessary();
+                }
+                NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
+                if (visibleWrapper != null) {
+                    visibleWrapper.setContentHeight(mContentHeight, getMinContentHeightHint());
                 }
                 updateBackgroundColor(animate);
             }
