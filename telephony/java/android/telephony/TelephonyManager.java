@@ -2690,6 +2690,28 @@ public class TelephonyManager {
         return false;
     }
 
+
+    /**
+     * Returns the package responsible of processing visual voicemail for the phone account.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
+     */
+    @Nullable
+    public String getVisualVoicemailPackageName(PhoneAccountHandle phoneAccountHandle) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony
+                        .getVisualVoicemailPackageName(mContext.getOpPackageName(),
+                                phoneAccountHandle);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
     /**
      * Enables the visual voicemail SMS filter for a phone account. When the filter is
      * enabled, Incoming SMS messages matching the OMTP VVM SMS interface will be redirected to the
