@@ -106,7 +106,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Tests for {@link NetworkScoreService}.
@@ -132,8 +132,8 @@ public class NetworkScoreServiceTest {
     @Mock private INetworkScoreCache.Stub mNetworkScoreCache, mNetworkScoreCache2;
     @Mock private IBinder mIBinder, mIBinder2;
     @Mock private INetworkRecommendationProvider mRecommendationProvider;
-    @Mock private Function<List<ScoredNetwork>, List<ScoredNetwork>> mCurrentNetworkFilter;
-    @Mock private Function<List<ScoredNetwork>, List<ScoredNetwork>> mScanResultsFilter;
+    @Mock private UnaryOperator<List<ScoredNetwork>> mCurrentNetworkFilter;
+    @Mock private UnaryOperator<List<ScoredNetwork>> mScanResultsFilter;
     @Mock private WifiInfo mWifiInfo;
     @Captor private ArgumentCaptor<List<ScoredNetwork>> mScoredNetworkCaptor;
 

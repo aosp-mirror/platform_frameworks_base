@@ -60,6 +60,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TimedRemoteCaller;
@@ -77,12 +78,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Backing service for {@link android.net.NetworkScoreManager}.
@@ -91,6 +93,7 @@ import java.util.function.Supplier;
 public class NetworkScoreService extends INetworkScoreService.Stub {
     private static final String TAG = "NetworkScoreService";
     private static final boolean DBG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VERBOSE = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Context mContext;
     private final NetworkScorerAppManager mNetworkScorerAppManager;
@@ -407,7 +410,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 }
 
                 final BiConsumer<INetworkScoreCache, Object> consumer =
-                        new FilteringCacheUpdatingConsumer(mContext, entry.getValue(),
+                        FilteringCacheUpdatingConsumer.create(mContext, entry.getValue(),
                                 entry.getKey());
                 sendCacheUpdateCallback(consumer, Collections.singleton(callbackList));
             }
@@ -424,25 +427,28 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      * accepted {@link INetworkScoreCache} implementation.
      */
     @VisibleForTesting
-    public static class FilteringCacheUpdatingConsumer
+    static class FilteringCacheUpdatingConsumer
             implements BiConsumer<INetworkScoreCache, Object> {
         private final Context mContext;
         private final List<ScoredNetwork> mScoredNetworkList;
         private final int mNetworkType;
-        // TODO(jjoslin): 1/23/17 - Consider a Map if we implement more filters.
-        private Function<List<ScoredNetwork>, List<ScoredNetwork>> mCurrentNetworkFilter;
-        private Function<List<ScoredNetwork>, List<ScoredNetwork>> mScanResultsFilter;
+        // TODO: 1/23/17 - Consider a Map if we implement more filters.
+        // These are created on-demand to defer the construction cost until
+        // an instance is actually needed.
+        private UnaryOperator<List<ScoredNetwork>> mCurrentNetworkFilter;
+        private UnaryOperator<List<ScoredNetwork>> mScanResultsFilter;
 
-        public FilteringCacheUpdatingConsumer(Context context,
+        static FilteringCacheUpdatingConsumer create(Context context,
                 List<ScoredNetwork> scoredNetworkList, int networkType) {
-            this(context, scoredNetworkList, networkType, null, null);
+            return new FilteringCacheUpdatingConsumer(context, scoredNetworkList, networkType,
+                    null, null);
         }
 
         @VisibleForTesting
-        public FilteringCacheUpdatingConsumer(Context context,
+        FilteringCacheUpdatingConsumer(Context context,
                 List<ScoredNetwork> scoredNetworkList, int networkType,
-                Function<List<ScoredNetwork>, List<ScoredNetwork>> currentNetworkFilter,
-                Function<List<ScoredNetwork>, List<ScoredNetwork>> scanResultsFilter) {
+                UnaryOperator<List<ScoredNetwork>> currentNetworkFilter,
+                UnaryOperator<List<ScoredNetwork>> scanResultsFilter) {
             mContext = context;
             mScoredNetworkList = scoredNetworkList;
             mNetworkType = networkType;
@@ -461,11 +467,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 final List<ScoredNetwork> filteredNetworkList =
                         filterScores(mScoredNetworkList, filterType);
                 if (!filteredNetworkList.isEmpty()) {
-                    networkScoreCache.updateScores(
-                            Collections.unmodifiableList(filteredNetworkList));
+                    networkScoreCache.updateScores(filteredNetworkList);
                 }
             } catch (RemoteException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                if (VERBOSE) {
                     Log.v(TAG, "Unable to update scores of type " + mNetworkType, e);
                 }
             }
@@ -554,10 +559,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      *       the computation is only done once.
      */
     @VisibleForTesting
-    public static class CurrentNetworkScoreCacheFilter
-            implements Function<List<ScoredNetwork>, List<ScoredNetwork>> {
+    static class CurrentNetworkScoreCacheFilter implements UnaryOperator<List<ScoredNetwork>> {
         private final NetworkKey mCurrentNetwork;
-        private Pair<List<ScoredNetwork>, Integer> mCache;
 
         CurrentNetworkScoreCacheFilter(Supplier<WifiInfo> wifiInfoSupplier) {
             mCurrentNetwork = NetworkKey.createFromWifiInfo(wifiInfoSupplier.get());
@@ -569,25 +572,14 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return Collections.emptyList();
             }
 
-            final int inputListHash = scoredNetworks.hashCode();
-            if (mCache == null || mCache.second != inputListHash) {
-                ScoredNetwork currentScore = null;
-                for (int i = 0; i < scoredNetworks.size(); i++) {
-                    final ScoredNetwork scoredNetwork = scoredNetworks.get(i);
-                    if (scoredNetwork.networkKey.equals(mCurrentNetwork)) {
-                        currentScore = scoredNetwork;
-                        break;
-                    }
-                }
-
-                if (currentScore == null) {
-                    mCache = Pair.create(Collections.emptyList(), inputListHash);
-                } else {
-                    mCache = Pair.create(Collections.singletonList(currentScore), inputListHash);
+            for (int i = 0; i < scoredNetworks.size(); i++) {
+                final ScoredNetwork scoredNetwork = scoredNetworks.get(i);
+                if (scoredNetwork.networkKey.equals(mCurrentNetwork)) {
+                    return Collections.singletonList(scoredNetwork);
                 }
             }
 
-            return mCache.first;
+            return Collections.emptyList();
         }
     }
 
@@ -602,15 +594,14 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      *       times in a row the computation is only done once.
      */
     @VisibleForTesting
-    public static class ScanResultsScoreCacheFilter
-            implements Function<List<ScoredNetwork>, List<ScoredNetwork>> {
-        private final List<NetworkKey> mScanResultKeys;
-        private Pair<List<ScoredNetwork>, Integer> mCache;
+    static class ScanResultsScoreCacheFilter implements UnaryOperator<List<ScoredNetwork>> {
+        private final Set<NetworkKey> mScanResultKeys;
 
         ScanResultsScoreCacheFilter(Supplier<List<ScanResult>> resultsSupplier) {
-            mScanResultKeys = new ArrayList<>();
             List<ScanResult> scanResults = resultsSupplier.get();
-            for (int i = 0; i < scanResults.size(); i++) {
+            final int size = scanResults.size();
+            mScanResultKeys = new ArraySet<>(size);
+            for (int i = 0; i < size; i++) {
                 ScanResult scanResult = scanResults.get(i);
                 mScanResultKeys.add(NetworkKey.createFromScanResult(scanResult));
             }
@@ -622,22 +613,15 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return Collections.emptyList();
             }
 
-            final int inputListHash = scoredNetworks.hashCode();
-            if (mCache == null || mCache.second != inputListHash) {
-                List<ScoredNetwork> filteredScores = new ArrayList<>();
-                for (int i = 0; i < scoredNetworks.size(); i++) {
-                    final ScoredNetwork scoredNetwork = scoredNetworks.get(i);
-                    for (int j = 0; j < mScanResultKeys.size(); j++) {
-                        final NetworkKey scanResultKey = mScanResultKeys.get(j);
-                        if (scanResultKey.equals(scoredNetwork.networkKey)) {
-                            filteredScores.add(scoredNetwork);
-                        }
-                    }
+            List<ScoredNetwork> filteredScores = new ArrayList<>();
+            for (int i = 0; i < scoredNetworks.size(); i++) {
+                final ScoredNetwork scoredNetwork = scoredNetworks.get(i);
+                if (mScanResultKeys.contains(scoredNetwork.networkKey)) {
+                    filteredScores.add(scoredNetwork);
                 }
-                mCache = Pair.create(filteredScores, inputListHash);
             }
 
-            return mCache.first;
+            return filteredScores;
         }
     }
 
@@ -796,7 +780,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     return caller.getRecommendationResult(provider, request);
                 } catch (RemoteException | TimeoutException e) {
                     Log.w(TAG, "Failed to request a recommendation.", e);
-                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                    // TODO: 12/15/16 - Keep track of failures.
                 }
             }
 
@@ -850,7 +834,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     return;
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to request a recommendation.", e);
-                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                    // TODO: 12/15/16 - Keep track of failures.
                     // Remove the timeout message
                     mHandler.removeMessages(timeoutMsg.what, pair);
                     // Will fall through and send back the default recommendation.
@@ -873,12 +857,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             if (provider != null) {
                 try {
                     provider.requestScores(networks);
-                    // TODO(jjoslin): 12/15/16 - Consider pushing null scores into the cache to
+                    // TODO: 12/15/16 - Consider pushing null scores into the cache to
                     // prevent repeated requests for the same scores.
                     return true;
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to request scores.", e);
-                    // TODO(jjoslin): 12/15/16 - Keep track of failures.
+                    // TODO: 12/15/16 - Keep track of failures.
                 }
             }
             return false;
