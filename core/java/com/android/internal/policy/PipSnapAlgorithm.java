@@ -59,6 +59,7 @@ public class PipSnapAlgorithm {
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private final int mMinimizedVisibleSize;
+    private boolean mIsMinimized;
 
     public PipSnapAlgorithm(Context context) {
         mContext = context;
@@ -73,6 +74,13 @@ public class PipSnapAlgorithm {
     public void onConfigurationChanged() {
         mOrientation = mContext.getResources().getConfiguration().orientation;
         calculateSnapTargets();
+    }
+
+    /**
+     * Sets the PIP's minimized state.
+     */
+    public void setMinimized(boolean isMinimized) {
+        mIsMinimized = isMinimized;
     }
 
     /**
@@ -251,8 +259,7 @@ public class PipSnapAlgorithm {
         final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
                 stackBounds.top));
         boundsOut.set(stackBounds);
-        if (stackBounds.left < movementBounds.left ||
-                stackBounds.left > movementBounds.right) {
+        if (mIsMinimized) {
             boundsOut.offsetTo(boundedLeft, boundsOut.top);
             return;
         }

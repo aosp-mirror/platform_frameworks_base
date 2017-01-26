@@ -114,6 +114,7 @@ class PinnedStackController {
         public void setIsMinimized(final boolean isMinimized) {
             mHandler.post(() -> {
                 mIsMinimized = isMinimized;
+                mSnapAlgorithm.setMinimized(isMinimized);
             });
         }
 

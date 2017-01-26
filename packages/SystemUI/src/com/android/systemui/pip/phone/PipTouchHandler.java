@@ -67,7 +67,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private static final int MINIMIZE_STACK_MAX_DURATION = 200;
 
     // The fraction of the stack width that the user has to drag offscreen to minimize the PIP
-    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.15f;
+    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.2f;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -183,7 +183,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         mTouchState = new PipTouchState(mViewConfig);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 2f);
         mGestures = new PipTouchGesture[] {
-                mDragToDismissGesture, mTapThroughGesture, mMinimizeGesture, mDefaultMovementGesture
+                mDragToDismissGesture, mDefaultMovementGesture
         };
         mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
         registerInputConsumer();
@@ -231,6 +231,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
     public void onMinimizedStateChanged(boolean isMinimized) {
         mIsMinimized = isMinimized;
+        mSnapAlgorithm.setMinimized(isMinimized);
     }
 
     public void onSnapToEdgeStateChanged(boolean isSnapToEdge) {
@@ -298,14 +299,13 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
-     * @return whether the current touch state is a horizontal drag offscreen.
+     * @return whether the current touch state places the pip partially offscreen.
      */
     private boolean isDraggingOffscreen(PipTouchState touchState) {
         PointF lastDelta = touchState.getLastTouchDelta();
         PointF downDelta = touchState.getDownTouchDelta();
         float left = mPinnedStackBounds.left + lastDelta.x;
-        return !(mBoundedPinnedStackBounds.left <= left && left <= mBoundedPinnedStackBounds.right)
-                && Math.abs(downDelta.x) > Math.abs(downDelta.y);
+        return !(mBoundedPinnedStackBounds.left <= left && left <= mBoundedPinnedStackBounds.right);
     }
 
     /**
@@ -429,7 +429,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mUpdatePinnedStackBoundsListener);
         mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationStart(Animator animation) {
                 mMenuController.hideMenu();
             }
         });
@@ -590,115 +590,22 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**** Gestures ****/
 
     /**
-     * Gesture controlling dragging the PIP slightly offscreen to minimize it.
-     */
-    private PipTouchGesture mMinimizeGesture = new PipTouchGesture() {
-        @Override
-        boolean onMove(PipTouchState touchState) {
-            if (mEnableMinimizing) {
-                boolean isDraggingOffscreen = isDraggingOffscreen(touchState);
-                if (touchState.startedDragging() && isDraggingOffscreen) {
-                    // Reset the minimized state once we drag horizontally
-                    setMinimizedState(false);
-                }
-
-                if (touchState.allowDraggingOffscreen() && isDraggingOffscreen) {
-                    // Move the pinned stack, but ignore the vertical movement
-                    float left = mPinnedStackBounds.left + touchState.getLastTouchDelta().x;
-                    mTmpBounds.set(mPinnedStackBounds);
-                    mTmpBounds.offsetTo((int) left, mPinnedStackBounds.top);
-                    if (!mTmpBounds.equals(mPinnedStackBounds)) {
-                        mPinnedStackBounds.set(mTmpBounds);
-                        mMotionHelper.resizeToBounds(mPinnedStackBounds);
-                    }
-                    return true;
-                } else if (mIsMinimized && touchState.isDragging()) {
-                    // Move the pinned stack, but ignore the horizontal movement
-                    PointF lastDelta = touchState.getLastTouchDelta();
-                    float top = mPinnedStackBounds.top + lastDelta.y;
-                    top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
-                            mBoundedPinnedStackBounds.bottom, top));
-                    mTmpBounds.set(mPinnedStackBounds);
-                    mTmpBounds.offsetTo(mPinnedStackBounds.left, (int) top);
-                    movePinnedStack(mTmpBounds);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onUp(PipTouchState touchState) {
-            if (mEnableMinimizing) {
-                if (touchState.isDragging()) {
-                    if (isDraggingOffscreen(touchState)) {
-                        if (shouldMinimizedPinnedStack()) {
-                            setMinimizedState(true);
-                            animateToClosestMinimizedTarget();
-                            return true;
-                        }
-                    } else if (mIsMinimized) {
-                        PointF vel = touchState.getVelocity();
-                        if (vel.length() > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                            flingToMinimizedSnapTarget(vel.y);
-                        } else {
-                            animateToClosestMinimizedTarget();
-                        }
-                        return true;
-                    }
-                } else if (mIsMinimized) {
-                    setMinimizedState(false);
-                    animateToClosestSnapTarget();
-                    return true;
-                }
-            }
-            return false;
-        }
-    };
-
-    /**
-     * Gesture controlling tapping on the PIP to show an overlay.
-     */
-    private PipTouchGesture mTapThroughGesture = new PipTouchGesture() {
-        @Override
-        boolean onMove(PipTouchState touchState) {
-            return false;
-        }
-
-        @Override
-        public boolean onUp(PipTouchState touchState) {
-            if (!touchState.isDragging() && !mIsMinimized && !mIsTappingThrough) {
-                mMenuController.showMenu();
-                mIsTappingThrough = true;
-                return true;
-            }
-            return false;
-        }
-    };
-
-    /**
      * Gesture controlling normal movement of the PIP.
      */
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
         @Override
         boolean onMove(PipTouchState touchState) {
-            if (touchState.startedDragging()) {
-                // For now, once the user has started a drag that the other gestures have not
-                // intercepted, disallow those gestures from intercepting again to drag offscreen
-                touchState.setDisallowDraggingOffscreen();
-            }
-
             if (touchState.isDragging()) {
                 // Move the pinned stack freely
                 PointF lastDelta = touchState.getLastTouchDelta();
                 float left = mPinnedStackBounds.left + lastDelta.x;
                 float top = mPinnedStackBounds.top + lastDelta.y;
-                if (!DEBUG_ALLOW_OUT_OF_BOUNDS_STACK) {
+                if (!touchState.allowDraggingOffscreen()) {
                     left = Math.max(mBoundedPinnedStackBounds.left, Math.min(
                             mBoundedPinnedStackBounds.right, left));
-                    top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
-                            mBoundedPinnedStackBounds.bottom, top));
                 }
+                top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
+                        mBoundedPinnedStackBounds.bottom, top));
                 mTmpBounds.set(mPinnedStackBounds);
                 mTmpBounds.offsetTo((int) left, (int) top);
                 movePinnedStack(mTmpBounds);
@@ -711,16 +618,58 @@ public class PipTouchHandler implements TunerService.Tunable {
         public boolean onUp(PipTouchState touchState) {
             if (touchState.isDragging()) {
                 PointF vel = mTouchState.getVelocity();
-                float velocity = PointF.length(vel.x, vel.y);
+                if (!mIsMinimized && (shouldMinimizedPinnedStack()
+                        || isHorizontalFlingTowardsCurrentEdge(vel))) {
+                    // Pip should be minimized
+                    setMinimizedState(true);
+                    animateToClosestMinimizedTarget();
+                    return true;
+                }
+                if (mIsMinimized) {
+                    // If we're dragging and it wasn't a minimize gesture
+                    // then we shouldn't be minimized.
+                    setMinimizedState(false);
+                }
+
+                final float velocity = PointF.length(vel.x, vel.y);
                 if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
                     flingToSnapTarget(velocity, vel.x, vel.y);
                 } else {
                     animateToClosestSnapTarget();
                 }
+            } else if (mIsMinimized) {
+                // This was a tap, so no longer minimized
+                animateToClosestSnapTarget();
+                setMinimizedState(false);
+            } else if (!mIsTappingThrough) {
+                mMenuController.showMenu();
+                mIsTappingThrough = true;
             } else {
                 expandPinnedStackToFullscreen();
             }
             return true;
         }
     };
+
+    /**
+     * @return whether the gesture ending in the {@param vel} is fast enough to be a fling towards
+     *         the same edge the PIP is on. Used to identify a minimize gesture.
+     */
+    private boolean isHorizontalFlingTowardsCurrentEdge(PointF vel) {
+        final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
+        final boolean isFling = PointF.length(vel.x, vel.y) > mFlingAnimationUtils
+                .getMinVelocityPxPerSecond();
+        final boolean towardsCurrentEdge = onEdge(true /* left */) && vel.x < 0
+                || onEdge(false /* right */) && vel.x > 0;
+        return towardsCurrentEdge && isHorizontal && isFling;
+    }
+
+    private boolean onEdge(boolean checkLeft) {
+        if (checkLeft) {
+            return mPinnedStackBounds.left <= mBoundedPinnedStackBounds.left;
+        } else {
+            return mPinnedStackBounds.right >= mBoundedPinnedStackBounds.right
+                    + mPinnedStackBounds.width();
+        }
+    }
 }
