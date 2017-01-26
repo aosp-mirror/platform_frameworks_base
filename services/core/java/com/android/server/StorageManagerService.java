@@ -108,6 +108,8 @@ import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.storage.AppFuseBridge;
+import com.android.server.storage.FileCollector;
+
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -817,6 +819,9 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleSystemReady() {
+        // Register kernel mapping from extensions to statistics GIDs
+        FileCollector.updateKernelExtensions();
+
         initIfReadyAndConnected();
         resetIfReadyAndConnected();
 

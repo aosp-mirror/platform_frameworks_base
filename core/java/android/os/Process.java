@@ -189,6 +189,13 @@ public class Process {
     /** {@hide} */
     public static final int LAST_APPLICATION_CACHE_GID = 29999;
 
+    /** {@hide} */
+    public static final int MEDIA_AUDIO_GID = 1055;
+    /** {@hide} */
+    public static final int MEDIA_VIDEO_GID = 1056;
+    /** {@hide} */
+    public static final int MEDIA_IMAGE_GID = 1057;
+
     /**
      * Standard priority of application threads.
      * Use with {@link #setThreadPriority(int)} and
