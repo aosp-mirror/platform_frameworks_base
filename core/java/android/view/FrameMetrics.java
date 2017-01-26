@@ -137,7 +137,7 @@ public final class FrameMetrics {
     /**
      * Identifiers for metrics available for each frame.
      *
-     * {@see {@link #getMetric(int)}}
+     * {@see #getMetric(int)}
      * @hide
      */
     @IntDef({

@@ -2340,13 +2340,13 @@ public class ActivityManager {
         public static final int FLAG_FOREGROUND = 1<<1;
 
         /**
-         * Bit for {@link #flags): set if the service is running in a
+         * Bit for {@link #flags}: set if the service is running in a
          * core system process.
          */
         public static final int FLAG_SYSTEM_PROCESS = 1<<2;
 
         /**
-         * Bit for {@link #flags): set if the service is running in a
+         * Bit for {@link #flags}: set if the service is running in a
          * persistent process.
          */
         public static final int FLAG_PERSISTENT_PROCESS = 1<<3;

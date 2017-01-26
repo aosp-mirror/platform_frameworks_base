@@ -2500,13 +2500,13 @@
         <!-- Sets the id of a view before which this one is visited in accessibility traversal.
              A screen-reader must visit the content of this view before the content of the one
              it precedes.
-             @see android.view.View#setAccessibilityTraversalBefore(int)} -->
+             {@see android.view.View#setAccessibilityTraversalBefore(int)} -->
         <attr name="accessibilityTraversalBefore" format="integer" />
 
         <!-- Sets the id of a view after which this one is visited in accessibility traversal.
              A screen-reader must visit the content of the other view before the content of
              this one.
-             @see android.view.View#setAccessibilityTraversalAfter(int)} -->
+             {@see android.view.View#setAccessibilityTraversalAfter(int)} -->
         <attr name="accessibilityTraversalAfter" format="integer" />
 
         <!-- Name of the method in this View's context to invoke when the view is
@@ -3266,8 +3266,8 @@
         <!-- The unique id for the subtype. The text service (spell checker) framework keeps track
              of enabled subtypes by ID. When the spell checker package gets upgraded, enabled IDs
              will stay enabled even if other attributes are different. If the ID is unspecified or
-             or explicitly specified to 0 in XML resources,
-             {@code Arrays.hashCode(new Object[] {subtypeLocale, extraValue}) will be used instead.
+             explicitly specified to 0 in XML resources,
+             {@code Arrays.hashCode(new Object[] {subtypeLocale, extraValue})} will be used instead.
               -->
         <attr name="subtypeId" />
         <!-- The BCP-47 Language Tag of the subtype.  This replaces

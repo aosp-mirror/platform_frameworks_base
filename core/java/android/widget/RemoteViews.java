@@ -3302,7 +3302,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Applies the views asynchronously, moving as much of the task on the background
      * thread as possible.
      *
-     * @see {@link #apply(Context, ViewGroup)}
+     * @see #apply(Context, ViewGroup)
      * @param context Default context to use
      * @param parent Parent that the resulting view hierarchy will be attached to. This method
      * does <strong>not</strong> attach the hierarchy. The caller should do so when appropriate.
@@ -3457,7 +3457,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Applies all the actions to the provided view, moving as much of the task on the background
      * thread as possible.
      *
-     * @see {@link #reapply(Context, View)}
+     * @see #reapply(Context, View)
      * @param context Default context to use
      * @param v The view to apply the actions to.  This should be the result of
      * the {@link #apply(Context,ViewGroup)} call.
