@@ -18,6 +18,7 @@ package android.net.wifi.hotspot2;
 
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.Policy;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -28,13 +29,12 @@ import android.os.Parcel;
  * For more info, refer to Hotspot 2.0 PPS MO defined in section 9.1 of the Hotspot 2.0
  * Release 2 Technical Specification.
  *
- * Currently, only HomeSP and Credential subtrees are supported.
- *
  * @hide
  */
 public final class PasspointConfiguration implements Parcelable {
     public HomeSP homeSp = null;
     public Credential credential = null;
+    public Policy policy = null;
 
     /**
      * Constructor for creating PasspointConfiguration with default values.
@@ -54,6 +54,9 @@ public final class PasspointConfiguration implements Parcelable {
             if (source.credential != null) {
                 credential = new Credential(source.credential);
             }
+            if (source.policy != null) {
+                policy = new Policy(source.policy);
+            }
         }
     }
 
@@ -66,6 +69,7 @@ public final class PasspointConfiguration implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(homeSp, flags);
         dest.writeParcelable(credential, flags);
+        dest.writeParcelable(policy, flags);
     }
 
     @Override
@@ -77,9 +81,10 @@ public final class PasspointConfiguration implements Parcelable {
             return false;
         }
         PasspointConfiguration that = (PasspointConfiguration) thatObject;
-        return (homeSp == null ? that.homeSp == null : homeSp.equals(that.homeSp)) &&
-                (credential == null ? that.credential == null :
-                    credential.equals(that.credential));
+        return (homeSp == null ? that.homeSp == null : homeSp.equals(that.homeSp))
+                && (credential == null ? that.credential == null :
+                    credential.equals(that.credential))
+                && (policy == null) ? that.policy == null : policy.equals(that.policy);
     }
 
     /**
@@ -94,6 +99,9 @@ public final class PasspointConfiguration implements Parcelable {
         if (credential == null || !credential.validate()) {
             return false;
         }
+        if (policy != null && !policy.validate()) {
+            return false;
+        }
         return true;
     }
 
@@ -104,6 +112,7 @@ public final class PasspointConfiguration implements Parcelable {
                 PasspointConfiguration config = new PasspointConfiguration();
                 config.homeSp = in.readParcelable(null);
                 config.credential = in.readParcelable(null);
+                config.policy = in.readParcelable(null);
                 return config;
             }
             @Override
