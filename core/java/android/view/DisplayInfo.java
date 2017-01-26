@@ -519,6 +519,20 @@ public final class DisplayInfo implements Parcelable {
                 logicalHeight : logicalWidth;
     }
 
+    public boolean isHdr() {
+        int[] types = hdrCapabilities.getSupportedHdrTypes();
+        return types != null && types.length > 0;
+    }
+
+    public boolean isWideColorGamut() {
+        for (int colorMode : supportedColorModes) {
+            if (colorMode == Display.COLOR_MODE_DCI_P3 || colorMode > Display.COLOR_MODE_SRGB) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Returns true if the specified UID has access to this display.
      */

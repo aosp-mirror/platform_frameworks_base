@@ -83,7 +83,7 @@ public class SplitAssetDependencyLoader
             throws PackageParser.PackageParserException {
         final AssetManager assets = new AssetManager();
         try {
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
 
             for (String assetPath : assetPaths) {
