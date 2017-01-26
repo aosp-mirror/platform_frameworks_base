@@ -56,7 +56,7 @@ public class WifiSignalController extends
     private final WifiNetworkScoreCache mScoreCache;
     private final WifiStatusTracker mWifiTracker;
 
-    private boolean mScoringEnabled = false;
+    private boolean mScoringUiEnabled = false;
 
     public WifiSignalController(Context context, boolean hasMobileData,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController,
@@ -95,25 +95,26 @@ public class WifiSignalController extends
 
         // Setup scoring
         mNetworkScoreManager = networkScoreManager;
+        configureScoringGating();
+        registerScoreCache();
+    }
+
+    private void configureScoringGating() {
         ContentObserver observer = new ContentObserver(new Handler(Looper.getMainLooper())) {
             @Override
             public void onChange(boolean selfChange) {
-                mScoringEnabled =
+                mScoringUiEnabled =
                         Settings.Global.getInt(
                                 mContext.getContentResolver(),
-                                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0) == 1;
-                if (!mScoringEnabled) {
-                    mScoreCache.clearScores();
-                }
+                                Settings.Global.NETWORK_SCORING_UI_ENABLED, 0) == 1;
             }
         };
-        ContentResolver cr = mContext.getContentResolver();
-        cr.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED),
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
                 false /* notifyForDescendants */,
                 observer);
-        observer.onChange(false /* selfChange */);
-        registerScoreCache();
+
+        observer.onChange(false /* selfChange */); // Set the initial values
     }
 
     private void registerScoreCache() {
@@ -199,7 +200,7 @@ public class WifiSignalController extends
      * <p>{@link #updateScoreCacheIfNecessary} should be called prior to this method.
      */
     private int getWifiBadgeEnum() {
-        if (!mScoringEnabled || mWifiTracker.networkKey == null) {
+        if (!mScoringUiEnabled || mWifiTracker.networkKey == null) {
             return ScoredNetwork.BADGING_NONE;
         }
         ScoredNetwork score = mScoreCache.getScoredNetwork(mWifiTracker.networkKey);
