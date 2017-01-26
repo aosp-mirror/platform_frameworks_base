@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<!--
+     Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,12 +14,44 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pip_dismiss_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/pip_dismiss_background"
-    android:foreground="@drawable/pip_dismiss"
-    android:alpha="0"
-    android:forceHasOverlappingRendering="false" />
+    android:alpha="0">
+
+    <!-- The height of the below view needs to be animated from a window
+         so it needs to be in a container to resize smoothly -->
+    <View
+        android:id="@+id/gradient_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:background="@drawable/pip_dismiss_background" />
+
+    <LinearLayout
+        android:id="@+id/pip_dismiss_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingBottom="32dp" >
+
+        <ImageView
+            android:id="@+id/pip_dismiss_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="2dp"
+            android:src="@drawable/pip_dismiss"
+            android:tint="#FFFFFFFF" />
+
+        <TextView
+            android:id="@+id/pip_dismiss_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pip_phone_close"
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</FrameLayout>
