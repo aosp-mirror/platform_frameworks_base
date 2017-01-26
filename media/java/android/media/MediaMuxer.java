@@ -95,7 +95,8 @@ final public class MediaMuxer {
     public @interface Format {}
 
     // All the native functions are listed here.
-    private static native long nativeSetup(@NonNull FileDescriptor fd, int format);
+    private static native long nativeSetup(@NonNull FileDescriptor fd, int format)
+            throws IllegalArgumentException, IOException;
     private static native void nativeRelease(long nativeObject);
     private static native void nativeStart(long nativeObject);
     private static native void nativeStop(long nativeObject);
@@ -134,24 +135,44 @@ final public class MediaMuxer {
         if (path == null) {
             throw new IllegalArgumentException("path must not be null");
         }
-        if (format != OutputFormat.MUXER_OUTPUT_MPEG_4 &&
-                format != OutputFormat.MUXER_OUTPUT_WEBM) {
-            throw new IllegalArgumentException("format is invalid");
-        }
         // Use RandomAccessFile so we can open the file with RW access;
         // RW access allows the native writer to memory map the output file.
         RandomAccessFile file = null;
         try {
             file = new RandomAccessFile(path, "rws");
             FileDescriptor fd = file.getFD();
-            mNativeObject = nativeSetup(fd, format);
-            mState = MUXER_STATE_INITIALIZED;
-            mCloseGuard.open("release");
+            setUpMediaMuxer(fd, format);
         } finally {
             if (file != null) {
                 file.close();
             }
         }
+    }
+
+    /**
+     * Constructor.
+     * Creates a media muxer that writes to the specified FileDescriptor. File descriptor
+     * must be seekable and writable. Application should not use the file referenced
+     * by this file descriptor until {@link #stop}. It is the application's responsibility
+     * to close the file descriptor. It is safe to do so as soon as this call returns.
+     * @param fd The FileDescriptor of the output media file.
+     * @param format The format of the output media file.
+     * @see android.media.MediaMuxer.OutputFormat
+     * @throws IllegalArgumentException if fd is invalid or format is not supported.
+     * @throws IOException if failed to open the file for write.
+     */
+    public MediaMuxer(@NonNull FileDescriptor fd, @Format int format) throws IOException {
+        setUpMediaMuxer(fd, format);
+    }
+
+    private void setUpMediaMuxer(@NonNull FileDescriptor fd, @Format int format) throws IOException {
+        if (format != OutputFormat.MUXER_OUTPUT_MPEG_4 &&
+                format != OutputFormat.MUXER_OUTPUT_WEBM) {
+            throw new IllegalArgumentException("format: " + format + " is invalid");
+        }
+        mNativeObject = nativeSetup(fd, format);
+        mState = MUXER_STATE_INITIALIZED;
+        mCloseGuard.open("release");
     }
 
     /**
