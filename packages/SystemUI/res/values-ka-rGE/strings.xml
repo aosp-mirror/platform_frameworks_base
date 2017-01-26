@@ -412,27 +412,21 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"ქსელის ჟურნალირება"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-ის გაუქმება"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-ის გათიშვა"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"თქვენს მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა. დამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"თქვენ დაუკავშირდით <xliff:g id="VPN_APP">%1$s</xliff:g>-ს, რომელსაც თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების, მონიტორინგი შეუძლია."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-ის პარამეტრების გახსნა"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"თქვენმა ადმინისტრატორმა ქსელის ჟურნალირება ჩართო, რომელიც თქვენი მოწყობილობის ტრაფიკის მონიტორინგს ახორციელებს.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"თქვენ მიეცით ნებართვა აპს, დააყენოს VPN კავშირი.\n\nამ აპს შეუძლია თქვენი მოწყობილობის და ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"თქვენს მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა.\n\nთქვენ დაკავშირებული ხართ VPN-თან, რომელსაც თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი შეუძლია.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს.\n\nგარდა ამისა, თქვენ დაკავშირებული ხართ VPN-თან, რომელსაც ასევე შეუძლია თქვენი ქსელის აქტივობის მონიტორინგი."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც თქვენი პირადი ქსელის აქტივობის მონიტორინგი შეუძლია, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ის დაკავშირებულია <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი შეუძლია.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"თქვენი სამუშაო პროფილი <xliff:g id="ORGANIZATION">%1$s</xliff:g>-ის მიერ იმართება. ის დაკავშირებულია <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი სამსახურის ქსელის აქტივობის, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების მონიტორინგი.\n\nასევე, დაკავშირებული ხართ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"თქვენს მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორაციული წვდომის, აპებისა და მონაცემების (მათ შორის, თქვენი მოწყობილობის მდებარეობის ინფორმაციის) მონიტორინგი და მართვა.\n\nთქვენ დაკავშირებული ხართ <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი შეუძლია.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"იხილეთ განბლოკვამდე"</string>

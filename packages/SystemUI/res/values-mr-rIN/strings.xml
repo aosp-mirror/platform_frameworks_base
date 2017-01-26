@@ -417,19 +417,16 @@
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"आपण <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सेटिंग्ज उघडा"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे निरीक्षण करते.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"आपण VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, आपल्या डिव्हाइस आणि नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
     <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nआपला प्रशासक ईमेल, अॅप्स आणि वेबसाइटच्या समावेशासह आपल्या नेटवर्क क्रियाकलापाचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क क्रियाकलापाचे निरीक्षण करू शकते."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"आपले कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. ते <xliff:g id="APPLICATION">%2$s</xliff:g> शी कनेक्ट केलेले आहे, जे ईमेल, अॅप्स आणि वेबसाइटच्या समावेशासह आपल्या कार्य नेटवर्क क्रियाकलापाचे निरीक्षण करते. \n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"आपले कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले आहे. ते <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nआपण <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शी देखील कनेक्‍ट केले आहे, जे आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
     <skip />

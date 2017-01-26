@@ -412,16 +412,14 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Netværksregistrering"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Afbryd VPN-forbindelse"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til din enhed, og din enheds placeringsoplysninger. Kontakt din administrator for at få flere oplysninger."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Du har forbindelse til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåge din netværksaktivitet, bl.a. e-mails, apps og websites."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Åbn VPN-indstillinger"</string>
     <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
     <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Du gav en app tilladelse til at konfigurere en VPN-forbindelse.\n\nDenne app kan overvåge din enhed og netværksaktivitet, bl.a. e-mails, apps og websites."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til din enhed, og din enheds placeringsoplysninger.\n\nDu har forbindelse til et VPN-netværk, der kan overvåge din netværksaktivitet, herunder e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
     <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -431,8 +429,7 @@
     <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
     <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Din arbejdsprofil administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den er forbundet til <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan overvåge din arbejdsrelaterede netværksaktivitet, bl.a. e-mails, apps og websites.\n\nDu er også forbundet til <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan overvåge din private netværksaktivitet."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"Din enhed administreres af <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDin administrator kan overvåge og administrere indstillinger, virksomhedsadgang, apps, data, der er knyttet til din enhed, og din enheds placeringsoplysninger.\n\nDu har forbindelse til <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan overvåge din netværksaktivitet, herunder e-mails, apps og websites.\n\nKontakt din administrator for at få flere oplysninger."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheden vil forblive låst, indtil du manuelt låser den op"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Modtag underretninger hurtigere"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Se dem, før du låser op"</string>

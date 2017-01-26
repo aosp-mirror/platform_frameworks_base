@@ -412,27 +412,21 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"የአውታረ መረብ ምዝግብ ማስታወሻ መያዝ"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN አሰናክል"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"የVPN ግንኙነት አቋርጥ"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚተዳደረው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን እና ውሂብን እና የመሣሪያዎን አካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ። ተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"የVPN ቅንብሮችን ይክፈቱ"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"የእርስዎ አስተዳዳሪ የአውታረ መረብ ምዝግብ ማስታወሻ መያዝን አብርተዋል፣ ይህም በመሣሪያዎ ላይ ያለውን ትራፊክ ይከታተላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"አንድ መተግበሪያ የVPN ግንኙነት እንዲያዋቅር ፍቃድ ሰጥተውታል።\n\nይህ መተግበሪያ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የመሣሪያዎን እና የአውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።"</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚተዳደረው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን እና ውሂብን እና የመሣሪያዎን አካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nእርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችል ቪፒኤን ጋር ተገናኝተዋል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"የእርስዎ የስራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚቀናበረው።\n\nየእርስዎ አስተዳዳሪ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።\n\nእርስዎ እንዲሁም የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችል ቪፒኤን ጋር ተገናኝተዋል።"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን ከሚከታተለው ከ<xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"የእርስዎ የስራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚቀናበረው። ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናጥቷል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"የስራ መገለጫዎ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው እየተዳደረ ያለው። ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝተዋል።\n\nእንዲሁም የግል አውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋርም ተገናኝተዋል።"</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> ነው የሚተዳደረው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን እና ውሂብን እና የመሣሪያዎን አካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nእርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ከሚችለው <xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝተዋል።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ከመክፈትዎ በፊት ይመልከቷቸው"</string>
