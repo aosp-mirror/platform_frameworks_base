@@ -1578,6 +1578,16 @@
     <permission android:name="android.permission.RECEIVE_STK_COMMANDS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by an ImsService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature|privileged
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_IMS_SERVICE"
+        android:protectionLevel="signature|privileged" />
+
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->
