@@ -156,6 +156,11 @@
         android:fragment="com.android.systemui.tuner.NavBarTuner" />
 
     <Preference
+            android:key="lockscreen"
+            android:title="@string/accessibility_desc_lock_screen"
+            android:fragment="com.android.systemui.tuner.LockscreenFragment" />
+
+    <Preference
             android:key="other"
             android:title="@string/other"
             android:fragment="com.android.systemui.tuner.OtherPrefs" />

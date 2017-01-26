@@ -18,6 +18,11 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_BUTTON;
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_LEFT_UNLOCK;
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON;
+import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNLOCK;
+import static com.android.systemui.tuner.LockscreenFragment.getIntentButton;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -31,7 +36,9 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,6 +50,7 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.service.media.CameraPrewarmService;
 import android.telecom.TelecomManager;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -74,6 +82,9 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
+import com.android.systemui.tuner.LockscreenFragment;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -81,7 +92,8 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
  */
 public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickListener,
         UnlockMethodCache.OnUnlockMethodChangedListener,
-        AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener {
+        AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener,
+        Tunable {
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
@@ -148,7 +160,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private Drawable mLeftAssistIcon;
 
     private IntentButton mRightButton = new DefaultRightButton();
+    private IntentButton mRightDefault = mRightButton;
+    private IntentButton mRightPlugin;
+    private String mRightButtonStr;
     private IntentButton mLeftButton = new DefaultLeftButton();
+    private IntentButton mLeftDefault = mLeftButton;
+    private IntentButton mLeftPlugin;
+    private String mLeftButtonStr;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -245,6 +263,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 mRightListener, IntentButtonProvider.VERSION, false /* Only allow one */);
         PluginManager.getInstance(getContext()).addPluginListener(LEFT_BUTTON_PLUGIN,
                 mLeftListener, IntentButtonProvider.VERSION, false /* Only allow one */);
+        TunerService.get(getContext()).addTunable(this, LockscreenFragment.LOCKSCREEN_LEFT_BUTTON,
+                LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON);
     }
 
     @Override
@@ -252,6 +272,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onDetachedFromWindow();
         PluginManager.getInstance(getContext()).removePluginListener(mRightListener);
         PluginManager.getInstance(getContext()).removePluginListener(mLeftListener);
+        TunerService.get(getContext()).removeTunable(this);
     }
 
     private void initAccessibility() {
@@ -552,8 +573,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mPhoneStatusBar.isKeyguardCurrentlySecure()) {
             AsyncTask.execute(runnable);
         } else {
+            boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
+                    && TunerService.get(getContext()).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
             mPhoneStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
-                    false /* dismissShade */, false /* afterKeyguardGone */, true /* deferred */);
+                    dismissShade, false /* afterKeyguardGone */, true /* deferred */);
         }
     }
 
@@ -571,7 +594,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 }
             });
         } else {
-            mActivityStarter.startActivity(mLeftButton.getIntent(), false /* dismissShade */);
+            boolean dismissShade = !TextUtils.isEmpty(mLeftButtonStr)
+                    && TunerService.get(getContext()).getValue(LOCKSCREEN_LEFT_UNLOCK, 1) != 0;
+            mActivityStarter.startActivity(mLeftButton.getIntent(), dismissShade);
         }
     }
 
@@ -763,15 +788,33 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         inflateCameraPreview();
     }
 
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (LockscreenFragment.LOCKSCREEN_LEFT_BUTTON.equals(key)) {
+            mLeftButtonStr = newValue;
+            mLeftIsVoiceAssist = TextUtils.isEmpty(mLeftButtonStr) && mLeftPlugin == null;
+            mLeftButton = getIntentButton(mContext, mLeftButtonStr, mLeftPlugin, mLeftDefault);
+            updateLeftAffordance();
+        } else {
+            mRightButtonStr = newValue;
+            mRightButton = getIntentButton(mContext, mRightButtonStr, mRightPlugin, mRightDefault);
+            updateRightAffordanceIcon();
+            updateCameraVisibility();
+            inflateCameraPreview();
+        }
+    }
+
     private void setRightButton(IntentButton button) {
-        mRightButton = button;
+        mRightPlugin = button;
+        mRightButton = getIntentButton(mContext, mRightButtonStr, mRightPlugin, mRightDefault);
         updateRightAffordanceIcon();
         updateCameraVisibility();
         inflateCameraPreview();
     }
 
     private void setLeftButton(IntentButton button) {
-        mLeftButton = button;
+        mLeftPlugin = button;
+        mLeftButton = getIntentButton(mContext, mLeftButtonStr, mLeftPlugin, mLeftDefault);
         mLeftIsVoiceAssist = false;
         updateLeftAffordance();
     }
@@ -785,7 +828,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onPluginDisconnected(IntentButtonProvider plugin) {
-            setRightButton(new DefaultRightButton());
+            setRightButton(null);
         }
     };
 
@@ -798,7 +841,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onPluginDisconnected(IntentButtonProvider plugin) {
-            setLeftButton(new DefaultLeftButton());
+            setLeftButton(null);
         }
     };
 
