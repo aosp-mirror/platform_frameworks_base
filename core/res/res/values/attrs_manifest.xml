@@ -2233,7 +2233,7 @@
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
-         also include zero or more {@link #IntentCategory <category> and
+         also include zero or more {@link #IntentCategory <category>} and
          {@link #Extra <extra>} tags. -->
     <declare-styleable name="Intent">
         <!-- The action name to assign to the Intent, as per

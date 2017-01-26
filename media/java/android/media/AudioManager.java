@@ -3902,7 +3902,9 @@ public class AudioManager {
      * currently connected to the system and meeting the criteria specified in the
      * <code>flags</code> parameter.
      * @param flags A set of bitflags specifying the criteria to test.
-     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@link GET_DEVICES_ALL}.
+     * @see #GET_DEVICES_OUTPUTS
+     * @see #GET_DEVICES_INPUTS
+     * @see #GET_DEVICES_ALL
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
      */
     public AudioDeviceInfo[] getDevices(int flags) {
@@ -3973,7 +3975,9 @@ public class AudioManager {
      * parameter.
      * This is an internal function. The public API front is getDevices(int).
      * @param flags A set of bitflags specifying the criteria to test.
-     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@link GET_DEVICES_ALL}.
+     * @see #GET_DEVICES_OUTPUTS
+     * @see #GET_DEVICES_INPUTS
+     * @see #GET_DEVICES_ALL
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
      * @hide
      */
@@ -4019,7 +4023,7 @@ public class AudioManager {
      * Unregisters an {@link AudioDeviceCallback} object which has been previously registered
      * to receive notifications of changes to the set of connected audio devices.
      * @param callback The {@link AudioDeviceCallback} object that was previously registered
-     * with {@link AudioManager#registerAudioDeviceCallback) to be unregistered.
+     * with {@link AudioManager#registerAudioDeviceCallback} to be unregistered.
      */
     public void unregisterAudioDeviceCallback(AudioDeviceCallback callback) {
         synchronized (mDeviceCallbacks) {

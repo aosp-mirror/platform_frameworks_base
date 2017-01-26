@@ -1315,7 +1315,7 @@ public abstract class Drawable {
          * provide an appropriate Resources object.
          *
          * @return a new drawable object based on this constant state
-         * @see {@link #newDrawable(Resources)}
+         * @see #newDrawable(Resources)
          */
         public abstract @NonNull Drawable newDrawable();
 
