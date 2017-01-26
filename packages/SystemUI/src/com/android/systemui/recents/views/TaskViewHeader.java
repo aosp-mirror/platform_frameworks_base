@@ -462,6 +462,7 @@ public class TaskViewHeader extends FrameLayout
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
+        mDismissButton.setContentDescription(t.dismissDescription);
         mDismissButton.setOnClickListener(this);
         mDismissButton.setClickable(false);
         ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
@@ -498,6 +499,7 @@ public class TaskViewHeader extends FrameLayout
 
         // In accessibility, a single click on the focused app info button will show it
         if (touchExplorationEnabled) {
+            mIconView.setContentDescription(t.appInfoDescription);
             mIconView.setOnClickListener(this);
             mIconView.setClickable(true);
         }
