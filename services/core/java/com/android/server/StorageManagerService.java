@@ -2080,9 +2080,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public String getPrimaryStorageUuid() {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
-        waitForReady();
-
         synchronized (mLock) {
             return mPrimaryStorageUuid;
         }
