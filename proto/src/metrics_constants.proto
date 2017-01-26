@@ -3339,6 +3339,13 @@ message MetricsEvent {
     // ACTION: Settings -> Display -> Theme
     ACTION_THEME = 816;
 
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Select to Speak
+    // ACTION: Select to Speak configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SELECT_TO_SPEAK = 817;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
