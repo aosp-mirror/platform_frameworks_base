@@ -1119,8 +1119,8 @@ public final class Debug
      * @hide
      */
     public static void startMethodTracing(String traceName, FileDescriptor fd,
-        int bufferSize, int flags) {
-        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags, false, 0);
+        int bufferSize, int flags, boolean streamOutput) {
+        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags, false, 0, streamOutput);
     }
 
     /**

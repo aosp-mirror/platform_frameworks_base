@@ -115,6 +115,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mProfileFile;
     private int mSamplingInterval;
     private boolean mAutoStop;
+    private boolean mStreaming;   // Streaming the profiling output to a file.
     private int mDisplayId;
     private int mStackId;
 
@@ -256,6 +257,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mProfileFile = null;
         mSamplingInterval = 0;
         mAutoStop = false;
+        mStreaming = false;
         mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
         mStackId = INVALID_STACK_ID;
@@ -277,6 +279,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAutoStop = false;
                 } else if (opt.equals("--sampling")) {
                     mSamplingInterval = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--streaming")) {
+                    mStreaming = true;
                 } else if (opt.equals("-R")) {
                     mRepeat = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("-S")) {
@@ -354,7 +358,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (fd == null) {
                     return 1;
                 }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
+                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
+                                                mStreaming);
             }
 
             pw.println("Starting: " + intent);
@@ -659,6 +664,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
         mSamplingInterval = 0;
+        mStreaming = false;
 
         String process = null;
 
@@ -672,6 +678,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     userId = UserHandle.parseUserArg(getNextArgRequired());
                 } else if (opt.equals("--wall")) {
                     wall = true;
+                } else if (opt.equals("--streaming")) {
+                    mStreaming = true;
                 } else if (opt.equals("--sampling")) {
                     mSamplingInterval = Integer.parseInt(getNextArgRequired());
                 } else {
@@ -716,7 +724,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (fd == null) {
                 return -1;
             }
-            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false);
+            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming);
         }
 
         try {
@@ -2425,7 +2433,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
-            pw.println("          [--sampling INTERVAL] [-R COUNT] [-S]");
+            pw.println("          [--sampling INTERVAL] [--streaming] [-R COUNT] [-S]");
             pw.println("          [--track-allocation] [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start an Activity.  Options are:");
             pw.println("      -D: enable debugging");
@@ -2434,6 +2442,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --start-profiler <FILE>: start profiler and send results to <FILE>");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples (use with --start-profiler)");
+            pw.println("      --streaming: stream the profiling output to the specified file");
+            pw.println("          (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      -R: repeat the activity launch <COUNT> times.  Prior to each repeat,");
             pw.println("          the top activity will be finished.");
@@ -2480,11 +2490,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      stop: stop tracing IPC transactions and dump the results to file.");
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
             pw.println("  profile [start|stop] [--user <USER_ID> current] [--sampling INTERVAL]");
-            pw.println("          <PROCESS> <FILE>");
+            pw.println("          [--streaming] <PROCESS> <FILE>");
             pw.println("      Start and stop profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to profile; uses current user if not specified.");
+            pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
+            pw.println("          between samples");
+            pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("  dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");

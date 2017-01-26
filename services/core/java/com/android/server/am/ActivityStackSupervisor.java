@@ -1322,7 +1322,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         }
 
                         profilerInfo = new ProfilerInfo(profileFile, profileFd,
-                                mService.mSamplingInterval, mService.mAutoStopProfiler);
+                                mService.mSamplingInterval, mService.mAutoStopProfiler,
+                                mService.mStreamingOutput);
                     }
                 }
             }
