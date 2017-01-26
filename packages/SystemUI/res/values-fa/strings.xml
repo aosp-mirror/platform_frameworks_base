@@ -412,16 +412,14 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"گزارش‌گیری شبکه"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"‏غیرفعال کردن VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏قطع اتصال VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"دستگاهتان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرست شما می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را مدیریت کند و بر آن‌ها نظارت داشته باشد. برای اطلاعات بیشتر، با سرپرست خود تماس بگیرید."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"به <xliff:g id="VPN_APP">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏باز کردن تنظیمات VPN"</string>
     <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
     <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏شما به برنامه‌ای برای تنظیم اتصال VPN اجازه دادید.\n\n این برنامه می‌تواند دستگاه و فعالیت شبکه‌تان را کنترل کند، از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"‏دستگاهتان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرست شما می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را مدیریت کند و بر آن‌ها نظارت داشته باشد.\n\nشما با یک VPN مرتبط هستید که می‌تواند بر فعالیت شبکه شما (ازجمله رایانامه‌ها، برنامه‌ها و وب‌سایت‌ها) نظارت داشته باشد.\n\nبرای اطلاعات بیشتر، با سرپرست خود تماس بگیرید."</string>
     <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
     <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -431,8 +429,7 @@
     <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
     <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این به <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> متصل است که می‌تواند فعالیت شبکه کاری‌تان از جمله رایانامه، برنامه و وب‌سایت‌ها را کنترل کند.\n\nشما همچنین به <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> متصل هستید که می‌تواند فعالیت شبکه شخصی‌تان را کنترل کند."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"دستگاهتان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرست شما می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را مدیریت کند و بر آن‌ها نظارت داشته باشد.\n\nشما با <xliff:g id="APPLICATION">%2$s</xliff:g> مرتبط هستید که می‌تواند بر فعالیت شبکه شما (ازجمله رایانامه‌ها، برنامه‌ها و وب‌سایت‌ها) نظارت داشته باشد.\n\nبرای اطلاعات بیشتر، با سرپرست خود تماس بگیرید."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"دریافت سریع‌تر اعلان‌ها"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>

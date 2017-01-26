@@ -410,27 +410,21 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Сүлжээний лог"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN идэвхгүйжүүлэх"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN таслах"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны төхөөрөмжийг удирддаг\n\nТаны админ тохиргоо, байгууллагын хандалт, апп, таны төхөөрөмжтэй холбоотой өгөгдөл болон байршлын мэдээллийг хянаж, удирдах боломжтой. Дэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN тохиргоог нээх"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Та апп-д VPN холболт хийхийг зөвшөөрсөн байна.\n\nЭнэхүү апп нь таны имэйл, апп, вэбсайт зэрэг төхөөрөмж болон сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны төхөөрөмжийг удирддаг\n\nТаны админ тохиргоо, байгууллагын хандалт, апп, таны төхөөрөмжтэй холбоотой өгөгдөл, болон байршлын мэдээллийг хянаж, удирдах боломжтой.\n\nТа имэйл, апп, вэб хуудас зэрэг таны сүлжээний үйл ажиллагааг хянах боломжтой VPN-д холбогдсон байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг.\n\nТаны админ имэйл, апп болон вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу.\n\nТа сүлжээний үйл ажиллагааг хянах боломжтой VPN-д холбогдсон байна."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Та <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны имэйл, апп, вэбсайт зэрэг сүлжээний хувийн үйл ажиллагааг хянах боломжтой."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Та имэйл, апп, вэб хуудас зэрэг хувийн сүлжээнийхээ үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны ажлын профайлыг удирддаг. Энэ нь таны имэйл, апп, вэб хуудас зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-тэй холбогдсон.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Таны ажлын профайлыг <xliff:g id="ORGANIZATION">%1$s</xliff:g> удирддаг. Энэ нь <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-тай холбогдсон бөгөөд таны имэйл, апп, вэбсайт зэрэг ажлын сүлжээний үйл ажиллагааг хянах боломжтой.\n\nМөн та <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-д холбогдсон бөгөөд энэ нь таны сүлжээний хувийн үйл ажиллагааг хянаж чадна."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> таны төхөөрөмжийг удирддаг\n\nТаны админ тохиргоо, байгууллагын хандалт, апп, таны төхөөрөмжтэй холбоотой өгөгдөл болон байршлын мэдээллийг хянаж, удирдах боломжтой.\n\nТа имэйл, апп, вэб хуудас зэрэг таны сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="APPLICATION">%2$s</xliff:g>-д холбогдсон байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>

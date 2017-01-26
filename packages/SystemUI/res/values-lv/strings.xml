@@ -414,16 +414,14 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Tīkla reģistrēšana"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Atspējot VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Atvienot VPN tīklu"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas saistīti ar jūsu ierīci, kā arī informāciju par ierīces atrašanās vietu. Lai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Atvērt VPN iestatījumus"</string>
     <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
     <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Jūs piešķīrāt lietotnei atļauju izveidot savienojumu ar VPN tīklu.\n\nŠī lietotne var pārraudzīt jūsu ierīcē un tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas saistīti ar jūsu ierīci, kā arī informāciju par ierīces atrašanās vietu.\n\nIr izveidots savienojums ar VPN tīklu, kurā var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
     <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -433,8 +431,7 @@
     <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
     <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Jūsu darba profilu pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Tas ir saistīts ar lietojumprogrammu <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, kura var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nIr piesaistīta arī lietojumprogramma <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, kas var pārraudzīt jūsu tīklā veiktās privātās darbības."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"Jūsu ierīci pārvalda <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJūsu administrators var pārraudzīt un pārvaldīt iestatījumus, korporatīvo piekļuvi, lietotnes un datus, kas saistīti ar jūsu ierīci, kā arī informāciju par ierīces atrašanās vietu.\n\nIr izveidots savienojums ar <xliff:g id="APPLICATION">%2$s</xliff:g>, kurā var pārraudzīt jūsu tīklā veiktās darbības, tostarp e-pasta ziņojumus, lietotnes un vietnes.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Ierīce būs bloķēta, līdz to manuāli atbloķēsiet."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Saņemiet paziņojumus ātrāk"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Skatiet tos pirms atbloķēšanas."</string>

@@ -414,16 +414,14 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Rexistro na rede"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Desactivar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> xestiona o teu dispositivo.\n\nO teu administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información sobre a súa localización. Para obter máis información, contacta co administrador."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Estás conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode controlar a túa actividade na rede, mesmo os correos electrónicos, as aplicacións e os sitios web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Abrir configuración da VPN"</string>
     <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
     <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Outorgaches permiso a unha aplicación para configurar unha conexión VPN.\n\nEsta aplicación pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> xestiona o teu dispositivo.\n\nO teu administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información sobre a súa localización.\n\nEstás conectado a unha VPN, que pode controlar a túa actividade da rede, mesmo os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, contacta co administrador."</string>
     <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
     <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -433,8 +431,7 @@
     <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
     <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Está conectado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pode supervisar a túa actividade na rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nTamén estás conectado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pode supervisar a túa actividade persoal na rede."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> xestiona o teu dispositivo.\n\nO teu administrador pode controlar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información sobre a súa localización.\n\nEstás conectado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode controlar a túa actividade da rede, mesmo os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, contacta co administrador."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado ata que o desbloquees manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibir notificacións máis rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Consúltaas antes de desbloquear"</string>

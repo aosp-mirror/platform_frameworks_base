@@ -414,16 +414,14 @@
     <string name="monitoring_subtitle_network_logging" msgid="5569072711320784030">"Journalisation réseau"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Désactiver le VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Déconnecter le VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (220006422537330981) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="220006422537330981">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus d\'entreprise, les applications, les données et les informations de localisation associées à votre appareil. Pour en savoir plus, contactez-le."</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Vous êtes connecté à <xliff:g id="VPN_APP">%1$s</xliff:g>, qui peut contrôler votre activité sur le réseau, y compris les e-mails, les applications et les sites Web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Ouvrir les paramètres VPN"</string>
     <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
     <skip />
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Vous avez autorisé une application à configurer une connexion VPN.\n\nCette application peut contrôler l\'activité de votre appareil et votre activité sur le réseau, y compris votre activité relative aux e-mails, aux applications et aux sites Web."</string>
-    <!-- no translation found for monitoring_description_vpn_device_owned (6741053132592567634) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="6741053132592567634">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus d\'entreprise, applications, données et informations de localisation associées à cet appareil.\n\nVous êtes connecté à un VPN qui peut contrôler votre activité sur le réseau, dont l\'activité relative aux e-mails, applications et sites Web.\n\nPour en savoir plus, contactez votre administrateur."</string>
     <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
     <skip />
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -433,8 +431,7 @@
     <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
     <skip />
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>. Cette application peut contrôler l\'activité de ce profil sur le réseau, y compris l\'activité relative aux e-mails, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>. Cette application peut surveiller votre activité personnelle sur le réseau."</string>
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (6157262536135989204) -->
-    <skip />
+    <string name="monitoring_description_vpn_app_device_owned" msgid="6157262536135989204">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus d\'entreprise, les applications, les données et les informations de localisation associées à cet appareil.\n\nVous êtes connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité sur le réseau, dont celle relative aux e-mails, applications et sites Web.\n\nPour en savoir plus, contactez votre administrateur."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recevoir les notifications plus vite"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
