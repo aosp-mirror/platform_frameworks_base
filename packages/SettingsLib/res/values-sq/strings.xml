@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeku Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Zgjidh kodekun e audios së Bluetooth-it"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Shpejtësia e shembullit të Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Zgjidh kodekun e audios së Bluetooth-it:\nShpejtësia e shembullit"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bite për shembull Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Zgjidh kodekun e audios së Bluetooth-it:\nBite për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Regjimi i kanalit Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Zgjidh kodekun e audios së Bluetooth-it:\nModaliteti i kanalit"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeku LDAC i audios së Bluetooth-it: Cilësia e luajtjes"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Zgjidh kodekun LDAC të audios së Bluetooth-it:\nCilësia e luajtjes"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"Ndihma dhe komentet"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menyja"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Fut fjalëkalimin për të kryer rivendosje në gjendje fabrike në modalitetin e demonstrimit"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Përpara"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Kërkohet fjalëkalimi"</string>
 </resources>

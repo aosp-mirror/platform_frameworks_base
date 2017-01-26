@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Data ya kifaa cha mkononi inatumika kila wakati"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zima sauti kamili"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodeki ya Sauti ya Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Chagua Kodeki ya Sauti ya Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Kiwango cha Sampuli ya Sauti ya Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Chagua Kodeki ya Sauti ya Bluetooth:\nKiwango cha Sampuli"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Biti za Sauti ya Bluetooth kwa Kila Sampuli"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Chagua Kodeki ya Sauti ya Bluetooth:\nBiti kwa Kila Sampuli"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Hali ya Mkondo wa Sauti ya Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Chagua Kodeki ya Sauti ya Bluetooth:\nHali ya Kituo"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodeki ya LDAC ya Sauti ya Bluetooth: Ubora wa Kucheza"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Chagua Kodeki ya LDAC ya Sauti ya Bluetooth:\nUbora wa Kucheza"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Kutiririsha: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Ikiwashwa, Wifi itakabidhi kwa hima muunganisho wa data kwa mtandao wa Simu za Mkononi, mawimbi ya Wifi yanapokuwa hafifu"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"Usaidizi na maoni"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menyu"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Weka nenosiri ili urejeshe mipangilio ya kiwandani ikiwa katika hali ya onyesho."</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Inayofuata"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Nenosiri linahitajika"</string>
 </resources>

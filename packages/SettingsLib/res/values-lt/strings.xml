@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Korinio ryšio duomenys visada aktyvūs"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Išjungti didžiausią garsą"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"„Bluetooth“ garso kodekas"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Pasirinkite „Bluetooth“ garso kodeką"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"„Bluetooth“ garso pavyzdžio dažnis"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Pasirinkite „Bluetooth“ garso kodekas:\nimties dydis"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"„Bluetooth“ garso įrašo bitų skaičius pavyzdyje"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Pasirinkite „Bluetooth“ garso kodeką:\nbitų skaičius viename pavyzdyje"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"„Bluetooth“ garso kanalo režimas"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Pasirinkite „Bluetooth“ garso kodeką:\n kanalo režimas"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"„Bluetooth“ garso LDAC kodekas: atkūrimo kokybė"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Pasirinkite „Bluetooth“ garso LDAC kodeką:\natkūrimo kokybė"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Srautinis perdavimas: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Jei įgalinta ši parinktis, „Wi‑Fi“ agresyviau perduos duomenų ryšį į mobiliojo ryšio tinklą, kai „Wi‑Fi“ signalas bus silpnas"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"Pagalba ir atsiliepimai"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meniu"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Įv. slapt. ir atk. gam. nust. dem. rež."</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Kitas"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Būtina nurodyti slaptažodį"</string>
 </resources>

@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"سیلولر ڈیٹا کو ہمیشہ فعال رکھیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"بلوٹوتھ آڈیو کوڈیک"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"بلوٹوتھ آڈیو کوڈیک منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"بلوٹوتھ آڈیو کے نمونے کی شرح"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nنمونے کی شرح"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"بلوٹوتھ آڈیو بٹس فی نمونہ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nبٹس فی نمونہ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"بلوٹوتھ آڈیو چینل موڈ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nچینل موڈ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏بلوٹوتھ آڈیو LDAC کوڈیک: پلے بیک کا معیار"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏بلوٹوتھ آڈیو LDAC کوڈیک منتخب کریں:\nپلے بیک کا معیار"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"سلسلہ بندی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏فعال ہونے پر، جب Wi‑Fi سگنل کمزور ہوگا تو Wi‑Fi سیلولر پر ڈیٹا کنکشن بھیجنے کیلئے مزید جارحانہ کاروائی کرے گا۔"</string>
@@ -360,4 +353,10 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"مدد اور تاثرات"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"مینو"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <!-- no translation found for retail_demo_reset_message (118771671364131297) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_next (8356731459226304963) -->
+    <skip />
+    <!-- no translation found for retail_demo_reset_title (696589204029930100) -->
+    <skip />
 </resources>

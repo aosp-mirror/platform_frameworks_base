@@ -360,4 +360,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"ជំនួយ និងមតិស្ថាបនា"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ម៉ឺនុយ"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"បញ្ចូល​ពាក្យ​សម្ងាត់ ដើម្បី​កំណត់​​ដូចចេញ​ពី​រោងចក្រឡើង​វិញ​នៅក្នុង​មុខងារ​សាកល្បង"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"បន្ទាប់"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"តម្រូវ​ឲ្យ​មានពាក្យ​សម្ងាត់"</string>
 </resources>

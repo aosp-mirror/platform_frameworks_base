@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"सेल्युलर डेटा हमेशा सक्रिय"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"पूर्ण वॉल्यूम अक्षम करें"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लूटूथ ऑडियो कोडेक"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ब्लूटूथ ऑडियो कोडेक चुनें"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ब्लूटूथ ऑडियो नमूना दर"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ब्लूटूथ ऑडियो कोडेक चुनें:\nनमूना दर"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ब्लूटूथ ऑडियो बिट प्रति नमूना"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"ब्लूटूथ ऑडियो कोडेक चुनें:\nबिट प्रति नमूना"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लूटूथ ऑडियो चैनल मोड"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"ब्लूटूथ ऑडियो कोडेक चुनें:\nचैनल मोड"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लूटूथ ऑडियो LDAC कोडेक: प्लेबैक क्वालिटी"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ब्लूटूथ ऑडियो LDAC कोडेक चुनें:\nप्लेबैक क्वालिटी"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"स्ट्रीम हो रहा है: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई प्रवेश स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"इसके सक्षम होने पर, जब वाई-फ़ाई संकेत कमज़ोर हों तो वाई-फ़ाई, डेटा कनेक्शन को सेल्यूलर पर अधिक बलपूर्वक भेजेगा"</string>
@@ -360,4 +353,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"सहायता और फ़ीडबैक"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेनू"</string>
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोड में फ़ैक्टरी रीसेट के लिए पासवर्ड डालें"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"आगे"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"पासवर्ड आवश्यक"</string>
 </resources>
