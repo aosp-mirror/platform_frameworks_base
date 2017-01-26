@@ -335,6 +335,13 @@ public class DexManager {
     }
 
     /**
+     * Return all packages that contain records of secondary dex files.
+     */
+    public Set<String> getAllPackagesWithSecondaryDexFiles() {
+        return mPackageDexUsage.getAllPackagesWithSecondaryDexFiles();
+    }
+
+    /**
      * Retrieves the package which owns the given dexPath.
      */
     private DexSearchResult getDexPackage(
