@@ -61,6 +61,7 @@ import com.android.systemui.plugins.qs.QS.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.util.NotificationChannels;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -561,7 +562,7 @@ public class UserSwitcherController {
                     0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
             Notification.Builder builder = new Notification.Builder(mContext)
                     .setVisibility(Notification.VISIBILITY_SECRET)
-                    .setPriority(Notification.PRIORITY_MIN)
+                    .setChannel(NotificationChannels.USER)
                     .setSmallIcon(R.drawable.ic_person)
                     .setContentTitle(mContext.getString(R.string.user_logout_notification_title))
                     .setContentText(mContext.getString(R.string.user_logout_notification_text))
@@ -585,7 +586,7 @@ public class UserSwitcherController {
 
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setVisibility(Notification.VISIBILITY_SECRET)
-                .setPriority(Notification.PRIORITY_MIN)
+                .setChannel(NotificationChannels.USER)
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle(mContext.getString(R.string.guest_notification_title))
                 .setContentText(mContext.getString(R.string.guest_notification_text))

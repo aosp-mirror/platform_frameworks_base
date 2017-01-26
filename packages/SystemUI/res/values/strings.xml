@@ -1800,4 +1800,15 @@
     <!-- SysUI Tuner: Switch to control if device gets unlocked [CHAR LIMIT=60] -->
     <string name="lockscreen_unlock">Prompt for password</string>
 
+    <!-- Title for the notification channel containing important alerts like low battery. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_alerts">Alerts</string>
+    <!-- Title for the notification channel dedicated to screenshot progress. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_screenshot">Screenshots</string>
+    <!-- Title for the notification channel for urgent security issues. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_security">Security</string>
+    <!-- Title for the notification channel containing multi-user status information. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_user_status">User status</string>
+    <!-- Title for the notification channel for problems with storage (i.e. low disk). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_storage">Storage</string>
+
 </resources>
