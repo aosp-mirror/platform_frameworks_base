@@ -26,9 +26,6 @@
     <drawable name="status_bar_notification_row_background_color">#ff090909</drawable>
     <color name="notification_list_shadow_top">#80000000</color>
     <drawable name="heads_up_notification_bg_pressed">#ff33B5E5</drawable>
-    <color name="batterymeter_frame_color">#4DFFFFFF</color><!-- 30% white -->
-    <color name="batterymeter_charge_color">#FFFFFFFF</color>
-    <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
     <color name="system_warning_color">@*android:color/system_error</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->

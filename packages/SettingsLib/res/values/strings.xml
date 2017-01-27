@@ -900,4 +900,7 @@
     <string name="retail_demo_reset_next">Next</string>
     <!-- Title for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=40] -->
     <string name="retail_demo_reset_title">Password required</string>
+
+    <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
+    <string name="battery_meter_very_low_overlay_symbol">!</string>
 </resources>

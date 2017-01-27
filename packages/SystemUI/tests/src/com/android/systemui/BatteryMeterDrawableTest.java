@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
@@ -48,24 +47,6 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mResources = mContext.getResources();
         mBatteryMeter = new BatteryMeterDrawable(mContext, 0);
-    }
-
-    @Test
-    public void testGetIntrinsicSize() {
-        assertEquals(
-                mResources.getDimensionPixelSize(R.dimen.battery_width),
-                mBatteryMeter.getIntrinsicWidth());
-        assertEquals(
-                mResources.getDimensionPixelSize(R.dimen.battery_height),
-                mBatteryMeter.getIntrinsicHeight());
-    }
-
-    @Test
-    public void testDrawNothingBeforeOnBatteryLevelChanged() {
-        final Canvas canvas = mock(Canvas.class);
-        mBatteryMeter.draw(canvas);
-        verify(canvas, never()).drawPath(any(), any());
-        verify(canvas, never()).drawText(anyString(), anyFloat(), anyFloat(), any());
     }
 
     @Test
