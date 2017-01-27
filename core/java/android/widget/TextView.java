@@ -137,6 +137,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutoFillType;
+import android.view.autofill.AutoFillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -9751,6 +9753,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
         }
         structure.setHint(getHint());
+    }
+
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+
+    @Override
+    public void autoFill(AutoFillValue value) {
+        final CharSequence text = value.getTextValue();
+
+        if (text != null && isTextEditable()) {
+            setText(text);
+        }
+    }
+
+    @Override
+    public AutoFillType getAutoFillType() {
+        // TODO(b/33197203): ideally it should return a constant, but value returned by
+        // getInputType() can change.
+        return AutoFillType.forText(getInputType());
     }
 
     /** @hide */
