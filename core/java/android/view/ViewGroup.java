@@ -1105,13 +1105,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
+    /** @hide Overriding hidden method */
     @Override
-    public boolean hasFocusable() {
+    public boolean hasFocusable(boolean allowAutoFocus) {
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
 
-        if (isFocusable()) {
+        // TODO This should probably be super.hasFocusable, but that would change behavior
+        if (allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE) {
             return true;
         }
 
@@ -1122,7 +1124,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
-                if (child.hasFocusable()) {
+                if (child.hasFocusable(allowAutoFocus)) {
                     return true;
                 }
             }
