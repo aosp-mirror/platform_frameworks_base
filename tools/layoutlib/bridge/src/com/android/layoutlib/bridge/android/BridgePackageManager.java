@@ -127,6 +127,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isPermissionReviewModeEnabled() {
+        return false;
+    }
+
+    @Override
     public PermissionGroupInfo getPermissionGroupInfo(String name, int flags)
             throws NameNotFoundException {
         return null;
