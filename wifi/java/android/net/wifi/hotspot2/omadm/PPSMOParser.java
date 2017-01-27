@@ -19,6 +19,8 @@ package android.net.wifi.hotspot2.omadm;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.Policy;
+import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -131,6 +133,20 @@ public final class PPSMOParser {
     private static final String NODE_PER_PROVIDER_SUBSCRIPTION = "PerProviderSubscription";
 
     /**
+     * Fields under PerProviderSubscription.
+     */
+    private static final String NODE_UPDATE_IDENTIFIER = "UpdateIdentifier";
+    private static final String NODE_AAA_SERVER_TRUST_ROOT = "AAAServerTrustRoot";
+    private static final String NODE_SUBSCRIPTION_UPDATE = "SubscriptionUpdate";
+    private static final String NODE_SUBSCRIPTION_PARAMETER = "SubscriptionParameter";
+    private static final String NODE_TYPE_OF_SUBSCRIPTION = "TypeOfSubscription";
+    private static final String NODE_USAGE_LIMITS = "UsageLimits";
+    private static final String NODE_DATA_LIMIT = "DataLimit";
+    private static final String NODE_START_DATE = "StartDate";
+    private static final String NODE_TIME_LIMIT = "TimeLimit";
+    private static final String NODE_USAGE_TIME_PERIOD = "UsageTimePeriod";
+    private static final String NODE_CREDENTIAL_PRIORITY = "CredentialPriority";
+    /**
      * Fields under HomeSP subtree.
      */
     private static final String NODE_HOMESP = "HomeSP";
@@ -168,11 +184,38 @@ public final class PPSMOParser {
     private static final String NODE_INNER_METHOD = "InnerMethod";
     private static final String NODE_DIGITAL_CERTIFICATE = "DigitalCertificate";
     private static final String NODE_CERTIFICATE_TYPE = "CertificateType";
-    private static final String NODE_CERT_SHA256_FINGERPRINT = "CertSHA256FingerPrint";
+    private static final String NODE_CERT_SHA256_FINGERPRINT = "CertSHA256Fingerprint";
     private static final String NODE_REALM = "Realm";
     private static final String NODE_SIM = "SIM";
     private static final String NODE_SIM_IMSI = "IMSI";
     private static final String NODE_CHECK_AAA_SERVER_CERT_STATUS = "CheckAAAServerCertStatus";
+
+    /**
+     * Fields under Policy subtree.
+     */
+    private static final String NODE_POLICY = "Policy";
+    private static final String NODE_PREFERRED_ROAMING_PARTNER_LIST =
+            "PreferredRoamingPartnerList";
+    private static final String NODE_FQDN_MATCH = "FQDN_Match";
+    private static final String NODE_PRIORITY = "Priority";
+    private static final String NODE_COUNTRY = "Country";
+    private static final String NODE_MIN_BACKHAUL_THRESHOLD = "MinBackhaulThreshold";
+    private static final String NODE_NETWORK_TYPE = "NetworkType";
+    private static final String NODE_DOWNLINK_BANDWIDTH = "DLBandwidth";
+    private static final String NODE_UPLINK_BANDWIDTH = "ULBandwidth";
+    private static final String NODE_POLICY_UPDATE = "PolicyUpdate";
+    private static final String NODE_UPDATE_INTERVAL = "UpdateInterval";
+    private static final String NODE_UPDATE_METHOD = "UpdateMethod";
+    private static final String NODE_RESTRICTION = "Restriction";
+    private static final String NODE_URI = "URI";
+    private static final String NODE_TRUST_ROOT = "TrustRoot";
+    private static final String NODE_CERT_URL = "CertURL";
+    private static final String NODE_SP_EXCLUSION_LIST = "SPExclusionList";
+    private static final String NODE_REQUIRED_PROTO_PORT_TUPLE = "RequiredProtoPortTuple";
+    private static final String NODE_IP_PROTOCOL = "IPProtocol";
+    private static final String NODE_PORT_NUMBER = "PortNumber";
+    private static final String NODE_MAXIMUM_BSS_LOAD_VALUE = "MaximumBSSLoadValue";
+    private static final String NODE_OTHER = "Other";
 
     /**
      * URN (Unique Resource Name) for PerProviderSubscription Management Object Tree.
@@ -349,6 +392,10 @@ public final class PPSMOParser {
      *     ...
      *   </RTPProperties>
      *   <Node>
+     *     <NodeName>UpdateIdentifier</NodeName>
+     *     <Value>...</Value>
+     *   </Node>
+     *   <Node>
      *     ...
      *   </Node>
      * </Node>
@@ -361,11 +408,12 @@ public final class PPSMOParser {
             throws ParsingException {
         PasspointConfiguration config = null;
         String nodeName = null;
+        int updateIdentifier = Integer.MIN_VALUE;
         for (XMLNode child : node.getChildren()) {
             switch (child.getTag()) {
                 case TAG_NODE_NAME:
                     if (nodeName != null) {
-                        throw new ParsingException("Duplicant NodeName: " + child.getText());
+                        throw new ParsingException("Duplicate NodeName: " + child.getText());
                     }
                     nodeName = child.getText();
                     if (!TextUtils.equals(nodeName, NODE_PER_PROVIDER_SUBSCRIPTION)) {
@@ -373,13 +421,22 @@ public final class PPSMOParser {
                     }
                     break;
                 case TAG_NODE:
-                    // Only one PerProviderSubscription instance is expected and allowed.
-                    if (config != null) {
-                        throw new ParsingException("Multiple PPS instance");
+                    // A node can be either an UpdateIdentifier node or a PerProviderSubscription
+                    // instance node.  Flatten out the XML tree first by converting it to a PPS
+                    // tree to reduce the complexity of the parsing code.
+                    PPSNode ppsNodeRoot = buildPpsNode(child);
+                    if (TextUtils.equals(ppsNodeRoot.getName(), NODE_UPDATE_IDENTIFIER)) {
+                        if (updateIdentifier != Integer.MIN_VALUE) {
+                            throw new ParsingException("Multiple node for UpdateIdentifier");
+                        }
+                        updateIdentifier = parseInteger(getPpsNodeValue(ppsNodeRoot));
+                    } else {
+                        // Only one PerProviderSubscription instance is expected and allowed.
+                        if (config != null) {
+                            throw new ParsingException("Multiple PPS instance");
+                        }
+                        config = parsePpsInstance(ppsNodeRoot);
                     }
-                    // Convert the XML tree to a PPS tree.
-                    PPSNode ppsInstanceRoot = buildPpsNode(child);
-                    config = parsePpsInstance(ppsInstanceRoot);
                     break;
                 case TAG_RT_PROPERTIES:
                     // Parse and verify URN stored in the RT (Run Time) Properties.
@@ -391,6 +448,9 @@ public final class PPSMOParser {
                 default:
                     throw new ParsingException("Unknown tag under PPS node: " + child.getTag());
             }
+        }
+        if (config != null && updateIdentifier != Integer.MIN_VALUE) {
+            config.updateIdentifier = updateIdentifier;
         }
         return config;
     }
@@ -551,6 +611,21 @@ public final class PPSMOParser {
                 case NODE_CREDENTIAL:
                     config.credential = parseCredential(child);
                     break;
+                case NODE_POLICY:
+                    config.policy = parsePolicy(child);
+                    break;
+                case NODE_AAA_SERVER_TRUST_ROOT:
+                    config.trustRootCertList = parseAAAServerTrustRootList(child);
+                    break;
+                case NODE_SUBSCRIPTION_UPDATE:
+                    config.subscriptionUpdate = parseUpdateParameter(child);
+                    break;
+                case NODE_SUBSCRIPTION_PARAMETER:
+                    parseSubscriptionParameter(child, config);
+                    break;
+                case NODE_CREDENTIAL_PRIORITY:
+                    config.credentialPriority = parseInteger(getPpsNodeValue(child));
+                    break;
                 default:
                     throw new ParsingException("Unknown node: " + child.getName());
             }
@@ -616,11 +691,7 @@ public final class PPSMOParser {
         String[] oiStrArray = oiStr.split(",");
         long[] oiArray = new long[oiStrArray.length];
         for (int i = 0; i < oiStrArray.length; i++) {
-            try {
-                oiArray[i] = Long.parseLong(oiStrArray[i], 16);
-            } catch (NumberFormatException e) {
-                throw new ParsingException("Invalid OI: " + oiStrArray[i]);
-            }
+            oiArray[i] = parseLong(oiStrArray[i], 16);
         }
         return oiArray;
     }
@@ -671,11 +742,7 @@ public final class PPSMOParser {
                     ssid = getPpsNodeValue(child);
                     break;
                 case NODE_HESSID:
-                    try {
-                        hessid = Long.parseLong(getPpsNodeValue(child), 16);
-                    } catch (NumberFormatException e) {
-                        throw new ParsingException("Invalid HESSID: " + getPpsNodeValue(child));
-                    }
+                    hessid = parseLong(getPpsNodeValue(child), 16);
                     break;
                 default:
                     throw new ParsingException("Unknown node under NetworkID instance: " +
@@ -999,6 +1066,503 @@ public final class PPSMOParser {
     }
 
     /**
+     * Parse configurations under PerProviderSubscription/Policy subtree.
+     *
+     * @param node PPSNode representing the root of the PerProviderSubscription/Policy subtree
+     * @return {@link Policy}
+     * @throws ParsingException
+     */
+    private static Policy parsePolicy(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for Policy");
+        }
+
+        Policy policy = new Policy();
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_PREFERRED_ROAMING_PARTNER_LIST:
+                    policy.preferredRoamingPartnerList = parsePreferredRoamingPartnerList(child);
+                    break;
+                case NODE_MIN_BACKHAUL_THRESHOLD:
+                    parseMinBackhaulThreshold(child, policy);
+                    break;
+                case NODE_POLICY_UPDATE:
+                    policy.policyUpdate = parseUpdateParameter(child);
+                    break;
+                case NODE_SP_EXCLUSION_LIST:
+                    policy.excludedSsidList = parseSpExclusionList(child);
+                    break;
+                case NODE_REQUIRED_PROTO_PORT_TUPLE:
+                    policy.requiredProtoPortMap = parseRequiredProtoPortTuple(child);
+                    break;
+                case NODE_MAXIMUM_BSS_LOAD_VALUE:
+                    policy.maximumBssLoadValue = parseInteger(getPpsNodeValue(child));
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under Policy: " + child.getName());
+            }
+        }
+        return policy;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/PreferredRoamingPartnerList
+     * subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/PreferredRoamingPartnerList subtree
+     * @return List of {@link Policy#RoamingPartner}
+     * @throws ParsingException
+     */
+    private static List<Policy.RoamingPartner> parsePreferredRoamingPartnerList(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for PreferredRoamingPartnerList");
+        }
+        List<Policy.RoamingPartner> partnerList = new ArrayList<>();
+        for (PPSNode child : node.getChildren()) {
+            partnerList.add(parsePreferredRoamingPartner(child));
+        }
+        return partnerList;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/PreferredRoamingPartnerList/<X+>
+     * subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/PreferredRoamingPartnerList/<X+> subtree
+     * @return {@link Policy#RoamingPartner}
+     * @throws ParsingException
+     */
+    private static Policy.RoamingPartner parsePreferredRoamingPartner(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for PreferredRoamingPartner "
+                    + "instance");
+        }
+
+        Policy.RoamingPartner roamingPartner = new Policy.RoamingPartner();
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_FQDN_MATCH:
+                    // FQDN_Match field is in the format of "[FQDN],[MatchInfo]", where [MatchInfo]
+                    // is either "exactMatch" for exact match of FQDN or "includeSubdomains" for
+                    // matching all FQDNs with the same sub-domain.
+                    String fqdnMatch = getPpsNodeValue(child);
+                    String[] fqdnMatchArray = fqdnMatch.split(",");
+                    if (fqdnMatchArray.length != 2) {
+                        throw new ParsingException("Invalid FQDN_Match: " + fqdnMatch);
+                    }
+                    roamingPartner.fqdn = fqdnMatchArray[0];
+                    if (TextUtils.equals(fqdnMatchArray[1], "exactMatch")) {
+                        roamingPartner.fqdnExactMatch = true;
+                    } else if (TextUtils.equals(fqdnMatchArray[1], "includeSubdomains")) {
+                        roamingPartner.fqdnExactMatch = false;
+                    } else {
+                        throw new ParsingException("Invalid FQDN_Match: " + fqdnMatch);
+                    }
+                    break;
+                case NODE_PRIORITY:
+                    roamingPartner.priority = parseInteger(getPpsNodeValue(child));
+                    break;
+                case NODE_COUNTRY:
+                    roamingPartner.countries = getPpsNodeValue(child);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under PreferredRoamingPartnerList "
+                            + "instance " + child.getName());
+            }
+        }
+        return roamingPartner;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/MinBackhaulThreshold subtree
+     * into the given policy.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/MinBackhaulThreshold subtree
+     * @param policy The policy to store the MinBackhualThreshold configuration
+     * @throws ParsingException
+     */
+    private static void parseMinBackhaulThreshold(PPSNode node, Policy policy)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for MinBackhaulThreshold");
+        }
+        for (PPSNode child : node.getChildren()) {
+            parseMinBackhaulThresholdInstance(child, policy);
+        }
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/MinBackhaulThreshold/<X+> subtree
+     * into the given policy.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/MinBackhaulThreshold/<X+> subtree
+     * @param policy The policy to store the MinBackhaulThreshold configuration
+     * @throws ParsingException
+     */
+    private static void parseMinBackhaulThresholdInstance(PPSNode node, Policy policy)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for MinBackhaulThreshold instance");
+        }
+        String networkType = null;
+        long downlinkBandwidth = Long.MIN_VALUE;
+        long uplinkBandwidth = Long.MIN_VALUE;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_NETWORK_TYPE:
+                    networkType = getPpsNodeValue(child);
+                    break;
+                case NODE_DOWNLINK_BANDWIDTH:
+                    downlinkBandwidth = parseLong(getPpsNodeValue(child), 10);
+                    break;
+                case NODE_UPLINK_BANDWIDTH:
+                    uplinkBandwidth = parseLong(getPpsNodeValue(child), 10);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under MinBackhaulThreshold instance "
+                            + child.getName());
+            }
+        }
+        if (networkType == null) {
+            throw new ParsingException("Missing NetworkType field");
+        }
+
+        if (TextUtils.equals(networkType, "home")) {
+            policy.minHomeDownlinkBandwidth = downlinkBandwidth;
+            policy.minHomeUplinkBandwidth = uplinkBandwidth;
+        } else if (TextUtils.equals(networkType, "roaming")) {
+            policy.minRoamingDownlinkBandwidth = downlinkBandwidth;
+            policy.minRoamingUplinkBandwidth = uplinkBandwidth;
+        } else {
+            throw new ParsingException("Invalid network type: " + networkType);
+        }
+    }
+
+    /**
+     * Parse update parameters. This contained configurations from either
+     * PerProviderSubscription/Policy/PolicyUpdate or PerProviderSubscription/SubscriptionUpdate
+     * subtree.
+     *
+     * @param node PPSNode representing the root of the PerProviderSubscription/Policy/PolicyUpdate
+     *             or PerProviderSubscription/SubscriptionUpdate subtree
+     * @return {@link UpdateParameter}
+     * @throws ParsingException
+     */
+    private static UpdateParameter parseUpdateParameter(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for Update Parameters");
+        }
+
+        UpdateParameter updateParam = new UpdateParameter();
+        for (PPSNode child : node.getChildren()) {
+            switch(child.getName()) {
+                case NODE_UPDATE_INTERVAL:
+                    updateParam.updateIntervalInMinutes = parseLong(getPpsNodeValue(child), 10);
+                    break;
+                case NODE_UPDATE_METHOD:
+                    updateParam.updateMethod = getPpsNodeValue(child);
+                    break;
+                case NODE_RESTRICTION:
+                    updateParam.restriction = getPpsNodeValue(child);
+                    break;
+                case NODE_URI:
+                    updateParam.serverUri = getPpsNodeValue(child);
+                    break;
+                case NODE_USERNAME_PASSWORD:
+                    Pair<String, String> usernamePassword = parseUpdateUserCredential(child);
+                    updateParam.username = usernamePassword.first;
+                    updateParam.base64EncodedPassword = usernamePassword.second;
+                    break;
+                case NODE_TRUST_ROOT:
+                    Pair<String, byte[]> trustRoot = parseTrustRoot(child);
+                    updateParam.trustRootCertUrl = trustRoot.first;
+                    updateParam.trustRootCertSha256Fingerprint = trustRoot.second;
+                    break;
+                case NODE_OTHER:
+                    Log.d(TAG, "Ignore unsupported paramter: " + child.getName());
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under Update Parameters: "
+                            + child.getName());
+            }
+        }
+        return updateParam;
+    }
+
+    /**
+     * Parse username and password parameters associated with policy or subscription update.
+     * This contained configurations under either
+     * PerProviderSubscription/Policy/PolicyUpdate/UsernamePassword or
+     * PerProviderSubscription/SubscriptionUpdate/UsernamePassword subtree.
+     *
+     * @param node PPSNode representing the root of the UsernamePassword subtree
+     * @return Pair of username and password
+     * @throws ParsingException
+     */
+    private static Pair<String, String> parseUpdateUserCredential(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for UsernamePassword");
+        }
+
+        String username = null;
+        String password = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_USERNAME:
+                    username = getPpsNodeValue(child);
+                    break;
+                case NODE_PASSWORD:
+                    password = getPpsNodeValue(child);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under UsernamePassword: "
+                            + child.getName());
+            }
+        }
+        return Pair.create(username, password);
+    }
+
+    /**
+     * Parse the trust root parameters associated with policy update, subscription update, or AAA
+     * server trust root.
+     *
+     * This contained configurations under either
+     * PerProviderSubscription/Policy/PolicyUpdate/TrustRoot or
+     * PerProviderSubscription/SubscriptionUpdate/TrustRoot or
+     * PerProviderSubscription/AAAServerTrustRoot/<X+> subtree.
+     *
+     * @param node PPSNode representing the root of the TrustRoot subtree
+     * @return Pair of Certificate URL and fingerprint
+     * @throws ParsingException
+     */
+    private static Pair<String, byte[]> parseTrustRoot(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for TrustRoot");
+        }
+
+        String certUrl = null;
+        byte[] certFingerprint = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_CERT_URL:
+                    certUrl = getPpsNodeValue(child);
+                    break;
+                case NODE_CERT_SHA256_FINGERPRINT:
+                    certFingerprint = parseHexString(getPpsNodeValue(child));
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under TrustRoot: "
+                            + child.getName());
+            }
+        }
+        return Pair.create(certUrl, certFingerprint);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/SPExclusionList subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/SPExclusionList subtree
+     * @return Array of excluded SSIDs
+     * @throws ParsingException
+     */
+    private static String[] parseSpExclusionList(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for SPExclusionList");
+        }
+        List<String> ssidList = new ArrayList<>();
+        for (PPSNode child : node.getChildren()) {
+            ssidList.add(parseSpExclusionInstance(child));
+        }
+        return ssidList.toArray(new String[ssidList.size()]);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/SPExclusionList/<X+> subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/SPExclusionList/<X+> subtree
+     * @return String
+     * @throws ParsingException
+     */
+    private static String parseSpExclusionInstance(PPSNode node) throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for SPExclusion instance");
+        }
+        String ssid = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_SSID:
+                    ssid = getPpsNodeValue(child);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under SPExclusion instance");
+            }
+        }
+        return ssid;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/RequiredProtoPortTuple subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/RequiredProtoPortTuple subtree
+     * @return Map of IP Protocol to Port Number tuples
+     * @throws ParsingException
+     */
+    private static Map<Integer, String> parseRequiredProtoPortTuple(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for RequiredProtoPortTuple");
+        }
+        Map<Integer, String> protoPortTupleMap = new HashMap<>();
+        for (PPSNode child : node.getChildren()) {
+            Pair<Integer, String> protoPortTuple = parseProtoPortTuple(child);
+            protoPortTupleMap.put(protoPortTuple.first, protoPortTuple.second);
+        }
+        return protoPortTupleMap;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/Policy/RequiredProtoPortTuple/<X+>
+     * subtree.
+     *
+     * @param node PPSNode representing the root of the
+     *             PerProviderSubscription/Policy/RequiredProtoPortTuple/<X+> subtree
+     * @return Pair of IP Protocol to Port Number tuple
+     * @throws ParsingException
+     */
+    private static Pair<Integer, String> parseProtoPortTuple(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for RequiredProtoPortTuple "
+                    + "instance");
+        }
+        int proto = Integer.MIN_VALUE;
+        String ports = null;
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_IP_PROTOCOL:
+                    proto = parseInteger(getPpsNodeValue(child));
+                    break;
+                case NODE_PORT_NUMBER:
+                    ports = getPpsNodeValue(child);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under RequiredProtoPortTuple instance"
+                            + child.getName());
+            }
+        }
+        if (proto == Integer.MIN_VALUE) {
+            throw new ParsingException("Missing IPProtocol field");
+        }
+        if (ports == null) {
+            throw new ParsingException("Missing PortNumber field");
+        }
+        return Pair.create(proto, ports);
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/AAAServerTrustRoot subtree.
+     *
+     * @param node PPSNode representing the root of PerProviderSubscription/AAAServerTrustRoot
+     *             subtree
+     * @return Map of certificate URL with the corresponding certificate fingerprint
+     * @throws ParsingException
+     */
+    private static Map<String, byte[]> parseAAAServerTrustRootList(PPSNode node)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for AAAServerTrustRoot");
+        }
+        Map<String, byte[]> certList = new HashMap<>();
+        for (PPSNode child : node.getChildren()) {
+            Pair<String, byte[]> certTuple = parseTrustRoot(child);
+            certList.put(certTuple.first, certTuple.second);
+        }
+        return certList;
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/SubscriptionParameter subtree.
+     *
+     * @param node PPSNode representing the root of PerProviderSubscription/SubscriptionParameter
+     *             subtree
+     * @param config Instance of {@link PasspointConfiguration}
+     * @throws ParsingException
+     */
+    private static void parseSubscriptionParameter(PPSNode node, PasspointConfiguration config)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for SubscriptionParameter");
+        }
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_CREATION_DATE:
+                    config.subscriptionCreationTimeInMs = parseDate(getPpsNodeValue(child));
+                    break;
+                case NODE_EXPIRATION_DATE:
+                    config.subscriptionExpirationTimeInMs = parseDate(getPpsNodeValue(child));
+                    break;
+                case NODE_TYPE_OF_SUBSCRIPTION:
+                    config.subscriptionType = getPpsNodeValue(child);
+                    break;
+                case NODE_USAGE_LIMITS:
+                    parseUsageLimits(child, config);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under SubscriptionParameter"
+                            + child.getName());
+            }
+        }
+    }
+
+    /**
+     * Parse configurations under PerProviderSubscription/SubscriptionParameter/UsageLimits
+     * subtree.
+     *
+     * @param node PPSNode representing the root of
+     *             PerProviderSubscription/SubscriptionParameter/UsageLimits subtree
+     * @param config Instance of {@link PasspointConfiguration}
+     * @throws ParsingException
+     */
+    private static void parseUsageLimits(PPSNode node, PasspointConfiguration config)
+            throws ParsingException {
+        if (node.isLeaf()) {
+            throw new ParsingException("Leaf node not expected for UsageLimits");
+        }
+        for (PPSNode child : node.getChildren()) {
+            switch (child.getName()) {
+                case NODE_DATA_LIMIT:
+                    config.usageLimitDataLimit = parseLong(getPpsNodeValue(child), 10);
+                    break;
+                case NODE_START_DATE:
+                    config.usageLimitStartTimeInMs = parseDate(getPpsNodeValue(child));
+                    break;
+                case NODE_TIME_LIMIT:
+                    config.usageLimitTimeLimitInMinutes = parseLong(getPpsNodeValue(child), 10);
+                    break;
+                case NODE_USAGE_TIME_PERIOD:
+                    config.usageLimitUsageTimePeriodInMinutes =
+                            parseLong(getPpsNodeValue(child), 10);
+                    break;
+                default:
+                    throw new ParsingException("Unknown node under UsageLimits"
+                            + child.getName());
+            }
+        }
+    }
+
+    /**
      * Convert a hex string to a byte array.
      *
      * @param str String containing hex values
@@ -1050,6 +1614,21 @@ public final class PPSMOParser {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             throw new ParsingException("Invalid integer value: " + value);
+        }
+    }
+
+    /**
+     * Parse a string representing a long integer.
+     *
+     * @param value String of long integer value
+     * @return long
+     * @throws ParsingException
+     */
+    private static long parseLong(String value, int radix) throws ParsingException {
+        try {
+            return Long.parseLong(value, radix);
+        } catch (NumberFormatException e) {
+            throw new ParsingException("Invalid long integer value: " + value);
         }
     }
 
