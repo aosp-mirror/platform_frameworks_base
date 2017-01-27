@@ -59,8 +59,6 @@ public class RescueParty {
     private static final int LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS = 3;
     private static final int LEVEL_FACTORY_RESET = 4;
 
-    private static final boolean DISABLE_RESET_SETTINGS = true;
-
     /** Threshold for boot loops */
     private static final Threshold sBoot = new BootThreshold();
     /** Threshold for app crash loops */
@@ -181,8 +179,6 @@ public class RescueParty {
     }
 
     private static void resetAllSettings(Context context, int mode) throws Exception {
-        if (DISABLE_RESET_SETTINGS) return;
-
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;

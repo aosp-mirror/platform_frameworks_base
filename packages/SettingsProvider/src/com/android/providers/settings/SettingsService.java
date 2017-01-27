@@ -113,7 +113,7 @@ final public class SettingsService extends Binder {
         String mKey = null;
         String mValue = null;
         String mPackageName = null;
-        String mToken = null;
+        String mTag = null;
         int mResetMode = -1;
         boolean mMakeDefault;
 
@@ -185,7 +185,7 @@ final public class SettingsService extends Binder {
                         if (peekNextArg() == null) {
                             valid = true;
                         } else {
-                            mToken = getNextArg();
+                            mTag = getNextArg();
                             if (peekNextArg() == null) {
                                 valid = true;
                             } else {
@@ -218,10 +218,10 @@ final public class SettingsService extends Binder {
                     // what we have so far is a valid command
                     valid = true;
                     // keep going; there may be another PUT arg
-                } else if (mToken == null) {
-                    mToken = arg;
-                    if ("default".equalsIgnoreCase(mToken)) {
-                        mToken = null;
+                } else if (mTag == null) {
+                    mTag = arg;
+                    if ("default".equalsIgnoreCase(mTag)) {
+                        mTag = null;
                         mMakeDefault = true;
                         if (peekNextArg() == null) {
                             valid = true;
@@ -282,7 +282,7 @@ final public class SettingsService extends Binder {
                     pout.println(getForUser(iprovider, mUser, mTable, mKey));
                     break;
                 case PUT:
-                    putForUser(iprovider, mUser, mTable, mKey, mValue, mToken, mMakeDefault);
+                    putForUser(iprovider, mUser, mTable, mKey, mValue, mTag, mMakeDefault);
                     break;
                 case DELETE:
                     pout.println("Deleted "
@@ -294,7 +294,7 @@ final public class SettingsService extends Binder {
                     }
                     break;
                 case RESET:
-                    resetForUser(iprovider, mUser, mTable, mToken);
+                    resetForUser(iprovider, mUser, mTable, mTag);
                     break;
                 default:
                     perr.println("Unspecified command");
@@ -358,7 +358,7 @@ final public class SettingsService extends Binder {
         }
 
         void putForUser(IContentProvider provider, int userHandle, final String table,
-                final String key, final String value, String token, boolean makeDefault) {
+                final String key, final String value, String tag, boolean makeDefault) {
             final String callPutCommand;
             if ("system".equals(table)) {
                 callPutCommand = Settings.CALL_METHOD_PUT_SYSTEM;
@@ -378,7 +378,9 @@ final public class SettingsService extends Binder {
                 Bundle arg = new Bundle();
                 arg.putString(Settings.NameValueTable.VALUE, value);
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                arg.putString(Settings.CALL_METHOD_TAG_KEY, token);
+                if (tag != null) {
+                    arg.putString(Settings.CALL_METHOD_TAG_KEY, tag);
+                }
                 if (makeDefault) {
                     arg.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
@@ -409,7 +411,7 @@ final public class SettingsService extends Binder {
         }
 
         void resetForUser(IContentProvider provider, int userHandle,
-                String table, String token) {
+                String table, String tag) {
             final String callResetCommand;
             if ("secure".equals(table)) callResetCommand = Settings.CALL_METHOD_RESET_SECURE;
             else if ("global".equals(table)) callResetCommand = Settings.CALL_METHOD_RESET_GLOBAL;
@@ -422,7 +424,9 @@ final public class SettingsService extends Binder {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
                 arg.putInt(Settings.CALL_METHOD_RESET_MODE_KEY, mResetMode);
-                arg.putString(Settings.CALL_METHOD_TAG_KEY, token);
+                if (tag != null) {
+                    arg.putString(Settings.CALL_METHOD_TAG_KEY, tag);
+                }
                 String packageName = mPackageName != null ? mPackageName : resolveCallingPackage();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
                 provider.call(packageName, callResetCommand, null, arg);
@@ -465,9 +469,9 @@ final public class SettingsService extends Binder {
                 pw.println("      Print this help text.");
                 pw.println("  get [--user <USER_ID> | current] NAMESPACE KEY");
                 pw.println("      Retrieve the current value of KEY.");
-                pw.println("  put [--user <USER_ID> | current] NAMESPACE KEY VALUE [TOKEN] [default]");
+                pw.println("  put [--user <USER_ID> | current] NAMESPACE KEY VALUE [TAG] [default]");
                 pw.println("      Change the contents of KEY to VALUE.");
-                pw.println("      TOKEN to associate with the setting.");
+                pw.println("      TAG to associate with the setting.");
                 pw.println("      {default} to set as the default, case-insensitive only for global/secure namespace");
                 pw.println("  delete NAMESPACE KEY");
                 pw.println("      Delete the entry for KEY.");
