@@ -47,6 +47,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -691,11 +692,26 @@ public class RankingHelper implements RankingConfig {
                 }
             }
         }
-        groups.addAll(r.groups.values());
+        for (NotificationChannelGroup group : r.groups.values()) {
+            if (group.getChannels().size() > 0) {
+                groups.add(group);
+            }
+        }
         if (nonGrouped.getChannels().size() > 0) {
             groups.add(nonGrouped);
         }
         return new ParceledListSlice<>(groups);
+    }
+
+    @Override
+    @VisibleForTesting
+    public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
+            int uid) {
+        Record r = getRecord(pkg, uid);
+        if (r == null) {
+            return new ArrayList<>();
+        }
+        return r.groups.values();
     }
 
     @Override

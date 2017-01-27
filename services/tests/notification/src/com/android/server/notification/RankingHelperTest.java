@@ -805,7 +805,7 @@ public class RankingHelperTest {
     public void testCreateGroup() throws Exception {
         NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
         mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
-        assertEquals(ncg, mHelper.getNotificationChannelGroups(pkg, uid, false).getList().get(0));
+        assertEquals(ncg, mHelper.getNotificationChannelGroups(pkg, uid).iterator().next());
     }
 
     @Test
@@ -834,6 +834,8 @@ public class RankingHelperTest {
 
     @Test
     public void testGetChannelGroups() throws Exception {
+        NotificationChannelGroup unused = new NotificationChannelGroup("unused", "s");
+        mHelper.createNotificationChannelGroup(pkg, uid, unused, true);
         NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
         mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
         NotificationChannelGroup ncg2 = new NotificationChannelGroup("group2", "name2");
