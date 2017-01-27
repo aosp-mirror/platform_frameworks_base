@@ -596,8 +596,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int largestWidthLimitDp = 0;
 
-    /** {@hide} */
+    /**
+     * UUID of the storage volume on which this application is being hosted. For
+     * apps hosted on the default internal storage at
+     * {@link Environment#getDataDirectory()}, the UUID value is {@code null}.
+     */
     public String volumeUuid;
+
     /** {@hide} */
     public String scanSourceDir;
     /** {@hide} */
