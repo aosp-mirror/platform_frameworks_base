@@ -558,12 +558,12 @@ void getHubsCb(const ::android::hardware::hidl_vec<ContextHub>& hubs)  {
 void initContextHubService() {
     db.hubInfo.numHubs = 0;
 
-    db.hubInfo.contextHub = IContexthub::getService("context_hub_hal");
+    db.hubInfo.contextHub = IContexthub::getService("context_hub");
 
     if (db.hubInfo.contextHub == nullptr) {
         ALOGE("Could not load context hub hal");
     } else {
-        ALOGI("Loaded context hub hal");
+        ALOGI("Loaded context hub hal, isRemote %s", db.hubInfo.contextHub->isRemote() ? "TRUE" : "FALSE");
     }
 
     // Prep for storing app info
