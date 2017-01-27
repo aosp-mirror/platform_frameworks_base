@@ -121,6 +121,10 @@ public class NotificationData {
             return row.getPublicLayout().getContractedChild();
         }
 
+        public View getAmbientContentView() {
+            return row.getPrivateLayout().getAmbientChild();
+        }
+
         public boolean cacheContentViews(Context ctx, Notification updatedNotification,
                 boolean isLowPriority) {
             boolean applyInPlace = false;
