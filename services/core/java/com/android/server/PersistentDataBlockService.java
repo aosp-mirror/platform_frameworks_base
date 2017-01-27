@@ -32,6 +32,7 @@ import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoUtils;
 
@@ -53,15 +54,14 @@ import java.util.Arrays;
  * This data will live across factory resets not initiated via the Settings UI.
  * When a device is factory reset through Settings this data is wiped.
  *
- * Allows writing one block at a time. Namely, each time
- * {@link android.service.persistentdata.IPersistentDataBlockService}.write(byte[] data)
- * is called, it will overwite the data that was previously written on the block.
+ * Allows writing one block at a time. Namely, each time {@link IPersistentDataBlockService#write}
+ * is called, it will overwrite the data that was previously written on the block.
  *
  * Clients can query the size of the currently written block via
- * {@link android.service.persistentdata.IPersistentDataBlockService}.getTotalDataSize().
+ * {@link IPersistentDataBlockService#getDataBlockSize}
  *
- * Clients can any number of bytes from the currently written block up to its total size by invoking
- * {@link android.service.persistentdata.IPersistentDataBlockService}.read(byte[] data)
+ * Clients can read any number of bytes from the currently written block up to its total size by
+ * invoking {@link IPersistentDataBlockService#read}
  */
 public class PersistentDataBlockService extends SystemService {
     private static final String TAG = PersistentDataBlockService.class.getSimpleName();
@@ -84,6 +84,9 @@ public class PersistentDataBlockService extends SystemService {
 
     private int mAllowedUid = -1;
     private long mBlockDeviceSize;
+
+    @GuardedBy("mLock")
+    private boolean mIsWritable = true;
 
     public PersistentDataBlockService(Context context) {
         super(context);
@@ -377,6 +380,11 @@ public class PersistentDataBlockService extends SystemService {
             headerAndData.put(data);
 
             synchronized (mLock) {
+                if (!mIsWritable) {
+                    IoUtils.closeQuietly(outputStream);
+                    return -1;
+                }
+
                 try {
                     byte[] checksum = new byte[DIGEST_SIZE_BYTES];
                     outputStream.write(checksum, 0, DIGEST_SIZE_BYTES);
@@ -451,6 +459,9 @@ public class PersistentDataBlockService extends SystemService {
 
                 if (ret < 0) {
                     Slog.e(TAG, "failed to wipe persistent partition");
+                } else {
+                    mIsWritable = false;
+                    Slog.i(TAG, "persistent partition now wiped and unwritable");
                 }
             }
         }
