@@ -19,6 +19,7 @@
 
 #include "android-base/macros.h"
 
+#include <array>
 #include <limits>
 #include <unordered_map>
 
@@ -95,18 +96,21 @@ class AssetManager2 : public ::AAssetManager {
   // new resource IDs.
   bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true);
 
-  const std::vector<const ApkAssets*> GetApkAssets() const;
+  inline const std::vector<const ApkAssets*> GetApkAssets() const { return apk_assets_; }
 
   // Returns the string pool for the given asset cookie.
   // Use the string pool returned here with a valid Res_value object of
   // type Res_value::TYPE_STRING.
   const ResStringPool* GetStringPoolForCookie(ApkAssetsCookie cookie) const;
 
+  // Returns the DynamicRefTable for the given package ID.
+  const DynamicRefTable* GetDynamicRefTableForPackage(uint32_t package_id) const;
+
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);
 
-  const ResTable_config& GetConfiguration() const;
+  inline const ResTable_config& GetConfiguration() const { return configuration_; }
 
   // Searches the set of APKs loaded by this AssetManager and opens the first one found located
   // in the assets/ directory.
@@ -173,6 +177,8 @@ class AssetManager2 : public ::AAssetManager {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
+  void DumpToLog() const;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
 
@@ -189,8 +195,12 @@ class AssetManager2 : public ::AAssetManager {
   // `out_flags` stores the resulting bitmask of configuration axis with which the resource
   // value varies.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            LoadedArsc::Entry* out_entry, ResTable_config* out_selected_config,
+                            LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
                             uint32_t* out_flags);
+
+  // Assigns package IDs to all shared library ApkAssets.
+  // Should be called whenever the ApkAssets are changed.
+  void BuildDynamicRefTable();
 
   // Purge all resources that are cached and vary by the configuration axis denoted by the
   // bitmask `diff`.
@@ -199,6 +209,22 @@ class AssetManager2 : public ::AAssetManager {
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
+
+  struct PackageGroup {
+    std::vector<const LoadedPackage*> packages_;
+    std::vector<ApkAssetsCookie> cookies_;
+    DynamicRefTable dynamic_ref_table;
+  };
+
+  // DynamicRefTables for shared library package resolution.
+  // These are ordered according to apk_assets_. The mappings may change depending on what is
+  // in apk_assets_, therefore they must be stored in the AssetManager and not in the
+  // immutable ApkAssets class.
+  std::vector<PackageGroup> package_groups_;
+
+  // An array mapping package ID to index into package_groups. This keeps the lookup fast
+  // without taking too much memory.
+  std::array<uint8_t, std::numeric_limits<uint8_t>::max() + 1> package_ids_;
 
   // The current configuration set for this AssetManager. When this changes, cached resources
   // may need to be purged.
@@ -279,12 +305,12 @@ class Theme {
   struct Package {
     // Each element of Type will be a dynamically sized object
     // allocated to have the entries stored contiguously with the Type.
-    util::unique_cptr<Type> types[kTypeCount];
+    std::array<util::unique_cptr<Type>, kTypeCount> types;
   };
 
   AssetManager2* asset_manager_;
   uint32_t type_spec_flags_ = 0u;
-  std::unique_ptr<Package> packages_[kPackageCount];
+  std::array<std::unique_ptr<Package>, kPackageCount> packages_;
 };
 
 inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) { return bag->entries; }

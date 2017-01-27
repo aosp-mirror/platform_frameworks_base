@@ -1538,6 +1538,8 @@ struct ResTable_lib_entry
     uint16_t packageName[128];
 };
 
+class AssetManager2;
+
 /**
  * Holds the shared library ID table. Shared libraries are assigned package IDs at
  * build time, but they may be loaded in a different order, so we need to maintain
@@ -1548,7 +1550,9 @@ struct ResTable_lib_entry
  */
 class DynamicRefTable
 {
+    friend class AssetManager2;
 public:
+    DynamicRefTable() = default;
     DynamicRefTable(uint8_t packageId, bool appAsLib);
 
     // Loads an unmapped reference table from the package.
@@ -1563,18 +1567,18 @@ public:
 
     // Performs the actual conversion of build-time resource ID to run-time
     // resource ID.
-    inline status_t lookupResourceId(uint32_t* resId) const;
-    inline status_t lookupResourceValue(Res_value* value) const;
+    status_t lookupResourceId(uint32_t* resId) const;
+    status_t lookupResourceValue(Res_value* value) const;
 
     inline const KeyedVector<String16, uint8_t>& entries() const {
         return mEntries;
     }
 
 private:
-    const uint8_t                   mAssignedPackageId;
+    uint8_t                         mAssignedPackageId = 0;
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
-    bool                            mAppAsLib;
+    bool                            mAppAsLib = false;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);

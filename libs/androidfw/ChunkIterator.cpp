@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Chunk.h"
+#include "androidfw/Chunk.h"
 
 #include "android-base/logging.h"
 

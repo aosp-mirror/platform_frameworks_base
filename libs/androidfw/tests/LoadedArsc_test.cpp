@@ -16,21 +16,18 @@
 
 #include "androidfw/LoadedArsc.h"
 
-#include "android-base/file.h"
-#include "android-base/logging.h"
-#include "android-base/macros.h"
-
 #include "TestHelpers.h"
 #include "data/basic/R.h"
+#include "data/libclient/R.h"
 #include "data/styles/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
+namespace libclient = com::android::libclient;
 
 namespace android {
 
 TEST(LoadedArscTest, LoadSinglePackageArsc) {
-  base::ScopedLogSeverity _log(base::LogSeverity::DEBUG);
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/styles/styles.apk", "resources.arsc",
                                       &contents));
@@ -38,11 +35,16 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
   ASSERT_NE(nullptr, loaded_arsc);
 
+  const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+  EXPECT_EQ(std::string("com.android.app"), packages[0]->GetPackageName());
+  EXPECT_EQ(0x7f, packages[0]->GetPackageId());
+
   ResTable_config config;
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 24;
 
-  LoadedArsc::Entry entry;
+  LoadedArscEntry entry;
   ResTable_config selected_config;
   uint32_t flags;
 
@@ -52,7 +54,6 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
 }
 
 TEST(LoadedArscTest, FindDefaultEntry) {
-  base::ScopedLogSeverity _log(base::LogSeverity::DEBUG);
   std::string contents;
   ASSERT_TRUE(
       ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
@@ -65,13 +66,77 @@ TEST(LoadedArscTest, FindDefaultEntry) {
   desired_config.language[0] = 'd';
   desired_config.language[1] = 'e';
 
-  LoadedArsc::Entry entry;
+  LoadedArscEntry entry;
   ResTable_config selected_config;
   uint32_t flags;
 
   ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test1, desired_config, &entry,
                                      &selected_config, &flags));
   ASSERT_NE(nullptr, entry.entry);
+}
+
+TEST(LoadedArscTest, LoadSharedLibrary) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk", "resources.arsc",
+                                      &contents));
+
+  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const auto& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+
+  EXPECT_TRUE(packages[0]->IsDynamic());
+  EXPECT_EQ(std::string("com.android.lib_one"), packages[0]->GetPackageName());
+  EXPECT_EQ(0, packages[0]->GetPackageId());
+
+  const auto& dynamic_pkg_map = packages[0]->GetDynamicPackageMap();
+
+  // The library has no dependencies.
+  ASSERT_TRUE(dynamic_pkg_map.empty());
+}
+
+TEST(LoadedArscTest, LoadAppLinkedAgainstSharedLibrary) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/libclient/libclient.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(), contents.size());
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const auto& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+
+  EXPECT_FALSE(packages[0]->IsDynamic());
+  EXPECT_EQ(std::string("com.android.libclient"), packages[0]->GetPackageName());
+  EXPECT_EQ(0x7f, packages[0]->GetPackageId());
+
+  const auto& dynamic_pkg_map = packages[0]->GetDynamicPackageMap();
+
+  // The library has two dependencies.
+  ASSERT_EQ(2u, dynamic_pkg_map.size());
+
+  EXPECT_EQ(std::string("com.android.lib_one"), dynamic_pkg_map[0].package_name);
+  EXPECT_EQ(0x02, dynamic_pkg_map[0].package_id);
+
+  EXPECT_EQ(std::string("com.android.lib_two"), dynamic_pkg_map[1].package_name);
+  EXPECT_EQ(0x03, dynamic_pkg_map[1].package_id);
+}
+
+TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/appaslib/appaslib.apk",
+                                      "resources.arsc", &contents));
+
+  std::unique_ptr<LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(contents.data(), contents.size(), true /*load_as_shared_library*/);
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  const auto& packages = loaded_arsc->GetPackages();
+  ASSERT_EQ(1u, packages.size());
+
+  EXPECT_TRUE(packages[0]->IsDynamic());
+  EXPECT_EQ(0x7f, packages[0]->GetPackageId());
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be

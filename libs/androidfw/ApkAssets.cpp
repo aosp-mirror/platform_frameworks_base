@@ -28,7 +28,16 @@
 namespace android {
 
 std::unique_ptr<ApkAssets> ApkAssets::Load(const std::string& path) {
-  ATRACE_NAME("ApkAssets::Load");
+  return ApkAssets::LoadImpl(path, false /*load_as_shared_library*/);
+}
+
+std::unique_ptr<ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path) {
+  return ApkAssets::LoadImpl(path, true /*load_as_shared_library*/);
+}
+
+std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(const std::string& path,
+                                               bool load_as_shared_library) {
+  ATRACE_CALL();
   ::ZipArchiveHandle unmanaged_handle;
   int32_t result = ::OpenArchive(path.c_str(), &unmanaged_handle);
   if (result != 0) {
@@ -61,7 +70,7 @@ std::unique_ptr<ApkAssets> ApkAssets::Load(const std::string& path) {
   loaded_apk->path_ = path;
   loaded_apk->loaded_arsc_ =
       LoadedArsc::Load(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/),
-                       loaded_apk->resources_asset_->getLength());
+                       loaded_apk->resources_asset_->getLength(), load_as_shared_library);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     return {};
   }

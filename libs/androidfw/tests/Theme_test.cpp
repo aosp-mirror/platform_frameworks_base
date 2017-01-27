@@ -19,9 +19,13 @@
 #include "android-base/logging.h"
 
 #include "TestHelpers.h"
+#include "data/lib_one/R.h"
+#include "data/libclient/R.h"
 #include "data/styles/R.h"
 
 namespace app = com::android::app;
+namespace lib_one = com::android::lib_one;
+namespace libclient = com::android::libclient;
 
 namespace android {
 
@@ -30,10 +34,22 @@ class ThemeTest : public ::testing::Test {
   void SetUp() override {
     style_assets_ = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
     ASSERT_NE(nullptr, style_assets_);
+
+    libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
+    ASSERT_NE(nullptr, libclient_assets_);
+
+    lib_one_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_one/lib_one.apk");
+    ASSERT_NE(nullptr, lib_one_assets_);
+
+    lib_two_assets_ = ApkAssets::Load(GetTestDataPath() + "/lib_two/lib_two.apk");
+    ASSERT_NE(nullptr, lib_two_assets_);
   }
 
  protected:
   std::unique_ptr<ApkAssets> style_assets_;
+  std::unique_ptr<ApkAssets> libclient_assets_;
+  std::unique_ptr<ApkAssets> lib_one_assets_;
+  std::unique_ptr<ApkAssets> lib_two_assets_;
 };
 
 TEST_F(ThemeTest, EmptyTheme) {
@@ -172,6 +188,36 @@ TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
   EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
   EXPECT_EQ(5u, value.data);
   EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets(
+      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(libclient::R::style::Theme, false /*force*/));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
+
+  // The attribute should be resolved to the final value.
+  cookie = theme->GetAttribute(libclient::R::attr::foo, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(700u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  // The reference should be resolved to a TYPE_REFERENCE.
+  cookie = theme->GetAttribute(libclient::R::attr::bar, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+
+  // lib_one is assigned package ID 0x03.
+  EXPECT_EQ(3u, util::get_package_id(value.data));
+  EXPECT_EQ(util::get_type_id(lib_one::R::string::foo), util::get_type_id(value.data));
+  EXPECT_EQ(util::get_entry_id(lib_one::R::string::foo), util::get_entry_id(value.data));
 }
 
 TEST_F(ThemeTest, CopyThemeSameAssetManager) {

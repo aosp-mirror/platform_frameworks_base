@@ -32,6 +32,7 @@ namespace android {
 class ApkAssets {
  public:
   static std::unique_ptr<ApkAssets> Load(const std::string& path);
+  static std::unique_ptr<ApkAssets> LoadAsSharedLibrary(const std::string& path);
 
   std::unique_ptr<Asset> Open(const std::string& path,
                               Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
@@ -42,6 +43,8 @@ class ApkAssets {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
+
+  static std::unique_ptr<ApkAssets> LoadImpl(const std::string& path, bool load_as_shared_library);
 
   ApkAssets() = default;
 

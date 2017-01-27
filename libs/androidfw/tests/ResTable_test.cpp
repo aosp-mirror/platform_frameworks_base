@@ -25,10 +25,10 @@
 
 #include "TestHelpers.h"
 #include "data/basic/R.h"
-#include "data/lib/R.h"
+#include "data/lib_one/R.h"
 
 namespace basic = com::android::basic;
-namespace lib = com::android::lib;
+namespace lib = com::android::lib_one;
 
 namespace android {
 
@@ -119,7 +119,7 @@ TEST(ResTableTest, ParentThemeIsAppliedCorrectly) {
 
 TEST(ResTableTest, LibraryThemeIsAppliedCorrectly) {
   std::string contents;
-  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib/lib.apk",
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk",
                                       "resources.arsc", &contents));
 
   ResTable table;
