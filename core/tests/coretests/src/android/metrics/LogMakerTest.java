@@ -132,4 +132,78 @@ public class LogMakerTest extends TestCase {
         assertTrue(badBuilder.serialize().length < LogMaker.MAX_SERIALIZED_SIZE);
     }
 
+    public void testIdentityEquality() {
+        LogMaker a = new LogMaker(0);
+        a.addTaggedData(1, "onetwothree");
+        a.addTaggedData(2, 123);
+        a.addTaggedData(3, 123L);
+
+        assertTrue("objects should be equal to themselves", a.isSubsetOf(a));
+    }
+
+    public void testExactEquality() {
+        LogMaker a = new LogMaker(0);
+        a.addTaggedData(1, "onetwothree");
+        a.addTaggedData(2, 123);
+        a.addTaggedData(3, 123L);
+        LogMaker b = new LogMaker(0);
+        b.addTaggedData(1, "onetwothree");
+        b.addTaggedData(2, 123);
+        b.addTaggedData(3, 123L);
+
+        assertTrue("deep equality should be true", a.isSubsetOf(b));
+        assertTrue("deep equality shoudl be true", b.isSubsetOf(a));
+    }
+
+    public void testSubsetEquality() {
+        LogMaker a = new LogMaker(0);
+        a.addTaggedData(1, "onetwothree");
+        a.addTaggedData(2, 123);
+        LogMaker b = new LogMaker(0);
+        b.addTaggedData(1, "onetwothree");
+        b.addTaggedData(2, 123);
+        b.addTaggedData(3, 123L);
+
+        assertTrue("a is a strict subset of b", a.isSubsetOf(b));
+        assertTrue("b is not a strict subset of a", !b.isSubsetOf(a));
+    }
+
+    public void testInequality() {
+        LogMaker a = new LogMaker(0);
+        a.addTaggedData(1, "onetwofour");
+        a.addTaggedData(2, 1234);
+        LogMaker b = new LogMaker(0);
+        b.addTaggedData(1, "onetwothree");
+        b.addTaggedData(2, 123);
+        b.addTaggedData(3, 123L);
+
+        assertTrue("a is not a subset of b", !a.isSubsetOf(b));
+        assertTrue("b is not a subset of a", !b.isSubsetOf(a));
+    }
+
+    public void testWildcardEquality() {
+        LogMaker empty = new LogMaker(0);
+        empty.clearTaggedData(MetricsEvent.RESERVED_FOR_LOGBUILDER_CATEGORY);  //dirty trick
+        LogMaker b = new LogMaker(0);
+        b.addTaggedData(1, "onetwothree");
+        b.addTaggedData(2, 123);
+        b.addTaggedData(3, 123L);
+
+        assertTrue("empty builder is a subset of anything", empty.isSubsetOf(b));
+    }
+
+    public void testNullEquality() {
+        LogMaker a = new LogMaker(0);
+        a.addTaggedData(1, "onetwofour");
+        a.addTaggedData(2, 1234);
+
+        assertTrue("a is not a subset of null", !a.isSubsetOf(null));
+    }
+
+    public void testMajorCategory() {
+        LogMaker a = new LogMaker(1);
+        LogMaker b = new LogMaker(2);
+        assertFalse(a.isSubsetOf(b));
+        assertFalse(b.isSubsetOf(a));
+    }
 }
