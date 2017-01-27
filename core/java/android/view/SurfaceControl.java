@@ -34,7 +34,7 @@ public class SurfaceControl {
     private static final String TAG = "SurfaceControl";
 
     private static native long nativeCreate(SurfaceSession session, String name,
-            int w, int h, int format, int flags)
+            int w, int h, int format, int flags, long parentObject)
             throws OutOfResourcesException;
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
@@ -287,6 +287,12 @@ public class SurfaceControl {
     public SurfaceControl(SurfaceSession session,
             String name, int w, int h, int format, int flags)
                     throws OutOfResourcesException {
+        this(session, name, w, h, format, flags, null);
+    }
+
+    public SurfaceControl(SurfaceSession session,
+            String name, int w, int h, int format, int flags, SurfaceControl parent)
+                    throws OutOfResourcesException {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
         }
@@ -304,7 +310,7 @@ public class SurfaceControl {
         }
 
         mName = name;
-        mNativeObject = nativeCreate(session, name, w, h, format, flags);
+        mNativeObject = nativeCreate(session, name, w, h, format, flags, parent != null ? parent.mNativeObject : 0);
         if (mNativeObject == 0) {
             throw new OutOfResourcesException(
                     "Couldn't allocate SurfaceControl native object");
