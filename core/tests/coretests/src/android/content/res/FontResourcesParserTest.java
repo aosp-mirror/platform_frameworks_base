@@ -15,6 +15,8 @@
  */
 package android.content.res;
 
+import static junit.framework.Assert.assertNull;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -77,5 +79,20 @@ public class FontResourcesParserTest {
         assertEquals(800, font4.getWeight());
         assertEquals(true, font4.isItalic());
         assertEquals("res/font/samplefont4.ttf", font4.getFontName());
+    }
+
+    @Test
+    public void testParseDownloadableFont() throws IOException, XmlPullParserException {
+        XmlResourceParser parser = mResources.getXml(R.font.samplexmldownloadedfont);
+
+        FontConfig result = FontResourcesParser.parse(parser, mResources);
+
+        assertNotNull(result);
+        List<FontConfig.Family> families = result.getFamilies();
+        assertEquals(1, families.size());
+        FontConfig.Family family = families.get(0);
+        assertEquals("com.example.test.fontprovider", family.getProviderAuthority());
+        assertEquals("MyRequestedFont", family.getQuery());
+        assertNull(family.getFonts());
     }
 }

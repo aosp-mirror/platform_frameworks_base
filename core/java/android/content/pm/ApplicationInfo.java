@@ -573,6 +573,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int privateFlags;
 
     /**
+     * @hide
+     */
+    public static final String METADATA_PRELOADED_FONTS = "preloaded_fonts";
+
+    /**
      * The required smallest screen width the application can run on.  If 0,
      * nothing has been specified.  Comes from
      * {@link android.R.styleable#AndroidManifestSupportsScreens_requiresSmallestWidthDp

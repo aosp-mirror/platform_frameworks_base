@@ -373,6 +373,20 @@ public class Resources {
     }
 
     /**
+     * @hide
+     */
+    public void preloadFonts(@FontRes int id) {
+        final TypedValue value = obtainTempTypedValue();
+        try {
+            final ResourcesImpl impl = mResourcesImpl;
+            impl.getValue(id, value, true);
+            impl.preloadFonts(this, value, id);
+        } finally {
+            releaseTempTypedValue(value);
+        }
+    }
+
+    /**
      * Returns the character sequence necessary for grammatically correct pluralization
      * of the given resource ID for the given quantity.
      * Note that the character sequence is selected based solely on grammatical necessity,
