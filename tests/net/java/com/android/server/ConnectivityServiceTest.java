@@ -1970,7 +1970,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Disconnect wifi and check that cell is foreground again.
         mWiFiNetworkAgent.disconnect();
-        mService.waitForIdle();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -2150,7 +2149,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             tracker.reevaluate();
             mService.waitForIdle();
             String msg = String.format("config=false, setting=%s", values[i]);
-            assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
+            assertTrue(mService.avoidBadWifi());
             assertFalse(msg, tracker.shouldNotifyWifiUnvalidated());
         }
 
@@ -2159,19 +2158,19 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         Settings.Global.putInt(cr, settingName, 0);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
+        assertFalse(mService.avoidBadWifi());
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putInt(cr, settingName, 1);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
+        assertTrue(mService.avoidBadWifi());
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putString(cr, settingName, null);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
+        assertFalse(mService.avoidBadWifi());
         assertTrue(tracker.shouldNotifyWifiUnvalidated());
     }
 
@@ -2392,17 +2391,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         networkCallback.assertNoCallback();
     }
 
-    public void assertEventuallyTrue(BooleanSupplier fn, long maxWaitingTimeMs) {
-        long start = SystemClock.elapsedRealtime();
-        while (SystemClock.elapsedRealtime() <= start + maxWaitingTimeMs) {
-            if (fn.getAsBoolean()) {
-                return;
-            }
-            sleepFor(15);
-        }
-        assertTrue(fn.getAsBoolean());
-    }
-
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
 
         public static enum CallbackType { ON_STARTED, ON_STOPPED, ON_ERROR };
@@ -2563,12 +2551,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
 
         // ... and that stopping it after that has no adverse effects.
-        // TODO: investigate assertEventuallyTrue is needed and waitForIdle() is not enough
+        mService.waitForIdle();
         final Network myNetAlias = myNet;
-        assertEventuallyTrue(() -> mCm.getNetworkCapabilities(myNetAlias) == null, 100);
+        assertNull(mCm.getNetworkCapabilities(myNetAlias));
         ka.stop();
 
         // Reconnect.
@@ -2580,6 +2569,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         callback.expectStarted();
         ka.stop();
         mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         mService.waitForIdle();
         callback.expectStopped();
 
