@@ -762,7 +762,8 @@ public class NotificationPanelView extends PanelView implements
         }
         if ((!mIsExpanding || mHintAnimationRunning)
                 && !mQsExpanded
-                && mStatusBar.getBarState() != StatusBarState.SHADE) {
+                && mStatusBar.getBarState() != StatusBarState.SHADE
+                && !mDozing) {
             mAffordanceHelper.onTouchEvent(event);
         }
         if (mOnlyAffordanceInThisMotion) {
