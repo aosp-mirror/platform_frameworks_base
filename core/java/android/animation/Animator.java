@@ -469,8 +469,9 @@ public abstract class Animator implements Cloneable, AnimationHandler.AnimationF
      */
     @Override
     public boolean doAnimationFrame(long frameTime) {
-        // TODO: Need to find a better signal than this
-        return getDuration() + getStartDelay() >= frameTime;
+        // TODO: Need to find a better signal than this. There's a bug in SystemUI that's preventing
+        // returning !isStarted() from working.
+        return false;
     }
 
     /**
