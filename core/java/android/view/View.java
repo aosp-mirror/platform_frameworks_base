@@ -6391,6 +6391,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see ViewGroup#getTouchscreenBlocksFocus()
      */
     public boolean hasFocusable() {
+        return hasFocusable(true);
+    }
+
+    /**
+     * @hide pending determination of whether this should be public or not.
+     * Currently used for compatibility with old focusability expectations in ListView.
+     */
+    public boolean hasFocusable(boolean allowAutoFocus) {
         if (!isFocusableInTouchMode()) {
             for (ViewParent p = mParent; p instanceof ViewGroup; p = p.getParent()) {
                 final ViewGroup g = (ViewGroup) p;
@@ -6399,7 +6407,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
-        return (mViewFlags & VISIBILITY_MASK) == VISIBLE && isFocusable();
+        if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
+            return false;
+        }
+        return allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE;
     }
 
     /**
