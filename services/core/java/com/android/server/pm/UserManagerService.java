@@ -227,6 +227,7 @@ public class UserManagerService extends IUserManager.Stub {
     private final Context mContext;
     private final PackageManagerService mPm;
     private final Object mPackagesLock;
+    private final UserDataPreparer mUserDataPreparer;
     // Short-term lock for internal state, when interaction/sync with PM is not required
     private final Object mUsersLock = new Object();
     private final Object mRestrictionsLock = new Object();
@@ -433,7 +434,7 @@ public class UserManagerService extends IUserManager.Stub {
     // TODO b/28848102 Add support for test dependencies injection
     @VisibleForTesting
     UserManagerService(Context context) {
-        this(context, null, new Object(), context.getCacheDir());
+        this(context, null, null, new Object(), context.getCacheDir());
     }
 
     /**
@@ -441,16 +442,18 @@ public class UserManagerService extends IUserManager.Stub {
      * associated with the package manager, and the given lock is the
      * package manager's own lock.
      */
-    UserManagerService(Context context, PackageManagerService pm, Object packagesLock) {
-        this(context, pm, packagesLock, Environment.getDataDirectory());
+    UserManagerService(Context context, PackageManagerService pm, UserDataPreparer userDataPreparer,
+            Object packagesLock) {
+        this(context, pm, userDataPreparer, packagesLock, Environment.getDataDirectory());
     }
 
     private UserManagerService(Context context, PackageManagerService pm,
-            Object packagesLock, File dataDir) {
+            UserDataPreparer userDataPreparer, Object packagesLock, File dataDir) {
         mContext = context;
         mPm = pm;
         mPackagesLock = packagesLock;
         mHandler = new MainHandler();
+        mUserDataPreparer = userDataPreparer;
         synchronized (mPackagesLock) {
             mUsersDir = new File(dataDir, USER_INFO_DIR);
             mUsersDir.mkdirs();
@@ -2494,7 +2497,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
-            mPm.prepareUserData(userId, userInfo.serialNumber,
+            mUserDataPreparer.prepareUserData(userId, userInfo.serialNumber,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             mPm.createNewUser(userId, disallowedPackages);
             userInfo.partial = false;
@@ -2788,7 +2791,7 @@ public class UserManagerService extends IUserManager.Stub {
         mPm.cleanUpUser(this, userHandle);
 
         // Clean up all data before removing metadata
-        mPm.destroyUserData(userHandle,
+        mUserDataPreparer.destroyUserData(userHandle,
                 StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
 
         // Remove this user from the list
@@ -3129,7 +3132,7 @@ public class UserManagerService extends IUserManager.Stub {
         final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
-        mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
+        mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData);
 
         if (userId != UserHandle.USER_SYSTEM) {
@@ -3151,7 +3154,7 @@ public class UserManagerService extends IUserManager.Stub {
         final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
-        mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
+        mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);
     }
 

@@ -831,6 +831,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
+    private final UserDataPreparer mUserDataPreparer;
 
     private File mCacheDir;
 
@@ -2262,8 +2263,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
-
-            sUserManager = new UserManagerService(context, this, mPackages);
+            mUserDataPreparer = new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore);
+            sUserManager = new UserManagerService(context, this, mUserDataPreparer, mPackages);
 
             // Propagate permission configuration in to package manager.
             ArrayMap<String, SystemConfig.PermissionEntry> permConfig
@@ -21256,101 +21257,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     /**
-     * Prepare storage areas for given user on all mounted devices.
-     */
-    void prepareUserData(int userId, int userSerial, int flags) {
-        synchronized (mInstallLock) {
-            final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                prepareUserDataLI(volumeUuid, userId, userSerial, flags, true);
-            }
-        }
-    }
-
-    private void prepareUserDataLI(String volumeUuid, int userId, int userSerial, int flags,
-            boolean allowRecover) {
-        // Prepare storage and verify that serial numbers are consistent; if
-        // there's a mismatch we need to destroy to avoid leaking data
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        try {
-            storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
-
-            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && !mOnlyCore) {
-                UserManagerService.enforceSerialNumber(
-                        Environment.getDataUserDeDirectory(volumeUuid, userId), userSerial);
-                if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
-                    UserManagerService.enforceSerialNumber(
-                            Environment.getDataSystemDeDirectory(userId), userSerial);
-                }
-            }
-            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && !mOnlyCore) {
-                UserManagerService.enforceSerialNumber(
-                        Environment.getDataUserCeDirectory(volumeUuid, userId), userSerial);
-                if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
-                    UserManagerService.enforceSerialNumber(
-                            Environment.getDataSystemCeDirectory(userId), userSerial);
-                }
-            }
-
-            synchronized (mInstallLock) {
-                mInstaller.createUserData(volumeUuid, userId, userSerial, flags);
-            }
-        } catch (Exception e) {
-            logCriticalInfo(Log.WARN, "Destroying user " + userId + " on volume " + volumeUuid
-                    + " because we failed to prepare: " + e);
-            destroyUserDataLI(volumeUuid, userId,
-                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-
-            if (allowRecover) {
-                // Try one last time; if we fail again we're really in trouble
-                prepareUserDataLI(volumeUuid, userId, userSerial, flags, false);
-            }
-        }
-    }
-
-    /**
-     * Destroy storage areas for given user on all mounted devices.
-     */
-    void destroyUserData(int userId, int flags) {
-        synchronized (mInstallLock) {
-            final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                destroyUserDataLI(volumeUuid, userId, flags);
-            }
-        }
-    }
-
-    private void destroyUserDataLI(String volumeUuid, int userId, int flags) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        try {
-            // Clean up app data, profile data, and media data
-            mInstaller.destroyUserData(volumeUuid, userId, flags);
-
-            // Clean up system data
-            if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
-                if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
-                    FileUtils.deleteContentsAndDir(Environment.getUserSystemDirectory(userId));
-                    FileUtils.deleteContentsAndDir(Environment.getDataSystemDeDirectory(userId));
-                    FileUtils.deleteContentsAndDir(Environment.getDataMiscDeDirectory(userId));
-                }
-                if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-                    FileUtils.deleteContentsAndDir(Environment.getDataSystemCeDirectory(userId));
-                    FileUtils.deleteContentsAndDir(Environment.getDataMiscCeDirectory(userId));
-                }
-            }
-
-            // Data with special labels is now gone, so finish the job
-            storage.destroyUserStorage(volumeUuid, userId, flags);
-
-        } catch (Exception e) {
-            logCriticalInfo(Log.WARN,
-                    "Failed to destroy user " + userId + " on volume " + volumeUuid + ": " + e);
-        }
-    }
-
-    /**
      * Examine all users present on given mounted volume, and destroy data
      * belonging to users that are no longer valid, or whose user ID has been
      * recycled.
@@ -21397,7 +21303,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
             if (destroyUser) {
                 synchronized (mInstallLock) {
-                    destroyUserDataLI(volumeUuid, userId,
+                    mUserDataPreparer.destroyUserDataLI(volumeUuid, userId,
                             StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
                 }
             }
