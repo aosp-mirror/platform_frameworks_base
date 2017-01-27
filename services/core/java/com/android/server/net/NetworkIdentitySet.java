@@ -91,6 +91,19 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
         }
     }
 
+    /** @return whether any {@link NetworkIdentity} in this set is considered metered. */
+    public boolean isAnyMemberMetered() {
+        if (isEmpty()) {
+            return false;
+        }
+        for (NetworkIdentity ident : this) {
+            if (ident.getMetered()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @return whether any {@link NetworkIdentity} in this set is considered roaming. */
     public boolean isAnyMemberRoaming() {
         if (isEmpty()) {

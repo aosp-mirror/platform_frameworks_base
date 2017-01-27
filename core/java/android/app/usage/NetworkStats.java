@@ -256,6 +256,15 @@ public final class NetworkStats implements AutoCloseable {
             return tag;
         }
 
+        private static @Metered int convertMetered(int metered) {
+            switch (metered) {
+                case android.net.NetworkStats.METERED_ALL : return METERED_ALL;
+                case android.net.NetworkStats.METERED_NO: return METERED_NO;
+                case android.net.NetworkStats.METERED_YES: return METERED_YES;
+            }
+            return 0;
+        }
+
         private static @Roaming int convertRoaming(int roaming) {
             switch (roaming) {
                 case android.net.NetworkStats.ROAMING_ALL : return ROAMING_ALL;
@@ -530,8 +539,7 @@ public final class NetworkStats implements AutoCloseable {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mTag = Bucket.convertTag(mRecycledSummaryEntry.tag);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
-        // TODO: Implement metered tracking.
-        bucketOut.mMetered = Bucket.METERED_ALL;
+        bucketOut.mMetered = Bucket.convertMetered(mRecycledSummaryEntry.metered);
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
         bucketOut.mEndTimeStamp = mEndTimeStamp;
