@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
@@ -39,8 +40,11 @@ import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.TelephonyHistogram;
+import android.telephony.ims.feature.ImsFeature;
 import android.util.Log;
 
+import com.android.ims.internal.IImsServiceController;
+import com.android.ims.internal.IImsServiceFeatureListener;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IPhoneSubInfo;
@@ -53,6 +57,8 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -4039,6 +4045,37 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             return new String[0];
         }
+    }
+
+    /** @hide */
+    @IntDef({ImsFeature.EMERGENCY_MMTEL, ImsFeature.MMTEL, ImsFeature.RCS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Feature {}
+
+    /**
+     * Returns the {@link IImsServiceController} that corresponds to the given slot Id and IMS
+     * feature or {@link null} if the service is not available. If an ImsServiceController is
+     * available, the {@link IImsServiceFeatureListener} callback is registered as a listener for
+     * feature updates.
+     * @param slotId The SIM slot that we are requesting the {@link IImsServiceController} for.
+     * @param feature The IMS Feature we are requesting, corresponding to {@link ImsFeature}.
+     * @param callback Listener that will send updates to ImsManager when there are updates to
+     * ImsServiceController.
+     * @return {@link IImsServiceController} interface for the feature specified or {@link null} if
+     * it is unavailable.
+     * @hide
+     */
+    public IImsServiceController getImsServiceControllerAndListen(int slotId, @Feature int feature,
+            IImsServiceFeatureListener callback) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getImsServiceControllerAndListen(slotId, feature, callback);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "getImsServiceControllerAndListen, RemoteException: " + e.getMessage());
+        }
+        return null;
     }
 
     /**
