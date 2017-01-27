@@ -256,6 +256,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mAccessibilityController.addStateChangedCallback(this);
         PluginManager.getInstance(getContext()).addPluginListener(RIGHT_BUTTON_PLUGIN,
                 mRightListener, IntentButtonProvider.VERSION, false /* Only allow one */);
         PluginManager.getInstance(getContext()).addPluginListener(LEFT_BUTTON_PLUGIN,
@@ -267,6 +268,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mAccessibilityController.removeStateChangedCallback(this);
         PluginManager.getInstance(getContext()).removePluginListener(mRightListener);
         PluginManager.getInstance(getContext()).removePluginListener(mLeftListener);
         TunerService.get(getContext()).removeTunable(this);
