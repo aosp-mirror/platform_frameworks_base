@@ -613,6 +613,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private Vibrator mVibrator;
     private long[] mCameraLaunchGestureVibePattern;
 
+    private final int[] mTmpInt2 = new int[2];
+
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
 
@@ -715,6 +717,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final View.OnClickListener mGoToLockedShadeListener = v -> {
         if (mState == StatusBarState.KEYGUARD) {
+            wakeUpIfDozing(SystemClock.uptimeMillis(), v);
             goToLockedShade(null);
         }
     };
@@ -4946,12 +4949,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
-    public void wakeUpIfDozing(long time, PointF where) {
+    public void wakeUpIfDozing(long time, View where) {
         if (mDozing && mDozeScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time, "com.android.systemui:NODOZE");
             mWakeUpComingFromTouch = true;
-            mWakeUpTouchLocation = where;
+            where.getLocationInWindow(mTmpInt2);
+            mWakeUpTouchLocation = new PointF(mTmpInt2[0] + where.getWidth() / 2,
+                    mTmpInt2[1] + where.getHeight() / 2);
             mNotificationPanel.setTouchDisabled(false);
             mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
             mFalsingManager.onScreenOnFromTouch();
@@ -5348,14 +5353,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
-        private final int[] mTmpInt2 = new int[2];
 
         @Override
         public boolean onClickHandler(
                 final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
-            view.getLocationInWindow(mTmpInt2);
-            wakeUpIfDozing(SystemClock.uptimeMillis(), new PointF(
-                    mTmpInt2[0] + view.getWidth() / 2, mTmpInt2[1] + view.getHeight() / 2));
+            wakeUpIfDozing(SystemClock.uptimeMillis(), view);
 
 
             if (handleRemoteInput(view, pendingIntent, fillInIntent)) {
@@ -6584,7 +6586,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
 
     private final class NotificationClicker implements View.OnClickListener {
-        private final int[] mTmpInt2 = new int[2];
 
         @Override
         public void onClick(final View v) {
@@ -6593,9 +6594,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return;
             }
 
-            v.getLocationInWindow(mTmpInt2);
-            wakeUpIfDozing(SystemClock.uptimeMillis(),
-                    new PointF(mTmpInt2[0] + v.getWidth() / 2, mTmpInt2[1] + v.getHeight() / 2));
+            wakeUpIfDozing(SystemClock.uptimeMillis(), v);
 
             final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             final StatusBarNotification sbn = row.getStatusBarNotification();
