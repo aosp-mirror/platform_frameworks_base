@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
@@ -909,6 +910,16 @@ public class DevicePolicyManager {
      * or the organization name.
      *
      * <p> Use in Bundle {@link #EXTRA_PROVISIONING_DISCLAIMERS}
+     *
+     * <p> System app, i.e. application with {@link ApplicationInfo#FLAG_SYSTEM}, can also insert a
+     * disclaimer by declaring an application-level meta-data in {@code AndroidManifest.xml}.
+     * Must use it with {@link #EXTRA_PROVISIONING_DISCLAIMER_CONTENT}. Here is the example:
+     *
+     * <pre>
+     *  &lt;meta-data
+     *      android:name="android.app.extra.PROVISIONING_DISCLAIMER_HEADER"
+     *      android:resource="@string/disclaimer_header"
+     * /&gt;</pre>
      */
     public static final String EXTRA_PROVISIONING_DISCLAIMER_HEADER =
             "android.app.extra.PROVISIONING_DISCLAIMER_HEADER";
@@ -931,6 +942,16 @@ public class DevicePolicyManager {
      * {@link android.content.ClipData} of the intent too.
      *
      * <p> Use in Bundle {@link #EXTRA_PROVISIONING_DISCLAIMERS}
+     *
+     * <p> System app, i.e. application with {@link ApplicationInfo#FLAG_SYSTEM}, can also insert a
+     * disclaimer by declaring an application-level meta-data in {@code AndroidManifest.xml}.
+     * Must use it with {@link #EXTRA_PROVISIONING_DISCLAIMER_HEADER}. Here is the example:
+     *
+     * <pre>
+     *  &lt;meta-data
+     *      android:name="android.app.extra.PROVISIONING_DISCLAIMER_CONTENT"
+     *      android:resource="@string/disclaimer_content"
+     * /&gt;</pre>
      */
     public static final String EXTRA_PROVISIONING_DISCLAIMER_CONTENT =
             "android.app.extra.PROVISIONING_DISCLAIMER_CONTENT";
