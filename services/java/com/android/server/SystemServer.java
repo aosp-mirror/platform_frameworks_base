@@ -55,6 +55,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.policy.EmergencyAffordanceManager;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -117,6 +118,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -1580,11 +1582,19 @@ public final class SystemServer {
             }
             traceEnd();
 
+            // No dependency on Webview preparation in system server. But this should
+            // be completed before allowring 3rd party
+            final String WEBVIEW_PREPARATION = "WebViewFactoryPreparation";
+            Future<?> webviewPrep = null;
             if (!mOnlyCore) {
-                Slog.i(TAG, "WebViewFactory preparation");
-                traceBeginAndSlog("WebViewFactoryPreparation");
-                mWebViewUpdateService.prepareWebViewInSystemServer();
-                traceEnd();
+                webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
+                    Slog.i(TAG, WEBVIEW_PREPARATION);
+                    BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+                            "SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
+                    traceLog.traceBegin(WEBVIEW_PREPARATION);
+                    mWebViewUpdateService.prepareWebViewInSystemServer();
+                    traceLog.traceEnd();
+                }, WEBVIEW_PREPARATION);
             }
 
             traceBeginAndSlog("StartSystemUI");
@@ -1640,6 +1650,10 @@ public final class SystemServer {
             traceBeginAndSlog("StartWatchdog");
             Watchdog.getInstance().start();
             traceEnd();
+
+            if (webviewPrep != null) {
+                ConcurrentUtils.waitForFutureNoInterrupt(webviewPrep, WEBVIEW_PREPARATION);
+            }
 
             // It is now okay to let the various system services start their
             // third party code...
