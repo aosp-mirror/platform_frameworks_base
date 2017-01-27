@@ -96,6 +96,24 @@ public class NetworkMonitor extends StateMachine {
     private static final int SOCKET_TIMEOUT_MS = 10000;
     private static final int PROBE_TIMEOUT_MS  = 3000;
 
+    static enum EvaluationResult {
+        VALIDATED(true),
+        CAPTIVE_PORTAL(false);
+        final boolean isValidated;
+        EvaluationResult(boolean isValidated) {
+            this.isValidated = isValidated;
+        }
+    }
+
+    static enum ValidationStage {
+        FIRST_VALIDATION(true),
+        REVALIDATION(false);
+        final boolean isFirstValidation;
+        ValidationStage(boolean isFirstValidation) {
+            this.isFirstValidation = isFirstValidation;
+        }
+    }
+
     public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
             "android.net.conn.NETWORK_CONDITIONS_MEASURED";
     public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
@@ -215,6 +233,8 @@ public class NetworkMonitor extends StateMachine {
     protected boolean mIsCaptivePortalCheckEnabled;
 
     private boolean mUseHttps;
+    // The total number of captive portal detection attempts for this NetworkMonitor instance.
+    private int mValidations = 0;
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
     private boolean mUserDoesNotWant = false;
@@ -287,6 +307,10 @@ public class NetworkMonitor extends StateMachine {
 
     public ReadOnlyLocalLog getValidationLogs() {
         return validationLogs.readOnlyLocalLog();
+    }
+
+    private ValidationStage validationStage() {
+        return 0 == mValidations ? ValidationStage.FIRST_VALIDATION : ValidationStage.REVALIDATION;
     }
 
     // DefaultState is the parent of all States.  It exists only to handle CMD_* messages but
@@ -365,9 +389,11 @@ public class NetworkMonitor extends StateMachine {
     private class ValidatedState extends State {
         @Override
         public void enter() {
-            maybeLogEvaluationResult(NetworkEvent.NETWORK_VALIDATED);
+            maybeLogEvaluationResult(
+                    networkEventType(validationStage(), EvaluationResult.VALIDATED));
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, mNetworkAgentInfo.network.netId, null));
+            mValidations++;
         }
 
         @Override
@@ -583,7 +609,8 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
-            maybeLogEvaluationResult(NetworkEvent.NETWORK_CAPTIVE_PORTAL_FOUND);
+            maybeLogEvaluationResult(
+                    networkEventType(validationStage(), EvaluationResult.CAPTIVE_PORTAL));
             // Don't annoy user with sign-in notifications.
             if (mDontDisplaySigninNotification) return;
             // Create a CustomIntentReceiver that sends us a
@@ -603,6 +630,7 @@ public class NetworkMonitor extends StateMachine {
             // Retest for captive portal occasionally.
             sendMessageDelayed(CMD_CAPTIVE_PORTAL_RECHECK, 0 /* no UID */,
                     CAPTIVE_PORTAL_REEVALUATE_DELAY_MS);
+            mValidations++;
         }
 
         @Override
@@ -678,48 +706,13 @@ public class NetworkMonitor extends StateMachine {
 
         long startTime = SystemClock.elapsedRealtime();
 
-        // Pre-resolve the captive portal server host so we can log it.
-        // Only do this if HttpURLConnection is about to, to avoid any potentially
-        // unnecessary resolution.
-        String hostToResolve = null;
+        final CaptivePortalProbeResult result;
         if (pacUrl != null) {
-            hostToResolve = pacUrl.getHost();
-        } else if (proxyInfo != null) {
-            hostToResolve = proxyInfo.getHost();
-        } else {
-            hostToResolve = httpUrl.getHost();
-        }
-
-        if (!TextUtils.isEmpty(hostToResolve)) {
-            String probeName = ValidationProbeEvent.getProbeName(ValidationProbeEvent.PROBE_DNS);
-            final Stopwatch dnsTimer = new Stopwatch().start();
-            int dnsResult;
-            long dnsLatency;
-            try {
-                InetAddress[] addresses = mNetworkAgentInfo.network.getAllByName(hostToResolve);
-                dnsResult = ValidationProbeEvent.DNS_SUCCESS;
-                dnsLatency = dnsTimer.stop();
-                final StringBuffer connectInfo = new StringBuffer(", " + hostToResolve + "=");
-                for (InetAddress address : addresses) {
-                    connectInfo.append(address.getHostAddress());
-                    if (address != addresses[addresses.length-1]) connectInfo.append(",");
-                }
-                validationLog(probeName + " OK " + dnsLatency + "ms" + connectInfo);
-            } catch (UnknownHostException e) {
-                dnsResult = ValidationProbeEvent.DNS_FAILURE;
-                dnsLatency = dnsTimer.stop();
-                validationLog(probeName + " FAIL " + dnsLatency + "ms, " + hostToResolve);
-            }
-            logValidationProbe(dnsLatency, ValidationProbeEvent.PROBE_DNS, dnsResult);
-        }
-
-        CaptivePortalProbeResult result;
-        if (pacUrl != null) {
-            result = sendHttpProbe(pacUrl, ValidationProbeEvent.PROBE_PAC);
+            result = sendDnsAndHttpProbes(null, pacUrl, ValidationProbeEvent.PROBE_PAC);
         } else if (mUseHttps) {
-            result = sendParallelHttpProbes(httpsUrl, httpUrl, fallbackUrl);
+            result = sendParallelHttpProbes(proxyInfo, httpsUrl, httpUrl, fallbackUrl);
         } else {
-            result = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
+            result = sendDnsAndHttpProbes(proxyInfo, httpUrl, ValidationProbeEvent.PROBE_HTTP);
         }
 
         long endTime = SystemClock.elapsedRealtime();
@@ -732,8 +725,50 @@ public class NetworkMonitor extends StateMachine {
     }
 
     /**
-     * Do a URL fetch on a known server to see if we get the data we expect.
-     * Returns HTTP response code.
+     * Do a DNS resolution and URL fetch on a known web server to see if we get the data we expect.
+     * @return a CaptivePortalProbeResult inferred from the HTTP response.
+     */
+    private CaptivePortalProbeResult sendDnsAndHttpProbes(ProxyInfo proxy, URL url, int probeType) {
+        // Pre-resolve the captive portal server host so we can log it.
+        // Only do this if HttpURLConnection is about to, to avoid any potentially
+        // unnecessary resolution.
+        final String host = (proxy != null) ? proxy.getHost() : url.getHost();
+        sendDnsProbe(host);
+        return sendHttpProbe(url, probeType);
+    }
+
+    /** Do a DNS resolution of the given server. */
+    private void sendDnsProbe(String host) {
+        if (TextUtils.isEmpty(host)) {
+            return;
+        }
+
+        final String name = ValidationProbeEvent.getProbeName(ValidationProbeEvent.PROBE_DNS);
+        final Stopwatch watch = new Stopwatch().start();
+        int result;
+        String connectInfo;
+        try {
+            InetAddress[] addresses = mNetworkAgentInfo.network.getAllByName(host);
+            result = ValidationProbeEvent.DNS_SUCCESS;
+            StringBuffer buffer = new StringBuffer(host).append("=");
+            for (InetAddress address : addresses) {
+                buffer.append(address.getHostAddress());
+                if (address != addresses[addresses.length-1]) buffer.append(",");
+            }
+            connectInfo = buffer.toString();
+        } catch (UnknownHostException e) {
+            result = ValidationProbeEvent.DNS_FAILURE;
+            connectInfo = host;
+        }
+        final long latency = watch.stop();
+        String resultString = (ValidationProbeEvent.DNS_SUCCESS == result) ? "OK" : "FAIL";
+        validationLog(String.format("%s %s %dms, %s", name, resultString, latency, connectInfo));
+        logValidationProbe(latency, ValidationProbeEvent.PROBE_DNS, result);
+    }
+
+    /**
+     * Do a URL fetch on a known web server to see if we get the data we expect.
+     * @return a CaptivePortalProbeResult inferred from the HTTP response.
      */
     @VisibleForTesting
     protected CaptivePortalProbeResult sendHttpProbe(URL url, int probeType) {
@@ -800,7 +835,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private CaptivePortalProbeResult sendParallelHttpProbes(
-            URL httpsUrl, URL httpUrl, URL fallbackUrl) {
+            ProxyInfo proxy, URL httpsUrl, URL httpUrl, URL fallbackUrl) {
         // Number of probes to wait for. If a probe completes with a conclusive answer
         // it shortcuts the latch immediately by forcing the count to 0.
         final CountDownLatch latch = new CountDownLatch(2);
@@ -820,9 +855,10 @@ public class NetworkMonitor extends StateMachine {
             @Override
             public void run() {
                 if (mIsHttps) {
-                    mResult = sendHttpProbe(httpsUrl, ValidationProbeEvent.PROBE_HTTPS);
+                    mResult =
+                            sendDnsAndHttpProbes(proxy, httpsUrl, ValidationProbeEvent.PROBE_HTTPS);
                 } else {
-                    mResult = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
+                    mResult = sendDnsAndHttpProbes(proxy, httpUrl, ValidationProbeEvent.PROBE_HTTP);
                 }
                 if ((mIsHttps && mResult.isSuccessful()) || (!mIsHttps && mResult.isPortal())) {
                     // Stop waiting immediately if https succeeds or if http finds a portal.
@@ -973,6 +1009,22 @@ public class NetworkMonitor extends StateMachine {
         mMetricsLog.log(new NetworkEvent(mNetId, evtype));
     }
 
+    private int networkEventType(ValidationStage s, EvaluationResult r) {
+        if (s.isFirstValidation) {
+            if (r.isValidated) {
+                return NetworkEvent.NETWORK_FIRST_VALIDATION_SUCCESS;
+            } else {
+                return NetworkEvent.NETWORK_FIRST_VALIDATION_PORTAL_FOUND;
+            }
+        } else {
+            if (r.isValidated) {
+                return NetworkEvent.NETWORK_REVALIDATION_SUCCESS;
+            } else {
+                return NetworkEvent.NETWORK_REVALIDATION_PORTAL_FOUND;
+            }
+        }
+    }
+
     private void maybeLogEvaluationResult(int evtype) {
         if (mEvaluationTimer.isRunning()) {
             mMetricsLog.log(new NetworkEvent(mNetId, evtype, mEvaluationTimer.stop()));
@@ -981,6 +1033,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private void logValidationProbe(long durationMs, int probeType, int probeResult) {
+        probeType =
+                ValidationProbeEvent.makeProbeType(probeType, validationStage().isFirstValidation);
         mMetricsLog.log(new ValidationProbeEvent(mNetId, durationMs, probeType, probeResult));
     }
 }

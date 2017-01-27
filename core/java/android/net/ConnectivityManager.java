@@ -2086,6 +2086,8 @@ public class ConnectivityManager {
     @SystemApi
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
+        checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
+
         ResultReceiver wrappedCallback = new ResultReceiver(handler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -2096,6 +2098,7 @@ public class ConnectivityManager {
                 }
             }
         };
+
         try {
             mService.startTethering(type, wrappedCallback, showProvisioningUi);
         } catch (RemoteException e) {
@@ -2599,7 +2602,8 @@ public class ConnectivityManager {
 
         /**
          * Called if no network is found in the given timeout time.  If no timeout is given,
-         * this will not be called.
+         * this will not be called. The associated {@link NetworkRequest} will have already
+         * been removed and released, as if {@link #unregisterNetworkCallback} had been called.
          * @hide
          */
         public void onUnavailable() {}
@@ -2663,6 +2667,7 @@ public class ConnectivityManager {
     public static final int CALLBACK_IP_CHANGED          = BASE + 7;
     /** @hide */
     public static final int CALLBACK_RELEASED            = BASE + 8;
+    // TODO: consider deleting CALLBACK_EXIT and shifting following enum codes down by 1.
     /** @hide */
     public static final int CALLBACK_EXIT                = BASE + 9;
     /** @hide obj = NetworkCapabilities, arg1 = seq number */
@@ -2672,25 +2677,38 @@ public class ConnectivityManager {
     /** @hide */
     public static final int CALLBACK_RESUMED             = BASE + 12;
 
+    /** @hide */
+    public static String getCallbackName(int whichCallback) {
+        switch (whichCallback) {
+            case CALLBACK_PRECHECK:     return "CALLBACK_PRECHECK";
+            case CALLBACK_AVAILABLE:    return "CALLBACK_AVAILABLE";
+            case CALLBACK_LOSING:       return "CALLBACK_LOSING";
+            case CALLBACK_LOST:         return "CALLBACK_LOST";
+            case CALLBACK_UNAVAIL:      return "CALLBACK_UNAVAIL";
+            case CALLBACK_CAP_CHANGED:  return "CALLBACK_CAP_CHANGED";
+            case CALLBACK_IP_CHANGED:   return "CALLBACK_IP_CHANGED";
+            case CALLBACK_RELEASED:     return "CALLBACK_RELEASED";
+            case CALLBACK_EXIT:         return "CALLBACK_EXIT";
+            case EXPIRE_LEGACY_REQUEST: return "EXPIRE_LEGACY_REQUEST";
+            case CALLBACK_SUSPENDED:    return "CALLBACK_SUSPENDED";
+            case CALLBACK_RESUMED:      return "CALLBACK_RESUMED";
+            default:
+                return Integer.toString(whichCallback);
+        }
+    }
+
     private class CallbackHandler extends Handler {
-        private final HashMap<NetworkRequest, NetworkCallback>mCallbackMap;
-        private final AtomicInteger mRefCount;
         private static final String TAG = "ConnectivityManager.CallbackHandler";
-        private final ConnectivityManager mCm;
         private static final boolean DBG = false;
 
-        CallbackHandler(Looper looper, HashMap<NetworkRequest, NetworkCallback>callbackMap,
-                AtomicInteger refCount, ConnectivityManager cm) {
+        CallbackHandler(Looper looper) {
             super(looper);
-            mCallbackMap = callbackMap;
-            mRefCount = refCount;
-            mCm = cm;
         }
 
         @Override
         public void handleMessage(Message message) {
-            NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
-            Network network = (Network) getObject(message, Network.class);
+            NetworkRequest request = getObject(message, NetworkRequest.class);
+            Network network = getObject(message, Network.class);
             if (DBG) {
                 Log.d(TAG, whatToString(message.what) + " for network " + network);
             }
@@ -2733,9 +2751,7 @@ public class ConnectivityManager {
                 case CALLBACK_CAP_CHANGED: {
                     NetworkCallback callback = getCallback(request, "CAP_CHANGED");
                     if (callback != null) {
-                        NetworkCapabilities cap = (NetworkCapabilities)getObject(message,
-                                NetworkCapabilities.class);
-
+                        NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
                         callback.onCapabilitiesChanged(network, cap);
                     }
                     break;
@@ -2743,9 +2759,7 @@ public class ConnectivityManager {
                 case CALLBACK_IP_CHANGED: {
                     NetworkCallback callback = getCallback(request, "IP_CHANGED");
                     if (callback != null) {
-                        LinkProperties lp = (LinkProperties)getObject(message,
-                                LinkProperties.class);
-
+                        LinkProperties lp = getObject(message, LinkProperties.class);
                         callback.onLinkPropertiesChanged(network, lp);
                     }
                     break;
@@ -2765,24 +2779,16 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_RELEASED: {
-                    NetworkCallback callback = null;
-                    synchronized(mCallbackMap) {
-                        callback = mCallbackMap.remove(request);
+                    final NetworkCallback callback;
+                    synchronized(sCallbacks) {
+                        callback = sCallbacks.remove(request);
                     }
-                    if (callback != null) {
-                        synchronized(mRefCount) {
-                            if (mRefCount.decrementAndGet() == 0) {
-                                getLooper().quit();
-                            }
-                        }
-                    } else {
+                    if (callback == null) {
                         Log.e(TAG, "callback not found for RELEASED message");
                     }
                     break;
                 }
                 case CALLBACK_EXIT: {
-                    Log.d(TAG, "Listener quitting");
-                    getLooper().quit();
                     break;
                 }
                 case EXPIRE_LEGACY_REQUEST: {
@@ -2792,14 +2798,14 @@ public class ConnectivityManager {
             }
         }
 
-        private Object getObject(Message msg, Class c) {
-            return msg.getData().getParcelable(c.getSimpleName());
+        private <T> T getObject(Message msg, Class<T> c) {
+            return (T) msg.getData().getParcelable(c.getSimpleName());
         }
 
         private NetworkCallback getCallback(NetworkRequest req, String name) {
             NetworkCallback callback;
-            synchronized(mCallbackMap) {
-                callback = mCallbackMap.get(req);
+            synchronized(sCallbacks) {
+                callback = sCallbacks.get(req);
             }
             if (callback == null) {
                 Log.e(TAG, "callback not found for " + name + " message");
@@ -2808,63 +2814,56 @@ public class ConnectivityManager {
         }
     }
 
-    private void incCallbackHandlerRefCount() {
-        synchronized(sCallbackRefCount) {
-            if (sCallbackRefCount.incrementAndGet() == 1) {
-                // TODO: switch this to ConnectivityThread
-                HandlerThread callbackThread = new HandlerThread("ConnectivityManager");
-                callbackThread.start();
-                sCallbackHandler = new CallbackHandler(callbackThread.getLooper(),
-                        sNetworkCallback, sCallbackRefCount, this);
+    private CallbackHandler getHandler() {
+        synchronized (sCallbacks) {
+            if (sCallbackHandler == null) {
+                sCallbackHandler = new CallbackHandler(ConnectivityThread.getInstanceLooper());
             }
+            return sCallbackHandler;
         }
     }
 
-    private void decCallbackHandlerRefCount() {
-        synchronized(sCallbackRefCount) {
-            if (sCallbackRefCount.decrementAndGet() == 0) {
-                sCallbackHandler.obtainMessage(CALLBACK_EXIT).sendToTarget();
-                sCallbackHandler = null;
-            }
-        }
-    }
-
-    static final HashMap<NetworkRequest, NetworkCallback> sNetworkCallback =
-            new HashMap<NetworkRequest, NetworkCallback>();
-    static final AtomicInteger sCallbackRefCount = new AtomicInteger(0);
-    static CallbackHandler sCallbackHandler = null;
+    static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
+    static CallbackHandler sCallbackHandler;
 
     private final static int LISTEN  = 1;
     private final static int REQUEST = 2;
 
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
-            NetworkCallback networkCallback, int timeoutSec, int action,
-            int legacyType) {
-        if (networkCallback == null) {
+            NetworkCallback callback, int timeoutMs, int action, int legacyType) {
+        return sendRequestForNetwork(need, callback, getHandler(), timeoutMs, action, legacyType);
+    }
+
+    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
+            NetworkCallback callback, Handler handler, int timeoutMs, int action, int legacyType) {
+        if (callback == null) {
             throw new IllegalArgumentException("null NetworkCallback");
         }
         if (need == null && action != REQUEST) {
             throw new IllegalArgumentException("null NetworkCapabilities");
         }
+        // TODO: throw an exception if callback.networkRequest is not null.
+        // http://b/20701525
+        final NetworkRequest request;
         try {
-            incCallbackHandlerRefCount();
-            synchronized(sNetworkCallback) {
+            synchronized(sCallbacks) {
+                Messenger messenger = new Messenger(handler);
+                Binder binder = new Binder();
                 if (action == LISTEN) {
-                    networkCallback.networkRequest = mService.listenForNetwork(need,
-                            new Messenger(sCallbackHandler), new Binder());
+                    request = mService.listenForNetwork(need, messenger, binder);
                 } else {
-                    networkCallback.networkRequest = mService.requestNetwork(need,
-                            new Messenger(sCallbackHandler), timeoutSec, new Binder(), legacyType);
+                    request = mService.requestNetwork(
+                            need, messenger, timeoutMs, binder, legacyType);
                 }
-                if (networkCallback.networkRequest != null) {
-                    sNetworkCallback.put(networkCallback.networkRequest, networkCallback);
+                if (request != null) {
+                    sCallbacks.put(request, callback);
                 }
+                callback.networkRequest = request;
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        if (networkCallback.networkRequest == null) decCallbackHandlerRefCount();
-        return networkCallback.networkRequest;
+        return request;
     }
 
     /**

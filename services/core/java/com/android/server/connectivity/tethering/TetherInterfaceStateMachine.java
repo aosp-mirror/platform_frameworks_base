@@ -94,14 +94,14 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     public TetherInterfaceStateMachine(String ifaceName, Looper looper, int interfaceType,
                     INetworkManagementService nMService, INetworkStatsService statsService,
-                    IControlsTethering tetherController) {
+                    IControlsTethering tetherController, IPv6TetheringInterfaceServices ipv6Svc) {
         super(ifaceName, looper);
         mNMService = nMService;
         mStatsService = statsService;
         mTetherController = tetherController;
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
-        mIPv6TetherSvc = new IPv6TetheringInterfaceServices(mIfaceName, mNMService);
+        mIPv6TetherSvc = ipv6Svc;
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         mInitialState = new InitialState();

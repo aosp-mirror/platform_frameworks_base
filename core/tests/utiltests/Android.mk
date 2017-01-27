@@ -16,6 +16,7 @@ LOCAL_JNI_SHARED_LIBRARIES := libmemoryintarraytest libcutils libc++
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
+    frameworks-base-testutils \
     mockito-target
 
 LOCAL_JAVA_LIBRARIES := android.test.runner

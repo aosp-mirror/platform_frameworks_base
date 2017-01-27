@@ -7179,6 +7179,13 @@ public final class Settings {
         */
        public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
 
+        /**
+         * Size of the event buffer for IP connectivity metrics.
+         * @hide
+         */
+        public static final String CONNECTIVITY_METRICS_BUFFER_SIZE =
+              "connectivity_metrics_buffer_size";
+
        /** {@hide} */
        public static final String NETSTATS_ENABLED = "netstats_enabled";
        /** {@hide} */
