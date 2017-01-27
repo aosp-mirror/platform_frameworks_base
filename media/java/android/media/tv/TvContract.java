@@ -1026,6 +1026,19 @@ public final class TvContract {
         @SystemApi
         public static final String COLUMN_TRANSIENT = "transient";
 
+        /**
+         * The flag indicating whether this TV channel is approved to be shown by the system.
+         *
+         * <p>A value of 1 indicates that the channel is approved to be shown by the system, and a
+         * value of 0 indicates that the channel is blocked by system. If not specified, this value
+         * is set to 0 (not approved) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         * @hide
+         */
+        @SystemApi
+        public static final String COLUMN_SYSTEM_APPROVED = "system_approved";
+
         private Channels() {}
 
         /**
