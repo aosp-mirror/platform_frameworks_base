@@ -280,7 +280,7 @@ class KeyguardController {
     /**
      * @return true if Keyguard can be currently dismissed without entering credentials.
      */
-    private boolean canDismissKeyguard() {
+    boolean canDismissKeyguard() {
         return mWindowManager.isKeyguardTrusted() || !mWindowManager.isKeyguardSecure();
     }
 

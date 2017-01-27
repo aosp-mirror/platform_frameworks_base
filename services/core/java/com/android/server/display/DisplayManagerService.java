@@ -16,6 +16,13 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager
+        .VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN;
+
 import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
@@ -1446,11 +1453,17 @@ public final class DisplayManagerService extends SystemService {
                 throw new IllegalArgumentException("Surface can't be single-buffered");
             }
 
-            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
-                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+            if ((flags & VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                flags |= VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+
+                // Public displays can't be allowed to show content when locked.
+                if ((flags & VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN) != 0) {
+                    throw new IllegalArgumentException(
+                            "Public display must not be marked as SHOW_WHEN_LOCKED_INSECURE");
+                }
             }
-            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
-                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+            if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY) != 0) {
+                flags &= ~VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
             }
 
             if (projection != null) {
@@ -1465,7 +1478,7 @@ public final class DisplayManagerService extends SystemService {
             }
 
             if (callingUid != Process.SYSTEM_UID &&
-                    (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                    (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
                 if (!canProjectVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                             + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
@@ -1473,7 +1486,7 @@ public final class DisplayManagerService extends SystemService {
                             + "display.");
                 }
             }
-            if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+            if ((flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                 if (!canProjectSecureVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_SECURE_VIDEO_OUTPUT "
                             + "or an appropriate MediaProjection token to create a "

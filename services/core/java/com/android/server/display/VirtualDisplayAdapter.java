@@ -333,6 +333,9 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                         }
                     }
                 }
+                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SHOW_WITH_INSECURE_LOCKSCREEN;
+                }
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
                 mInfo.state = mSurface != null ? Display.STATE_ON : Display.STATE_OFF;

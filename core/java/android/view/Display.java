@@ -163,7 +163,7 @@ public final class Display {
 
     /**
      * Display flag: Indicates that the display is private.  Only the application that
-     * owns the display can create windows on it.
+     * owns the display and apps that are already on the display can create windows on it.
      *
      * @see #getFlags
      */
@@ -192,6 +192,19 @@ public final class Display {
      * @see #getFlags
      */
     public static final int FLAG_ROUND = 1 << 4;
+
+    /**
+     * Display flag: Indicates that the display can show its content when non-secure keyguard is
+     * shown.
+     * <p>
+     * This flag identifies secondary displays that won't show keyguard if it can be dismissed
+     * without entering credentials. Display content will be shown even if other displays are
+     * locked.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_SHOW_WITH_INSECURE_LOCKSCREEN = 1 << 5;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled
