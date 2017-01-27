@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto administratorin tënd për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Trafiku i rrjetit po monitorohet"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Trokit për të mësuar më shumë"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacionit të administratorit i mungojnë përbërësit ose është dëmtuar dhe nuk mund të përdoret. Pajisja jote tani do të fshihet. Kontakto administratorin tënd për ndihmë."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>

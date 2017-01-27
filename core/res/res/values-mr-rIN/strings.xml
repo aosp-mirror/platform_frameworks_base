@@ -68,10 +68,10 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"येणारा कॉलर ID"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"केला जाणारा कॉलर ID"</string>
-    <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट केलेला रेखा ID"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट केलेला रेखा ID प्रतिबंध"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"येणारा कॉलर आयडी"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"केला जाणारा कॉलर आयडी"</string>
+    <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट केलेला रेखा आयडी"</string>
+    <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट केलेला रेखा आयडी प्रतिबंध"</string>
     <string name="CfMmi" msgid="5123218989141573515">"कॉल अग्रेषण"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल सोडून"</string>
@@ -83,12 +83,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"अवांछित त्रासदायक कॉल ला नकार"</string>
     <string name="CndMmi" msgid="3116446237081575808">"कॉल करणार्‍या नंबरचे वितरण"</string>
     <string name="DndMmi" msgid="1265478932418334331">"व्यत्यय आणू नका"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवेची तरतूद केलेली नाही."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर ID सेटिंग बदलू शकत नाही."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर आयडी सेटिंग बदलू शकत नाही."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आणीबाणी सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"व्हॉइस सेवा अवरोधित केली आहे."</string>
@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाईल प्रशासन अॅप गहाळ आहे किंवा दुषित आहे. यामुळे, आपले कार्य प्रोफाईल आणि संबंधित डेटा हटविला गेला आहे. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"आपले कार्य प्रोफाईल या डिव्‍डाइसवर यापुढे उपलब्‍ध नाही."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्क रहदारीचे परीक्षण केले जात आहे"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"अधिक जाणून घेण्यासाठी टॅप करा"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"आपले डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"प्रशासन अॅपमध्ये घटक गहाळ किंवा दूषित आहेत आणि वापरला जाऊ शकत नाही. आपले डिव्हाइस आता मिटविले जाईल. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>
@@ -382,7 +381,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवेमध्‍ये प्रवेश करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस ID आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टॅबलेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"निष्क्रिय होण्यापासून प्रतिबंध करा"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फोन निष्‍क्रिय होण्‍यापासून प्रतिबंधित करा"</string>

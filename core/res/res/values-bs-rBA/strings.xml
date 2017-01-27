@@ -185,8 +185,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikacija administratora za poslovni profil nedostaje ili je neispravna. Zbog toga su vaš poslovni profil i vezani podaci obrisani. Za pomoć se obratite administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil za posao više nije dostupan na ovom uređaju."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Mrežni saobraćaj se nadgleda"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Dodirnite da saznate više"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će biti izbrisan"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikaciji administratora nedostaju komponente ili je neispravna, i ne može se koristiti. Vaš uređaj će sada biti izbrisan. Za pomoć se obratite administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>

@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਐਡਮਿਨ ਐਪ ਜਾਂ ਤਾਂ ਲੁਪਤ ਹੈ ਜਾਂ ਕਰਪਟ ਹੈ। ਇੱਕ ਸਿੱਟੇ ਦੇ ਤੌਰ ਤੇ, ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਸੰਬੰਧਿਤ ਡੈਟਾ ਮਿਟਾਇਆ ਗਿਆ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ਤੁਹਾਡੀ ਕੰਮ ਪ੍ਰੋਫਾਈਲ ਹੁਣ ਇਸ ਡੀਵਾਈਸ ਤੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾਈ ਜਾਏਗੀ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ਐਡਮਿਨ ਐਪ ਲੁਪਤ ਕੰਪੋਨੈਂਟ ਜਾਂ ਕਰਪਟ ਹੈ ਅਤੇ ਇਸਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਮਿਟਾ ਦਿੱਤੀ ਜਾਏਗੀ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="me" msgid="6545696007631404292">"ਮੈਂ"</string>
