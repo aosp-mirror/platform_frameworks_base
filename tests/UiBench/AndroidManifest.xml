@@ -100,6 +100,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ClippedListActivity"
+            android:label="General/Clipped ListView"
+            android:theme="@style/NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialRecyclerViewActivity"
             android:label="General/Trivial RecyclerView" >
             <intent-filter>
