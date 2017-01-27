@@ -40,6 +40,7 @@ import com.android.internal.util.HexDump;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
+import dalvik.system.VMRuntime;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -423,7 +424,21 @@ public final class StrictMode {
              * disk operations but will likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(ALL_THREAD_DETECT_BITS);
+                detectDiskReads();
+                detectDiskWrites();
+                detectNetwork();
+
+                final int targetSdk = VMRuntime.getRuntime().getTargetSdkVersion();
+                if (targetSdk >= Build.VERSION_CODES.HONEYCOMB) {
+                    detectCustomSlowCalls();
+                }
+                if (targetSdk >= Build.VERSION_CODES.M) {
+                    detectResourceMismatches();
+                }
+                if (targetSdk >= Build.VERSION_CODES.O) {
+                    detectUnbufferedIo();
+                }
+                return this;
             }
 
             /**
@@ -722,18 +737,31 @@ public final class StrictMode {
              * but will likely expand in future releases.
              */
             public Builder detectAll() {
-                int flags = DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
-                        | DETECT_VM_CLOSABLE_LEAKS | DETECT_VM_REGISTRATION_LEAKS
-                        | DETECT_VM_FILE_URI_EXPOSURE | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION
-                        | DETECT_VM_UNTAGGED_SOCKET;
+                detectLeakedSqlLiteObjects();
 
-                // TODO: always add DETECT_VM_CLEARTEXT_NETWORK once we have facility
-                // for apps to mark sockets that should be ignored
-                if (SystemProperties.getBoolean(CLEARTEXT_PROPERTY, false)) {
-                    flags |= DETECT_VM_CLEARTEXT_NETWORK;
+                final int targetSdk = VMRuntime.getRuntime().getTargetSdkVersion();
+                if (targetSdk >= Build.VERSION_CODES.HONEYCOMB) {
+                    detectActivityLeaks();
+                    detectLeakedClosableObjects();
                 }
-
-                return enable(flags);
+                if (targetSdk >= Build.VERSION_CODES.JELLY_BEAN) {
+                    detectLeakedRegistrationObjects();
+                }
+                if (targetSdk >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    detectFileUriExposure();
+                }
+                if (targetSdk >= Build.VERSION_CODES.M) {
+                    // TODO: always add DETECT_VM_CLEARTEXT_NETWORK once we have
+                    // facility for apps to mark sockets that should be ignored
+                    if (SystemProperties.getBoolean(CLEARTEXT_PROPERTY, false)) {
+                        detectCleartextNetwork();
+                    }
+                }
+                if (targetSdk >= Build.VERSION_CODES.O) {
+                    detectContentUriWithoutPermission();
+                    detectUntaggedSockets();
+                }
+                return this;
             }
 
             /**
