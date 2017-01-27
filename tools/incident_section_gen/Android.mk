@@ -21,6 +21,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := incident-section-gen
+# b/34740546, work around clang-tidy segmentation fault.
+LOCAL_TIDY_CHECKS := -modernize*
 LOCAL_CFLAGS += -g -O0
 LOCAL_C_INCLUDES := \
     external/protobuf/src

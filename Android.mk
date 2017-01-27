@@ -1409,6 +1409,8 @@ include $(BUILD_JAVA_LIBRARY)
 # ====  c++ proto host library  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := libplatformprotos
+# b/34740546, work around clang-tidy segmentation fault.
+LOCAL_TIDY_CHECKS := -modernize*
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 LOCAL_PROTOC_FLAGS := \
     --include_source_info \
