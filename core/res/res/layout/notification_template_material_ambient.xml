@@ -52,7 +52,7 @@
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:textSize="20sp"
-                android:textColor="@android:color/white"
+                android:textColor="#e6fafafa"
             />
             <TextView android:id="@+id/text"
                 android:layout_width="match_parent"
@@ -63,8 +63,8 @@
                 android:layout_weight="1"
                 android:gravity="top"
                 android:visibility="gone"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textColor="#ccfafafa"
                 android:layout_marginTop="4dp"
             />
         </LinearLayout>
