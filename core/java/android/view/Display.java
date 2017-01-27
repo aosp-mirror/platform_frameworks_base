@@ -204,7 +204,7 @@ public final class Display {
      *
      * @see #getFlags
      */
-    public static final int FLAG_SHOW_WITH_INSECURE_LOCKSCREEN = 1 << 5;
+    public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
     /**
      * Display flag: Indicates that the contents of the display should not be scaled

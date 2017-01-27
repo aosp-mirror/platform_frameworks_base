@@ -248,7 +248,7 @@ public final class DisplayManager {
      *
      * @see #createVirtualDisplay
      */
-    public static final int VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN = 1 << 5;
+    public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
     /** @hide */
     public DisplayManager(Context context) {

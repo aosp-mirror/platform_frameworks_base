@@ -26,7 +26,7 @@ import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.FLAG_SHOW_WITH_INSECURE_LOCKSCREEN;
+import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -1887,7 +1887,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 mTopActivityOccludesKeyguard |= showWhenLocked;
             }
 
-            final boolean canShowWithKeyguard = isOnShowWhenLockedInsecureDisplay()
+            final boolean canShowWithKeyguard = canShowWithInsecureKeyguard()
                     && mStackSupervisor.mKeyguardController.canDismissKeyguard();
             if (canShowWithKeyguard) {
                 return true;
@@ -1909,9 +1909,9 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     /**
      * Check if the display to which this stack is attached has
-     * {@link Display#FLAG_SHOW_WITH_INSECURE_LOCKSCREEN} applied.
+     * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
-    private boolean isOnShowWhenLockedInsecureDisplay() {
+    private boolean canShowWithInsecureKeyguard() {
         final ActivityStackSupervisor.ActivityDisplay activityDisplay
                 = mActivityContainer.mActivityDisplay;
         if (activityDisplay == null) {
@@ -1920,7 +1920,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         }
 
         final int flags = activityDisplay.mDisplay.getFlags();
-        return (flags & FLAG_SHOW_WITH_INSECURE_LOCKSCREEN) != 0;
+        return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
     private void checkTranslucentActivityWaiting(ActivityRecord top) {
