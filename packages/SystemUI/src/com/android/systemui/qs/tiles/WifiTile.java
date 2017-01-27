@@ -39,7 +39,7 @@ import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.SignalCallbackAdapter;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.List;
 
@@ -245,7 +245,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     }
 
-    protected final class WifiSignalCallback extends SignalCallbackAdapter {
+    protected final class WifiSignalCallback implements SignalCallback {
         final CallbackInfo mInfo = new CallbackInfo();
 
         @Override

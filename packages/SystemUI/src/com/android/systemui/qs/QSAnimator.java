@@ -189,8 +189,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 translationXBuilder.addFloat(label, "translationX", -xDiff, 0);
                 translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
 
-                mTopFiveQs.add(tileIcon);
-                mAllViews.add(tileIcon);
+                mTopFiveQs.add(tileView.getIcon());
+                mAllViews.add(tileView.getIcon());
                 mAllViews.add(quickTileView);
             } else if (mFullRows && isIconInAnimatedRow(count)) {
                 // TODO: Refactor some of this, it shares a lot with the above block.
