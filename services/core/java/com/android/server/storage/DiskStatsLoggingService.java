@@ -21,6 +21,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.AsyncTask;
@@ -28,6 +29,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -54,7 +56,7 @@ public class DiskStatsLoggingService extends JobService {
     public boolean onStartJob(JobParameters params) {
         // We need to check the preconditions again because they may not be enforced for
         // subsequent runs.
-        if (!isCharging(this)) {
+        if (!isCharging(this) || !isDumpsysTaskEnabled(getContentResolver())) {
             jobFinished(params, true);
             return false;
         }
@@ -102,6 +104,12 @@ public class DiskStatsLoggingService extends JobService {
             return batteryManager.isCharging();
         }
         return false;
+    }
+
+    @VisibleForTesting
+    static boolean isDumpsysTaskEnabled(ContentResolver resolver) {
+        // The default is to treat the task as enabled.
+        return Settings.Global.getInt(resolver, Settings.Global.ENABLE_DISKSTATS_LOGGING, 1) != 0;
     }
 
     @VisibleForTesting
