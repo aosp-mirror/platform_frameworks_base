@@ -3346,6 +3346,11 @@ message MetricsEvent {
     // OS: N
     SUW_ACCESSIBILITY_TOGGLE_SELECT_TO_SPEAK = 817;
 
+    // OPEN: Settings > System > Backup
+    // CATEGORY: SETTINGS
+    // OS: O
+    BACKUP_SETTINGS = 818;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
