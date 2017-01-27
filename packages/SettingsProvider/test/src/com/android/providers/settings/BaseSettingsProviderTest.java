@@ -206,19 +206,22 @@ abstract class BaseSettingsProviderTest {
         resetToDefaultsViaShell(type, packageName, null);
     }
 
-    protected static void resetToDefaultsViaShell(int type, String packageName, String token)
+    protected static void resetToDefaultsViaShell(int type, String packageName, String tag)
             throws IOException {
         switch (type) {
             case SETTING_TYPE_GLOBAL: {
-                executeShellCommand("settings reset global " + packageName + " " + token);
+                executeShellCommand("settings reset global " + packageName + " "
+                        + (tag != null ? tag : ""));
             } break;
 
             case SETTING_TYPE_SECURE: {
-                executeShellCommand("settings reset secure " + packageName + " " + token);
+                executeShellCommand("settings reset secure " + packageName + " "
+                        + (tag != null ? tag : ""));
             } break;
 
             case SETTING_TYPE_SYSTEM: {
-                executeShellCommand("settings reset system " + packageName + " " + token);
+                executeShellCommand("settings reset system " + packageName + " "
+                        + (tag != null ? tag : ""));
             } break;
 
             default: {

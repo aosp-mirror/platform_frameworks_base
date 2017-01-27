@@ -182,6 +182,18 @@ public class SettingsProvider extends ContentProvider {
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
 
+    // Changes to these global settings are synchronously persisted
+    private static final Set<String> CRITICAL_GLOBAL_SETTINGS = new ArraySet<>();
+    static {
+        CRITICAL_GLOBAL_SETTINGS.add(Settings.Global.DEVICE_PROVISIONED);
+    }
+
+    // Changes to these secure settings are synchronously persisted
+    private static final Set<String> CRITICAL_SECURE_SETTINGS = new ArraySet<>();
+    static {
+        CRITICAL_SECURE_SETTINGS.add(Settings.Secure.USER_SETUP_COMPLETE);
+    }
+
     // Per user secure settings that moved to the for all users global settings.
     static final Set<String> sSecureMovedToGlobalSettings = new ArraySet<>();
     static {
@@ -949,18 +961,18 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify);
+                            getCallingPackage(), forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_GLOBAL,
-                            UserHandle.USER_SYSTEM, name, forceNotify);
+                            UserHandle.USER_SYSTEM, name, forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify);
+                            getCallingPackage(), forceNotify, CRITICAL_GLOBAL_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_RESET: {
@@ -1156,18 +1168,18 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
                             owningUserId, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify);
+                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SECURE,
-                            owningUserId, name, forceNotify);
+                            owningUserId, name, forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SECURE,
                             owningUserId, name, value, tag, makeDefault,
-                            getCallingPackage(), forceNotify);
+                            getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
                 }
 
                 case MUTATION_OPERATION_RESET: {
@@ -1304,18 +1316,20 @@ public class SettingsProvider extends ContentProvider {
                 case MUTATION_OPERATION_INSERT: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, null, false, getCallingPackage(), false);
+                            owningUserId, name, value, null, false, getCallingPackage(),
+                            false, null);
                 }
 
                 case MUTATION_OPERATION_DELETE: {
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, false);
+                            owningUserId, name, false, null);
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     validateSystemSettingValue(name, value);
                     return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
-                            owningUserId, name, value, null, false, getCallingPackage(), false);
+                            owningUserId, name, value, null, false, getCallingPackage(),
+                            false, null);
                 }
             }
 
@@ -1689,7 +1703,7 @@ public class SettingsProvider extends ContentProvider {
 
         return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
                 owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders,
-                tag, makeDefault, getCallingPackage(), forceNotify);
+                tag, makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
     }
 
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
@@ -2234,7 +2248,8 @@ public class SettingsProvider extends ContentProvider {
         }
 
         public boolean insertSettingLocked(int type, int userId, String name, String value,
-                String tag, boolean makeDefault, String packageName, boolean forceNotify) {
+                String tag, boolean makeDefault, String packageName, boolean forceNotify,
+                Set<String> criticalSettings) {
             final int key = makeKey(type, userId);
 
             boolean success = false;
@@ -2244,13 +2259,18 @@ public class SettingsProvider extends ContentProvider {
                         tag, makeDefault, packageName);
             }
 
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
+
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
             return success;
         }
 
-        public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify) {
+        public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify,
+                Set<String> criticalSettings) {
             final int key = makeKey(type, userId);
 
             boolean success = false;
@@ -2259,9 +2279,36 @@ public class SettingsProvider extends ContentProvider {
                 success = settingsState.deleteSettingLocked(name);
             }
 
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
+
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
+            return success;
+        }
+
+        public boolean updateSettingLocked(int type, int userId, String name, String value,
+                String tag, boolean makeDefault, String packageName, boolean forceNotify,
+                Set<String> criticalSettings) {
+            final int key = makeKey(type, userId);
+
+            boolean success = false;
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState != null) {
+                success = settingsState.updateSettingLocked(name, value, tag,
+                        makeDefault, packageName);
+            }
+
+            if (success && criticalSettings != null && criticalSettings.contains(name)) {
+                settingsState.persistSyncLocked();
+            }
+
+            if (forceNotify || success) {
+                notifyForSettingsChange(key, name);
+            }
+
             return success;
         }
 
@@ -2277,24 +2324,6 @@ public class SettingsProvider extends ContentProvider {
             return settingsState.getSettingLocked(name);
         }
 
-        public boolean updateSettingLocked(int type, int userId, String name, String value,
-                String tag, boolean makeDefault, String packageName, boolean forceNotify) {
-            final int key = makeKey(type, userId);
-
-            boolean success = false;
-            SettingsState settingsState = peekSettingsStateLocked(key);
-            if (settingsState != null) {
-                success = settingsState.updateSettingLocked(name, value, tag,
-                        makeDefault, packageName);
-            }
-
-            if (forceNotify || success) {
-                notifyForSettingsChange(key, name);
-            }
-
-            return success;
-        }
-
         public void resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag) {
             final int key = makeKey(type, userId);
@@ -2306,42 +2335,58 @@ public class SettingsProvider extends ContentProvider {
             switch (mode) {
                 case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (packageName.equals(setting.getPackageName())) {
                             if (tag != null && !tag.equals(setting.getTag())) {
                                 continue;
                             }
-                            if (settingsState.resetSettingLocked(name, packageName)) {
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
                             }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
                         }
                     }
                 } break;
 
                 case Settings.RESET_MODE_UNTRUSTED_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
-                            if (settingsState.resetSettingLocked(name, packageName)) {
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
                             }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
                         }
                     }
                 } break;
 
                 case Settings.RESET_MODE_UNTRUSTED_CHANGES: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
                             if (setting.isDefaultFromSystem()) {
-                                if (settingsState.resetSettingLocked(name, packageName)) {
+                                if (settingsState.resetSettingLocked(name)) {
+                                    someSettingChanged = true;
                                     notifyForSettingsChange(key, name);
                                 }
                             } else if (settingsState.deleteSettingLocked(name)) {
+                                someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
                             }
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
                         }
                     }
                 } break;
@@ -2349,12 +2394,18 @@ public class SettingsProvider extends ContentProvider {
                 case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
                         Setting setting = settingsState.getSettingLocked(name);
+                        boolean someSettingChanged = false;
                         if (setting.isDefaultFromSystem()) {
-                            if (settingsState.resetSettingLocked(name, packageName)) {
+                            if (settingsState.resetSettingLocked(name)) {
+                                someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
                             }
                         } else if (settingsState.deleteSettingLocked(name)) {
+                            someSettingChanged = true;
                             notifyForSettingsChange(key, name);
+                        }
+                        if (someSettingChanged) {
+                            settingsState.persistSyncLocked();
                         }
                     }
                 } break;

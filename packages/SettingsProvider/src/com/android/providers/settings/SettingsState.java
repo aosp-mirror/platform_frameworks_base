@@ -64,6 +64,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -129,7 +130,7 @@ final class SettingsState {
     private static final String HISTORICAL_OPERATION_INITIALIZE = "initialize";
     private static final String HISTORICAL_OPERATION_RESET = "reset";
 
-    private static final String SHELL_PACKAGE_NAME = "shell";
+    private static final String SHELL_PACKAGE_NAME = "com.android.shell";
     private static final String ROOT_PACKAGE_NAME = "root";
 
     private static final String NULL_VALUE = "null";
@@ -307,7 +308,7 @@ final class SettingsState {
         Setting newState;
 
         if (oldState != null) {
-            if (!oldState.update(value, makeDefault, packageName, tag)) {
+            if (!oldState.update(value, makeDefault, packageName, tag, false)) {
                 return false;
             }
             newState = oldState;
@@ -351,7 +352,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    public boolean resetSettingLocked(String name, String packageName) {
+    public boolean resetSettingLocked(String name) {
         if (TextUtils.isEmpty(name) || !hasSettingLocked(name)) {
             return false;
         }
@@ -362,7 +363,7 @@ final class SettingsState {
         String oldValue = setting.getValue();
         String oldDefaultValue = setting.getDefaultValue();
 
-        if (!setting.reset(packageName)) {
+        if (!setting.reset()) {
             return false;
         }
 
@@ -817,7 +818,7 @@ final class SettingsState {
         public Setting(String name, String value, boolean makeDefault, String packageName,
                 String tag) {
             this.name = name;
-            update(value, makeDefault, packageName, tag);
+            update(value, makeDefault, packageName, tag, false);
         }
 
         public Setting(String name, String value, String defaultValue,
@@ -877,16 +878,18 @@ final class SettingsState {
         }
 
         /** @return whether the value changed */
-        public boolean reset(String packageName) {
-            return update(this.defaultValue, false, packageName, null);
+        public boolean reset() {
+            return update(this.defaultValue, false, packageName, null, true);
         }
 
-        public boolean update(String value, boolean setDefault, String packageName, String tag) {
+        public boolean update(String value, boolean setDefault, String packageName, String tag,
+                boolean forceNonSystemPackage) {
             if (NULL_VALUE.equals(value)) {
                 value = null;
             }
 
-            final boolean callerSystem = !isNull() && isSystemPackage(mContext, packageName);
+            final boolean callerSystem = !forceNonSystemPackage &&
+                    !isNull() && isSystemPackage(mContext, packageName);
             // Settings set by the system are always defaults.
             if (callerSystem) {
                 setDefault = true;
