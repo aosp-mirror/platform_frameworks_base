@@ -17,6 +17,8 @@
 package com.android.server.net;
 
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.NetworkStats.SET_ALL;
@@ -242,6 +244,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                 entry.uid = key.uid;
                 entry.set = key.set;
                 entry.tag = key.tag;
+                entry.metered = key.ident.isAnyMemberMetered() ? METERED_YES : METERED_NO;
                 entry.roaming = key.ident.isAnyMemberRoaming() ? ROAMING_YES : ROAMING_NO;
                 entry.rxBytes = historyEntry.rxBytes;
                 entry.rxPackets = historyEntry.rxPackets;

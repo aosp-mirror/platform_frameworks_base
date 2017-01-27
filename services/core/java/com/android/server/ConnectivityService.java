@@ -1804,11 +1804,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateMtu(LinkProperties newLp, LinkProperties oldLp) {
         final String iface = newLp.getInterfaceName();
         final int mtu = newLp.getMtu();
+        if (oldLp == null && mtu == 0) {
+            // Silently ignore unset MTU value.
+            return;
+        }
         if (oldLp != null && newLp.isIdenticalMtu(oldLp)) {
             if (VDBG) log("identical MTU - not setting");
             return;
         }
-
         if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address()) == false) {
             if (mtu != 0) loge("Unexpected mtu value: " + mtu + ", " + iface);
             return;
@@ -2254,11 +2257,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     synchronized (mNetworkForNetId) {
                         nai = mNetworkForNetId.get(netId);
                     }
-                    // If captive portal status has changed, update capabilities.
+                    // If captive portal status has changed, update capabilities or disconnect.
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
                         final int oldScore = nai.getCurrentScore();
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
+                        if (nai.lastCaptivePortalDetected &&
+                            Settings.Global.CAPTIVE_PORTAL_MODE_AVOID == getCaptivePortalMode()) {
+                            if (DBG) log("Avoiding captive portal network: " + nai.name());
+                            nai.asyncChannel.sendMessage(
+                                    NetworkAgent.CMD_PREVENT_AUTOMATIC_RECONNECT);
+                            teardownUnneededNetwork(nai);
+                            break;
+                        }
                         updateCapabilities(oldScore, nai, nai.networkCapabilities);
                     }
                     if (!visible) {
@@ -2277,6 +2288,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
             return true;
+        }
+
+        private int getCaptivePortalMode() {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.CAPTIVE_PORTAL_MODE,
+                    Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
         }
 
         private boolean maybeHandleNetworkAgentInfoMessage(Message msg) {
@@ -2588,14 +2605,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "request NetworkCapabilities", ConnectivityManager.CALLBACK_CAP_CHANGED);
     }
 
+    private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
+        if (mNetworkRequests.get(nri.request) != null && mNetworkForRequestId.get(
+                nri.request.requestId) == null) {
+            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_UNAVAIL);
+        }
+    }
+
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
         final NetworkRequestInfo nri = getNriForAppRequest(
                 request, callingUid, "release NetworkRequest");
-        if (nri == null) return;
+        if (nri != null) {
+            handleRemoveNetworkRequest(nri, ConnectivityManager.CALLBACK_RELEASED);
+        }
+    }
 
-        if (VDBG || (DBG && nri.request.isRequest())) log("releasing " + request);
+    private void handleRemoveNetworkRequest(final NetworkRequestInfo nri, final int whichCallback) {
+        final String logCallbackType = ConnectivityManager.getCallbackName(whichCallback);
+        if (VDBG || (DBG && nri.request.isRequest())) {
+            log("releasing " + nri.request + " (" + logCallbackType + ")");
+        }
         nri.unlinkDeathRecipient();
-        mNetworkRequests.remove(request);
+        mNetworkRequests.remove(nri.request);
         synchronized (mUidToNetworkRequestCount) {
             int requests = mUidToNetworkRequestCount.get(nri.mUid, 0);
             if (requests < 1) {
@@ -2689,7 +2720,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_RELEASED, 0);
+        callCallbackForRequest(nri, null, whichCallback, 0);
     }
 
     @Override
@@ -2924,6 +2955,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT:
                 case EVENT_REGISTER_NETWORK_LISTENER_WITH_INTENT: {
                     handleRegisterNetworkRequestWithIntent(msg);
+                    break;
+                }
+                case EVENT_TIMEOUT_NETWORK_REQUEST: {
+                    NetworkRequestInfo nri = (NetworkRequestInfo) msg.obj;
+                    handleTimedOutNetworkRequest(nri);
                     break;
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT: {
@@ -5283,6 +5319,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // notify only this one new request of the current state
     protected void notifyNetworkCallback(NetworkAgentInfo nai, NetworkRequestInfo nri) {
         int notifyType = ConnectivityManager.CALLBACK_AVAILABLE;
+        mHandler.removeMessages(EVENT_TIMEOUT_NETWORK_REQUEST, nri);
         if (nri.mPendingIntent == null) {
             callCallbackForRequest(nri, nai, notifyType, 0);
         } else {

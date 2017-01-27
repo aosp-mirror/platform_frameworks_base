@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import com.android.server.net.BaseNetworkObserver;
+import com.android.internal.util.test.BroadcastInterceptingContext;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;

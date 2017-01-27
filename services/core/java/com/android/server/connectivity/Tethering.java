@@ -75,6 +75,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
+import com.android.server.connectivity.tethering.IPv6TetheringInterfaceServices;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
@@ -1645,7 +1646,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private void trackNewTetherableInterface(String iface, int interfaceType) {
         TetherState tetherState;
         tetherState = new TetherState(new TetherInterfaceStateMachine(iface, mLooper,
-                interfaceType, mNMService, mStatsService, this));
+                interfaceType, mNMService, mStatsService, this,
+                new IPv6TetheringInterfaceServices(iface, mNMService)));
         mTetherStates.put(iface, tetherState);
         tetherState.mStateMachine.start();
     }
