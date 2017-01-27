@@ -68,7 +68,6 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
-import android.test.FlakyTest;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -154,49 +153,32 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     /**
-     * A subclass of HandlerThread that allows callers to wait for it to become idle. waitForIdle
-     * will return immediately if the handler is already idle.
+     * Block until the given handler becomes idle, or until timeoutMs has passed.
      */
-    private class IdleableHandlerThread extends HandlerThread {
-        private IdleHandler mIdleHandler;
-
-        public IdleableHandlerThread(String name) {
-            super(name);
-        }
-
-        public void waitForIdle(int timeoutMs) {
-            final ConditionVariable cv = new ConditionVariable();
-            final MessageQueue queue = getLooper().getQueue();
-
+    private static void waitForIdleHandler(HandlerThread handler, int timeoutMs) {
+        final ConditionVariable cv = new ConditionVariable();
+        final MessageQueue queue = handler.getLooper().getQueue();
+        final IdleHandler idleHandler = () -> {
             synchronized (queue) {
-                if (queue.isIdle()) {
-                    return;
-                }
-
-                assertNull("BUG: only one idle handler allowed", mIdleHandler);
-                mIdleHandler = new IdleHandler() {
-                    public boolean queueIdle() {
-                        synchronized (queue) {
-                            cv.open();
-                            mIdleHandler = null;
-                            return false;  // Remove the handler.
-                        }
-                    }
-                };
-                queue.addIdleHandler(mIdleHandler);
+                cv.open();
+                return false; // Remove the idleHandler.
             }
-
-            if (!cv.block(timeoutMs)) {
-                fail("HandlerThread " + getName() +
-                        " did not become idle after " + timeoutMs + " ms");
-                queue.removeIdleHandler(mIdleHandler);
+        };
+        synchronized (queue) {
+            if (queue.isIdle()) {
+                return;
             }
+            queue.addIdleHandler(idleHandler);
+        }
+        if (!cv.block(timeoutMs)) {
+            fail("HandlerThread " + handler.getName() +
+                    " did not become idle after " + timeoutMs + " ms");
+            queue.removeIdleHandler(idleHandler);
         }
     }
 
-    // Tests that IdleableHandlerThread works as expected.
     @SmallTest
-    public void testIdleableHandlerThread() {
+    public void testWaitForIdle() {
         final int attempts = 50;  // Causes the test to take about 200ms on bullhead-eng.
 
         // Tests that waitForIdle returns immediately if the service is already idle.
@@ -220,9 +202,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
-    @FlakyTest(tolerance = 3)
-    public void testNotWaitingForIdleCausesRaceConditions() {
+    // This test has an inherent race condition in it, and cannot be enabled for continuous testing
+    // or presubmit tests. It is kept for manual runs and documentation purposes.
+    public void verifyThatNotWaitingForIdleCausesRaceConditions() {
         // Bring up a network that we can use to send messages to ConnectivityService.
         ConditionVariable cv = waitForConnectivityBroadcasts(1);
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -249,7 +231,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private final WrappedNetworkMonitor mWrappedNetworkMonitor;
         private final NetworkInfo mNetworkInfo;
         private final NetworkCapabilities mNetworkCapabilities;
-        private final IdleableHandlerThread mHandlerThread;
+        private final HandlerThread mHandlerThread;
         private final ConditionVariable mDisconnected = new ConditionVariable();
         private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
         private final ConditionVariable mPreventReconnectReceived = new ConditionVariable();
@@ -281,7 +263,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");
             }
-            mHandlerThread = new IdleableHandlerThread("Mock-" + typeName);
+            mHandlerThread = new HandlerThread("Mock-" + typeName);
             mHandlerThread.start();
             mNetworkAgent = new NetworkAgent(mHandlerThread.getLooper(), mServiceContext,
                     "Mock-" + typeName, mNetworkInfo, mNetworkCapabilities,
@@ -321,7 +303,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         public void waitForIdle(int timeoutMs) {
-            mHandlerThread.waitForIdle(timeoutMs);
+            waitForIdleHandler(mHandlerThread, timeoutMs);
         }
 
         public void waitForIdle() {
@@ -648,11 +630,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        protected HandlerThread createHandlerThread() {
-            return new IdleableHandlerThread("WrappedConnectivityService");
-        }
-
-        @Override
         protected int getDefaultTcpRwnd() {
             // Prevent wrapped ConnectivityService from trying to write to SystemProperties.
             return 0;
@@ -710,7 +687,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         public void waitForIdle(int timeoutMs) {
-            ((IdleableHandlerThread) mHandlerThread).waitForIdle(timeoutMs);
+            waitForIdleHandler(mHandlerThread, timeoutMs);
         }
 
         public void waitForIdle() {
