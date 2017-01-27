@@ -242,6 +242,16 @@ class WindowTestsBase {
             super(sWm, null, false, dc);
         }
 
+        TestAppWindowToken(WindowManagerService service, IApplicationToken token,
+                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
+                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
+                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+                boolean alwaysFocusable, AppWindowContainerController controller) {
+            super(service, token, voiceInteraction, dc, inputDispatchingTimeoutNanos, fullscreen,
+                    showForAllUsers, targetSdk, orientation, rotationAnimationHint, configChanges,
+                    launchTaskBehind, alwaysFocusable, controller);
+        }
+
         int getWindowsCount() {
             return mChildren.size();
         }
@@ -256,6 +266,10 @@ class WindowTestsBase {
 
         WindowState getLastChild() {
             return mChildren.getLast();
+        }
+
+        int positionInParent() {
+            return getParent().mChildren.indexOf(this);
         }
     }
 
@@ -355,6 +369,19 @@ class WindowTestsBase {
                     0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
                     0 /* inputDispatchingTimeoutNanos */, sWm);
             mToken = token;
+        }
+
+        @Override
+        AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
+                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
+                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
+                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+                boolean alwaysFocusable, AppWindowContainerController controller) {
+            return new TestAppWindowToken(service, token, voiceInteraction, dc,
+                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
+                    orientation,
+                    rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
+                    controller);
         }
 
         AppWindowToken getAppWindowToken() {

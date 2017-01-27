@@ -729,7 +729,6 @@ final class ActivityRecord implements AppWindowContainerListener {
         if (mWindowContainerController != null) {
             throw new IllegalArgumentException("Window container=" + mWindowContainerController
                     + " already created for r=" + this);
-
         }
 
         inHistory = true;
@@ -752,6 +751,26 @@ final class ActivityRecord implements AppWindowContainerListener {
     void removeWindowContainer() {
         mWindowContainerController.removeContainer(getDisplayId());
         mWindowContainerController = null;
+    }
+
+    /**
+     * Reparents this activity into {@param newTask} at the provided {@param position}.  The caller
+     * should ensure that the {@param newTask} is not already the parent of this activity.
+     */
+    void reparent(TaskRecord newTask, int position, String reason) {
+        final TaskRecord prevTask = task;
+        if (prevTask == newTask) {
+            throw new IllegalArgumentException(reason + ": task=" + newTask
+                    + " is already the parent of r=" + this);
+        }
+
+        // Must reparent first in window manager
+        mWindowContainerController.reparent(newTask.getWindowContainerController(), position);
+
+        // Remove the activity from the old task and add it to the new task
+        prevTask.removeActivity(this);
+        setTask(newTask, null);
+        newTask.addActivityAtIndex(position, this);
     }
 
     private boolean isHomeIntent(Intent intent) {

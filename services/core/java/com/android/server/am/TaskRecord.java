@@ -1028,8 +1028,10 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         addActivityAtIndex(mActivities.size(), r);
     }
 
-    // TODO: Figure-out if any of the call points expect the window container to be reparented and
-    // correct them to use the right method.
+    /**
+     * Adds an activity {@param r} at the given {@param index}. The activity {@param r} must either
+     * be in the current task or unparented to any task.
+     */
     void addActivityAtIndex(int index, ActivityRecord r) {
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {

@@ -41,6 +41,7 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.WindowManagerPolicy.StartingSurface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AttributeCache;
 /**
  * Controller for the app window token container. This is created by activity manager to link
@@ -202,7 +203,7 @@ public class AppWindowContainerController
                         + " controller=" + taskController);
             }
 
-            atoken = new AppWindowToken(mService, token, voiceInteraction, task.getDisplayContent(),
+            atoken = createAppWindow(mService, token, voiceInteraction, task.getDisplayContent(),
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdkVersion,
                     requestedOrientation, rotationAnimationHint, configChanges, launchTaskBehind,
                     alwaysFocusable, this);
@@ -210,6 +211,18 @@ public class AppWindowContainerController
                     + " controller=" + taskController + " at " + index);
             task.addChild(atoken, index);
         }
+    }
+
+    @VisibleForTesting
+    AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
+            boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
+            boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
+            int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
+            boolean alwaysFocusable, AppWindowContainerController controller) {
+        return  new AppWindowToken(service, token, voiceInteraction, dc,
+                inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
+                rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
+                controller);
     }
 
     public void removeContainer(int displayId) {
@@ -228,6 +241,25 @@ public class AppWindowContainerController
     @Override
     public void removeContainer() {
         throw new UnsupportedOperationException("Use removeContainer(displayId) instead.");
+    }
+
+    public void reparent(TaskWindowContainerController taskController, int position) {
+        synchronized (mWindowMap) {
+            if (DEBUG_ADD_REMOVE) Slog.i(TAG_WM, "reparent: moving app token=" + mToken
+                    + " to task=" + taskController + " at " + position);
+            if (mContainer == null) {
+                if (DEBUG_ADD_REMOVE) Slog.i(TAG_WM,
+                        "reparent: could not find app token=" + mToken);
+                return;
+            }
+            final Task task = taskController.mContainer;
+            if (task == null) {
+                throw new IllegalArgumentException("reparent: could not find task="
+                        + taskController);
+            }
+            mContainer.reparent(task, position);
+            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+        }
     }
 
     public Configuration setOrientation(int requestedOrientation, int displayId,
