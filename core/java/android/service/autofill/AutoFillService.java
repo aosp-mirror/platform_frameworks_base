@@ -89,16 +89,14 @@ public abstract class AutoFillService extends Service {
 
     /**
      * Key of the {@link Bundle} passed to methods such as
-     * {@link #onSaveRequest(AssistStructure, Bundle, CancellationSignal, SaveCallback)}
-     * containing the extras set by
+     * {@link #onSaveRequest(AssistStructure, Bundle, SaveCallback)} containing the extras set by
      * {@link android.view.autofill.FillResponse.Builder#setExtras(Bundle)}.
      */
     public static final String EXTRA_RESPONSE_EXTRAS = KEY_PREFIX + "RESPONSE_EXTRAS";
 
     /**
      * Key of the {@link Bundle} passed to methods such as
-     * {@link #onSaveRequest(AssistStructure, Bundle, CancellationSignal, SaveCallback)}
-     * containing the extras set by
+     * {@link #onSaveRequest(AssistStructure, Bundle, SaveCallback)} containing the extras set by
      * {@link android.view.autofill.Dataset.Builder#setExtras(Bundle)}.
      */
     public static final String EXTRA_DATASET_EXTRAS = KEY_PREFIX + "DATASET_EXTRAS";
@@ -134,9 +132,9 @@ public abstract class AutoFillService extends Service {
 
         @Override
         public void autoFill(AssistStructure structure, IAutoFillServerCallback callback,
-                Bundle extras, int flags) {
+                int flags) {
             mHandlerCaller
-                    .obtainMessageIOOO(MSG_AUTO_FILL_ACTIVITY, flags, structure, extras, callback)
+                    .obtainMessageIOO(MSG_AUTO_FILL_ACTIVITY, flags, structure, callback)
                     .sendToTarget();
         }
 
@@ -179,9 +177,8 @@ public abstract class AutoFillService extends Service {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     final int flags = msg.arg1;
                     final AssistStructure structure = (AssistStructure) args.arg1;
-                    final Bundle extras = (Bundle) args.arg2;
-                    final IAutoFillServerCallback callback = (IAutoFillServerCallback) args.arg3;
-                    requestAutoFill(callback, structure, extras, flags);
+                    final IAutoFillServerCallback callback = (IAutoFillServerCallback) args.arg2;
+                    requestAutoFill(callback, structure, flags);
                     break;
                 } case MSG_AUTHENTICATE_FILL_RESPONSE: {
                     final int flags = msg.arg1;
@@ -254,8 +251,8 @@ public abstract class AutoFillService extends Service {
      * @param cancellationSignal signal for observing cancel requests.
      * @param callback object used to notify the result of the request.
      */
-    public abstract void onFillRequest(AssistStructure structure,
-            Bundle data, CancellationSignal cancellationSignal, FillCallback callback);
+    public abstract void onFillRequest(AssistStructure structure, Bundle data,
+            CancellationSignal cancellationSignal, FillCallback callback);
 
     /**
      * Called when user requests service to save the fields of an {@link Activity}.
@@ -267,20 +264,19 @@ public abstract class AutoFillService extends Service {
      * @param structure {@link Activity}'s view structure.
      * @param data bundle containing additional arguments set by the Android system (currently none)
      * or data passed by the service in the {@link FillResponse} that originated this call.
-     * @param cancellationSignal signal for observing cancel requests.
      * @param callback object used to notify the result of the request.
      */
-    public abstract void onSaveRequest(AssistStructure structure,
-            Bundle data, CancellationSignal cancellationSignal, SaveCallback callback);
+    public abstract void onSaveRequest(AssistStructure structure, Bundle data,
+            SaveCallback callback);
 
     /**
      * Called as result of the user action for a {@link FillResponse} that required authentication.
      *
      * <p>When the {@link FillResponse} required authentication through
-     * {@link android.view.autofill.FillResponse.Builder#requiresCustomAuthentication(Bundle, int)}, this
-     * call indicates the user is requesting the service to authenticate him/her (and {@code flags}
-     * contains {@link #FLAG_AUTHENTICATION_REQUESTED}), and {@code extras} contains the
-     * {@link Bundle} passed to that method.
+     * {@link android.view.autofill.FillResponse.Builder#requiresCustomAuthentication(Bundle, int)},
+     * this call indicates the user is requesting the service to authenticate him/her (and
+     * {@code flags} contains {@link #FLAG_AUTHENTICATION_REQUESTED}), and {@code extras} contains
+     * the {@link Bundle} passed to that method.
      *
      * <p>When the {@link FillResponse} required authentication through
      * {@link android.view.autofill.FillResponse.Builder#requiresFingerprintAuthentication(
@@ -336,27 +332,28 @@ public abstract class AutoFillService extends Service {
     }
 
     private void requestAutoFill(IAutoFillServerCallback callback, AssistStructure structure,
-            Bundle data, int flags) {
-        switch (flags) {
-            case AUTO_FILL_FLAG_TYPE_FILL:
-                final FillCallback fillCallback = new FillCallback(callback);
-                if (DEBUG_PENDING_CALLBACKS) {
-                    addPendingCallback(fillCallback);
-                }
-                // TODO(b/33197203): hook up the cancelationSignal
-                onFillRequest(structure, data, new CancellationSignal(), fillCallback);
-                break;
-            case AUTO_FILL_FLAG_TYPE_SAVE:
-                final SaveCallback saveCallback = new SaveCallback(callback);
-                if (DEBUG_PENDING_CALLBACKS) {
-                    addPendingCallback(saveCallback);
-                }
-                // TODO(b/33197203): hook up the cancelationSignal
-                onSaveRequest(structure, data, new CancellationSignal(), saveCallback);
-                break;
-            default:
-                Log.w(TAG, "invalid flag on requestAutoFill(): " + flags);
+            int flags) {
+        if (DEBUG) Log.d(TAG, "requestAutoFill(): flags=" + flags);
+
+        if ((flags & AUTO_FILL_FLAG_TYPE_FILL) != 0) {
+            final FillCallback fillCallback = new FillCallback(callback);
+            if (DEBUG_PENDING_CALLBACKS) {
+                addPendingCallback(fillCallback);
+            }
+            // TODO(b/33197203): hook up the cancelationSignal
+            onFillRequest(structure, null, new CancellationSignal(), fillCallback);
+            return;
         }
+        if ((flags & AUTO_FILL_FLAG_TYPE_SAVE) != 0) {
+            final SaveCallback saveCallback = new SaveCallback(callback);
+            if (DEBUG_PENDING_CALLBACKS) {
+                addPendingCallback(saveCallback);
+            }
+            onSaveRequest(structure, null, saveCallback);
+            return;
+        }
+
+        Log.w(TAG, "invalid flags on requestAutoFill(): " + flags);
     }
 
     private void addPendingCallback(CallbackHelper.Dumpable callback) {

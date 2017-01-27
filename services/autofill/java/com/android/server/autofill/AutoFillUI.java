@@ -15,11 +15,8 @@
  */
 package com.android.server.autofill;
 
-import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
-import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
 
 import static com.android.server.autofill.Helper.DEBUG;
-import static com.android.server.autofill.Helper.bundleToString;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -31,13 +28,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
+import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Bundle;
-import android.service.autofill.AutoFillService;
 import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
@@ -56,8 +57,16 @@ final class AutoFillUI {
 
     private final Context mContext;
 
+    private final WindowManager mWm;
+
+    /**
+     * Custom snackbar UI used for saving autofill or other informational messages.
+     */
+    private View mSnackbar;
+
     AutoFillUI(Context context, AutoFillManagerService service, Object lock) {
         mContext = context;
+        mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mService = service;
         mLock = lock;
 
@@ -87,12 +96,15 @@ final class AutoFillUI {
 
     /**
      * Shows the options from a {@link FillResponse} so the user can pick up the proper
-     * {@link Dataset} (when the response has one).
+     * {@link Dataset} (when the response has one) for a given view (identified by
+     * {@code autoFillId}).
      */
-    void showOptions(int userId, int sessionId, FillResponse response) {
+    void showResponse(int userId, int sessionId, AutoFillId autoFillId, Rect bounds,
+            FillResponse response) {
+        if (DEBUG) Slog.d(TAG, "showResponse: id=" + autoFillId +  ", bounds=" + bounds);
         // TODO(b/33197203): proper implementation
-        // TODO(b/33197203): make sure if removes the callback from cache
-        showOptionsNotification(userId, sessionId, response);
+        // TODO(b/33197203): make sure if removes the session from cache
+        showOptionsNotification(userId, sessionId, autoFillId, response);
     }
 
     /**
@@ -127,6 +139,26 @@ final class AutoFillUI {
     }
 
     /**
+     * Shows the UI asking the user to save for auto-fill.
+     */
+    void showSaveUI(int userId, int sessionId) {
+        showSnackbar(new SavePrompt(mContext, new SavePrompt.OnSaveListener() {
+            @Override
+            public void onSaveClick() {
+                hideSnackbar();
+                synchronized (mLock) {
+                    final AutoFillManagerServiceImpl service = getServiceLocked(userId);
+                    service.requestSaveLocked(sessionId);
+                }
+            }
+            @Override
+            public void onCancelClick() {
+                hideSnackbar();
+            }
+        }));
+    }
+
+    /**
      * Called by service after the user user the fingerprint sensors to authenticate.
      */
     void dismissFingerprintRequest(int userId, boolean success) {
@@ -150,27 +182,9 @@ final class AutoFillUI {
         return service;
     }
 
-    private void onSaveRequested(int userId, Bundle responseExtras, Bundle datasetExtras) {
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-            if (service == null) return;
-
-            final Bundle extras = (responseExtras == null && datasetExtras == null)
-                    ? null : new Bundle();
-
-            if (responseExtras != null) {
-                if (DEBUG) Slog.d(TAG, "response extras on save notification: " +
-                        bundleToString(responseExtras));
-                extras.putBundle(AutoFillService.EXTRA_RESPONSE_EXTRAS, responseExtras);
-            }
-            if (datasetExtras != null) {
-                if (DEBUG) Slog.d(TAG, "dataset extras on save notificataion: " +
-                        bundleToString(datasetExtras));
-                extras.putBundle(AutoFillService.EXTRA_DATASET_EXTRAS, datasetExtras);
-            }
-
-            service.requestAutoFill(null, extras, AUTO_FILL_FLAG_TYPE_SAVE);
-        }
+    private void onSaveRequested(int userId, int sessionId) {
+        // TODO(b/33197203): displays the snack bar, until save notification is refactored
+        showSaveUI(userId, sessionId);
     }
 
     private void onDatasetPicked(int userId, Dataset dataset, int sessionId) {
@@ -200,6 +214,34 @@ final class AutoFillUI {
         }
     }
 
+    //similar to a snackbar, but can be a bit custom since it is more than just text. This will
+    //allow two buttons for saving or not saving the autofill for instance as well.
+    private void showSnackbar(View snackBar) {
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.FILL_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, // TODO(b/33197203) use TYPE_AUTO_FILL
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
+            PixelFormat.TRANSLUCENT);
+
+        params.gravity = Gravity.BOTTOM | Gravity.LEFT;
+
+        UiThread.getHandler().runWithScissors(() -> {
+            mSnackbar = snackBar;
+            mWm.addView(mSnackbar, params);
+        }, 0);
+    }
+
+    private void hideSnackbar() {
+        UiThread.getHandler().runWithScissors(() -> {
+            if (mSnackbar != null) {
+                mWm.removeView(mSnackbar);
+                mSnackbar = null;
+            }
+        }, 0);
+    }
+
     /////////////////////////////////////////////////////////////////////////////////
     // TODO(b/33197203): temporary code using a notification to request auto-fill. //
     // Will be removed once UX decide the right way to present it to the user.     //
@@ -224,9 +266,9 @@ final class AutoFillUI {
     private static final String TYPE_SAVE = "save";
     private static final String TYPE_AUTH_RESPONSE = "auth_response";
 
-    @GuardedBy("mLock")
+    @GuardedBy("mServiceLock")
     private BroadcastReceiver mNotificationReceiver;
-    @GuardedBy("mLock")
+    @GuardedBy("mServiceLock")
     private final AutoFillManagerService mService;
     private final Object mLock;
 
@@ -253,10 +295,7 @@ final class AutoFillUI {
                 Slog.wtf(TAG, "No extra " + EXTRA_NOTIFICATION_TYPE + " on intent " + intent);
                 return;
             }
-            final FillResponse response = intent.getParcelableExtra(EXTRA_FILL_RESPONSE);
             final Dataset dataset = intent.getParcelableExtra(EXTRA_DATASET);
-            final Bundle responseExtras = response == null ? null : response.getExtras();
-            final Bundle datasetExtras = dataset == null ? null : dataset.getExtras();
             final int flags = intent.getIntExtra(EXTRA_FLAGS, 0);
 
             if (DEBUG) Slog.d(TAG, "Notification received: type=" + type + ", userId=" + userId
@@ -264,7 +303,7 @@ final class AutoFillUI {
             synchronized (mLock) {
                 switch (type) {
                     case TYPE_SAVE:
-                        onSaveRequested(userId, responseExtras, datasetExtras);
+                        onSaveRequested(userId, sessionId);
                         break;
                     case TYPE_FINISH_SESSION:
                         onSessionDone(userId, sessionId);
@@ -315,17 +354,18 @@ final class AutoFillUI {
      * Shows a notification with the results of an auto-fill request, using notications actions
      * to emulate the auto-fill bar buttons displaying the dataset names.
      */
-    private void showOptionsNotification(int userId, int sessionId, FillResponse response) {
+    private void showOptionsNotification(int userId, int callbackId, AutoFillId autoFillId,
+            FillResponse response) {
         final long token = Binder.clearCallingIdentity();
         try {
-            showOptionsNotificationAsSystem(userId, sessionId, response);
+            showOptionsNotificationAsSystem(userId, callbackId, autoFillId, response);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
     private void showOptionsNotificationAsSystem(int userId, int sessionId,
-            FillResponse response) {
+            AutoFillId autoFillId, FillResponse response) {
         // Make sure server callback is removed from cache if user cancels the notification.
         final Intent deleteIntent = newNotificationIntent(userId, TYPE_FINISH_SESSION)
                 .putExtra(EXTRA_SESSION_ID, sessionId);
@@ -352,13 +392,13 @@ final class AutoFillUI {
         }
         boolean showSave = false;
         if (datasets == null ) {
-            subTitle = "No options to auto-fill this activity.";
+            subTitle = "No options to auto-fill " + autoFillId;
         } else if (datasets.isEmpty()) {
             if (savableIds.length == 0) {
-                subTitle = "No options to auto-fill this activity.";
+                subTitle = "No options to auto-fill " + autoFillId;
             } else {
-                subTitle = "No options to auto-fill this activity, but provider can save ids:\n"
-                        + Arrays.toString(savableIds);
+                subTitle = "No options to auto-fill " + autoFillId
+                        + ", but provider can save ids:\n" + Arrays.toString(savableIds);
                 showSave = true;
             }
         } else {
@@ -369,7 +409,7 @@ final class AutoFillUI {
             } else {
                 autoCancel = false;
                 final int size = datasets.size();
-                subTitle = "There are " + size + " option(s).\n"
+                subTitle = "There are " + size + " option(s) to fill " + autoFillId + ".\n"
                         + "Use the notification action(s) to select the proper one."
                         + "Actions with (F) require fingerprint unlock, and with (P) require"
                         + "provider authentication to unlock";
@@ -394,36 +434,28 @@ final class AutoFillUI {
         NotificationManager.from(mContext).notify(TYPE_OPTIONS, userId, notification.build());
 
         if (showSave) {
-            showSaveNotification(userId, response, null);
+            showSaveNotification(userId, sessionId);
         }
     }
 
-    void showSaveNotification(int userId, FillResponse response, Dataset dataset) {
+    void showSaveNotification(int userId, int sessionId) {
         final long token = Binder.clearCallingIdentity();
         try {
-            showSaveNotificationAsSystem(userId, response, dataset);
+            showSaveNotificationAsSystem(userId, sessionId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    private void showSaveNotificationAsSystem(int userId, FillResponse response, Dataset dataset) {
-        final Intent saveIntent = newNotificationIntent(userId, TYPE_SAVE);
-        if (response != null) {
-            saveIntent.putExtra(EXTRA_FILL_RESPONSE, response);
-        }
-        if (dataset != null) {
-            saveIntent.putExtra(EXTRA_DATASET, dataset);
-        }
+    private void showSaveNotificationAsSystem(int userId, int sessionId) {
+        final Intent saveIntent = newNotificationIntent(userId, TYPE_SAVE)
+                .putExtra(EXTRA_SESSION_ID, sessionId);
+
         final PendingIntent savePendingIntent = PendingIntent.getBroadcast(mContext,
                 ++sResultCode, saveIntent, PendingIntent.FLAG_ONE_SHOT);
 
-        final String title = "AutoFill Save";
-        // Response is not set after fillign an authenticated dataset...
-        final String subTitle = response == null
-                ? "Tap notification to ask provider to save fields."
-                : "Tap notification to ask provider to save fields: \n"
-                        + Arrays.toString(response.getSavableIds());
+        final String title = "AutoFill Save Emulation";
+        final String subTitle = "Tap notification to launch the save snackbar.";
 
         final Notification notification = newNotificationBuilder()
                 .setAutoCancel(true)

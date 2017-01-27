@@ -16,16 +16,18 @@
 
 package com.android.server.autofill;
 
-import static com.android.server.autofill.Helper.DEBUG;
-import static com.android.server.autofill.Helper.bundleToString;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_ERROR;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_REQUESTED;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_SUCCESS;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
+import static android.view.autofill.AutoFillManager.FLAG_UPDATE_UI_HIDE;
+
+import static com.android.server.autofill.Helper.DEBUG;
+import static com.android.server.autofill.Helper.bundleToString;
 
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.assist.AssistStructure;
 import android.content.BroadcastReceiver;
@@ -35,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -53,6 +56,7 @@ import android.service.autofill.IAutoFillAppCallback;
 import android.service.autofill.IAutoFillServerCallback;
 import android.service.autofill.IAutoFillService;
 import android.service.voice.VoiceInteractionSession;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -64,9 +68,9 @@ import android.view.autofill.FillResponse;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +90,7 @@ final class AutoFillManagerServiceImpl {
     private final int mUserId;
     private final int mUid;
     private final ComponentName mComponent;
+    private final String mComponentName;
     private final Context mContext;
     private final IActivityManager mAm;
     private final Object mLock;
@@ -93,13 +98,14 @@ final class AutoFillManagerServiceImpl {
     private final AutoFillManagerService mManagerService;
     private final AutoFillUI mUi;
 
-    // TODO(b/33197203): improve its usage
-    // - set maximum number of entries
-    // - disable on low-memory devices.
-    private final List<String> mRequestHistory = new LinkedList<>();
+    // Token used for fingerprint authentication
+    // TODO(b/33197203): create on demand?
+    private final IBinder mAuthToken = new Binder();
 
     @GuardedBy("mLock")
     private final List<QueuedRequest> mQueuedRequests = new LinkedList<>();
+
+    private final LocalLog mRequestsHistory;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -140,9 +146,10 @@ final class AutoFillManagerServiceImpl {
                     if (DEBUG) Slog.d(TAG, "queued requests:" + mQueuedRequests.size());
                 }
                 for (final QueuedRequest request: mQueuedRequests) {
-                    requestAutoFillLocked(request.activityToken, request.extras, request.flags,
-                            false);
+                    requestAutoFillLocked(request.activityToken, request.autoFillId,
+                            request.bounds, request.flags, false);
                 }
+                mQueuedRequests.clear();
             }
         }
 
@@ -151,7 +158,7 @@ final class AutoFillManagerServiceImpl {
             if (DEBUG) Slog.d(TAG, name + " disconnected");
             synchronized (mLock) {
                 mService = null;
-                mManagerService.removeCachedServiceForUserLocked(mUserId);
+                mManagerService.removeCachedServiceLocked(mUserId);
             }
         }
     };
@@ -181,9 +188,9 @@ final class AutoFillManagerServiceImpl {
                     Slog.w(TAG, "no server callback for id " + resultCode);
                     return;
                 }
-                session.mAppCallback = IAutoFillAppCallback.Stub.asInterface(appBinder);
+                session.setAppCallback(appBinder);
             }
-            mService.autoFill(structure, session.mServerCallback, session.mExtras, flags);
+            mService.autoFill(structure, session.mServerCallback, flags);
         }
     };
 
@@ -198,15 +205,17 @@ final class AutoFillManagerServiceImpl {
     long mEstimateTimeOfDeath;
 
     AutoFillManagerServiceImpl(AutoFillManagerService managerService, AutoFillUI ui,
-            Context context, Object lock, Handler handler, int userId, int uid,
-            ComponentName component, long ttl) {
+            Context context, Object lock, LocalLog requestsHistory, Handler handler, int userId,
+            int uid, ComponentName component, long ttl) {
         mManagerService = managerService;
         mUi = ui;
         mContext = context;
         mLock = lock;
+        mRequestsHistory = requestsHistory;
         mUserId = userId;
         mUid = uid;
         mComponent = component;
+        mComponentName = mComponent.flattenToShortString();
         mAm = ActivityManager.getService();
         setLifeExpectancy(ttl);
 
@@ -254,60 +263,86 @@ final class AutoFillManagerServiceImpl {
     /**
      * Asks service to auto-fill an activity.
      *
-     * @param activityToken activity token
-     * @param extras bundle to be passed to the {@link AutoFillService} method.
+     * @param activityToken activity token.
+     * @param autoFillId id of the view that requested auto-fill.
      * @param flags optional flags.
      */
-    void requestAutoFill(@Nullable IBinder activityToken, @Nullable Bundle extras, int flags) {
-        synchronized (mLock) {
-            if (!mBound) {
-                Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
-                return;
-            }
+    void requestAutoFillLocked(IBinder activityToken, @Nullable AutoFillId autoFillId,
+            @Nullable Rect bounds, int flags) {
+        if (!mBound) {
+            Slog.w(TAG, "requestAutoFill() failed because it's not bound to service");
+            return;
         }
 
-        // TODO(b/33197203): activityToken should probably not be null, but we need to wait until
-        // the UI is triggering the call (for now it's trough 'adb shell cmd autofill request'
-        if (activityToken == null) {
-            // Let's get top activities from all visible stacks.
-
-            // TODO(b/33197203): overload getTopVisibleActivities() to take userId, otherwise it
-            // could return activities for different users when a work profile app is displayed in
-            // another window (in a multi-window environment).
-            final List<IBinder> topActivities = LocalServices
-                    .getService(ActivityManagerInternal.class).getTopVisibleActivities();
-            if (DEBUG)
-                Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
-            if (topActivities.isEmpty()) {
-                Slog.w(TAG, "Could not get top activity");
-                return;
-            }
-            activityToken = topActivities.get(0);
-        }
-
-        final String historyItem = TimeUtils.formatForLogging(System.currentTimeMillis())
-                + " - " + activityToken;
-        synchronized (mLock) {
-            mRequestHistory.add(historyItem);
-            requestAutoFillLocked(activityToken, extras, flags, true);
-        }
+        requestAutoFillLocked(activityToken, autoFillId, bounds, flags, true);
     }
 
-    private void requestAutoFillLocked(IBinder activityToken, @Nullable Bundle extras, int flags,
-            boolean queueIfNecessary) {
+    private void requestAutoFillLocked(IBinder activityToken, AutoFillId autoFillId, Rect bounds,
+            int flags, boolean queueIfNecessary) {
         if (mService == null) {
             if (!queueIfNecessary) {
                 Slog.w(TAG, "requestAutoFillLocked(): service is null");
                 return;
             }
-            if (DEBUG) Slog.d(TAG, "requestAutoFill(): service not set yet, queuing it");
-            mQueuedRequests.add(new QueuedRequest(activityToken, extras, flags));
+            if (DEBUG) Slog.d(TAG, "requestAutoFillLocked(): service not set yet, queuing it");
+            mQueuedRequests.add(new QueuedRequest(activityToken, autoFillId, bounds, flags));
+            return;
+        }
+        if (activityToken == null) {
+            // Sanity check
+            Slog.wtf(TAG, "requestAutoFillLocked(): null activityToken");
+            return;
+        }
+
+        final Session session = getSessionByTokenLocked(activityToken);
+
+        if (session != null) {
+            // Session already exist, update UI instead...
+            /*
+             * TODO(b/33197203): currently, it's always reusing the session, regardless of the
+             * requested autoFillId, but it should start a new session for views that
+             * were not part of the initial auto-fill dataset returned by the service. For example:
+             *
+             * 1.Activity has 4 fields, `first_name`, `last_name`, and `address`.
+             * 2.User taps `first_name`.
+             * 3.Service returns a dataset with ids for `first_name` and `last_name`.
+             * 4.When user taps `first_name` (again) or `last_name`, session should be reused, but
+             * when user taps `address`, it should start a new session (since that field was
+             *   not part of the initial dataset).
+             *
+             * Similarly, once the activity is auto-filled, the flag logic should be reset (so if
+             * the user taps the view again, a new auto-fill request is made)
+             */
+            if (DEBUG) {
+                Slog.d(TAG, "requestAutoFillLocked(): reusing session for token "
+                        + activityToken + ", id " + autoFillId + " and flags " + flags);
+            }
+
+            if ((flags & FLAG_UPDATE_UI_HIDE) != 0) {
+                // TODO(b/33197203): handle it?
+                if (DEBUG) Slog.d(TAG, "ignoring FLAG_UPDATE_UI_HIDE request for " + autoFillId);
+
+                return;
+            }
+
+            session.mCurrentAutoFillId = autoFillId;
+            session.mCurrentBounds = bounds;
+            mUi.showResponse(mUserId, session.mId, autoFillId, bounds, session.mCurrentResponse);
             return;
         }
 
         final int sessionId = ++sSessionIdCounter;
-        final Session session = new Session(sessionId, extras);
-        mSessions.put(sessionId, session);
+        if (DEBUG) {
+            Slog.d(TAG, "requestAutoFillLocked(): new session (id=" + sessionId + " for token "
+                    + activityToken + " and autoFillId " + autoFillId);
+        }
+
+        final Session newSession = new Session(sessionId, activityToken, autoFillId, bounds);
+        mSessions.put(sessionId, newSession);
+
+        final String historyItem = "s=" + mComponentName + " u=" + mUserId + " f=" + flags
+                + " a=" + activityToken + " i=" + autoFillId + " b=" + bounds;
+        mRequestsHistory.log(historyItem);
 
         /*
          * TODO(b/33197203): apply security checks below:
@@ -324,8 +359,77 @@ final class AutoFillManagerServiceImpl {
                 Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
             }
         } catch (RemoteException e) {
-            // Should happen, it's a local call.
+            // Should not happen, it's a local call.
         }
+    }
+
+    /**
+     * Called by UI to trigger a save request to the service.
+     */
+    void requestSaveLocked(int sessionId) {
+        // TODO(b/33197203): add MetricsLogger call
+        // TODO(b/33197203): use handler?
+        // TODO(b/33197203): show error on UI on Slog.w situations below???
+
+        if (mService == null) {
+            Slog.w(TAG, "requestSave(): service is null");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null) {
+            Slog.w(TAG, "requestSave(): no session with id " + sessionId);
+            return;
+        }
+        final IBinder activityToken = session.mActivityToken.get();
+        if (activityToken == null) {
+            Slog.w(TAG, "activity token for session " + sessionId + " already GCed");
+            return;
+        }
+
+        /*
+         * TODO(b/33197203): apply security checks below:
+         * - checks if disabled by secure settings / device policy
+         * - log operation using noteOp()
+         * - check flags
+         * - display disclosure if needed
+         */
+        try {
+            /* TODO(b/33197203): refactor save logic so it uses a cached AssistStructure, and get
+               the extras to be sent to the service based on the response / dataset in the session.
+               Something like:
+           final Bundle extras = (responseExtras == null && datasetExtras == null)
+                  ? null : new Bundle();
+            if (responseExtras != null) {
+                if (DEBUG) Slog.d(TAG, "response extras on save notification: " +
+                        bundleToString(responseExtras));
+                extras.putBundle(AutoFillService.EXTRA_RESPONSE_EXTRAS, responseExtras);
+            }
+            if (datasetExtras != null) {
+                if (DEBUG) Slog.d(TAG, "dataset extras on save notification: " +
+                        bundleToString(datasetExtras));
+                extras.putBundle(AutoFillService.EXTRA_DATASET_EXTRAS, datasetExtras);
+            }
+
+             */
+
+            if (!mAm.requestAutoFillData(mAssistReceiver, null, sessionId, activityToken,
+                    AUTO_FILL_FLAG_TYPE_SAVE)) {
+                Slog.w(TAG, "failed to save for " + activityToken);
+            }
+        } catch (RemoteException e) {
+            // Should not happen, it's a local call.
+        }
+    }
+
+    private Session getSessionByTokenLocked(IBinder activityToken) {
+        final int size = mSessions.size();
+        for (int i = 0; i < size; i++) {
+            final Session session = mSessions.valueAt(i);
+            if (activityToken.equals(session.mActivityToken.get())) {
+                return session;
+            }
+        }
+        return null;
     }
 
     void stopLocked() {
@@ -443,12 +547,13 @@ final class AutoFillManagerServiceImpl {
 
         pw.print(prefix); pw.print("mUserId="); pw.println(mUserId);
         pw.print(prefix); pw.print("mUid="); pw.println(mUid);
-        pw.print(prefix); pw.print("mComponent="); pw.println(mComponent.flattenToShortString());
+        pw.print(prefix); pw.print("mComponent="); pw.println(mComponentName);
         pw.print(prefix); pw.print("mService: "); pw.println(mService);
         pw.print(prefix); pw.print("mBound="); pw.println(mBound);
         pw.print(prefix); pw.print("mEstimateTimeOfDeath=");
             TimeUtils.formatDuration(mEstimateTimeOfDeath, SystemClock.uptimeMillis(), pw);
-        pw.println();
+            pw.println();
+        pw.print(prefix); pw.print("mAuthToken: "); pw.println(mAuthToken);
 
         if (DEBUG) {
             // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
@@ -456,14 +561,6 @@ final class AutoFillManagerServiceImpl {
             mInfo.getServiceInfo().dump(new PrintWriterPrinter(pw), prefix + prefix);
         }
 
-        if (mRequestHistory.isEmpty()) {
-            pw.print(prefix); pw.println("No history");
-        } else {
-            pw.print(prefix); pw.println("History:");
-            for (int i = 0; i < mRequestHistory.size(); i++) {
-                pw.print(prefix2); pw.print(i); pw.print(": "); pw.println(mRequestHistory.get(i));
-            }
-        }
         if (mQueuedRequests.isEmpty()) {
             pw.print(prefix); pw.println("No queued requests");
         } else {
@@ -480,38 +577,37 @@ final class AutoFillManagerServiceImpl {
         } else {
             pw.print(prefix); pw.print(size); pw.println(" sessions:");
             for (int i = 0; i < size; i++) {
-                pw.print(prefix2); pw.print(mSessions.keyAt(i));
-                final Session session = mSessions.valueAt(i);
-                if (session.mAppCallback == null) {
-                    pw.println("(no appCallback)");
-                } else {
-                    pw.print(" (app callback: "); pw.print(session.mAppCallback) ; pw.println(")");
-                }
+                pw.print(prefix); pw.print("#"); pw.println(i + 1);
+                mSessions.valueAt(i).dumpLocked(prefix2, pw);
             }
-            pw.println();
         }
     }
 
     @Override
     public String toString() {
         return "AutoFillManagerServiceImpl: [userId=" + mUserId + ", uid=" + mUid
-                + ", component=" + mComponent.flattenToShortString() + "]";
+                + ", component=" + mComponentName + "]";
     }
 
     private static final class QueuedRequest {
         final IBinder activityToken;
-        final Bundle extras;
+        final AutoFillId autoFillId;
+        final Rect bounds;
         final int flags;
 
-        QueuedRequest(IBinder activityToken, Bundle extras, int flags) {
+        QueuedRequest(IBinder activityToken, AutoFillId autoFillId, Rect bounds, int flags) {
             this.activityToken = activityToken;
-            this.extras = extras;
+            this.autoFillId = autoFillId;
+            this.bounds = bounds;
             this.flags = flags;
         }
 
         @Override
         public String toString() {
-            return "flags: " + flags + " token: " + activityToken;
+            if (!DEBUG) return super.toString();
+
+            return "QueuedRequest: [flags=" + flags + ", token=" + activityToken
+                    + ", id=" + autoFillId + ", bounds=" + bounds;
         }
     }
 
@@ -532,11 +628,17 @@ final class AutoFillManagerServiceImpl {
     private final class Session {
 
         private final int mId;
-        private final Bundle mExtras;
+        private final WeakReference<IBinder> mActivityToken;
+
         private IAutoFillAppCallback mAppCallback;
 
-        // Token used on fingerprint authentication
-        private final IBinder mToken = new Binder();
+        // Current view where the auto-fill bar is displayed
+        @GuardedBy("mLock")
+        private AutoFillId mCurrentAutoFillId;
+        @GuardedBy("mLock")
+        private Rect mCurrentBounds;
+        @GuardedBy("mLock")
+        private FillResponse mCurrentResponse;
 
         private final IFingerprintService mFingerprintService;
 
@@ -710,11 +812,26 @@ final class AutoFillManagerServiceImpl {
             }
         };
 
-        private Session(int id, Bundle extras) {
+        private Session(int id, IBinder activityToken, AutoFillId autoFillId, Rect bounds) {
             this.mId = id;
-            this.mExtras = extras;
+            this.mActivityToken = new WeakReference<>(activityToken);
+            this.mCurrentAutoFillId = autoFillId;
+            this.mCurrentBounds = bounds;
             this.mFingerprintService = IFingerprintService.Stub
                     .asInterface(ServiceManager.getService("fingerprint"));
+        }
+
+        void setAppCallback(IBinder appBinder) {
+            try {
+                appBinder.linkToDeath(() -> {
+                    if (DEBUG) Slog.d(TAG, "app callback died");
+                    // TODO(b/33197203): more cleanup here?
+                    mAppCallback = null;
+                }, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "linkToDeath() failed: " + e);
+            }
+            mAppCallback = IAutoFillAppCallback.Stub.asInterface(appBinder);
         }
 
         private void showResponseLocked(FillResponse response, boolean authRequired) {
@@ -735,7 +852,8 @@ final class AutoFillManagerServiceImpl {
 
             if (!authRequired) {
                 // TODO(b/33197203): add MetricsLogger call
-                mUi.showOptions(mUserId, mId, response);
+                mCurrentResponse = response;
+                mUi.showResponse(mUserId, mId, mCurrentAutoFillId, mCurrentBounds, mCurrentResponse);
                 return;
             }
 
@@ -768,8 +886,8 @@ final class AutoFillManagerServiceImpl {
                 mDatasetRequiringAuth = dataset;
                 final boolean requiresFingerprint = dataset.hasCryptoObject();
                 if (requiresFingerprint) {
-                    // TODO(b/33197203): check if fingerprint is available first and call error callback
-                    // with FLAG_FINGERPRINT_AUTHENTICATION_NOT_AVAILABLE if it's not.
+                    // TODO(b/33197203): check if fingerprint is available first and call error
+                    // callback with FLAG_FINGERPRINT_AUTHENTICATION_NOT_AVAILABLE if it's not.
                     // Start scanning for the fingerprint.
                     scanFingerprint(dataset.getCryptoObjectOpId());
                     // Displays the message asking the user to tap (or fingerprint) for AutoFill.
@@ -785,14 +903,27 @@ final class AutoFillManagerServiceImpl {
             }
         }
 
+        void dumpLocked(String prefix, PrintWriter pw) {
+            pw.print(prefix); pw.print("mId: "); pw.println(mId);
+            pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken.get());
+            pw.print(prefix); pw.print("mCurrentAutoFillId: "); pw.println(mCurrentAutoFillId);
+            pw.print(prefix); pw.print("mCurrentBounds: "); pw.println(mCurrentBounds);
+            pw.print(prefix); pw.print("mCurrentResponse: "); pw.println(mCurrentResponse);
+            pw.print(prefix);
+                pw.print("mResponseRequiringAuth: "); pw.println(mResponseRequiringAuth);
+            pw.print(prefix);
+                pw.print("mDatasetRequiringAuth: "); pw.println(mDatasetRequiringAuth);
+            pw.print(prefix); pw.print("mAutoFillDirectly: "); pw.println(mAutoFillDirectly);
+        }
+
         private void autoFillAppLocked(Dataset dataset, boolean removeSelf) {
             try {
                 if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
                 mAppCallback.autoFill(dataset);
 
-                // TODO(b/33197203): temporarily hack: show the save notification, since save is
-                // not integrated with IME yet.
-                mUi.showSaveNotification(mUserId, null, dataset);
+                // TODO(b/33197203): temporarily hack: show the save notification after autofilled,
+                // since save is not automatically detected yet.
+                mUi.showSaveNotification(mUserId, mId); removeSelf = false;
 
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error auto-filling activity: " + e);
@@ -812,7 +943,8 @@ final class AutoFillManagerServiceImpl {
             final long token = Binder.clearCallingIdentity();
             try {
                 // TODO(b/33197203): set a timeout?
-                mFingerprintService.authenticate(mToken, opId, mUserId, mServiceReceiver, 0, null);
+                mFingerprintService.authenticate(mAuthToken, opId, mUserId, mServiceReceiver, 0,
+                        null);
             } catch (RemoteException e) {
                 // Local call, shouldn't happen.
             } finally {

@@ -58,7 +58,7 @@ public final class SaveCallback implements Dumpable {
     /**
      * Notifies the Android System that an
      * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
-     * android.os.CancellationSignal, SaveCallback)} was successfully fulfilled by the service.
+     * SaveCallback)} was successfully fulfilled by the service.
      *
      * @param ids ids ({@link ViewNode#getAutoFillId()}) of the fields that were saved.
      *
@@ -85,7 +85,7 @@ public final class SaveCallback implements Dumpable {
     /**
      * Notifies the Android System that an
      * {@link AutoFillService#onSaveRequest(android.app.assist.AssistStructure, Bundle,
-     * android.os.CancellationSignal, SaveCallback)} could not be fulfilled by the service.
+     * SaveCallback)} could not be fulfilled by the service.
      *
      * @param message error message to be displayed to the user.
      *

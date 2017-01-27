@@ -4899,4 +4899,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         return topActivityTokens;
     }
+
+    public IBinder getTopVisibleActivity(int uid) {
+        // TODO(b/33197203): get rid of DEFAULT_DISPLAY here?. Used in
+        // VoiceInteractionManagerServiceImpl#showSessionLocked.
+        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
+        if (display == null) {
+            return null;
+        }
+        final ArrayList<ActivityStack> stacks = display.mStacks;
+        for (int i = stacks.size() - 1; i >= 0; i--) {
+            ActivityStack stack = stacks.get(i);
+            if (stack.getStackVisibilityLocked(null) == ActivityStack.STACK_VISIBLE) {
+                ActivityRecord top = stack.topActivity();
+                if (top != null && stack == mFocusedStack && top.app.uid == uid) {
+                    return top.appToken;
+                }
+            }
+        }
+        return null;
+    }
 }

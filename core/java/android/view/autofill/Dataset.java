@@ -284,7 +284,7 @@ public final class Dataset implements Parcelable {
          * Sets a {@link Bundle} that will be passed to subsequent calls to
          * {@link android.service.autofill.AutoFillService} methods such as
  * {@link android.service.autofill.AutoFillService#onSaveRequest(android.app.assist.AssistStructure,
-         * Bundle, android.os.CancellationSignal, android.service.autofill.SaveCallback)}, using
+         * Bundle, android.service.autofill.SaveCallback)}, using
          * {@link android.service.autofill.AutoFillService#EXTRA_DATASET_EXTRAS} as the key.
          *
          * <p>It can be used to keep service state in between calls.

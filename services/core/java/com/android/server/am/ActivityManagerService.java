@@ -22603,6 +22603,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public IBinder getTopVisibleActivity(int uid) {
+            synchronized (ActivityManagerService.this) {
+                return mStackSupervisor.getTopVisibleActivity(uid);
+            }
+        }
+
+        @Override
         public void notifyDockedStackMinimizedChanged(boolean minimized) {
             synchronized (ActivityManagerService.this) {
                 mStackSupervisor.setDockedStackMinimized(minimized);

@@ -117,9 +117,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutoFillId;
-import android.view.autofill.Dataset;
-import android.view.autofill.DatasetField;
-import android.view.autofill.VirtualViewDelegate;
+import android.view.autofill.AutoFillManager;
+import android.view.autofill.AutoFillSession;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -848,10 +847,7 @@ public class Activity extends ContextThemeWrapper
     private boolean mHasCurrentPermissionsRequest;
 
     @GuardedBy("this")
-    private WeakReference<IAutoFillAppCallback> mAutoFillCallback;
-
-    @GuardedBy("this")
-    private VirtualViewDelegate.Callback mAutoFillDelegateCallback;
+    private AutoFillSession mAutoFillSession;
 
     private static native String getDlWarning();
 
@@ -1704,76 +1700,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Lazily sets the {@link #mAutoFillDelegateCallback}.
-     */
-    private void setAutoFillDelegateCallback() {
-        synchronized (this) {
-            if (mAutoFillDelegateCallback == null) {
-                mAutoFillDelegateCallback = new VirtualViewDelegate.Callback() {
-                    // TODO(b/33197203): implement
-                };
-            }
-        }
-    }
-
-    /**
      * Lazily gets the {@link IAutoFillAppCallback} for this activitity.
      *
      * <p>This callback is used by the {@link AutoFillService} app to auto-fill the activity fields.
      */
-    WeakReference<IAutoFillAppCallback> getAutoFillCallback() {
+    IAutoFillAppCallback getAutoFillCallback() {
         synchronized (this) {
-            if (mAutoFillCallback == null) {
-                final IAutoFillAppCallback cb = new IAutoFillAppCallback.Stub() {
-                    @Override
-                    public void autoFill(Dataset dataset) throws RemoteException {
-                        // TODO(b/33197203): must keep the dataset so subsequent calls pass the same
-                        // dataset.extras to service
-                        runOnUiThread(() -> {
-                            final View root = getWindow().getDecorView().getRootView();
-                            for (DatasetField field : dataset.getFields()) {
-                                final AutoFillId id = field.getId();
-                                if (id == null) {
-                                    Log.w(TAG, "autoFill(): null id on " + field);
-                                    continue;
-                                }
-                                final int viewId = id.getViewId();
-                                final View view = root.findViewByAccessibilityIdTraversal(viewId);
-                                if (view == null) {
-                                    Log.w(TAG, "autoFill(): no View with id " + viewId);
-                                    continue;
-                                }
-
-                                // TODO(b/33197203): handle protected value (like credit card)
-                                if (id.isVirtual()) {
-                                    // Delegate virtual fields to provider.
-                                    setAutoFillDelegateCallback();
-                                    final VirtualViewDelegate mgr = view
-                                            .getAutoFillVirtualViewDelegate(
-                                                    mAutoFillDelegateCallback);
-                                    if (mgr == null) {
-                                        Log.w(TAG, "autoFill(): cannot fill virtual " + id
-                                                + "; no auto-fill provider for view "
-                                                + view.getClass());
-                                        continue;
-                                    }
-                                    if (DEBUG_AUTO_FILL) {
-                                        Log.d(TAG, "autoFill(): delegating " + id
-                                                + " to virtual manager  " + mgr);
-                                    }
-                                    mgr.autoFill(id.getVirtualChildId(), field.getValue());
-                                } else {
-                                    // Handle non-virtual fields itself.
-                                    view.autoFill(field.getValue());
-                                }
-                            }
-                        });
-                    }
-                };
-                mAutoFillCallback = new WeakReference<IAutoFillAppCallback>(cb);
+            if (mAutoFillSession == null) {
+                mAutoFillSession = new AutoFillSession(this);
             }
+            return mAutoFillSession.getCallback();
         }
-        return mAutoFillCallback;
     }
 
     /**
@@ -6067,9 +6004,9 @@ public class Activity extends ContextThemeWrapper
             getWindow().peekDecorView().getViewRootImpl().dump(prefix, fd, writer, args);
         }
 
-        if (mAutoFillCallback != null) {
-            writer.print(prefix); writer.print("mAutoFillCallback: " );
-                    writer.println(mAutoFillCallback.get());
+        if (mAutoFillSession!= null) {
+            writer.print(prefix); writer.print("mAutoFillSession: " );
+                    writer.println(mAutoFillSession);
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);

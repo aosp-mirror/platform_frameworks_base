@@ -36,12 +36,16 @@ public final class AutoFillManager {
     /**
      * Flag used to show the auto-fill UI affordance for a view.
      */
-    public static final int FLAG_UPDATE_UI_SHOW = 1 << 0;
+    // TODO(b/33197203): cannot conflict with flags defined on View until they're removed (when
+    // save is refactored).
+    public static final int FLAG_UPDATE_UI_SHOW = 0x1;
 
     /**
      * Flag used to hide the auto-fill UI affordance for a view.
      */
-    public static final int FLAG_UPDATE_UI_HIDE = 1 << 1;
+    // TODO(b/33197203): cannot conflict with flags defined on View until they're removed (when
+    // save is refactored).
+    public static final int FLAG_UPDATE_UI_HIDE = 0x2;
 
     private final IAutoFillManagerService mService;
 
@@ -64,11 +68,10 @@ public final class AutoFillManager {
      * {@link #FLAG_UPDATE_UI_HIDE}.
      */
     public void updateAutoFillInput(View view, int flags) {
-        if (DEBUG) {
-            Log.v(TAG, "updateAutoFillInput(" + view.getAutoFillViewId() + "): flags=" + flags);
-        }
+        final Rect bounds = new Rect();
+        view.getBoundsOnScreen(bounds);
 
-        updateAutoFillInput(view, false, View.NO_ID, null, flags);
+        requestAutoFill(new AutoFillId(view.getAccessibilityViewId()), bounds, flags);
     }
 
     /**
@@ -79,56 +82,22 @@ public final class AutoFillManager {
      *
      * @param parent parent view.
      * @param childId id identifying the virtual child inside the parent view.
-     * @param boundaries boundaries of the child (inside the parent; could be {@code null} when
+     * @param bounds absolute boundaries of the child in the window (could be {@code null} when
      * flag is {@link #FLAG_UPDATE_UI_HIDE}.
      * @param flags either {@link #FLAG_UPDATE_UI_SHOW} or
      * {@link #FLAG_UPDATE_UI_HIDE}.
      */
-    public void updateAutoFillInput(View parent, int childId, @Nullable Rect boundaries,
+    public void updateAutoFillInput(View parent, int childId, @Nullable Rect bounds,
             int flags) {
+        requestAutoFill(new AutoFillId(parent.getAccessibilityViewId(), childId), bounds, flags);
+    }
+
+    private void requestAutoFill(AutoFillId id, Rect bounds, int flags) {
         if (DEBUG) {
-            Log.v(TAG, "updateAutoFillInput(" + parent.getAutoFillViewId() + ", " + childId
-                    + "): boundaries=" + boundaries + ", flags=" + flags);
+            Log.v(TAG, "requestAutoFill(): id=" + id + ", bounds=" + bounds + ", flags=" + flags);
         }
-        updateAutoFillInput(parent, true, childId, boundaries, flags);
-    }
-
-    private void updateAutoFillInput(View view, boolean virtual, int childId, Rect boundaries,
-            int flags) {
-        if ((flags & FLAG_UPDATE_UI_SHOW) != 0) {
-            final int viewId = view.getAutoFillViewId();
-            final AutoFillId id = virtual
-                    ? new AutoFillId(viewId, childId)
-                    : new AutoFillId(viewId);
-            showAutoFillInput(id, boundaries);
-            return;
-        }
-        // TODO(b/33197203): handle FLAG_UPDATE_UI_HIDE
-    }
-
-    private void showAutoFillInput(AutoFillId id, Rect boundaries) {
-        final int autoFillViewId = id.getViewId();
-        /*
-         * TODO(b/33197203): currently SHOW_AUTO_FILL_BAR is only set once per activity (i.e, when
-         * the view does not have an auto-fill id), but it should be called again for views that
-         * were not part of the initial auto-fill dataset returned by the service. For example:
-         *
-         * 1.Activity has 4 fields, `first_name`, `last_name`, and `address`.
-         * 2.User taps `first_name`.
-         * 3.Service returns a dataset with ids for `first_name` and `last_name`.
-         * 4.When user taps `first_name` (again) or `last_name`, flag should not have
-         *   SHOW_AUTO_FILL_BAR set, but when user taps `address`, it should (since that field was
-         *   not part of the initial dataset).
-         *
-         * Similarly, once the activity is auto-filled, the flag logic should be reset (so if the
-         * user taps the view again, a new auto-fill request is made)
-         */
-        if (autoFillViewId != View.NO_ID) {
-            return;
-        }
-
         try {
-            mService.showAutoFillInput(id, boundaries);
+            mService.requestAutoFill(id, bounds, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
