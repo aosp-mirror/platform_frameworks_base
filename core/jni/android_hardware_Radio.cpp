@@ -23,7 +23,7 @@
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
 #include <system/radio.h>
-#include <system/radio_metadata.h>
+#include <system/RadioMetadataWrapper.h>
 #include <radio/RadioCallback.h>
 #include <radio/Radio.h>
 #include <utils/RefBase.h>
@@ -752,7 +752,7 @@ android_hardware_Radio_getProgramInformation(JNIEnv *env, jobject thiz, jobjectA
     }
 
     struct radio_program_info nInfo;
-    radio_metadata_allocate(&nInfo.metadata, 0, 0);
+    RadioMetadataWrapper metadataWrapper(&nInfo.metadata);
     jobject jInfo = NULL;
     int jStatus;
 
@@ -770,7 +770,6 @@ exit:
     if (jInfo != NULL) {
         env->DeleteLocalRef(jInfo);
     }
-    radio_metadata_deallocate(nInfo.metadata);
     return jStatus;
 }
 
