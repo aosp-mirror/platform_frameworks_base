@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import java.io.PrintWriter;
 /**
  * A window above the application that is smartly anchored to a rectangular region.
  */
@@ -112,6 +113,14 @@ final class AnchoredWindow {
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         return params;
+    }
+
+    void dump(PrintWriter pw) {
+        pw.println("Anchored Window");
+        final String prefix = "  ";
+        pw.print(prefix); pw.print("width: "); pw.println(mWidth);
+        pw.print(prefix); pw.print("height: "); pw.println(mHeight);
+        pw.print(prefix); pw.print("visible: "); pw.println(mIsShowing);
     }
 
     /** FrameLayout that listens for touch events removes itself if the touch event is outside. */

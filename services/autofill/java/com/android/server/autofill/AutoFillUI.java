@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.DEBUG;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.Notification.Action;
@@ -38,6 +39,7 @@ import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -59,6 +61,9 @@ final class AutoFillUI {
     private final Context mContext;
 
     private final WindowManager mWm;
+
+    @Nullable
+    private AnchoredWindow mFillWindow;
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
@@ -103,9 +108,23 @@ final class AutoFillUI {
     void showResponse(int userId, int sessionId, AutoFillId autoFillId, Rect bounds,
             FillResponse response) {
         if (DEBUG) Slog.d(TAG, "showResponse: id=" + autoFillId +  ", bounds=" + bounds);
-        // TODO(b/33197203): proper implementation
-        // TODO(b/33197203): make sure if removes the session from cache
-        showOptionsNotification(userId, sessionId, autoFillId, response);
+
+        UiThread.getHandler().runWithScissors(() -> {
+            if (mFillWindow != null) {
+                mFillWindow.hide();
+            }
+
+            final DatasetPicker fillView = new DatasetPicker(mContext, response.getDatasets(),
+                    (dataset) -> {
+                        mFillWindow.hide();
+                        onDatasetPicked(userId, dataset, sessionId);
+                    });
+
+            // TODO(b/33197203): request width/height properly.
+            mFillWindow = new AnchoredWindow(mWm, fillView, 800,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            mFillWindow.show(bounds != null ? bounds : new Rect());
+        }, 0);
     }
 
     /**
@@ -180,6 +199,7 @@ final class AutoFillUI {
         final String prefix = "  ";
         pw.print(prefix); pw.print("sResultCode: "); pw.println(sResultCode);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
+        mFillWindow.dump(pw);
     }
 
     private AutoFillManagerServiceImpl getServiceLocked(int userId) {
