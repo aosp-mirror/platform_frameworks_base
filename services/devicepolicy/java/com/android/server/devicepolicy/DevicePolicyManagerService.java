@@ -9292,11 +9292,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         PackageManager packageManager = mInjector.getPackageManager();
 
         UserHandle user = mInjector.binderGetCallingUserHandle();
-        enforceProfileOwnerOrSystemUser(admin);
-        synchronized (this) {
+        if (!isCallerWithSystemUid()) {
             // Ensure the caller is a DO/PO or a permission grant state delegate.
-            enforceCanManageScope(admin, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                    DELEGATION_PERMISSION_GRANT);
+            enforceCanManageScope(admin, callerPackage,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, DELEGATION_PERMISSION_GRANT);
+        }
+        synchronized (this) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 int granted = mIPackageManager.checkPermission(permission,

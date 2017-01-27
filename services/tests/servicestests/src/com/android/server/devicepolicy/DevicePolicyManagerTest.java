@@ -3575,20 +3575,24 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // System can retrieve permission grant state.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        mContext.packageName = "com.example.system";
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
                 dpm.getPermissionGrantState(null, app1, permission));
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT,
                 dpm.getPermissionGrantState(null, app2, permission));
 
         // A regular app cannot retrieve permission grant state.
-        mMockContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.binder.callingUid = setupPackageInPackageManager(app1, 1);
+        mContext.packageName = app1;
         try {
             dpm.getPermissionGrantState(null, app1, permission);
-            fail("Didn't throw IllegalStateException");
-        } catch (IllegalStateException expected) {
+            fail("Didn't throw SecurityException");
+        } catch (SecurityException expected) {
         }
 
         // Profile owner can retrieve permission grant state.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.packageName = admin1.getPackageName();
         setAsProfileOwner(admin1);
         assertEquals(DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
                 dpm.getPermissionGrantState(admin1, app1, permission));
