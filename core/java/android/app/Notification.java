@@ -3498,7 +3498,9 @@ public class Notification implements Parcelable
             if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, p.title);
-                setTextViewColorPrimary(contentView, R.id.title);
+                if (!p.ambient) {
+                    setTextViewColorPrimary(contentView, R.id.title);
+                }
                 contentView.setViewLayoutWidth(R.id.title, showProgress
                         ? ViewGroup.LayoutParams.WRAP_CONTENT
                         : ViewGroup.LayoutParams.MATCH_PARENT);
@@ -3507,7 +3509,9 @@ public class Notification implements Parcelable
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
                 contentView.setTextViewText(textId, p.text);
-                setTextViewColorSecondary(contentView, textId);
+                if (!p.ambient) {
+                    setTextViewColorSecondary(contentView, textId);
+                }
                 contentView.setViewVisibility(textId, View.VISIBLE);
             }
 
@@ -3715,7 +3719,7 @@ public class Notification implements Parcelable
         }
         private void bindHeaderAppName(RemoteViews contentView, boolean ambient) {
             contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
-            if (isColorized()) {
+            if (isColorized() && !ambient) {
                 setTextViewColorPrimary(contentView, R.id.app_name_text);
             } else {
                 contentView.setTextColor(R.id.app_name_text,
@@ -4067,7 +4071,7 @@ public class Notification implements Parcelable
                 }
             } else {
                 button.setTextViewText(R.id.action0, processLegacyText(action.title));
-                if (isColorized()) {
+                if (isColorized() && !ambient) {
                     setTextViewColorPrimary(button, R.id.action0);
                 } else if (mN.color != COLOR_DEFAULT) {
                     button.setTextColor(R.id.action0,
