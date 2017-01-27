@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -1385,6 +1386,14 @@ public class MediaPlayer extends PlayerBase
      * to provide a notification when the height is available.
      */
     public native int getVideoHeight();
+
+    /**
+     *  Returns Analytics/Metrics data about the current video in this player.
+     *
+     * @return the a map of attributes and values available for this video
+     * player or null if no metrics are available.
+     */
+    public native Bundle getMetrics();
 
     /**
      * Checks whether the MediaPlayer is playing.

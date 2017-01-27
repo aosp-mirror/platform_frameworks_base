@@ -23,6 +23,8 @@
 #include <media/AudioResamplerPublic.h>
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
+#include <media/MediaAnalyticsItem.h>
+#include <media/stagefright/Utils.h>            // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -39,6 +41,7 @@
 #include "utils/String8.h"
 #include "android_media_BufferingParams.h"
 #include "android_media_MediaDataSource.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_SyncParams.h"
 #include "android_media_Utils.h"
@@ -684,6 +687,33 @@ android_media_MediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz)
     return (jint) h;
 }
 
+static jobject
+android_media_MediaPlayer_getMetrics(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return 0;
+    }
+
+    Parcel p;
+    int key = FOURCC('m','t','r','X');
+    status_t status = mp->getParameter(key, &p);
+    if (status != OK) {
+        ALOGD("getMetrics() failed: %d", status);
+        return (jobject) NULL;
+    }
+
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(p);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
 
 static jint
 android_media_MediaPlayer_getCurrentPosition(JNIEnv *env, jobject thiz)
@@ -1118,6 +1148,7 @@ static const JNINativeMethod gMethods[] = {
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
+    {"getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaPlayer_getMetrics},
     {"setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer_setPlaybackParams},
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
     {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
