@@ -2548,7 +2548,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private boolean isItemClickable(View view) {
-        return !view.hasFocusable();
+        return !view.hasFocusable(false);
     }
 
     /**
@@ -2824,7 +2824,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final View v = getChildAt(mSelectedPosition - mFirstPosition);
 
             if (v != null) {
-                if (v.hasFocusable()) return;
+                if (v.hasFocusable(false)) return;
                 v.setPressed(true);
             }
             setPressed(true);
@@ -3428,7 +3428,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (mTouchMode == TOUCH_MODE_DOWN) {
                 mTouchMode = TOUCH_MODE_TAP;
                 final View child = getChildAt(mMotionPosition - mFirstPosition);
-                if (child != null && !child.hasFocusable()) {
+                if (child != null && !child.hasFocusable(false)) {
                     mLayoutMode = LAYOUT_NORMAL;
 
                     if (!mDataChanged) {
@@ -4005,7 +4005,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                 final float x = ev.getX();
                 final boolean inList = x > mListPadding.left && x < getWidth() - mListPadding.right;
-                if (inList && !child.hasFocusable()) {
+                if (inList && !child.hasFocusable(false)) {
                     if (mPerformClick == null) {
                         mPerformClick = new PerformClick();
                     }
