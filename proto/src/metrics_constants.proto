@@ -3276,8 +3276,8 @@ message MetricsEvent {
     DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
 
 
-    // OPEN: Settings > Apps > Default Apps > Default auto-fill app
-    DEFAULT_AUTO_FILL_PICKER = 792;
+    // OPEN: Settings > Apps > Default Apps > Default autofill app
+    DEFAULT_AUTOFILL_PICKER = 792;
 
     // These values should never appear in log outputs - they are reserved for
     // internal Tron use.
