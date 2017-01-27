@@ -1296,7 +1296,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
 
                         profilerInfo = new ProfilerInfo(profileFile, profileFd,
-                                mService.mSamplingInterval, mService.mAutoStopProfiler);
+                                mService.mSamplingInterval, mService.mAutoStopProfiler,
+                                mService.mStreamingOutput);
                     }
                 }
             }

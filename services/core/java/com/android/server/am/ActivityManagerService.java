@@ -1381,6 +1381,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     ParcelFileDescriptor mProfileFd;
     int mSamplingInterval = 0;
     boolean mAutoStopProfiler = false;
+    boolean mStreamingOutput = false;
     int mProfileType = 0;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
@@ -6571,12 +6572,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             ParcelFileDescriptor profileFd = null;
             int samplingInterval = 0;
             boolean profileAutoStop = false;
+            boolean profileStreamingOutput = false;
             if (mProfileApp != null && mProfileApp.equals(processName)) {
                 mProfileProc = app;
                 profileFile = mProfileFile;
                 profileFd = mProfileFd;
                 samplingInterval = mSamplingInterval;
                 profileAutoStop = mAutoStopProfiler;
+                profileStreamingOutput = mStreamingOutput;
             }
             boolean enableTrackAllocation = false;
             if (mTrackAllocationApp != null && mTrackAllocationApp.equals(processName)) {
@@ -6606,7 +6609,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 profileFd = profileFd.dup();
             }
             ProfilerInfo profilerInfo = profileFile == null ? null
-                    : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
+                    : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop,
+                                       profileStreamingOutput);
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode,
@@ -12039,6 +12043,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mProfileFd = profilerInfo.profileFd;
             mSamplingInterval = profilerInfo.samplingInterval;
             mAutoStopProfiler = profilerInfo.autoStopProfiler;
+            mStreamingOutput = profilerInfo.streamingOutput;
             mProfileType = 0;
         }
     }
@@ -14920,7 +14925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  mProfileApp=" + mProfileApp + " mProfileProc=" + mProfileProc);
                 pw.println("  mProfileFile=" + mProfileFile + " mProfileFd=" + mProfileFd);
                 pw.println("  mSamplingInterval=" + mSamplingInterval + " mAutoStopProfiler="
-                        + mAutoStopProfiler);
+                        + mAutoStopProfiler + " mStreamingOutput=" + mStreamingOutput);
                 pw.println("  mProfileType=" + mProfileType);
             }
         }
@@ -21439,6 +21444,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProfileFile = null;
         mProfileType = 0;
         mAutoStopProfiler = false;
+        mStreamingOutput = false;
         mSamplingInterval = 0;
     }
 
