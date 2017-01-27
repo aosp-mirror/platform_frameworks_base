@@ -174,9 +174,18 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      */
     private long mPauseTime = -1;
 
-    // This is to work around a bug in b/34736819. This needs to be removed once play team
+    // This is to work around a bug in b/34736819. This needs to be removed once app team
     // fixes their side.
-    private AnimatorListenerAdapter mDummyListener = new AnimatorListenerAdapter() {};
+    private AnimatorListenerAdapter mDummyListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mNodeMap.get(animation) == null) {
+                throw new AndroidRuntimeException("Error: animation ended is not in the node map");
+            }
+            mNodeMap.get(animation).mEnded = true;
+
+        }
+    };
 
     public AnimatorSet() {
         super();
@@ -1172,6 +1181,17 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
         anim.mEvents = new ArrayList<AnimationEvent>();
+        anim.mDummyListener = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (anim.mNodeMap.get(animation) == null) {
+                    throw new AndroidRuntimeException("Error: animation ended is not in the node"
+                            + " map");
+                }
+                anim.mNodeMap.get(animation).mEnded = true;
+
+            }
+        };
         anim.mReversing = false;
         anim.mDependencyDirty = true;
 
