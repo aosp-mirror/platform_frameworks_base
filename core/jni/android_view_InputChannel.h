@@ -21,6 +21,8 @@
 
 #include <input/InputTransport.h>
 
+#include <vector>
+
 namespace android {
 
 typedef void (*InputChannelObjDisposeCallback)(JNIEnv* env, jobject inputChannelObj,
@@ -35,6 +37,17 @@ extern sp<InputChannel> android_view_InputChannel_getInputChannel(JNIEnv* env,
 extern void android_view_InputChannel_setDisposeCallback(JNIEnv* env, jobject inputChannelObj,
         InputChannelObjDisposeCallback callback, void* data = NULL);
 
+}
+
+namespace util {
+/**
+ * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
+ * This will be present in C++14 and can be removed then.
+ */
+template <typename T, class... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T{std::forward<Args>(args)...});
+} // namespace util
 } // namespace android
 
 #endif // _ANDROID_OS_INPUTCHANNEL_H
