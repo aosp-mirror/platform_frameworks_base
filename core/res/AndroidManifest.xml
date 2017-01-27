@@ -82,6 +82,10 @@
     <protected-broadcast android:name="android.intent.action.USER_SWITCHED" />
     <protected-broadcast android:name="android.intent.action.USER_INITIALIZE" />
     <protected-broadcast android:name="android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION" />
+    <protected-broadcast android:name="android.intent.action.OVERLAY_ADDED" />
+    <protected-broadcast android:name="android.intent.action.OVERLAY_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.OVERLAY_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
@@ -2106,6 +2110,12 @@
     <permission android:name="android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE"
         android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE"/>
+
+    <!-- Allows an application to enable, disable and change priority of
+         runtime resource overlays.
+         @hide -->
+    <permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"
+        android:protectionLevel="signature|privileged|development" />
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
