@@ -44,6 +44,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
@@ -1167,8 +1168,7 @@ public class StorageManager {
      *         false not encrypted and not encryptable
      */
     public static boolean isEncryptable() {
-        final String state = SystemProperties.get("ro.crypto.state", "unsupported");
-        return !"unsupported".equalsIgnoreCase(state);
+        return RoSystemProperties.CRYPTO_ENCRYPTABLE;
     }
 
     /** {@hide}
@@ -1177,8 +1177,7 @@ public class StorageManager {
      *         false not encrypted
      */
     public static boolean isEncrypted() {
-        final String state = SystemProperties.get("ro.crypto.state", "");
-        return "encrypted".equalsIgnoreCase(state);
+        return RoSystemProperties.CRYPTO_ENCRYPTED;
     }
 
     /** {@hide}
@@ -1190,9 +1189,7 @@ public class StorageManager {
         if (!isEncrypted()) {
             return false;
         }
-
-        final String status = SystemProperties.get("ro.crypto.type", "");
-        return "file".equalsIgnoreCase(status);
+        return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
     }
 
     /** {@hide}
@@ -1204,8 +1201,7 @@ public class StorageManager {
         if (!isEncrypted()) {
             return false;
         }
-        final String status = SystemProperties.get("ro.crypto.type", "");
-        return "block".equalsIgnoreCase(status);
+        return RoSystemProperties.CRYPTO_BLOCK_ENCRYPTED;
     }
 
     /** {@hide}
