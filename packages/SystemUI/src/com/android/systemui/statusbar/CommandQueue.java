@@ -25,7 +25,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
-import android.view.KeyEvent;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
@@ -92,6 +91,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private final Object mLock = new Object();
     private ArrayList<Callbacks> mCallbacks = new ArrayList<>();
     private Handler mHandler = new H(Looper.getMainLooper());
+    private int mDisable1;
+    private int mDisable2;
 
     /**
      * These methods are called back on the main thread.
@@ -119,9 +120,9 @@ public class CommandQueue extends IStatusBar.Stub {
         default void cancelPreloadRecentApps() { }
         default void setWindowState(int window, int state) { }
         default void showScreenPinningRequest(int taskId) { }
-        default void appTransitionPending() { }
+        default void appTransitionPending(boolean forced) { }
         default void appTransitionCancelled() { }
-        default void appTransitionStarting(long startTime, long duration) { }
+        default void appTransitionStarting(long startTime, long duration, boolean forced) { }
         default void appTransitionFinished() { }
         default void showAssistDisclosure() { }
         default void startAssist(Bundle args) { }
@@ -141,6 +142,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void addCallbacks(Callbacks callbacks) {
         mCallbacks.add(callbacks);
+        callbacks.disable(mDisable1, mDisable2, false /* animate */);
     }
 
     public void removeCallbacks(Callbacks callbacks) {
@@ -164,6 +166,8 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void disable(int state1, int state2) {
         synchronized (mLock) {
+            mDisable1 = state1;
+            mDisable2 = state2;
             mHandler.removeMessages(MSG_DISABLE);
             mHandler.obtainMessage(MSG_DISABLE, state1, state2, null).sendToTarget();
         }
@@ -315,9 +319,13 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     public void appTransitionPending() {
+        appTransitionPending(false /* forced */);
+    }
+
+    public void appTransitionPending(boolean forced) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
-            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+            mHandler.obtainMessage(MSG_APP_TRANSITION_PENDING, forced ? 1 : 0, 0).sendToTarget();
         }
     }
 
@@ -329,10 +337,14 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     public void appTransitionStarting(long startTime, long duration) {
+        appTransitionStarting(startTime, duration, false /* forced */);
+    }
+
+    public void appTransitionStarting(long startTime, long duration, boolean forced) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_APP_TRANSITION_STARTING);
-            mHandler.obtainMessage(MSG_APP_TRANSITION_STARTING, Pair.create(startTime, duration))
-                    .sendToTarget();
+            mHandler.obtainMessage(MSG_APP_TRANSITION_STARTING, forced ? 1 : 0, 0,
+                    Pair.create(startTime, duration)).sendToTarget();
         }
     }
 
@@ -505,7 +517,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_APP_TRANSITION_PENDING:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).appTransitionPending();
+                        mCallbacks.get(i).appTransitionPending(msg.arg1 != 0);
                     }
                     break;
                 case MSG_APP_TRANSITION_CANCELLED:
@@ -516,7 +528,8 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_APP_TRANSITION_STARTING:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
-                        mCallbacks.get(i).appTransitionStarting(data.first, data.second);
+                        mCallbacks.get(i).appTransitionStarting(data.first, data.second,
+                                msg.arg1 != 0);
                     }
                     break;
                 case MSG_APP_TRANSITION_FINISHED:

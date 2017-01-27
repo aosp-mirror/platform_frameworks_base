@@ -97,7 +97,7 @@ public class FragmentHostManager {
         return p;
     }
 
-    public void addTagListener(String tag, FragmentListener listener) {
+    public FragmentHostManager addTagListener(String tag, FragmentListener listener) {
         ArrayList<FragmentListener> listeners = mListeners.get(tag);
         if (listeners == null) {
             listeners = new ArrayList<>();
@@ -108,6 +108,7 @@ public class FragmentHostManager {
         if (current != null && current.getView() != null) {
             listener.onFragmentViewCreated(tag, current);
         }
+        return this;
     }
 
     // Shouldn't generally be needed, included for completeness sake.

@@ -45,6 +45,26 @@ public class FakeKeyguardMonitor implements KeyguardMonitor {
     }
 
     @Override
+    public boolean isKeyguardFadingAway() {
+        return false;
+    }
+
+    @Override
+    public boolean isKeyguardGoingAway() {
+        return false;
+    }
+
+    @Override
+    public long getKeyguardFadingAwayDuration() {
+        return 0;
+    }
+
+    @Override
+    public long getKeyguardFadingAwayDelay() {
+        return 0;
+    }
+
+    @Override
     public boolean canSkipBouncer() {
         return false;
     }

@@ -166,6 +166,10 @@ public abstract class PanelBar extends FrameLayout {
         if (DEBUG) LOG("onPanelPeeked");
     }
 
+    public boolean isClosed() {
+        return mState == STATE_CLOSED;
+    }
+
     public void onPanelCollapsed() {
         if (DEBUG) LOG("onPanelCollapsed");
     }

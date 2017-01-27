@@ -15,10 +15,14 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Looper;
+import android.view.Display;
 import android.view.WindowManager;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.FragmentTestCase;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
@@ -35,17 +39,21 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
 
     @Before
     public void setup() {
+        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
         mContext.putComponent(Recents.class, mock(Recents.class));
         mContext.putComponent(Divider.class, mock(Divider.class));
-        mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
+        WindowManager windowManager = mock(WindowManager.class);
+        Display defaultDisplay = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
+        when(windowManager.getDefaultDisplay()).thenReturn(
+                defaultDisplay);
+        mContext.addMockSystemService(Context.WINDOW_SERVICE, windowManager);
     }
 
     @Test
     public void testHomeLongPress() {
-        mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
         NavigationBarFragment navigationBarFragment = (NavigationBarFragment) mFragment;
 
         postAndWait(() -> mFragments.dispatchResume());

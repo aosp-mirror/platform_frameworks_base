@@ -118,7 +118,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private int mSystemUiVisibility;
     private LightBarController mLightBarController;
-    private boolean mKeyguardGoingAway;
 
     public boolean mHomeBlockedThisTouch;
 
@@ -195,6 +194,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mNavigationBarView.getLightTransitionsController().destroy(getContext());
         getContext().unregisterReceiver(mBroadcastReceiver);
     }
 
@@ -285,31 +285,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mNavigationBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
         }
-    }
-
-    @Override
-    public void appTransitionPending() {
-        mNavigationBarView.getLightTransitionsController().appTransitionPending();
-    }
-
-    @Override
-    public void appTransitionCancelled() {
-        mNavigationBarView.getLightTransitionsController().appTransitionCancelled();
-    }
-
-    @Override
-    public void appTransitionStarting(long startTime, long duration) {
-        if (mKeyguardGoingAway) return;
-        doAppTransitionStarting(startTime, duration);
-    }
-
-    /**
-     * Calls appTransitionStarting for the nav bar regardless of whether keyguard is going away.
-     * public so StatusBar can force this when needed.
-     */
-    public void doAppTransitionStarting(long startTime, long duration) {
-        mNavigationBarView.getLightTransitionsController().appTransitionStarting(startTime,
-                duration);
     }
 
     // Injected from StatusBar at creation.
@@ -610,10 +585,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mNavigationBarView.setLayoutTransitionsEnabled(false);
         mNavigationBarView.postDelayed(() -> mNavigationBarView.setLayoutTransitionsEnabled(true),
                 delay + StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
-    }
-
-    public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-        mKeyguardGoingAway = keyguardGoingAway;
     }
 
     public BarTransitions getBarTransitions() {

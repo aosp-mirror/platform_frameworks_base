@@ -22,6 +22,7 @@ import android.view.View;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -36,7 +37,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
-    private final StatusBarIconController mStatusBarIconController;
+    private final DarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
     private FingerprintUnlockController mFingerprintUnlockController;
 
@@ -65,8 +66,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
 
-    public LightBarController(StatusBarIconController statusBarIconController) {
-        mStatusBarIconController = statusBarIconController;
+    public LightBarController() {
+        mStatusBarIconController = Dependency.get(DarkIconDispatcher.class);
         mBatteryController = Dependency.get(BatteryController.class);
         mBatteryController.addCallback(this);
     }

@@ -41,6 +41,7 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue = new CommandQueue();
         mCallbacks = mock(Callbacks.class);
         mCommandQueue.addCallbacks(mCallbacks);
+        verify(mCallbacks).disable(eq(0), eq(0), eq(false));
     }
 
     @After
@@ -181,7 +182,7 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testAppTransitionPending() {
         mCommandQueue.appTransitionPending();
         waitForIdleSync();
-        verify(mCallbacks).appTransitionPending();
+        verify(mCallbacks).appTransitionPending(eq(false));
     }
 
     @Test
@@ -195,7 +196,7 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testAppTransitionStarting() {
         mCommandQueue.appTransitionStarting(1, 2);
         waitForIdleSync();
-        verify(mCallbacks).appTransitionStarting(eq(1L), eq(2L));
+        verify(mCallbacks).appTransitionStarting(eq(1L), eq(2L), eq(false));
     }
 
     @Test

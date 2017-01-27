@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -14,19 +14,18 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
+import android.content.res.Configuration;
 
-public interface KeyguardMonitor extends CallbackController<Callback> {
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
-    boolean isSecure();
-    boolean canSkipBouncer();
-    boolean isShowing();
-    boolean isKeyguardFadingAway();
-    boolean isKeyguardGoingAway();
-    long getKeyguardFadingAwayDuration();
-    long getKeyguardFadingAwayDelay();
+/**
+ * Common listener for configuration or subsets of configuration changes (like density or
+ * font scaling), providing easy static dependence on these events.
+ */
+public interface ConfigurationController extends CallbackController<ConfigurationListener> {
 
-    public interface Callback {
-        void onKeyguardShowingChanged();
+    interface ConfigurationListener {
+        default void onConfigChanged(Configuration newConfig) {}
+        default void onDensityOrFontScaleChanged() {}
     }
 }

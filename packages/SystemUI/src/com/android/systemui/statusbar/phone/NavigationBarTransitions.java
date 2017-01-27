@@ -38,7 +38,8 @@ public final class NavigationBarTransitions extends BarTransitions {
         mView = view;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mLightTransitionsController = new LightBarTransitionsController(this::applyDarkIntensity);
+        mLightTransitionsController = new LightBarTransitionsController(view.getContext(),
+                this::applyDarkIntensity);
     }
 
     public void init() {

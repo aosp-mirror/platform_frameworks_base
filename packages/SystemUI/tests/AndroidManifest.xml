@@ -35,6 +35,7 @@
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.REQUEST_NETWORK_SCORES" />
+    <uses-permission android:name="android.permission.CONTROL_VPN" />
 
     <application>
         <uses-library android:name="android.test.runner" />

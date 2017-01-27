@@ -18,13 +18,10 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.RemoteException;
-import android.view.WindowManagerGlobal;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;
-import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
 import java.util.ArrayList;
 
@@ -44,6 +41,10 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private boolean mCanSkipBouncer;
 
     private boolean mListening;
+    private boolean mKeyguardFadingAway;
+    private long mKeyguardFadingAwayDelay;
+    private long mKeyguardFadingAwayDuration;
+    private boolean mKeyguardGoingAway;
 
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
@@ -115,8 +116,42 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     }
 
     private void notifyKeyguardChanged() {
-        for (Callback callback : mCallbacks) {
-            callback.onKeyguardChanged();
-        }
+        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+    }
+
+    public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
+        mKeyguardFadingAway = true;
+        mKeyguardFadingAwayDelay = delay;
+        mKeyguardFadingAwayDuration = fadeoutDuration;
+        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+    }
+
+    public void notifyKeyguardDoneFading() {
+        mKeyguardFadingAway = false;
+        mCallbacks.forEach(Callback::onKeyguardShowingChanged);
+    }
+
+    @Override
+    public boolean isKeyguardFadingAway() {
+        return mKeyguardFadingAway;
+    }
+
+    @Override
+    public boolean isKeyguardGoingAway() {
+        return mKeyguardGoingAway;
+    }
+
+    @Override
+    public long getKeyguardFadingAwayDelay() {
+        return mKeyguardFadingAwayDelay;
+    }
+
+    @Override
+    public long getKeyguardFadingAwayDuration() {
+        return mKeyguardFadingAwayDuration;
+    }
+
+    public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
+        mKeyguardGoingAway = keyguardGoingAway;
     }
 }
