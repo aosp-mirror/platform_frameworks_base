@@ -113,6 +113,7 @@ public class Am extends BaseCommand {
     private String mProfileFile;
     private int mSamplingInterval;
     private boolean mAutoStop;
+    private boolean mStreaming;   // Streaming the profiling output to a file.
     private int mStackId;
 
     /**
@@ -130,7 +131,7 @@ public class Am extends BaseCommand {
         pw.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--sampling INTERVAL] [-R COUNT] [-S]\n" +
+                "               [--sampling INTERVAL] [--streaming] [-R COUNT] [-S]\n" +
                 "               [--track-allocation] [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -141,7 +142,8 @@ public class Am extends BaseCommand {
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
                 "               [--no-window-animation] [--abi <ABI>] <COMPONENT>\n" +
-                "       am profile start [--user <USER_ID> current] [--sampling INTERVAL] <PROCESS> <FILE>\n" +
+                "       am profile start [--user <USER_ID> current] [--sampling INTERVAL]\n"+
+                "               [--streaming] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
@@ -194,6 +196,8 @@ public class Am extends BaseCommand {
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
                 "    --sampling INTERVAL: use sample profiling with INTERVAL microseconds\n" +
                 "        between samples (use with --start-profiler)\n" +
+                "    --streaming: stream the profiling output to the specified file (use\n" +
+                "        with --start-profiler)\n" +
                 "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
@@ -253,6 +257,9 @@ public class Am extends BaseCommand {
                 "  may be either a process name or pid.  Options are:\n" +
                 "    --user <USER_ID> | current: When supplying a process name,\n" +
                 "        specify user of process to profile; uses current user if not specified.\n" +
+                "    --sampling INTERVAL: use sample profiling with INTERVAL microseconds\n" +
+                "        between samples\n" +
+                "    --streaming: stream the profiling output to the specified file\n" +
                 "\n" +
                 "am dumpheap: dump the heap of a process.  The given <PROCESS> argument may\n" +
                 "  be either a process name or pid.  Options are:\n" +
@@ -490,6 +497,7 @@ public class Am extends BaseCommand {
         mProfileFile = null;
         mSamplingInterval = 0;
         mAutoStop = false;
+        mStreaming = false;
         mUserId = defUser;
         mStackId = INVALID_STACK_ID;
 
@@ -510,6 +518,8 @@ public class Am extends BaseCommand {
                     mAutoStop = false;
                 } else if (opt.equals("--sampling")) {
                     mSamplingInterval = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("--streaming")) {
+                    mStreaming = true;
                 } else if (opt.equals("-R")) {
                     mRepeat = Integer.parseInt(nextArgRequired());
                 } else if (opt.equals("-S")) {
@@ -622,7 +632,8 @@ public class Am extends BaseCommand {
                     System.err.println("Consider using a file under /data/local/tmp/");
                     return;
                 }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
+                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
+                                                mStreaming);
             }
 
             IActivityManager.WaitResult result = null;
@@ -980,6 +991,7 @@ public class Am extends BaseCommand {
         int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
         mSamplingInterval = 0;
+        mStreaming = false;
 
         String process = null;
 
@@ -993,6 +1005,8 @@ public class Am extends BaseCommand {
                     userId = parseUserArg(nextArgRequired());
                 } else if (opt.equals("--wall")) {
                     wall = true;
+                } else if (opt.equals("--streaming")) {
+                    mStreaming = true;
                 } else if (opt.equals("--sampling")) {
                     mSamplingInterval = Integer.parseInt(nextArgRequired());
                 } else {
@@ -1044,7 +1058,7 @@ public class Am extends BaseCommand {
                 System.err.println("Consider using a file under /data/local/tmp/");
                 return;
             }
-            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false);
+            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming);
         }
 
         try {
