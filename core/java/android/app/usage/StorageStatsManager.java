@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.annotation.WorkerThread;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
@@ -99,6 +100,8 @@ public class StorageStatsManager {
      * @param volumeUuid the UUID of the storage volume you're interested in, or
      *            {@code null} to specify the default internal storage.
      * @param uid the UID you're interested in.
+     * @see ApplicationInfo#volumeUuid
+     * @see ApplicationInfo#uid
      */
     @WorkerThread
     public StorageStats queryStatsForUid(String volumeUuid, int uid) {
