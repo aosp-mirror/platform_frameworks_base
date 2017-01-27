@@ -473,6 +473,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(Integer.toHexString(expected), Integer.toHexString(got));
     }
 
+    @SmallTest
     public void testTruncatedOfferPackets() throws Exception {
         final byte[] packet = HexDump.hexStringToByteArray(
             // IP header.
@@ -506,6 +507,7 @@ public class DhcpPacketTest extends TestCase {
         }
     }
 
+    @SmallTest
     public void testRandomPackets() throws Exception {
         final int maxRandomPacketSize = 512;
         final Random r = new Random();

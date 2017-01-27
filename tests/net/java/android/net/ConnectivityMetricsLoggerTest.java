@@ -18,6 +18,7 @@ package android.net;
 
 import android.os.Bundle;
 import android.os.Parcel;
+import android.test.suitebuilder.annotation.SmallTest;
 import java.util.List;
 import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
@@ -49,6 +50,7 @@ public class ConnectivityMetricsLoggerTest extends TestCase {
         mLog = new ConnectivityMetricsLogger(mService);
     }
 
+    @SmallTest
     public void testLogEvents() throws Exception {
         mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
         mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
@@ -60,6 +62,7 @@ public class ConnectivityMetricsLoggerTest extends TestCase {
         assertEventsEqual(expectedEvent(3), gotEvents.get(2));
     }
 
+    @SmallTest
     public void testLogEventTriggerThrottling() throws Exception {
         when(mService.logEvent(any())).thenReturn(1234L);
 
@@ -70,6 +73,7 @@ public class ConnectivityMetricsLoggerTest extends TestCase {
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
+    @SmallTest
     public void testLogEventFails() throws Exception {
         when(mService.logEvent(any())).thenReturn(-1L); // Error.
 
@@ -80,6 +84,7 @@ public class ConnectivityMetricsLoggerTest extends TestCase {
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
+    @SmallTest
     public void testLogEventWhenThrottling() throws Exception {
         when(mService.logEvent(any())).thenReturn(Long.MAX_VALUE); // Throttled
 
@@ -92,6 +97,7 @@ public class ConnectivityMetricsLoggerTest extends TestCase {
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
+    @SmallTest
     public void testLogEventRecoverFromThrottling() throws Exception {
         final long throttleTimeout = System.currentTimeMillis() + 10;
         when(mService.logEvent(any())).thenReturn(throttleTimeout, 0L);
