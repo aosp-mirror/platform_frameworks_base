@@ -16,208 +16,43 @@
 
 package android.view.textservice;
 
-import com.android.internal.textservice.ISpellCheckerSessionListener;
-import com.android.internal.textservice.ITextServicesManager;
-import com.android.internal.textservice.ITextServicesSessionListener;
-
-import android.content.Context;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 
 import java.util.Locale;
 
 /**
- * System API to the overall text services, which arbitrates interaction between applications
- * and text services. You can retrieve an instance of this interface with
- * {@link Context#getSystemService(String) Context.getSystemService()}.
- *
- * The user can change the current text services in Settings. And also applications can specify
- * the target text services.
- *
- * <h3>Architecture Overview</h3>
- *
- * <p>There are three primary parties involved in the text services
- * framework (TSF) architecture:</p>
- *
- * <ul>
- * <li> The <strong>text services manager</strong> as expressed by this class
- * is the central point of the system that manages interaction between all
- * other parts.  It is expressed as the client-side API here which exists
- * in each application context and communicates with a global system service
- * that manages the interaction across all processes.
- * <li> A <strong>text service</strong> implements a particular
- * interaction model allowing the client application to retrieve information of text.
- * The system binds to the current text service that is in use, causing it to be created and run.
- * <li> Multiple <strong>client applications</strong> arbitrate with the text service
- * manager for connections to text services.
- * </ul>
- *
- * <h3>Text services sessions</h3>
- * <ul>
- * <li>The <strong>spell checker session</strong> is one of the text services.
- * {@link android.view.textservice.SpellCheckerSession}</li>
- * </ul>
- *
+ * A stub class of TextServicesManager for Layout-Lib.
  */
 public final class TextServicesManager {
-    private static final String TAG = TextServicesManager.class.getSimpleName();
-    private static final boolean DBG = false;
-
-    private static TextServicesManager sInstance;
-
-    private final ITextServicesManager mService;
-
-    private TextServicesManager() {
-        mService = new FakeTextServicesManager();
-    }
+    private static final TextServicesManager sInstance = new TextServicesManager();
+    private static final SpellCheckerInfo[] EMPTY_SPELL_CHECKER_INFO = new SpellCheckerInfo[0];
 
     /**
      * Retrieve the global TextServicesManager instance, creating it if it doesn't already exist.
      * @hide
      */
     public static TextServicesManager getInstance() {
-        synchronized (TextServicesManager.class) {
-            if (sInstance == null) {
-                sInstance = new TextServicesManager();
-            }
-            return sInstance;
-        }
+        return sInstance;
     }
 
-    /**
-     * Returns the language component of a given locale string.
-     */
-    private static String parseLanguageFromLocaleString(String locale) {
-        final int idx = locale.indexOf('_');
-        if (idx < 0) {
-            return locale;
-        } else {
-            return locale.substring(0, idx);
-        }
-    }
-
-    /**
-     * Get a spell checker session for the specified spell checker
-     * @param locale the locale for the spell checker. If {@code locale} is null and
-     * referToSpellCheckerLanguageSettings is true, the locale specified in Settings will be
-     * returned. If {@code locale} is not null and referToSpellCheckerLanguageSettings is true,
-     * the locale specified in Settings will be returned only when it is same as {@code locale}.
-     * Exceptionally, when referToSpellCheckerLanguageSettings is true and {@code locale} is
-     * only language (e.g. "en"), the specified locale in Settings (e.g. "en_US") will be
-     * selected.
-     * @param listener a spell checker session lister for getting results from a spell checker.
-     * @param referToSpellCheckerLanguageSettings if true, the session for one of enabled
-     * languages in settings will be returned.
-     * @return the spell checker session of the spell checker
-     */
     public SpellCheckerSession newSpellCheckerSession(Bundle bundle, Locale locale,
             SpellCheckerSessionListener listener, boolean referToSpellCheckerLanguageSettings) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        if (!referToSpellCheckerLanguageSettings && locale == null) {
-            throw new IllegalArgumentException("Locale should not be null if you don't refer"
-                    + " settings.");
-        }
-
-        if (referToSpellCheckerLanguageSettings && !isSpellCheckerEnabled()) {
-            return null;
-        }
-
-        final SpellCheckerInfo sci;
-        try {
-            sci = mService.getCurrentSpellChecker(null);
-        } catch (RemoteException e) {
-            return null;
-        }
-        if (sci == null) {
-            return null;
-        }
-        SpellCheckerSubtype subtypeInUse = null;
-        if (referToSpellCheckerLanguageSettings) {
-            subtypeInUse = getCurrentSpellCheckerSubtype(true);
-            if (subtypeInUse == null) {
-                return null;
-            }
-            if (locale != null) {
-                final String subtypeLocale = subtypeInUse.getLocale();
-                final String subtypeLanguage = parseLanguageFromLocaleString(subtypeLocale);
-                if (subtypeLanguage.length() < 2 || !locale.getLanguage().equals(subtypeLanguage)) {
-                    return null;
-                }
-            }
-        } else {
-            final String localeStr = locale.toString();
-            for (int i = 0; i < sci.getSubtypeCount(); ++i) {
-                final SpellCheckerSubtype subtype = sci.getSubtypeAt(i);
-                final String tempSubtypeLocale = subtype.getLocale();
-                final String tempSubtypeLanguage = parseLanguageFromLocaleString(tempSubtypeLocale);
-                if (tempSubtypeLocale.equals(localeStr)) {
-                    subtypeInUse = subtype;
-                    break;
-                } else if (tempSubtypeLanguage.length() >= 2 &&
-                        locale.getLanguage().equals(tempSubtypeLanguage)) {
-                    subtypeInUse = subtype;
-                }
-            }
-        }
-        if (subtypeInUse == null) {
-            return null;
-        }
-        final SpellCheckerSession session = new SpellCheckerSession(
-                sci, mService, listener, subtypeInUse);
-        try {
-            mService.getSpellCheckerService(sci.getId(), subtypeInUse.getLocale(),
-                    session.getTextServicesSessionListener(),
-                    session.getSpellCheckerSessionListener(), bundle);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return session;
+        return null;
     }
 
     /**
      * @hide
      */
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
-        try {
-            final SpellCheckerInfo[] retval = mService.getEnabledSpellCheckers();
-            if (DBG) {
-                Log.d(TAG, "getEnabledSpellCheckers: " + (retval != null ? retval.length : "null"));
-            }
-            return retval;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return EMPTY_SPELL_CHECKER_INFO;
     }
 
     /**
      * @hide
      */
     public SpellCheckerInfo getCurrentSpellChecker() {
-        try {
-            // Passing null as a locale for ICS
-            return mService.getCurrentSpellChecker(null);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setCurrentSpellChecker(SpellCheckerInfo sci) {
-        try {
-            if (sci == null) {
-                throw new NullPointerException("SpellCheckerInfo is null.");
-            }
-            mService.setCurrentSpellChecker(null, sci.getId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return null;
     }
 
     /**
@@ -225,118 +60,13 @@ public final class TextServicesManager {
      */
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
-        try {
-            // Passing null as a locale until we support multiple enabled spell checker subtypes.
-            return mService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSpellCheckerSubtype(SpellCheckerSubtype subtype) {
-        try {
-            final int hashCode;
-            if (subtype == null) {
-                hashCode = 0;
-            } else {
-                hashCode = subtype.hashCode();
-            }
-            mService.setCurrentSpellCheckerSubtype(null, hashCode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSpellCheckerEnabled(boolean enabled) {
-        try {
-            mService.setSpellCheckerEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return null;
     }
 
     /**
      * @hide
      */
     public boolean isSpellCheckerEnabled() {
-        try {
-            return mService.isSpellCheckerEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private static class FakeTextServicesManager implements ITextServicesManager {
-
-        @Override
-        public void finishSpellCheckerService(ISpellCheckerSessionListener arg0)
-                throws RemoteException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public SpellCheckerInfo getCurrentSpellChecker(String arg0) throws RemoteException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public SpellCheckerSubtype getCurrentSpellCheckerSubtype(String arg0, boolean arg1)
-                throws RemoteException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public SpellCheckerInfo[] getEnabledSpellCheckers() throws RemoteException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void getSpellCheckerService(String arg0, String arg1,
-                ITextServicesSessionListener arg2, ISpellCheckerSessionListener arg3, Bundle arg4)
-                throws RemoteException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public boolean isSpellCheckerEnabled() throws RemoteException {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void setCurrentSpellChecker(String arg0, String arg1) throws RemoteException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void setCurrentSpellCheckerSubtype(String arg0, int arg1) throws RemoteException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void setSpellCheckerEnabled(boolean arg0) throws RemoteException {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public IBinder asBinder() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
+        return false;
     }
 }
