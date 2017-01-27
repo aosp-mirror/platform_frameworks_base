@@ -104,6 +104,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 import android.view.autofill.VirtualViewDelegate;
@@ -6433,14 +6434,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (isPressed()) {
                 setPressed(false);
             }
-            if (imm != null && mAttachInfo != null
-                    && mAttachInfo.mHasWindowFocus) {
+            if (imm != null && mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
                 imm.focusOut(this);
             }
             onFocusLost();
-        } else if (imm != null && mAttachInfo != null
-                && mAttachInfo.mHasWindowFocus) {
+        } else if (imm != null && mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
             imm.focusIn(this);
+        }
+
+        if (isAutoFillable()) {
+            AutoFillManager afm = getAutoFillManager();
+            if (afm != null) {
+                afm.updateAutoFillInput(this, gainFocus
+                        ? AutoFillManager.FLAG_UPDATE_UI_SHOW
+                        : AutoFillManager.FLAG_UPDATE_UI_HIDE);
+            }
         }
 
         invalidate(true);
@@ -7076,6 +7084,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public AutoFillType getAutoFillType() {
         return null;
+    }
+
+    @Nullable
+    private AutoFillManager getAutoFillManager() {
+        return mContext.getSystemService(AutoFillManager.class);
+    }
+
+    private boolean isAutoFillable() {
+        return getAutoFillType() != null && !isAutoFillBlocked();
     }
 
     private void populateVirtualStructure(ViewStructure structure,
