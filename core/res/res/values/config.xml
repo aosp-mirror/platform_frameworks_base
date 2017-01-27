@@ -2304,6 +2304,13 @@
     <!-- Whether to use voip audio mode for ims call -->
     <bool name="config_use_voip_mode_for_ims">false</bool>
 
+    <!-- ImsService package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_ims_package"/>
+
+    <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
+    <bool name="config_dynamic_bind_ims">true</bool>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <string-array translatable="false" name="config_cdma_home_system" />
