@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.UiThread;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -172,6 +173,13 @@ final class AutoFillUI {
                 Toast.makeText(mContext, "AutoFill: fingerprint failed", Toast.LENGTH_LONG).show();
             }, 0);
         }
+    }
+
+    void dump(PrintWriter pw) {
+        pw.println("AufoFill UI");
+        final String prefix = "  ";
+        pw.print(prefix); pw.print("sResultCode: "); pw.println(sResultCode);
+        pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
     }
 
     private AutoFillManagerServiceImpl getServiceLocked(int userId) {

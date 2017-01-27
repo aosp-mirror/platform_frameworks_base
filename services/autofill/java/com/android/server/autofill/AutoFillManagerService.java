@@ -326,6 +326,7 @@ public final class AutoFillManagerService extends SystemService {
                     }
                 }
             }
+            mUi.dump(pw);
             pw.println("Requests history:");
             mRequestsHistory.reverseDump(fd, pw, args);
         }
