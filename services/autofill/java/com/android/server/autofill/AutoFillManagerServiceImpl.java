@@ -923,7 +923,7 @@ final class AutoFillManagerServiceImpl {
 
                 // TODO(b/33197203): temporarily hack: show the save notification after autofilled,
                 // since save is not automatically detected yet.
-                mUi.showSaveUI(mUserId, mId);
+                mUi.showSaveNotification(mUserId, mId); removeSelf = false;
 
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error auto-filling activity: " + e);

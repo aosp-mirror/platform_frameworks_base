@@ -29,12 +29,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
+import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Bundle;
 import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
@@ -53,8 +57,16 @@ final class AutoFillUI {
 
     private final Context mContext;
 
+    private final WindowManager mWm;
+
+    /**
+     * Custom snackbar UI used for saving autofill or other informational messages.
+     */
+    private View mSnackbar;
+
     AutoFillUI(Context context, AutoFillManagerService service, Object lock) {
         mContext = context;
+        mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mService = service;
         mLock = lock;
 
@@ -130,7 +142,20 @@ final class AutoFillUI {
      * Shows the UI asking the user to save for auto-fill.
      */
     void showSaveUI(int userId, int sessionId) {
-        showSaveNotification(userId, sessionId);
+        showSnackbar(new SavePrompt(mContext, new SavePrompt.OnSaveListener() {
+            @Override
+            public void onSaveClick() {
+                hideSnackbar();
+                synchronized (mLock) {
+                    final AutoFillManagerServiceImpl service = getServiceLocked(userId);
+                    service.requestSaveLocked(sessionId);
+                }
+            }
+            @Override
+            public void onCancelClick() {
+                hideSnackbar();
+            }
+        }));
     }
 
     /**
@@ -158,10 +183,8 @@ final class AutoFillUI {
     }
 
     private void onSaveRequested(int userId, int sessionId) {
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-            service.requestSaveLocked(sessionId);
-        }
+        // TODO(b/33197203): displays the snack bar, until save notification is refactored
+        showSaveUI(userId, sessionId);
     }
 
     private void onDatasetPicked(int userId, Dataset dataset, int sessionId) {
@@ -191,6 +214,34 @@ final class AutoFillUI {
         }
     }
 
+    //similar to a snackbar, but can be a bit custom since it is more than just text. This will
+    //allow two buttons for saving or not saving the autofill for instance as well.
+    private void showSnackbar(View snackBar) {
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.FILL_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, // TODO(b/33197203) use TYPE_AUTO_FILL
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
+            PixelFormat.TRANSLUCENT);
+
+        params.gravity = Gravity.BOTTOM | Gravity.LEFT;
+
+        UiThread.getHandler().runWithScissors(() -> {
+            mSnackbar = snackBar;
+            mWm.addView(mSnackbar, params);
+        }, 0);
+    }
+
+    private void hideSnackbar() {
+        UiThread.getHandler().runWithScissors(() -> {
+            if (mSnackbar != null) {
+                mWm.removeView(mSnackbar);
+                mSnackbar = null;
+            }
+        }, 0);
+    }
+
     /////////////////////////////////////////////////////////////////////////////////
     // TODO(b/33197203): temporary code using a notification to request auto-fill. //
     // Will be removed once UX decide the right way to present it to the user.     //
@@ -215,9 +266,9 @@ final class AutoFillUI {
     private static final String TYPE_SAVE = "save";
     private static final String TYPE_AUTH_RESPONSE = "auth_response";
 
-    @GuardedBy("mLock")
+    @GuardedBy("mServiceLock")
     private BroadcastReceiver mNotificationReceiver;
-    @GuardedBy("mLock")
+    @GuardedBy("mServiceLock")
     private final AutoFillManagerService mService;
     private final Object mLock;
 
@@ -403,8 +454,8 @@ final class AutoFillUI {
         final PendingIntent savePendingIntent = PendingIntent.getBroadcast(mContext,
                 ++sResultCode, saveIntent, PendingIntent.FLAG_ONE_SHOT);
 
-        final String title = "AutoFill Save";
-        final String subTitle = "Tap notification to ask provider to save fields.";
+        final String title = "AutoFill Save Emulation";
+        final String subTitle = "Tap notification to launch the save snackbar.";
 
         final Notification notification = newNotificationBuilder()
                 .setAutoCancel(true)
