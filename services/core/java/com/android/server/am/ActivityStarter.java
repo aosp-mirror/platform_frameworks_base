@@ -2072,6 +2072,9 @@ class ActivityStarter {
             case RECENTS_STACK_ID:
                 return r.isRecentsActivity();
             default:
+                if (StackId.isDynamicStack(stackId)) {
+                    return true;
+                }
                 Slog.e(TAG, "isValidLaunchStackId: Unexpected stackId=" + stackId);
                 return false;
         }

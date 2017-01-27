@@ -520,7 +520,7 @@ public final class DisplayInfo implements Parcelable {
     }
 
     public boolean isHdr() {
-        int[] types = hdrCapabilities.getSupportedHdrTypes();
+        int[] types = hdrCapabilities != null ? hdrCapabilities.getSupportedHdrTypes() : null;
         return types != null && types.length > 0;
     }
 
