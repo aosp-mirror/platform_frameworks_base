@@ -451,7 +451,7 @@ public class AppSecurityPermissions {
 
     private View getPermissionsView(int which, boolean showRevokeUI) {
         LinearLayout permsView = (LinearLayout) mInflater.inflate(R.layout.app_perms_summary, null);
-        LinearLayout displayList = (LinearLayout) permsView.findViewById(R.id.perms_list);
+        LinearLayout displayList = permsView.findViewById(R.id.perms_list);
         View noPermsView = permsView.findViewById(R.id.no_permissions);
 
         displayPermissions(mPermGroupsList, displayList, which, showRevokeUI);
@@ -517,8 +517,8 @@ public class AppSecurityPermissions {
             CharSequence grpName, CharSequence permList, boolean dangerous, Drawable icon) {
         View permView = inflater.inflate(R.layout.app_permission_item_old, null);
 
-        TextView permGrpView = (TextView) permView.findViewById(R.id.permission_group);
-        TextView permDescView = (TextView) permView.findViewById(R.id.permission_list);
+        TextView permGrpView = permView.findViewById(R.id.permission_group);
+        TextView permDescView = permView.findViewById(R.id.permission_list);
 
         ImageView imgView = (ImageView)permView.findViewById(R.id.perm_icon);
         imgView.setImageDrawable(icon);
