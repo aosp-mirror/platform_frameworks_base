@@ -752,8 +752,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntry(PrivateKey privateKey, X509Certificate clientCertificate) {
-        setClientKeyEntryWithCertificateChain(privateKey,
-                new X509Certificate[] {clientCertificate});
+        X509Certificate[] clientCertificates = null;
+        if (clientCertificate != null) {
+            clientCertificates = new X509Certificate[] {clientCertificate};
+        }
+        setClientKeyEntryWithCertificateChain(privateKey, clientCertificates);
     }
 
     /**
