@@ -140,6 +140,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public boolean isPermissionReviewModeEnabled() {
+        return false;
+    }
+
     @Override
     public PermissionGroupInfo getPermissionGroupInfo(String name,
             int flags) throws NameNotFoundException {

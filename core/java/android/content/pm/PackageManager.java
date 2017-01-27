@@ -2826,6 +2826,14 @@ public abstract class PackageManager {
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
+     * Returns true if Permission Review Mode is enabled, false otherwise.
+     *
+     * @hide
+     */
+    @TestApi
+    public abstract boolean isPermissionReviewModeEnabled();
+
+    /**
      * Retrieve all of the information we know about a particular group of
      * permissions.
      *

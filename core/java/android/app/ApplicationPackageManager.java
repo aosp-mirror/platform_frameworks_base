@@ -292,6 +292,12 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isPermissionReviewModeEnabled() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_permissionReviewRequired);
+    }
+
+    @Override
     public PermissionGroupInfo getPermissionGroupInfo(String name,
             int flags) throws NameNotFoundException {
         try {
