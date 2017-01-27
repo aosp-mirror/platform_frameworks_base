@@ -9473,6 +9473,12 @@ public final class Settings {
          * @hide
          */
         public static final String WARNING_TEMPERATURE = "warning_temperature";
+
+        /**
+         * Whether the diskstats logging task is enabled/disabled.
+         * @hide
+         */
+        public static final String ENABLE_DISKSTATS_LOGGING = "enable_diskstats_logging";
     }
 
     /**
