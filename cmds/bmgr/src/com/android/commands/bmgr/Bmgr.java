@@ -17,6 +17,7 @@
 package com.android.commands.bmgr;
 
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
@@ -312,8 +313,9 @@ public final class Bmgr {
         }
         try {
             BackupObserver observer = new BackupObserver();
+            // TODO: implement monitor here?
             int err = mBmgr.requestBackup(packages.toArray(new String[packages.size()]), observer,
-                    flags);
+                    null, flags);
             if (err == 0) {
                 // Off and running -- wait for the backup to complete
                 observer.waitForCompletion();
