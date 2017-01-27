@@ -205,18 +205,26 @@ public final class NotificationRecord {
 
     private AudioAttributes calculateAttributes() {
         final Notification n = sbn.getNotification();
-        AudioAttributes attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+        AudioAttributes attributes = getChannel().getAudioAttributes();
+        if (attributes == null) {
+            attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+        }
 
-        if (n.audioAttributes != null) {
-            // prefer audio attributes to stream type
-            attributes = n.audioAttributes;
-        } else if (n.audioStreamType >= 0 && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
-            // the stream type is valid, use it
-            attributes = new AudioAttributes.Builder()
-                    .setInternalLegacyStreamType(n.audioStreamType)
-                    .build();
-        } else if (n.audioStreamType != AudioSystem.STREAM_DEFAULT) {
-            Log.w(TAG, String.format("Invalid stream type: %d", n.audioStreamType));
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_SOUND) == 0) {
+            if (n.audioAttributes != null) {
+                // prefer audio attributes to stream type
+                attributes = n.audioAttributes;
+            } else if (n.audioStreamType >= 0
+                    && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
+                // the stream type is valid, use it
+                attributes = new AudioAttributes.Builder()
+                        .setInternalLegacyStreamType(n.audioStreamType)
+                        .build();
+            } else if (n.audioStreamType != AudioSystem.STREAM_DEFAULT) {
+                Log.w(TAG, String.format("Invalid stream type: %d", n.audioStreamType));
+            }
         }
         return attributes;
     }

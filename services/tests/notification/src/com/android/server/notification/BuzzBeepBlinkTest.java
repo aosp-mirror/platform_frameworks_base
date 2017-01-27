@@ -85,6 +85,10 @@ public class BuzzBeepBlinkTest {
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 };
     private static final Uri CUSTOM_SOUND = Settings.System.DEFAULT_ALARM_ALERT_URI;
+    private static final AudioAttributes CUSTOM_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+            .build();
     private static final int CUSTOM_LIGHT_COLOR = Color.BLACK;
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
@@ -200,10 +204,11 @@ public class BuzzBeepBlinkTest {
         if (noisy) {
             if (defaultSound) {
                 defaults |= Notification.DEFAULT_SOUND;
-                channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+                channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
+                        Notification.AUDIO_ATTRIBUTES_DEFAULT);
             } else {
                 builder.setSound(CUSTOM_SOUND);
-                channel.setSound(CUSTOM_SOUND);
+                channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
             }
         }
         if (buzzy) {
@@ -521,6 +526,8 @@ public class BuzzBeepBlinkTest {
 
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(FALLBACK_VIBRATION),
                 eq(-1), (AudioAttributes) anyObject());
+        verify(mRingtonePlayer, never()).playAsync
+                (anyObject(), anyObject(), anyBoolean(), anyObject());
     }
 
     @Test

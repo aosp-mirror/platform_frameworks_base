@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SystemApi;
 import android.app.NotificationManager;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -55,8 +56,9 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_VIBRATION = "vibration";
     private static final String ATT_VIBRATION_ENABLED = "vibration_enabled";
     private static final String ATT_SOUND = "sound";
-    //TODO: add audio attributes support
-    private static final String ATT_AUDIO_ATTRIBUTES = "audio_attributes";
+    private static final String ATT_USAGE = "usage";
+    private static final String ATT_FLAGS = "flags";
+    private static final String ATT_CONTENT_TYPE = "content_type";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
     private static final String ATT_GROUP = "group";
@@ -109,6 +111,12 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @SystemApi
+    public static final int USER_LOCKED_AUDIO_ATTRIBUTES = 0x00000100;
+
+    /**
+     * @hide
+     */
+    @SystemApi
     public static final int[] LOCKABLE_FIELDS = new int[] {
             USER_LOCKED_PRIORITY,
             USER_LOCKED_VISIBILITY,
@@ -117,7 +125,8 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_VIBRATION,
             USER_LOCKED_SOUND,
             USER_LOCKED_ALLOWED,
-            USER_LOCKED_SHOW_BADGE
+            USER_LOCKED_SHOW_BADGE,
+            USER_LOCKED_AUDIO_ATTRIBUTES
     };
 
 
@@ -141,6 +150,7 @@ public final class NotificationChannel implements Parcelable {
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
     private String mGroup;
+    private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
 
     /**
      * Creates a notification channel.
@@ -183,6 +193,7 @@ public final class NotificationChannel implements Parcelable {
         } else {
             mGroup = null;
         }
+        mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
     }
 
     @Override
@@ -214,6 +225,12 @@ public final class NotificationChannel implements Parcelable {
             dest.writeString(mGroup);
         } else {
             dest.writeByte((byte) 0);
+        }
+        if (mAudioAttributes != null) {
+            dest.writeInt(1);
+            mAudioAttributes.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
         }
     }
 
@@ -275,6 +292,9 @@ public final class NotificationChannel implements Parcelable {
      *
      * Group information is only used for presentation, not for behavior.
      *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
+     *
      * @param groupId the id of a group created by
      * {@link NotificationManager#createNotificationChannelGroup(NotificationChannelGroup)}.
      */
@@ -293,18 +313,23 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets the sound that should be played for notifications posted to this channel if
-     * the notifications don't supply a sound. Only modifiable before the channel is submitted
-     * to the NotificationManager.
+     * Sets the sound that should be played for notifications posted to this channel and its
+     * audio attributes.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
      */
-    public void setSound(Uri sound) {
+    public void setSound(Uri sound, AudioAttributes audioAttributes) {
         this.mSound = sound;
+        this.mAudioAttributes = audioAttributes;
     }
 
     /**
      * Sets whether notifications posted to this channel should display notification lights,
-     * on devices that support that feature. Only modifiable before the channel is submitted to
-     * the NotificationManager.
+     * on devices that support that feature.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
      */
     public void setLights(boolean lights) {
         this.mLights = lights;
@@ -312,16 +337,20 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether notification posted to this channel should vibrate. The vibration pattern can
-     * be set with {@link #setVibrationPattern(long[])}. Only modifiable before the channel is
-     * submitted to the NotificationManager.
+     * be set with {@link #setVibrationPattern(long[])}.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
      */
     public void enableVibration(boolean vibration) {
         this.mVibrationEnabled = vibration;
     }
 
     /**
-     * Sets whether notification posted to this channel should vibrate. Only modifiable before the
-     * channel is submitted to the NotificationManager.
+     * Sets whether notification posted to this channel should vibrate.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
      */
     public void setVibrationPattern(long[] vibrationPattern) {
         this.mVibration = vibrationPattern;
@@ -362,6 +391,13 @@ public final class NotificationChannel implements Parcelable {
      */
     public Uri getSound() {
         return mSound;
+    }
+
+    /**
+     * Returns the audio attributes for sound played by notifications posted to this channel.
+     */
+    public AudioAttributes getAudioAttributes() {
+        return mAudioAttributes;
     }
 
     /**
@@ -438,7 +474,7 @@ public final class NotificationChannel implements Parcelable {
         setBypassDnd(Notification.PRIORITY_DEFAULT
                 != safeInt(parser, ATT_PRIORITY, Notification.PRIORITY_DEFAULT));
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
-        setSound(safeUri(parser, ATT_SOUND));
+        setSound(safeUri(parser, ATT_SOUND), safeAudioAttributes(parser));
         setLights(safeBool(parser, ATT_LIGHTS, false));
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
@@ -470,6 +506,12 @@ public final class NotificationChannel implements Parcelable {
         }
         if (getSound() != null) {
             out.attribute(null, ATT_SOUND, getSound().toString());
+        }
+        if (getAudioAttributes() != null) {
+            out.attribute(null, ATT_USAGE, Integer.toString(getAudioAttributes().getUsage()));
+            out.attribute(null, ATT_CONTENT_TYPE,
+                    Integer.toString(getAudioAttributes().getContentType()));
+            out.attribute(null, ATT_FLAGS, Integer.toString(getAudioAttributes().getFlags()));
         }
         if (shouldShowLights()) {
             out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
@@ -517,6 +559,12 @@ public final class NotificationChannel implements Parcelable {
         if (getSound() != null) {
             record.put(ATT_SOUND, getSound().toString());
         }
+        if (getAudioAttributes() != null) {
+            record.put(ATT_USAGE, Integer.toString(getAudioAttributes().getUsage()));
+            record.put(ATT_CONTENT_TYPE,
+                    Integer.toString(getAudioAttributes().getContentType()));
+            record.put(ATT_FLAGS, Integer.toString(getAudioAttributes().getFlags()));
+        }
         record.put(ATT_LIGHTS, Boolean.toString(shouldShowLights()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
@@ -525,6 +573,18 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
         return record;
+    }
+
+    private static AudioAttributes safeAudioAttributes(XmlPullParser parser) {
+        int usage = safeInt(parser, ATT_USAGE, AudioAttributes.USAGE_NOTIFICATION);
+        int contentType = safeInt(parser, ATT_CONTENT_TYPE,
+                AudioAttributes.CONTENT_TYPE_SONIFICATION);
+        int flags = safeInt(parser, ATT_FLAGS, 0);
+        return new AudioAttributes.Builder()
+                .setUsage(usage)
+                .setContentType(contentType)
+                .setFlags(flags)
+                .build();
     }
 
     private static Uri safeUri(XmlPullParser parser, String att) {
@@ -618,7 +678,11 @@ public final class NotificationChannel implements Parcelable {
             return false;
         }
         if (!Arrays.equals(mVibration, that.mVibration)) return false;
-        return getGroup() != null ? getGroup().equals(that.getGroup()) : that.getGroup() == null;
+        if (getGroup() != null ? !getGroup().equals(that.getGroup()) : that.getGroup() != null) {
+            return false;
+        }
+        return getAudioAttributes() != null ? getAudioAttributes().equals(that.getAudioAttributes())
+                : that.getAudioAttributes() == null;
 
     }
 
@@ -637,6 +701,7 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + (mShowBadge ? 1 : 0);
         result = 31 * result + (isDeleted() ? 1 : 0);
         result = 31 * result + (getGroup() != null ? getGroup().hashCode() : 0);
+        result = 31 * result + (getAudioAttributes() != null ? getAudioAttributes().hashCode() : 0);
         return result;
     }
 
@@ -656,6 +721,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mShowBadge=" + mShowBadge +
                 ", mDeleted=" + mDeleted +
                 ", mGroup='" + mGroup + '\'' +
+                ", mAudioAttributes=" + mAudioAttributes +
                 '}';
     }
 }
