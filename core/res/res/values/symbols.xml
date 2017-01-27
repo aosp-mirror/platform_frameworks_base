@@ -504,7 +504,6 @@
   <java-symbol type="string" name="NetworkPreferenceSwitchTitle" />
   <java-symbol type="string" name="SetupCallDefault" />
   <java-symbol type="string" name="accept" />
-  <java-symbol type="string" name="accessibility_enabled" />
   <java-symbol type="string" name="activity_chooser_view_see_all" />
   <java-symbol type="string" name="activitychooserview_choose_application" />
   <java-symbol type="string" name="activitychooserview_choose_application_error" />
@@ -601,7 +600,6 @@
   <java-symbol type="string" name="contentServiceSync" />
   <java-symbol type="string" name="contentServiceSyncNotificationTitle" />
   <java-symbol type="string" name="contentServiceTooManyDeletesNotificationDesc" />
-  <java-symbol type="string" name="continue_to_enable_accessibility" />
   <java-symbol type="string" name="date_and_time" />
   <java-symbol type="string" name="date_picker_decrement_day_button" />
   <java-symbol type="string" name="date_picker_decrement_month_button" />
@@ -648,7 +646,6 @@
   <java-symbol type="string" name="widget_default_class_name" />
   <java-symbol type="string" name="emergency_calls_only" />
   <java-symbol type="array" name="config_ephemeralResolverPackage" />
-  <java-symbol type="string" name="enable_accessibility_canceled" />
   <java-symbol type="string" name="eventTypeAnniversary" />
   <java-symbol type="string" name="eventTypeBirthday" />
   <java-symbol type="string" name="eventTypeCustom" />
