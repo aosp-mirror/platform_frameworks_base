@@ -4704,6 +4704,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPendingRemoteInputView = clicked;
     }
 
+    protected void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
+            View clickedView) {
+        if (isKeyguardShowing()) {
+            onLockedRemoteInput(row, clickedView);
+        } else {
+            row.setUserExpanded(true);
+            row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
+        }
+    }
+
     protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
             String notificationKey) {
         // Clear pending remote view, as we do not want to trigger pending remote input view when
@@ -5463,7 +5473,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (p instanceof View) {
                     View pv = (View) p;
                     if (pv.isRootNamespace()) {
-                        riv = (RemoteInputView) pv.findViewWithTag(RemoteInputView.VIEW_TAG);
+                        riv = findRemoteInputView(pv);
                         break;
                     }
                 }
@@ -5478,7 +5488,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 p = p.getParent();
             }
 
-            if (riv == null || row == null) {
+            if (row == null) {
                 return false;
             }
 
@@ -5493,6 +5503,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (mUserManager.getUserInfo(userId).isManagedProfile()
                         && mKeyguardManager.isDeviceLocked(userId)) {
                     onLockedWorkRemoteInput(userId, row, view);
+                    return true;
+                }
+            }
+
+            if (riv == null) {
+                riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
+                if (riv == null) {
+                    return false;
+                }
+                if (!row.getPrivateLayout().getExpandedChild().isShown()) {
+                    onMakeExpandedVisibleForRemoteInput(row, view);
                     return true;
                 }
             }
@@ -5523,6 +5544,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             return true;
         }
 
+        private RemoteInputView findRemoteInputView(View v) {
+            if (v == null) {
+                return null;
+            }
+            return (RemoteInputView) v.findViewWithTag(RemoteInputView.VIEW_TAG);
+        }
     };
 
     private final BroadcastReceiver mBaseBroadcastReceiver = new BroadcastReceiver() {
