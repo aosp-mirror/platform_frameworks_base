@@ -34,6 +34,9 @@ LOCAL_SHARED_LIBRARIES := \
     libplatformprotos \
     libprotobuf-cpp-full
 
+# b/34740546, work around clang-tidy segmentation fault.
+LOCAL_TIDY_CHECKS := -modernize*
+
 LOCAL_C_FLAGS := \
     -Wno-unused-parameter
 include $(BUILD_HOST_EXECUTABLE)
