@@ -30,6 +30,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.res.Configuration.NativeConfig;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -1197,7 +1198,7 @@ public class ResourcesImpl {
 
         @Config int getChangingConfigurations() {
             synchronized (mKey) {
-                final int nativeChangingConfig =
+                final @NativeConfig int nativeChangingConfig =
                         AssetManager.getThemeChangingConfigurations(mTheme);
                 return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
             }
