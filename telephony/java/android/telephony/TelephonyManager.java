@@ -2913,6 +2913,30 @@ public class TelephonyManager {
     }
 
     /**
+     * Send the special dialer code. The IPC caller must be the current default dialer.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param inputCode The special dialer code to send which follows the format of *#*#<code>#*#*
+     * @return true if sent sucessfully, false otherwise
+     *
+     */
+    public boolean sendDialerCode(String inputCode) {
+        try {
+            final ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Log.e(TAG, "Telephony service unavailable");
+                return false;
+            }
+            return telephony.sendDialerCode(mContext.getOpPackageName(), inputCode);
+        } catch (RemoteException | NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return false;
+        }
+    }
+
+    /**
      * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
      * @return the IMPI, or null if not present or not loaded
      * @hide
