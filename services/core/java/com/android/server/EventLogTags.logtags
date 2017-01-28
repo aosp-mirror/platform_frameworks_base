@@ -132,6 +132,7 @@ option java_package com.android.server
 2843 full_backup_success (Package|3)
 2844 full_restore_package (Package|3)
 2845 full_backup_quota_exceeded (Package|3)
+2846 full_backup_cancelled (Package|3),(Message|3)
 
 2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
 
