@@ -218,8 +218,6 @@ public class UserManagerService extends IUserManager.Stub {
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
 
-    private static final String XATTR_SERIAL = "user.serial";
-
     // Tron counters
     private static final String TRON_GUEST_CREATED = "users_guest_created";
     private static final String TRON_USER_CREATED = "users_user_created";
@@ -3159,6 +3157,15 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Examine all users present on given mounted volume, and destroy data
+     * belonging to users that are no longer valid, or whose user ID has been
+     * recycled.
+     */
+    void reconcileUsers(String volumeUuid) {
+        mUserDataPreparer.reconcileUsers(volumeUuid, getUsers(true /* excludeDying */));
+    }
+
+    /**
      * Make a note of the last started time of a user and do some cleanup.
      * This is called with ActivityManagerService lock held.
      * @param userId the user that was just foregrounded
@@ -3217,78 +3224,6 @@ public class UserManagerService extends IUserManager.Stub {
 
     private String packageToRestrictionsFileName(String packageName) {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
-    }
-
-    /**
-     * Enforce that serial number stored in user directory inode matches the
-     * given expected value. Gracefully sets the serial number if currently
-     * undefined.
-     *
-     * @throws IOException when problem extracting serial number, or serial
-     *             number is mismatched.
-     */
-    public static void enforceSerialNumber(File file, int serialNumber) throws IOException {
-        if (StorageManager.isFileEncryptedEmulatedOnly()) {
-            // When we're emulating FBE, the directory may have been chmod
-            // 000'ed, meaning we can't read the serial number to enforce it;
-            // instead of destroying the user, just log a warning.
-            Slog.w(LOG_TAG, "Device is emulating FBE; assuming current serial number is valid");
-            return;
-        }
-
-        final int foundSerial = getSerialNumber(file);
-        Slog.v(LOG_TAG, "Found " + file + " with serial number " + foundSerial);
-
-        if (foundSerial == -1) {
-            Slog.d(LOG_TAG, "Serial number missing on " + file + "; assuming current is valid");
-            try {
-                setSerialNumber(file, serialNumber);
-            } catch (IOException e) {
-                Slog.w(LOG_TAG, "Failed to set serial number on " + file, e);
-            }
-
-        } else if (foundSerial != serialNumber) {
-            throw new IOException("Found serial number " + foundSerial
-                    + " doesn't match expected " + serialNumber);
-        }
-    }
-
-    /**
-     * Set serial number stored in user directory inode.
-     *
-     * @throws IOException if serial number was already set
-     */
-    private static void setSerialNumber(File file, int serialNumber)
-            throws IOException {
-        try {
-            final byte[] buf = Integer.toString(serialNumber).getBytes(StandardCharsets.UTF_8);
-            Os.setxattr(file.getAbsolutePath(), XATTR_SERIAL, buf, OsConstants.XATTR_CREATE);
-        } catch (ErrnoException e) {
-            throw e.rethrowAsIOException();
-        }
-    }
-
-    /**
-     * Return serial number stored in user directory inode.
-     *
-     * @return parsed serial number, or -1 if not set
-     */
-    private static int getSerialNumber(File file) throws IOException {
-        try {
-            final byte[] buf = Os.getxattr(file.getAbsolutePath(), XATTR_SERIAL);
-            final String serial = new String(buf);
-            try {
-                return Integer.parseInt(serial);
-            } catch (NumberFormatException e) {
-                throw new IOException("Bad serial number: " + serial);
-            }
-        } catch (ErrnoException e) {
-            if (e.errno == OsConstants.ENODATA) {
-                return -1;
-            } else {
-                throw e.rethrowAsIOException();
-            }
-        }
     }
 
     @Override
