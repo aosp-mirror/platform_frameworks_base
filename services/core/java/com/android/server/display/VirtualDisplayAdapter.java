@@ -16,8 +16,14 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.hardware.display.DisplayManager
+        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
@@ -63,7 +69,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallback callback,
             IMediaProjection projection, int ownerUid, String ownerPackageName,
             String name, int width, int height, int densityDpi, Surface surface, int flags) {
-        boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
+        boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
         IBinder appToken = callback.asBinder();
         IBinder displayToken = SurfaceControl.createDisplay(name, secure);
         final String baseUniqueId =
@@ -308,23 +314,23 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.yDpi = mDensityDpi;
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) REFRESH_RATE; // 1 frame
                 mInfo.flags = 0;
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
                             | DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 }
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
                     mInfo.flags &= ~DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 } else {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                 }
 
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
                 }
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
 
-                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
                         // For demonstration purposes, allow rotation of the external display.
                         // In the future we might allow the user to configure this directly.
                         if ("portrait".equals(SystemProperties.get(
@@ -333,8 +339,8 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                         }
                     }
                 }
-                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN) != 0) {
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_SHOW_WITH_INSECURE_LOCKSCREEN;
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
                 }
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;

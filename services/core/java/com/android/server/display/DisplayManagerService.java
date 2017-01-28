@@ -21,7 +21,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_C
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN;
+        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -29,7 +29,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
@@ -1457,7 +1456,7 @@ public final class DisplayManagerService extends SystemService {
                 flags |= VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 
                 // Public displays can't be allowed to show content when locked.
-                if ((flags & VIRTUAL_DISPLAY_FLAG_SHOW_WITH_INSECURE_LOCKSCREEN) != 0) {
+                if ((flags & VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
                     throw new IllegalArgumentException(
                             "Public display must not be marked as SHOW_WHEN_LOCKED_INSECURE");
                 }
