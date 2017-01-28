@@ -19,7 +19,9 @@ package com.android.server.autofill;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_ERROR;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_REQUESTED;
 import static android.service.autofill.AutoFillService.FLAG_AUTHENTICATION_SUCCESS;
+import static android.view.View.AUTO_FILL_FLAG_TYPE_FILL;
 import static android.view.View.AUTO_FILL_FLAG_TYPE_SAVE;
+import static android.view.autofill.AutoFillManager.FLAG_UPDATE_UI_SHOW;
 import static android.view.autofill.AutoFillManager.FLAG_UPDATE_UI_HIDE;
 
 import static com.android.server.autofill.Helper.DEBUG;
@@ -56,6 +58,7 @@ import android.service.autofill.IAutoFillAppCallback;
 import android.service.autofill.IAutoFillServerCallback;
 import android.service.autofill.IAutoFillService;
 import android.service.voice.VoiceInteractionSession;
+import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -63,6 +66,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 
@@ -74,6 +78,7 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bridge between the {@code system_server}'s {@link AutoFillManagerService} and the
@@ -96,11 +101,13 @@ final class AutoFillManagerServiceImpl {
     private final Object mLock;
     private final AutoFillServiceInfo mInfo;
     private final AutoFillManagerService mManagerService;
-    private final AutoFillUI mUi;
 
     // Token used for fingerprint authentication
     // TODO(b/33197203): create on demand?
     private final IBinder mAuthToken = new Binder();
+
+    private final IFingerprintService mFingerprintService =
+            IFingerprintService.Stub.asInterface(ServiceManager.getService("fingerprint"));
 
     @GuardedBy("mLock")
     private final List<QueuedRequest> mQueuedRequests = new LinkedList<>();
@@ -204,11 +211,10 @@ final class AutoFillManagerServiceImpl {
     // Estimated time when the service will be evicted from the cache.
     long mEstimateTimeOfDeath;
 
-    AutoFillManagerServiceImpl(AutoFillManagerService managerService, AutoFillUI ui,
-            Context context, Object lock, LocalLog requestsHistory, Handler handler, int userId,
-            int uid, ComponentName component, long ttl) {
+    AutoFillManagerServiceImpl(AutoFillManagerService managerService, Context context, Object lock,
+            LocalLog requestsHistory, Handler handler, int userId, int uid, ComponentName component,
+            long ttl) {
         mManagerService = managerService;
-        mUi = ui;
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
@@ -277,8 +283,8 @@ final class AutoFillManagerServiceImpl {
         requestAutoFillLocked(activityToken, autoFillId, bounds, flags, true);
     }
 
-    private void requestAutoFillLocked(IBinder activityToken, AutoFillId autoFillId, Rect bounds,
-            int flags, boolean queueIfNecessary) {
+    private void requestAutoFillLocked(IBinder activityToken, @Nullable AutoFillId autoFillId,
+          @Nullable Rect bounds, int flags, boolean queueIfNecessary) {
         if (mService == null) {
             if (!queueIfNecessary) {
                 Slog.w(TAG, "requestAutoFillLocked(): service is null");
@@ -294,55 +300,34 @@ final class AutoFillManagerServiceImpl {
             return;
         }
 
-        final Session session = getSessionByTokenLocked(activityToken);
-
-        if (session != null) {
-            // Session already exist, update UI instead...
-            /*
-             * TODO(b/33197203): currently, it's always reusing the session, regardless of the
-             * requested autoFillId, but it should start a new session for views that
-             * were not part of the initial auto-fill dataset returned by the service. For example:
-             *
-             * 1.Activity has 4 fields, `first_name`, `last_name`, and `address`.
-             * 2.User taps `first_name`.
-             * 3.Service returns a dataset with ids for `first_name` and `last_name`.
-             * 4.When user taps `first_name` (again) or `last_name`, session should be reused, but
-             * when user taps `address`, it should start a new session (since that field was
-             *   not part of the initial dataset).
-             *
-             * Similarly, once the activity is auto-filled, the flag logic should be reset (so if
-             * the user taps the view again, a new auto-fill request is made)
-             */
-            if (DEBUG) {
-                Slog.d(TAG, "requestAutoFillLocked(): reusing session for token "
-                        + activityToken + ", id " + autoFillId + " and flags " + flags);
-            }
-
-            if ((flags & FLAG_UPDATE_UI_HIDE) != 0) {
-                // TODO(b/33197203): handle it?
-                if (DEBUG) Slog.d(TAG, "ignoring FLAG_UPDATE_UI_HIDE request for " + autoFillId);
-
-                return;
-            }
-
-            session.mCurrentAutoFillId = autoFillId;
-            session.mCurrentBounds = bounds;
-            mUi.showResponse(mUserId, session.mId, autoFillId, bounds, session.mCurrentResponse);
-            return;
-        }
-
-        final int sessionId = ++sSessionIdCounter;
-        if (DEBUG) {
-            Slog.d(TAG, "requestAutoFillLocked(): new session (id=" + sessionId + " for token "
-                    + activityToken + " and autoFillId " + autoFillId);
-        }
-
-        final Session newSession = new Session(sessionId, activityToken, autoFillId, bounds);
-        mSessions.put(sessionId, newSession);
-
         final String historyItem = "s=" + mComponentName + " u=" + mUserId + " f=" + flags
                 + " a=" + activityToken + " i=" + autoFillId + " b=" + bounds;
         mRequestsHistory.log(historyItem);
+
+        // TODO(b/33197203): Handle partitioning
+        Session session = getOrCreateSessionByTokenLocked(activityToken);
+        if (DEBUG) Slog.d(TAG, "using Session: " + session.mId);
+
+        session.updateAutoFillInput(flags, autoFillId, null, bounds);
+    }
+
+    private Session getOrCreateSessionByTokenLocked(IBinder activityToken) {
+        final int size = mSessions.size();
+        for (int i = 0; i < size; i++) {
+            final Session session = mSessions.valueAt(i);
+            if (activityToken.equals(session.mActivityToken.get())) {
+                return session;
+            }
+        }
+        return createSessionByTokenLocked(activityToken);
+    }
+
+    private Session createSessionByTokenLocked(IBinder activityToken) {
+        final int sessionId = ++sSessionIdCounter;
+        if (DEBUG) Slog.d(TAG, "creating Session: " + sessionId);
+
+        final Session newSession = new Session(sessionId, activityToken);
+        mSessions.put(sessionId, newSession);
 
         /*
          * TODO(b/33197203): apply security checks below:
@@ -353,7 +338,8 @@ final class AutoFillManagerServiceImpl {
          */
         try {
             // TODO(b/33197203): add MetricsLogger call
-            if (!mAm.requestAutoFillData(mAssistReceiver, null, sessionId, activityToken, flags)) {
+            if (!mAm.requestAutoFillData(
+                    mAssistReceiver, null, sessionId, activityToken, AUTO_FILL_FLAG_TYPE_FILL)) {
                 // TODO(b/33197203): might need a way to warn user (perhaps a new method on
                 // AutoFillService).
                 Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
@@ -361,75 +347,7 @@ final class AutoFillManagerServiceImpl {
         } catch (RemoteException e) {
             // Should not happen, it's a local call.
         }
-    }
-
-    /**
-     * Called by UI to trigger a save request to the service.
-     */
-    void requestSaveLocked(int sessionId) {
-        // TODO(b/33197203): add MetricsLogger call
-        // TODO(b/33197203): use handler?
-        // TODO(b/33197203): show error on UI on Slog.w situations below???
-
-        if (mService == null) {
-            Slog.w(TAG, "requestSave(): service is null");
-            return;
-        }
-        final Session session = mSessions.get(sessionId);
-        if (session == null) {
-            Slog.w(TAG, "requestSave(): no session with id " + sessionId);
-            return;
-        }
-        final IBinder activityToken = session.mActivityToken.get();
-        if (activityToken == null) {
-            Slog.w(TAG, "activity token for session " + sessionId + " already GCed");
-            return;
-        }
-
-        /*
-         * TODO(b/33197203): apply security checks below:
-         * - checks if disabled by secure settings / device policy
-         * - log operation using noteOp()
-         * - check flags
-         * - display disclosure if needed
-         */
-        try {
-            /* TODO(b/33197203): refactor save logic so it uses a cached AssistStructure, and get
-               the extras to be sent to the service based on the response / dataset in the session.
-               Something like:
-           final Bundle extras = (responseExtras == null && datasetExtras == null)
-                  ? null : new Bundle();
-            if (responseExtras != null) {
-                if (DEBUG) Slog.d(TAG, "response extras on save notification: " +
-                        bundleToString(responseExtras));
-                extras.putBundle(AutoFillService.EXTRA_RESPONSE_EXTRAS, responseExtras);
-            }
-            if (datasetExtras != null) {
-                if (DEBUG) Slog.d(TAG, "dataset extras on save notification: " +
-                        bundleToString(datasetExtras));
-                extras.putBundle(AutoFillService.EXTRA_DATASET_EXTRAS, datasetExtras);
-            }
-
-             */
-
-            if (!mAm.requestAutoFillData(mAssistReceiver, null, sessionId, activityToken,
-                    AUTO_FILL_FLAG_TYPE_SAVE)) {
-                Slog.w(TAG, "failed to save for " + activityToken);
-            }
-        } catch (RemoteException e) {
-            // Should not happen, it's a local call.
-        }
-    }
-
-    private Session getSessionByTokenLocked(IBinder activityToken) {
-        final int size = mSessions.size();
-        for (int i = 0; i < size; i++) {
-            final Session session = mSessions.valueAt(i);
-            if (activityToken.equals(session.mActivityToken.get())) {
-                return session;
-            }
-        }
-        return null;
+        return newSession;
     }
 
     void stopLocked() {
@@ -459,77 +377,11 @@ final class AutoFillManagerServiceImpl {
         }
     }
 
-    /**
-     * Called by {@link AutoFillUI} to fill an activity after the user selected a dataset.
-     */
-    void autoFillApp(int sessionId, Dataset dataset) {
-        // TODO(b/33197203): add MetricsLogger call
-
-        if (dataset == null) {
-            Slog.w(TAG, "autoFillApp(): no dataset for callback id " + sessionId);
-            return;
-        }
-
-
-        final Session session;
-        synchronized (mLock) {
-            session = mSessions.get(sessionId);
-            if (session == null) {
-                Slog.w(TAG, "autoFillApp(): no session with id " + sessionId);
-                return;
-            }
-            if (session.mAppCallback == null) {
-                Slog.w(TAG, "autoFillApp(): no app callback for session " + sessionId);
-                return;
-            }
-
-            // TODO(b/33197203): use a handler?
-            session.autoFill(dataset);
-        }
-    }
-
     void removeSessionLocked(int id) {
         if (DEBUG) Slog.d(TAG, "Removing session " + id);
         mSessions.remove(id);
 
         // TODO(b/33197203): notify mService so it can invalidate the FillCallback / SaveCallback?
-    }
-
-    /**
-     * Notifies the result of a {@link FillResponse} authentication request to the service.
-     *
-     * <p>Typically called by the UI after user taps the "Tap to autofill" affordance, or after user
-     * used the fingerprint sensors to authenticate.
-     */
-    void notifyResponseAuthenticationResult(Bundle extras, int flags) {
-        if (DEBUG) Slog.d(TAG, "notifyResponseAuthenticationResult(): flags=" + flags
-                + ", extras=" + bundleToString(extras));
-
-        synchronized (mLock) {
-            try {
-                mService.authenticateFillResponse(extras, flags);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error sending authentication result back to service: " + e);
-            }
-        }
-    }
-
-    /**
-     * Notifies the result of a {@link Dataset} authentication request to the service.
-     *
-     * <p>Typically called by the UI after user taps the "Tap to autofill" affordance, or after
-     * it gets the results from a fingerprint authentication.
-     */
-    void notifyDatasetAuthenticationResult(Bundle extras, int flags) {
-        if (DEBUG) Slog.d(TAG, "notifyDatasetAuthenticationResult(): flags=" + flags
-                + ", extras=" + bundleToString(extras));
-        synchronized (mLock) {
-            try {
-                mService.authenticateDataset(extras, flags);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error sending authentication result back to service: " + e);
-            }
-        }
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
@@ -612,8 +464,78 @@ final class AutoFillManagerServiceImpl {
     }
 
     /**
-     * A bridge between the {@link AutoFillService} implementation and the activity being
-     * auto-filled (represented through the {@link IAutoFillAppCallback}).
+     * State for a given view with a AutoFillId.
+     *
+     * <p>This class holds state about a view and calls its listener when the fill UI is ready to
+     * be displayed for the view.
+     */
+    static final class ViewState {
+        interface Listener {
+            /**
+             * Called when the fill UI is ready to be shown for this view.
+             */
+            void onFillReady(ViewState viewState, FillResponse fillResponse, Rect bounds,
+                    @Nullable AutoFillValue value);
+        }
+
+        private final Listener mListener;
+        @Nullable
+        private FillResponse mResponse;
+        private AutoFillValue mAutoFillValue;
+        private Rect mBounds;
+
+        ViewState(Listener listener) {
+            mListener = listener;
+        }
+
+        /**
+         * Response should only be set once.
+         */
+        void setResponse(FillResponse response) {
+            if (mResponse != null) {
+                Slog.e(TAG, "ViewState response set more than once");
+                return;
+            }
+            mResponse = response;
+
+            maybeCallOnFillReady();
+        }
+
+        void update(@Nullable AutoFillValue autoFillValue, @Nullable Rect bounds) {
+            if (autoFillValue != null) {
+                mAutoFillValue = autoFillValue;
+            }
+            if (bounds != null) {
+                mBounds = bounds;
+            }
+
+            maybeCallOnFillReady();
+        }
+
+        /**
+         * Calls {@link Listener#onFillReady(ViewState, FillResponse, Rect, AutoFillValue)} if the
+         * fill UI is ready to be displayed (i.e. when response and bounds are set).
+         */
+        void maybeCallOnFillReady() {
+            if (mResponse != null && mBounds != null) {
+                mListener.onFillReady(this, mResponse, mBounds, mAutoFillValue);
+            }
+        }
+
+        @Override
+        public String toString() {
+            if (!DEBUG) return super.toString();
+
+            return "ViewState: [response=" + mResponse + ", value=" + mAutoFillValue
+                    + ", bounds=" + mBounds + "]";
+        }
+    }
+
+    /**
+     * A session for a given activity.
+     *
+     * <p>This class manages the multiple {@link ViewState}s for each view it has, and keeps track
+     * of the current view session to display the appropriate UI.
      *
      * <p>Although the auto-fill requests and callbacks are stateless from the service's point of
      * view, we need to keep state in the framework side for cases such as authentication. For
@@ -625,23 +547,23 @@ final class AutoFillManagerServiceImpl {
     // - On all authentication scenarios.
     // - When user does not interact back after a while.
     // - When service is unbound.
-    private final class Session {
+    final class Session implements ViewState.Listener {
 
-        private final int mId;
+        private final AutoFillUI mUi;
+        final int mId;
         private final WeakReference<IBinder> mActivityToken;
+
+        @GuardedBy("mLock")
+        private final Map<AutoFillId, ViewState> mViewStates = new ArrayMap<>();
+        @GuardedBy("mLock")
+        @Nullable
+        private ViewState mCurrentViewState;
 
         private IAutoFillAppCallback mAppCallback;
 
-        // Current view where the auto-fill bar is displayed
-        @GuardedBy("mLock")
-        private AutoFillId mCurrentAutoFillId;
-        @GuardedBy("mLock")
-        private Rect mCurrentBounds;
+        // TODO(b/33197203): Get a response per view instead of per activity.
         @GuardedBy("mLock")
         private FillResponse mCurrentResponse;
-
-        private final IFingerprintService mFingerprintService;
-
         @GuardedBy("mLock")
         private FillResponse mResponseRequiringAuth;
         @GuardedBy("mLock")
@@ -683,7 +605,7 @@ final class AutoFillManagerServiceImpl {
                         notifyDatasetAuthenticationResult(mDatasetRequiringAuth.getExtras(),
                                 FLAG_AUTHENTICATION_SUCCESS);
                     } else {
-                        autoFillAppLocked(mDatasetRequiringAuth, true);
+                        autoFillApp(mDatasetRequiringAuth);
                     }
                 } else if (mResponseRequiringAuth != null) {
                     final List<Dataset> datasets = mResponseRequiringAuth.getDatasets();
@@ -697,7 +619,7 @@ final class AutoFillManagerServiceImpl {
                     Slog.w(TAG, "onAuthenticationSucceeded(): no response or dataset");
                 }
 
-                mUi.dismissFingerprintRequest(mUserId, true);
+                mUi.dismissFingerprintRequest(true);
             }
 
             @Override
@@ -721,7 +643,7 @@ final class AutoFillManagerServiceImpl {
                     Slog.w(TAG, "onError(): no response or dataset");
                 }
 
-                mUi.dismissFingerprintRequest(mUserId, false);
+                mUi.dismissFingerprintRequest(false);
             }
 
             @Override
@@ -741,7 +663,6 @@ final class AutoFillManagerServiceImpl {
                 // TODO(b/33197203): add MetricsLogger call
                 if (response == null) {
                     if (DEBUG) Slog.d(TAG, "showResponse(): null response");
-
                     removeSelf();
                     return;
                 }
@@ -805,20 +726,16 @@ final class AutoFillManagerServiceImpl {
                 if (DEBUG) Log.d(TAG, "unlockDataset(): dataset=" + dataset + ", flags=" + flags);
 
                 if ((flags & FLAG_AUTHENTICATION_SUCCESS) != 0) {
-                    autoFillAppLocked(dataset != null ? dataset : mDatasetRequiringAuth, true);
+                    autoFillApp(dataset != null ? dataset : mDatasetRequiringAuth);
                     return;
                 }
-                removeSelf();
             }
         };
 
-        private Session(int id, IBinder activityToken, AutoFillId autoFillId, Rect bounds) {
-            this.mId = id;
-            this.mActivityToken = new WeakReference<>(activityToken);
-            this.mCurrentAutoFillId = autoFillId;
-            this.mCurrentBounds = bounds;
-            this.mFingerprintService = IFingerprintService.Stub
-                    .asInterface(ServiceManager.getService("fingerprint"));
+        private Session(int id, IBinder activityToken) {
+            mUi = new AutoFillUI(mContext, this);
+            mId = id;
+            mActivityToken = new WeakReference<>(activityToken);
         }
 
         void setAppCallback(IBinder appBinder) {
@@ -834,6 +751,54 @@ final class AutoFillManagerServiceImpl {
             mAppCallback = IAutoFillAppCallback.Stub.asInterface(appBinder);
         }
 
+        void updateAutoFillInput(int flags, AutoFillId autoFillId,
+                @Nullable AutoFillValue autoFillValue, @Nullable Rect bounds) {
+            synchronized (mLock) {
+                ViewState viewState = mViewStates.get(autoFillId);
+                if (viewState == null) {
+                    viewState = new ViewState(this);
+                    mViewStates.put(autoFillId, viewState);
+                }
+
+                if ((flags & FLAG_UPDATE_UI_SHOW) != 0) {
+                    // Remove the UI if the ViewState has changed.
+                    if (mCurrentViewState != viewState) {
+                        mUi.hideFillUi();
+                        mCurrentViewState = viewState;
+                    }
+
+                    // If the ViewState is ready to be displayed, onReady() will be called.
+                    viewState.update(autoFillValue, bounds);
+
+                    // TODO(b/33197203): Remove when there is a response per activity.
+                    if (mCurrentResponse != null) {
+                        viewState.setResponse(mCurrentResponse);
+                    }
+                } else if ((flags & FLAG_UPDATE_UI_HIDE) != 0) {
+                    if (mCurrentViewState == viewState) {
+                        mUi.hideFillUi();
+                        mCurrentViewState = null;
+                    }
+                } else {
+                    Slog.w(TAG, "unknown flags " + flags);
+                }
+            }
+        }
+
+        @Override
+        public void onFillReady(ViewState viewState, FillResponse response, Rect bounds,
+                @Nullable AutoFillValue value) {
+            String filterText = "";
+            if (value != null) {
+                // TODO(b/33197203): Handle other AutoFillValue types
+                final CharSequence text = value.getTextValue();
+                if (text != null) {
+                    filterText = text.toString();
+                }
+            }
+            mUi.showFillUi(viewState, response.getDatasets(), bounds, filterText);
+        }
+
         private void showResponseLocked(FillResponse response, boolean authRequired) {
             if (DEBUG) Slog.d(TAG, "showResponse(directly=" + mAutoFillDirectly
                     + ", authRequired=" + authRequired +"):" + response);
@@ -845,7 +810,7 @@ final class AutoFillManagerServiceImpl {
                     final Dataset dataset = datasets.get(0);
                     if (DEBUG) Slog.d(TAG, "auto-filling directly from auth: " + dataset);
 
-                    autoFillAppLocked(dataset, true);
+                    autoFillApp(dataset);
                     return;
                 }
             }
@@ -853,7 +818,10 @@ final class AutoFillManagerServiceImpl {
             if (!authRequired) {
                 // TODO(b/33197203): add MetricsLogger call
                 mCurrentResponse = response;
-                mUi.showResponse(mUserId, mId, mCurrentAutoFillId, mCurrentBounds, mCurrentResponse);
+                // TODO(b/33197203): Consider using mCurrentResponse, depends on partitioning design
+                if (mCurrentViewState != null) {
+                    mCurrentViewState.setResponse(mCurrentResponse);
+                }
                 return;
             }
 
@@ -869,7 +837,7 @@ final class AutoFillManagerServiceImpl {
                 scanFingerprint(response.getCryptoObjectOpId());
             }
             // Displays the message asking the user to tap (or fingerprint) for AutoFill.
-            mUi.showFillResponseAuthenticationRequest(mUserId, mId, requiresFingerprint,
+            mUi.showFillResponseAuthenticationRequest(requiresFingerprint,
                     response.getExtras(), response.getFlags());
         }
 
@@ -877,7 +845,7 @@ final class AutoFillManagerServiceImpl {
             synchronized (mLock) {
                 // Autofill it directly...
                 if (!dataset.isAuthRequired()) {
-                    autoFillAppLocked(dataset, true);
+                    autoFillApp(dataset);
                     return;
                 }
 
@@ -906,30 +874,114 @@ final class AutoFillManagerServiceImpl {
         void dumpLocked(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("mId: "); pw.println(mId);
             pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken.get());
-            pw.print(prefix); pw.print("mCurrentAutoFillId: "); pw.println(mCurrentAutoFillId);
-            pw.print(prefix); pw.print("mCurrentBounds: "); pw.println(mCurrentBounds);
             pw.print(prefix); pw.print("mCurrentResponse: "); pw.println(mCurrentResponse);
             pw.print(prefix);
                 pw.print("mResponseRequiringAuth: "); pw.println(mResponseRequiringAuth);
             pw.print(prefix);
                 pw.print("mDatasetRequiringAuth: "); pw.println(mDatasetRequiringAuth);
             pw.print(prefix); pw.print("mAutoFillDirectly: "); pw.println(mAutoFillDirectly);
+            pw.print(prefix); pw.print("mCurrentViewStates: "); pw.println(mCurrentViewState);
+            pw.print(prefix); pw.print("mViewStates: "); pw.println(mViewStates.size());
+            final String prefix2 = prefix + "  ";
+            for (Map.Entry<AutoFillId, ViewState> entry : mViewStates.entrySet()) {
+                pw.print(prefix2);
+                pw.print(entry.getKey()); pw.print(": " ); pw.println(entry.getValue());
+            }
         }
 
-        private void autoFillAppLocked(Dataset dataset, boolean removeSelf) {
-            try {
-                if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
-                mAppCallback.autoFill(dataset);
-
-                // TODO(b/33197203): temporarily hack: show the save notification after autofilled,
-                // since save is not automatically detected yet.
-                mUi.showSaveNotification(mUserId, mId); removeSelf = false;
-
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error auto-filling activity: " + e);
+        /**
+         * Notifies the result of a {@link FillResponse} authentication request to the service.
+         *
+         * <p>Typically called by the UI after user taps the "Tap to autofill" affordance, or after user
+         * used the fingerprint sensors to authenticate.
+         */
+        void notifyResponseAuthenticationResult(Bundle extras, int flags) {
+            if (DEBUG) Slog.d(TAG, "notifyResponseAuthenticationResult(): flags=" + flags
+                    + ", extras=" + bundleToString(extras));
+            synchronized (mLock) {
+                try {
+                    mService.authenticateFillResponse(extras, flags);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error sending authentication result back to service: " + e);
+                }
             }
-            if (removeSelf) {
-                removeSelf();
+        }
+
+        /**
+         * Notifies the result of a {@link Dataset} authentication request to the service.
+         *
+         * <p>Typically called by the UI after user taps the "Tap to autofill" affordance, or after
+         * it gets the results from a fingerprint authentication.
+         */
+        void notifyDatasetAuthenticationResult(Bundle extras, int flags) {
+            if (DEBUG) Slog.d(TAG, "notifyDatasetAuthenticationResult(): flags=" + flags
+                    + ", extras=" + bundleToString(extras));
+            synchronized (mLock) {
+                try {
+                    mService.authenticateDataset(extras, flags);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error sending authentication result back to service: " + e);
+                }
+            }
+        }
+
+        void autoFillApp(Dataset dataset) {
+            synchronized (mLock) {
+                try {
+                    if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
+                    mAppCallback.autoFill(dataset);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error auto-filling activity: " + e);
+                }
+            }
+        }
+
+        void requestSave() {
+            synchronized (mLock) {
+                requestSaveLocked(mId);
+            }
+        }
+
+        /**
+         * Called by UI to trigger a save request to the service.
+         */
+        void requestSaveLocked(int sessionId) {
+            // TODO(b/33197203): add MetricsLogger call
+            // TODO(b/33197203): use handler?
+            // TODO(b/33197203): show error on UI on Slog.w situations below???
+
+            if (mService == null) {
+                Slog.w(TAG, "requestSave(): service is null");
+                return;
+            }
+            final Session session = mSessions.get(sessionId);
+            if (session == null) {
+                Slog.w(TAG, "requestSave(): no session with id " + sessionId);
+                return;
+            }
+            final IBinder activityToken = session.mActivityToken.get();
+            if (activityToken == null) {
+                Slog.w(TAG, "activity token for session " + sessionId + " already GCed");
+                return;
+            }
+
+            /*
+             * TODO(b/33197203): apply security checks below:
+             * - checks if disabled by secure settings / device policy
+             * - log operation using noteOp()
+             * - check flags
+             * - display disclosure if needed
+             */
+            try {
+                /* TODO(b/33197203): refactor save logic so it uses a cached AssistStructure, and
+                   get the extras to be sent to the service based on the response / dataset in the
+                   session. */
+                if (!mAm.requestAutoFillData(mAssistReceiver, null, sessionId, activityToken,
+                    AUTO_FILL_FLAG_TYPE_SAVE)) {
+                    Slog.w(TAG, "failed to save for " + activityToken);
+                }
+            } catch (RemoteException e) {
+                // Should not happen, it's a local call.
             }
         }
 

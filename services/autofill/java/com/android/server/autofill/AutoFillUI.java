@@ -45,6 +45,8 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.UiThread;
+import com.android.server.autofill.AutoFillManagerServiceImpl.Session;
+import com.android.server.autofill.AutoFillManagerServiceImpl.ViewState;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -59,24 +61,25 @@ final class AutoFillUI {
     private static final String TAG = "AutoFillUI";
 
     private final Context mContext;
-
+    private final Session mSession;
     private final WindowManager mWm;
 
-    @Nullable
+    // Fill UI variables
     private AnchoredWindow mFillWindow;
+    private DatasetPicker mFillView;
+    private ViewState mViewState;
+    private Rect mBounds;
+    private String mFilterText;
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
      */
     private View mSnackbar;
 
-    AutoFillUI(Context context, AutoFillManagerService service, Object lock) {
+    AutoFillUI(Context context, Session session) {
         mContext = context;
+        mSession = session;
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mService = service;
-        mLock = lock;
-
-        setNotificationListener();
     }
 
     /**
@@ -101,29 +104,63 @@ final class AutoFillUI {
     }
 
     /**
-     * Shows the options from a {@link FillResponse} so the user can pick up the proper
-     * {@link Dataset} (when the response has one) for a given view (identified by
-     * {@code autoFillId}).
+     * Hides the fill UI.
      */
-    void showResponse(int userId, int sessionId, AutoFillId autoFillId, Rect bounds,
-            FillResponse response) {
-        if (DEBUG) Slog.d(TAG, "showResponse: id=" + autoFillId +  ", bounds=" + bounds);
-
+    void hideFillUi() {
         UiThread.getHandler().runWithScissors(() -> {
             if (mFillWindow != null) {
+                if (DEBUG) Slog.d(TAG, "remove FillUi remove " + mFillWindow);
                 mFillWindow.hide();
             }
 
-            final DatasetPicker fillView = new DatasetPicker(mContext, response.getDatasets(),
-                    (dataset) -> {
-                        mFillWindow.hide();
-                        onDatasetPicked(userId, dataset, sessionId);
-                    });
+            mViewState = null;
+            mBounds = null;
+            mFilterText = null;
+            mFillView = null;
+            mFillWindow = null;
+        }, 0);
+    }
 
-            // TODO(b/33197203): request width/height properly.
-            mFillWindow = new AnchoredWindow(mWm, fillView, 800,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            mFillWindow.show(bounds != null ? bounds : new Rect());
+    /**
+     * Shows the fill UI, removing the previous fill UI if the has changed.
+     *
+     * @param viewState the view state, compared by reference to know if new UI should be shown
+     * @param response the response to show, not used if viewState is the same
+     * @param bounds bounds of the view to be filled, used if changed
+     * @param filterText text of the view to be filled, used if changed
+     */
+    void showFillUi(ViewState viewState, List<Dataset> datasets, Rect bounds,
+            String filterText) {
+        UiThread.getHandler().runWithScissors(() -> {
+            if (mViewState != viewState) {
+                // new
+                hideFillUi();
+
+                mViewState = viewState;
+
+                mFillView = new DatasetPicker(mContext, datasets,
+                        (dataset) -> {
+                            mSession.autoFillApp(dataset);
+                            hideFillUi();
+                            showSaveUi();
+                        });
+                mFillWindow = new AnchoredWindow(
+                        mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                if (DEBUG) Slog.d(TAG, "show FillUi");
+            }
+
+            if (!bounds.equals(mBounds)) {
+                if (DEBUG) Slog.d(TAG, "update FillUi bounds: " + mBounds);
+                mBounds = bounds;
+                mFillWindow.show(mBounds);
+            }
+
+            if (!filterText.equals(mFilterText)) {
+                if (DEBUG) Slog.d(TAG, "update FillUi filter text: " + mFilterText);
+                mFilterText = filterText;
+                mFillView.update(mFilterText);
+            }
         }, 0);
     }
 
@@ -134,10 +171,10 @@ final class AutoFillUI {
      * <p>It typically replaces the auto-fill bar with a message saying "Press fingerprint or tap to
      * autofill" or "Tap to autofill", depending on the value of {@code usesFingerprint}.
      */
-    void showFillResponseAuthenticationRequest(int userId, int sessionId, boolean usesFingerprint,
+    void showFillResponseAuthenticationRequest(boolean usesFingerprint,
             Bundle extras, int flags) {
         // TODO(b/33197203): proper implementation
-        showAuthNotification(userId, sessionId, usesFingerprint, extras, flags);
+        showAuthNotification(usesFingerprint, extras, flags);
     }
 
     /**
@@ -161,15 +198,13 @@ final class AutoFillUI {
     /**
      * Shows the UI asking the user to save for auto-fill.
      */
-    void showSaveUI(int userId, int sessionId) {
+    void showSaveUi() {
         showSnackbar(new SavePrompt(mContext, new SavePrompt.OnSaveListener() {
             @Override
             public void onSaveClick() {
                 hideSnackbar();
-                synchronized (mLock) {
-                    final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-                    service.requestSaveLocked(sessionId);
-                }
+
+                mSession.requestSave();
             }
             @Override
             public void onCancelClick() {
@@ -181,10 +216,10 @@ final class AutoFillUI {
     /**
      * Called by service after the user user the fingerprint sensors to authenticate.
      */
-    void dismissFingerprintRequest(int userId, boolean success) {
+    void dismissFingerprintRequest(boolean success) {
         if (DEBUG) Slog.d(TAG, "dismissFingerprintRequest(): ok=" + success);
 
-        dismissAuthNotification(userId);
+        dismissAuthNotification();
 
         if (!success) {
             // TODO(b/33197203): proper implementation (snack bar / i18n string)
@@ -198,48 +233,11 @@ final class AutoFillUI {
         pw.println("AufoFill UI");
         final String prefix = "  ";
         pw.print(prefix); pw.print("sResultCode: "); pw.println(sResultCode);
+        pw.print(prefix); pw.print("mSessionId: "); pw.println(mSession.mId);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
-        mFillWindow.dump(pw);
-    }
-
-    private AutoFillManagerServiceImpl getServiceLocked(int userId) {
-        final AutoFillManagerServiceImpl service = mService.getServiceForUserLocked(userId);
-        if (service == null) {
-            Slog.w(TAG, "no auto-fill service for user " + userId);
-        }
-        return service;
-    }
-
-    private void onSaveRequested(int userId, int sessionId) {
-        // TODO(b/33197203): displays the snack bar, until save notification is refactored
-        showSaveUI(userId, sessionId);
-    }
-
-    private void onDatasetPicked(int userId, Dataset dataset, int sessionId) {
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-            if (service == null) return;
-
-            service.autoFillApp(sessionId, dataset);
-        }
-    }
-
-    private void onSessionDone(int userId, int sessionId) {
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-            if (service == null) return;
-
-            service.removeSessionLocked(sessionId);
-        }
-    }
-
-    private void onResponseAuthenticationRequested(int userId, Bundle extras, int flags) {
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceLocked(userId);
-            if (service == null) return;
-
-            service.notifyResponseAuthenticationResult(extras, flags);
-        }
+        pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
+        pw.print(prefix); pw.print("mBounds: "); pw.println(mBounds);
+        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
     }
 
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
@@ -289,16 +287,10 @@ final class AutoFillUI {
     private static final String EXTRA_FLAGS = "flags";
 
     private static final String TYPE_OPTIONS = "options";
-    private static final String TYPE_FINISH_SESSION = "finish_session";
-    private static final String TYPE_PICK_DATASET = "pick_dataset";
-    private static final String TYPE_SAVE = "save";
     private static final String TYPE_AUTH_RESPONSE = "auth_response";
 
-    @GuardedBy("mServiceLock")
     private BroadcastReceiver mNotificationReceiver;
-    @GuardedBy("mServiceLock")
-    private final AutoFillManagerService mService;
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     // Hack used to generate unique pending intents
     static int sResultCode = 0;
@@ -316,8 +308,6 @@ final class AutoFillUI {
     final class NotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final int userId = intent.getIntExtra(EXTRA_USER_ID, -1);
-            final int sessionId = intent.getIntExtra(EXTRA_SESSION_ID, -1);
             final String type = intent.getStringExtra(EXTRA_NOTIFICATION_TYPE);
             if (type == null) {
                 Slog.wtf(TAG, "No extra " + EXTRA_NOTIFICATION_TYPE + " on intent " + intent);
@@ -326,26 +316,12 @@ final class AutoFillUI {
             final Dataset dataset = intent.getParcelableExtra(EXTRA_DATASET);
             final int flags = intent.getIntExtra(EXTRA_FLAGS, 0);
 
-            if (DEBUG) Slog.d(TAG, "Notification received: type=" + type + ", userId=" + userId
-                    + ", sessionId=" + sessionId);
+            if (DEBUG) Slog.d(TAG, "Notification received: type=" + type
+                    + ", sessionId=" + mSession.mId);
             synchronized (mLock) {
                 switch (type) {
-                    case TYPE_SAVE:
-                        onSaveRequested(userId, sessionId);
-                        break;
-                    case TYPE_FINISH_SESSION:
-                        onSessionDone(userId, sessionId);
-                        break;
-                    case TYPE_PICK_DATASET:
-                        onDatasetPicked(userId, dataset, sessionId);
-
-                        // Must cancel notification because it might be comming from action
-                        if (DEBUG) Slog.d(TAG, "Cancelling notification");
-                        NotificationManager.from(mContext).cancel(TYPE_OPTIONS, userId);
-
-                        break;
                     case TYPE_AUTH_RESPONSE:
-                        onResponseAuthenticationRequested(userId,
+                        mSession.notifyResponseAuthenticationResult(
                                 intent.getBundleExtra(EXTRA_AUTH_REQUIRED_EXTRAS), flags);
                         break;
                     default: {
@@ -357,161 +333,28 @@ final class AutoFillUI {
         }
     }
 
-    private static Intent newNotificationIntent(int userId, String type) {
+    private static Intent newNotificationIntent(String type) {
         final Intent intent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
-        intent.putExtra(EXTRA_USER_ID, userId);
         intent.putExtra(EXTRA_NOTIFICATION_TYPE, type);
         return intent;
     }
 
-    private PendingIntent newPickDatasetPI(int userId, int sessionId, FillResponse response,
-            Dataset dataset) {
-        final int resultCode = ++ sResultCode;
-        if (DEBUG) Slog.d(TAG, "newPickDatasetPI: userId=" + userId + ", sessionId=" + sessionId
-                + ", resultCode=" + resultCode);
-
-        final Intent intent = newNotificationIntent(userId, TYPE_PICK_DATASET);
-        intent.putExtra(EXTRA_SESSION_ID, sessionId);
-        intent.putExtra(EXTRA_FILL_RESPONSE, response);
-        intent.putExtra(EXTRA_DATASET, dataset);
-        return PendingIntent.getBroadcast(mContext, resultCode, intent,
-                PendingIntent.FLAG_ONE_SHOT);
-    }
-
-    /**
-     * Shows a notification with the results of an auto-fill request, using notications actions
-     * to emulate the auto-fill bar buttons displaying the dataset names.
-     */
-    private void showOptionsNotification(int userId, int callbackId, AutoFillId autoFillId,
-            FillResponse response) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            showOptionsNotificationAsSystem(userId, callbackId, autoFillId, response);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void showOptionsNotificationAsSystem(int userId, int sessionId,
-            AutoFillId autoFillId, FillResponse response) {
-        // Make sure server callback is removed from cache if user cancels the notification.
-        final Intent deleteIntent = newNotificationIntent(userId, TYPE_FINISH_SESSION)
-                .putExtra(EXTRA_SESSION_ID, sessionId);
-        final PendingIntent deletePendingIntent = PendingIntent.getBroadcast(mContext,
-                ++sResultCode, deleteIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        final String title = "AutoFill Options";
-
-        final Notification.Builder notification = newNotificationBuilder()
-                .setOngoing(false)
-                .setDeleteIntent(deletePendingIntent)
-                .setContentTitle(title);
-
-        boolean autoCancel = true;
-        final String subTitle;
-        final List<Dataset> datasets;
-        final AutoFillId[] savableIds;
-        if (response != null) {
-            datasets = response.getDatasets();
-            savableIds = response.getSavableIds();
-        } else {
-            datasets = null;
-            savableIds = null;
-        }
-        boolean showSave = false;
-        if (datasets == null ) {
-            subTitle = "No options to auto-fill " + autoFillId;
-        } else if (datasets.isEmpty()) {
-            if (savableIds.length == 0) {
-                subTitle = "No options to auto-fill " + autoFillId;
-            } else {
-                subTitle = "No options to auto-fill " + autoFillId
-                        + ", but provider can save ids:\n" + Arrays.toString(savableIds);
-                showSave = true;
-            }
-        } else {
-            final AutoFillManagerServiceImpl service = mService.getServiceForUserLocked(userId);
-            if (service == null) {
-                subTitle = "No auto-fill service for user " + userId;
-                Slog.w(TAG, subTitle);
-            } else {
-                autoCancel = false;
-                final int size = datasets.size();
-                subTitle = "There are " + size + " option(s) to fill " + autoFillId + ".\n"
-                        + "Use the notification action(s) to select the proper one."
-                        + "Actions with (F) require fingerprint unlock, and with (P) require"
-                        + "provider authentication to unlock";
-                for (Dataset dataset : datasets) {
-                    final StringBuilder name = new StringBuilder(dataset.getName());
-                    if (dataset.isAuthRequired()) {
-                        if (dataset.hasCryptoObject()) {
-                            name.append("(F)");
-                        } else {
-                            name.append("(P)");
-                        }
-                    }
-                    final PendingIntent pi = newPickDatasetPI(userId, sessionId, response, dataset);
-                    notification.addAction(new Action.Builder(null, name, pi).build());
-                }
-            }
-        }
-
-        notification.setAutoCancel(autoCancel);
-        notification.setStyle(new Notification.BigTextStyle().bigText(subTitle));
-
-        NotificationManager.from(mContext).notify(TYPE_OPTIONS, userId, notification.build());
-
-        if (showSave) {
-            showSaveNotification(userId, sessionId);
-        }
-    }
-
-    void showSaveNotification(int userId, int sessionId) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            showSaveNotificationAsSystem(userId, sessionId);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void showSaveNotificationAsSystem(int userId, int sessionId) {
-        final Intent saveIntent = newNotificationIntent(userId, TYPE_SAVE)
-                .putExtra(EXTRA_SESSION_ID, sessionId);
-
-        final PendingIntent savePendingIntent = PendingIntent.getBroadcast(mContext,
-                ++sResultCode, saveIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        final String title = "AutoFill Save Emulation";
-        final String subTitle = "Tap notification to launch the save snackbar.";
-
-        final Notification notification = newNotificationBuilder()
-                .setAutoCancel(true)
-                .setOngoing(false)
-                .setContentTitle(title)
-                .setContentIntent(savePendingIntent)
-                .setStyle(new Notification.BigTextStyle().bigText(subTitle))
-                .build();
-        NotificationManager.from(mContext).notify(TYPE_SAVE, userId, notification);
-    }
-
-    private void showAuthNotification(int userId, int sessionId, boolean usesFingerprint,
+    private void showAuthNotification(boolean usesFingerprint,
             Bundle extras, int flags) {
         final long token = Binder.clearCallingIdentity();
         try {
-            showAuthNotificationAsSystem(userId, sessionId, usesFingerprint, extras, flags);
+            showAuthNotificationAsSystem(usesFingerprint, extras, flags);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    private void showAuthNotificationAsSystem(int userId, int sessionId,
+    private void showAuthNotificationAsSystem(
             boolean usesFingerprint, Bundle extras, int flags) {
         final String title = "AutoFill Authentication";
         final StringBuilder subTitle = new StringBuilder("Provider require user authentication.\n");
 
-        final Intent authIntent = newNotificationIntent(userId, TYPE_AUTH_RESPONSE)
-                .putExtra(EXTRA_SESSION_ID, sessionId);
+        final Intent authIntent = newNotificationIntent(TYPE_AUTH_RESPONSE);
         if (extras != null) {
             authIntent.putExtra(EXTRA_AUTH_REQUIRED_EXTRAS, extras);
         }
@@ -537,11 +380,11 @@ final class AutoFillUI {
         if (authPendingIntent != null) {
             notification.setContentIntent(authPendingIntent);
         }
-        NotificationManager.from(mContext).notify(TYPE_AUTH_RESPONSE, userId, notification.build());
+        NotificationManager.from(mContext).notify(mSession.mId, notification.build());
     }
 
-    private void dismissAuthNotification(int userId) {
-        NotificationManager.from(mContext).cancel(TYPE_AUTH_RESPONSE, userId);
+    private void dismissAuthNotification() {
+        NotificationManager.from(mContext).cancel(mSession.mId);
     }
 
     private Notification.Builder newNotificationBuilder() {
