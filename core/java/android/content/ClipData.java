@@ -17,6 +17,9 @@
 package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
+import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
+import static android.content.ContentResolver.SCHEME_CONTENT;
+import static android.content.ContentResolver.SCHEME_FILE;
 
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
@@ -371,8 +374,14 @@ public class ClipData implements Parcelable {
                     }
                 }
 
-                // If we couldn't open the URI as a stream, then the URI itself
-                // probably serves fairly well as a textual representation.
+                // If we couldn't open the URI as a stream, use the URI itself as a textual
+                // representation (but not for "content", "android.resource" or "file" schemes).
+                final String scheme = uri.getScheme();
+                if (SCHEME_CONTENT.equals(scheme)
+                        || SCHEME_ANDROID_RESOURCE.equals(scheme)
+                        || SCHEME_FILE.equals(scheme)) {
+                    return "";
+                }
                 return uri.toString();
             }
 
@@ -555,9 +564,15 @@ public class ClipData implements Parcelable {
                     }
                 }
 
-                // If we couldn't open the URI as a stream, then we can build
-                // some HTML text with the URI itself.
-                // probably serves fairly well as a textual representation.
+                // If we couldn't open the URI as a stream, use the URI itself as a textual
+                // representation (but not for "content", "android.resource" or "file" schemes).
+                final String scheme = mUri.getScheme();
+                if (SCHEME_CONTENT.equals(scheme)
+                        || SCHEME_ANDROID_RESOURCE.equals(scheme)
+                        || SCHEME_FILE.equals(scheme)) {
+                    return "";
+                }
+
                 if (styled) {
                     return uriToStyledText(mUri.toString());
                 } else {
@@ -777,7 +792,7 @@ public class ClipData implements Parcelable {
      */
     private static String[] getMimeTypes(ContentResolver resolver, Uri uri) {
         String[] mimeTypes = null;
-        if ("content".equals(uri.getScheme())) {
+        if (SCHEME_CONTENT.equals(uri.getScheme())) {
             String realType = resolver.getType(uri);
             mimeTypes = resolver.getStreamTypes(uri, "*/*");
             if (realType != null) {
