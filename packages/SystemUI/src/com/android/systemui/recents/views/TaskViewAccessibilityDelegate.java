@@ -18,7 +18,6 @@ package com.android.systemui.recents.views;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.SparseArray;
@@ -29,6 +28,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.Utilities;
@@ -39,8 +39,6 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
 
     private final TaskView mTaskView;
 
-    protected static final int OPEN = R.id.action_open;
-    protected static final int DIMISS = R.id.action_dimiss;
     protected static final int SPLIT_TASK_TOP = R.id.action_split_task_to_top;
     protected static final int SPLIT_TASK_LEFT = R.id.action_split_task_to_left;
     protected static final int SPLIT_TASK_RIGHT = R.id.action_split_task_to_right;
@@ -50,10 +48,6 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
     public TaskViewAccessibilityDelegate(TaskView taskView) {
         mTaskView = taskView;
         Context context = taskView.getContext();
-        mActions.put(OPEN, new AccessibilityAction(OPEN,
-                context.getString(R.string.recents_accessibility_open)));
-        mActions.put(DIMISS, new AccessibilityAction(DIMISS,
-                context.getString(R.string.recents_accessibility_dismissed)));
         mActions.put(SPLIT_TASK_TOP, new AccessibilityAction(SPLIT_TASK_TOP,
                 context.getString(R.string.recents_accessibility_split_screen_top)));
         mActions.put(SPLIT_TASK_LEFT, new AccessibilityAction(SPLIT_TASK_LEFT,
@@ -65,8 +59,6 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
     @Override
     public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(host, info);
-        info.addAction(mActions.get(OPEN));
-        info.addAction(mActions.get(DIMISS));
         if (ActivityManager.supportsSplitScreenMultiWindow()
                 && !Recents.getSystemServices().hasDockedTask()) {
             TaskStack.DockState[] dockStates = Recents.getConfiguration()
@@ -85,11 +77,7 @@ public class TaskViewAccessibilityDelegate extends View.AccessibilityDelegate {
 
     @Override
     public boolean performAccessibilityAction(View host, int action, Bundle args) {
-        if (action == OPEN) {
-            mTaskView.onClick(host);
-        } else if (action == DIMISS) {
-            mTaskView.dismissTask();
-        } else if (action == SPLIT_TASK_TOP) {
+        if (action == SPLIT_TASK_TOP) {
             simulateDragIntoMultiwindow(TaskStack.DockState.TOP);
         } else if (action == SPLIT_TASK_LEFT) {
             simulateDragIntoMultiwindow(TaskStack.DockState.LEFT);

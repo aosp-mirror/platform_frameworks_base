@@ -258,11 +258,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     @Override
-    public void addChildrenForAccessibility(ArrayList<View> outChildren) {
-        // Prevent any children from being focusable during talkback
-    }
-
-    @Override
     public boolean hasOverlappingRendering() {
         return false;
     }
