@@ -186,6 +186,8 @@ final class BackStackRecord extends FragmentTransaction implements
     static final int OP_SHOW = 5;
     static final int OP_DETACH = 6;
     static final int OP_ATTACH = 7;
+    static final int OP_SET_PRIMARY_NAV = 8;
+    static final int OP_UNSET_PRIMARY_NAV = 9;
 
     static final class Op {
         int cmd;
@@ -194,6 +196,14 @@ final class BackStackRecord extends FragmentTransaction implements
         int exitAnim;
         int popEnterAnim;
         int popExitAnim;
+
+        Op() {
+        }
+
+        Op(int cmd, Fragment fragment) {
+            this.cmd = cmd;
+            this.fragment = fragment;
+        }
     }
 
     ArrayList<Op> mOps = new ArrayList<>();
@@ -318,6 +328,13 @@ final class BackStackRecord extends FragmentTransaction implements
                     case OP_ATTACH:
                         cmdStr = "ATTACH";
                         break;
+                    case OP_SET_PRIMARY_NAV:
+                        cmdStr="SET_PRIMARY_NAV";
+                        break;
+                    case OP_UNSET_PRIMARY_NAV:
+                        cmdStr="UNSET_PRIMARY_NAV";
+                        break;
+
                     default:
                         cmdStr = "cmd=" + op.cmd;
                         break;
@@ -438,10 +455,7 @@ final class BackStackRecord extends FragmentTransaction implements
             fragment.mContainerId = fragment.mFragmentId = containerViewId;
         }
 
-        Op op = new Op();
-        op.cmd = opcmd;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(opcmd, fragment));
     }
 
     public FragmentTransaction replace(int containerViewId, Fragment fragment) {
@@ -458,46 +472,37 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public FragmentTransaction remove(Fragment fragment) {
-        Op op = new Op();
-        op.cmd = OP_REMOVE;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(OP_REMOVE, fragment));
 
         return this;
     }
 
     public FragmentTransaction hide(Fragment fragment) {
-        Op op = new Op();
-        op.cmd = OP_HIDE;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(OP_HIDE, fragment));
 
         return this;
     }
 
     public FragmentTransaction show(Fragment fragment) {
-        Op op = new Op();
-        op.cmd = OP_SHOW;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(OP_SHOW, fragment));
 
         return this;
     }
 
     public FragmentTransaction detach(Fragment fragment) {
-        Op op = new Op();
-        op.cmd = OP_DETACH;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(OP_DETACH, fragment));
 
         return this;
     }
 
     public FragmentTransaction attach(Fragment fragment) {
-        Op op = new Op();
-        op.cmd = OP_ATTACH;
-        op.fragment = fragment;
-        addOp(op);
+        addOp(new Op(OP_ATTACH, fragment));
+
+        return this;
+    }
+
+    public FragmentTransaction setPrimaryNavigationFragment(Fragment fragment) {
+        addOp(new Op(OP_SET_PRIMARY_NAV, fragment));
 
         return this;
     }
@@ -689,7 +694,8 @@ final class BackStackRecord extends FragmentTransaction implements
         final int numOps = mOps.size();
         for (int opNum = 0; opNum < numOps; opNum++) {
             final Op op = mOps.get(opNum);
-            if (op.fragment.mContainerId == containerId) {
+            final int fragContainer = op.fragment != null ? op.fragment.mContainerId : 0;
+            if (fragContainer != 0 && fragContainer == containerId) {
                 return true;
             }
         }
@@ -704,7 +710,7 @@ final class BackStackRecord extends FragmentTransaction implements
         int lastContainer = -1;
         for (int opNum = 0; opNum < numOps; opNum++) {
             final Op op = mOps.get(opNum);
-            final int container = op.fragment.mContainerId;
+            final int container = op.fragment != null ? op.fragment.mContainerId : 0;
             if (container != 0 && container != lastContainer) {
                 lastContainer = container;
                 for (int i = startIndex; i < endIndex; i++) {
@@ -712,7 +718,9 @@ final class BackStackRecord extends FragmentTransaction implements
                     final int numThoseOps = record.mOps.size();
                     for (int thoseOpIndex = 0; thoseOpIndex < numThoseOps; thoseOpIndex++) {
                         final Op thatOp = record.mOps.get(thoseOpIndex);
-                        if (thatOp.fragment.mContainerId == container) {
+                        final int thatContainer = thatOp.fragment != null
+                                ? thatOp.fragment.mContainerId : 0;
+                        if (thatContainer == container) {
                             return true;
                         }
                     }
@@ -731,7 +739,9 @@ final class BackStackRecord extends FragmentTransaction implements
         for (int opNum = 0; opNum < numOps; opNum++) {
             final Op op = mOps.get(opNum);
             final Fragment f = op.fragment;
-            f.setNextTransition(mTransition, mTransitionStyle);
+            if (f != null) {
+                f.setNextTransition(mTransition, mTransitionStyle);
+            }
             switch (op.cmd) {
                 case OP_ADD:
                     f.setNextAnim(op.enterAnim);
@@ -757,10 +767,16 @@ final class BackStackRecord extends FragmentTransaction implements
                     f.setNextAnim(op.enterAnim);
                     mManager.attachFragment(f);
                     break;
+                case OP_SET_PRIMARY_NAV:
+                    mManager.setPrimaryNavigationFragment(f);
+                    break;
+                case OP_UNSET_PRIMARY_NAV:
+                    mManager.setPrimaryNavigationFragment(null);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
             }
-            if (!mAllowOptimization && op.cmd != OP_ADD) {
+            if (!mAllowOptimization && op.cmd != OP_ADD && f != null) {
                 mManager.moveFragmentToExpectedState(f);
             }
         }
@@ -778,7 +794,10 @@ final class BackStackRecord extends FragmentTransaction implements
         for (int opNum = mOps.size() - 1; opNum >= 0; opNum--) {
             final Op op = mOps.get(opNum);
             Fragment f = op.fragment;
-            f.setNextTransition(FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
+            if (f != null) {
+                f.setNextTransition(FragmentManagerImpl.reverseTransit(mTransition),
+                        mTransitionStyle);
+            }
             switch (op.cmd) {
                 case OP_ADD:
                     f.setNextAnim(op.popExitAnim);
@@ -804,10 +823,16 @@ final class BackStackRecord extends FragmentTransaction implements
                     f.setNextAnim(op.popExitAnim);
                     mManager.detachFragment(f);
                     break;
+                case OP_SET_PRIMARY_NAV:
+                    mManager.setPrimaryNavigationFragment(null);
+                    break;
+                case OP_UNSET_PRIMARY_NAV:
+                    mManager.setPrimaryNavigationFragment(f);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
             }
-            if (!mAllowOptimization && op.cmd != OP_REMOVE) {
+            if (!mAllowOptimization && op.cmd != OP_REMOVE && f != null) {
                 mManager.moveFragmentToExpectedState(f);
             }
         }
@@ -817,15 +842,28 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     /**
-     * Removes all OP_REPLACE ops and replaces them with the proper add and remove
-     * operations that are equivalent to the replace. This must be called prior to
-     * {@link #executeOps()} or any other call that operations on mOps.
+     * Expands all meta-ops into their more primitive equivalents. This must be called prior to
+     * {@link #executeOps()} or any other call that operations on mOps for forward navigation.
+     * It should not be called for pop/reverse navigation operations.
+     *
+     * <p>Removes all OP_REPLACE ops and replaces them with the proper add and remove
+     * operations that are equivalent to the replace.</p>
+     *
+     * <p>Adds OP_UNSET_PRIMARY_NAV ops to match OP_SET_PRIMARY_NAV, OP_REMOVE and OP_DETACH
+     * ops so that we can restore the old primary nav fragment later. Since callers call this
+     * method in a loop before running ops from several transactions at once, the caller should
+     * pass the return value from this method as the oldPrimaryNav parameter for the next call.
+     * The first call in such a loop should pass the value of
+     * {@link FragmentManager#getPrimaryNavigationFragment()}.</p>
      *
      * @param added Initialized to the fragments that are in the mManager.mAdded, this
      *              will be modified to contain the fragments that will be in mAdded
      *              after the execution ({@link #executeOps()}.
+     * @param oldPrimaryNav The tracked primary navigation fragment as of the beginning of
+     *                      this set of ops
+     * @return the new oldPrimaryNav fragment after this record's ops would be run
      */
-    void expandReplaceOps(ArrayList<Fragment> added) {
+    Fragment expandOps(ArrayList<Fragment> added, Fragment oldPrimaryNav) {
         for (int opNum = 0; opNum < mOps.size(); opNum++) {
             final Op op = mOps.get(opNum);
             switch (op.cmd) {
@@ -834,22 +872,33 @@ final class BackStackRecord extends FragmentTransaction implements
                     added.add(op.fragment);
                     break;
                 case OP_REMOVE:
-                case OP_DETACH:
+                case OP_DETACH: {
                     added.remove(op.fragment);
-                    break;
+                    if (op.fragment == oldPrimaryNav) {
+                        mOps.add(opNum, new Op(OP_UNSET_PRIMARY_NAV, op.fragment));
+                        opNum++;
+                        oldPrimaryNav = null;
+                    }
+                }
+                break;
                 case OP_REPLACE: {
-                    Fragment f = op.fragment;
-                    int containerId = f.mContainerId;
+                    final Fragment f = op.fragment;
+                    final int containerId = f.mContainerId;
                     boolean alreadyAdded = false;
                     for (int i = added.size() - 1; i >= 0; i--) {
-                        Fragment old = added.get(i);
+                        final Fragment old = added.get(i);
                         if (old.mContainerId == containerId) {
                             if (old == f) {
                                 alreadyAdded = true;
                             } else {
-                                Op removeOp = new Op();
-                                removeOp.cmd = OP_REMOVE;
-                                removeOp.fragment = old;
+                                // This is duplicated from above since we only make
+                                // a single pass for expanding ops. Unset any outgoing primary nav.
+                                if (old == oldPrimaryNav) {
+                                    mOps.add(opNum, new Op(OP_UNSET_PRIMARY_NAV, old));
+                                    opNum++;
+                                    oldPrimaryNav = null;
+                                }
+                                final Op removeOp = new Op(OP_REMOVE, old);
                                 removeOp.enterAnim = op.enterAnim;
                                 removeOp.popEnterAnim = op.popEnterAnim;
                                 removeOp.exitAnim = op.exitAnim;
@@ -869,8 +918,18 @@ final class BackStackRecord extends FragmentTransaction implements
                     }
                 }
                 break;
+                case OP_SET_PRIMARY_NAV: {
+                    // It's ok if this is null, that means we will restore to no active
+                    // primary navigation fragment on a pop.
+                    mOps.add(opNum, new Op(OP_UNSET_PRIMARY_NAV, oldPrimaryNav));
+                    opNum++;
+                    // Will be set by the OP_SET_PRIMARY_NAV we inserted before when run
+                    oldPrimaryNav = op.fragment;
+                }
+                break;
             }
         }
+        return oldPrimaryNav;
     }
 
     /**
@@ -917,8 +976,8 @@ final class BackStackRecord extends FragmentTransaction implements
 
     private static boolean isFragmentPostponed(Op op) {
         final Fragment fragment = op.fragment;
-        return (fragment.mAdded && fragment.mView != null && !fragment.mDetached &&
-                !fragment.mHidden && fragment.isPostponed());
+        return fragment != null && fragment.mAdded && fragment.mView != null && !fragment.mDetached
+                && !fragment.mHidden && fragment.isPostponed();
     }
 
     public String getName() {

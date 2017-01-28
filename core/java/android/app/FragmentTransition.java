@@ -43,14 +43,16 @@ class FragmentTransition {
      * REPLACE operations have already been replaced by add/remove operations.
      */
     private static final int[] INVERSE_OPS = {
-            BackStackRecord.OP_NULL,   // inverse of OP_NULL (error)
-            BackStackRecord.OP_REMOVE, // inverse of OP_ADD
-            BackStackRecord.OP_NULL,   // inverse of OP_REPLACE (error)
-            BackStackRecord.OP_ADD,    // inverse of OP_REMOVE
-            BackStackRecord.OP_SHOW,   // inverse of OP_HIDE
-            BackStackRecord.OP_HIDE,   // inverse of OP_SHOW
-            BackStackRecord.OP_ATTACH, // inverse of OP_DETACH
-            BackStackRecord.OP_DETACH, // inverse of OP_ATTACH
+            BackStackRecord.OP_NULL,              // inverse of OP_NULL (error)
+            BackStackRecord.OP_REMOVE,            // inverse of OP_ADD
+            BackStackRecord.OP_NULL,              // inverse of OP_REPLACE (error)
+            BackStackRecord.OP_ADD,               // inverse of OP_REMOVE
+            BackStackRecord.OP_SHOW,              // inverse of OP_HIDE
+            BackStackRecord.OP_HIDE,              // inverse of OP_SHOW
+            BackStackRecord.OP_ATTACH,            // inverse of OP_DETACH
+            BackStackRecord.OP_DETACH,            // inverse of OP_ATTACH
+            BackStackRecord.OP_UNSET_PRIMARY_NAV, // inverse of OP_SET_PRIMARY_NAV
+            BackStackRecord.OP_SET_PRIMARY_NAV,   // inverse of OP_UNSET_PRIMARY_NAV
     };
 
     /**
@@ -1232,6 +1234,9 @@ class FragmentTransition {
             SparseArray<FragmentContainerTransition> transitioningFragments, boolean isPop,
             boolean isOptimizedTransaction) {
         final Fragment fragment = op.fragment;
+        if (fragment == null) {
+            return; // no fragment, no transition
+        }
         final int containerId = fragment.mContainerId;
         if (containerId == 0) {
             return; // no container, no transition
