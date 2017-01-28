@@ -142,7 +142,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate[] mCaCerts;
     private PrivateKey mClientPrivateKey;
-    private X509Certificate mClientCertificate;
+    private X509Certificate[] mClientCertificateChain;
     private int mEapMethod = Eap.NONE;
     private int mPhase2Method = Phase2.NONE;
 
@@ -161,9 +161,19 @@ public class WifiEnterpriseConfig implements Parcelable {
         for (String key : source.mFields.keySet()) {
             mFields.put(key, source.mFields.get(key));
         }
-        mCaCerts = source.mCaCerts;
+        if (source.mCaCerts != null) {
+            mCaCerts = Arrays.copyOf(source.mCaCerts, source.mCaCerts.length);
+        } else {
+            mCaCerts = null;
+        }
         mClientPrivateKey = source.mClientPrivateKey;
-        mClientCertificate = source.mClientCertificate;
+        if (source.mClientCertificateChain != null) {
+            mClientCertificateChain = Arrays.copyOf(
+                    source.mClientCertificateChain,
+                    source.mClientCertificateChain.length);
+        } else {
+            mClientCertificateChain = null;
+        }
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
     }
@@ -185,7 +195,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         dest.writeInt(mPhase2Method);
         ParcelUtil.writeCertificates(dest, mCaCerts);
         ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
-        ParcelUtil.writeCertificate(dest, mClientCertificate);
+        ParcelUtil.writeCertificates(dest, mClientCertificateChain);
     }
 
     public static final Creator<WifiEnterpriseConfig> CREATOR =
@@ -204,7 +214,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mPhase2Method = in.readInt();
                     enterpriseConfig.mCaCerts = ParcelUtil.readCertificates(in);
                     enterpriseConfig.mClientPrivateKey = ParcelUtil.readPrivateKey(in);
-                    enterpriseConfig.mClientCertificate = ParcelUtil.readCertificate(in);
+                    enterpriseConfig.mClientCertificateChain = ParcelUtil.readCertificates(in);
                     return enterpriseConfig;
                 }
 
@@ -742,10 +752,54 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @throws IllegalArgumentException for an invalid key or certificate.
      */
     public void setClientKeyEntry(PrivateKey privateKey, X509Certificate clientCertificate) {
+        X509Certificate[] clientCertificates = null;
         if (clientCertificate != null) {
-            if (clientCertificate.getBasicConstraints() != -1) {
-                throw new IllegalArgumentException("Cannot be a CA certificate");
+            clientCertificates = new X509Certificate[] {clientCertificate};
+        }
+        setClientKeyEntryWithCertificateChain(privateKey, clientCertificates);
+    }
+
+    /**
+     * Specify a private key and client certificate chain for client authorization.
+     *
+     * <p>A default name is automatically assigned to the key entry and used
+     * with this configuration.  The framework takes care of installing the
+     * key entry when the config is saved and removing the key entry when
+     * the config is removed.
+
+     * @param privateKey
+     * @param clientCertificateChain
+     * @throws IllegalArgumentException for an invalid key or certificate.
+     */
+    public void setClientKeyEntryWithCertificateChain(PrivateKey privateKey,
+            X509Certificate[] clientCertificateChain) {
+        X509Certificate[] newCerts = null;
+        if (clientCertificateChain != null && clientCertificateChain.length > 0) {
+            // We validate that this is a well formed chain that starts
+            // with an end-certificate and is followed by CA certificates.
+            // We don't validate that each following certificate verifies
+            // the previous. https://en.wikipedia.org/wiki/Chain_of_trust
+            //
+            // Basic constraints is an X.509 extension type that defines
+            // whether a given certificate is allowed to sign additional
+            // certificates and what path length restrictions may exist.
+            // We use this to judge whether the certificate is an end
+            // certificate or a CA certificate.
+            // https://cryptography.io/en/latest/x509/reference/
+            if (clientCertificateChain[0].getBasicConstraints() != -1) {
+                throw new IllegalArgumentException(
+                        "First certificate in the chain must be a client end certificate");
             }
+
+            for (int i = 1; i < clientCertificateChain.length; i++) {
+                if (clientCertificateChain[i].getBasicConstraints() == -1) {
+                    throw new IllegalArgumentException(
+                            "All certificates following the first must be CA certificates");
+                }
+            }
+            newCerts = Arrays.copyOf(clientCertificateChain,
+                    clientCertificateChain.length);
+
             if (privateKey == null) {
                 throw new IllegalArgumentException("Client cert without a private key");
             }
@@ -755,7 +809,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
 
         mClientPrivateKey = privateKey;
-        mClientCertificate = clientCertificate;
+        mClientCertificateChain = newCerts;
     }
 
     /**
@@ -764,7 +818,24 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return X.509 client certificate
      */
     public X509Certificate getClientCertificate() {
-        return mClientCertificate;
+        if (mClientCertificateChain != null && mClientCertificateChain.length > 0) {
+            return mClientCertificateChain[0];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the complete client certificate chain
+     *
+     * @return X.509 client certificates
+     */
+    @Nullable public X509Certificate[] getClientCertificateChain() {
+        if (mClientCertificateChain != null && mClientCertificateChain.length > 0) {
+            return mClientCertificateChain;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -772,7 +843,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public void resetClientKeyEntry() {
         mClientPrivateKey = null;
-        mClientCertificate = null;
+        mClientCertificateChain = null;
     }
 
     /**

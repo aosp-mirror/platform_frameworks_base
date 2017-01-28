@@ -87,6 +87,52 @@ public class WifiEnterpriseConfigTest {
     }
 
     @Test
+    public void testSetClientKeyEntryWithNull() {
+        mEnterpriseConfig.setClientKeyEntry(null, null);
+        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
+        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
+        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
+        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+    }
+
+    @Test
+    public void testSetClientCertificateChain() {
+        PrivateKey clientKey = FakeKeys.RSA_KEY1;
+        X509Certificate cert0 = FakeKeys.CLIENT_CERT;
+        X509Certificate cert1 = FakeKeys.CA_CERT1;
+        X509Certificate[] clientChain = new X509Certificate[] {cert0, cert1};
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        X509Certificate[] result = mEnterpriseConfig.getClientCertificateChain();
+        assertEquals(result.length, 2);
+        assertTrue(result[0] == cert0 && result[1] == cert1);
+        assertTrue(mEnterpriseConfig.getClientCertificate() == cert0);
+    }
+
+    private boolean isClientCertificateChainInvalid(X509Certificate[] clientChain) {
+        boolean exceptionThrown = false;
+        try {
+            PrivateKey clientKey = FakeKeys.RSA_KEY1;
+            mEnterpriseConfig.setClientKeyEntryWithCertificateChain(clientKey, clientChain);
+        } catch (IllegalArgumentException e) {
+            exceptionThrown = true;
+        }
+        return exceptionThrown;
+    }
+
+    @Test
+    public void testSetInvalidClientCertificateChain() {
+        X509Certificate clientCert = FakeKeys.CLIENT_CERT;
+        X509Certificate caCert = FakeKeys.CA_CERT1;
+        assertTrue("Invalid client certificate",
+                isClientCertificateChainInvalid(new X509Certificate[] {caCert, caCert}));
+        assertTrue("Invalid CA certificate",
+                isClientCertificateChainInvalid(new X509Certificate[] {clientCert, clientCert}));
+        assertTrue("Both certificates invalid",
+                isClientCertificateChainInvalid(new X509Certificate[] {caCert, clientCert}));
+    }
+
+    @Test
     public void testSaveSingleCaCertificateAlias() {
         final String alias = "single_alias 0";
         mEnterpriseConfig.setCaCertificateAliases(new String[] {alias});
