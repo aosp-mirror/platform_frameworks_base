@@ -87,6 +87,16 @@ public class WifiEnterpriseConfigTest {
     }
 
     @Test
+    public void testSetClientKeyEntryWithNull() {
+        mEnterpriseConfig.setClientKeyEntry(null, null);
+        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
+        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+        mEnterpriseConfig.setClientKeyEntryWithCertificateChain(null, null);
+        assertEquals(null, mEnterpriseConfig.getClientCertificateChain());
+        assertEquals(null, mEnterpriseConfig.getClientCertificate());
+    }
+
+    @Test
     public void testSetClientCertificateChain() {
         PrivateKey clientKey = FakeKeys.RSA_KEY1;
         X509Certificate cert0 = FakeKeys.CLIENT_CERT;
