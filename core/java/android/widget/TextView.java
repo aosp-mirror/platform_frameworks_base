@@ -9028,14 +9028,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Spannable sp = (Spannable) mText;
                 MetaKeyKeyListener.resetMetaState(sp);
             }
-        } else {
-            final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
-            if (afm != null) {
-                if (DEBUG_AUTOFILL) {
-                    Log.v(LOG_TAG, "onFocusChanged(false): id=" + getAccessibilityViewId());
-                }
-                afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_HIDE);
-            }
         }
 
         startStopMarquee(focused);
@@ -9767,10 +9759,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    @Nullable
     public AutoFillType getAutoFillType() {
-        // TODO(b/33197203): ideally it should return a constant, but value returned by
-        // getInputType() can change.
-        return AutoFillType.forText(getInputType());
+        return isTextEditable() ? AutoFillType.forText(getInputType()) : null;
     }
 
     /** @hide */
