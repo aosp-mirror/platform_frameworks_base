@@ -21,7 +21,10 @@ import android.graphics.Color;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
+import android.view.LayoutInflater;
 import android.view.View;
+
+import com.android.internal.R;
 
 /**
  * Autofill Save Prompt
@@ -29,11 +32,9 @@ import android.view.View;
 final class SavePrompt extends RelativeLayout {
     public interface OnSaveListener {
         void onSaveClick();
-
         void onCancelClick();
     }
 
-    private final TextView mTextView;
     private final TextView mNoButton;
     private final TextView mYesButton;
     private final OnSaveListener mListener;
@@ -41,52 +42,19 @@ final class SavePrompt extends RelativeLayout {
     SavePrompt(Context context, OnSaveListener listener) {
         super(context);
         mListener = listener;
-        setBackgroundColor(Color.YELLOW);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.autofill_save, this);
 
-        // TODO(b/33197203): move layout to XML
-        mTextView = new TextView(context);
-        final LayoutParams textParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        textParams.setMargins(50, 25, 50, 0);
-        mTextView.setLayoutParams(textParams);
-        // TODO(b/33197203): use R.string once final wording is done
-        mTextView.setText("Save for autofill?");
-        mTextView.setId(View.generateViewId());
-
-        mNoButton = new TextView(context);
-        // TODO(b/33197203): use R.string once final wording is done
-        mNoButton.setText("No thanks");
-        mNoButton.setBackgroundColor(Color.TRANSPARENT);
-        mNoButton.setAllCaps(true);
+        mNoButton = (TextView) view.findViewById(R.id.autofill_save_no);
         mNoButton.setOnClickListener((v) -> {
             mListener.onCancelClick();
         });
 
-        mYesButton = new TextView(context);
-        // TODO(b/33197203): use R.string once final wording is done
-        mYesButton.setText("Save");
-        mYesButton.setBackgroundColor(Color.TRANSPARENT);
-        mYesButton.setId(View.generateViewId());
-        mYesButton.setAllCaps(true);
+        mYesButton = (TextView) view.findViewById(R.id.autofill_save_yes);
         mYesButton.setOnClickListener((v) -> {
             mListener.onSaveClick();
         });
 
-        addView(mTextView);
-        addView(mNoButton);
-        addView(mYesButton);
-
-        final LayoutParams yesLayoutParams = new LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        yesLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        yesLayoutParams.addRule(RelativeLayout.BELOW, mTextView.getId());
-        yesLayoutParams.setMargins(25, 25, 50, 25);
-        mYesButton.setLayoutParams(yesLayoutParams);
-        final LayoutParams noLayoutParams = new LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        noLayoutParams.addRule(RelativeLayout.LEFT_OF, mYesButton.getId());
-        noLayoutParams.addRule(RelativeLayout.BELOW, mTextView.getId());
-        noLayoutParams.setMargins(50, 25, 25, 25);
-        mNoButton.setLayoutParams(noLayoutParams);
+        //addView(view);
     }
 }

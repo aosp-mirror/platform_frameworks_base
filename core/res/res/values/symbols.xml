@@ -2828,4 +2828,10 @@
   <java-symbol type="dimen" name="item_touch_helper_max_drag_scroll_per_frame"/>
   <java-symbol type="dimen" name="item_touch_helper_swipe_escape_velocity"/>
   <java-symbol type="dimen" name="item_touch_helper_swipe_escape_max_velocity"/>
+
+  <!-- com.android.server.autofill -->
+  <java-symbol type="layout" name="autofill_save"/>
+  <java-symbol type="id" name="autofill_save_title" />
+  <java-symbol type="id" name="autofill_save_no" />
+  <java-symbol type="id" name="autofill_save_yes" />
 </resources>
