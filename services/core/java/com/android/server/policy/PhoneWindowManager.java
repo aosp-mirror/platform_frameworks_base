@@ -236,6 +236,7 @@ import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.AppTransition;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.vr.PersistentVrStateListener;
 
 import java.io.File;
 import java.io.FileReader;
@@ -416,6 +417,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     AppOpsManager mAppOpsManager;
     private boolean mHasFeatureWatch;
 
+    // Assigned on main thread, accessed on UI thread
+    volatile VrManagerInternal mVrManagerInternal;
+
     // Vibrator pattern for haptic feedback of a long press.
     long[] mLongPressVibePattern;
 
@@ -503,6 +507,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mTvPictureInPictureVisible;
+    // Written by vr manager thread, only read in this class
+    volatile boolean mPersistentVrModeEnabled;
 
     // Used to hold the last user key used to wake the device.  This helps us prevent up events
     // from being passed to the foregrounded app without a corresponding down event
@@ -981,6 +987,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     MyOrientationListener mOrientationListener;
+
+    final PersistentVrStateListener mPersistentVrModeListener =
+            new PersistentVrStateListener() {
+        @Override
+        public void onPersistentVrStateChanged(boolean enabled) {
+            mPersistentVrModeEnabled = enabled;
+        }
+    };
 
     private final StatusBarController mStatusBarController = new StatusBarController();
 
@@ -1914,11 +1928,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (mStatusBar != null) {
                             requestTransientBars(mStatusBar);
                         }
+                        if (mPersistentVrModeEnabled) {
+                            exitPersistentVrMode();
+                        }
                     }
                     @Override
                     public void onSwipeFromBottom() {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                             requestTransientBars(mNavigationBar);
+                        }
+                        if (mPersistentVrModeEnabled) {
+                            exitPersistentVrMode();
                         }
                     }
                     @Override
@@ -1926,11 +1946,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_RIGHT) {
                             requestTransientBars(mNavigationBar);
                         }
+                        if (mPersistentVrModeEnabled) {
+                            exitPersistentVrMode();
+                        }
                     }
                     @Override
                     public void onSwipeFromLeft() {
                         if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_LEFT) {
                             requestTransientBars(mNavigationBar);
+                        }
+                        if (mPersistentVrModeEnabled) {
+                            exitPersistentVrMode();
                         }
                     }
                     @Override
@@ -6487,11 +6513,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void reportScreenStateToVrManager(boolean isScreenOn) {
-        VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
+        if (mVrManagerInternal == null) {
             return;
         }
-        vrService.onScreenStateChanged(isScreenOn);
+        mVrManagerInternal.onScreenStateChanged(isScreenOn);
+    }
+
+    private void exitPersistentVrMode() {
+        if (mVrManagerInternal == null) {
+            return;
+        }
+        mVrManagerInternal.setPersistentVrModeEnabled(false);
     }
 
     private void finishWindowsDrawn() {
@@ -6979,6 +7011,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 });
         mKeyguardDelegate.onSystemReady();
+
+        mVrManagerInternal = LocalServices.getService(VrManagerInternal.class);
+        if (mVrManagerInternal != null) {
+            mVrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
+        }
 
         readCameraLensCoverState();
         updateUiMode();

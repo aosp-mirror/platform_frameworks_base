@@ -88,4 +88,9 @@ public abstract class VrManagerInternal {
      * @param enabled true if the device should be placed in persistent VR mode.
      */
     public abstract void setPersistentVrModeEnabled(boolean enabled);
+
+    /**
+     * Adds listener that reports state changes to persistent VR mode.
+     */
+    public abstract void addPersistentVrModeStateListener(PersistentVrStateListener listener);
 }

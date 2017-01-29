@@ -122,6 +122,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private boolean mGuard;
     private final RemoteCallbackList<IVrStateCallbacks> mRemoteCallbacks =
             new RemoteCallbackList<>();
+    private final ArrayList<PersistentVrStateListener> mPersistentVrStateListeners =
+            new ArrayList<>();
     private int mPreviousCoarseLocationMode = INVALID_APPOPS_MODE;
     private int mPreviousManageOverlayMode = INVALID_APPOPS_MODE;
     private VrState mPendingState;
@@ -132,6 +134,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
+    private static final int MSG_PERSISTENT_VR_MODE_STATE_CHANGE = 2;
 
     /**
      * Set whether VR mode may be enabled.
@@ -151,7 +154,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             } else {
                 // Disable persistent mode when VR mode isn't allowed, allows an escape hatch to
                 // exit persistent VR mode when screen is turned off.
-                mPersistentVrModeEnabled = false;
+                setPersistentModeAndNotifyListenersLocked(false);
 
                 // Set pending state to current state.
                 mPendingState = (mVrModeEnabled && mCurrentVrService != null)
@@ -211,6 +214,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         if (mVrModeAllowed) {
                            VrManagerService.this.consumeAndApplyPendingStateLocked();
                         }
+                    }
+                } break;
+                case MSG_PERSISTENT_VR_MODE_STATE_CHANGE : {
+                    boolean state = (msg.arg1 == 1);
+                    for (int i = 0; i < mPersistentVrStateListeners.size(); i++) {
+                        mPersistentVrStateListeners.get(i).onPersistentVrStateChanged(
+                                state);
                     }
                 } break;
                 default :
@@ -424,6 +434,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     pw.println(n.flattenToString());
                 }
             }
+            pw.println("Attached persistent mode listeners:");
+            if (mPersistentVrStateListeners == null ||
+                    mPersistentVrStateListeners.size() == 0) {
+                pw.println("None");
+            } else {
+                for (PersistentVrStateListener l : mPersistentVrStateListeners) {
+                    pw.print(tab);
+                    pw.println("listener: " + l);
+                }
+            }
             pw.println("\n");
             pw.println("********* End of VrManagerService Dump *********");
         }
@@ -470,6 +490,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public void setPersistentVrModeEnabled(boolean enabled) {
             VrManagerService.this.setPersistentVrModeEnabled(enabled);
+        }
+
+        @Override
+        public void addPersistentVrModeStateListener(PersistentVrStateListener listener) {
+            VrManagerService.this.addPersistentVrModeStateListener(listener);
         }
     }
 
@@ -1013,13 +1038,28 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     }
 
     private void setPersistentVrModeEnabled(boolean enabled) {
-        synchronized (mLock) {
-            mPersistentVrModeEnabled = enabled;
-
+        synchronized(mLock) {
+            setPersistentModeAndNotifyListenersLocked(enabled);
             // Disabling persistent mode when not showing a VR should disable the overall vr mode.
             if (!enabled && mCurrentVrModeComponent == null) {
                 setVrMode(false, null, 0, null);
             }
+        }
+    }
+
+    private void setPersistentModeAndNotifyListenersLocked(boolean enabled) {
+        if (mPersistentVrModeEnabled == enabled) {
+            return;
+        }
+        mPersistentVrModeEnabled = enabled;
+
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_PERSISTENT_VR_MODE_STATE_CHANGE,
+                (mPersistentVrModeEnabled) ? 1 : 0, 0));
+    }
+
+    private void addPersistentVrModeStateListener(PersistentVrStateListener listener) {
+        synchronized (mLock) {
+            mPersistentVrStateListeners.add(listener);
         }
     }
 
