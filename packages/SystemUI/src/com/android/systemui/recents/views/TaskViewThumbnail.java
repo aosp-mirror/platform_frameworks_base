@@ -31,6 +31,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewDebug;
@@ -40,7 +41,6 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 import java.io.PrintWriter;
-
 
 /**
  * The task thumbnail view.  It implements an image view that allows for animating the dim and
@@ -176,9 +176,25 @@ public class TaskViewThumbnail extends View {
     void setThumbnail(Bitmap bm, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         if (bm != null) {
             bm.prepareToDraw();
-            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+
+            float INITIAL_SCALE = 0.75f;
+            int h = bm.getHeight();
+            int w = bm.getWidth();
+            Bitmap cropped = null;
+
+            if (currentHandsMode() == 1) {
+                cropped = Bitmap.createBitmap(bm, 0, (int)(h * (1-INITIAL_SCALE)),
+                        (int)(w * INITIAL_SCALE), (int)(h * INITIAL_SCALE));
+            } else if (currentHandsMode() == 2) {
+                cropped = Bitmap.createBitmap(bm, (int)(w * (1-INITIAL_SCALE)), (int)(h * (1-INITIAL_SCALE)),
+                        (int)(w * INITIAL_SCALE), (int)(h * INITIAL_SCALE));
+            }
+
+            mBitmapShader = new BitmapShader(currentHandsMode() != 0 ? cropped: bm,
+                    Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
-            mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            mThumbnailRect.set(0, 0, currentHandsMode() != 0 ? cropped.getWidth() : w,
+                    currentHandsMode() != 0 ? cropped.getHeight() : h);
             mThumbnailInfo = thumbnailInfo;
             updateThumbnailScale();
         } else {
@@ -187,6 +203,20 @@ public class TaskViewThumbnail extends View {
             mThumbnailRect.setEmpty();
             mThumbnailInfo = null;
         }
+    }
+
+    private int currentHandsMode() {
+        int mode;
+        String str = Settings.Global.getString(getContext().getContentResolver(),
+                Settings.Global.SINGLE_HAND_MODE);
+        if (str != null && str.contains("left")) {
+            mode = 1;
+        } else if (str != null && str.contains("right")) {
+            mode = 2;
+        } else {
+            mode = 0;
+        }
+        return mode;
     }
 
     /** Updates the paint to draw the thumbnail. */
