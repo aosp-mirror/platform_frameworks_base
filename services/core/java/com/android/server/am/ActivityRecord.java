@@ -30,6 +30,7 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
@@ -44,7 +45,10 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
+import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -79,6 +83,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -2007,7 +2012,8 @@ final class ActivityRecord implements AppWindowContainerListener {
                         + ", newGlobalConfig=" + newGlobalConfig
                         + ", newTaskMergedOverrideConfig=" + newTaskMergedOverrideConfig);
 
-        if ((changes&(~info.getRealConfigChanged())) != 0 || forceNewConfig) {
+        if (shouldRelaunchLocked(changes, newGlobalConfig, newTaskMergedOverrideConfig)
+                || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
             startFreezingScreenLocked(app, globalChanges);
@@ -2056,6 +2062,27 @@ final class ActivityRecord implements AppWindowContainerListener {
         stopFreezingScreenLocked(false);
 
         return true;
+    }
+
+    /**
+     * When assessing a configuration change, decide if the changes flags and the new configurations
+     * should cause the Activity to relaunch.
+     */
+    private boolean shouldRelaunchLocked(int changes, Configuration newGlobalConfig,
+            Configuration newTaskMergedOverrideConfig) {
+        int configChanged = info.getRealConfigChanged();
+
+        // Override for apps targeting pre-O sdks
+        // If a device is in VR mode, and we're transitioning into VR ui mode, add ignore ui mode
+        // to the config change.
+        // For O and later, apps will be required to add configChanges="uimode" to their manifest.
+        if (appInfo.targetSdkVersion < O
+                && requestedVrComponent != null
+                && (isInVrUiMode(newGlobalConfig) || isInVrUiMode(newTaskMergedOverrideConfig))) {
+            configChanged |= CONFIG_UI_MODE;
+        }
+
+        return (changes&(~configChanged)) != 0;
     }
 
     private static int getTaskConfigurationChanges(ActivityRecord record, Configuration taskConfig,
@@ -2292,6 +2319,10 @@ final class ActivityRecord implements AppWindowContainerListener {
             case RECENTS_ACTIVITY_TYPE: return "RECENTS_ACTIVITY_TYPE";
             default: return Integer.toString(type);
         }
+    }
+
+    private static boolean isInVrUiMode(Configuration config) {
+        return (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
     }
 
     @Override
