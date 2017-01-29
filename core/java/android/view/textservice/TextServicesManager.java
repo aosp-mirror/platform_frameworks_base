@@ -171,8 +171,7 @@ public final class TextServicesManager {
         if (subtypeInUse == null) {
             return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(
-                sci, mService, listener, subtypeInUse);
+        final SpellCheckerSession session = new SpellCheckerSession(sci, mService, listener);
         try {
             mService.getSpellCheckerService(sci.getId(), subtypeInUse.getLocale(),
                     session.getTextServicesSessionListener(),
