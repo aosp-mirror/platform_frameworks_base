@@ -29,6 +29,7 @@ import static com.android.server.pm.PackageInstallerService.prepareExternalStage
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -45,6 +46,7 @@ import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.FileBridge;
@@ -295,6 +297,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
+            info.installReason = params.installReason;
             info.sizeBytes = params.sizeBytes;
             info.appPackageName = params.appPackageName;
             info.appIcon = params.appIcon;
@@ -1139,6 +1142,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);
+
+        // Send broadcast to default launcher only if it's a new install
+        final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
+        if (success && isNewInstall) {
+            UserManagerService ums = UserManagerService.getInstance();
+            if (ums != null) {
+                final UserInfo parent = ums.getProfileParent(userId);
+                final int launcherUid = (parent != null) ? parent.id : userId;
+                final ComponentName launcherComponent = mPm.getDefaultHomeActivity(launcherUid);
+                if (launcherComponent != null) {
+                    Intent launcherIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
+                            .putExtra(PackageInstaller.EXTRA_SESSION, generateInfo())
+                            .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
+                            .setPackage(launcherComponent.getPackageName());
+                    mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
+                }
+            }
+        }
+
         mCallback.onSessionFinished(this, success);
     }
 

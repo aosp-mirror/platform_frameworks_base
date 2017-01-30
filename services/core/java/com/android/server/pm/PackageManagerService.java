@@ -19636,6 +19636,35 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
+    /**
+     * Report the 'Home' activity which is currently set as "always use this one". If non is set
+     * then reports the most likely home activity or null if there are more than one.
+     */
+    public ComponentName getDefaultHomeActivity(int userId) {
+        List<ResolveInfo> allHomeCandidates = new ArrayList<>();
+        ComponentName cn = getHomeActivitiesAsUser(allHomeCandidates, userId);
+        if (cn != null) {
+            return cn;
+        }
+
+        // Find the launcher with the highest priority and return that component if there are no
+        // other home activity with the same priority.
+        int lastPriority = Integer.MIN_VALUE;
+        ComponentName lastComponent = null;
+        final int size = allHomeCandidates.size();
+        for (int i = 0; i < size; i++) {
+            final ResolveInfo ri = allHomeCandidates.get(i);
+            if (ri.priority > lastPriority) {
+                lastComponent = ri.activityInfo.getComponentName();
+                lastPriority = ri.priority;
+            } else if (ri.priority == lastPriority) {
+                // Two components found with same priority.
+                lastComponent = null;
+            }
+        }
+        return lastComponent;
+    }
+
     private Intent getHomeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
