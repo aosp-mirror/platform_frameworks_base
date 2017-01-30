@@ -2043,7 +2043,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             mInterface.stopLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
-            mInterface.startLockTaskModeById(taskId);
+            mInterface.startSystemLockTaskMode(taskId);
         }
         pw.println("Activity manager is " + (mInterface.isInLockTaskMode() ? "" : "not ") +
                 "in lockTaskMode");
