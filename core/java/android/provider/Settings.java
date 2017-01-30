@@ -4128,6 +4128,7 @@ public final class Settings {
             EPHEMERAL_SETTINGS.add(FONT_SCALE);
             EPHEMERAL_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             EPHEMERAL_SETTINGS.add(TIME_12_24);
+            EPHEMERAL_SETTINGS.add(SOUND_EFFECTS_ENABLED);
         }
 
         /**
