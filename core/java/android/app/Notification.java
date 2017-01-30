@@ -1895,6 +1895,9 @@ public class Notification implements Parcelable
             final String[] keys = keyset.toArray(new String[N]);
             for (int i=0; i<N; i++) {
                 final String key = keys[i];
+                if (TvExtender.EXTRA_TV_EXTENDER.equals(key)) {
+                    continue;
+                }
                 final Object obj = extras.get(key);
                 if (obj != null &&
                     (  obj instanceof Parcelable
