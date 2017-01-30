@@ -101,9 +101,31 @@ bool TextureCache::canMakeTextureFromBitmap(Bitmap* bitmap) {
     return true;
 }
 
+Texture* TextureCache::createTexture(Bitmap* bitmap) {
+     Texture* texture = new Texture(Caches::getInstance());
+     texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
+     texture->generation = bitmap->getGenerationID();
+     texture->upload(*bitmap);
+     return texture;
+}
+
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
 Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
+    if (bitmap->isHardware()) {
+        auto textureIterator = mHardwareTextures.find(bitmap->getStableID());
+        if (textureIterator == mHardwareTextures.end()) {
+            Texture*  texture = createTexture(bitmap);
+            mHardwareTextures.insert(std::make_pair(bitmap->getStableID(),
+                    std::unique_ptr<Texture>(texture)));
+            if (mDebugEnabled) {
+                ALOGD("Texture created for hw bitmap size = %d", texture->bitmapSize);
+            }
+            return texture;
+        }
+        return textureIterator->second.get();
+    }
+
     Texture* texture = mCache.get(bitmap->getStableID());
 
     if (!texture) {
@@ -124,11 +146,7 @@ Texture* TextureCache::getCachedTexture(Bitmap* bitmap) {
         }
 
         if (canCache) {
-            texture = new Texture(Caches::getInstance());
-            texture->bitmapSize = size;
-            texture->generation = bitmap->getGenerationID();
-            texture->upload(*bitmap);
-
+            texture = createTexture(bitmap);
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
                      bitmap, texture->id, size, mSize);
@@ -166,12 +184,7 @@ Texture* TextureCache::get(Bitmap* bitmap) {
         if (!canMakeTextureFromBitmap(bitmap)) {
             return nullptr;
         }
-
-        const uint32_t size = bitmap->rowBytes() * bitmap->height();
-        texture = new Texture(Caches::getInstance());
-        texture->bitmapSize = size;
-        texture->upload(*bitmap);
-        texture->generation = bitmap->getGenerationID();
+        texture = createTexture(bitmap);
         texture->cleanup = true;
     }
 
@@ -188,7 +201,13 @@ void TextureCache::clearGarbage() {
     size_t count = mGarbage.size();
     for (size_t i = 0; i < count; i++) {
         uint32_t pixelRefId = mGarbage[i];
-        mCache.remove(pixelRefId);
+        auto hardwareIter = mHardwareTextures.find(pixelRefId);
+        if (hardwareIter == mHardwareTextures.end()) {
+            mCache.remove(pixelRefId);
+        } else {
+            hardwareIter->second->deleteTexture();
+            mHardwareTextures.erase(hardwareIter);
+        }
     }
     mGarbage.clear();
 }
