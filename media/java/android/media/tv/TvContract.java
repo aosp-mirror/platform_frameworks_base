@@ -1665,7 +1665,7 @@ public final class TvContract {
          *
          * <p>Type: TEXT
          */
-        public static final String COLUMN_LOGO = "logo";
+        public static final String COLUMN_LOGO_URI = "logo_uri";
 
         /**
          * The availability of this TV program.
@@ -1860,8 +1860,8 @@ public final class TvContract {
          *
          * <p>Type: INTEGER
          */
-        public static final String COLUMN_PREVIEW_LAST_PLAYBACK_POSITION =
-                "preview_last_playback_position";
+        public static final String COLUMN_LAST_PLAYBACK_POSITION_MILLIS =
+                "last_playback_position_millis";
 
         /**
          * The duration (in milliseconds) of the preview video.
@@ -1872,7 +1872,7 @@ public final class TvContract {
          *
          * <p>Type: INTEGER
          */
-        public static final String COLUMN_PREVIEW_DURATION = "preview_duration";
+        public static final String COLUMN_DURATION_MILLIS = "duration_millis";
 
         /**
          * The intent URI which is launched when the preview video is selected.
@@ -1885,8 +1885,8 @@ public final class TvContract {
          *
          * <p>Type: TEXT
          */
-        public static final String COLUMN_PREVIEW_INTENT_URI =
-                "preview_intent_uri";
+        public static final String COLUMN_APP_LINK_INTENT_URI =
+                "app_link_intent_uri";
 
         /**
          * The weight of the preview program within the channel.
@@ -1900,7 +1900,7 @@ public final class TvContract {
          *
          * <p>Type: INTEGER
          */
-        public static final String COLUMN_PREVIEW_WEIGHT = "preview_weight";
+        public static final String COLUMN_WEIGHT = "weight";
 
         /**
          * The flag indicating whether this program is transient or not.
