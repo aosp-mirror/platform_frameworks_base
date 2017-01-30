@@ -39,6 +39,7 @@ import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Trace;
+import android.text.FontConfig;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,7 +47,6 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import java.io.IOException;
@@ -746,13 +746,17 @@ public class ResourcesImpl {
      * Loads a font from XML or resources stream.
      */
     @Nullable
-    public Typeface loadFont(TypedValue value, int id) {
+    public Typeface loadFont(Resources wrapper, TypedValue value, int id) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
                     + Integer.toHexString(id) + ") is not a Font: " + value);
         }
 
         final String file = value.string.toString();
+        Typeface cached = Typeface.createFromCache(mAssets, file);
+        if (cached != null) {
+            return cached;
+        }
 
         if (DEBUG_LOAD) {
             Log.v(TAG, "Loading font for cookie " + value.assetCookie + ": " + file);
@@ -760,12 +764,17 @@ public class ResourcesImpl {
 
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
         try {
-            if (file.endsWith(".xml")) {
-                // TODO handle xml type font definitions
-            } else {
-                return Typeface.createFromResources(
-                        mAssets, value.string.toString(), value.assetCookie);
+            if (file.endsWith("xml")) {
+                final XmlResourceParser rp = loadXmlResourceParser(
+                        file, id, value.assetCookie, "font");
+                final FontConfig config = FontResourcesParser.parse(rp, wrapper);
+                return Typeface.createFromResources(config, mAssets, file);
             }
+            return Typeface.createFromResources(mAssets, file, value.assetCookie);
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "Failed to parse xml resource " + file, e);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read xml resource " + file, e);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }

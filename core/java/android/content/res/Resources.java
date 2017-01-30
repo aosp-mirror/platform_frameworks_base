@@ -27,6 +27,7 @@ import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
+import android.annotation.FontRes;
 import android.annotation.FractionRes;
 import android.annotation.IntegerRes;
 import android.annotation.LayoutRes;
@@ -350,12 +351,12 @@ public class Resources {
      *
      * @return Typeface The Typeface data associated with the resource.
      */
-    @NonNull public Typeface getFont(@StringRes int id) throws NotFoundException {
+    @NonNull public Typeface getFont(@FontRes int id) throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
         try {
             final ResourcesImpl impl = mResourcesImpl;
             impl.getValue(id, value, true);
-            Typeface typeface = impl.loadFont(value, id);
+            Typeface typeface = impl.loadFont(this, value, id);
             if (typeface != null) {
                 return typeface;
             }
@@ -364,6 +365,11 @@ public class Resources {
         }
         throw new NotFoundException("Font resource ID #0x"
                 + Integer.toHexString(id));
+    }
+
+    @NonNull
+    Typeface getFont(@NonNull TypedValue value, @FontRes int id) throws NotFoundException {
+        return mResourcesImpl.loadFont(this, value, id);
     }
 
     /**
