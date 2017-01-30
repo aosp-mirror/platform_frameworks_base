@@ -63,6 +63,7 @@ public class NotificationGutsTest {
     private static final String TEST_CHANNEL = "test_channel";
     private static final String TEST_CHANNEL_NAME = "TEST CHANNEL NAME";
 
+    private NotificationGuts mNotificationGuts;
     private NotificationInfo mNotificationInfo;
     private final INotificationManager mMockINotificationManager = mock(INotificationManager.class);
     private final PackageManager mMockPackageManager = mock(PackageManager.class);
@@ -78,6 +79,9 @@ public class NotificationGutsTest {
                 LayoutInflater.from(InstrumentationRegistry.getTargetContext());
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
                 null);
+        mNotificationGuts = (NotificationGuts) layoutInflater.inflate(R.layout.notification_guts,
+                null);
+        mNotificationInfo.setInteractionListener(mNotificationGuts);
 
         // PackageManager must return a packageInfo and applicationInfo.
         final PackageInfo packageInfo = new PackageInfo();
@@ -198,54 +202,41 @@ public class NotificationGutsTest {
 
     @Test
     @UiThreadTest
-    public void testCloseControls_DoesNotUpdateNotificationChannelIfUnchanged() throws Exception {
+    public void testSaveImportance_DoesNotUpdateNotificationChannelIfUnchanged() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
-        mNotificationInfo.closeControls();
+        mNotificationInfo.saveImportance();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
 
     @Test
     @UiThreadTest
-    public void testCloseControls_DoesNotUpdateNotificationChannelIfUnspecified() throws Exception {
+    public void testSaveImportance_DoesNotUpdateNotificationChannelIfUnspecified()
+            throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
-        mNotificationInfo.closeControls();
+        mNotificationInfo.saveImportance();
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
 
     @Test
     @UiThreadTest
-    public void testCloseControls_CallsUpdateNotificationChannelIfChanged() throws Exception {
+    public void testSaveImportance_CallsUpdateNotificationChannelIfChanged() throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
         RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
         highButton.setChecked(true);
-        mNotificationInfo.closeControls();
+        mNotificationInfo.saveImportance();
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
         assertEquals(NotificationManager.IMPORTANCE_HIGH, mNotificationChannel.getImportance());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testCloseControls_DoesNotUpdateNotificationChannelIfSaveFalse() throws Exception {
-        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
-        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, mNotificationChannel, null, null, null);
-
-        RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
-        highButton.setChecked(true);
-        mNotificationInfo.closeControls();
-        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
-                anyString(), anyInt(), any());
     }
 
     @Test
@@ -292,7 +283,7 @@ public class NotificationGutsTest {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.closeControls();
+        mNotificationInfo.saveImportance();
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }
@@ -308,7 +299,7 @@ public class NotificationGutsTest {
         RadioButton lowButton = (RadioButton) mNotificationInfo.findViewById(R.id.low_importance);
         lowButton.setChecked(true);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.closeControls();
+        mNotificationInfo.saveImportance();
         assertEquals(NotificationManager.IMPORTANCE_NONE, mNotificationChannel.getImportance());
     }
 }
