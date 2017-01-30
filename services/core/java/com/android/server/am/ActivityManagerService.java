@@ -3753,7 +3753,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             int debugFlags = 0;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+                debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
+                debugFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.
                 debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
