@@ -20,13 +20,12 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,25 +41,19 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
@@ -71,8 +64,10 @@ public class NotificationManagerServiceTest {
     private NotificationManagerService mNotificationManagerService;
     private INotificationManager mBinderService;
     private IPackageManager mPackageManager = mock(IPackageManager.class);
+    final PackageManager mPackageManagerClient = mock(PackageManager.class);
     private Context mContext;
     private HandlerThread mThread;
+    final RankingHelper mRankingHelper = mock(RankingHelper.class);
 
     @Before
     @Test
@@ -86,8 +81,7 @@ public class NotificationManagerServiceTest {
         applicationInfo.uid = uid;
         when(mPackageManager.getApplicationInfo(any(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
-        final PackageManager mockPackageManagerClient = mock(PackageManager.class);
-        when(mockPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
@@ -102,7 +96,7 @@ public class NotificationManagerServiceTest {
                         new ComponentName(pkg, "test_class"), uid, true, null, 0));
 
         mNotificationManagerService.init(mThread.getLooper(), mPackageManager,
-                mockPackageManagerClient, mockLightsManager, mockNotificationListeners);
+                mPackageManagerClient, mockLightsManager, mockNotificationListeners);
 
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
@@ -127,17 +121,25 @@ public class NotificationManagerServiceTest {
     }
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
+        return generateNotificationRecord(channel, null);
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel,
+            Notification.TvExtender extender) {
         if (channel == null) {
             channel = new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
         }
-        Notification n = new Notification.Builder(mContext)
+        Notification.Builder nb = new Notification.Builder(mContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .build();
+                .setChannel(channel.getId())
+                .setPriority(Notification.PRIORITY_HIGH);
+        if (extender != null) {
+            nb.extend(extender);
+        }
         StatusBarNotification sbn = new StatusBarNotification(mContext.getPackageName(),
                 mContext.getPackageName(), 1, "tag", uid, 0,
-                n, new UserHandle(uid), null, 0);
+                nb.build(), new UserHandle(uid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -364,5 +366,37 @@ public class NotificationManagerServiceTest {
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(sbn.getPackageName());
         assertEquals(1, notifs.length);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testTvExtenderChannelOverride_onTv() throws Exception {
+        mNotificationManagerService.setIsTelevision(true);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelWithFallback(
+                anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
+                        new NotificationChannel("foo", "foo", NotificationManager.IMPORTANCE_HIGH));
+
+        Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
+        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+                generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
+        verify(mRankingHelper, times(1)).getNotificationChannelWithFallback(
+                anyString(), anyInt(), eq("foo"), anyBoolean());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testTvExtenderChannelOverride_notOnTv() throws Exception {
+        mNotificationManagerService.setIsTelevision(false);
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        when(mRankingHelper.getNotificationChannelWithFallback(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                new NotificationChannel("id", "id", NotificationManager.IMPORTANCE_HIGH));
+
+        Notification.TvExtender tv = new Notification.TvExtender().setChannel("foo");
+        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+                generateNotificationRecord(null, tv).getNotification(), new int[1], 0);
+        verify(mRankingHelper, times(1)).getNotificationChannelWithFallback(
+                anyString(), anyInt(), eq("id"), anyBoolean());
     }
 }
