@@ -118,6 +118,7 @@ public class NotificationRecordTest {
                 defaults |= Notification.DEFAULT_SOUND;
             } else {
                 builder.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
+                channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
             }
         }
         if (buzzy) {
@@ -150,29 +151,31 @@ public class NotificationRecordTest {
 
     @Test
     public void testSound_default_preUpgradeUsesNotification() throws Exception {
-        defaultChannel.setSound(null);
+        defaultChannel.setSound(null, null);
         // pre upgrade, default sound.
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, record.getSound());
+        assertEquals(Notification.AUDIO_ATTRIBUTES_DEFAULT, record.getAudioAttributes());
     }
 
     @Test
     public void testSound_custom_preUpgradeUsesNotification() throws Exception {
-        defaultChannel.setSound(null);
+        defaultChannel.setSound(null, null);
         // pre upgrade, custom sound.
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_SOUND, record.getSound());
+        assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
 
     @Test
     public void testSound_default_userLocked_preUpgrade() throws Exception {
-        defaultChannel.setSound(CUSTOM_SOUND);
+        defaultChannel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         // pre upgrade, default sound.
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
@@ -180,17 +183,19 @@ public class NotificationRecordTest {
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
         assertEquals(CUSTOM_SOUND, record.getSound());
+        assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
 
     @Test
     public void testSound_default_upgradeUsesChannel() throws Exception {
-        channel.setSound(CUSTOM_SOUND);
+        channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         // post upgrade, default sound.
         StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(CUSTOM_SOUND, record.getSound());
+        assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
 
     @Test
@@ -236,28 +241,6 @@ public class NotificationRecordTest {
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertEquals(CUSTOM_CHANNEL_VIBRATION, record.getVibration());
-    }
-
-    @Test
-    public void testAudioAttributes_preUpgrade() throws Exception {
-        defaultChannel.setSound(null);
-        // pre upgrade, default sound.
-        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
-                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */);
-
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
-    }
-
-    @Test
-    public void testAudioAttributes_upgrade() throws Exception {
-        channel.setSound(null);
-        // post upgrade, default sound.
-        StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
-                false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */);
-
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertEquals(CUSTOM_ATTRIBUTES, record.getAudioAttributes());
     }
 
     @Test

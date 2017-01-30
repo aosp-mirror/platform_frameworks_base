@@ -569,7 +569,7 @@ public class RankingHelper implements RankingConfig {
             channel.setBypassDnd(updatedChannel.canBypassDnd());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_SOUND) == 0) {
-            channel.setSound(updatedChannel.getSound());
+            channel.setSound(updatedChannel.getSound(), updatedChannel.getAudioAttributes());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
             channel.enableVibration(updatedChannel.shouldVibrate());
