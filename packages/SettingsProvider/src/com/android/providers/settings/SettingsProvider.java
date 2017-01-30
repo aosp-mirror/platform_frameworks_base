@@ -1531,14 +1531,14 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private Set<String> getEphemeralAccessibleSettings(int settingsType) {
+    private Set<String> getInstantAppAccessibleSettings(int settingsType) {
         switch (settingsType) {
             case SETTINGS_TYPE_GLOBAL:
-                return Settings.Global.EPHEMERAL_SETTINGS;
+                return Settings.Global.INSTANT_APP_SETTINGS;
             case SETTINGS_TYPE_SECURE:
-                return Settings.Secure.EPHEMERAL_SETTINGS;
+                return Settings.Secure.INSTANT_APP_SETTINGS;
             case SETTINGS_TYPE_SYSTEM:
-                return Settings.System.EPHEMERAL_SETTINGS;
+                return Settings.System.INSTANT_APP_SETTINGS;
             default:
                 throw new IllegalArgumentException("Invalid settings type: " + settingsType);
         }
@@ -1547,7 +1547,7 @@ public class SettingsProvider extends ContentProvider {
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
         ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
         if (ai.isInstantApp()) {
-            return new ArrayList<String>(getEphemeralAccessibleSettings(settingsType));
+            return new ArrayList<String>(getInstantAppAccessibleSettings(settingsType));
         } else {
             return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
         }
@@ -1561,7 +1561,7 @@ public class SettingsProvider extends ContentProvider {
         if (!ai.isInstantApp()) {
             return;
         }
-        if (!getEphemeralAccessibleSettings(settingsType).contains(settingName)) {
+        if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)) {
             throw new SecurityException("Setting " + settingName + " is not accessible from"
                     + " ephemeral package " + getCallingPackage());
         }

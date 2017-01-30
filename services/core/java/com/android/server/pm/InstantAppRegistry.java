@@ -217,7 +217,7 @@ class InstantAppRegistry {
             propagateInstantAppPermissionsIfNeeded(pkg.packageName, userId);
 
             // Track instant apps
-            if (pkg.applicationInfo.isInstantApp()) {
+            if (ps.getInstantApp(userId)) {
                 addInstantAppLPw(userId, ps.appId);
             }
 
@@ -257,7 +257,7 @@ class InstantAppRegistry {
                 continue;
             }
 
-            if (pkg.applicationInfo.isInstantApp()) {
+            if (ps.getInstantApp(userId)) {
                 // Add a record for an uninstalled instant app
                 addUninstalledInstantAppLPw(pkg, userId);
                 removeInstantAppLPw(userId, ps.appId);
@@ -533,11 +533,12 @@ class InstantAppRegistry {
 
         final int packageCount = mService.mPackages.size();
         for (int i = 0; i < packageCount; i++) {
-            PackageParser.Package pkg = mService.mPackages.valueAt(i);
-            if (!pkg.applicationInfo.isInstantApp()) {
+            final PackageParser.Package pkg = mService.mPackages.valueAt(i);
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
+            if (ps == null || !ps.getInstantApp(userId)) {
                 continue;
             }
-            InstantAppInfo info = createInstantAppInfoForPackage(
+            final InstantAppInfo info = createInstantAppInfoForPackage(
                     pkg, userId, true);
             if (info == null) {
                 continue;

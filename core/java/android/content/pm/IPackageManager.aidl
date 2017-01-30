@@ -552,7 +552,8 @@ interface IPackageManager {
     boolean setInstallLocation(int loc);
     int getInstallLocation();
 
-    int installExistingPackageAsUser(String packageName, int userId, int installReason);
+    int installExistingPackageAsUser(String packageName, int userId, int installFlags,
+            int installReason);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
