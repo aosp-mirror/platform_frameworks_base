@@ -35,10 +35,12 @@ import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -47,8 +49,6 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.WindowManagerInternal;
-import android.view.WindowManagerPolicy;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -62,7 +62,6 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
-import com.android.server.wm.WindowManagerService;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -238,7 +237,7 @@ final class UiModeManagerService extends SystemService {
         publishBinderService(Context.UI_MODE_SERVICE, mService);
     }
 
-    private final IBinder mService = new IUiModeManager.Stub() {
+    private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
         @Override
         public void enableCarMode(int flags) {
             if (isUiModeLocked()) {
@@ -387,6 +386,12 @@ final class UiModeManagerService extends SystemService {
             synchronized (mLock) {
                 return mNightModeLocked;
             }
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            new Shell(mService).exec(mService, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
@@ -777,4 +782,101 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
+    /**
+     * Handles "adb shell" commands.
+     */
+    private static class Shell extends ShellCommand {
+        public static final String NIGHT_MODE_STR_YES = "yes";
+        public static final String NIGHT_MODE_STR_NO = "no";
+        public static final String NIGHT_MODE_STR_AUTO = "auto";
+        public static final String NIGHT_MODE_STR_UNKNOWN = "unknown";
+        private final IUiModeManager mInterface;
+
+        Shell(IUiModeManager iface) {
+            mInterface = iface;
+        }
+
+        @Override
+        public void onHelp() {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("UiModeManager service (uimode) commands:");
+            pw.println("  help");
+            pw.println("    Print this help text.");
+            pw.println("  night [yes|no|auto]");
+            pw.println("    Set or read night mode.");
+        }
+
+        @Override
+        public int onCommand(String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
+
+            try {
+                switch (cmd) {
+                    case "night":
+                        return handleNightMode();
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (RemoteException e) {
+                final PrintWriter err = getErrPrintWriter();
+                err.println("Remote exception: " + e);
+            }
+            return -1;
+        }
+
+        private int handleNightMode() throws RemoteException {
+            final PrintWriter err = getErrPrintWriter();
+            final String modeStr = getNextArg();
+            if (modeStr == null) {
+                printCurrentNightMode();
+                return 0;
+            }
+
+            final int mode = strToNightMode(modeStr);
+            if (mode >= 0) {
+                mInterface.setNightMode(mode);
+                printCurrentNightMode();
+                return 0;
+            } else {
+                err.println("Error: mode must be '" + NIGHT_MODE_STR_YES + "', '"
+                        + NIGHT_MODE_STR_NO + "', or '" + NIGHT_MODE_STR_AUTO + "'");
+                return -1;
+            }
+        }
+
+        private void printCurrentNightMode() throws RemoteException {
+            final PrintWriter pw = getOutPrintWriter();
+            final int currMode = mInterface.getNightMode();
+            final String currModeStr = nightModeToStr(currMode);
+            pw.println("Night mode: " + currModeStr);
+        }
+
+        private static String nightModeToStr(int mode) {
+            switch (mode) {
+                case UiModeManager.MODE_NIGHT_YES:
+                    return NIGHT_MODE_STR_YES;
+                case UiModeManager.MODE_NIGHT_NO:
+                    return NIGHT_MODE_STR_NO;
+                case UiModeManager.MODE_NIGHT_AUTO:
+                    return NIGHT_MODE_STR_AUTO;
+                default:
+                    return NIGHT_MODE_STR_UNKNOWN;
+            }
+        }
+
+        private static int strToNightMode(String modeStr) {
+            switch (modeStr) {
+                case NIGHT_MODE_STR_YES:
+                    return UiModeManager.MODE_NIGHT_YES;
+                case NIGHT_MODE_STR_NO:
+                    return UiModeManager.MODE_NIGHT_NO;
+                case NIGHT_MODE_STR_AUTO:
+                    return UiModeManager.MODE_NIGHT_AUTO;
+                default:
+                    return -1;
+            }
+        }
+    }
 }
