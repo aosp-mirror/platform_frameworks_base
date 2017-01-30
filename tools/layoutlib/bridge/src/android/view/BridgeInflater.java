@@ -38,7 +38,10 @@ import org.xmlpull.v1.XmlPullParser;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 
 import java.io.File;
@@ -399,6 +402,15 @@ public final class BridgeInflater extends LayoutInflater {
                 String maxValue = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI, "maxValue");
                 if (maxValue != null) {
                     numberPicker.setMaxValue(Integer.parseInt(maxValue));
+                }
+            }
+            else if (view instanceof ImageView) {
+                ImageView img = (ImageView) view;
+                Drawable drawable = img.getDrawable();
+                if (drawable instanceof Animatable) {
+                    if (!((Animatable) drawable).isRunning()) {
+                        ((Animatable) drawable).start();
+                    }
                 }
             }
 

@@ -863,29 +863,6 @@ public class VectorDrawable_Delegate {
             }
 
             mLocalMatrix.set(copy.mLocalMatrix);
-
-            final ArrayList<Object> children = copy.mChildren;
-            //noinspection ForLoopReplaceableByForEach
-            for (int i = 0; i < children.size(); i++) {
-                Object copyChild = children.get(i);
-                if (copyChild instanceof VGroup_Delegate) {
-                    VGroup_Delegate copyGroup = (VGroup_Delegate) copyChild;
-                    mChildren.add(new VGroup_Delegate(copyGroup, targetsMap));
-                } else {
-                    VPath_Delegate newPath;
-                    if (copyChild instanceof VFullPath_Delegate) {
-                        newPath = new VFullPath_Delegate((VFullPath_Delegate) copyChild);
-                    } else if (copyChild instanceof VClipPath_Delegate) {
-                        newPath = new VClipPath_Delegate((VClipPath_Delegate) copyChild);
-                    } else {
-                        throw new IllegalStateException("Unknown object in the tree!");
-                    }
-                    mChildren.add(newPath);
-                    if (newPath.mPathName != null) {
-                        targetsMap.put(newPath.mPathName, newPath);
-                    }
-                }
-            }
         }
 
         private VGroup_Delegate() {
