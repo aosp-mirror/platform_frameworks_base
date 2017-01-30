@@ -145,18 +145,10 @@ public final class WebViewFactory {
     /**
      * @hide
      */
-    public static Class<WebViewFactoryProvider> getWebViewProviderClass(  ClassLoader clazzLoader)
-            throws ClassNotFoundException{
-        try {
-            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
-                    true, clazzLoader);
-        } catch (ClassNotFoundException e) {
-            // TODO: This loads the provider which is not built for O, should be removed
-            // before the release.
-            return (Class<WebViewFactoryProvider>) Class.forName(
-                    "com.android.webview.chromium.WebViewChromiumFactoryProvider",
-                    true, clazzLoader);
-        }
+    public static Class<WebViewFactoryProvider> getWebViewProviderClass(ClassLoader clazzLoader)
+            throws ClassNotFoundException {
+        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
+                true, clazzLoader);
     }
 
     /**
@@ -225,15 +217,10 @@ public final class WebViewFactory {
                     }
                 }
 
-                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactoryProvider invocation");
                 try {
-                    if (staticFactory != null) {
-                        sProviderInstance = (WebViewFactoryProvider)
-                                staticFactory.invoke(null, new WebViewDelegate());
-                    } else {
-                        sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
-                                .newInstance(new WebViewDelegate());
-                    }
+                    sProviderInstance = (WebViewFactoryProvider)
+                            staticFactory.invoke(null, new WebViewDelegate());
                     if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
                     return sProviderInstance;
                 } catch (Exception e) {
@@ -384,8 +371,7 @@ public final class WebViewFactory {
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
                 try {
                     return getWebViewProviderClass(clazzLoader);
-                }
-                finally {
+                } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
             } catch (ClassNotFoundException e) {

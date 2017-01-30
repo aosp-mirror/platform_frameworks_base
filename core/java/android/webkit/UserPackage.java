@@ -20,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.os.Build;
 import android.os.UserManager;
 
 import java.util.ArrayList;
@@ -75,6 +76,15 @@ public class UserPackage {
         return (((mPackageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
             && ((mPackageInfo.applicationInfo.privateFlags
                         & ApplicationInfo.PRIVATE_FLAG_HIDDEN) == 0));
+    }
+
+    /**
+     * Returns whether the package represented by {@param packageInfo} targets a sdk version
+     * supported by the current framework version.
+     */
+    public static boolean hasCorrectTargetSdkVersion(PackageInfo packageInfo) {
+        // TODO(gsennton) use Build.VERSION_CODES.O when that has been updated.
+        return packageInfo.applicationInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1;
     }
 
     public UserInfo getUserInfo() {

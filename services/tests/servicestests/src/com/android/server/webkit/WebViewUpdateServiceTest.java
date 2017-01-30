@@ -16,6 +16,7 @@
 
 package com.android.server.webkit;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -174,6 +176,8 @@ public class WebViewUpdateServiceTest {
             // no flag means invalid
             p.applicationInfo.metaData.putString(WEBVIEW_LIBRARY_FLAG, "blah");
         }
+        // Default to this package being valid in terms of targetSdkVersion.
+        p.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
         return p;
     }
 
@@ -1613,5 +1617,43 @@ public class WebViewUpdateServiceTest {
                 WebViewUpdateService.PACKAGE_ADDED_REPLACED, 0);
         checkPreparationPhasesForPackage(primaryPackage, 3);
         assertTrue(mWebViewUpdateServiceImpl.isMultiProcessEnabled());
+    }
+
+    /**
+     * Ensure that packages with a targetSdkVersion targeting the current platform are valid, and
+     * that packages targeting an older version are not valid.
+     */
+    @Test
+    public void testTargetSdkVersionValidity() {
+        PackageInfo newSdkPackage = createPackageInfo("newTargetSdkPackage",
+            true /* enabled */, true /* valid */, true /* installed */);
+        newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+        PackageInfo currentSdkPackage = createPackageInfo("currentTargetSdkPackage",
+            true /* enabled */, true /* valid */, true /* installed */);
+        currentSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1+1;
+        PackageInfo oldSdkPackage = createPackageInfo("oldTargetSdkPackage",
+            true /* enabled */, true /* valid */, true /* installed */);
+        oldSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+
+        WebViewProviderInfo newSdkProviderInfo =
+                new WebViewProviderInfo(newSdkPackage.packageName, "", true, false, null);
+        WebViewProviderInfo currentSdkProviderInfo =
+                new WebViewProviderInfo(currentSdkPackage.packageName, "", true, false, null);
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(oldSdkPackage.packageName, "", true, false, null),
+            currentSdkProviderInfo, newSdkProviderInfo};
+        setupWithPackages(packages, true);
+;
+        mTestSystemImpl.setPackageInfo(newSdkPackage);
+        mTestSystemImpl.setPackageInfo(currentSdkPackage);
+        mTestSystemImpl.setPackageInfo(oldSdkPackage);
+
+        assertArrayEquals(new WebViewProviderInfo[]{currentSdkProviderInfo, newSdkProviderInfo},
+                mWebViewUpdateServiceImpl.getValidWebViewPackages());
+
+        runWebViewBootPreparationOnMainSync();
+
+        checkPreparationPhasesForPackage(currentSdkPackage.packageName,
+                1 /* first preparation phase */);
     }
 }
