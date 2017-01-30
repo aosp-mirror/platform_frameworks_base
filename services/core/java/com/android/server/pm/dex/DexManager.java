@@ -21,8 +21,13 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
+
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.pm.Installer;
+import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
@@ -62,6 +67,9 @@ public class DexManager {
 
     private final IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
+    private final Object mInstallLock;
+    @GuardedBy("mInstallLock")
+    private final Installer mInstaller;
 
     // Possible outcomes of a dex search.
     private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
@@ -69,11 +77,14 @@ public class DexManager {
     private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
-    public DexManager(IPackageManager pms, PackageDexOptimizer pdo) {
+    public DexManager(IPackageManager pms, PackageDexOptimizer pdo,
+            Installer installer, Object installLock) {
       mPackageCodeLocationsCache = new HashMap<>();
       mPackageDexUsage = new PackageDexUsage();
       mPackageManager = pms;
       mPackageDexOptimizer = pdo;
+      mInstaller = installer;
+      mInstallLock = installLock;
     }
 
     /**
@@ -255,7 +266,7 @@ public class DexManager {
             if (pkg == null) {
                 Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
                         + " for user " + dexUseInfo.getOwnerUserId());
-                // Skip over it, another user might still have the package.
+                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
                 continue;
             }
             int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
@@ -263,6 +274,73 @@ public class DexManager {
             success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
         }
         return success;
+    }
+
+    /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete any generated oat files.
+     */
+    public void reconcileSecondaryDexFiles(String packageName) {
+        PackageUseInfo useInfo = getPackageUseInfo(packageName);
+        if (useInfo == null || useInfo.getDexUseInfoMap().isEmpty()) {
+            if (DEBUG) {
+                Slog.d(TAG, "No secondary dex use for package:" + packageName);
+            }
+            // Nothing to reconcile.
+            return;
+        }
+        Set<String> dexFilesToRemove = new HashSet<>();
+        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
+            String dexPath = entry.getKey();
+            DexUseInfo dexUseInfo = entry.getValue();
+            PackageInfo pkg = null;
+            try {
+                // Note that we look for the package in the PackageManager just to be able
+                // to get back the real app uid and its storage kind. These are only used
+                // to perform extra validation in installd.
+                // TODO(calin): maybe a bit overkill.
+                pkg = mPackageManager.getPackageInfo(packageName, /*flags*/0,
+                    dexUseInfo.getOwnerUserId());
+            } catch (RemoteException ignore) {
+                // Can't happen, DexManager is local.
+            }
+            if (pkg == null) {
+                // It may be that the package was uninstalled while we process the secondary
+                // dex files.
+                Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
+                        + " for user " + dexUseInfo.getOwnerUserId());
+                // Update the usage and continue, another user might still have the package.
+                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
+                continue;
+            }
+            ApplicationInfo info = pkg.applicationInfo;
+            int flags = 0;
+            if (info.dataDir.equals(info.deviceProtectedDataDir)) {
+                flags |= StorageManager.FLAG_STORAGE_DE;
+            } else if (info.dataDir.equals(info.credentialProtectedDataDir)) {
+                flags |= StorageManager.FLAG_STORAGE_CE;
+            } else {
+                Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
+                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
+                continue;
+            }
+
+            boolean dexStillExists = true;
+            synchronized(mInstallLock) {
+                try {
+                    String[] isas = dexUseInfo.getLoaderIsas().toArray(new String[0]);
+                    dexStillExists = mInstaller.reconcileSecondaryDexFile(dexPath, packageName,
+                            pkg.applicationInfo.uid, isas, pkg.applicationInfo.volumeUuid, flags);
+                } catch (InstallerException e) {
+                    Slog.e(TAG, "Got InstallerException when reconciling dex " + dexPath +
+                            " : " + e.getMessage());
+                }
+            }
+            if (!dexStillExists) {
+                mPackageDexUsage.removeDexFile(packageName, dexPath, dexUseInfo.getOwnerUserId());
+            }
+        }
     }
 
     /**

@@ -2227,7 +2227,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(installer, mInstallLock, context,
                 "*dexopt*");
-        mDexManager = new DexManager(this, mPackageDexOptimizer);
+        mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -8233,6 +8233,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     public boolean performDexOptSecondary(String packageName, String compilerFilter,
             boolean force) {
         return mDexManager.dexoptSecondaryDex(packageName, compilerFilter, force);
+    }
+
+    /**
+     * Reconcile the information we have about the secondary dex files belonging to
+     * {@code packagName} and the actual dex files. For all dex files that were
+     * deleted, update the internal records and delete the generated oat files.
+     */
+    @Override
+    public void reconcileSecondaryDexFiles(String packageName) {
+        mDexManager.reconcileSecondaryDexFiles(packageName);
     }
 
     List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
