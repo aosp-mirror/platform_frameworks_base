@@ -100,6 +100,7 @@ import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
+import com.android.server.text.TextClassificationService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
@@ -948,6 +949,12 @@ public final class SystemServer {
             if (!disableNonCoreServices && !disableTextServices) {
                 traceBeginAndSlog("StartTextServicesManager");
                 mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
+                traceEnd();
+            }
+
+            if (!disableNonCoreServices) {
+                traceBeginAndSlog("StartTextClassificationService");
+                mSystemServiceManager.startService(TextClassificationService.Lifecycle.class);
                 traceEnd();
             }
 

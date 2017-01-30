@@ -306,6 +306,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
 	core/java/android/service/chooser/IChooserTargetService.aidl \
 	core/java/android/service/chooser/IChooserTargetResult.aidl \
+	core/java/android/text/ITextClassificationService.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
