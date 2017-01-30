@@ -198,7 +198,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 mUserManager.getProfileIdsWithDisabled(mSettings.getCurrentUserId()));
     }
 
-    private class TextServicesMonitor extends PackageMonitor {
+    private final class TextServicesMonitor extends PackageMonitor {
         private boolean isChangingPackagesOfCurrentUser() {
             final int userId = getChangingUserId();
             final boolean retval = userId == mSettings.getCurrentUserId();
@@ -236,7 +236,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    class TextServicesBroadcastReceiver extends BroadcastReceiver {
+    private final class TextServicesBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -618,8 +618,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.w(TAG, "Start spell checker session inner locked.");
         }
         final String sciId = info.getId();
-        final InternalServiceConnection connection = new InternalServiceConnection(
-                sciId, locale, bundle);
+        final InternalServiceConnection connection = new InternalServiceConnection(sciId);
         final Intent serviceIntent = new Intent(SpellCheckerService.SERVICE_INTERFACE);
         serviceIntent.setComponent(info.getComponent());
         if (DBG) {
@@ -836,7 +835,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     // SpellCheckerBindGroup contains active text service session listeners.
     // If there are no listeners anymore, the SpellCheckerBindGroup instance will be removed from
     // mSpellCheckerBindGroups
-    private class SpellCheckerBindGroup {
+    private final class SpellCheckerBindGroup {
         private final String TAG = SpellCheckerBindGroup.class.getSimpleName();
         private final InternalServiceConnection mInternalConnection;
         private final CopyOnWriteArrayList<InternalDeathRecipient> mListeners =
@@ -972,15 +971,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private class InternalServiceConnection implements ServiceConnection {
+    private final class InternalServiceConnection implements ServiceConnection {
         private final String mSciId;
-        private final String mLocale;
-        private final Bundle mBundle;
-        public InternalServiceConnection(
-                String id, String locale, Bundle bundle) {
+        public InternalServiceConnection(String id) {
             mSciId = id;
-            mLocale = locale;
-            mBundle = bundle;
         }
 
         @Override
@@ -1013,7 +1007,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private class InternalDeathRecipient implements IBinder.DeathRecipient {
+    private static final class InternalDeathRecipient implements IBinder.DeathRecipient {
         public final ITextServicesSessionListener mTsListener;
         public final ISpellCheckerSessionListener mScListener;
         public final String mScLocale;
@@ -1041,7 +1035,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
     }
 
-    private static class TextServicesSettings {
+    private static final class TextServicesSettings {
         private final ContentResolver mResolver;
         @UserIdInt
         private int mCurrentUserId;
