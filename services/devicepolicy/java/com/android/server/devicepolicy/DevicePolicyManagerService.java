@@ -3231,7 +3231,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // If admin is a device or profile owner tidy that up first.
                 if (isDeviceOwner(adminReceiver, userHandle)) {
                     clearDeviceOwnerLocked(getDeviceOwnerAdminLocked(), userHandle);
-                    clearDeviceOwnerUserRestrictionLocked(UserHandle.of(userHandle));
                 }
                 if (isProfileOwner(adminReceiver, userHandle)) {
                     final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver,
@@ -3247,10 +3246,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    // It's temporary solution to clear DISALLOW_ADD_USER after CTS
-    // STOPSHIP(b/31952368) when the restriction is moved from system to the device owner,
-    // it can be removed.
     private void clearDeviceOwnerUserRestrictionLocked(UserHandle userHandle) {
+        // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userHandle);
         }
@@ -6593,6 +6590,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
 
+        clearDeviceOwnerUserRestrictionLocked(UserHandle.of(userId));
         mInjector.securityLogSetLoggingEnabledProperty(false);
         mSecurityLogMonitor.stop();
         setNetworkLoggingActiveInternal(false);
