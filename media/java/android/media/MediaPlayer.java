@@ -47,6 +47,7 @@ import android.widget.VideoView;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.BufferingParams;
+import android.media.MediaDrm;
 import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
 import android.media.PlaybackParams;
@@ -60,6 +61,7 @@ import com.android.internal.util.Preconditions;
 
 import libcore.io.IoBridge;
 import libcore.io.Libcore;
+import libcore.io.Streams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -70,13 +72,20 @@ import java.io.InputStream;
 import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URL;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
-import java.lang.ref.WeakReference;
+
 
 /**
  * MediaPlayer class can be used to control playback
@@ -624,6 +633,17 @@ public class MediaPlayer extends PlayerBase
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
     private boolean mBypassInterruptionPolicy;
+
+    // Modular DRM
+    private UUID mDrmUUID;
+    private final Object mDrmLock = new Object();
+    private DrmInfo mDrmInfo;
+    private boolean mDrmInfoResolved;
+    private boolean mActiveDrmScheme;
+    private boolean mDrmConfigAllowed;
+    private boolean mDrmProvisioningInProgress;
+    private boolean mPrepareDrmInProgress;
+    private ProvisioningThread mDrmProvisioningThread;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -1866,6 +1886,12 @@ public class MediaPlayer extends PlayerBase
             mTimeProvider = null;
         }
         mOnSubtitleDataListener = null;
+
+        // Modular DRM clean up
+        mOnDrmInfoHandlerDelegate = null;
+        mOnDrmPreparedHandlerDelegate = null;
+        resetDrmState();
+
         _release();
     }
 
@@ -1906,6 +1932,8 @@ public class MediaPlayer extends PlayerBase
             mIndexTrackPairs.clear();
             mInbandTrackIndices.clear();
         };
+
+        resetDrmState();
     }
 
     private native void _reset();
@@ -2999,6 +3027,7 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_INFO = 200;
     private static final int MEDIA_SUBTITLE_DATA = 201;
     private static final int MEDIA_META_DATA = 202;
+    private static final int MEDIA_DRM_INFO = 210;
 
     private TimeProvider mTimeProvider;
 
@@ -3037,9 +3066,41 @@ public class MediaPlayer extends PlayerBase
                             MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
                     sendMessage(msg2);
                 }
+
+                // MEDIA_DRM_INFO is fired (if available) before MEDIA_PREPARED.
+                // An empty mDrmInfo indicates prepared is done but the source is not DRM protected.
+                // Setting this before the callback so onPreparedListener can call getDrmInfo to
+                // get the right state
+                mDrmInfoResolved = true;
+
                 OnPreparedListener onPreparedListener = mOnPreparedListener;
                 if (onPreparedListener != null)
                     onPreparedListener.onPrepared(mMediaPlayer);
+                return;
+
+            case MEDIA_DRM_INFO:
+                Log.v(TAG, "MEDIA_DRM_INFO " + mOnDrmInfoHandlerDelegate);
+
+                if (msg.obj == null) {
+                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
+                } else if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel)msg.obj;
+                    DrmInfo drmInfo = new DrmInfo(parcel);
+
+                    OnDrmInfoHandlerDelegate onDrmInfoHandlerDelegate;
+                    synchronized (mDrmLock) {
+                        mDrmInfo = drmInfo.makeCopy();
+                        // local copy while keeping the lock
+                        onDrmInfoHandlerDelegate = mOnDrmInfoHandlerDelegate;
+                    }
+
+                    // notifying the client outside the lock
+                    if (onDrmInfoHandlerDelegate != null) {
+                        onDrmInfoHandlerDelegate.notifyClient(drmInfo);
+                    }
+                } else {
+                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj NONE; UNEXPECTED" + msg.obj);
+                }
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
@@ -3699,6 +3760,988 @@ public class MediaPlayer extends PlayerBase
     }
 
     private OnInfoListener mOnInfoListener;
+
+    // Modular DRM begin
+
+    /**
+     * Interface definition of a callback to be invoked when the app
+     * can do DRM configuration (get/set properties) before the session
+     * is opened. This facilitates configuration of the properties, like
+     * 'securityLevel', which has to be set after DRM scheme creation but
+     * before the DRM session is opened.
+     *
+     * The only allowed DRM calls in this listener are getDrmPropertyString
+     * and setDrmPropertyString.
+     *
+     */
+    public static abstract class OnDrmConfigCallback
+    {
+        /**
+         * Called to give the app the opportunity to configure DRM before the session is created
+         *
+         * @param mp the {@code MediaPlayer} associated with this callback
+         */
+        public void onDrmConfig(MediaPlayer mp) {}
+    }
+
+    /**
+     * Interface definition of a callback to be invoked when the
+     * DRM info becomes available
+     */
+    public interface OnDrmInfoListener
+    {
+        /**
+         * Called to indicate DRM info is available
+         *
+         * @param mp the {@code MediaPlayer} associated with this callback
+         * @param drmInfo DRM info of the source including PSSH, mimes, and subset
+         *                of crypto schemes supported by this device
+         */
+        public void onDrmInfo(MediaPlayer mp, DrmInfo drmInfo);
+    }
+
+    /**
+     * Register a callback to be invoked when the DRM info is
+     * known.
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnDrmInfoListener(OnDrmInfoListener listener)
+    {
+        setOnDrmInfoListener(listener, null);
+    }
+
+    /**
+     * Register a callback to be invoked when the DRM info is
+     * known.
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnDrmInfoListener(OnDrmInfoListener listener, Handler handler)
+    {
+        synchronized (mDrmLock) {
+            if (listener != null) {
+                mOnDrmInfoHandlerDelegate = new OnDrmInfoHandlerDelegate(this, listener, handler);
+            } else {
+                mOnDrmInfoHandlerDelegate = null;
+            }
+        } // synchronized
+    }
+
+    private OnDrmInfoHandlerDelegate mOnDrmInfoHandlerDelegate;
+
+    /**
+     * Interface definition of a callback to notify the app when the
+     * DRM is ready for key request/response
+     */
+    public interface OnDrmPreparedListener
+    {
+        /**
+         * Called to notify the app that prepareDrm is finished and ready for key request/response
+         *
+         * @param mp the {@code MediaPlayer} associated with this callback
+         * @param success the result of DRM preparation
+         */
+        public void onDrmPrepared(MediaPlayer mp, boolean success);
+    }
+
+    /**
+     * Register a callback to be invoked when the DRM object is prepared.
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnDrmPreparedListener(OnDrmPreparedListener listener)
+    {
+        setOnDrmPreparedListener(listener, null);
+    }
+
+    /**
+     * Register a callback to be invoked when the DRM object is prepared.
+     *
+     * @param listener the callback that will be run
+     * @param handler the Handler that will receive the callback
+     */
+    public void setOnDrmPreparedListener(OnDrmPreparedListener listener, Handler handler)
+    {
+        synchronized (mDrmLock) {
+            if (listener != null) {
+                mOnDrmPreparedHandlerDelegate = new OnDrmPreparedHandlerDelegate(this,
+                                                            listener, handler);
+            } else {
+                mOnDrmPreparedHandlerDelegate = null;
+            }
+        } // synchronized
+    }
+
+    private OnDrmPreparedHandlerDelegate mOnDrmPreparedHandlerDelegate;
+
+
+    private class OnDrmInfoHandlerDelegate {
+        private MediaPlayer mMediaPlayer;
+        private OnDrmInfoListener mOnDrmInfoListener;
+        private Handler mHandler;
+
+        OnDrmInfoHandlerDelegate(MediaPlayer mp, OnDrmInfoListener listener, Handler handler) {
+            mMediaPlayer = mp;
+            mOnDrmInfoListener = listener;
+
+            // find the looper for our new event handler
+            Looper looper = null;
+            if (handler != null) {
+                looper = handler.getLooper();
+            }
+
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    public void handleMessage(Message msg) {
+                        DrmInfo drmInfo = (DrmInfo)msg.obj;
+                        mOnDrmInfoListener.onDrmInfo(mMediaPlayer, drmInfo);
+                    }
+                };
+            }
+        }
+
+        void notifyClient(DrmInfo drmInfo) {
+            if ( mHandler != null ) {
+                Message msg = new Message();  // no message type needed
+                msg.obj = drmInfo;
+                mHandler.sendMessage(msg);
+            }
+            else {  // no handler: direct call
+                mOnDrmInfoListener.onDrmInfo(mMediaPlayer, drmInfo);
+            }
+        }
+    }
+
+    private class OnDrmPreparedHandlerDelegate {
+        private MediaPlayer mMediaPlayer;
+        private OnDrmPreparedListener mOnDrmPreparedListener;
+        private Handler mHandler;
+
+        OnDrmPreparedHandlerDelegate(MediaPlayer mp, OnDrmPreparedListener listener,
+                Handler handler) {
+            mMediaPlayer = mp;
+            mOnDrmPreparedListener = listener;
+
+            // find the looper for our new event handler
+            Looper looper = null;
+            if (handler != null) {
+                looper = handler.getLooper();
+            }
+
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    public void handleMessage(Message msg) {
+                        boolean success = (msg.arg1 == 0) ? false : true;
+                        mOnDrmPreparedListener.onDrmPrepared(mMediaPlayer, success);
+                    }
+                };
+            }
+        }
+
+        void notifyClient(boolean success) {
+            if ( mHandler != null ) {
+                Message msg = new Message();  // no message type needed
+                msg.arg1 = success ? 1 : 0;
+                mHandler.sendMessage(msg);
+            }
+            else {  // no handler: direct call
+                mOnDrmPreparedListener.onDrmPrepared(mMediaPlayer, success);
+            }
+        }
+    }
+
+    /**
+     * Retrieves the DRM Info associated with the current source
+     *
+     * @throws IllegalStateException if called before prepare()
+     */
+    public DrmInfo getDrmInfo()
+    {
+        DrmInfo drmInfo = null;
+
+        // there is not much point if the app calls getDrmInfo within an OnDrmInfoListenet;
+        // regardless below returns drmInfo anyway instead of raising an exception
+        synchronized (mDrmLock) {
+            if (!mDrmInfoResolved && mDrmInfo == null) {
+                final String msg = "The Player has not been prepared yet";
+                Log.v(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mDrmInfo != null) {
+                drmInfo = mDrmInfo.makeCopy();
+            }
+        }   // synchronized
+
+        return drmInfo;
+    }
+
+    private native void _prepareDrm(@NonNull byte[] uuid, int mode)
+            throws UnsupportedSchemeException, ResourceBusyException, NotProvisionedException;
+
+    /**
+     * Prepares the DRM for the current source
+     * <p>
+     * If {@code OnDrmConfigCallback} is registered, it will be called half-way into
+     * preparation to allow configuration of the DRM properties before opening the
+     * DRM session. Note that the callback is called synchronously in the thread that called
+     * {@code prepareDrm}. It should be used only for a series of {@code getDrmPropertyString}
+     * and {@code setDrmPropertyString} calls and refrain from any lengthy operation.
+     * <p>
+     * If the device has not been provisioned before, this call also provisions the device
+     * which involves accessing the provisioning server and can take a variable time to
+     * complete depending on the network connectivity.
+     * If OnDrmPreparedListener is registered, prepareDrm() runs in non-blocking
+     * mode by launching the provisioning in the background and returning. The listener
+     * will be called when provisioning and preperation has finished. If a
+     * OnDrmPreparedListener is not registered, prepareDrm() waits till provisioning
+     * and preperation has finished, i.e., runs in blocking mode.
+     * <p>
+     * If OnDrmPreparedListener is registered, it is called to indicated the DRM session
+     * being ready regardless of blocking or non-blocking mode. The application should
+     * not make any assumption about its call sequence (e.g., before or after prepareDrm
+     * returns) or the thread context that will execute the listener.
+     * <p>
+     *
+     * @param uuid The UUID of the crypto scheme.
+     *
+     * @throws IllegalStateException       if called before prepare(), or there exists a Drm already
+     * @throws UnsupportedSchemeException  if the crypto scheme is not supported
+     * @throws ResourceBusyException       if required DRM resources are in use
+     * @throws ProvisioningErrorException  if provisioning is required but an attempt failed
+     */
+    public void prepareDrm(@NonNull UUID uuid, OnDrmConfigCallback configCallback)
+            throws UnsupportedSchemeException,
+                   ResourceBusyException, ProvisioningErrorException
+    {
+        boolean allDoneWithoutProvisioning = false;
+        // get a snapshot as we'll use them outside the lock
+        OnDrmPreparedHandlerDelegate onDrmPreparedHandlerDelegate = null;
+
+        synchronized (mDrmLock) {
+
+            // only allowing if tied to a protected source; might releax for releasing offline keys
+            if (mDrmInfo == null) {
+                final String msg = String.format("prepareDrm(%s): Wrong usage: " +
+                                                 "The player must be prepared and DRM " +
+                                                 "info be retrieved before this call.", uuid);
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mActiveDrmScheme) {
+                final String msg = String.format("prepareDrm(%s): Wrong usage: There is already " +
+                                                 "an active DRM scheme with %s.", uuid, mDrmUUID);
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mPrepareDrmInProgress) {
+                final String msg = String.format("prepareDrm(%s): Wrong usage: There is already " +
+                                                 "a pending prepareDrm call.", uuid);
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            if (mDrmProvisioningInProgress) {
+                final String msg = String.format("prepareDrm(%s): Unexpectd: Provisioning is " +
+                                                 "already in progress.", uuid);
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            }
+
+            mPrepareDrmInProgress = true;
+            // local copy while the lock is held
+            onDrmPreparedHandlerDelegate = mOnDrmPreparedHandlerDelegate;
+
+            if (configCallback != null) {
+                try {
+                    boolean allowOpenSession = false;   // just pre-openSession
+                    _prepareDrm(getByteArrayFromUUID(uuid), allowOpenSession ? 1 : 0);
+                } catch (IllegalStateException e) {
+                    final String msg = String.format("prepareDrm(): Wrong usage: The player must " +
+                                                     "be in prepared state to call prepareDrm().");
+                    Log.e(TAG, msg);
+                    throw new IllegalStateException(msg);
+                } catch (NotProvisionedException e) {   // the pre-config step won't raise this
+                    final String msg = String.format("prepareDrm: Unexpected " +
+                                                     "NotProvisionedException here.");
+                    Log.e(TAG, msg);
+                    throw new ProvisioningErrorException(msg);
+                } catch (Exception e) {
+                    Log.w(TAG, String.format("prepareDrm: Exception %s", e));
+                    throw e;
+                } finally {
+                    mPrepareDrmInProgress = false;
+                }
+            }
+
+            mDrmConfigAllowed = true;
+        }   // synchronized
+
+
+        // call the callback outside the lock
+        if (configCallback != null)  {
+            configCallback.onDrmConfig(this);
+        }
+
+        synchronized (mDrmLock) {
+            mDrmConfigAllowed = false;
+
+            try {
+                boolean allowOpenSession = true;    // all in
+                _prepareDrm(getByteArrayFromUUID(uuid), allowOpenSession ? 1 : 0);
+
+                mDrmUUID = uuid;
+                mActiveDrmScheme = true;
+
+                mPrepareDrmInProgress = false;
+
+                allDoneWithoutProvisioning = true;
+            } catch (IllegalStateException e) {
+                final String msg = String.format("prepareDrm(%s): Wrong usage: The player must be" +
+                                                 " in prepared state to call prepareDrm().", uuid);
+                Log.e(TAG, msg);
+                throw new IllegalStateException(msg);
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, String.format("prepareDrm: NotProvisionedException"));
+
+                // handle provisioning internally
+                boolean result = HandleProvisioninig(uuid);
+
+                // if blocking mode, we're already done;
+                // if non-blocking mode, we attempted to launch background provisioning
+                if (result == false) {
+                    final String msg =
+                                String.format("prepareDrm: Provisioning was required but failed.");
+                    Log.e(TAG, msg);
+                    throw new ProvisioningErrorException(msg);
+                }
+
+                // nothing else to do;
+                // if blocking or non-blocking, HandleProvisioninig does the re-attempt & cleanup
+            } catch (Exception e) {
+                Log.w(TAG, String.format("prepareDrm: Exception %s", e));
+                throw e;
+            } finally {
+                mPrepareDrmInProgress = false;
+            }
+        }   // synchronized
+
+
+        // if finished successfully without provisioning, call the callback outside the lock
+        if (allDoneWithoutProvisioning) {
+            if (onDrmPreparedHandlerDelegate != null)
+                onDrmPreparedHandlerDelegate.notifyClient(true /*success*/);
+        }
+
+    }
+
+
+    private native void _releaseDrm();
+
+    /**
+     * Releases the DRM session
+     *
+     * @throws NoDrmSchemeException if there is no active DRM session to release
+     */
+    public void releaseDrm()
+            throws NoDrmSchemeException
+    {
+        synchronized (mDrmLock) {
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, String.format("releaseDrm(%s): No active DRM scheme to release."));
+                throw new NoDrmSchemeException("releaseDrm: No active DRM scheme to release.");
+            } else {
+                _releaseDrm();
+
+                mActiveDrmScheme = false;
+            }
+        }   // synchronized
+    }
+
+
+    @NonNull
+    private native MediaDrm.KeyRequest _getKeyRequest(@NonNull byte[] scope,
+            @Nullable String mimeType, @MediaDrm.KeyType int keyType,
+            @Nullable Map<String, String> optionalParameters)
+            throws NotProvisionedException;
+
+    /**
+     * A key request/response exchange occurs between the app and a license server
+     * to obtain or release keys used to decrypt encrypted content.
+     * <p>
+     * getKeyRequest() is used to obtain an opaque key request byte array that is
+     * delivered to the license server.  The opaque key request byte array is returned
+     * in KeyRequest.data.  The recommended URL to deliver the key request to is
+     * returned in KeyRequest.defaultUrl.
+     * <p>
+     * After the app has received the key request response from the server,
+     * it should deliver to the response to the DRM engine plugin using the method
+     * {@link #provideKeyResponse}.
+     *
+     * @param scope may be a container-specific initialization data or a keySetId,
+     * depending on the specified keyType.
+     * When the keyType is KEY_TYPE_STREAMING or KEY_TYPE_OFFLINE, scope should be set to
+     * the container-specific initialization data. Its meaning is interpreted based on the
+     * mime type provided in the mimeType parameter.  It could contain, for example,
+     * the content ID, key ID or other data obtained from the content metadata that is
+     * required in generating the key request.
+     * When the keyType is KEY_TYPE_RELEASE, scope should be set to the keySetId of
+     * the keys being released.
+     *
+     * @param mimeType identifies the mime type of the content
+     *
+     * @param keyType specifes the type of the request. The request may be to acquire
+     * keys for streaming or offline content, or to release previously acquired
+     * keys, which are identified by a keySetId.
+     *
+     * @param optionalParameters are included in the key request message to
+     * allow a client application to provide additional message parameters to the server.
+     * This may be {@code null} if no additional parameters are to be sent.
+     *
+     * @throws NoDrmSchemeException if there is no active DRM session
+     */
+    @NonNull
+    public MediaDrm.KeyRequest getKeyRequest(@NonNull byte[] scope, @Nullable String mimeType,
+            @MediaDrm.KeyType int keyType, @Nullable Map<String, String> optionalParameters)
+            throws NoDrmSchemeException
+    {
+        synchronized (mDrmLock) {
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, String.format("getKeyRequest NoDrmSchemeException"));
+                throw new NoDrmSchemeException("getKeyRequest: Has to set a DRM scheme first.");
+            }
+
+            try {
+                return _getKeyRequest(scope, mimeType, keyType, optionalParameters);
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, String.format("getKeyRequest NotProvisionedException: " +
+                                         "Unexpected. Shouldn't have reached here."));
+                throw new IllegalStateException("getKeyRequest: Unexpected provisioning error.");
+            } catch (Exception e) {
+                Log.w(TAG, String.format("getKeyRequest Exception %s", e));
+                throw e;
+            }
+
+        }   // synchronized
+    }
+
+
+    @Nullable
+    private native byte[] _provideKeyResponse(@Nullable byte[] keySetId, @NonNull byte[] response)
+            throws DeniedByServerException;
+
+    /**
+     * A key response is received from the license server by the app, then it is
+     * provided to the DRM engine plugin using provideKeyResponse. When the
+     * response is for an offline key request, a key-set identifier is returned that
+     * can be used to later restore the keys to a new session with the method
+     * {@ link # restoreKeys}.
+     * When the response is for a streaming or release request, null is returned.
+     *
+     * @param keySetId When the response is for a release request, keySetId identifies
+     * the saved key associated with the release request (i.e., the same keySetId
+     * passed to the earlier {@ link # getKeyRequest} call. It MUST be null when the
+     * response is for either streaming or offline key requests.
+     *
+     * @param response the byte array response from the server
+     *
+     * @throws NoDrmSchemeException if there is no active DRM session
+     * @throws DeniedByServerException if the response indicates that the
+     * server rejected the request
+     */
+    public byte[] provideKeyResponse(@Nullable byte[] keySetId, @NonNull byte[] response)
+            throws NoDrmSchemeException, DeniedByServerException
+    {
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, String.format("getKeyRequest NoDrmSchemeException"));
+                throw new NoDrmSchemeException("getKeyRequest: Has to set a DRM scheme first.");
+            }
+
+            try {
+                return _provideKeyResponse(keySetId, response);
+            } catch (Exception e) {
+                Log.w(TAG, String.format("provideKeyResponse Exception %s", e));
+                throw e;
+            }
+        }   // synchronized
+    }
+
+
+    private native void _restoreKeys(@NonNull byte[] keySetId);
+
+    /**
+     * Restore persisted offline keys into a new session.  keySetId identifies the
+     * keys to load, obtained from a prior call to {@link #provideKeyResponse}.
+     *
+     * @param keySetId identifies the saved key set to restore
+     */
+    public void restoreKeys(@NonNull byte[] keySetId)
+            throws NoDrmSchemeException
+    {
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme) {
+                Log.w(TAG, String.format("restoreKeys NoDrmSchemeException"));
+                throw new NoDrmSchemeException("restoreKeys: Has to set a DRM scheme first.");
+            }
+
+            try {
+                _restoreKeys(keySetId);
+            } catch (Exception e) {
+                Log.w(TAG, String.format("restoreKeys Exception %s", e));
+                throw e;
+            }
+
+        }   // synchronized
+    }
+
+
+    @NonNull
+    private native String _getDrmPropertyString(@NonNull String propertyName);
+
+    /**
+     * Read a DRM engine plugin String property value, given the property name string.
+     * <p>
+     * @param propertyName the property name
+     *
+     * Standard fields names are:
+     * {link #PROPERTY_VENDOR}, {link #PROPERTY_VERSION},
+     * {link #PROPERTY_DESCRIPTION}, {link #PROPERTY_ALGORITHMS}
+     */
+    @NonNull
+    public String getDrmPropertyString(@NonNull @MediaDrm.StringProperty String propertyName)
+            throws NoDrmSchemeException
+    {
+        String value;
+        synchronized (mDrmLock) {
+
+            if (!mActiveDrmScheme && !mDrmConfigAllowed) {
+                Log.w(TAG, String.format("getDrmPropertyString NoDrmSchemeException"));
+                throw new NoDrmSchemeException("getDrmPropertyString: Has to prepareDrm() first.");
+            }
+
+            try {
+                value = _getDrmPropertyString(propertyName);
+            } catch (Exception e) {
+                Log.w(TAG, String.format("getDrmPropertyString Exception %s", e));
+                throw e;
+            }
+        }   // synchronized
+
+        return value;
+    }
+
+    private native void _setDrmPropertyString(@NonNull String propertyName, @NonNull String value);
+
+    /**
+     * Set a DRM engine plugin String property value.
+     * <p>
+     * @param propertyName the property name
+     * @param value the property value
+     *
+     * Standard fields names are:
+     * {link #PROPERTY_VENDOR}, {link #PROPERTY_VERSION},
+     * {link #PROPERTY_DESCRIPTION}, {link #PROPERTY_ALGORITHMS}
+     */
+    public void setDrmPropertyString(@NonNull @MediaDrm.StringProperty String propertyName,
+                                     @NonNull String value)
+            throws NoDrmSchemeException
+    {
+        synchronized (mDrmLock) {
+
+            if ( !mActiveDrmScheme && !mDrmConfigAllowed ) {
+                Log.w(TAG, String.format("setDrmPropertyString NoDrmSchemeException"));
+                throw new NoDrmSchemeException("setDrmPropertyString: Has to prepareDrm() first.");
+            }
+
+            try {
+                _setDrmPropertyString(propertyName, value);
+            } catch ( Exception e ) {
+                Log.w(TAG, String.format("setDrmPropertyString Exception %s", e));
+                throw e;
+            }
+        }   // synchronized
+    }
+
+    public static final class DrmInfo {
+        private Map<UUID, byte[]> mapPssh;
+        private UUID[] supportedSchemes;
+        // TODO: Won't need this in final release. Only keeping it for the existing test app.
+        private String[] mimes;
+
+        public Map<UUID, byte[]> getPssh() {
+            return mapPssh;
+        }
+        public UUID[] getSupportedSchemes() {
+            return supportedSchemes;
+        }
+        // TODO: Won't need this in final release. Only keeping it for the existing test app.
+        public String[] getMimes() {
+            return mimes;
+        }
+
+        private DrmInfo(Map<UUID, byte[]> Pssh, UUID[] SupportedSchemes, String[] Mimes) {
+            mapPssh = Pssh;
+            supportedSchemes = SupportedSchemes;
+            mimes = Mimes;
+        }
+
+        private DrmInfo(Parcel parcel) {
+            Log.v(TAG, "DrmInfo(" + parcel + ") size " + parcel.dataSize());
+
+            int psshsize = parcel.readInt();
+            byte[] pssh = new byte[psshsize];
+            parcel.readByteArray(pssh);
+
+            Log.v(TAG, "DrmInfo() PSSH: " + arrToHex(pssh));
+            mapPssh = parsePSSH(pssh, psshsize);
+            Log.v(TAG, "DrmInfo() PSSH: " + mapPssh);
+
+            int supportedDRMsCount = parcel.readInt();
+            supportedSchemes = new UUID[supportedDRMsCount];
+            for (int i = 0; i < supportedDRMsCount; i++) {
+                byte[] uuid = new byte[16];
+                parcel.readByteArray(uuid);
+
+                supportedSchemes[i] = bytesToUUID(uuid);
+
+                Log.v(TAG, "DrmInfo() supportedScheme[" + i + "]: " +
+                      supportedSchemes[i]);
+            }
+
+            // TODO: Won't need this in final release. Only keeping it for the test app.
+            mimes = parcel.readStringArray();
+            int mimeCount = mimes.length;
+            Log.v(TAG, "DrmInfo() mime: " + Arrays.toString(mimes));
+
+            Log.v(TAG, "DrmInfo() Parcel psshsize: " + psshsize +
+                  " supportedDRMsCount: " + supportedDRMsCount +
+                  " mimeCount: " + mimeCount);
+        }
+
+        private DrmInfo makeCopy() {
+            return new DrmInfo(this.mapPssh, this.supportedSchemes, this.mimes);
+        }
+
+        private String arrToHex(byte[] bytes) {
+            String out = "0x";
+            for (int i = 0; i < bytes.length; i++) {
+                out += String.format("%02x", bytes[i]);
+            }
+
+            return out;
+        }
+
+        private UUID bytesToUUID(byte[] uuid) {
+            long msb = 0, lsb = 0;
+            for (int i = 0; i < 8; i++) {
+                msb |= ( ((long)uuid[i]   & 0xff) << (8 * (7 - i)) );
+                lsb |= ( ((long)uuid[i+8] & 0xff) << (8 * (7 - i)) );
+            }
+
+            return new UUID(msb, lsb);
+        }
+
+        private Map<UUID, byte[]> parsePSSH(byte[] pssh, int psshsize) {
+            Map<UUID, byte[]> result = new HashMap<UUID, byte[]>();
+
+            final int UUID_SIZE = 16;
+            final int DATALEN_SIZE = 4;
+
+            int len = psshsize;
+            int numentries = 0;
+            int i = 0;
+
+            while (len > 0) {
+                if (len < UUID_SIZE) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse " +
+                                             "UUID: (%d < 16) pssh: %d", len, psshsize));
+                    return null;
+                }
+
+                byte[] subset = Arrays.copyOfRange(pssh, i, i + UUID_SIZE);
+                UUID uuid = bytesToUUID(subset);
+                i += UUID_SIZE;
+                len -= UUID_SIZE;
+
+                // get data length
+                if (len < 4) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse " +
+                                             "datalen: (%d < 4) pssh: %d", len, psshsize));
+                    return null;
+                }
+
+                subset = Arrays.copyOfRange(pssh, i, i+DATALEN_SIZE);
+                int datalen = (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) ?
+                    ((subset[3] & 0xff) << 24) | ((subset[2] & 0xff) << 16) |
+                    ((subset[1] & 0xff) <<  8) |  (subset[0] & 0xff)          :
+                    ((subset[0] & 0xff) << 24) | ((subset[1] & 0xff) << 16) |
+                    ((subset[2] & 0xff) <<  8) |  (subset[3] & 0xff) ;
+                i += DATALEN_SIZE;
+                len -= DATALEN_SIZE;
+
+                if (len < datalen) {
+                    Log.w(TAG, String.format("parsePSSH: len is too short to parse " +
+                                             "data: (%d < %d) pssh: %d", len, datalen, psshsize));
+                    return null;
+                }
+
+                byte[] data = Arrays.copyOfRange(pssh, i, i+datalen);
+
+                // skip the data
+                i += datalen;
+                len -= datalen;
+
+                Log.v(TAG, String.format("parsePSSH[%d]: <%s, %s> pssh: %d",
+                                         numentries, uuid, arrToHex(data), psshsize));
+                numentries++;
+                result.put(uuid, data);
+            }
+
+            return result;
+        }
+
+    };  // DrmInfo
+
+    /**
+     * Thrown when a DRM method is called before preparing a DRM scheme through prepareDrm().
+     * Extends MediaDrm.MediaDrmException
+     */
+    public static final class NoDrmSchemeException extends MediaDrmException {
+        public NoDrmSchemeException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+    /**
+     * Thrown when the device requires DRM provisioning but the provisioning attempt has
+     * failed (for example: network timeout, provisioning server error).
+     * Extends MediaDrm.MediaDrmException
+     */
+    public static final class ProvisioningErrorException extends MediaDrmException {
+        public ProvisioningErrorException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+        // Modular DRM helpers
+
+    private class ProvisioningThread extends Thread
+    {
+        public static final int TIMEOUT_MS = 60000;
+
+        private UUID uuid;
+        private String urlStr;
+        private byte[] response;
+        private Object drmLock;
+        private OnDrmPreparedHandlerDelegate onDrmPreparedHandlerDelegate;
+        private MediaPlayer mediaPlayer;
+        private boolean succeeded;
+        private boolean finished;
+        public  boolean succeeded() {
+            return succeeded;
+        }
+
+        public ProvisioningThread initialize(MediaDrm.ProvisionRequest request,
+                                          UUID uuid, MediaPlayer mediaPlayer) {
+            // lock is held by the caller
+            drmLock = mediaPlayer.mDrmLock;
+            onDrmPreparedHandlerDelegate = mediaPlayer.mOnDrmPreparedHandlerDelegate;
+            this.mediaPlayer = mediaPlayer;
+
+            urlStr = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
+            this.uuid = uuid;
+
+            Log.v(TAG, String.format("HandleProvisioninig: Thread is initialised url: %s", urlStr));
+            return this;
+        }
+
+        public void run() {
+
+            boolean provisioningSucceeded = false;
+            try {
+                URL url = new URL(urlStr);
+                final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(false);
+                    connection.setDoInput(true);
+                    connection.setConnectTimeout(TIMEOUT_MS);
+                    connection.setReadTimeout(TIMEOUT_MS);
+
+                    connection.connect();
+                    response = Streams.readFully(connection.getInputStream());
+
+                    Log.v(TAG, String.format("HandleProvisioninig: Thread run response %d %s",
+                                             response.length, response));
+                } catch (Exception e) {
+                    Log.w(TAG, String.format("HandleProvisioninig: Thread run connect %s url: %s",
+                                             e, url));
+                } finally {
+                    connection.disconnect();
+                }
+            } catch (Exception e)   {
+                Log.w(TAG, String.format("HandleProvisioninig: Thread run openConnection %s", e));
+            }
+
+            if (response != null) {
+                try {
+                    MediaDrm drm = new MediaDrm(uuid);
+                    drm.provideProvisionResponse(response);
+                    drm.release();
+                    Log.v(TAG, String.format("HandleProvisioninig: Thread run " +
+                                             "newDrm+provideProvisionResponse SUCCEEDED!"));
+
+                    provisioningSucceeded = true;
+                } catch (Exception e)   {
+                    Log.w(TAG, String.format("HandleProvisioninig: Thread run " +
+                                             "newDrm+provideProvisionResponse %s", e));
+                }
+            }
+
+            // non-blocking mode needs the lock
+            if (onDrmPreparedHandlerDelegate != null) {
+
+                synchronized (drmLock) {
+                    // continuing with prepareDrm
+                    if (provisioningSucceeded) {
+                        succeeded = mediaPlayer.resumePrepareDrm(uuid);
+                    }
+                    mediaPlayer.mDrmProvisioningInProgress = false;
+                    mediaPlayer.mPrepareDrmInProgress = false;
+                }
+
+                // calling the callback outside the lock
+                onDrmPreparedHandlerDelegate.notifyClient(succeeded);
+            } else {   // blocking mode already has the lock
+
+                // continuing with prepareDrm
+                if (provisioningSucceeded) {
+                    succeeded = mediaPlayer.resumePrepareDrm(uuid);
+                }
+                mediaPlayer.mDrmProvisioningInProgress = false;
+                mediaPlayer.mPrepareDrmInProgress = false;
+            }
+
+            finished = true;
+        }   // run()
+
+    }   // ProvisioningThread
+
+    private boolean HandleProvisioninig(UUID uuid)
+    {
+        // the lock is already held by the caller
+
+        if (mDrmProvisioningInProgress) {
+            Log.e(TAG, String.format("HandleProvisioninig: Unexpected mDrmProvisioningInProgress"));
+            return false;
+        }
+
+        MediaDrm.ProvisionRequest provReq = null;
+        try {
+            MediaDrm drm = new MediaDrm(uuid);
+            provReq = drm.getProvisionRequest();
+            drm.release();
+        } catch (Exception e) {
+            Log.e(TAG, String.format("HandleProvisioninig: getProvisionRequest failed with %s", e));
+            return false;
+        }
+
+        Log.v(TAG, String.format("HandleProvisioninig provReq: data %s  url %s",
+                                 (provReq != null) ? provReq.getData() : "-",
+                                 (provReq != null) ? provReq.getDefaultUrl() : "://")
+              );
+
+        // networking in a background thread
+        mDrmProvisioningInProgress = true;
+
+        mDrmProvisioningThread = new ProvisioningThread().initialize(provReq, uuid, this);
+        mDrmProvisioningThread.start();
+
+        boolean result = false;
+
+        // non-blocking
+        if (mOnDrmPreparedHandlerDelegate != null) {
+            result = true;
+        } else {
+            // if blocking mode, wait till provisioning is done
+            try {
+                mDrmProvisioningThread.join();
+            } catch (Exception e) {
+                Log.w(TAG, String.format("HandleProvisioninig: Thread.join Exception %s", e));
+            }
+            result = mDrmProvisioningThread.succeeded();
+            // no longer need the thread
+            mDrmProvisioningThread = null;
+        }
+
+        return result;
+    }
+
+    private boolean resumePrepareDrm(UUID uuid)
+    {
+        // mDrmLock is guaranteed to be held
+        boolean success = false;
+        try {
+            boolean allowOpenSession = true;  // resuming
+            _prepareDrm(getByteArrayFromUUID(uuid),  allowOpenSession ? 1 : 0);
+
+            mDrmUUID = uuid;
+            mActiveDrmScheme = true;
+
+            success = true;
+        } catch (Exception e) {
+            Log.w(TAG, String.format("HandleProvisioninig: " +
+                                     "Thread run _prepareDrm resume failed with %s", e));
+        }
+
+        return success;
+    }
+
+    private void resetDrmState()
+    {
+        synchronized (mDrmLock) {
+            mDrmInfoResolved = false;
+            mDrmInfo = null;
+
+            if (mDrmProvisioningThread != null) {
+                // timeout; relying on HttpUrlConnection
+                try {
+                    mDrmProvisioningThread.join();
+                }
+                catch (InterruptedException e) {
+                    Log.w(TAG, String.format("resetDrmState: ProvThread.join Exception %s", e));
+                }
+                mDrmProvisioningThread = null;
+            }
+
+            mPrepareDrmInProgress = false;
+        }   // synchronized
+    }
+
+    private static final byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
+        long msb = uuid.getMostSignificantBits();
+        long lsb = uuid.getLeastSignificantBits();
+
+        byte[] uuidBytes = new byte[16];
+        for (int i = 0; i < 8; ++i) {
+            uuidBytes[i] = (byte)(msb >>> (8 * (7 - i)));
+            uuidBytes[8 + i] = (byte)(lsb >>> (8 * (7 - i)));
+        }
+
+        return uuidBytes;
+    }
+
+    // Modular DRM end
 
     /*
      * Test whether a given video scaling mode is supported.
