@@ -262,7 +262,6 @@ private:
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayList(TreeObserver& observer, TreeInfo* info = nullptr);
-    void destroyHardwareResourcesImpl(TreeObserver& observer, TreeInfo* info = nullptr);
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }

@@ -130,6 +130,112 @@ TEST(RenderNode, validity) {
     EXPECT_TRUE(parent->nothingToDraw());
 }
 
+TEST(RenderNode, multiTreeValidity) {
+    auto child = TestUtils::createNode(0, 0, 200, 400,
+            [](RenderProperties& props, Canvas& canvas) {
+        canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
+    });
+    auto parent1 = TestUtils::createNode(0, 0, 200, 400,
+            [&child](RenderProperties& props, Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+    auto parent2 = TestUtils::createNode(0, 0, 200, 400,
+            [&child](RenderProperties& props, Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_TRUE(parent1->nothingToDraw());
+    EXPECT_TRUE(parent2->nothingToDraw());
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent1);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent1->nothingToDraw());
+    EXPECT_TRUE(parent2->nothingToDraw());
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent2);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent1->nothingToDraw());
+    EXPECT_FALSE(parent2->nothingToDraw());
+
+    TestUtils::recordNode(*parent1, [](Canvas& canvas) {
+        canvas.drawColor(Color::Amber_500, SkBlendMode::kSrcOver);
+    });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent1);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent1->nothingToDraw());
+    EXPECT_FALSE(parent2->nothingToDraw());
+
+    TestUtils::recordNode(*parent2, [](Canvas& canvas) {
+        canvas.drawColor(Color::Amber_500, SkBlendMode::kSrcOver);
+    });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent2);
+
+    EXPECT_FALSE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_FALSE(parent1->nothingToDraw());
+    EXPECT_FALSE(parent2->nothingToDraw());
+
+    TestUtils::recordNode(*child, [](Canvas& canvas) {
+        canvas.drawColor(Color::Red_500, SkBlendMode::kSrcOver);
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(child);
+
+    TestUtils::recordNode(*parent1, [&child](Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent1);
+
+    TestUtils::recordNode(*parent2, [&child](Canvas& canvas) {
+        canvas.drawRenderNode(child.get());
+    });
+    TestUtils::syncHierarchyPropertiesAndDisplayList(parent2);
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_TRUE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_FALSE(parent1->nothingToDraw());
+    EXPECT_FALSE(parent2->nothingToDraw());
+
+    parent1->destroyHardwareResources();
+
+    EXPECT_TRUE(child->isValid());
+    EXPECT_FALSE(parent1->isValid());
+    EXPECT_TRUE(parent2->isValid());
+    EXPECT_FALSE(child->nothingToDraw());
+    EXPECT_TRUE(parent1->nothingToDraw());
+    EXPECT_FALSE(parent2->nothingToDraw());
+
+    parent2->destroyHardwareResources();
+
+    EXPECT_FALSE(child->isValid());
+    EXPECT_FALSE(parent1->isValid());
+    EXPECT_FALSE(parent2->isValid());
+    EXPECT_TRUE(child->nothingToDraw());
+    EXPECT_TRUE(parent1->nothingToDraw());
+    EXPECT_TRUE(parent2->nothingToDraw());
+}
+
 TEST(RenderNode, releasedCallback) {
     class DecRefOnReleased : public GlFunctorLifecycleListener {
     public:

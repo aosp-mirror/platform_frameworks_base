@@ -406,21 +406,13 @@ void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
 }
 
 void RenderNode::destroyHardwareResources(TreeInfo* info) {
-    ImmediateRemoved observer(info);
-    destroyHardwareResourcesImpl(observer, info);
-}
-
-void RenderNode::destroyHardwareResourcesImpl(TreeObserver& observer, TreeInfo* info) {
     if (hasLayer()) {
         renderthread::CanvasContext::destroyLayer(this);
     }
-    if (mDisplayList) {
-        mDisplayList->updateChildren([&observer, info](RenderNode* child) {
-            child->destroyHardwareResourcesImpl(observer, info);
-        });
-        setStagingDisplayList(nullptr);
-        deleteDisplayList(observer, info);
-    }
+    setStagingDisplayList(nullptr);
+
+    ImmediateRemoved observer(info);
+    deleteDisplayList(observer, info);
 }
 
 void RenderNode::destroyLayers() {

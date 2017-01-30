@@ -357,7 +357,10 @@ private:
     static void syncHierarchyPropertiesAndDisplayListImpl(RenderNode* node) {
         MarkAndSweepRemoved observer(nullptr);
         node->syncProperties();
-        node->syncDisplayList(observer, nullptr);
+        if (node->mNeedsDisplayListSync) {
+            node->mNeedsDisplayListSync = false;
+            node->syncDisplayList(observer, nullptr);
+        }
         auto displayList = node->getDisplayList();
         if (displayList) {
             for (auto&& childOp : displayList->getChildren()) {
