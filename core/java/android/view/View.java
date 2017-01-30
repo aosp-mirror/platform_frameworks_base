@@ -24740,6 +24740,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide Binary compatibility stub. To be removed when we finalize O APIs.
+     */
+    public void setTooltip(@Nullable CharSequence tooltipText) {
+        setTooltipText(tooltipText);
+    }
+
+    /**
      * Returns the view's tooltip text.
      *
      * @return the tooltip text
@@ -24747,6 +24754,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public final CharSequence getTooltipText() {
         return mTooltipInfo != null ? mTooltipInfo.mTooltipText : null;
+    }
+
+    /**
+     * @hide Binary compatibility stub. To be removed when we finalize O APIs.
+     */
+    @Nullable
+    public CharSequence getTooltip() {
+        return getTooltipText();
     }
 
     private boolean showTooltip(int x, int y, boolean fromLongClick) {
