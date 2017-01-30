@@ -291,6 +291,7 @@ public class DexManager {
             return;
         }
         Set<String> dexFilesToRemove = new HashSet<>();
+        boolean updated = false;
         for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
             String dexPath = entry.getKey();
             DexUseInfo dexUseInfo = entry.getValue();
@@ -311,7 +312,8 @@ public class DexManager {
                 Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
                         + " for user " + dexUseInfo.getOwnerUserId());
                 // Update the usage and continue, another user might still have the package.
-                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
+                updated = mPackageDexUsage.removeUserPackage(
+                        packageName, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
             ApplicationInfo info = pkg.applicationInfo;
@@ -322,7 +324,8 @@ public class DexManager {
                 flags |= StorageManager.FLAG_STORAGE_CE;
             } else {
                 Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
-                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
+                updated = mPackageDexUsage.removeUserPackage(
+                        packageName, dexUseInfo.getOwnerUserId()) || updated;
                 continue;
             }
 
@@ -338,9 +341,21 @@ public class DexManager {
                 }
             }
             if (!dexStillExists) {
-                mPackageDexUsage.removeDexFile(packageName, dexPath, dexUseInfo.getOwnerUserId());
+                updated = mPackageDexUsage.removeDexFile(
+                        packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
             }
+
         }
+        if (updated) {
+            mPackageDexUsage.maybeWriteAsync();
+        }
+    }
+
+    /**
+     * Return all packages that contain records of secondary dex files.
+     */
+    public Set<String> getAllPackagesWithSecondaryDexFiles() {
+        return mPackageDexUsage.getAllPackagesWithSecondaryDexFiles();
     }
 
     /**
