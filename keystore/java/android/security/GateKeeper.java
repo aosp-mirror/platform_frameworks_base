@@ -29,6 +29,8 @@ import android.service.gatekeeper.IGateKeeperService;
  */
 public abstract class GateKeeper {
 
+    public static final long INVALID_SECURE_USER_ID = 0;
+
     private GateKeeper() {}
 
     public static IGateKeeperService getService() {
