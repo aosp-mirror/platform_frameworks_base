@@ -33,7 +33,7 @@ public final class Zygote {
     */
 
     /** enable debugging over JDWP */
-    public static final int DEBUG_ENABLE_DEBUGGER   = 1;
+    public static final int DEBUG_ENABLE_JDWP   = 1;
     /** enable JNI checks */
     public static final int DEBUG_ENABLE_CHECKJNI   = 1 << 1;
     /** enable Java programming language "assert" statements */
@@ -46,8 +46,10 @@ public final class Zygote {
     public static final int DEBUG_GENERATE_DEBUG_INFO = 1 << 5;
     /** Always use JIT-ed code. */
     public static final int DEBUG_ALWAYS_JIT = 1 << 6;
-    /** Make the code debuggable with turning off some optimizations. */
+    /** Make the code native debuggable by turning off some optimizations. */
     public static final int DEBUG_NATIVE_DEBUGGABLE = 1 << 7;
+    /** Make the code Java debuggable by turning off some optimizations. */
+    public static final int DEBUG_JAVA_DEBUGGABLE = 1 << 8;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;

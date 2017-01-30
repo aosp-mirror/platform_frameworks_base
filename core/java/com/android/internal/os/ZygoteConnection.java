@@ -342,8 +342,9 @@ class ZygoteConnection {
         int[] gids;
 
         /**
-         * From --enable-debugger, --enable-checkjni, --enable-assert,
-         * --enable-safemode, --generate-debug-info and --enable-jni-logging.
+         * From --enable-jdwp, --enable-checkjni, --enable-assert,
+         * --enable-safemode, --generate-debug-info, --enable-jni-logging,
+         * --java-debuggable, and --native-debuggable.
          */
         int debugFlags;
 
@@ -453,8 +454,8 @@ class ZygoteConnection {
                     targetSdkVersionSpecified = true;
                     targetSdkVersion = Integer.parseInt(
                             arg.substring(arg.indexOf('=') + 1));
-                } else if (arg.equals("--enable-debugger")) {
-                    debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+                } else if (arg.equals("--enable-jdwp")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
                 } else if (arg.equals("--enable-safemode")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
                 } else if (arg.equals("--enable-checkjni")) {
@@ -465,6 +466,8 @@ class ZygoteConnection {
                     debugFlags |= Zygote.DEBUG_ALWAYS_JIT;
                 } else if (arg.equals("--native-debuggable")) {
                     debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;
+                } else if (arg.equals("--java-debuggable")) {
+                    debugFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 } else if (arg.equals("--enable-jni-logging")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
                 } else if (arg.equals("--enable-assert")) {
@@ -676,14 +679,14 @@ class ZygoteConnection {
      * Applies debugger system properties to the zygote arguments.
      *
      * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
-     * the debugger state is specified via the "--enable-debugger" flag
+     * the debugger state is specified via the "--enable-jdwp" flag
      * in the spawn request.
      *
      * @param args non-null; zygote spawner args
      */
     public static void applyDebuggerSystemProperty(Arguments args) {
         if (RoSystemProperties.DEBUGGABLE) {
-            args.debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+            args.debugFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
     }
 
@@ -705,7 +708,7 @@ class ZygoteConnection {
         int peerUid = peer.getUid();
 
         if (args.invokeWith != null && peerUid != 0 &&
-            (args.debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) == 0) {
+            (args.debugFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
             throw new ZygoteSecurityException("Peer is permitted to specify an"
                     + "explicit invoke-with wrapper command only for debuggable"
                     + "applications.");
