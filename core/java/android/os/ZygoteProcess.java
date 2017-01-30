@@ -352,8 +352,8 @@ public class ZygoteProcess {
         if ((debugFlags & Zygote.DEBUG_ENABLE_SAFEMODE) != 0) {
             argsForZygote.add("--enable-safemode");
         }
-        if ((debugFlags & Zygote.DEBUG_ENABLE_DEBUGGER) != 0) {
-            argsForZygote.add("--enable-debugger");
+        if ((debugFlags & Zygote.DEBUG_ENABLE_JDWP) != 0) {
+            argsForZygote.add("--enable-jdwp");
         }
         if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
             argsForZygote.add("--enable-checkjni");
@@ -367,6 +367,9 @@ public class ZygoteProcess {
         if ((debugFlags & Zygote.DEBUG_NATIVE_DEBUGGABLE) != 0) {
             argsForZygote.add("--native-debuggable");
         }
+        if ((debugFlags & Zygote.DEBUG_JAVA_DEBUGGABLE) != 0) {
+            argsForZygote.add("--java-debuggable");
+        }
         if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
             argsForZygote.add("--enable-assert");
         }
@@ -378,9 +381,6 @@ public class ZygoteProcess {
             argsForZygote.add("--mount-external-write");
         }
         argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
-
-        //TODO optionally enable debuger
-        //argsForZygote.add("--enable-debugger");
 
         // --setgroups is a comma-separated list
         if (gids != null && gids.length > 0) {
