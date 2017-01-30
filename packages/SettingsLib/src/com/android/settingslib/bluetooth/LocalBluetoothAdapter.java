@@ -135,6 +135,10 @@ public final class LocalBluetoothAdapter {
         mAdapter.setDiscoverableTimeout(timeout);
     }
 
+    public long getDiscoveryEndMillis() {
+        return mAdapter.getDiscoveryEndMillis();
+    }
+
     public void setName(String name) {
         mAdapter.setName(name);
     }
