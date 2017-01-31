@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Stjórnunarforrit vinnusniðsins vantar eða er skemmt. Vinnusniðinu og gögnum því tengdu hefur því verið eytt. Hafðu samband við kerfisstjórann til að fá frekari aðstoð."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Vinnusniðið þitt er ekki lengur í boði á þessu tæki."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Verið er að fylgjast með netumferð"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Ýttu til að fá frekari upplýsingar"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Ýttu til að fá frekari upplýsingar"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Stjórnunarforritið vantar íhluti eða er skemmt og ekki er hægt að nota það. Þurrkað verður út af tækinu. Hafðu samband við kerfisstjórann til að fá aðstoð."</string>
     <string name="me" msgid="6545696007631404292">"Ég"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Leyfir forriti að nota IMS-þjónustu til að hringja án inngrips frá þér."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lesa stöðu símans og auðkenni"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leyfir forriti að fá aðgang að símaeiginleikum tækisins. Þessi heimild gerir forritinu kleift að komast að símanúmeri og auðkennum tækisins, hvort símtal er í gangi og símanúmeri viðmælanda í símtali."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"senda símtöl gegnum kerfið"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Heimilar forritinu að senda símtöl sín gegnum kerfið til að bæta gæði símtalsins."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lesa símanúmer"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Veitir forritinu aðgang að símanúmeri tækisins."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"koma í veg fyrir að spjaldtölvan fari í biðstöðu"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Eyða"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Innsláttaraðferð"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaaðgerðir"</string>
+    <string name="email" msgid="4560673117055050403">"Tölvupóstur"</string>
+    <string name="dial" msgid="2275093056198652749">"Hringja"</string>
+    <string name="map" msgid="5441053548030107189">"Kort"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Geymslurýmið er senn á þrotum"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sumir kerfiseiginleikar kunna að vera óvirkir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Ekki nægt geymslurými fyrir kerfið. Gakktu úr skugga um að 250 MB séu laus og endurræstu."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Leyfir forriti að lesa uppsetningarlotur. Þetta gerir því kleift að sjá upplýsingar um virkar pakkauppsetningar."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"fara fram á uppsetningu pakka"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Leyfir forriti að fara fram á uppsetningu pakka."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"biðja um eyðingu á pökkum"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Leyfir forriti að biðja um eyðingu pakka."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"biðja um að hunsa rafhlöðusparnað"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Gerir forriti kleift að biðja um heimild til að hunsa rafhlöðusparnað fyrir forritið."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Ýttu tvisvar til að opna aðdráttarstýringar"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjarlægja"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Haltu tveimur fingrum áfram á skjánum til að kveikja á auknu aðgengi."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Kveikt á auknu aðgengi."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hætt við aukið aðgengi."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"KVEIKT er á flýtileið aðgengisstillingar"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Kveiktu eða slökktu á <xliff:g id="SERVICE_NAME">%1$s</xliff:g> með því að halda inni báðum tökkunum fyrir hljóðstyrk í þrjár sekúndur.\n\nÞú getur breytt þjónustunni í „Stillingar &gt; Aðgengi“."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Slökkva á flýtileið"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Hafa kveikt"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Flýtileið aðgengisstillingar kveikti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Flýtileið aðgengisstillingar slökkti á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Núverandi notandi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skiptir yfir á <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Skráir <xliff:g id="NAME">%1$s</xliff:g> út…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Slökkt <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Símafundur"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Ábending"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Leikir"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Tónlist og hljóð"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Kvikmyndir og myndskeið"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Myndir"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Samfélag og samskipti"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Fréttir og tímarit"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Kort og leiðsögn"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Aðstoð"</string>
 </resources>

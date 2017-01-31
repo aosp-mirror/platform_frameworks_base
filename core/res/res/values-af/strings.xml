@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Die werkprofiel se administrasieprogram ontbreek of is korrup. Gevolglik is jou werkprofiel en verwante data uitgevee. Kontak jou administrateur vir bystand."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Netwerkverkeer word gemonitor"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tik vir meer besonderhede"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tik om meer te wete te kom"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jou toestel sal uitgevee word"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Die administrasieprogram kort komponente of is korrup en kan nie gebruik word nie. Jou toestel sal nou uitgevee word. Kontak jou administrateur vir bystand."</string>
     <string name="me" msgid="6545696007631404292">"Ek"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lees foonstatus en identiteit"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Laat die program toe om toegang tot die foonfunksies van die toestel te verkry. Hierdie toestemming laat die program toe om te bepaal wat die foonnommer en toestel-IDs is, of die oproep aan die gang is, en die afgeleë nommer wat deur \'n oproep verbind word."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"roeteer oproepe deur die stelsel"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Laat die program toe om sy oproepe deur die stelsel te stuur om die oproepervaring te verbeter."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lees foonnommer"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Gee die program toegang tot die toestel se foonnommer."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"verhoed dat tablet slaap"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Vee uit"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Invoermetode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksaksies"</string>
+    <string name="email" msgid="4560673117055050403">"E-pos"</string>
+    <string name="dial" msgid="2275093056198652749">"Bel"</string>
+    <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Bergingspasie word min"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sommige stelselfunksies werk moontlik nie"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nie genoeg berging vir die stelsel nie. Maak seker jy het 250 MB spasie beskikbaar en herbegin."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Laat \'n program toe om installasiesessies te lees. Dit laat dit toe om besonderhede van aktiewe pakketinstallasies te sien."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"versoek installeerpakkette"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Laat \'n program toe om te versoek dat pakkette geïnstalleer word."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"versoek uitvee van pakkette"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Laat \'n program toe om te versoek dat pakkette uitgevee word."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"vra om batteryoptimerings te ignoreer"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Laat \'n program toe om toestemming te vra om batteryoptimerings vir daardie program ignoreer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Klop twee keer vir zoembeheer"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Verhoog volume bo aanbevole vlak?\n\nOm lang tydperke teen hoë volume te luister, kan jou gehoor beskadig."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hou aan met twee vingers inhou om toeganklikheid te aktiveer."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Toeganklikheidskortpad is AAN"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Skakel <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aan of af deur albei volumeknoppies vir 3 sekondes in te hou.\n\nJy kan die diens in Instellings &gt; Toeganklikheid verander."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Skakel kortpad af"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Los aan"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Toeganklikheidskortpad het <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aangeskakel"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Toeganklikheidskortpad het <xliff:g id="SERVICE_NAME">%1$s</xliff:g> afgeskakel"</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g> ."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skakel tans oor na <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Meld <xliff:g id="NAME">%1$s</xliff:g> tans af …"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Het <xliff:g id="LABEL">%1$s</xliff:g> gedeaktiveer"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferensie-oproep"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Nutswenk"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Speletjies"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Musiek en oudio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Flieks en video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Foto\'s en prente"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Sosiaal en kommunikasie"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Nuus en tydskrifte"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Kaarte en navigasie"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produktiwiteit"</string>
 </resources>

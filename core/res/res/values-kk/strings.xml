@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жұмыс профилінің басқару қолданбасы жоқ немесе бүлінген. Нәтижесінде жұмыс профиліңіз және қатысты деректер жойылды. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жұмыс профиліңіз осы құрылғыда енді қолжетімді емес."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Желі трафигі бақылануда"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Қосымша мәліметтерді көру үшін түртіңіз"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Толығырақ мәліметтер үшін түртіңіз"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Басқару қолданбасында құрамдастар жетіспейді немесе ол бүлінген және оны пайдалану мүмкін емес. Құрылғыңыздағы деректер қазір өшіріледі. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефон күйін оқу немесе анықтау"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"қоңырауларды жүйе арқылы бағыттау"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Қоңырау шалу тәжірибесін жақсарту үшін қолданба қоңырауларды жүйе арқылы бағыттай алады."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"телефон нөмірін оқу"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Қолданбаға құрылғының телефон нөмірін алуға рұқсат береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Жою"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Енгізу әдісі"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Мәтін әрекеттері"</string>
+    <string name="email" msgid="4560673117055050403">"Электрондық пошта"</string>
+    <string name="dial" msgid="2275093056198652749">"Теру"</string>
+    <string name="map" msgid="5441053548030107189">"Map"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Жүйе үшін жад жеткіліксіз. 250 МБ бос орын бар екенін тексеріп, қайта іске қосыңыз."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Қолданбаға орнату сеанстарын оқуға рұқсат етеді. Бұл оған белсенді бума орнатулары туралы мәліметтерді көруге рұқсат етеді."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"орнату бумаларын сұрау"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Қолданбаның бумаларды орнатуға рұқсат сұрауына мүмкіндік береді."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"пакеттерді жоюға рұқсат сұрау"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Қолданбаның пакеттерді жоюға рұқсат сұрауына мүмкіндік береді."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"батареяны оңтайландыру әрекетін елемеуді сұрау"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Қолданба батареяны оңтайландыру әрекетін елемеуді сұрай алады."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Масштабтау параметрін басқару үшін екі рет түртіңіз"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып тастау"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Қол жетімділікті қосу үшін екі саусағыңызды төмен басып тұрыңыз."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Қол жетімділік қосылды."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Қол жетімділік өшірілді."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Арнайы мүмкіндіктер таңбашасы ҚОСУЛЫ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Дыбыс деңгейі түймелерін 3 секунд басып тұрып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосыңыз не өшіріңіз.\n\nҚызметті \"Параметрлер &gt; Арнайы мүмкіндіктер\" тармағынан өзгерте аласыз."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Таңбашаны өшіру"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Қосулы қалдыру"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> өшірулі"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конференциялық қоңырау"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Қалқыма сөзкөмек"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Ойындар"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Музыка және аудиомазмұн"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Фильм және бейне"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Суреттер және кескіндер"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Әлеуметтік қолданба мен байланыс"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Газеттер және журналдар"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Карта және навигация"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Өнімділік"</string>
 </resources>

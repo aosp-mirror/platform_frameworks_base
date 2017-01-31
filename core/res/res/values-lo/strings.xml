@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ແອັບ​ບໍ​ລິ​ຫານ​ໂປ​ຣ​ໄຟ​ລ໌​ວຽກ​ຂາດ​ໄປ ຫຼື​ຖືກ​​ເສຍ​ຫາຍ. ດ້ວຍ​ເຫດ​ຜົນ​ນັ້ນ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດວຽກ​ຂອງ​ທ່ານ ແລະ​ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ຈິ່ງ​ຖືກ​ລຶບ​ໄປ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸ​ມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ່ມີໃຫ້ໃຊ້ງານເທິງອຸປະກອນນີ້ອີກຕໍ່ໄປ."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ກຳລັງຕິດຕາມທຣາບຟິກເຄືອຂ່າຍ"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດເພີ່ມເຕີມ"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ແອັບ​ບໍ​ລິ​ຫານ​ຂາດ​ອົງ​ປະ​ກອບ​ ຫ​ຼື​ຖືກ​ຂັດ​ຈັງ​ຫວະ, ແລະ​ບໍ່​ສາ​ມາດ​ໃຊ​ໄດ້. ດຽວ​ນີ້​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ. ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ ເພື່ອ​ຂໍ​ຄວາມ​ຊ່ວຍ​ເຫຼືອ."</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ໃຊ້​ການ​ບໍ​ລິ​ການ IMS ເພື່ອ​ໂທ​ໂດຍ​ບໍ່​ມີ​ການ​ຊ່ວຍ​ເຫຼືອ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ອ່ານສະຖານະ ແລະຂໍ້ມູນລະບຸໂຕຕົນຂອງໂທລະສັບ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ອະນຸຍາດໃຫ້ແອັບຯ ເຂົ້າເຖິງຄວາມສາມາດການໂທລະສັບຂອງອຸປະກອນ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດກວດສອບເບີໂທລະສັບ ແລະ ID ຂອງອຸປະກອນ, ບໍ່ວ່າການໂທຈະຍັງດຳເນີນຢູ່ ແລະເບີປາຍທາງເຊື່ອມຕໍ່ຢູ່ຫຼືບໍ່ກໍຕາມ."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"route calls through the system"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Allows the app to route its calls through the system in order to improve the calling experience."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"read phone number"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Allows the app to access the phone number of the device."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"ລຶບ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
+    <string name="email" msgid="4560673117055050403">"ອີເມວ"</string>
+    <string name="dial" msgid="2275093056198652749">"ໂທອອກ"</string>
+    <string name="map" msgid="5441053548030107189">"ແຜນທີ່"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ການເຮັດວຽກບາງຢ່າງຂອງລະບົບບາງອາດຈະໃຊ້ບໍ່ໄດ້"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"​ບໍ່​ມີ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ພຽງ​ພໍ​ສຳ​ລັບ​ລະ​ບົບ. ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ທ່ານ​ມີ​ພື້ນ​ທີ່​ຫວ່າງ​ຢ່າງ​ໜ້ອຍ 250MB ​ແລ້ວລອງ​ໃໝ່."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້. ນີ້​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ມັນ​ເບິ່ງ​ເຫັນ​ລາຍ​ລະ​ອຽດ​ກ່ຽວ​ກັບ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ​ທີ່​ເຮັດ​​ວຽກ​ຢູ່​ໄດ້."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ຂໍ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຂອງ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"request delete packages"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຂອງ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ຖາມເພື່ອໃຫ້ເພີກເສີຍການປັບແຕ່ງແບັດເຕີຣີ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"ອະນຸຍາດໃຫ້ແອັບຖາມສິດອະນຸຍາດເພື່ອເພີກເສີຍຕໍ່ການປັບແຕ່ງແບັດເຕີຣີສຳລັບແອັບນັ້ນ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ແຕະສອງເທື່ອເພື່ອຄວບຄຸມການຊູມ"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ກົດສອງນິ້ວຄ້າງໄວ້ເພື່ອເປີດໃຊ້ການຊ່ວຍເຂົ້າເຖິງ"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ເປີດການຊ່ວຍເຂົ້າເຖິງແລ້ວ."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ຍົກເລີກໂຕຊ່ວຍການເຂົ້າເຖິງແລ້ວ."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Accessibility Shortcut is ON"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Turn <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on or off by holding down both volume buttons for 3 seconds.\n\nYou can change the service in Settings &gt; Accessibility."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Turn Off Shortcut"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Leave on"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
     <string name="user_switched" msgid="3768006783166984410">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"ກຳ​ລັງ​ສະ​ລັບ​​ໄປ​ຫາ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"ກຳລັງອອກຈາກລະບົບ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ປິດການນຳໃຊ້ <xliff:g id="LABEL">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ການປະຊຸມສາຍ"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ຄຳອະທິບາຍເຄື່ອງມື"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"ເກມ"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Music &amp; Audio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Movies &amp; Video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Photos &amp; Images"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Social &amp; Communication"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"News &amp; Magazines"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps &amp; Navigation"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"ຜະລິດຕະພາບ"</string>
 </resources>

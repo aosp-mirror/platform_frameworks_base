@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"L\'app di amministrazione dei profili di lavoro manca o è danneggiata. Di conseguenza, il tuo profilo di lavoro e i relativi dati sono stati eliminati. Contatta l\'amministratore per ricevere assistenza."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Il tuo profilo di lavoro non è più disponibile sul dispositivo."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Il traffico di rete è monitorato"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tocca per ulteriori dettagli"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tocca per ulteriori informazioni"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"L\'app di amministrazione è danneggiata o mancano componenti, pertanto non è possibile utilizzarla. Il dispositivo verrà resettato. Contatta l\'amministratore per ricevere assistenza."</string>
     <string name="me" msgid="6545696007631404292">"Io"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lettura stato e identità telefono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Consente all\'applicazione di accedere alle funzioni telefoniche del dispositivo. Questa autorizzazione consente all\'applicazione di determinare il numero di telefono e gli ID dei dispositivi, se una chiamata è attiva e il numero remoto connesso da una chiamata."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"indirizzamento delle chiamate tramite il sistema"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Consente all\'app di indirizzare le proprie chiamate tramite il sistema al fine di migliorare l\'esperienza di chiamata."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"leggi il numero di telefono"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Consente all\'app di accedere al numero di telefono del dispositivo."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"disattivazione stand-by del tablet"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Elimina"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
+    <string name="email" msgid="4560673117055050403">"Invia una email"</string>
+    <string name="dial" msgid="2275093056198652749">"Componi"</string>
+    <string name="map" msgid="5441053548030107189">"Mappa"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spazio di archiviazione in esaurimento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Alcune funzioni di sistema potrebbero non funzionare"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Memoria insufficiente per il sistema. Assicurati di avere 250 MB di spazio libero e riavvia."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"richiesta di pacchetti di installazione"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Consente a un\'applicazione di richiedere l\'installazione di pacchetti."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"richiesta di eliminazione dei pacchetti"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Consente a un\'applicazione di richiedere l\'eliminazione di pacchetti."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"chiedi di ignorare le ottimizzazioni della batteria"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Consente a un\'app di chiedere l\'autorizzazione a ignorare le ottimizzazioni della batteria per quell\'app."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tocca due volte per il comando dello zoom"</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Listener di notifica"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener realtà virtuale"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Provider condizioni"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servizio di classificazione delle notifiche"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN attiva"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Rimuovi"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Continua a tenere premuto con due dita per attivare l\'accessibilità."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Accessibilità attivata."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilità annullata."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Scorciatoia Accessibilità attiva"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Attiva o disattiva <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tenendo premuti entrambi i pulsanti del volume per tre secondi.\n\nPuoi cambiare il servizio in Impostazioni &gt; Accessibilità."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Disattiva scorciatoia"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Lascia attiva"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"La scorciatoia Accessibilità ha attivato <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"La scorciatoia Accessibilità ha disattivato <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Passaggio a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Disconnessione di <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
     <string name="conference_call" msgid="3751093130790472426">"Audioconferenza"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Descrizione comando"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Giochi"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Musica e audio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Film e video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Foto e immagini"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Social e comunicazione"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Notizie e riviste"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps e Navigatore"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produttività"</string>
 </resources>

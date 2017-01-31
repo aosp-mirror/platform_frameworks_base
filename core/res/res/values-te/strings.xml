@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"కార్యాలయ ప్రొఫైల్ నిర్వాహక అనువర్తనం లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడుతోంది"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"మరిన్ని వివరాల కోసం నొక్కండి"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"మరింత తెలుసుకోవడానికి నొక్కండి"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"నిర్వాహక అనువర్తనంలో కొన్ని అంతర్భాగాలు లేవు లేదా అది పాడైపోయి, నిరుపయోగంగా మారింది. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది. సహాయం కోసం మీ నిర్వాహకుడిని సంప్రదించండి."</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"మీ ప్రమేయం లేకుండా కాల్‌లు చేయడం కోసం IMS సేవను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ లక్షణాలను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ఫోన్ నంబర్‌ను చదవడం"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"పరికరం యొక్క ఫోన్ నంబర్‌ను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"తొలగించు"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
+    <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
+    <string name="dial" msgid="2275093056198652749">"డయల్ చేయి"</string>
+    <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ఇన్‌స్టాల్ ప్యాకేజీలను అభ్యర్థించడం"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ప్యాకేజీల ఇన్‌స్టాలేషన్ అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"ప్యాకేజీలను తొలగించడానికి అభ్యర్థించు"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ప్యాకేజీల తొలగింపును అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"బ్యాటరీ అనుకూలీకరణలను విస్మరించడానికి అడగాలి"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"ఆ అనువర్తనం కోసం బ్యాటరీ అనుకూలీకరణలు విస్మరించేలా అనుమతి కోరడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"జూమ్ నియంత్రణ కోసం రెండుసార్లు నొక్కండి"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"తీసివేయి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ప్రాప్యతను ప్రారంభించడానికి రెండు వేళ్లను నొక్కి ఉంచండి."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ప్రాప్యత ప్రారంభించబడింది."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ప్రాప్యత రద్దు చేయబడింది."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ప్రాప్యతా సత్వరమార్గం ఆన్ చేయబడింది"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"వాల్యూమ్ బటన్‌లు రెండింటినీ 3 సెకన్ల పాటు నొక్కి, పట్టుకోవడం ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఆన్ లేదా ఆఫ్ చేయండి.\n\nమీరు సెట్టింగ్‌లు &gt; ప్రాప్యతలో సేవని మార్చవచ్చు."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ఆన్‌లో ఉంచు"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ప్రాప్యతా సత్వరమార్గం ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ప్రాప్యతా సత్వరమార్గం ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="user_switched" msgid="3768006783166984410">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>కి మారుస్తోంది…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> నిలిపివేయబడింది"</string>
     <string name="conference_call" msgid="3751093130790472426">"కాన్ఫరెన్స్ కాల్"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"సాధనం చిట్కా"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"గేమ్‌లు"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"సంగీతం &amp; ఆడియో"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"చలనచిత్రాలు &amp; వీడియో"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"ఫోటోలు &amp; చిత్రాలు"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"సామాజికం &amp; కమ్యూనికేషన్"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"వార్తలు &amp; వార్తాపత్రికలు"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"మ్యాప్స్ &amp; నావిగేషన్"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"ఉత్పాదకత"</string>
 </resources>

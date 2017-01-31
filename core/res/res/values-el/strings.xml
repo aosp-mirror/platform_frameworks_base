@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Η εφαρμογή διαχείρισης προφίλ εργασίας είτε λείπει είτε είναι κατεστραμμένη. Ως αποτέλεσμα, το προφίλ εργασίας και σχετικά δεδομένα διαγράφηκαν. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Το προφίλ σας εργασίας δεν είναι πια διαθέσιμο σε αυτήν τη συσκευή."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Η επισκεψιμότητα δικτύου παρακολουθείται"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Πατήστε για να δείτε περισσότερες λεπτομέρειες"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Πατήστε για να μάθετε περισσότερα"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Η συσκευή σας θα διαγραφεί"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Λείπουν στοιχεία από την εφαρμογή διαχείρισης ή είναι κατεστραμμένη, και δεν μπορεί να χρησιμοποιηθεί. Η συσκευή σας θα διαγραφεί. Επικοινωνήστε με το διαχειριστή για βοήθεια."</string>
     <string name="me" msgid="6545696007631404292">"Για εμένα"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Επιτρέπει στην εφαρμογή τη χρήση της υπηρεσίας IMS για την πραγματοποίηση κλήσεων χωρίς τη δική σας παρέμβαση."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"διαβάζει την κατάσταση και ταυτότητα τηλεφώνου"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Επιτρέπει στην εφαρμογή την πρόσβαση στις λειτουργίες τηλεφώνου της συσκευής. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να καθορίζει τον αριθμό τηλεφώνου και τα αναγνωριστικά συσκευών, εάν μια κλήση είναι ενεργή, καθώς και τον απομακρυσμένο αριθμό που συνδέεται από μια κλήση."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"δρομολόγηση κλήσεων μέσω του συστήματος"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Επιτρέπει στην εφαρμογή να δρομολογεί τις κλήσεις της μέσω του συστήματος για να βελτιώσει την εμπειρία κλήσης."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ανάγνωση αριθμού τηλεφώνου"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση στον αριθμό τηλεφώνου της συσκευής."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"αποτρέπει την μετάβαση του tablet σε κατάσταση αδράνειας"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Διαγραφή"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Μέθοδος εισόδου"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ενέργειες κειμένου"</string>
+    <string name="email" msgid="4560673117055050403">"Ηλεκτρονικό ταχυδρομείο"</string>
+    <string name="dial" msgid="2275093056198652749">"Κλήση"</string>
+    <string name="map" msgid="5441053548030107189">"Χάρτης"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ο αποθηκευτικός χώρος εξαντλείται"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ορισμένες λειτουργίες συστήματος ενδέχεται να μην λειτουργούν"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Δεν υπάρχει αρκετός αποθηκευτικός χώρος για το σύστημα. Βεβαιωθείτε ότι διαθέτετε 250 MB ελεύθερου χώρου και κάντε επανεκκίνηση."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των περιόδων σύνδεσης εγκατάστασης. Αυτό της επιτρέπει να βλέπει λεπτομέρειες σχετικά με τις εγκαταστάσεις του ενεργού πακέτου."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ζητά πακέτα εγκατάστασης"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Επιτρέπει σε μια εφαρμογή να ζητά εγκατάσταση πακέτων."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"αίτημα διαγραφής πακέτων"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Επιτρέπει σε μια εφαρμογή να ζητά διαγραφή πακέτων."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"αίτημα αγνόησης βελτιστοποιήσεων μπαταρίας"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Επιτρέπει σε μια εφαρμογή να ζητήσει άδεια για την αγνόηση βελτιστοποιήσεων της μπαταρίας για τη συγκεκριμένη εφαρμογή."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Πατήστε δύο φορές για έλεγχο εστίασης"</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ταπετσαρία"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Αλλαγή ταπετσαρίας"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Υπηρεσία ακρόασης ειδοποίησης"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Λειτουργία ακρόασης Εικονικής Πραγματικότητας"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Λειτουργία ακρόασης VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Πάροχος συνθηκών"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Υπηρεσία κατάταξης ειδοποιήσεων"</string>
     <string name="vpn_title" msgid="19615213552042827">"Το VPN ενεργοποιήθηκε"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;\n\nΑν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Αγγίξτε παρατεταμένα με δύο δάχτυλα για να ενεργοποιήσετε τη λειτουργία προσβασιμότητας."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Ενεργοποιήθηκε η προσβασιμότητα."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Η συντόμευση προσβασιμότητας είναι ΕΝΕΡΓΗ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Ενεργοποιήστε ή απενεργοποιήστε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g> πατώντας παρατεταμένα τα κουμπιά έντασης ήχου για 3 δευτερόλεπτα.\n\nΜπορείτε να αλλάξετε την υπηρεσία στις Ρυθμίσεις &gt; Προσβασιμότητα."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Απενεργοποίηση συντόμευσης"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Διατήρηση ενεργοποίησης"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Η συντόμευση προσβασιμότητας ενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Η συντόμευση προσβασιμότητας απενεργοποίησε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Αποσύνδεση <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Απενεργοποιημένο <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Κλήση συνδιάσκεψης"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Επεξήγηση εργαλείου"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Παιχνίδια"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Μουσική και ήχος"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Ταινίες και βίντεο"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Φωτογραφίες και εικόνες"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Κοινωνικά και επικοινωνία"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Ειδήσεις και περιοδικά"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Χάρτες και πλοήγηση"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Παραγωγικότητα"</string>
 </resources>

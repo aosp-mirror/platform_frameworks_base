@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Arbeidsprofilen din er ikke lenger tilgjengelig på denne enheten."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Nettverkstrafikken blir overvåket"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Trykk for å få flere detaljer"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Trykk for å finne ut mer"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lar appen bruke nettprattjenesten til å ringe uten at du gjør noe."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lese telefonstatus og -identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lar appen bruke enhetens telefonfunksjoner. Med denne tillatelsen kan appen finne telefonnummer og enhets-ID-er, registrere om en samtale pågår, og se det eksterne nummeret det opprettes en forbindelse med via oppringing."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"send anrop gjennom systemet"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"les telefonnummeret"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Gir appen tilgang til telefonnummeret til enheten."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"hindre nettbrettet fra å gå over til sovemodus"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Slett"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
+    <string name="email" msgid="4560673117055050403">"E-post"</string>
+    <string name="dial" msgid="2275093056198652749">"Ring"</string>
+    <string name="map" msgid="5441053548030107189">"Kart"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lite ledig lagringsplass"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Enkelte systemfunksjoner fungerer muligens ikke slik de skal"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det er ikke nok lagringsplass for systemet. Kontrollér at du har 250 MB ledig plass, og start på nytt."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillater en app å lese installeringsøkter. Dette gjør det mulig for den å se detaljer om aktive pakkeinstallasjoner."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"be om installasjon av pakker"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lar apper be om installasjon av pakker."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"be om pakkesletting"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Lar apper be om sletting av pakker."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"be om å ignorere batterioptimaliseringer"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Gjør det mulig for apper å be om tillatelse til å ignorere batterioptimaliseringer for disse appene."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Trykk to ganger for zoomkontroll"</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Bakgrunnsbilde"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Velg bakgrunnsbilde"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Varsellytteren"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyttetjeneste for virtuell virkelighet"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyttetjeneste for VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Betingelsesleverandør"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Tjeneste for rangering av varsler"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN er aktivert"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Vil du øke volumet til over anbefalt nivå?\n\nHvis du hører på et høyt volum over lengre perioder, kan det skade hørselen din."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Fortsett å holde nede to fingre for å aktivere tilgjengelighet."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Tilgjengelighet er aktivert."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Tilgjengelighetstjenesten ble avbrutt."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Snarvei for tilgjengelighet er PÅ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Slå <xliff:g id="SERVICE_NAME">%1$s</xliff:g> på eller av ved å holde begge volumknappene nede i tre sekunder.\n\nDu kan endre tjenesten i Innstillinger og Tilgjengelighet."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Slå av snarveien"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"La den være på"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Snarveien for tilgjengelighet slo på <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Snarveien for tilgjengelighet slo av <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Gjeldende bruker: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Bytter til <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Logger av <xliff:g id="NAME">%1$s</xliff:g> …"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferansesamtale"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Verktøytips"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Spill"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Musikk og lyd"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filmer og video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotografier og bilder"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Sosialt og kommunikasjon"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Nyheter og tidsskrifter"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Kart og navigering"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produktivitet"</string>
 </resources>

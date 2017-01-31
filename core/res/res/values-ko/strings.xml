@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"네트워크 트래픽이 모니터링되고 있음"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"탭하여 세부정보 더보기"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"관리 앱이 손상되었거나 구성요소가 없어서 사용할 수 없습니다. 이제 기기가 삭제됩니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"앱이 IMS 서비스를 사용하여 자동으로 전화를 걸 수 있도록 허용합니다."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"휴대전화 상태 및 ID 읽기"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"앱이 기기의 휴대전화 기능에 접근할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 전화번호 및 기기의 ID, 활성 통화인지 여부, 통화가 연결된 원격 번호 등을 확인할 수 있습니다."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"시스템을 통해 통화 연결"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"통화 환경을 개선하기 위해 앱이 시스템을 통해 통화를 연결하도록 허용합니다."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"전화번호 읽기"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"앱에서 기기의 전화번호에 액세스할 수 있도록 허용합니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"삭제"</string>
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
+    <string name="email" msgid="4560673117055050403">"이메일"</string>
+    <string name="dial" msgid="2275093056198652749">"전화걸기"</string>
+    <string name="map" msgid="5441053548030107189">"지도"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"패키지 설치 요청"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"애플리케이션이 패키지 설치를 요청하도록 허용합니다."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"패키지 삭제 요청"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"애플리케이션이 패키지 삭제를 요청하도록 허용합니다."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"배터리 최적화를 무시하도록 요청"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"앱에서 배터리 최적화를 무시할 수 있는 권한을 요청할 수 있도록 허용합니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"확대/축소하려면 두 번 탭하세요."</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"배경화면"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"배경화면 변경"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"알림 수신기"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"가상 현실 리스너"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR 리스너"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"조건 제공자"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"알림 순위 지정 서비스"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN이 활성화됨"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"접근성 단축키가 사용 설정됨"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"볼륨 버튼 두 개를 3초 동안 눌러 <xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용 또는 사용 중지할 수 있습니다.\n\n이 서비스는 설정 &gt; 접근성에서 변경할 수 있습니다."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"단축키 사용 중지"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"계속 사용"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g>님을 로그아웃하는 중…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> 사용 중지됨"</string>
     <string name="conference_call" msgid="3751093130790472426">"다자간 통화"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"도움말"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"게임"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"음악/오디오"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"영화/동영상"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"사진/이미지"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"소셜/커뮤니케이션"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"뉴스/잡지"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"지도/내비게이션"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"생산성"</string>
 </resources>

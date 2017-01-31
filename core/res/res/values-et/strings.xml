@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Tööprofiili administraatori rakendus puudub või on rikutud. Seetõttu on teie tööprofiil ja seotud andmed kustutatud. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Teie tööprofiil pole selles seadmes enam saadaval."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Võrguliiklust jälgitakse"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Puudutage üksikasjade vaatamiseks"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Puudutage lisateabe saamiseks"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administraatori rakendusel on puuduvaid osi või on see rikutud ja seda ei saa kasutada. Seade kustutatakse. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Võimaldab rakendusel kasutada IMS-teenust kõnede tegemiseks ilma, et peaksite sekkuma."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lugege telefoni olekut ja identiteeti"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kõnede marsruutimine süsteemi kaudu"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lugeda telefoninumbrit"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Lubab rakendusel juurde pääseda seadme telefoninumbrile."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tahvelarvuti uinumise vältimine"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Kustuta"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Sisestusmeetod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoimingud"</string>
+    <string name="email" msgid="4560673117055050403">"E-post"</string>
+    <string name="dial" msgid="2275093056198652749">"Helistamine"</string>
+    <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installipakettide taotlemine"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Võimaldab rakendusel pakettide installimist taotleda."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"pakettide kustutamise taotlemine"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Võimaldab rakendusel taotleda pakettide kustutamist."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"küsida luba aku optimeerimise eiramiseks"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Lubab rakendusel küsida luba rakenduse aku optimeerimise eiramiseks."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Suumi kasutamiseks koputage kaks korda"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eemalda"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hõlbustuse lubamiseks hoidke kaht sõrme all."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Hõlbustus on lubatud."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hõlbustus on tühistatud."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Juurdepääsetavuse otsetee on SEES"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Lülitage teenus <xliff:g id="SERVICE_NAME">%1$s</xliff:g> sisse või välja, hoides mõlemat helitugevuse nuppu kolm sekundit all.\n\nTeenust saate muuta menüüs Seaded &gt; Juurdepääsetavus."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Lülita otsetee välja"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Jäta sisselülitatuks"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Juurdepääsetavuse otsetee lülitas teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> sisse"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Juurdepääsetavuse otsetee lülitas teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> välja"</string>
     <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Üleminek kasutajale <xliff:g id="NAME">%1$s</xliff:g> ..."</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Kasutaja <xliff:g id="NAME">%1$s</xliff:g> väljalogimine …"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Keelatud <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konverentskõne"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Tööriistavihje"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Mängud"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Muusika ja heli"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filmid ja video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotod ja kujutised"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Suhtlus ja side"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Uudised ja ajakirjad"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Kaardid ja navigeerimine"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produktiivsus"</string>
 </resources>

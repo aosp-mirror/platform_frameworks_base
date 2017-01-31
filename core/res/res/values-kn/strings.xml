@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್ ಕಳೆದು ಹೋಗಿದೆ ಅಥವಾ ಹಾಳಾಗಿದೆ. ಇದರ ಪರಿಣಾಮವಾಗಿ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಅದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗಿದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ನಿಮ್ಮ ಕಾರ್ಯ ಪ್ರೊಫೈಲ್ ಈ ಸಾಧನದಲ್ಲಿ ಇನ್ನು ಮುಂದೆ ಲಭ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಅನ್ನು ಮಾನಿಟರ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"ನಿರ್ವಾಹಕ ಅಪ್ಲಿಕೇಶನ್‌ನ ಅಂಶಗಳು ಕಾಣೆಯಾಗಿವೆ ಅಥವಾ ದೋಷಪೂರಿತವಾಗಿದೆ ಮತ್ತು ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಮ್ಮ ಸಾಧನವನ್ನು ಇದೀಗ ಅಳಿಸಲಾಗುತ್ತದೆ. ಸಹಾಯಕ್ಕಾಗಿ ನಿಮ್ಮ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="me" msgid="6545696007631404292">"ನಾನು"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ನಿಮ್ಮ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡಲು IMS ಸೇವೆಯನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ಫೋನ್ ಸ್ಥಿತಿ ಮತ್ತು ಗುರುತಿಸುವಿಕೆಯನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ಸಾಧನದ ಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ಸಾಧನದ ID ಗಳನ್ನು ನಿರ್ಧರಿಸಲು, ಕರೆಯು ಸಕ್ರಿಯವಾಗಿದೆಯೇ ಮತ್ತು ಕರೆಯ ಮೂಲಕ ರಿಮೋಟ್ ಸಂಖ್ಯೆಯು ಸಂಪರ್ಕಗೊಂಡಿವೆಯೇ ಎಂಬುದನ್ನೂ ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸುತ್ತದೆ."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಿ"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ಕರೆಯ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ನ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"ಫೋನ್ ಸಂಖ್ಯೆ ಓದಿ"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"ಅಳಿಸು"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
+    <string name="email" msgid="4560673117055050403">"ಇಮೇಲ್"</string>
+    <string name="dial" msgid="2275093056198652749">"ಡಯಲ್"</string>
+    <string name="map" msgid="5441053548030107189">"ನಕ್ಷೆ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ಸ್ಥಾಪಿತ ಸೆಷನ್‌ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ. ಸಕ್ರಿಯ ಪ್ಯಾಕೇಜ್‌ ಸ್ಥಾಪನೆಗಳ ಕುರಿತು ವಿವರಣೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಇದು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ಸ್ಥಾಪನೆ ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ವಿನಂತಿಸಿ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ಪ್ಯಾಕೇಜ್‌ಗಳ ಸ್ಥಾಪನೆಯನ್ನು ವಿನಂತಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ಅಳಿಸಲು ವಿನಂತಿ"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ಪ್ಯಾಕೇಜ್‌ಗಳನ್ನು ಅಳಿಸುವುದಕ್ಕಾಗಿ ವಿನಂತಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸಲು ಕೇಳಿ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಬ್ಯಾಟರಿ ಆಪ್ಟಿಮೈಸೇಶನ್‌ಗಳನ್ನು ಕಡೆಗಣಿಸುವುದಕ್ಕೆ ಅನುಮತಿಯನ್ನು ಕೇಳಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ಝೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ತೆಗೆದುಹಾಕು"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡುವುದೇ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಎರಡೂ ಬೆರಳುಗಳನ್ನು ಕೆಳಮುಖವಾಗಿ ಹಿಡಿದಿಟ್ಟುಕೊಂಡಿರಿ."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ಪ್ರವೇಶಿಸುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"ಎರಡೂ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳನ್ನು 3 ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಒತ್ತಿ ಹಿಡಿಯುವ ಮೂಲಕ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಅಥವಾ ಆಫ್ ಮಾಡಿ.\n\nನೀವು ಈ ಸೇವೆಯನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಪ್ರವೇಶಿಸುವಿಕೆ ಆಯ್ಕೆಯಲ್ಲಿ ಬದಲಿಸಬಹುದು."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"ಶಾರ್ಟ್‌ಕಟ್‌ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ಆನ್ ಆಗಿರಿಸಿ"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್‌, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಿದೆ"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್‌, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆಫ್ ಮಾಡಿದೆ"</string>
     <string name="user_switched" msgid="3768006783166984410">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರನ್ನು ಲಾಗ್‌ ಔಟ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="conference_call" msgid="3751093130790472426">"ಕಾನ್ಫರೆನ್ಸ್ ಕರೆ"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ಟೂಲ್‌ಟಿಪ್"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"ಆಟಗಳು"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"ಸಂಗೀತ ಮತ್ತು ಆಡಿಯೋ"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"ಸಿನಿಮಾಗಳು ಮತ್ತು ವೀಡಿಯೊ"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"ಫೋಟೋಗಳು ಮತ್ತು ಚಿತ್ರಗಳು"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"ಸಾಮಾಜಿಕ ಮತ್ತು ಸಂವಹನ"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"ಸುದ್ದಿ ಮತ್ತು ನಿಯತಕಾಲಿಕೆಗಳು"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"ನಕ್ಷೆಗಳು ಮತ್ತು ನ್ಯಾವಿಗೇಶನ್"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"ಉತ್ಪಾದಕತೆ"</string>
 </resources>

@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"De beheerapp van het werkprofiel ontbreekt of is beschadigd. Als gevolg hiervan zijn je werkprofiel en alle gerelateerde gegevens verwijderd. Neem voor hulp contact op met je beheerder."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Je werkprofiel is niet meer beschikbaar op dit apparaat."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Netwerkverkeer wordt bijgehouden"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Tik voor meer informatie"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tik voor meer informatie"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Er ontbreken onderdelen van de beheerapp of de app is beschadigd, waardoor de app niet kan worden gebruikt. Je apparaat wordt nu gewist. Neem voor hulp contact op met je beheerder."</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Hiermee kan de app de IMS-service gebruiken om te bellen zonder je tussenkomst."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefoonstatus en -identiteit lezen"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Hiermee kan de app toegang krijgen tot de telefoonfuncties van het apparaat, Met deze toestemming kan de app het telefoonnummer en de apparaat-ID\'s bepalen, of een oproep actief is, en het andere telefoonnummer waarmee wordt gebeld."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"oproepen doorschakelen via het systeem"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Hiermee kan de app de bijbehorende oproepen doorschakelen via het systeem om de belfunctionaliteit te verbeteren."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"telefoonnummer lezen"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Hiermee kan de app toegang krijgen tot het telefoonnummer van het apparaat."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"voorkomen dat tablet overschakelt naar slaapmodus"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Verwijderen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstacties"</string>
+    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="dial" msgid="2275093056198652749">"Bellen"</string>
+    <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Opslagruimte is bijna vol"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bepaalde systeemfuncties werken mogelijk niet"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Onvoldoende opslagruimte voor het systeem. Zorg ervoor dat je 250 MB vrije ruimte hebt en start opnieuw."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Hiermee wordt een app toegestaan installatiesessies te lezen. Zo kan de app informatie bekijken over actieve pakketinstallaties."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installatiepakketten aanvragen"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Hiermee kan een app installatie van pakketten aanvragen."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"verwijdering van pakketten aanvragen"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Hiermee kan een app verwijdering van pakketten aanvragen."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"vragen om batterijoptimalisatie te negeren"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Hiermee kan een app toestemming vragen om batterijoptimalisatie voor die app te negeren."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tik twee keer voor zoomregeling"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls u langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Blijf het scherm met twee vingers aanraken om toegankelijkheid in te schakelen."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Toegankelijkheid ingeschakeld."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toegankelijkheid geannuleerd."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"\'Snelle link voor toegankelijkheid\' is AAN"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Schakel <xliff:g id="SERVICE_NAME">%1$s</xliff:g> in of uit door beide volumeknoppen drie seconden ingedrukt te houden.\n\nJe kunt de service wijzigen in Instellingen &gt; Toegankelijkheid."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"\'Snelle link voor toegankelijkheid\' uitschakelen"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Ingeschakeld laten"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"\'Snelle link voor toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ingeschakeld"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"\'Snelle link voor toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> uitgeschakeld"</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Overschakelen naar <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> uitloggen…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonische vergadering"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Knopinfo"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Games"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Muziek en audio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Films en video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Foto\'s en afbeeldingen"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Sociaal en communicatie"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Nieuws en tijdschriften"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps en navigatie"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Productiviteit"</string>
 </resources>

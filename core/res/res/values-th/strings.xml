@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"โปรไฟล์งานของคุณไม่สามารถใช้บนอุปกรณ์นี้ได้อีกต่อไป"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"มีการติดตามดูการจราจรของข้อมูลในเครือข่าย"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"แตะเพื่อดูรายละเอียดเพิ่มเติม"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"แตะเพื่อเรียนรู้เพิ่มเติม"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"แอปผู้ดูแลระบบมีองค์ประกอบไม่ครบหรือเสียหาย และใช้งานไม่ได้ ระบบจะลบข้อมูลอุปกรณ์ของคุณ โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"อนุญาตให้แอปใช้บริการ IMS เพื่อโทรออกโดยคุณไม่ต้องดำเนินการใดๆ เลย"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"อ่านสถานะและข้อมูลระบุตัวตนของโทรศัพท์"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"อนุญาตให้แอปพลิเคชันเข้าถึงคุณลักษณะโทรศัพท์ของอุปกรณ์ การอนุญาตนี้ทำให้แอปพลิเคชันสามารถตรวจสอบหมายเลขโทรศัพท์และรหัสอุปกรณ์ ตรวจสอบว่ามีการโทรที่ทำงานอยู่หรือไม่ และตรวจสอบหมายเลขระยะไกลที่เชื่อมต่อด้วยการโทร"</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"กำหนดเส้นทางการโทรผ่านระบบ"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"อ่านหมายเลขโทรศัพท์"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"อนุญาตให้แอปเข้าถึงหมายเลขโทรศัพท์ของอุปกรณ์"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"ลบ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
+    <string name="email" msgid="4560673117055050403">"อีเมล"</string>
+    <string name="dial" msgid="2275093056198652749">"หมุนหมายเลข"</string>
+    <string name="map" msgid="5441053548030107189">"แผนที่"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"อนุญาตให้แอปพลิเคชันอ่านเซสชันการติดตั้ง ซึ่งจะอนุญาตให้อ่านรายละเอียดเกี่ยวกับการติดตั้งแพ็กเกจที่ใช้งาน"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ขอติดตั้งแพ็กเกจ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"อนุญาตให้แอปพลิเคชันขอการติดตั้งแพ็กเกจ"</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"ขอการลบแพ็กเกจ"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"อนุญาตให้แอปพลิเคชันขอการลบแพ็กเกจ"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ขอเพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"อนุญาตให้แอปขอสิทธิ์เพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่สำหรับแอปนั้น"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"วอลเปเปอร์"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"เปลี่ยนวอลเปเปอร์"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"ตัวฟังการแจ้งเตือน"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener ความเป็นจริงเสมือน"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR Listener"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ผู้เสนอเงื่อนไข"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"บริการตัวจัดอันดับการแจ้งเตือน"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN เปิดใช้งานแล้ว"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ใช้สองนิ้วแตะค้างไว้เพื่อเปิดใช้งานการเข้าถึง"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ทางลัดการเข้าถึงเปิดอยู่"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"เปิดหรือปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> โดยกดปุ่มปรับระดับเสียงทั้งสองค้างไว้ 3 วินาที\n\nคุณสามารถเปลี่ยนบริการได้ในการตั้งค่า &gt; การเข้าถึง"</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"ปิดทางลัด"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"เปิดไว้"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"กำลังออกจากระบบ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ปิดใช้ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"การประชุมสาย"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"เคล็ดลับเครื่องมือ"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"เกม"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"เพลงและเสียง"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"ภาพยนตร์และวิดีโอ"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"รูปภาพ"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"โซเชียลและการสื่อสาร"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"ข่าวสารและนิตยสาร"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"แผนที่และการนำทาง"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"ประสิทธิภาพการทำงาน"</string>
 </resources>

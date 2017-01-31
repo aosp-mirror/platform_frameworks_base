@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"İş profili yönetici uygulaması eksik ya da bozuk. Bunun sonucunda iş profiliniz ve ilgili veriler silindi. Yardım almak için yöneticiniz ile iletişim kurun."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"İş profiliniz arık bu cihazda kullanılamıyor."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ağ trafiği izleniyor"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Daha fazla ayrıntı için dokunun"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Daha fazla bilgi için dokunun"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Yönetici uygulamasında bileşen eksik ya da uygulama bozuk ve kullanılamaz durumda. Cihazınız şimdi silinecek. Yardım için yöneticinizle iletişim kurun."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonun durumunu ve kimliğini okuma"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Uygulamaya cihazdaki telefon özelliklerine erişme izni verir. Bu izin, uygulamanın telefon numarasını ve cihaz kimliğini, etkin bir çağrı olup olmadığını ve çağrıda bağlanılan karşı tarafın numarasını öğrenmesine olanak sağlar."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"çağrıları sistem üzerinden yönlendir"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Uygulamanın, çağrı deneyimini iyileştirmek için çağrılarını sistem üzerinden yönlendirmesine olanak tanır."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"telefon numarasını oku"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Uygulamanın cihazın telefon numarasına erişmesine izin verir."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tabletin uykuya geçmesini önle"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Sil"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
+    <string name="email" msgid="4560673117055050403">"E-posta"</string>
+    <string name="dial" msgid="2275093056198652749">"Çevir"</string>
+    <string name="map" msgid="5441053548030107189">"Harita"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Depolama alanı bitiyor"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bazı sistem işlevleri çalışmayabilir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistem için yeterli depolama alanı yok. 250 MB boş alanınızın bulunduğundan emin olun ve yeniden başlatın."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Bir uygulamanın yükleme oturumlarını okumasına izin verir. Bu, etkin paket yüklemeleriyle ilgili ayrıntıların görülmesine olanak tanır."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"paket yükleme isteğinde bulunma"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Uygulamaya, paketleri yükleme isteğinde bulunma izni verir."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"paketleri silme isteğinde bulunma"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Uygulamaya, paketleri silme isteğinde bulunma izni verir."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"pil optimizasyonlarını göz ardı etme izni iste"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Bir uygulamanın, kendisi için pil optimizasyonlarını göz ardı etme izni istemesine olanak sağlar."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Zum denetimi için iki kez dokun"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kaldır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Erişilebilirliği etkinleştirmek için iki parmağınızı basılı tutmaya devam edin."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Erişilebilirlik etkinleştirildi."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erişilebilirlik iptal edildi."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Erişilebilirlik Kısayolu AÇIK"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Ses düğmelerini 3 saniye basılı tutarak <xliff:g id="SERVICE_NAME">%1$s</xliff:g> hizmetini açın veya kapatın.\n\nHizmeti, Ayarlar &gt; Erişilebilirlik seçeneğinden değiştirebilirsiniz."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Kısayolu Kapat"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Açık bırak"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Erişilebilirlik Kısayolu <xliff:g id="SERVICE_NAME">%1$s</xliff:g> hizmetini açtı"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Erişilebilirlik Kısayolu <xliff:g id="SERVICE_NAME">%1$s</xliff:g> hizmetini kapattı"</string>
     <string name="user_switched" msgid="3768006783166984410">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> adlı kullanıcıya geçiliyor…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> hesabından çıkış yapılıyor…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> devre dışı"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferans Çağrısı"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"İpucu"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Oyunlar"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Müzik ve Ses"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filmler ve Video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotoğraflar ve Görüntüler"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Sosyal Ağ ve İletişim"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Haberler ve Dergiler"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Haritalar ve Navigasyon"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Verimlilik"</string>
 </resources>

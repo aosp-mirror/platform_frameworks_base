@@ -191,7 +191,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"تطبيق المشرف للملف الشخصي للعمل مفقود أو تالف لذا تم حذف الملف والبيانات ذات الصلة. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"لم يعد ملفك الشخصي للعمل متاحًا على هذا الجهاز."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"تتم مراقبة حركة بيانات الشبكة"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"انقر للحصول على المزيد من التفاصيل"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"انقر لمعرفة المزيد من المعلومات"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"تطبيق المشرف فاقد لمكونات أو تالف ويتعذر استخدامه. سيتم محو بيانات جهازك الآن. اتصل بالمشرف للحصول على المساعدة."</string>
     <string name="me" msgid="6545696007631404292">"أنا"</string>
@@ -394,6 +394,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات دون تدخل منك."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"قراءة حالة الهاتف والهوية"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"للسماح للتطبيق بالدخول إلى ميزات الهاتف في الجهاز. ويتيح هذا الإذن للتطبيق تحديد رقم الهاتف ومعرّفات الجهاز، وما إذا كانت هناك مكالمة نشطة والرقم البعيد الذي تم الاتصال به في المكالمة."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"توجيه المكالمات من خلال النظام"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"يسمح للتطبيق بتوجيه المكالمات من خلال النظام لتحسين تجربة الاتصال."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"قراءة رقم الهاتف"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"للسماح للتطبيق بالوصول إلى رقم الهاتف على الجهاز."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"منع الجهاز اللوحي من الدخول في وضع السكون"</string>
@@ -1027,6 +1029,9 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
+    <string name="email" msgid="4560673117055050403">"بريد إلكتروني"</string>
+    <string name="dial" msgid="2275093056198652749">"طلب"</string>
+    <string name="map" msgid="5441053548030107189">"خريطة"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1277,6 +1282,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"طلب حزم التثبيت"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"طلب حذف الحِزم"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"اضغط مرتين للتحكم في التكبير/التصغير"</string>
@@ -1507,9 +1514,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"إزالة"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"اضغط بإصبعين لأسفل مع الاستمرار لتمكين تسهيل الدخول."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"تم تمكين إمكانية الدخول."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"تم إلغاء تسهيل الدخول."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"اختصار إمكانية الوصول قيد التشغيل"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"يمكنك تشغيل خدمة <xliff:g id="SERVICE_NAME">%1$s</xliff:g> أو إيقافها عن طريق الضغط باستمرار على مفتاحي مستوى الصوت على حد سواء لمدة 3 ثوانٍ.\n\nيمكنك تغيير الخدمة في الإعدادات وإمكانية الوصول."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"إيقاف الاختصار"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ترك الاختصار في وضع التشغيل"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"شغَّل اختصار إمكانية الوصول خدمة <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"أوقف اختصار إمكانية الوصول خدمة <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"جارٍ الخروج <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1795,20 +1805,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"تم تعطيل <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"مكالمة جماعية"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"تلميح"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"الألعاب"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"الموسيقى والصوت"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"الأفلام والفيديو"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"الصور"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"التواصل الاجتماعي"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"الأخبار والمجلات"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"الخرائط والتنقل"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"الإنتاجية"</string>
 </resources>

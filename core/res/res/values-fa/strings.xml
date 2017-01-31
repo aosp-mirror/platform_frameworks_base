@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"برنامه سرپرست نمایه کار وجود ندارد یا خراب است. در نتیجه، نمایه کاریتان و اطلاعات مرتبط حذف شده است. برای دریافت راهنمایی با سرپرستتان تماس بگیرید."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"نمایه کاری شما دیگر در این دستگاه در دسترس نیست."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ترافیک شبکه، تحت نظارت است"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"برای جزئیات بیشتر ضربه بزنید"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"برای اطلاعات بیشتر ضربه بزنید"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"دستگاهتان پاک خواهد شد"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"برنامه سرپرست بخش‌هایی را ندارد یا خراب است، و نمی‌تواند استفاده شود. دستگاهتان اکنون پاک می‌شود. برای این که راهنمایی شوید، با سرپرستتان تماس بگیرید."</string>
     <string name="me" msgid="6545696007631404292">"من"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"خواندن وضعیت تلفن و شناسه"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"به برنامه اجازه می‌دهد به ویژگی‌های تلفن دستگاه شما دسترسی پیدا کند. این مجوز به برنامه اجازه می‌دهد شماره تلفن و شناسه‌های دستگاه، فعال بودن یک تماس و شماره راه دوری که با یک تماس متصل شده است را مشخص کند."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"برقرار کردن تماس‌ها ازطریق سیستم"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"خواندن شماره تلفن"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"به برنامه اجازه می‌دهد به شماره تلفن دستگاه دسترسی پیدا کند."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ممانعت از به خواب رفتن رایانهٔ لوحی"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
+    <string name="email" msgid="4560673117055050403">"رایانامه"</string>
+    <string name="dial" msgid="2275093056198652749">"شماره‌گیری"</string>
+    <string name="map" msgid="5441053548030107189">"نقشه"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"به برنامه اجازه می‌دهد جلسات نصب را بخواند. این کار به برنامه اجازه می‌دهد جزئیات نصب‌های بسته فعال را ببیند."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"درخواست نصب بسته"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"به برنامه اجازه می‌دهد درخواست نصب بسته‌بندی کند."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"درخواست حذف بسته‌ها"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"به برنامه اجازه می‌دهد حذف بسته‌ها را درخواست کند."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"درخواست نادیده‌گرفتن بهینه‌سازی باتری"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"به یک برنامه اجازه می‌دهد جهت نادیده گرفتن بهینه‌سازی باتری برای خود مجوز درخواست کند."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"برای کنترل بزرگ‌نمایی، دو بار ضربه بزنید"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"برای فعال کردن دسترس‌پذیری، با دو انگشت خود همچنان به طرف پایین فشار دهید."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"قابلیت دسترسی فعال شد."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"دسترس‌پذیری لغو شد."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"«میان‌بر دسترس‌پذیری» روشن است"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"با هم‌زمان پایین نگه‌داشتن دکمه‌های صدا به مدت ۳ ثانیه، <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن یا خاموش کنید.\n\nمی‌توانید در «تنظیمات &gt; دسترس‌پذیری» سرویس را تغییر دهید."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"خاموش کردن میان‌بر"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"روشن بماند"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را روشن کرد"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"«میان‌بر دسترس‌پذیری» <xliff:g id="SERVICE_NAME">%1$s</xliff:g> را خاموش کرد"</string>
     <string name="user_switched" msgid="3768006783166984410">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"در حال خروج از سیستم <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> غیرفعال شد"</string>
     <string name="conference_call" msgid="3751093130790472426">"تماس کنفرانسی"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"نکته‌ابزار"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"بازی"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"موسیقی و صوت"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"فیلم و ویدیو"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"عکس و تصویر"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"اجتماعی و ارتباطات"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"اخبار و مجله"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"نقشه و پیمایش"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"بهره‌وری"</string>
 </resources>

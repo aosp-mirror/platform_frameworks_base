@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ඔබේ කාර්යාල පැතිකඩ මෙම උපාංගය මත තවදුරටත් ලබා ගැනීමට නොහැකිය."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ජාල තදබදය නිරීක්ෂණය කරමින් පවතී"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"වැඩි විස්තර සඳහා තට්ටු කරන්න"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"තව දැන ගැනීමට තට්ටු කරන්න"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"යෙදුමේ කොටස් නොමැති හෝ දූෂණය වී ඇති නිසා, භාවිතා කළ නොහැක. ඔබගේ උපාංගය දැන් මකා දැමෙනු ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කරගන්න."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"පද්ධතිය හරහා ඇමතුම් මාර්ගගත කරන්න"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ඇමතුම් අත්දැකීම වැඩිදියුණු කිරීම සඳහා යෙදුමට පද්ධතිය හරහා එහි ඇමතුම් මාර්ගගත කිරීමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"දුරකථන අංකය කියවන්න"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"උපාංගයේ දුරකථන අංකය වෙත පිවිසීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
@@ -949,6 +951,9 @@
     <string name="deleteText" msgid="6979668428458199034">"මකන්න"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ආදාන ක්‍රමය"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"පෙළ ක්‍රියාවන්"</string>
+    <string name="email" msgid="4560673117055050403">"ඊ-තැපෑල"</string>
+    <string name="dial" msgid="2275093056198652749">"අමතන්න"</string>
+    <string name="map" msgid="5441053548030107189">"සිතියම"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>
@@ -1199,6 +1204,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ස්ථාපන සැසිය කියවීමට යෙදුමට ඉඩ දෙන්න. සක්‍රිය පැකේජ ස්ථාපනය පිළිබඳ විස්තර බැලීමට එයට මෙයින් ඉඩ දෙයි."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ස්ථාපන පැකේජ ඉල්ලීමට යෙදුමකට අවසර දීම."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"පැකේජ මැකීමට ඉල්ලීම"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ස්ථාපන පැකේජ මැකීමට යෙදුමකට ඉඩ දීම."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"බැටරි ප්‍රශස්තකරණ නොසලකා හැරීමට ඉල්ලන්න"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"යෙදුමකට එම යෙදුම සඳහා බැටරි ප්‍රශස්තකරණ නොසලකා හැරීමට අවසර ඉල්ලීමට ඉඩ දෙයි."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"විශාලන පාලක සඳහා දෙවතාවක් තට්ටු කරන්න"</string>
@@ -1425,9 +1432,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ඉවත් කරන්න"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"නිර්දේශිතයි මට්ටමට වඩා ශබ්දය වැඩිද?\n\nදිගු කාලයක් සඳහා ඉහළ ශබ්දයක් ඇසීමෙන් ඇතැම් විට ඔබගේ ඇසීමට හානි විය හැක."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ප්‍රවේශ්‍යතාවය සබල කිරීමට ඇඟිලි දෙකක් පහළට රඳවා සිටින්න."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ප‍්‍රවේශ්‍යතාව සබල කරන ලදි."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ප‍්‍රවේශ්‍යතාව අවලංගු කර ඇත."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ප්‍රවේශ්‍යතා කෙටි මග ක්‍රියාත්මකයි"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"හඬ පරිමා බොත්තම් දෙකම තත්පර 3ක් අල්ලාගෙන සිටීමෙන් <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මක හෝ ක්‍රියාවිරහිත කරන්න.\n\nඔබට සැකසීම් &gt; ප්‍රවේශ්‍යතාව තුළ සේවාව වෙනස් කළ හැකිය."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"කෙටි මග ක්‍රියාවිරහිත කරන්න"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"සබල කර ඇත"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ප්‍රවේශ්‍යතා කෙටි මග <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මක කරන ලදී"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ප්‍රවේශ්‍යතා කෙටි මග <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිත කරන ලදී"</string>
     <string name="user_switched" msgid="3768006783166984410">"දැනට සිටින පරිශීලකයා <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> වෙත මාරු කරමින්…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> වරමින්…"</string>
@@ -1673,20 +1683,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"අබල කළ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"සම්මන්ත්‍රණ ඇමතුම"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"මෙවලම් ඉඟිය"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"ක්‍රීඩා"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"සංගීතය සහ ශ්‍රව්‍ය"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"චිත්‍රපට සහ වීඩියෝ"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"ඡායාරූප සහ රූප"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"සමාජ සහ සන්නිවේදන"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"පුවත් සහ සඟරා"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"සිතියම් සහ සංචලනය"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"ඵලදායිතාව"</string>
 </resources>

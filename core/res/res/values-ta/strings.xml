@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படுகிறது"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"மேலும் விவரங்களுக்கு, தட்டவும்"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"மேலும் அறிய, தட்டவும்"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"சிஸ்டம் மூலம் அழைப்புகளை ரூட் செய்தல்"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"மொபைல் எண்ணைப் படி"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"சாதனத்தின் மொபைல் எண்ணை அணுக, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"நீக்கு"</string>
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
+    <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
+    <string name="dial" msgid="2275093056198652749">"டயல்"</string>
+    <string name="map" msgid="5441053548030107189">"வரைபடம்"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"நிறுவல் அமர்வுகளைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. இது செயல்படும் தொகுப்பு நிறுவல்களைப் பற்றிய விவரங்களைப் பார்க்க அனுமதிக்கிறது."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"நிறுவல் தொகுப்புகளைக் கோருதல்"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"தொகுப்புகளின் நிறுவலைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"தொகுப்புகளை நீக்க கோரு"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"தொகுப்புகளை நீக்க கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோரு"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"அளவை மாற்றுவதற்கான கட்டுப்பாட்டிற்கு, இருமுறை தட்டவும்"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"அகற்று"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\n\nநீண்ட நேரத்திற்கு அதிகளவில் ஒலி கேட்பது கேட்கும் திறனைப் பாதிக்கலாம்."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"அணுகல்தன்மையை இயக்க இரண்டு விரல்களைத் தொடர்ந்து வைக்கவும்."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"அணுகல்தன்மை இயக்கப்பட்டது."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"அணுகல்தன்மை ரத்துசெய்யப்பட்டது."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"அணுகல்தன்மைக் குறுக்குவழி இயக்கப்பட்டது"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"இரண்டு ஒலியளவுப் பொத்தான்களையும் 3 வினாடிகளுக்குப் பிடித்திருப்பதன் மூலம், <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கவும் அல்லது முடக்கவும்.\n\nஅமைப்புகள் &gt; அணுகல்தன்மை என்பதற்குச் சென்று, சேவையை மாற்றிக்கொள்ளலாம்."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"குறுக்குவழியை முடக்கு"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"இயக்கத்திலேயே வை"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
     <string name="user_switched" msgid="3768006783166984410">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> வெளியேறுகிறார்…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"முடக்கப்பட்டது: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"உதவிக்குறிப்பு"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"கேம்கள்"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"இசையும் ஆடியோவும்"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"திரைப்படங்களும் வீடியோவும்"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"புகைப்படங்களும் படங்களும்"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"சமூகமும் தகவல்தொடர்பும்"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"செய்திகளும் பத்திரிகைகளும்"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"உற்பத்தித்திறன்"</string>
 </resources>

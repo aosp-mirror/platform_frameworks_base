@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"A munkahelyi profil rendszergazda alkalmazása hiányzik vagy sérült. A rendszer ezért törölte munkahelyi profilját, és az ahhoz kapcsolódó adatokat. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Munkaprofilja már nem érhető el ezen az eszközön."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"A hálózati forgalmat figyelik"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Koppintson, ha további információt szeretne"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Koppintson, ha további információt szeretne kapni"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"A rendszer törölni fogja eszközét"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"A rendszergazda alkalmazás egyes részei hiányoznak, vagy az alkalmazás sérült, ezért nem használható. A rendszer most törölni fogja eszközét. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="me" msgid="6545696007631404292">"Saját"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Az alkalmazás az IMS-szolgáltatást használhatja híváskezdeményezéshez az Ön közbeavatkozása nélkül."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonállapot és azonosító olvasása"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen az eszköz telefonálási funkcióihoz. Az engedéllyel rendelkező alkalmazás meghatározhatja a telefonszámot és eszközazonosítókat, hogy egy hívás aktív-e, valamint híváskor a másik fél telefonszámát."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"rendszeren keresztüli hívásirányítás"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"A telefonálási élmény javítása érdekében lehetővé teszi az alkalmazás számára a rendszeren keresztüli hívásirányítást."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"telefonszám beolvasása"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Engedélyezi az alkalmazás számára, hogy hozzáférjen az eszköz telefonszámához."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"táblagép alvás üzemmódjának megakadályozása"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Törlés"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
+    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="dial" msgid="2275093056198652749">"Tárcsázás"</string>
+    <string name="map" msgid="5441053548030107189">"Térkép"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kevés a szabad terület"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Előfordulhat, hogy néhány rendszerfunkció nem működik."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nincs elegendő tárhely a rendszerhez. Győződjön meg arról, hogy rendelkezik 250 MB szabad területtel, majd kezdje elölről."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"telepítőcsomagok kérése"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lehetővé teszi az alkalmazás számára csomagok telepítésének kérését."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"csomagok törlésének kérése"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Lehetővé teszi az alkalmazás számára, hogy csomagok törlését kérje."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"Akkumulátoroptimalizálási beállítások mellőzésének kérése"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Az alkalmazás engedélyt kérhet az akkumulátoroptimalizálási beállítások mellőzésére."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Érintse meg kétszer a nagyítás beállításához"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eltávolítás"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Továbbra is tartsa lenyomva két ujját a hozzáférés engedélyezéséhez."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"A Kisegítő lehetőségek gyorsparancsa BE van kapcsolva"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"A(z) <xliff:g id="SERVICE_NAME">%1$s</xliff:g> be- vagy kikapcsolásához tartsa 3 másodpercig lenyomva mindkét hangerőgombot.\n\nA szolgáltatást a Beállítások &gt; Kisegítő lehetőségek elemnél módosíthatja."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Gyorsparancs kikapcsolása"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Maradjon bekapcsolva"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"A Kisegítő lehetőségek gyorsparancsa bekapcsolta a következő szolgáltatást: <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"A Kisegítő lehetőségek gyorsparancsa kikapcsolta a következő szolgáltatást: <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Átváltás erre: <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> kijelentkeztetése folyamatban van…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"A(z) <xliff:g id="LABEL">%1$s</xliff:g> letiltva"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenciahívás"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Elemleírás"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Játékok"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Zene és hang"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filmek és videó"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotók és képek"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Közösségi és kommunikációs"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Hírlapok és folyóiratok"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Térképek és navigáció"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Irodai alkalmazások"</string>
 </resources>

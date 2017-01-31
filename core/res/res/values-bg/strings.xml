@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Администраторското приложение на служебния потребителски профил липсва или е повредено. В резултат на това той и свързаните с него данни са изтрити. За съдействие се свържете с администратора си."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Служебният ви потребителски профил вече не е налице на това устройство."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Трафикът в мрежата се следи"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Докоснете за още подробности"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Докоснете, за да научите повече"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Данните на устройството ви ще бъдат изтрити"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"В администраторското приложение липсват компоненти или то е невалидно и не може да се използва. Сега данните на устройството ви ще бъдат изтрити. Свържете се с администратора си за съдействие."</string>
     <string name="me" msgid="6545696007631404292">"Аз"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Разрешава на приложението да използва услугата за незабавни съобщения за извършване на обаждания без намеса от ваша страна."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"четене на състоянието и идентификационните данни на телефона"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Разрешава на приложението достъп до телефонните функции на устройството. Това разрешение позволява на приложението да определя телефонния номер и идентификационния номер на устройството, дали се води разговор и отдалечения номер, до който е установена връзка с обаждането."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"маршрутизиране на обажданията чрез системата"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Разрешава на приложението да маршрутизира обажданията си чрез системата с цел подобряване на свързаната с тях практическа работа."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"четене на телефонния номер"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Разрешава на приложението да осъществява достъп до телефонния номер на устройството."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"предотвратяване на спящия режим на таблета"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Изтриване"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод на въвеждане"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Действия с текста"</string>
+    <string name="email" msgid="4560673117055050403">"Имейл"</string>
+    <string name="dial" msgid="2275093056198652749">"Набиране"</string>
+    <string name="map" msgid="5441053548030107189">"Карта"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Мястото в хранилището е на изчерпване"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Възможно е някои функции на системата да не работят"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"За системата няма достатъчно място в хранилището. Уверете се, че имате свободни 250 МБ, и рестартирайте."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Разрешава на приложението да чете сесии за инсталиране. Това му позволява да вижда подробности за активните инсталирания на пакети."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"заявка на пакети за инсталиране"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Разрешава на приложението да заявява инсталиране на пакети."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"заявяване на изтриване на пакети"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Разрешава на приложението да заявява изтриване на пакети."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"искане за пренебрегване на оптимизациите на батерията"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Разрешава на дадено приложение да иска разрешение за пренебрегване на свързаните с него оптимизации на батерията."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Докоснете двукратно за управление на промяната на мащаба"</string>
@@ -1225,7 +1232,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Тапет"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Промяна на тапета"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Слушател на известия"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Приемател за виртуална реалност"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Приемател за VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Доставчик на условия"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Услуга за класифициране на известията"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN е активирана"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Премахване"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Продължете да натискате с два пръста, за да активирате функцията за достъпност."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Достъпността е активирана."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Функцията за достъпност е анулирана."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Прекият път за достъпност е ВКЛЮЧЕН"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Включете или изключете <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, като задържите натиснати за 3 секунди бутоните за силата на звука.\n\nМожете да промените услугата от „Настройки“ &gt; „Достъпност“."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Изключване на прекия път"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Да остане включен"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Прекият път за достъпност включи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Прекият път за достъпност изключи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Текущ потребител <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Превключва се към <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> излиза…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g>: Деактивирано"</string>
     <string name="conference_call" msgid="3751093130790472426">"Конферентно обаждане"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Подсказка"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Игри"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Музика и аудио"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Филми и видеоклипове"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Снимки и изображения"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Социални мрежи и комуникация"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Новини и списания"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Карти и навигация"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Производителност"</string>
 </resources>
