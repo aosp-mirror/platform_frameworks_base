@@ -162,7 +162,9 @@ int main(int argc, char** argv)
     uint8_t displayOrientation = configs[activeConfig].orientation;
     uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
 
-    status_t result = screenshot.update(display, Rect(), 0, 0, 0, -1U,
+    status_t result = screenshot.update(display, Rect(),
+            0 /* reqWidth */, 0 /* reqHeight */,
+            INT32_MIN, INT32_MAX, /* all layers */
             false, captureOrientation);
     if (result == NO_ERROR) {
         base = screenshot.getPixels();
