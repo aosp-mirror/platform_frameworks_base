@@ -182,12 +182,12 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#acceptRingingCall
      */
-    void acceptRingingCall();
+    void acceptRingingCall(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#acceptRingingCallWithVideoState(int)
      */
-    void acceptRingingCallWithVideoState(int videoState);
+    void acceptRingingCallWithVideoState(String callingPackage, int videoState);
 
     /**
      * @see TelecomServiceImpl#cancelMissedCallsNotification

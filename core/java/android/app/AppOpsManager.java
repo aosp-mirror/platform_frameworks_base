@@ -249,8 +249,10 @@ public class AppOpsManager {
     public static final int OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE = 67;
     /** @hide Instant app start foreground service. */
     public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
+    /** @hide Answer incoming phone calls */
+    public static final int OP_ANSWER_PHONE_CALLS = 69;
     /** @hide */
-    public static final int _NUM_OP = 69;
+    public static final int _NUM_OP = 70;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -356,6 +358,9 @@ public class AppOpsManager {
     /** @hide */
     public static final String OPSTR_INSTANT_APP_START_FOREGROUND
             = "android:instant_app_start_foreground";
+    /** Answer incoming phone calls */
+    public static final String OPSTR_ANSWER_PHONE_CALLS
+            = "android:answer_phone_calls";
 
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
             // RUNTIME PERMISSIONS
@@ -388,6 +393,7 @@ public class AppOpsManager {
             OP_ADD_VOICEMAIL,
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
+            OP_ANSWER_PHONE_CALLS,
             // Microphone
             OP_RECORD_AUDIO,
             // Camera
@@ -480,6 +486,7 @@ public class AppOpsManager {
             OP_REQUEST_INSTALL_PACKAGES,
             OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE,
             OP_INSTANT_APP_START_FOREGROUND,
+            OP_ANSWER_PHONE_CALLS
     };
 
     /**
@@ -556,6 +563,7 @@ public class AppOpsManager {
             null, // OP_REQUEST_INSTALL_PACKAGES
             null,
             OPSTR_INSTANT_APP_START_FOREGROUND,
+            OPSTR_ANSWER_PHONE_CALLS,
     };
 
     /**
@@ -632,6 +640,7 @@ public class AppOpsManager {
             "REQUEST_INSTALL_PACKAGES",
             "OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE",
             "INSTANT_APP_START_FOREGROUND",
+            "ANSWER_PHONE_CALLS",
     };
 
     /**
@@ -708,6 +717,7 @@ public class AppOpsManager {
             Manifest.permission.REQUEST_INSTALL_PACKAGES,
             null, // no permission for entering picture-in-picture on hide
             Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
+            Manifest.permission.ANSWER_PHONE_CALLS,
     };
 
     /**
@@ -785,6 +795,7 @@ public class AppOpsManager {
             null, // REQUEST_INSTALL_PACKAGES
             null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
             null, // INSTANT_APP_START_FOREGROUND
+            null, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -861,6 +872,7 @@ public class AppOpsManager {
             false, // REQUEST_INSTALL_PACKAGES
             false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
             false, // INSTANT_APP_START_FOREGROUND
+            false, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -936,6 +948,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT,  // OP_REQUEST_INSTALL_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
             AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
+            AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
     };
 
     /**
@@ -1015,6 +1028,7 @@ public class AppOpsManager {
             false, // OP_REQUEST_INSTALL_PACKAGES
             false, // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
             false,
+            false, // ANSWER_PHONE_CALLS
     };
 
     /**
