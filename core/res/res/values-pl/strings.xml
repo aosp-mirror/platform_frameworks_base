@@ -187,8 +187,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Brakuje aplikacji administracyjnej profilu do pracy lub jest ona uszkodzona. Z tego powodu Twój profil do pracy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Twój profil do pracy nie jest już dostępny na tym urządzeniu."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ruch w sieci jest monitorowany"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Kliknij, by dowiedzieć się więcej"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacja administracyjna nie ma wszystkich składników lub jest uszkodzona i nie można jej użyć. Twoje urządzenie zostanie teraz wyczyszczone. Skontaktuj się ze swoim administratorem, aby uzyskać pomoc."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -1292,7 +1291,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Zmień tapetę"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Odbiornik powiadomień"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Odbiornik rzeczywistości wirtualnej"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Odbiornik VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Dostawca warunków"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Usługa rankingu powiadomień"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktywny"</string>

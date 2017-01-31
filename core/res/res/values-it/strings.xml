@@ -1241,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Listener di notifica"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener realtà virtuale"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Listener VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Provider condizioni"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Servizio di classificazione delle notifiche"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN attiva"</string>

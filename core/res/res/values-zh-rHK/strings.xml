@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"找不到工作設定檔應用程式，或工作設定檔應用程式已受損。因此，您的工作設定檔現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"無法在此裝置上再使用您的工作設定檔。"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"網絡流量現正受監控"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"輕按即可瞭解詳情"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置將被清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"找不到管理員應用程式的元件，或管理員應用程式已受損並不能使用。您的裝置現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="me" msgid="6545696007631404292">"我本人"</string>

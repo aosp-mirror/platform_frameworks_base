@@ -1241,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ubah wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Pendengar pemberitahuan"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Pemroses Realitas Maya"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Pemroses VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Penyedia ketentuan"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Layanan penentu peringkat notifikasi"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN diaktifkan"</string>

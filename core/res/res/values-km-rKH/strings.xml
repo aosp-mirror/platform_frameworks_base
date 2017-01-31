@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"ប្រវត្តិរូបការងាររបស់អ្នកអាចបាត់បង់ ឬមានបញ្ហា។ ជាលទ្ធផល ប្រវត្តិរូបការងាររបស់អ្នក និងទិន្នន័យដែលពាក់ព័ន្ធត្រូវបានលុប។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ប្រវត្តិរូបការងាររបស់អ្នកមិនមាននៅលើឧបករណ៍នេះទៀតទេ។"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"កំពុង​តាមដាន​ចរាចរណ៍​បណ្តាញ"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"ចុច​ដើម្បី​ស្វែងយល់​បន្ថែម"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"កម្មវិធីគ្រប់គ្រងបាត់បង់សមាសធាតុ ឬមានបញ្ហា ហើយមិនអាចប្រើបានទេ។ ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុបឥឡូវនេះ។ ទំនាក់ទំនងអ្នកគ្រប់គ្រងរបស់អ្នកសម្រាប់ជំនួយ។"</string>
     <string name="me" msgid="6545696007631404292">"ខ្ញុំ"</string>

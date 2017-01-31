@@ -1080,7 +1080,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi eginbidea ezin da Internetera konektatu"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Ezin da konektatu Internetera Wi-Fi bidez"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
@@ -1241,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Aldatu horma-papera"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Jakinarazpenak hautemateko zerbitzua"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Errealitate birtualeko hautemailea"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"EB hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Jakinarazpenen sailkapen-zerbitzua"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN eginbidea aktibatuta"</string>

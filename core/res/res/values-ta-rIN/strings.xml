@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"பணி சுயவிவர நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது. இதன் விளைவாக, உங்கள் பணி சுயவிவரமும், அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"சாதனத்தில் இனி பணி சுயவிவரம் கிடைக்காது."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படுகிறது"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"மேலும் அறிய, தட்டவும்"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"நிர்வாகி பயன்பாடு இல்லை அல்லது சேதமடைந்துள்ளது மற்றும் பயன்படுத்த முடியாது. இப்போது சாதனத் தரவு அழிக்கப்படும். உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>

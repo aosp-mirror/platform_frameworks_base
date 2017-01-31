@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"İş profili yönetici uygulaması eksik ya da bozuk. Bunun sonucunda iş profiliniz ve ilgili veriler silindi. Yardım almak için yöneticiniz ile iletişim kurun."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"İş profiliniz arık bu cihazda kullanılamıyor."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Ağ trafiği izleniyor"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Daha fazla bilgi için dokunun"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Yönetici uygulamasında bileşen eksik ya da uygulama bozuk ve kullanılamaz durumda. Cihazınız şimdi silinecek. Yardım için yöneticinizle iletişim kurun."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
@@ -1242,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Duvar Kağıdı"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Duvar kağıdını değiştir"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Bildirim dinleyici"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Sanal Gerçeklik dinleyici"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR dinleyici"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Durum sağlayıcı"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Bildirim sıralama hizmeti"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN etkinleştirildi"</string>

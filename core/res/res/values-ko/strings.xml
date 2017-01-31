@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"직장 프로필 관리 앱이 없거나 손상되어 직장 프로필 및 관련 데이터가 삭제되었습니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"직장 프로필을 이 기기에서 더 이상 사용할 수 없습니다."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"네트워크 트래픽이 모니터링되고 있음"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"자세한 내용을 보려면 탭하세요."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"관리 앱이 손상되었거나 구성요소가 없어서 사용할 수 없습니다. 이제 기기가 삭제됩니다. 도움이 필요한 경우 관리자에게 문의하세요."</string>
     <string name="me" msgid="6545696007631404292">"나"</string>
@@ -1242,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"배경화면"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"배경화면 변경"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"알림 수신기"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"가상 현실 리스너"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR 리스너"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"조건 제공자"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"알림 순위 지정 서비스"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN이 활성화됨"</string>
