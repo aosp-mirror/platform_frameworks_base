@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Work 設定檔管理員應用程式遺失或已毀損，因此系統刪除了您的 Work 設定檔和相關資料。如需協助，請與您的管理員聯絡。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"您的 Work 設定檔已不在這台裝置上。"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"網路流量目前受到監控"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"輕觸即可瞭解詳情"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置資料將遭到清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理員應用程式因遺失元件或已毀損而無法使用，您的裝置資料將隨即遭到清除。如需相關協助，請與您的管理員聯絡。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>

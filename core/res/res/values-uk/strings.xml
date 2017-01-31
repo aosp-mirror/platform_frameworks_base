@@ -187,8 +187,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Додаток адміністратора в робочому профілі відсутній або пошкоджений. У результаті ваш робочий профіль і пов’язані з ним дані видалено. Зверніться до свого адміністратора по допомогу."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Робочий профіль більше не доступний на цьому пристрої."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Відстежується мережевий трафік"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Торкніться, щоб дізнатися більше"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Неможливо скористатися додатком адміністратора, оскільки в ньому немає певних компонентів або його пошкоджено. З вашого пристрою буде стерто всі дані. Зверніться до свого адміністратора по допомогу."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
@@ -1292,7 +1291,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Служба читання сповіщень"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Обробник віртуальної реальності"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Постачальник умов"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Служба встановлення пріоритетності сповіщень"</string>
     <string name="vpn_title" msgid="19615213552042827">"Мережу VPN активовано"</string>

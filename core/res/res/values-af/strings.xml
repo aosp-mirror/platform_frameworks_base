@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Die werkprofiel se administrasieprogram ontbreek of is korrup. Gevolglik is jou werkprofiel en verwante data uitgevee. Kontak jou administrateur vir bystand."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Jou werkprofiel is nie meer op hierdie toestel beskikbaar nie."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Netwerkverkeer word gemonitor"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tik om meer te wete te kom"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jou toestel sal uitgevee word"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Die administrasieprogram kort komponente of is korrup en kan nie gebruik word nie. Jou toestel sal nou uitgevee word. Kontak jou administrateur vir bystand."</string>
     <string name="me" msgid="6545696007631404292">"Ek"</string>

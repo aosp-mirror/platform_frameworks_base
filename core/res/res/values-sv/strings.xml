@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din jobbprofil är inte längre tillgänglig på den här enheten."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Nätverkstrafiken övervakas"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tryck här om du vill läsa mer"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
@@ -1242,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Ändra bakgrund"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Meddelandelyssnare"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyssnare för virtuell verklighet"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Rankningstjänst för aviseringar"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN är aktiverat"</string>

@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Apl admin profil kerja hilang atau pun rosak. Akibatnya, profil kerja anda dan data yang berkaitan telah dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil kerja anda tidak tersedia pada peranti ini lagi."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Trafik rangkaian sedang dipantau"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Ketik untuk mengetahui lebih lanjut"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Peranti anda akan dipadam"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Apl pentadbir kehilangan komponen atau rosak dan tidak boleh digunakan. Sekarang peranti anda akan dipadam. Hubungi pentadbir anda untuk mendapatkan bantuan."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>

@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Le profil professionnel de l\'application d\'administration est manquant ou corrompu. Votre profil professionnel et ses données connexes ont donc été supprimés. Communiquez avec votre administrateur pour obtenir de l\'assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Votre profil professionnel n\'est plus accessible sur cet appareil."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Le trafic réseau est surveillé"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Touchez ici pour en savoir plus"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Le contenu de votre appareil sera effacé"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Des éléments de l\'application d\'administration sont manquants ou celle-ci est corrompue, ce qui la rend inutilisable. Le contenu de votre appareil sera maintenant effacé. Communiquez avec votre administrateur pour obtenir de l\'assistance."</string>
     <string name="me" msgid="6545696007631404292">"Moi"</string>

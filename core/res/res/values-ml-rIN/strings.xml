@@ -270,7 +270,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ടാപ്പുചെയ്ത ഇനങ്ങൾ ഉച്ചത്തിൽ പറയപ്പെടും, ജെസ്റ്ററുകൾ ഉപയോഗിച്ച് സ്‌ക്രീൻ അടുത്തറിയാവുന്നതാണ്."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"മെച്ചപ്പെടുത്തിയ വെബ് പ്രവേശനക്ഷമത ഓണാക്കുക"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"മെച്ചപ്പെടുത്തിയ വെബ് ഉപയോഗസഹായി ഓണാക്കുക"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"അപ്ലിക്കേഷൻ ഉള്ളടക്കം കൂടുതൽ ആക്‌സസ്സുചെയ്യാൻ കഴിയുന്നതാക്കാൻ സ്‌ക്രിപ്റ്റുകൾ ഇൻസ്റ്റാളുചെയ്യാനിടയുണ്ട്."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"നിങ്ങൾ ടൈപ്പുചെയ്യുന്ന വാചകം നിരീക്ഷിക്കുക"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ക്രെഡിറ്റ് കാർഡ് നമ്പറുകളും പാസ്‌വേഡുകളും പോലുള്ള വ്യക്തിഗത ഡാറ്റ ഉൾപ്പെടുന്നു."</string>
@@ -1237,7 +1237,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിൽ ഈ അപ്ലിക്കേഷൻ ഉപയോഗിക്കുന്നു"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"സമന്വയിപ്പിക്കുക"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"പ്രവേശനക്ഷമത"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"ഉപയോഗസഹായി"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"വാൾപേപ്പർ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"വാൾപേപ്പർ മാറ്റുക"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"അറിയിപ്പ് ലിസണർ"</string>
@@ -1439,9 +1439,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"നീക്കംചെയ്യുക"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"പ്രവേശനക്ഷമത പ്രവർത്തനക്ഷമമാക്കാൻ രണ്ട് വിരലുകൾ അമർത്തിപ്പിടിക്കുക."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"പ്രവേശനക്ഷമത പ്രവർത്തനക്ഷമമാക്കി."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"പ്രവേശനക്ഷമത റദ്ദാക്കി."</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ഉപയോഗസഹായി പ്രവർത്തനക്ഷമമാക്കാൻ രണ്ട് വിരലുകൾ അമർത്തിപ്പിടിക്കുക."</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"ഉപയോഗസഹായി പ്രവർത്തനക്ഷമമാക്കി."</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ഉപയോഗസഹായി റദ്ദാക്കി."</string>
     <string name="user_switched" msgid="3768006783166984410">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ലോഗൌട്ട് ചെയ്യുന്നു…"</string>

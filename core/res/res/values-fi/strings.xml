@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Työprofiilin järjestelmänvalvojasovellus puuttuu tai se on vioittunut. Tästä syystä työprofiilisi ja siihen liittyvät tiedot on poistettu. Pyydä ohjeita järjestelmänvalvojaltasi."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Työprofiilisi ei ole enää käytettävissä tällä laitteella."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Verkkoliikennettä seurataan"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Lue lisää napauttamalla."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Laitteen tiedot poistetaan"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Järjestelmänvalvojasovelluksesta puuttuu osia tai se on vioittunut, eikä sitä voi käyttää. Laitteen tiedot poistetaan. Pyydä ohjeita järjestelmänvalvojaltasi."</string>
     <string name="me" msgid="6545696007631404292">"Minä"</string>
@@ -1242,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Taustakuva"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Vaihda taustakuvaa"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Ilmoituskuuntelija"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Virtuaalitodellisuuden kuuntelija"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR-kuuntelija"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Ehtojen toimituspalvelu"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Ilmoitusten sijoituspalvelu"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN on aktivoitu"</string>

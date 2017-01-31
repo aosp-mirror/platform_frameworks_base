@@ -1241,7 +1241,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Ταπετσαρία"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Αλλαγή ταπετσαρίας"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Υπηρεσία ακρόασης ειδοποίησης"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Λειτουργία ακρόασης Εικονικής Πραγματικότητας"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Λειτουργία ακρόασης VR"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Πάροχος συνθηκών"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Υπηρεσία κατάταξης ειδοποιήσεων"</string>
     <string name="vpn_title" msgid="19615213552042827">"Το VPN ενεργοποιήθηκε"</string>

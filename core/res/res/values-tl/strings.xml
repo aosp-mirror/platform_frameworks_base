@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Ang admin app ng profile sa trabaho ay nawawala o sira. Bilang resulta, na-delete na ang iyong profile sa trabaho at nauugnay na data. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Hindi na available ang iyong profile sa trabaho sa device na ito."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Sinusubaybayan ang trapiko sa network"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"I-tap upang matuto pa"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Ang admin app ay may mga kulang na bahagi o sira, at hindi ito magagamit. Buburahin na ngayon ang iyong device. Makipag-ugnayan sa iyong administrator para sa tulong."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>

@@ -185,8 +185,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Trūkst darba profila administratora lietotnes, vai šī lietotne ir bojāta. Šī iemesla dēļ jūsu darba profils un saistītie dati tika dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Jūsu darba profils šai ierīcē vairs nav pieejams."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Tīkla datplūsma tiek pārraudzīta"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Pieskarieties, lai uzzinātu vairāk"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratora lietotnē trūkst komponentu, vai šī lietotne ir bojāta. Lietotni nevar izmantot. Ierīces dati tūlīt tiks dzēsti. Lai saņemtu palīdzību, sazinieties ar administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Man"</string>

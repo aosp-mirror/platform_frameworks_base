@@ -183,8 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"The work profile admin app is either missing or corrupted. As a result, your work profile and related data have been deleted. Contact your administrator for assistance."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Your work profile is no longer available on this device."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Network traffic is being monitored"</string>
-    <!-- no translation found for network_logging_notification_text (2671761001956320094) -->
-    <skip />
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tap to find out more"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Your device will be erased"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"The admin app is missing components or corrupted, and can\'t be used. Your device will now be erased. Contact your administrator for assistance."</string>
     <string name="me" msgid="6545696007631404292">"Me"</string>
