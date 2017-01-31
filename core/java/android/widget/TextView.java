@@ -1162,12 +1162,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextView_fontFamily:
                     try {
-                        fontTypeface = appearance.getFont(attr);
+                        fontTypeface = a.getFont(attr);
                     } catch (UnsupportedOperationException e) {
                         // Expected if it is not a font resource.
                     }
                     if (fontTypeface == null) {
-                        fontFamily = appearance.getString(attr);
+                        fontFamily = a.getString(attr);
                     }
                     fontFamilyExplicit = true;
                     break;
