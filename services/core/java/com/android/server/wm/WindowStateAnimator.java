@@ -1321,8 +1321,8 @@ class WindowStateAnimator {
             }
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
-            mExtraHScale = (mTmpClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
-            mExtraVScale = (mTmpClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
+            mExtraHScale = (finalClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
+            mExtraVScale = (finalClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
 
             // In the case of ForceScaleToCrop we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
@@ -1345,8 +1345,7 @@ class WindowStateAnimator {
             // Since we are scaled to fit in our previously desired crop, we can now
             // expose the whole window in buffer space, and not risk extending
             // past where the system would have cropped us
-            mTmpClipRect.set(0, 0, (int)surfaceWidth, (int)surfaceHeight);
-            mTmpFinalClipRect.setEmpty();
+            clipRect = null;
 
             // Various surfaces in the scaled stack may resize at different times.
             // We need to ensure for each surface, that we disable transformation matrix
