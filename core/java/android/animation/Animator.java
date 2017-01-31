@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * This is the superclass for classes which provide basic support for animations which can be
  * started, ended, and have <code>AnimatorListeners</code> added to them.
  */
-public abstract class Animator implements Cloneable, AnimationHandler.AnimationFrameCallback {
+public abstract class Animator implements Cloneable {
 
     /**
      * The value used to indicate infinite duration (e.g. when Animators repeat infinitely).
@@ -464,22 +464,12 @@ public abstract class Animator implements Cloneable, AnimationHandler.AnimationF
         throw new IllegalStateException("Reverse is not supported");
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    public boolean doAnimationFrame(long frameTime) {
+    // Pulse an animation frame into the animation.
+    boolean pulseAnimationFrame(long frameTime) {
         // TODO: Need to find a better signal than this. There's a bug in SystemUI that's preventing
         // returning !isStarted() from working.
         return false;
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void commitAnimationFrame(long frameTime) {}
-
 
     /**
      * Internal use only.

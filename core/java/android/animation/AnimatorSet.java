@@ -948,7 +948,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         for (int i = 0; i < mPlayingSet.size(); i++) {
             Node node = mPlayingSet.get(i);
             if (!node.mEnded) {
-                node.mEnded = node.mAnimation.doAnimationFrame(getPlayTimeForNode(playTime, node));
+                node.mEnded = node.mAnimation.pulseAnimationFrame(
+                    getPlayTimeForNode(playTime, node));
             }
         }
 
@@ -978,6 +979,19 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public void commitAnimationFrame(long frameTime) {
+        // No op.
+    }
+
+    @Override
+    boolean pulseAnimationFrame(long frameTime) {
+        return doAnimationFrame(frameTime);
+    }
+
+    /**
      * When playing forward, we call start() at the animation's scheduled start time, and make sure
      * to pump a frame at the animation's scheduled end time.
      *
@@ -993,11 +1007,10 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 if (event.mEvent == AnimationEvent.ANIMATION_END) {
                     mPlayingSet.add(event.mNode);
                     node.mAnimation.startWithoutPulsing(true);
-                    node.mAnimation.doAnimationFrame(0);
+                    pulseFrame(node, 0);
                 } else if (event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED && !node.mEnded) {
                     // end event:
-                    node.mEnded =
-                            node.mAnimation.doAnimationFrame(getPlayTimeForNode(playTime, node));
+                    pulseFrame(node, getPlayTimeForNode(playTime, node));
                 }
             }
         } else {
@@ -1007,13 +1020,18 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 if (event.mEvent == AnimationEvent.ANIMATION_START) {
                     mPlayingSet.add(event.mNode);
                     node.mAnimation.startWithoutPulsing(false);
-                    node.mAnimation.doAnimationFrame(0);
+                    pulseFrame(node, 0);
                 } else if (event.mEvent == AnimationEvent.ANIMATION_END && !node.mEnded) {
                     // start event:
-                    node.mEnded =
-                            node.mAnimation.doAnimationFrame(getPlayTimeForNode(playTime, node));
+                    pulseFrame(node, getPlayTimeForNode(playTime, node));
                 }
             }
+        }
+    }
+
+    private void pulseFrame(Node node, long frameTime) {
+        if (!node.mEnded) {
+            node.mEnded = node.mAnimation.pulseAnimationFrame(frameTime);
         }
     }
 
