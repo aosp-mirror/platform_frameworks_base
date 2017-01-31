@@ -190,6 +190,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAms.addAccountExplicitly(a31, "p31", null);
         mAms.addAccountExplicitly(a32, "p32", null);
 
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
         Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(6, accounts.length);
@@ -306,6 +308,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testRemovedAccountSync() throws Exception {
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
         unlockSystemUser();
         Account a1 = new Account("account1", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1);
         Account a2 = new Account("account2", AccountManagerServiceTestFixtures.ACCOUNT_TYPE_2);
@@ -347,6 +351,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         // Start testing
         unlockSystemUser();
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
         Account[] accounts = mAms.getAccounts(null, mContext.getOpPackageName());
         assertEquals("1 account should be migrated", 1, accounts.length);
         assertEquals(PreNTestDatabaseHelper.ACCOUNT_NAME, accounts[0].name);
@@ -1048,7 +1054,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         // Assert finishSessionAsUser added calling uid and pid into the sessionBundle
         assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_UID));
         assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_PID));
-        // Assert App bundle data overrides sessionBundle data
         assertEquals(sessionBundle.getString(
                 AccountManager.KEY_ANDROID_PACKAGE_NAME), "APCT.package");
 
@@ -1387,6 +1392,9 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testRemoveAccountAsUserRemovalAllowed() throws Exception {
+        String[] list = new String[]{AccountManagerServiceTestFixtures.CALLER_PACKAGE};
+        when(mMockPackageManager.getPackagesForUid(anyInt())).thenReturn(list);
+
         unlockSystemUser();
         mAms.addAccountExplicitly(AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, "p1", null);
         Account[] addedAccounts =

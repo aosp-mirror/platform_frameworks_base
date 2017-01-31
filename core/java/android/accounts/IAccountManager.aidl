@@ -108,15 +108,12 @@ interface IAccountManager {
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
 
-    /* Returns Map<Integer, Integer> from UID to visibility with all values stored for given account*/
-    Map getUidsAndVisibilityForAccount(in Account account);
-
+    /* Returns Map<String, Integer> from package name to visibility with all values stored for given account */
+    Map getPackagesAndVisibilityForAccount(in Account account);
     boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
             in Map visibility);
-
-    boolean setAccountVisibility(in Account a, int uid, int newVisibility);
-    int getAccountVisibility(in Account a, int uid);
-
+    boolean setAccountVisibility(in Account a, in String packageName, int newVisibility);
+    int getAccountVisibility(in Account a, in String packageName);
     /* Type may be null returns Map <Account, Integer>*/
     Map getAccountsAndVisibilityForPackage(in String packageName, in String accountType);
 
