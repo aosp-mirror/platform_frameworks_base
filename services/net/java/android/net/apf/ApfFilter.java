@@ -286,7 +286,8 @@ public class ApfFilter {
     }
 
     // Returns seconds since device boot.
-    private static long curTime() {
+    @VisibleForTesting
+    protected long currentTimeSeconds() {
         return SystemClock.elapsedRealtime() / DateUtils.SECOND_IN_MILLIS;
     }
 
@@ -450,7 +451,7 @@ public class ApfFilter {
             }
 
             mPacket = ByteBuffer.wrap(Arrays.copyOf(packet, length));
-            mLastSeen = curTime();
+            mLastSeen = currentTimeSeconds();
 
             // Sanity check packet in case a packet arrives before we attach RA filter
             // to our packet socket. b/29586253
@@ -580,7 +581,7 @@ public class ApfFilter {
         // How many seconds does this RA's have to live, taking into account the fact
         // that we might have seen it a while ago.
         long currentLifetime() {
-            return mMinLifetime - (curTime() - mLastSeen);
+            return mMinLifetime - (currentTimeSeconds() - mLastSeen);
         }
 
         boolean isExpired() {
@@ -946,7 +947,7 @@ public class ApfFilter {
             Log.e(TAG, "Failed to generate APF program.", e);
             return;
         }
-        mLastTimeInstalledProgram = curTime();
+        mLastTimeInstalledProgram = currentTimeSeconds();
         mLastInstalledProgramMinLifetime = programMinLifetime;
         mLastInstalledProgram = program;
         mNumProgramUpdates++;
@@ -965,7 +966,7 @@ public class ApfFilter {
      */
     private boolean shouldInstallnewProgram() {
         long expiry = mLastTimeInstalledProgram + mLastInstalledProgramMinLifetime;
-        return expiry < curTime() + MAX_PROGRAM_LIFETIME_WORTH_REFRESHING;
+        return expiry < currentTimeSeconds() + MAX_PROGRAM_LIFETIME_WORTH_REFRESHING;
     }
 
     private void hexDump(String msg, byte[] packet, int length) {
@@ -999,7 +1000,7 @@ public class ApfFilter {
             if (ra.matches(packet, length)) {
                 if (VDBG) log("matched RA " + ra);
                 // Update lifetimes.
-                ra.mLastSeen = curTime();
+                ra.mLastSeen = currentTimeSeconds();
                 ra.mMinLifetime = ra.minLifetime(packet, length);
                 ra.seenCount++;
 
@@ -1128,7 +1129,7 @@ public class ApfFilter {
         pw.println("Program updates: " + mNumProgramUpdates);
         pw.println(String.format(
                 "Last program length %d, installed %ds ago, lifetime %ds",
-                mLastInstalledProgram.length, curTime() - mLastTimeInstalledProgram,
+                mLastInstalledProgram.length, currentTimeSeconds() - mLastTimeInstalledProgram,
                 mLastInstalledProgramMinLifetime));
 
         pw.println("RA filters:");
@@ -1137,7 +1138,7 @@ public class ApfFilter {
             pw.println(ra);
             pw.increaseIndent();
             pw.println(String.format(
-                    "Seen: %d, last %ds ago", ra.seenCount, curTime() - ra.mLastSeen));
+                    "Seen: %d, last %ds ago", ra.seenCount, currentTimeSeconds() - ra.mLastSeen));
             if (DBG) {
                 pw.println("Last match:");
                 pw.increaseIndent();
