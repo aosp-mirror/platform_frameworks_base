@@ -455,6 +455,12 @@ public final class SystemServer {
      * the other functions.
      */
     private void startBootstrapServices() {
+        Slog.i(TAG, "Reading configuration...");
+        final String TAG_SYSTEM_CONFIG = "ReadingSystemConfig";
+        traceBeginAndSlog(TAG_SYSTEM_CONFIG);
+        SystemServerInitThreadPool.get().submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
+        traceEnd();
+
         // Wait for installd to finish starting up so that it has a chance to
         // create critical directories such as /data/user with the appropriate
         // permissions.  We need this to complete before we initialize other services.
@@ -665,11 +671,6 @@ public final class SystemServer {
         }
 
         try {
-            Slog.i(TAG, "Reading configuration...");
-            traceBeginAndSlog("ReadingSystemConfig");
-            SystemConfig.getInstance();
-            traceEnd();
-
             traceBeginAndSlog("StartKeyAttestationApplicationIdProviderService");
             ServiceManager.addService("sec_key_att_app_id_provider",
                     new KeyAttestationApplicationIdProviderService(context));

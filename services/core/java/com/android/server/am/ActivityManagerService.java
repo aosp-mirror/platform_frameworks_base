@@ -770,7 +770,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Broadcast actions that will always be deliverable to unlaunched/background apps
      */
-    final ArraySet<String> mBackgroundLaunchBroadcasts;
+    ArraySet<String> mBackgroundLaunchBroadcasts;
 
     /**
      * All of the processes we currently have running organized by pid.
@@ -2615,12 +2615,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPermissionReviewRequired = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
-        mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
         if (DEBUG_BACKGROUND_CHECK) {
             Slog.d(TAG, "Enforcing O+ bg restrictions: " + mConstants.ENFORCE_BG_CHECK);
             StringBuilder sb = new StringBuilder(200);
             sb.append("  ");
-            for (String a : mBackgroundLaunchBroadcasts) {
+            for (String a : getBackgroundLaunchBroadcasts()) {
                 sb.append(' '); sb.append(a);
             }
             Slog.d(TAG, "Background implicit broadcasts:");
@@ -2782,6 +2781,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
         mVoiceWakeLock.setReferenceCounted(false);
+    }
+
+    private ArraySet<String> getBackgroundLaunchBroadcasts() {
+        if (mBackgroundLaunchBroadcasts == null) {
+            mBackgroundLaunchBroadcasts = SystemConfig.getInstance().getAllowImplicitBroadcasts();
+        }
+        return mBackgroundLaunchBroadcasts;
     }
 
     @Override
@@ -18305,7 +18311,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (action != null) {
-            if (mBackgroundLaunchBroadcasts.contains(action)) {
+            if (getBackgroundLaunchBroadcasts().contains(action)) {
                 if (DEBUG_BACKGROUND_CHECK) {
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }

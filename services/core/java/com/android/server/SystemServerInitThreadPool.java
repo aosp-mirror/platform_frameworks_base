@@ -44,7 +44,7 @@ public class SystemServerInitThreadPool {
 
     private static SystemServerInitThreadPool sInstance;
 
-    private ExecutorService mService = ConcurrentUtils.newFixedThreadPool(2,
+    private ExecutorService mService = ConcurrentUtils.newFixedThreadPool(4,
             "system-server-init-thread", Process.THREAD_PRIORITY_FOREGROUND);
 
     public static synchronized SystemServerInitThreadPool get() {
