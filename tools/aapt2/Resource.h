@@ -44,6 +44,11 @@ enum class ResourceType {
   kAttrPrivate,
   kBool,
   kColor,
+
+  // Not really a type, but it shows up in some CTS tests and
+  // we need to continue respecting it.
+  kConfigVarying,
+
   kDimen,
   kDrawable,
   kFont,

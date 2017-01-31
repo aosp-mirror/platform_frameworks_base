@@ -111,6 +111,36 @@ static bool FixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
   return true;
 }
 
+// Checks that <uses-feature> has android:glEsVersion or android:name, not both (or neither).
+static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
+  bool has_name = false;
+  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
+    if (attr->value.empty()) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "android:name in <uses-feature> must not be empty");
+      return false;
+    }
+    has_name = true;
+  }
+
+  bool has_gl_es_version = false;
+  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "glEsVersion")) {
+    if (has_name) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "cannot define both android:name and android:glEsVersion in <uses-feature>");
+      return false;
+    }
+    has_gl_es_version = true;
+  }
+
+  if (!has_name && !has_gl_es_version) {
+    diag->Error(DiagMessage(el->line_number)
+                << "<uses-feature> must have either android:name or android:glEsVersion attribute");
+    return false;
+  }
+  return true;
+}
+
 bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
                                IDiagnostics* diag) {
   // First verify some options.
@@ -134,14 +164,24 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
   }
 
-  // Common intent-filter actions.
+  // Common <intent-filter> actions.
   xml::XmlNodeAction intent_filter_action;
   intent_filter_action["action"];
   intent_filter_action["category"];
   intent_filter_action["data"];
 
-  // Common meta-data actions.
+  // Common <meta-data> actions.
   xml::XmlNodeAction meta_data_action;
+
+  // Common <uses-feature> actions.
+  xml::XmlNodeAction uses_feature_action;
+  uses_feature_action.Action(VerifyUsesFeature);
+
+  // Common component actions.
+  xml::XmlNodeAction component_action;
+  component_action.Action(RequiredNameIsJavaClassName);
+  component_action["intent-filter"] = intent_filter_action;
+  component_action["meta-data"] = meta_data_action;
 
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
@@ -190,6 +230,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   });
 
   // Instrumentation actions.
+  manifest_action["instrumentation"].Action(RequiredNameIsJavaClassName);
   manifest_action["instrumentation"].Action([&](xml::Element* el) -> bool {
     if (!options_.rename_instrumentation_target_package) {
       return true;
@@ -201,6 +242,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
     return true;
   });
+  manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
   manifest_action["original-package"];
   manifest_action["protected-broadcast"];
@@ -208,51 +250,28 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["permission"];
   manifest_action["permission-tree"];
   manifest_action["permission-group"];
-
   manifest_action["uses-configuration"];
-  manifest_action["uses-feature"];
   manifest_action["supports-screens"];
-
+  manifest_action["uses-feature"] = uses_feature_action;
+  manifest_action["feature-group"]["uses-feature"] = uses_feature_action;
   manifest_action["compatible-screens"];
   manifest_action["compatible-screens"]["screen"];
-
   manifest_action["supports-gl-texture"];
-
   manifest_action["meta-data"] = meta_data_action;
 
   // Application actions.
   xml::XmlNodeAction& application_action = manifest_action["application"];
   application_action.Action(OptionalNameIsJavaClassName);
 
-  // Uses library actions.
   application_action["uses-library"];
-
-  // Meta-data.
   application_action["meta-data"] = meta_data_action;
-
-  // Activity actions.
-  application_action["activity"].Action(RequiredNameIsJavaClassName);
-  application_action["activity"]["intent-filter"] = intent_filter_action;
-  application_action["activity"]["meta-data"] = meta_data_action;
-
-  // Activity alias actions.
-  application_action["activity-alias"]["intent-filter"] = intent_filter_action;
-  application_action["activity-alias"]["meta-data"] = meta_data_action;
-
-  // Service actions.
-  application_action["service"].Action(RequiredNameIsJavaClassName);
-  application_action["service"]["intent-filter"] = intent_filter_action;
-  application_action["service"]["meta-data"] = meta_data_action;
-
-  // Receiver actions.
-  application_action["receiver"].Action(RequiredNameIsJavaClassName);
-  application_action["receiver"]["intent-filter"] = intent_filter_action;
-  application_action["receiver"]["meta-data"] = meta_data_action;
+  application_action["activity"] = component_action;
+  application_action["activity-alias"] = component_action;
+  application_action["service"] = component_action;
+  application_action["receiver"] = component_action;
 
   // Provider actions.
-  application_action["provider"].Action(RequiredNameIsJavaClassName);
-  application_action["provider"]["intent-filter"] = intent_filter_action;
-  application_action["provider"]["meta-data"] = meta_data_action;
+  application_action["provider"] = component_action;
   application_action["provider"]["grant-uri-permissions"];
   application_action["provider"]["path-permissions"];
 

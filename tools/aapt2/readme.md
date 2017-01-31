@@ -1,5 +1,12 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.6
+### `aapt2`
+- Support legacy `configVarying` resource type.
+- Support `<bag>` tag and treat as `<style>` regardless of type.
+- Add `<feature-group>` manifest tag verification.
+- Add `<meta-data>` tag support to `<instrumentation>`.
+
 ## Version 2.5
 ### `aapt2 link ...`
 - Transition XML versioning: Adds a new flag `--no-version-transitions` to disable automatic

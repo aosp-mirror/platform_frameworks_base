@@ -102,7 +102,8 @@ class ResourceParser {
                      bool weak);
   Maybe<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
                                                const android::StringPiece& tag);
-  bool ParseStyle(xml::XmlPullParser* parser, ParsedResource* out_resource);
+  bool ParseStyle(const ResourceType type, xml::XmlPullParser* parser,
+                  ParsedResource* out_resource);
   bool ParseStyleItem(xml::XmlPullParser* parser, Style* style);
   bool ParseDeclareStyleable(xml::XmlPullParser* parser,
                              ParsedResource* out_resource);

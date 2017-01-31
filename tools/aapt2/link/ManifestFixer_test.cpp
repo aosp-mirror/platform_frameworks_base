@@ -90,7 +90,7 @@ TEST_F(ManifestFixerTest, EnsureManifestHasPackage) {
 }
 
 TEST_F(ManifestFixerTest, AllowMetaData) {
-    auto doc = Verify(R"EOF(
+  auto doc = Verify(R"EOF(
         <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                   package="android">
           <meta-data />
@@ -98,12 +98,13 @@ TEST_F(ManifestFixerTest, AllowMetaData) {
             <meta-data />
             <activity android:name=".Hi"><meta-data /></activity>
             <activity-alias android:name=".Ho"><meta-data /></activity-alias>
-            <receiver android:name=".OffToWork"><meta-data /></receiver>
-            <provider android:name=".We"><meta-data /></provider>
-            <service android:name=".Go"><meta-data /></service>
+            <receiver android:name=".OffTo"><meta-data /></receiver>
+            <provider android:name=".Work"><meta-data /></provider>
+            <service android:name=".We"><meta-data /></service>
           </application>
+          <instrumentation android:name=".Go"><meta-data /></instrumentation>
         </manifest>)EOF");
-    ASSERT_NE(nullptr, doc);
+  ASSERT_NE(nullptr, doc);
 }
 
 TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
@@ -290,7 +291,7 @@ TEST_F(ManifestFixerTest,
   std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                 package="android">
-        <instrumentation android:targetPackage="android" />
+        <instrumentation android:name=".TestRunner" android:targetPackage="android" />
       </manifest>)EOF",
                                                             options);
   ASSERT_NE(nullptr, doc);
@@ -352,6 +353,53 @@ TEST_F(ManifestFixerTest, EnsureManifestAttributesAreTyped) {
 
   EXPECT_NE(nullptr, attr->compiled_value);
   EXPECT_NE(nullptr, ValueCast<BinaryPrimitive>(attr->compiled_value.get()));
+}
+
+TEST_F(ManifestFixerTest, UsesFeatureMustHaveNameOrGlEsVersion) {
+  std::string input = R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <uses-feature android:name="feature" />
+          <uses-feature android:glEsVersion="1" />
+          <feature-group />
+          <feature-group>
+            <uses-feature android:name="feature_in_group" />
+            <uses-feature android:glEsVersion="2" />
+          </feature-group>
+        </manifest>)EOF";
+  EXPECT_NE(nullptr, Verify(input));
+
+  input = R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <uses-feature android:name="feature" android:glEsVersion="1" />
+        </manifest>)EOF";
+  EXPECT_EQ(nullptr, Verify(input));
+
+  input = R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <uses-feature />
+        </manifest>)EOF";
+  EXPECT_EQ(nullptr, Verify(input));
+
+  input = R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <feature-group>
+            <uses-feature android:name="feature" android:glEsVersion="1" />
+          </feature-group>
+        </manifest>)EOF";
+  EXPECT_EQ(nullptr, Verify(input));
+
+  input = R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android">
+          <feature-group>
+            <uses-feature />
+          </feature-group>
+        </manifest>)EOF";
+  EXPECT_EQ(nullptr, Verify(input));
 }
 
 }  // namespace aapt

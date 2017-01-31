@@ -49,6 +49,10 @@ TEST(ResourceTypeTest, ParseResourceTypes) {
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kColor);
 
+  type = ParseResourceType("configVarying");
+  ASSERT_NE(type, nullptr);
+  EXPECT_EQ(*type, ResourceType::kConfigVarying);
+
   type = ParseResourceType("dimen");
   ASSERT_NE(type, nullptr);
   EXPECT_EQ(*type, ResourceType::kDimen);
