@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"ඔබේ සේවාව සක්‍රිය කරන්න"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"දත්ත සේවාව නැත"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"ඔබේ සේවාව සක්‍රිය කිරීමට තට්ටු කරන්න"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"සේවාව නැත. කරුණාකර ඔබගේ සේවා සැපයුම්කරු අමතන්න"</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"පිවිසුම් දොරටුව වෙත සබැඳෙමින්..."</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"ජාලය කාල නිමා විය, ඔබ යළි උත්සාහ කිරීමට කැමතිද?"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"ජාලය ලබා ගත නොහැකිය"</string>
+    <string name="quit" msgid="4392968039488794590">"ඉවත් වන්න"</string>
+    <string name="wait" msgid="7902715035629500128">"රැඳී සිටින්න"</string>
+</resources>

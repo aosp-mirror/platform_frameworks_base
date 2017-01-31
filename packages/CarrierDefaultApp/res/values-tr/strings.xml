@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"VarsayılanOperatörUygulaması"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"Hizmetinizi etkinleştirin"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"Veri hizmeti yok"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"Hizmetinizi etkinleştirmek için dokunun"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"Hizmet yok, lütfen servis sağlayıcınıza başvurun"</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"Giriş portalına bağlanıyor..."</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"Ağ zaman aşımı, yeniden denemek istiyor musunuz?"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"Ağa ulaşılamıyor"</string>
+    <string name="quit" msgid="4392968039488794590">"Çık"</string>
+    <string name="wait" msgid="7902715035629500128">"Bekle"</string>
+</resources>

@@ -7,8 +7,8 @@
     <string name="portal_notification_detail" msgid="2860620550281695686">"Gonga ili uanzishe huduma yako"</string>
     <string name="no_data_notification_detail" msgid="1757413358517680719">"Hakuna Huduma, tafadhali wasiliana na mtoa huduma wako"</string>
     <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"Inaunganisha kwenye ukurasa wa mwanzo..."</string>
-    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"Muda wa kutumia mtandao umekwisha, ungependa kujaribu tena?"</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"Mtandao haupatikani, ungependa kujaribu tena?"</string>
     <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"Mtandao haupatikani"</string>
-    <string name="quit" msgid="4392968039488794590">"Ondoka"</string>
+    <string name="quit" msgid="4392968039488794590">"Acha"</string>
     <string name="wait" msgid="7902715035629500128">"Subiri"</string>
 </resources>
