@@ -569,6 +569,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *     <li> {@link #CATEGORY_HE_DESK_DOCK}
  *     <li> {@link #CATEGORY_CAR_MODE}
  *     <li> {@link #CATEGORY_APP_MARKET}
+ *     <li> {@link #CATEGORY_VR_HOME}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -3643,6 +3644,13 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";
 
+    /**
+     * An activity to use for the launcher when the device is placed in a VR Headset viewer.
+     * Used with {@link #ACTION_MAIN} to launch an activity.  For more
+     * information, see {@link android.app.UiModeManager}.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_VR_HOME = "android.intent.category.VR_HOME";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Application launch intent categories (see addCategory()).
