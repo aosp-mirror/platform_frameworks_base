@@ -127,7 +127,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ComponentInfo;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.EphemeralRequest;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralResponse;
@@ -255,6 +255,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
+import com.android.server.BackgroundDexOptJobService;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.IntentResolver;
@@ -375,7 +376,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Debug output for dexopting. This is shared between PackageManagerService, OtaDexoptService
     // and PackageDexOptimizer. All these classes have their own flag to allow switching a single
     // user, but by default initialize to this.
-    static final boolean DEBUG_DEXOPT = false;
+    public static final boolean DEBUG_DEXOPT = false;
 
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
@@ -386,7 +387,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
     private static final boolean DISABLE_EPHEMERAL_APPS = false;
-    private static final boolean HIDE_EPHEMERAL_APIS = true;
+    private static final boolean HIDE_EPHEMERAL_APIS = false;
 
     private static final boolean ENABLE_QUOTA =
             SystemProperties.getBoolean("persist.fw.quota", false);
@@ -716,7 +717,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // If mac_permissions.xml was found for seinfo labeling.
     boolean mFoundPolicyFile;
 
-    private final EphemeralApplicationRegistry mEphemeralApplicationRegistry;
+    private final InstantAppRegistry mInstantAppRegistry;
 
     public static final class SharedLibraryEntry {
         public final String path;
@@ -1751,7 +1752,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             synchronized (mPackages) {
-                mEphemeralApplicationRegistry.onPackageInstalledLPw(res.pkg);
+                mInstantAppRegistry.onPackageInstalledLPw(res.pkg, res.newUsers);
             }
 
             final String packageName = res.pkg.applicationInfo.packageName;
@@ -2255,7 +2256,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
 
             mDefaultPermissionPolicy = new DefaultPermissionGrantPolicy(this);
-            mEphemeralApplicationRegistry = new EphemeralApplicationRegistry(this);
+            mInstantAppRegistry = new InstantAppRegistry(this);
 
             File dataDir = Environment.getDataDirectory();
             mAppInstallDir = new File(dataDir, "app");
@@ -3303,10 +3304,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         //   * An installed app can see metadata for 1) other installed apps
         //     and 2) ephemeral apps that have explicitly interacted with it
         //   * Ephemeral apps can only see their own metadata
+        //   * Holding a signature permission allows seeing instant apps
         final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
         if (callingAppId != Process.SYSTEM_UID
                 && callingAppId != Process.SHELL_UID
-                && callingAppId != Process.ROOT_UID) {
+                && callingAppId != Process.ROOT_UID
+                && checkUidPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                        Binder.getCallingUid()) != PackageManager.PERMISSION_GRANTED) {
             final String ephemeralPackageName = getEphemeralPackageName(Binder.getCallingUid());
             if (ephemeralPackageName != null) {
                 // ephemeral apps can only get information on themselves
@@ -3314,9 +3318,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return null;
                 }
             } else {
-                if (p.applicationInfo.isEphemeralApp()) {
+                if (p.applicationInfo.isInstantApp()) {
                     // only get access to the ephemeral app if we've been granted access
-                    if (!mEphemeralApplicationRegistry.isEphemeralAccessGranted(
+                    if (!mInstantAppRegistry.isInstantAccessGranted(
                             userId, callingAppId, ps.appId)) {
                         return null;
                     }
@@ -4617,7 +4621,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
-            if (pkg.applicationInfo.isEphemeralApp() && !bp.isEphemeral()) {
+            if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
                 throw new SecurityException("Cannot grant non-ephemeral permission"
                         + name + " for package " + packageName);
             }
@@ -5912,7 +5916,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         CrossProfileIntentResolver resolver = mSettings.mCrossProfileIntentResolvers.get(userId);
         if (resolver != null) {
             return resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/,
-                    false /*visibleToEphemeral*/, false /*isEphemeral*/, userId);
+                    false /*visibleToEphemeral*/, false /*isInstant*/, userId);
         }
         return null;
     }
@@ -5940,7 +5944,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final Object obj = mSettings.getUserIdLPr(appId);
             if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                return ps.pkg.applicationInfo.isEphemeralApp() ? ps.pkg.packageName : null;
+                return ps.pkg.applicationInfo.isInstantApp() ? ps.pkg.packageName : null;
             }
         }
         return null;
@@ -6218,7 +6222,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             ResolveInfo info = resolveInfos.get(i);
-            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isEphemeralApp();
+            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
             // allow activities that are defined in the provided package
             if (isEphemeralApp && ephemeralPkgName.equals(info.activityInfo.packageName)) {
                 continue;
@@ -7034,31 +7038,31 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<EphemeralApplicationInfo> getEphemeralApplications(int userId) {
+    public ParceledListSlice<InstantAppInfo> getInstantApps(int userId) {
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
                 "getEphemeralApplications");
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "getEphemeralApplications");
         synchronized (mPackages) {
-            List<EphemeralApplicationInfo> ephemeralApps = mEphemeralApplicationRegistry
-                    .getEphemeralApplicationsLPw(userId);
-            if (ephemeralApps != null) {
-                return new ParceledListSlice<>(ephemeralApps);
+            List<InstantAppInfo> instantApps = mInstantAppRegistry
+                    .getInstantAppsLPr(userId);
+            if (instantApps != null) {
+                return new ParceledListSlice<>(instantApps);
             }
         }
         return null;
     }
 
     @Override
-    public boolean isEphemeralApplication(String packageName, int userId) {
+    public boolean isInstantApp(String packageName, int userId) {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
-                "isEphemeral");
+                "isInstantApp");
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return false;
         }
@@ -7069,62 +7073,63 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg != null) {
-                return pkg.applicationInfo.isEphemeralApp();
+                return pkg.applicationInfo.isInstantApp();
             }
         }
         return false;
     }
 
     @Override
-    public byte[] getEphemeralApplicationCookie(String packageName, int userId) {
+    public byte[] getInstantAppCookie(String packageName, int userId) {
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
-                "getCookie");
+                "getInstantAppCookie");
         if (!isCallerSameApp(packageName)) {
             return null;
         }
         synchronized (mPackages) {
-            return mEphemeralApplicationRegistry.getEphemeralApplicationCookieLPw(
+            return mInstantAppRegistry.getInstantAppCookieLPw(
                     packageName, userId);
         }
     }
 
     @Override
-    public boolean setEphemeralApplicationCookie(String packageName, byte[] cookie, int userId) {
+    public boolean setInstantAppCookie(String packageName, byte[] cookie, int userId) {
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return true;
         }
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, true /* checkShell */,
-                "setCookie");
+                "setInstantAppCookie");
         if (!isCallerSameApp(packageName)) {
             return false;
         }
         synchronized (mPackages) {
-            return mEphemeralApplicationRegistry.setEphemeralApplicationCookieLPw(
+            return mInstantAppRegistry.setInstantAppCookieLPw(
                     packageName, cookie, userId);
         }
     }
 
     @Override
-    public Bitmap getEphemeralApplicationIcon(String packageName, int userId) {
+    public Bitmap getInstantAppIcon(String packageName, int userId) {
         if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
-                "getEphemeralApplicationIcon");
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_INSTANT_APPS,
+                "getInstantAppIcon");
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
-                "getEphemeralApplicationIcon");
+                "getInstantAppIcon");
+
         synchronized (mPackages) {
-            return mEphemeralApplicationRegistry.getEphemeralApplicationIconLPw(
+            return mInstantAppRegistry.getInstantAppIconLPw(
                     packageName, userId);
         }
     }
@@ -9345,7 +9350,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     (policyFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
             if (isEphemeral(pkg)) {
                 final int userId = user == null ? 0 : user.getIdentifier();
-                mEphemeralApplicationRegistry.addEphemeralAppLPw(userId, pkgSetting.appId);
+                mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
             }
         }
         return pkg;
@@ -9460,7 +9465,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 // Package declaring static a shared lib cannot be ephemeral
-                if (pkg.applicationInfo.isEphemeralApp()) {
+                if (pkg.applicationInfo.isInstantApp()) {
                     throw new PackageManagerException(
                             "Packages declaring static-shared libs cannot be ephemeral");
                 }
@@ -9994,7 +9999,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.PermissionGroup cur = mPermissionGroups.get(pg.info.name);
                 final String curPackageName = cur == null ? null : cur.info.packageName;
                 // Dont allow ephemeral apps to define new permission groups.
-                if (pkg.applicationInfo.isEphemeralApp()) {
+                if (pkg.applicationInfo.isInstantApp()) {
                     Slog.w(TAG, "Permission group " + pg.info.name + " from package "
                             + pg.info.packageName
                             + " ignored: ephemeral apps cannot define new permission groups.");
@@ -10039,7 +10044,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageParser.Permission p = pkg.permissions.get(i);
 
                 // Dont allow ephemeral apps to define new permissions.
-                if (pkg.applicationInfo.isEphemeralApp()) {
+                if (pkg.applicationInfo.isInstantApp()) {
                     Slog.w(TAG, "Permission " + p.info.name + " from package "
                             + p.info.packageName
                             + " ignored: ephemeral apps cannot define new permissions.");
@@ -11242,7 +11247,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
 
             // Limit ephemeral apps to ephemeral allowed permissions.
-            if (pkg.applicationInfo.isEphemeralApp() && !bp.isEphemeral()) {
+            if (pkg.applicationInfo.isInstantApp() && !bp.isInstant()) {
                 Log.i(TAG, "Denying non-ephemeral permission " + bp.name + " for package "
                         + pkg.packageName);
                 continue;
@@ -15752,7 +15757,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // don't allow an upgrade from full to ephemeral
-            final boolean oldIsEphemeral = oldPackage.applicationInfo.isEphemeralApp();
+            final boolean oldIsEphemeral = oldPackage.applicationInfo.isInstantApp();
             if (isEphemeral && !oldIsEphemeral) {
                 // can't downgrade from full to ephemeral
                 Slog.w(TAG, "Can't replace app with ephemeral: " + pkgName);
@@ -16776,10 +16781,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     getOrCreateCompilerPackageStats(pkg));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            // Notify BackgroundDexOptService that the package has been changed.
+            // Notify BackgroundDexOptJobService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
             // BDOS will remove it from its blacklist.
-            BackgroundDexOptService.notifyPackageChanged(pkg.packageName);
+            // TODO: Layering violation
+            BackgroundDexOptJobService.notifyPackageChanged(pkg.packageName);
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
@@ -16970,7 +16976,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static boolean isEphemeral(PackageParser.Package pkg) {
-        return pkg.applicationInfo.isEphemeralApp();
+        return pkg.applicationInfo.isInstantApp();
     }
 
     private static boolean isEphemeral(PackageSetting ps) {
@@ -17407,7 +17413,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             synchronized (mPackages) {
                 if (res) {
-                    mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPs.pkg);
+                    mInstantAppRegistry.onPackageUninstalledLPw(uninstalledPs.pkg,
+                            info.removedUsers);
                 }
             }
         }
@@ -18260,6 +18267,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         succeeded = clearApplicationUserDataLIF(packageName, userId);
                     }
                     clearExternalStorageDataSync(packageName, userId, true);
+                    synchronized (mPackages) {
+                        mInstantAppRegistry.deleteInstantApplicationMetadataLPw(
+                                packageName, userId);
+                    }
                 }
                 if (succeeded) {
                     // invoke DeviceStorageMonitor's update method to clear any notifications
@@ -22165,7 +22176,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             mUserNeedsBadging.delete(userHandle);
             mSettings.removeUserLPw(userHandle);
             mPendingBroadcasts.remove(userHandle);
-            mEphemeralApplicationRegistry.onUserRemovedLPw(userHandle);
+            mInstantAppRegistry.onUserRemovedLPw(userHandle);
             removeUnusedPackagesLPw(userManager, userHandle);
         }
     }
@@ -22746,7 +22757,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public boolean isPackageEphemeral(int userId, String packageName) {
             synchronized (mPackages) {
                 PackageParser.Package p = mPackages.get(packageName);
-                return p != null ? p.applicationInfo.isEphemeralApp() : false;
+                return p != null ? p.applicationInfo.isInstantApp() : false;
             }
         }
 
@@ -22788,11 +22799,19 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public void grantEphemeralAccess(int userId, Intent intent,
                 int targetAppId, int ephemeralAppId) {
             synchronized (mPackages) {
-                mEphemeralApplicationRegistry.grantEphemeralAccessLPw(userId, intent,
+                mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                         targetAppId, ephemeralAppId);
             }
         }
 
+        @Override
+        public void pruneInstantApps() {
+            synchronized (mPackages) {
+                mInstantAppRegistry.pruneInstantAppsLPw();
+            }
+        }
+
+        @Override
         public String getSetupWizardPackageName() {
             return mSetupWizardPackage;
         }

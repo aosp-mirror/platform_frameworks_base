@@ -287,7 +287,7 @@ public final class SELinuxMMAC {
             }
         }
 
-        if (pkg.applicationInfo.isEphemeralApp())
+        if (pkg.applicationInfo.isInstantApp())
             pkg.applicationInfo.seinfo += EPHEMERAL_APP_STR;
 
         if (pkg.applicationInfo.targetSandboxVersion == 2)

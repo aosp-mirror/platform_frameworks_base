@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -3422,7 +3421,6 @@ public abstract class PackageManager {
      */
     public abstract void removePermission(String name);
 
-
     /**
      * Permission flags set when granting or revoking a permission.
      *
@@ -3698,89 +3696,86 @@ public abstract class PackageManager {
             @ApplicationInfoFlags int flags, @UserIdInt int userId);
 
     /**
-     * Gets the ephemeral applications the user recently used. Requires
-     * holding "android.permission.ACCESS_EPHEMERAL_APPS".
+     * Gets the instant applications the user recently used. Requires
+     * holding "android.permission.ACCESS_INSTANT_APPS".
      *
-     * @return The ephemeral app list.
+     * @return The instant app list.
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS)
-    public abstract List<EphemeralApplicationInfo> getEphemeralApplications();
+    @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+    public abstract @NonNull List<InstantAppInfo> getInstantApps();
 
     /**
-     * Gets the icon for an ephemeral application.
+     * Gets the icon for an instant application.
      *
      * @param packageName The app package name.
      *
      * @hide
      */
-    public abstract Drawable getEphemeralApplicationIcon(String packageName);
+    @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+    public abstract @Nullable Drawable getInstantAppIcon(String packageName);
 
     /**
-     * Gets whether the caller is an ephemeral app.
+     * Gets whether the caller is an instant app.
      *
-     * @return Whether caller is an ephemeral app.
+     * @return Whether caller is an instant app.
      *
-     * @see #setEphemeralCookie(byte[])
-     * @see #getEphemeralCookie()
-     * @see #getEphemeralCookieMaxSizeBytes()
-     *
-     * @hide
+     * @see #setInstantAppCookie(byte[])
+     * @see #getInstantAppCookie()
+     * @see #getInstantAppCookieMaxSize()
      */
-    public abstract boolean isEphemeralApplication();
+    public abstract boolean isInstantApp();
 
     /**
-     * Gets the maximum size in bytes of the cookie data an ephemeral app
+     * Gets the maximum size in bytes of the cookie data an instant app
      * can store on the device.
      *
      * @return The max cookie size in bytes.
      *
-     * @see #isEphemeralApplication()
-     * @see #setEphemeralCookie(byte[])
-     * @see #getEphemeralCookie()
-     *
-     * @hide
+     * @see #isInstantApp()
+     * @see #setInstantAppCookie(byte[])
+     * @see #getInstantAppCookie()
      */
-    public abstract int getEphemeralCookieMaxSizeBytes();
+    public abstract int getInstantAppCookieMaxSize();
 
     /**
-     * Gets the ephemeral application cookie for this app. Non
-     * ephemeral apps and apps that were ephemeral but were upgraded
-     * to non-ephemeral can still access this API. For ephemeral apps
+     * Gets the instant application cookie for this app. Non
+     * instant apps and apps that were instant but were upgraded
+     * to normal apps can still access this API. For instant apps
      * this cooke is cached for some time after uninstall while for
      * normal apps the cookie is deleted after the app is uninstalled.
      * The cookie is always present while the app is installed.
      *
      * @return The cookie.
      *
-     * @see #isEphemeralApplication()
-     * @see #setEphemeralCookie(byte[])
-     * @see #getEphemeralCookieMaxSizeBytes()
-     *
-     * @hide
+     * @see #isInstantApp()
+     * @see #setInstantAppCookie(byte[])
+     * @see #getInstantAppCookieMaxSize()
      */
-    public abstract @NonNull byte[] getEphemeralCookie();
+    public abstract @NonNull byte[] getInstantAppCookie();
 
     /**
-     * Sets the ephemeral application cookie for the calling app. Non
-     * ephemeral apps and apps that were ephemeral but were upgraded
-     * to non-ephemeral can still access this API. For ephemeral apps
+     * Sets the instant application cookie for the calling app. Non
+     * instant apps and apps that were instant but were upgraded
+     * to normal apps can still access this API. For instant apps
      * this cooke is cached for some time after uninstall while for
      * normal apps the cookie is deleted after the app is uninstalled.
      * The cookie is always present while the app is installed. The
-     * cookie size is limited by {@link #getEphemeralCookieMaxSizeBytes()}.
+     * cookie size is limited by {@link #getInstantAppCookieMaxSize()}.
+     * If the provided cookie size is over the limit this method
+     * returns <code>false</code>. Passing <code>null</code> or an empty
+     * array clears the cookie.
+     * </p>
      *
      * @param cookie The cookie data.
-     * @return True if the cookie was set.
+     * @return Whether the cookie was set.
      *
-     * @see #isEphemeralApplication()
-     * @see #getEphemeralCookieMaxSizeBytes()
-     * @see #getEphemeralCookie()
-     *
-     * @hide
+     * @see #isInstantApp()
+     * @see #getInstantAppCookieMaxSize()
+     * @see #getInstantAppCookie()
      */
-    public abstract boolean setEphemeralCookie(@NonNull  byte[] cookie);
+    public abstract boolean setInstantAppCookie(@Nullable byte[] cookie);
 
     /**
      * Get a list of shared libraries that are available on the

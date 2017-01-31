@@ -879,7 +879,7 @@ class SettingsProtoDumpUtil {
                 Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                 GlobalSettingsProto.ENABLE_EPHEMERAL_FEATURE);
         dumpSetting(s, p,
-                Settings.Global.UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS,
+                Settings.Global.UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS,
                 GlobalSettingsProto.UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS);
         dumpSetting(s, p,
                 Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,

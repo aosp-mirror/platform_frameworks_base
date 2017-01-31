@@ -24,7 +24,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -300,32 +300,32 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+    public List<InstantAppInfo> getInstantApps() {
         return null;
     }
 
     @Override
-    public Drawable getEphemeralApplicationIcon(String packageName) {
+    public Drawable getInstantAppIcon(String packageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public byte[] getEphemeralCookie() {
+    public byte[] getInstantAppCookie() {
         return new byte[0];
     }
 
     @Override
-    public boolean isEphemeralApplication() {
+    public boolean isInstantApp() {
         return false;
     }
 
     @Override
-    public int getEphemeralCookieMaxSizeBytes() {
+    public int getInstantAppCookieMaxSize() {
         return 0;
     }
 
     @Override
-    public boolean setEphemeralCookie(@NonNull byte[] cookie) {
+    public boolean setInstantAppCookie(@NonNull byte[] cookie) {
         return false;
     }
 

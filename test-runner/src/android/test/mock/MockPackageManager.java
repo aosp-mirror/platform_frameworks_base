@@ -16,9 +16,7 @@
 
 package android.test.mock;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -26,7 +24,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -342,38 +340,38 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+    public List<InstantAppInfo> getInstantApps() {
         throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public Drawable getEphemeralApplicationIcon(String packageName) {
+    public Drawable getInstantAppIcon(String packageName) {
         throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public byte[] getEphemeralCookie() {
-        return new byte[0];
+    public byte[] getInstantAppCookie() {
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public boolean isEphemeralApplication() {
-        return false;
+    public boolean isInstantApp() {
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public int getEphemeralCookieMaxSizeBytes() {
-        return 0;
+    public int getInstantAppCookieMaxSize() {
+        throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public boolean setEphemeralCookie(@NonNull byte[] cookie) {
-        return false;
+    public boolean setInstantAppCookie(@NonNull byte[] cookie) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -309,7 +309,7 @@ public class SettingsTest {
                     Settings.Global.TRUSTED_SOUND,
                     Settings.Global.TZINFO_UPDATE_CONTENT_URL,
                     Settings.Global.TZINFO_UPDATE_METADATA_URL,
-                    Settings.Global.UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS,
+                    Settings.Global.UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS,
                     Settings.Global.UNLOCK_SOUND,
                     Settings.Global.USE_GOOGLE_MAIL,
                     Settings.Global.VT_IMS_ENABLED,

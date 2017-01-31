@@ -18651,7 +18651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     List<BroadcastFilter> registeredReceiversForUser =
                             mReceiverResolver.queryIntent(intent,
                                     resolvedType, false, false /*visibleToEphemeral*/,
-                                    false /*isEphemeral*/, users[i]);
+                                    false /*isInstant*/, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
                     } else if (registeredReceiversForUser != null) {
@@ -18661,7 +18661,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(intent,
                         resolvedType, false, false /*visibleToEphemeral*/,
-                        false /*isEphemeral*/, userId);
+                        false /*isInstant*/, userId);
             }
         }
 
@@ -21553,7 +21553,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Keeping this process, update its uid.
                     final UidRecord uidRec = app.uidRecord;
                     if (uidRec != null) {
-                        uidRec.ephemeral = app.info.isEphemeralApp();
+                        uidRec.ephemeral = app.info.isInstantApp();
                         if (uidRec.curProcState > app.curProcState) {
                             uidRec.curProcState = app.curProcState;
                         }

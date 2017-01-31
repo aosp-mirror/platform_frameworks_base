@@ -3081,7 +3081,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private static boolean isEphemeralApp(@Nullable ApplicationInfo ai) {
-        return (ai != null) && ai.isEphemeralApp();
+        return (ai != null) && ai.isInstantApp();
     }
 
     private static boolean isInstalled(@Nullable PackageInfo pi) {

@@ -1409,7 +1409,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
-    public boolean isEphemeralApp() {
+    public boolean isInstantApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0;
     }
 
