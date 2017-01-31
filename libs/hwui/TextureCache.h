@@ -125,6 +125,7 @@ private:
     bool canMakeTextureFromBitmap(Bitmap* bitmap);
 
     Texture* getCachedTexture(Bitmap* bitmap);
+    Texture* createTexture(Bitmap* bitmap);
 
     LruCache<uint32_t, Texture*> mCache;
 
@@ -137,6 +138,7 @@ private:
     bool mDebugEnabled;
 
     std::vector<uint32_t> mGarbage;
+    std::unordered_map<uint32_t, std::unique_ptr<Texture>> mHardwareTextures;
     mutable Mutex mLock;
 }; // class TextureCache
 
