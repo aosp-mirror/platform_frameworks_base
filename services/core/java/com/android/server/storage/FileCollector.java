@@ -26,6 +26,7 @@ import android.util.ArrayMap;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 /**
  * FileCollector walks over a directory and categorizes storage usage by their type.
@@ -43,9 +44,8 @@ public class FileCollector {
             AUDIO })
     private @interface FileTypes {}
 
-    // NOTE: If you update these extensions, you'll also want to update
-    // matchgen.py over in installd which is used for non-quota stats.
-    private static final ArrayMap<String, Integer> EXTENSION_MAP = new ArrayMap<>();
+
+    private static final Map<String, Integer> EXTENSION_MAP = new ArrayMap<String, Integer>();
     static {
         // Audio
         EXTENSION_MAP.put("aac", AUDIO);
@@ -142,36 +142,6 @@ public class FileCollector {
         EXTENSION_MAP.put("xbm", IMAGES);
         EXTENSION_MAP.put("xpm", IMAGES);
         EXTENSION_MAP.put("xwd", IMAGES);
-    }
-
-    private static File mkdir(File parent, String name) {
-        final File file = new File(parent, name);
-        file.mkdir();
-        return file;
-    }
-
-    /**
-     * Update the mapping used by sdcardfs to map from file extensions to GIDs
-     * used for statistics purposes.
-     */
-    public static void updateKernelExtensions() {
-        final File root = new File("/config/sdcardfs/extensions/");
-        if (!root.exists()) return;
-
-        final File audio = mkdir(root, Integer.toString(android.os.Process.MEDIA_AUDIO_GID));
-        final File video = mkdir(root, Integer.toString(android.os.Process.MEDIA_VIDEO_GID));
-        final File image = mkdir(root, Integer.toString(android.os.Process.MEDIA_IMAGE_GID));
-
-        for (int i = 0; i < EXTENSION_MAP.size(); i++) {
-            final String ext = EXTENSION_MAP.keyAt(i);
-            final int type = EXTENSION_MAP.valueAt(i);
-
-            switch (type) {
-                case AUDIO: mkdir(audio, ext); break;
-                case VIDEO: mkdir(video, ext); break;
-                case IMAGES: mkdir(image, ext); break;
-            }
-        }
     }
 
     /**
