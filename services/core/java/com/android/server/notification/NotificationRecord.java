@@ -122,6 +122,7 @@ public final class NotificationRecord {
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
     private boolean mShowBadge;
     private LogMaker mLogMaker;
+    private Light mLight;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -140,6 +141,7 @@ public final class NotificationRecord {
         mVibration = calculateVibration();
         mAttributes = calculateAttributes();
         mImportance = calculateImportance();
+        mLight = calculateLights();
     }
 
     private boolean isPreChannelsNotification() {
@@ -173,6 +175,34 @@ public final class NotificationRecord {
             }
         }
         return sound;
+    }
+
+    private Light calculateLights() {
+        int defaultLightColor = mContext.getResources().getColor(
+                com.android.internal.R.color.config_defaultNotificationColor);
+        int defaultLightOn = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOn);
+        int defaultLightOff = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOff);
+
+        Light light = getChannel().shouldShowLights() ? new Light(defaultLightColor,
+                defaultLightOn, defaultLightOff) : null;
+        if (mPreChannelsNotification
+                && (getChannel().getUserLockedFields()
+                & NotificationChannel.USER_LOCKED_LIGHTS) == 0) {
+            final Notification notification = sbn.getNotification();
+            if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
+                light = new Light(notification.ledARGB, notification.ledOnMS,
+                        notification.ledOffMS);
+                if ((notification.defaults & Notification.DEFAULT_LIGHTS) != 0) {
+                    light = new Light(defaultLightColor, defaultLightOn,
+                            defaultLightOff);
+                }
+            } else {
+                light = null;
+            }
+        }
+        return light;
     }
 
     private long[] calculateVibration() {
@@ -239,6 +269,8 @@ public final class NotificationRecord {
             n.priority = Notification.PRIORITY_MAX;
         }
 
+        n.priority = NotificationManagerService.clamp(n.priority, Notification.PRIORITY_MIN,
+                Notification.PRIORITY_MAX);
         switch (n.priority) {
             case Notification.PRIORITY_MIN:
                 requestedImportance = IMPORTANCE_MIN;
@@ -322,15 +354,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "  tickerText=" + notification.tickerText);
         pw.println(prefix + "  contentView=" + notification.contentView);
-        pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
-                notification.defaults, notification.flags));
-        pw.println(prefix + "  sound=" + notification.sound);
-        pw.println(prefix + "  audioStreamType=" + notification.audioStreamType);
-        pw.println(prefix + "  audioAttributes=" + notification.audioAttributes);
         pw.println(prefix + String.format("  color=0x%08x", notification.color));
-        pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
-        pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
-                notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
         pw.println(prefix + "  timeout=" + TimeUtils.formatForLogging(notification.getTimeout()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "  actions={");
@@ -398,12 +422,22 @@ public final class NotificationRecord {
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
-        pw.println(prefix + "  notificationChannel= " + notification.getChannel());
+        if (mPreChannelsNotification) {
+            pw.println(prefix + String.format("  defaults=0x%08x flags=0x%08x",
+                    notification.defaults, notification.flags));
+            pw.println(prefix + "  n.sound=" + notification.sound);
+            pw.println(prefix + "  n.audioStreamType=" + notification.audioStreamType);
+            pw.println(prefix + "  n.audioAttributes=" + notification.audioAttributes);
+            pw.println(prefix + String.format("  led=0x%08x onMs=%d offMs=%d",
+                    notification.ledARGB, notification.ledOnMS, notification.ledOffMS));
+            pw.println(prefix + "  vibrate=" + Arrays.toString(notification.vibrate));
+        }
         pw.println(prefix + "  mSound= " + mSound);
         pw.println(prefix + "  mVibration= " + mVibration);
         pw.println(prefix + "  mAttributes= " + mAttributes);
+        pw.println(prefix + "  mLight= " + mLight);
         pw.println(prefix + "  mShowBadge=" + mShowBadge);
-        pw.println(prefix + "  channel=" + getChannel());
+        pw.println(prefix + "  effectiveNotificationChannel=" + getChannel());
         if (getPeopleOverride() != null) {
             pw.println(prefix + "  overridePeople= " + TextUtils.join(",", getPeopleOverride()));
         }
@@ -682,6 +716,10 @@ public final class NotificationRecord {
         return mShowBadge;
     }
 
+    public Light getLight() {
+        return mLight;
+    }
+
     public Uri getSound() {
         return mSound;
     }
@@ -729,5 +767,48 @@ public final class NotificationRecord {
 
     public LogMaker getLogMaker() {
         return getLogMaker(System.currentTimeMillis());
+    }
+
+    @VisibleForTesting
+    static final class Light {
+        public final int color;
+        public final int onMs;
+        public final int offMs;
+
+        public Light(int color, int onMs, int offMs) {
+            this.color = color;
+            this.onMs = onMs;
+            this.offMs = offMs;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Light light = (Light) o;
+
+            if (color != light.color) return false;
+            if (onMs != light.onMs) return false;
+            return offMs == light.offMs;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = color;
+            result = 31 * result + onMs;
+            result = 31 * result + offMs;
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Light{" +
+                    "color=" + color +
+                    ", onMs=" + onMs +
+                    ", offMs=" + offMs +
+                    '}';
+        }
     }
 }

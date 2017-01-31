@@ -130,7 +130,7 @@ public class StatusBarNotification implements Parcelable {
         }
         return user.getIdentifier() + "|" + pkg + "|" +
                 (group == null
-                        ? "p:" + notification.priority
+                        ? "c:" + notification.getChannel()
                         : "g:" + group);
     }
 

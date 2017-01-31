@@ -261,10 +261,6 @@ public class NotificationManagerService extends SystemService {
 
     private Light mNotificationLight;
     Light mAttentionLight;
-    private int mDefaultNotificationColor;
-    private int mDefaultNotificationLedOn;
-
-    private int mDefaultNotificationLedOff;
 
     private long[] mFallbackVibrationPattern;
     private boolean mUseAttentionLight;
@@ -1118,13 +1114,6 @@ public class NotificationManagerService extends SystemService {
 
         mNotificationLight = lightsManager.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
         mAttentionLight = lightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
-
-        mDefaultNotificationColor = resources.getColor(
-                R.color.config_defaultNotificationColor);
-        mDefaultNotificationLedOn = resources.getInteger(
-                R.integer.config_defaultNotificationLedOn);
-        mDefaultNotificationLedOff = resources.getInteger(
-                R.integer.config_defaultNotificationLedOff);
 
         mFallbackVibrationPattern = getLongArray(resources,
                 R.array.config_notificationFallbackVibePattern,
@@ -3068,10 +3057,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // Sanitize inputs
-        notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
-                Notification.PRIORITY_MAX);
-
         // setup local book-keeping
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
@@ -3429,7 +3414,7 @@ public class NotificationManagerService extends SystemService {
         // light
         // release the light
         boolean wasShowLights = mLights.remove(key);
-        if (shouldShowLights(record) && aboveThreshold
+        if (record.getLight() != null && aboveThreshold
                 && ((record.getSuppressedVisualEffects()
                 & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) == 0)) {
             mLights.add(key);
@@ -3454,11 +3439,6 @@ public class NotificationManagerService extends SystemService {
                         buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
             }
         }
-    }
-
-    private boolean shouldShowLights(final NotificationRecord record) {
-        return record.getChannel().shouldShowLights()
-                || (record.getNotification().flags & Notification.FLAG_SHOW_LIGHTS) != 0;
     }
 
     private boolean playSound(final NotificationRecord record, Uri soundUri) {
@@ -4237,20 +4217,11 @@ public class NotificationManagerService extends SystemService {
         if (ledNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
         } else {
-            final Notification ledno = ledNotification.sbn.getNotification();
-            int ledARGB = ledno.ledARGB;
-            int ledOnMS = ledno.ledOnMS;
-            int ledOffMS = ledno.ledOffMS;
-            if ((ledno.defaults & Notification.DEFAULT_LIGHTS) != 0
-                    || (ledno.flags & Notification.FLAG_SHOW_LIGHTS) == 0) {
-                ledARGB = mDefaultNotificationColor;
-                ledOnMS = mDefaultNotificationLedOn;
-                ledOffMS = mDefaultNotificationLedOff;
-            }
-            if (mNotificationPulseEnabled) {
+            NotificationRecord.Light light = ledNotification.getLight();
+            if (light != null && mNotificationPulseEnabled) {
                 // pulse repeatedly
-                mNotificationLight.setFlashing(ledARGB, Light.LIGHT_FLASH_TIMED,
-                        ledOnMS, ledOffMS);
+                mNotificationLight.setFlashing(light.color, Light.LIGHT_FLASH_TIMED,
+                        light.onMs, light.offMs);
             }
         }
     }

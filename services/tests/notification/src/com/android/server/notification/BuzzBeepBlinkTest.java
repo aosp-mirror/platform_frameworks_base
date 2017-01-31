@@ -333,33 +333,12 @@ public class BuzzBeepBlinkTest {
     }
 
     @Test
-    public void testLightsFromChannel() throws Exception {
-        NotificationRecord r = getQuietNotification();
-        r.setImportance(NotificationManager.IMPORTANCE_DEFAULT, "for testing");
-        r.getChannel().setLights(true);
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyLights();
-    }
-
-    @Test
     public void testBeepInsistently() throws Exception {
         NotificationRecord r = getInsistentBeepyNotification();
 
         mService.buzzBeepBlinkLocked(r);
 
         verifyBeep();
-    }
-
-    @Test
-    public void testChannelNoOverwriteCustomLights() throws Exception {
-        NotificationRecord r = getCustomLightsNotification();
-        r.getChannel().setLights(true);
-
-        mService.buzzBeepBlinkLocked(r);
-
-        verifyCustomLights();
     }
 
     @Test
@@ -562,7 +541,7 @@ public class BuzzBeepBlinkTest {
     }
 
     @Test
-    public void testVibratTwice() throws Exception {
+    public void testVibrateTwice() throws Exception {
         NotificationRecord r = getBuzzyNotification();
 
         // set up internal state
