@@ -1984,12 +1984,12 @@ public class Editor {
                 if (mRestartActionModeOnNextRefresh) {
                     // To avoid distraction, newly start action mode only when selection action
                     // mode is being restarted.
-                    startSelectionActionMode(getTextClassifierInfo(true));
+                    startSelectionActionMode(null);
                 }
             } else if (selectionController == null || !selectionController.isActive()) {
                 // Insertion action mode is active. Avoid dismissing the selection.
                 stopTextActionModeWithPreservingSelection();
-                startSelectionActionMode(getTextClassifierInfo(true));
+                startSelectionActionMode(null);
             } else {
                 mTextActionMode.invalidateContentRect();
             }
@@ -5496,8 +5496,9 @@ public class Editor {
                     resetDragAcceleratorState();
 
                     if (mTextView.hasSelection()) {
-                        // TODO: Do not invoke the text assistant if this was a drag selection.
-                        startSelectionActionMode(getTextClassifierInfo(true));
+                        // Do not invoke the text assistant if this was a drag selection.
+                        startSelectionActionMode(
+                                mHaventMovedEnoughToStartDrag ? getTextClassifierInfo(true) : null);
                     }
                     break;
             }
