@@ -173,7 +173,7 @@
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ ਚੁਣੋ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਨਮੂਨਾ ਦਰ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ ਚੁਣੋ:\nਨਮੂਨਾ ਗਤੀ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ ਚੁਣੋ:\nਸੈਂਪਲ ਰੇਟ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ਪ੍ਰਤੀ ਨਮੂਨਾ ਬਲੂਟੁੱਥ ਔਡੀਓ ਬਿਟਾਂ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ ਚੁਣੋ:\nਬਿਟਾਂ ਪ੍ਰਤੀ ਨਮੂਨਾ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਚੈਨਲ ਮੋਡ"</string>

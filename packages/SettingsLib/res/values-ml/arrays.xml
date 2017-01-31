@@ -58,20 +58,14 @@
     <item msgid="3878793616631049349">"DRM ഉള്ളടക്കത്തിനുമാത്രമായി HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
     <item msgid="45075631231212732">"എല്ലായ്‌പ്പോഴും HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
-    <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="4260844283202960798">"aptX"</item>
-    <item msgid="500463122137421129">"aptX HD"</item>
-    <item msgid="2301339338870319651">"LDAC"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
-    <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="1190434429082395888">"aptX"</item>
-    <item msgid="3093550793512117000">"aptX HD"</item>
-    <item msgid="508106435710925399">"LDAC"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_titles:2 (686685526567131661) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (8910200421843557332) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (8434403964359457768) -->
+    <!-- no translation found for bluetooth_a2dp_codec_titles:5 (6751080638867012696) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:2 (6839647709301342559) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (2279916056363477395) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (6641171061200063516) -->
+    <!-- no translation found for bluetooth_a2dp_codec_summaries:5 (7950781694447359344) -->
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -108,16 +102,10 @@
     <item msgid="8900559293912978337">"മോണോ"</item>
     <item msgid="8883739882299884241">"സ്റ്റീരിയോ"</item>
   </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="3411577996960199959">"ഓഡിയോ നിലവാരമുയർത്താൻ ഒപ്റ്റിമൈസ് ചെയ്യുക (990kbps/909kbps)"</item>
-    <item msgid="2921767058740704969">"സന്തുലിതമായ ‌ഓഡിയോ/കണക്ഷൻ നിലവാരം (660kbps/606kbps)"</item>
-    <item msgid="3682554248829489641">"കണക്ഷൻ നിലവാരമുയർത്താൻ ഒപ്റ്റിമൈസ് ചെയ്യുക (330kbps/303kbps)"</item>
-  </string-array>
-  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="7668834469173465015">"ശബ്ദനിലവാരമുയർത്താൻ ഒപ്റ്റിമൈസ് ചെയ്യുക"</item>
-    <item msgid="4327143584633311908">"സന്തുലിതമായ ‌ഓഡിയോ/കണക്ഷൻ നിലവാരം"</item>
-    <item msgid="6155648878105378550">"കണക്ഷൻ നിലവാരമുയർത്താൻ ഒപ്റ്റിമൈസ് ചെയ്യുക"</item>
-  </string-array>
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:0 (7158319962230727476) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:2 (8860982705384396512) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:0 (6398189564246596868) -->
+    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:2 (4681409244565426925) -->
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ഓഫ്"</item>
     <item msgid="1593289376502312923">"64K"</item>

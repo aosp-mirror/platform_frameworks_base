@@ -178,8 +178,8 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Выбраць аўдыякодэк Bluetooth:\nбіты на сэмпл"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Канальны рэжым Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Выбраць аўдыякодэк Bluetooth:\nканальны рэжым"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аўдыякодэк Bluetooth Audio LDAC: якасць прайгравання"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Выбраць аўдыякодэк Bluetooth Audio LDAC:\nякасць прайгравання"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аўдыякодэк Bluetooth LDAC: якасць прайгравання"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Выбраць аўдыякодэк Bluetooth LDAC:\nякасць прайгравання"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Перадача плынню: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Паказаць опцыі сертыфікацыі бесправаднога дысплея"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Падвыс. узровень дэтал-цыі журнала Wi‑Fi у залежн. ад SSID RSSI у Wi‑Fi Picker"</string>
