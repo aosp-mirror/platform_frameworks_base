@@ -13,127 +13,105 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.server.autofill;
 
-import static com.android.server.autofill.Helper.DEBUG;
-
-import android.app.Activity;
 import android.content.Context;
-import android.util.Slog;
-import android.view.View;
-import android.view.WindowManager;
+import android.graphics.Color;
 import android.view.autofill.Dataset;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Filter.FilterListener;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * View responsible for drawing the {@link Dataset} options that can be used to auto-fill an
- * {@link Activity}.
+ * View for dataset picker.
+ *
+ * <p>A fill session starts when a View is clicked and FillResponse is supplied.
+ * <p>A fill session ends when 1) the user takes action in the UI, 2) another View is clicked, or
+ * 3) the View is detached.
  */
-final class DatasetPicker extends LinearLayout {
-
+final class DatasetPicker extends ListView implements OnItemClickListener {
     private static final String TAG = "DatasetPicker";
 
-    // TODO(b/33197203): use / calculate proper values instead of hardcoding them
-    private static final LayoutParams NAME_PARAMS = new LayoutParams(400,
-            WindowManager.LayoutParams.WRAP_CONTENT);
-    private static final LayoutParams DROP_DOWN_PARAMS = new LayoutParams(100,
-            WindowManager.LayoutParams.WRAP_CONTENT);
+    interface Listener {
+        void onDatasetPicked(Dataset dataset);
+    }
 
-    private final Line[] mLines;
-
-    private boolean mExpanded;
     private final Listener mListener;
 
-    public DatasetPicker(Context context, Listener listener, List<Dataset> datasets) {
+    DatasetPicker(Context context, List<Dataset> datasets, Listener listener) {
         super(context);
-
         mListener = listener;
 
-        // TODO(b/33197203): use XML layout
-        setOrientation(LinearLayout.VERTICAL);
+        final List<ViewItem> items = new ArrayList<>(datasets.size());
+        for (Dataset dataset : datasets) {
+            items.add(new ViewItem(dataset));
+        }
 
-        final int size = datasets.size();
-        mLines = new Line[size];
-
-        for (int i = 0; i < size; i++) {
-            final boolean first = i == 0;
-            final Line line = new Line(context, datasets.get(i), first);
-            mLines[i] = line;
-            if (first) {
-                addView(line);
+        final ArrayAdapter<ViewItem> adapter = new ArrayAdapter<ViewItem>(
+            context,
+            android.R.layout.simple_list_item_1,
+            android.R.id.text1,
+            items) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                final TextView textView = (TextView) super.getView(position, convertView, parent);
+                textView.setMinHeight(
+                    getDimen(com.android.internal.R.dimen.autofill_fill_item_height));
+                return textView;
             }
-        }
-        mExpanded = false;
+        };
+        setAdapter(adapter);
+        setBackgroundColor(Color.WHITE);
+        setDivider(null);
+        setElevation(getDimen(com.android.internal.R.dimen.autofill_fill_elevation));
+        setOnItemClickListener(this);
     }
 
-    private void togleDropDown() {
-        if (mExpanded) {
-            hideDropDown();
-            return;
-        }
-        for (int i = 1; i < mLines.length; i++) {
-            addView(mLines[i]);
-        }
-        mExpanded = true;
-    }
-
-    private void hideDropDown() {
-        if (!mExpanded) return;
-        // TODO(b/33197203): invert order to be less janky?
-        for (int i = 1; i < mLines.length; i++) {
-            removeView(mLines[i]);
-        }
-        mExpanded = false;
-    }
-
-    private class Line extends LinearLayout {
-        final TextView name;
-        final ImageView dropDown;
-
-        private Line(Context context, Dataset dataset, boolean first) {
-            super(context);
-
-            final View.OnClickListener l = new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    if (DEBUG) Slog.d(TAG, "dataset picked: " + dataset.getName());
-                    mListener.onDatasetPicked(dataset);
-
-                }
-            };
-
-            // TODO(b/33197203): use XML layout
-            setOrientation(LinearLayout.HORIZONTAL);
-
-            name = new TextView(context);
-            name.setLayoutParams(NAME_PARAMS);
-            name.setText(dataset.getName());
-            name.setOnClickListener(l);
-
-            dropDown = new ImageView(context);
-            dropDown.setLayoutParams(DROP_DOWN_PARAMS);
-            // TODO(b/33197203): use proper icon
-            dropDown.setImageResource(com.android.internal.R.drawable.arrow_down_float);
-            dropDown.setOnClickListener((v) -> {
-                togleDropDown();
-            });
-
-            if (!first) {
-                dropDown.setVisibility(View.INVISIBLE);
+    public void update(String prefix) {
+        final ArrayAdapter<ViewItem> adapter = (ArrayAdapter) getAdapter();
+        adapter.getFilter().filter(prefix, new FilterListener() {
+            @Override
+            public void onFilterComplete(int count) {
+                DatasetPicker.this.requestLayout();
             }
+        });
+    }
 
-            addView(name);
-            addView(dropDown);
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+        if (mListener != null) {
+            final ViewItem vi = (ViewItem) adapterView.getItemAtPosition(pos);
+            mListener.onDatasetPicked(vi.getData());
         }
     }
 
-    static interface Listener {
-        void onDatasetPicked(Dataset dataset);
+    private int getDimen(int resId) {
+        return getContext().getResources().getDimensionPixelSize(resId);
+    }
+
+    private static class ViewItem {
+        private final Dataset mData;
+
+        ViewItem(Dataset data) {
+            mData = data;
+        }
+
+        public Dataset getData() {
+            return mData;
+        }
+
+        @Override
+        public String toString() {
+            // used by ArrayAdapter
+            return mData.getName().toString();
+        }
     }
 }
