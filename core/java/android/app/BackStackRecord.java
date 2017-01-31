@@ -220,6 +220,8 @@ final class BackStackRecord extends FragmentTransaction implements
     int mIndex = -1;
     boolean mAllowOptimization;
 
+    ArrayList<Runnable> mCommitRunnables;
+
     int mBreadCrumbTitleRes;
     CharSequence mBreadCrumbTitleText;
     int mBreadCrumbShortTitleRes;
@@ -617,6 +619,28 @@ final class BackStackRecord extends FragmentTransaction implements
                             + op.fragment + " to " + op.fragment.mBackStackNesting);
                 }
             }
+        }
+    }
+
+    @Override
+    public FragmentTransaction postOnCommit(Runnable runnable) {
+        if (runnable == null) {
+            throw new IllegalArgumentException("runnable cannot be null");
+        }
+        disallowAddToBackStack();
+        if (mCommitRunnables == null) {
+            mCommitRunnables = new ArrayList<>();
+        }
+        mCommitRunnables.add(runnable);
+        return this;
+    }
+
+    public void runOnCommitRunnables() {
+        if (mCommitRunnables != null) {
+            for (int i = 0, N = mCommitRunnables.size(); i < N; i++) {
+                mCommitRunnables.get(i).run();
+            }
+            mCommitRunnables = null;
         }
     }
 
