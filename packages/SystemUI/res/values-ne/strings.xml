@@ -337,16 +337,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"तेर्सो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ठाडो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"आफू अनुकूल विभाजन गर्नुहोस्"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"विभाजित-स्क्रिनलाई शीर्ष स्थानमा राख्नुहोस्‌"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"विभाजित-स्क्रिनलाई बायाँतर्फ राख्नुहोस्‌"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"विभाजित-स्क्रिनलाई दायाँतर्फ राख्नुहोस्‌"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज भयो"</string>
@@ -427,20 +420,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तपाईंको यन्त्र <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> द्वारा व्यवस्थापन गरिएको छ।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्न <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> को प्रयोग गर्दछ।"</string>
-    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोग, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थान सम्बन्धी जानकारीको निगरानी तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोग, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
-    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"तपाईँको प्रशासकले तपाईँको यन्त्रमा ट्राफिकको निगरानी गर्ने नेटवर्कको लगिङलाई सक्रिय पार्नुभएको छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"तपाईँको प्रशासकले तपाईँको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्कको लगिङलाई सक्रिय पार्नुभएको छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईँका यन्त्र र  नेटवर्क गतिविधि लगायत इमेल, अनुप्रयोग र वेबसाइटहरू अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ।\n\nतपाईँको प्रशासकले तपाईँको इमेल, अनुप्रयोग र वेबसाइट सहित नेटवर्कमा तपाईँको गतिविधिको निगरानी गर्न सक्नुहुन्छ। \n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।\n\n तपाईँ एउटा VPN मा जडित हुनुहुन्छ। यस VPN ले नेटवर्कमा तपाईँको गतिविधिको निगरानी गर्न सक्छ।"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ।\n\nतपाईँको प्रशासकले तपाईँको इमेल, अनुप्रयोग र वेबसाइट सहित नेटवर्कमा तपाईँको गतिविधिको अनुगमन गर्न सक्नुहुन्छ। \n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।\n\n तपाईँ एउटा VPN मा जडित हुनुहुन्छ। यस VPN ले नेटवर्कमा तपाईँको गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_app_work" msgid="7777228449969022305">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ। तपाईँको कार्य प्रोफाइल <xliff:g id="APPLICATION">%2$s</xliff:g> मा जोडिएको छ। यो अनुप्रयोगले तपाईँको इमेल, अन्य अनुप्रयोग र वेबसाइटहरू सहित नेटवर्कमा तपाईँको गतिविधिको निगरानी गर्न सक्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ। तपाईँको कार्य प्रोफाइल <xliff:g id="APPLICATION">%2$s</xliff:g> मा जोडिएको छ। यो अनुप्रयोगले तपाईँको इमेल, अन्य अनुप्रयोग र वेबसाइटहरू सहित नेटवर्कमा तपाईँको गतिविधिको अनुगमन गर्न सक्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
@@ -533,7 +526,24 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"आवाज निकाल्ने र स्क्रिनमा पपअप देखाउने"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"थप सेटिङहरू"</string>
     <string name="notification_done" msgid="5279426047273930175">"सम्पन्‍न भयो"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचनाका लागि नियन्त्रणहरू"</string>
+    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
+    <skip />
+    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
+    <skip />
+    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
+    <skip />
+    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
+    <skip />
+    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
+    <skip />
+    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
+    <skip />
+    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
+    <skip />
+    <!-- no translation found for snooze_undo (6074877317002985129) -->
+    <skip />
+    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
+    <skip />
     <string name="battery_panel_title" msgid="7944156115535366613">"ब्याट्री उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज गर्ने समयमा ब्याट्री सेभर उपलब्ध छैन"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ब्याट्री सेभर"</string>
@@ -595,25 +605,33 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"सक्रिय गर्नुहोस्"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"निष्क्रिय"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नेभिगेशन पट्टी"</string>
-    <string name="start" msgid="6873794757232879664">"सुरु गर्नुहोस्"</string>
-    <string name="center" msgid="4327473927066010960">"केन्द्र"</string>
-    <string name="end" msgid="125797972524818282">"अन्त्य गर्नुहोस्"</string>
-    <string name="space" msgid="804232271282109749">"स्पेसर"</string>
+    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
+    <skip />
+    <!-- no translation found for nav_bar_left (731491280511316123) -->
+    <skip />
+    <!-- no translation found for nav_bar_right (2523774879720231974) -->
+    <skip />
+    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
+    <skip />
+    <!-- no translation found for nav_bar_default (8587114043070993007) -->
+    <skip />
+    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
+    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
+    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
+    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
+    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
+    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
+    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
+    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
     <string name="menu_ime" msgid="4943221416525250684">"मेनु / किबोर्ड स्विचर"</string>
-    <string name="select_button" msgid="1597989540662710653">"थप्नका लागि बटन चयन गर्नुहोस्"</string>
-    <string name="add_button" msgid="4134946063432258161">"बटन थप्नुहोस्"</string>
     <string name="save" msgid="2311877285724540644">"सुरक्षित गर्नुहोस्"</string>
     <string name="reset" msgid="2448168080964209908">"पुनःसेट गर्नु"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"गृह बटन फेला परेन"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"यस यन्त्रलाई नेभिगेट गर्न सक्षम हुन गृह बटन आवश्यक छ। कृपया सुरक्षित गर्नु पूर्व गृह बटन थप्नुहोस्।"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"बटनको चौडाइ समायोजन गर्नुहोस्"</string>
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"क्लिपबोर्डले वस्तुहरूलाई क्लिपबोर्डमा प्रत्यक्ष तान्न अनुमति दिन्छ। प्रस्तुत गर्दा वस्तुहरूलाई क्लिपबोर्डबाट प्रत्यक्ष रूपमा बाहिर तान्न पनि सकिन्छ।"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलनको नेभिगेशन बटन"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Keycode बटनहरूले किबोर्ड कुञ्जीहरूलाई नेभिगेशन पट्टीमा थपिने अनुमति दिन्छ। थिच्दा तिनीहरूले चयन गरिएको किबोर्ड कुञ्जी अनुकरण गर्छन्। सुरुमा बटनका लागि कुञ्जी चयन गर्नुपर्छ, त्यसपछि बटनमा छवि देखिनुपर्छ।"</string>
-    <string name="select_keycode" msgid="7413765103381924584">"किबोर्ड बटन चयन गर्नुहोस्"</string>
-    <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
+    <!-- no translation found for icon (8732339849035837289) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइलहरू थप्न तान्नुहोस्"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाउनका लागि यहाँ तान्नुहोस्"</string>
     <string name="qs_edit" msgid="2232596095725105230">"सम्पादन गर्नुहोस्"</string>
@@ -668,4 +686,24 @@
     <string name="high_temp_title" msgid="4589508026407318374">"फोन तातो भइरहेको छ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्नेछ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
+    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <skip />
+    <!-- no translation found for lockscreen_right (6093496261656102989) -->
+    <skip />
+    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
+    <skip />
+    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
+    <skip />
+    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
+    <skip />
+    <!-- no translation found for notification_channel_security (7345516133431326347) -->
+    <skip />
+    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
+    <skip />
+    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
+    <skip />
 </resources>

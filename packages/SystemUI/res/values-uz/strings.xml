@@ -339,8 +339,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikal yo‘nalishda bo‘lish"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Boshqa usulda bo‘lish"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Yopish"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Ochish"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Ekranni tepaga qadash"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ekranni chap tomonga qadash"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ekranni o‘ng tomonga qadash"</string>
@@ -530,7 +528,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Ovoz va qalqib chiquvchi oyna"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Boshqa sozlamalar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tayyor"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> bildirishnomalarini boshqarish"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"bildirishnomalarni boshqarish elementlari"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"bildirishnomalarni kechiktirish parametrlari"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 daqiqa"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 daqiqa"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 soat"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Kechiktirilmasin"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"BEKOR QILISH"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> kechiktirildi"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batareya sarfi"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Quvvat tejash rejimidan quvvatlash vaqtida foydalanib bo‘lmaydi"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Quvvat tejash rejimi"</string>
@@ -592,25 +598,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Yoniq"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"O‘chiq"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
-    <string name="start" msgid="6873794757232879664">"Boshlash"</string>
-    <string name="center" msgid="4327473927066010960">"Markazda"</string>
-    <string name="end" msgid="125797972524818282">"Oxiri"</string>
-    <string name="space" msgid="804232271282109749">"Ajratuvchi"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Sxema"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Chap"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"O‘ng"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tugma turi"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(standart)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Vaqtinchalik xotira"</item>
+    <item msgid="5742013440802239414">"Tugma kodi"</item>
+    <item msgid="8748101184830239843">"Menyu yoki klaviatura"</item>
+    <item msgid="8175437057325747277">"Hech qaysi"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Bo‘lingan (standart)"</item>
+    <item msgid="6210279084134579668">"O‘rtaga tekislangan"</item>
+    <item msgid="89143234390889289">"Chapga tekislangan"</item>
+    <item msgid="7715533883382410603">"O‘ngga tekislangan"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Menyu yoki klaviatura"</string>
-    <string name="select_button" msgid="1597989540662710653">"Qo‘shish uchun tugmani tanlang"</string>
-    <string name="add_button" msgid="4134946063432258161">"Tugma qo‘shish"</string>
     <string name="save" msgid="2311877285724540644">"Saqlash"</string>
     <string name="reset" msgid="2448168080964209908">"Asliga qaytarish"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"“Bosh ekran” tugmasi topilmadi"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Qurilma bo‘ylab o‘tish uchun “Bosh ekran” tugmasi kerak. Saqlashdan oldin mazkur tugmani qo‘shing."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Tugma enini moslashtiring"</string>
     <string name="clipboard" msgid="1313879395099896312">"Vaqtinchalik xotira"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"“Vaqtinchalik xotira” tugmasi yordamida elementlarni vaqtinchalik xotiraga olish va undan chiqarish qulay."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Maxsus navigatsiya tugmasi"</string>
     <string name="keycode" msgid="7335281375728356499">"Tugma kodi"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Tugmalar kodi yordamida klaviatura tugmalarini navigatsiya paneliga qo‘shish mumkin. Ular bosilganda tanlangan klaviatura tugmasining bosilishini taqlid qiladi. Tugmalar kodi uchun klaviatura tugmasi va rasm tanlanishi kerak."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Klaviatura tugmasini tanlang"</string>
-    <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
+    <string name="icon" msgid="8732339849035837289">"Nishoncha"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kerakli elementni tortib qo‘shing"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
@@ -665,4 +677,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qizib ketdi"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Chap"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"O‘ng"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Yorliqni sozlash"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Yorliq"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Parol uchun bildirgi"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skrinshotlar"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Xavfsizlik"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Foydalanuvchi holati"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Xotira"</string>
 </resources>

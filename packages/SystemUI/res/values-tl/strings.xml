@@ -321,12 +321,9 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Babala sa <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Work mode"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Night Light"</string>
-    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
-    <skip />
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Naka-disable ang NFC"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Naka-enable ang NFC"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Walang mga kamakailang item"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Na-clear mo ang lahat"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Impormasyon ng Application"</string>
@@ -340,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Custom"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"I-dismiss"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Bukas"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"I-split ang screen pataas"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"I-split ang screen pakaliwa"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"I-split ang screen pakanan"</string>
@@ -425,24 +420,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"Idiskonekta ang VPN"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"Pinamamahalaan ng <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ang iyong device."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"Ginagamit ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> upang pamahalaan ang iyong device."</string>
-    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
-    <skip />
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"Masusubaybayan at mapamamahalaan ng admin mo ang setting, pangkorporasyong access, app, data sa device at impormasyon tungkol sa lokasyon ng device mo."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Matuto pa"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Kumonekta ka sa <xliff:g id="VPN_APP">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kasama ang mga email, app at website."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Buksan ang Mga Setting ng VPN"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko ng device mo.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong admin."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Nagbigay ka ng pahintulot sa app upang mag-set up ng VPN na koneksyon.\n\nMaaaring subaybayan ng app na ito ang iyong aktibidad sa device at network, kabilang ang mga email, app at website."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Pinamamahalaan ng <xliff:g id="ORGANIZATION">%1$s</xliff:g> ang iyong profile sa trabaho.\n\nMay kakayahan ang admin mo na subaybayan ang iyong aktibidad sa network, kasama ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa admin mo.\n\nNakakonekta ka rin sa isang VPN, na may kakayahang subaybayan ang iyong aktibidad sa network."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Nakakonekta ka sa <xliff:g id="APPLICATION">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network kabilang ang mga email, app at website."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Nakakonekta ka sa <xliff:g id="APPLICATION">%1$s</xliff:g>, na maaaring sumubaybay sa iyong personal na aktibidad sa network, kabilang ang mga email, app at website."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Nakakonekta ka sa <xliff:g id="APPLICATION">%1$s</xliff:g>, na maaaring sumubaybay sa aktibidad sa iyong personal na network, kabilang ang mga email, app at website."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"Pinamamahalaan ng <xliff:g id="ORGANIZATION">%1$s</xliff:g> ang iyong profile sa trabaho. Nakakonekta ito sa <xliff:g id="APPLICATION">%2$s</xliff:g>, na may kakayahang subaybayan ang aktibidad mo sa network sa trabaho, kasama ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong admin."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Ang iyong profile sa trabaho ay pinapamahalaan ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Nakakonekta ito sa <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app at website.\n\nNakakonekta ka rin sa <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, na maaaring sumubaybay sa iyong personal na aktibidad sa network."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Mananatiling naka-lock ang device hanggang sa manu-mano mong i-unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Kunin ang notification nang mas mabilis"</string>
@@ -535,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Gumawa ng tunog at mag-pop up sa screen"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Higit pang mga setting"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tapos Na"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Mga kontrol sa notification ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"mga kontrol ng notification"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"mga opsyon sa pag-snooze ng notification"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minuto"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minuto"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 oras"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Huwag mag-snooze"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"I-UNDO"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Na-snooze ng <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Paggamit ng baterya"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>
@@ -597,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"I-on"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"I-off"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigation bar"</string>
-    <string name="start" msgid="6873794757232879664">"Simula"</string>
-    <string name="center" msgid="4327473927066010960">"Gitna"</string>
-    <string name="end" msgid="125797972524818282">"Dulo"</string>
-    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Layout"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Kaliwa"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Kanan"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Uri ng button"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(default)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Clipboard"</item>
+    <item msgid="5742013440802239414">"Keycode"</item>
+    <item msgid="8748101184830239843">"Menu / Keyboard Switcher"</item>
+    <item msgid="8175437057325747277">"Wala"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Hati-hati (default)"</item>
+    <item msgid="6210279084134579668">"Nasa gitna"</item>
+    <item msgid="89143234390889289">"Naka-align sa kaliwa"</item>
+    <item msgid="7715533883382410603">"Naka-align sa kanan"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Menu / Keyboard Switcher"</string>
-    <string name="select_button" msgid="1597989540662710653">"Pumili ng button na idaragdag"</string>
-    <string name="add_button" msgid="4134946063432258161">"Magdagdag ng button"</string>
     <string name="save" msgid="2311877285724540644">"I-save"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Walang nakitang home button"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Kailangan ng home button upang ma-navigate ang device na ito. Mangyaring magdagdag ng home button bago mag-save."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Isaayos ang lapad ng button"</string>
     <string name="clipboard" msgid="1313879395099896312">"Clipboard"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Nagbibigay-daan ang Clipboard na direktang ma-drag sa clipboard ang mga item. Maaari ding direktang i-drag ang mga item palabas sa clipboard."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Custom na button ng navigation"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Nagbibigay-daan ang mga button na Keycode na maidagdag ang mga keyboard key sa Navigation Bar. Kapag pinindot, ginagaya ng mga ito ang napiling keyboard key. Una, dapat munang piliin ang key para sa button, kasunod ng larawan na ipapakita sa button."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Pumili ng Button na Keyboard"</string>
-    <string name="preview" msgid="9077832302472282938">"I-preview"</string>
+    <string name="icon" msgid="8732339849035837289">"Icon"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Mag-drag upang magdagdag ng mga tile"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"I-drag dito upang alisin"</string>
     <string name="qs_edit" msgid="2232596095725105230">"I-edit"</string>
@@ -670,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Umiinit ang telepono"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Kaliwa"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Kanan"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"I-customize ang shortcut"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Shortcut"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Mag-prompt para sa password"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Mga Alerto"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Mga Screenshot"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Seguridad"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Status ng user"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Storage"</string>
 </resources>

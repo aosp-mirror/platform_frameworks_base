@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"አግድም ክፈል"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ቁልቁል ክፈል"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"በብጁ ክፈል"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"አሰናብት"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"ክፈት"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"ማያ ገጽ ወደ ላይ ክፈል"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"ማያ ገጽ ወደ ግራ ክፈል"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"ማያ ገጽ ወደ ቀኝ ክፈል"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ድምፅ ፍጠር እና በማያ ገጽ ላይ ብቅ በል"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
     <string name="notification_done" msgid="5279426047273930175">"ተከናውኗል"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ ቁጥጥሮች"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"የማሳወቂያ መቆጣጠሪያዎች"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"የማሳወቂያ ማሸለቢያ አማራጮች"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 ደቂቃዎች"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 ደቂቃዎች"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ሰዓት"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"አታሸልብ"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ቀልብስ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"ለ<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> አሸልቧል"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"የባትሪ አጠቃቀም"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ባትሪ ቆጣቢ"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"በርቷል"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ጠፍቷል"</string>
     <string name="nav_bar" msgid="1993221402773877607">"የአሰሳ አሞሌ"</string>
-    <string name="start" msgid="6873794757232879664">"ጀምር"</string>
-    <string name="center" msgid="4327473927066010960">"መሃል"</string>
-    <string name="end" msgid="125797972524818282">"መጨረሻ"</string>
-    <string name="space" msgid="804232271282109749">"ክፍተት ሰጪ"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"አቀማመጥ"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"ግራ"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"ቀኝ"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"የአዝራር አይነት"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(ነባሪ)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"የቅንጥብ ሰሌዳ"</item>
+    <item msgid="5742013440802239414">"የቁልፍ ኮድ"</item>
+    <item msgid="8748101184830239843">"ምናሌ / የቁልፍ ሰሌዳ መቀየሪያ"</item>
+    <item msgid="8175437057325747277">"ምንም የለም"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"የተከፈለ (ነባሪ)"</item>
+    <item msgid="6210279084134579668">"መሃል ላይ የሆነ"</item>
+    <item msgid="89143234390889289">"በግራ የተሰለፈ"</item>
+    <item msgid="7715533883382410603">"በቀኝ የተሰለፈ"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"ምናሌ / የቁልፍ ሰሌዳ መቀየሪያ"</string>
-    <string name="select_button" msgid="1597989540662710653">"የሚታከል አዝራር ይምረጡ"</string>
-    <string name="add_button" msgid="4134946063432258161">"አዝራር አክል"</string>
     <string name="save" msgid="2311877285724540644">"አስቀምጥ"</string>
     <string name="reset" msgid="2448168080964209908">"ዳግም አስጀምር"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"ምንም የመነሻ አዝራር አልተገኘም"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"ይህን መሣሪያ ማሰስ ለመቻል የመነሻ አዝራር ያስፈልጋል። እባክዎ ከማስቀመጥዎ በፊት የመነሻ አዝራር ያክሉ።"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"የአዝራር ስፋት አስተካክል"</string>
     <string name="clipboard" msgid="1313879395099896312">"የቅንጥብ ሰሌዳ"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"የቅንጥብ ሰሌዳው ንጥሎች በቀጥታ ወደ ቅንጥብ ሰሌዳው እንዲጎተቱ ያስችላል። እንዲሁም ሲኖር ንጥሎች በቀጥታ ከቅንጥብ ሰሌዳው ውጭ ሊጎተቱ ይችላሉ።"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ብጁ የአሰሳ አዝራር"</string>
     <string name="keycode" msgid="7335281375728356499">"የቁልፍ ኮድ"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"የቁልፍ ኮድ አዝራሮች የቁልፍ ሰሌዳ ቁልፎች ወደ የአሰሳ አሞሌው እንዲታከሉ ያስችላሉ። ሲጫኑ የተመረጠውን የቁልፍ ሰሌዳ ቁልፍ ያስመስላሉ። መጀመሪያ ቁልፉ ለአዝራሩ መመረጥ አለበት፣ ከዚያ በመቀጠል በአዝራሩ ላይ የሚታየው ምስል መመረጥ አለበት።"</string>
-    <string name="select_keycode" msgid="7413765103381924584">"የቁልፍ ሰሌዳ አዝራር ይምረጡ"</string>
-    <string name="preview" msgid="9077832302472282938">"ቅድመ-እይታ"</string>
+    <string name="icon" msgid="8732339849035837289">"አዶ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ሰቆችን ለማከል ይጎትቱ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ለማስወገድ ወደዚህ ይጎትቱ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"አርትዕ"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ስልኩ እየሞቀ ነው"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ስልኩ እየቀዘቀዘ ሳለ አንዳንድ ባህሪዎች ይገደባሉ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"የእርስዎ ስልክ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ስልክዎን መጠቀም ይችላሉ፣ ነገር ግን ሊንቀራፈፍ ይችላል።\n\nአንዴ ስልክዎ ከቀዘቀዘ በኋላ በመደበኝነት ያሄዳል።"</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"ግራ"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"ቀኝ"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"አቋራጭን አብጅ"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"አቋራጭ"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"የይለፍ ቃል ጠይቅ"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"ማንቂያዎች"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"ቅጽበታዊ ገጽ እይታዎች"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"ደህንነት"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"የተጠቃሚ ሁኔታ"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"ማከማቻ"</string>
 </resources>

@@ -339,8 +339,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Подели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Подели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Прилагођено дељење"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Одбаци"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Отвори"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Подели екран нагоре"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Подели екран налево"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Подели екран надесно"</string>
@@ -530,7 +528,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Емитује се звучни сигнал и приказује се на екрану"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Још подешавања"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Контроле обавештења за апликацију <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"контроле обавештења"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"опције за одлагање обавештења"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минута"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 минута"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 сат"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Не одлажи"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ОПОЗОВИ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Одложено је за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Потрошња батерије"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Уштеда батерије није доступна током пуњења"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Уштеда батерије"</string>
@@ -592,25 +598,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Укључено"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Искључено"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Трака за навигацију"</string>
-    <string name="start" msgid="6873794757232879664">"Покрени"</string>
-    <string name="center" msgid="4327473927066010960">"Центар"</string>
-    <string name="end" msgid="125797972524818282">"Дно"</string>
-    <string name="space" msgid="804232271282109749">"Ознака за размак"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Распоред"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Лево"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Десно"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Тип дугмета"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(подразумевано)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Меморија"</item>
+    <item msgid="5742013440802239414">"Кôд тастера"</item>
+    <item msgid="8748101184830239843">"Пребацивач мени/тастатура"</item>
+    <item msgid="8175437057325747277">"Ништа"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Подељено (подразумевано)"</item>
+    <item msgid="6210279084134579668">"Центрирано"</item>
+    <item msgid="89143234390889289">"Поравнато улево"</item>
+    <item msgid="7715533883382410603">"Поравнато удесно"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Мени/Тастатура пребацивач"</string>
-    <string name="select_button" msgid="1597989540662710653">"Изаберите дугме за додавање"</string>
-    <string name="add_button" msgid="4134946063432258161">"Додај дугме"</string>
     <string name="save" msgid="2311877285724540644">"Сачувај"</string>
     <string name="reset" msgid="2448168080964209908">"Поново постави"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Нисмо пронашли дугме Почетна"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Дугме Почетна је неопходно за навигацију на овом уређају. Додајте дугме Почетна пре него што сачувате измене."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Прилагоди ширину дугмета"</string>
     <string name="clipboard" msgid="1313879395099896312">"Привремена меморија"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Привремена меморија омогућава да се ставке превлаче директно у привремену меморију. Постојеће ставке могу да се превлаче и директно из привремене меморије."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Прилагођено дугме за навигацију"</string>
     <string name="keycode" msgid="7335281375728356499">"Кôд тастера"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Дугмад за кодове тастера омогућава да се на траку за навигацију додају тастери на тастатури. Када притиснете дугме, симулира се изабрани тастер на тастатури. Прво морате да изаберете тастер за дугме, па слику коју ће се приказивати на дугмету."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Изаберите дугме за тастатуру"</string>
-    <string name="preview" msgid="9077832302472282938">"Преглед"</string>
+    <string name="icon" msgid="8732339849035837289">"Икона"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Превуците да бисте додали плочице"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Превуците овде да бисте уклонили"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
@@ -665,4 +677,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон се загрејао"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Неке функције су ограничене док се телефон не охлади"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Лево"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Десно"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Прилагоди пречицу"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Пречица"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Упит за лозинку"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Снимци екрана"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Безбедност"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Статус корисника"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Меморијски простор"</string>
 </resources>

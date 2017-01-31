@@ -337,9 +337,7 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisão horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisão vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisão personalizada"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Ignorar"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Abrir"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Ecrã dividido à parte superior"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Ecrã dividido na parte superior"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ecrã dividido à esquerda"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ecrã dividido à direita"</string>
   <string-array name="recents_blacklist_array">
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Emitir som e aparecer no ecrã"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Mais definições"</string>
     <string name="notification_done" msgid="5279426047273930175">"Concluído"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Controlos de notificações do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"controlos de notificação"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opções de suspensão de notificações"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minutos"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minutos"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 hora"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Não suspender"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ANULAR"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utiliz. da bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Poupança de bateria não disponível durante o carregamento"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Poupança de bateria"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Ativado"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Desativado"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegação"</string>
-    <string name="start" msgid="6873794757232879664">"Início"</string>
-    <string name="center" msgid="4327473927066010960">"Centro"</string>
-    <string name="end" msgid="125797972524818282">"Fim"</string>
-    <string name="space" msgid="804232271282109749">"Espaçador"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Esquema"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Esquerda"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Direita"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tipo de botão"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(predefinição)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Área de transferência"</item>
+    <item msgid="5742013440802239414">"Código de tecla"</item>
+    <item msgid="8748101184830239843">"Menu/comutador de teclado"</item>
+    <item msgid="8175437057325747277">"Nenhum"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Dividido (predefinição)"</item>
+    <item msgid="6210279084134579668">"Centrado"</item>
+    <item msgid="89143234390889289">"Alinhado à esquerda"</item>
+    <item msgid="7715533883382410603">"Alinhado à direita"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Menu/comutador de teclado"</string>
-    <string name="select_button" msgid="1597989540662710653">"Selecionar o botão a adicionar"</string>
-    <string name="add_button" msgid="4134946063432258161">"Adicionar botão"</string>
     <string name="save" msgid="2311877285724540644">"Guardar"</string>
     <string name="reset" msgid="2448168080964209908">"Repor"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Sem botão de página inicial"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"É necessário um botão de página inicial para navegar neste dispositivo. Adicione um botão de página inicial antes de guardar."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Ajustar largura do botão"</string>
     <string name="clipboard" msgid="1313879395099896312">"Área de transferência"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"A Área de transferência permite arrastar itens diretamente para a área de transferência. Também é possível arrastar itens diretamente para fora da mesma, quando aí se encontram."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Botão de navegação personalizado"</string>
     <string name="keycode" msgid="7335281375728356499">"Código de tecla"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Os códigos de tecla permitem adicionar teclas do teclado à Barra de navegação. Quando são premidos, emulam a tecla do teclado selecionada. É necessário selecionar primeiro a tecla para botão e depois uma imagem que será apresentada no mesmo."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Selecionar o botão do teclado"</string>
-    <string name="preview" msgid="9077832302472282938">"Pré-visualizar"</string>
+    <string name="icon" msgid="8732339849035837289">"Ícone"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arraste para adicionar mosaicos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastar para aqui para remover"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"O telemóvel está a aquecer"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Algumas funcionalidades são limitadas enquanto o telemóvel arrefece"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"O telemóvel tenta arrefecer automaticamente. Pode continuar a utilizá-lo, mas este poderá funcionar mais lentamente.\n\nAssim que o telemóvel tiver arrefecido, funcionará normalmente."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Esquerda"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Direita"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Personalizar atalho"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Atalho"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Solicitar palavra-passe"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de ecrã"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Segurança"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Estado do utilizador"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Armazenamento"</string>
 </resources>

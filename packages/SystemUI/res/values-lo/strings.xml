@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ການ​ແຍກ​ລວງ​ຕັ້ງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ການ​ແຍກ​ກຳ​ນົດ​ເອງ"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"ປິດໄວ້"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"ເປີດ"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Split screen to the top"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Split screen to the left"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Split screen to the right"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ເຮັດສຽງດັງ ແລະ ສະແດງຂຶ້ນໃນໜ້າຈໍ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"ການຄວບຄຸມການແຈ້ງເຕືອນ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"ການຄວບຄຸມການແຈ້ງເຕືອນ"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ຕົວເລືອກການເລື່ອນການແຈ້ງເຕືອນ"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 ນາທີ"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 ນາທີ"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ຊົ່ວໂມງ"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"ບໍ່ເລື່ອນ"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ຍົກເລີກ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"ເລື່ອນໄປ <xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ນາທີແລ້ວ"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ການໃຊ້ແບັດເຕີຣີ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"ເປີດ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ປິດ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>
-    <string name="start" msgid="6873794757232879664">"ເລີ່ມຕົ້ນ"</string>
-    <string name="center" msgid="4327473927066010960">"ເຄິ່ງກາງ"</string>
-    <string name="end" msgid="125797972524818282">"ທ້າຍ"</string>
-    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"ຮູບແບບ"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"ຊ້າຍ"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"ຂວາ"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"ປະເພດປຸ່ມ"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(ຄ່າເລີ່ມຕົ້ນ)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"ຄລິບບອດ"</item>
+    <item msgid="5742013440802239414">"ລະຫັດກະແຈ"</item>
+    <item msgid="8748101184830239843">"ຕົວປ່ຽນເມນູ / ແປ້ນພິມ"</item>
+    <item msgid="8175437057325747277">"ບໍ່ໃຊ້"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"ແຍກກັນ (ຄ່າເລີ່ມຕົ້ນ)"</item>
+    <item msgid="6210279084134579668">"ທາງກາງ"</item>
+    <item msgid="89143234390889289">"ຮຽງຊ້າຍ"</item>
+    <item msgid="7715533883382410603">"ຮຽງຂວາ"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"ຕົວປ່ຽນເມນູ / ແປ້ນພິມ"</string>
-    <string name="select_button" msgid="1597989540662710653">"ເລືອກປຸ່ມເພື່ອເພີ່ມ"</string>
-    <string name="add_button" msgid="4134946063432258161">"ເພີ່ມປຸ່ມ"</string>
     <string name="save" msgid="2311877285724540644">"ບັນທຶກ"</string>
     <string name="reset" msgid="2448168080964209908">"ຣີເຊັດ"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"ບໍ່ພົບປຸ່ມໜ້າຫຼັກ"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"ຈຳເປັນຕ້ອງມີປຸ່ມໜ້າຫຼັກເພື່ອໃຫ້ສາມາດນຳທາງອຸປະກອນນີ້. ກະລຸນາເພີ່ມປຸ່ມໜ້າຫຼັກກ່ອນທີ່ຈະບັນທຶກ."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ປັບຄວາມກວ້າງຂອງປຸ່ມ"</string>
     <string name="clipboard" msgid="1313879395099896312">"​ຄລິບບອດ"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"ຄລິບບອດອະນຸຍາດໃຫ້ລາກລາຍການຕ່າງໆໂດຍກົງຫາຄລິບບອດ. ນອກນັ້ນ ຍັງສາມາດລາກລາຍການໂດຍກົງອອກຈາກຄລິບບອດໄດ້ ເມື່ອມີຢູ່."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ປຸ່ມນຳທາງແບບກຳນົດເອງ"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"ປຸ່ມ Keycode ອະນຸຍາດໃຫ້ເພີ່ມປຸ່ມແປ້ນພິມໃສ່ແຖບການນຳທາງ. ເມື່ອກົດແລ້ວພວກມັນຈະຮຽນແບບປຸ່ມແປ້ນພິມທີ່ເລືອກ. ທຳອິດຕ້ອງເລືອກປຸ່ມແປ້ນພິມສຳລັບປຸ່ມນັ້ນ, ຕາມດ້ວຍຮູບທີ່ຈະປາກົດຂຶ້ນເທິງປຸ່ມນັ້ນ."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"ເລືອກປຸ່ມແປ້ນພິມ"</string>
-    <string name="preview" msgid="9077832302472282938">"ສະແດງຕົວຢ່າງ"</string>
+    <string name="icon" msgid="8732339849035837289">"ໄອຄອນ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄອຄອນ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ລາກມາບ່ອນນີ້ເພື່ອລຶບອອກ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ໂທລະສັບກຳລັງຮ້ອນຂຶ້ນ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ເນື່ອງໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ໂທລະສັບຂອງທ່ານຈະພະຍາຍາມລົດອຸນຫະພູມລົງ. ທ່ານຍັງຄົງສາມາດໃຊ້ໂທລະສັບຂອງທ່ານໄດ້ຢູ່, ແຕ່ມັນຈະເຮັດວຽກຊ້າລົງ.\n\nເມື່ອໂທລະສັບຂອງທ່ານບໍ່ຮ້ອນຫຼາຍແລ້ວ, ມັນຈະກັບມາເຮັດວຽກຕາມປົກກະຕິ."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"ຊ້າຍ"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"ຂວາ"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"ປັບແຕ່ງທາງລັດ"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"ທາງລັດ"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"ຖາມຫາລະຫັດຜ່ານ"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"ການເຕືອນ"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"ຮູບຖ່າຍໜ້າຈໍ"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"ຄວາມປອດໄພ"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"ສະຖານະຜູ້ໃຊ້"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"ບ່ອນເກັບຂໍ້ມູນ"</string>
 </resources>

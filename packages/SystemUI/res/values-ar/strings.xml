@@ -345,8 +345,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"تجاهل"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"فتح"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"تقسيم الشاشة بمحاذاة الجزء العلوي"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"تقسيم الشاشة بمحاذاة اليسار"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"تقسيم الشاشة بمحاذاة اليمين"</string>
@@ -536,7 +534,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"إصدار تنبيه صوتي والظهور بسرعة على الشاشة"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
     <string name="notification_done" msgid="5279426047273930175">"تم"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"عناصر التحكم في إشعارات <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"عناصر التحكم في الإشعارات"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"خيارات تأجيل الإشعارات"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"١٥ دقيقة"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"٣۰ دقيقة"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"ساعة واحدة"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"عدم التأجيل"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"تراجع"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"تم تأجيل الإشعار لمدة <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>
@@ -598,25 +604,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"تشغيل"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"إيقاف"</string>
     <string name="nav_bar" msgid="1993221402773877607">"شريط التنقل"</string>
-    <string name="start" msgid="6873794757232879664">"البدء"</string>
-    <string name="center" msgid="4327473927066010960">"وسط"</string>
-    <string name="end" msgid="125797972524818282">"النهاية"</string>
-    <string name="space" msgid="804232271282109749">"أداة المباعدة"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"التنسيق"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"يسار"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"يمين"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"نوع الزر"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(افتراضي)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"الحافظة"</item>
+    <item msgid="5742013440802239414">"رمز المفتاح"</item>
+    <item msgid="8748101184830239843">"مبدِّل القوائم / لوحة المفاتيح"</item>
+    <item msgid="8175437057325747277">"بدون"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"مقسّم (افتراضي)"</item>
+    <item msgid="6210279084134579668">"تم التوسيط"</item>
+    <item msgid="89143234390889289">"تمت المحاذاة إلى اليسار"</item>
+    <item msgid="7715533883382410603">"تمت المحاذاة إلى اليمين"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"مبدِّل القوائم / لوحة المفاتيح"</string>
-    <string name="select_button" msgid="1597989540662710653">"تحديد الزر لإضافته"</string>
-    <string name="add_button" msgid="4134946063432258161">"إضافة زر"</string>
     <string name="save" msgid="2311877285724540644">"حفظ"</string>
     <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"لم يُعثر على زر صفحة رئيسية"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"زر الصفحة الرئيسية مطلوب لكي تتمكن من التنقل في هذا الجهاز، الرجاء إضافة زر صفحة رئيسية قبل الحفظ."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
     <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"تتيح الحافظة إمكانية سحب العناصر مباشرة إلى الحافظة، وكذلك يمكن سحب العناصر مباشرة خارج الحافظة عند وجودها."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>
     <string name="keycode" msgid="7335281375728356499">"رمز المفتاح"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"تتيح أزرار رموز المفاتيح إمكانية إضافة مفاتيح لوحة المفاتيح إلى شريط التنقل. وعند الضغط عليها، تحاكي الأزرار مفتاح لوحة المفاتيح المحدد. ويجب أولاً تحديد المفتاح للزر، وبعد ذلك تحديد صورة لكي يتم عرضها على الزر."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"تحديد زر لوحة المفاتيح"</string>
-    <string name="preview" msgid="9077832302472282938">"معاينة"</string>
+    <string name="icon" msgid="8732339849035837289">"رمز"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"اسحب لإضافة مربعات"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"اسحب هنا للإزالة"</string>
     <string name="qs_edit" msgid="2232596095725105230">"تعديل"</string>
@@ -671,4 +683,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"تزداد درجة حرارة الهاتف"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"يسار"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"يمين"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"تخصيص الاختصار"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"اختصار"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"طلب إدخال كلمة المرور"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"لقطات الشاشة"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"الأمان"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"حالة المستخدمين"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"سعة التخزين"</string>
 </resources>

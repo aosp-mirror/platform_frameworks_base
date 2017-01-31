@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Бөлінген тік"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Бөлінген теңшелетін"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Қабылдамау"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Ашу"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Экранды жоғарыға қарай бөлу"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Экранды солға қарай бөлу"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Экранды оңға қарай бөлу"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Дыбыстық сигнал беру және экранға шығару"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларды басқару элементтері"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"хабарландыруларды басқару элементтері"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"хабарландыруды кідірту опциялары"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минут"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 минут"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 сағат"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Кідіртілмесін"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"КЕРІ ҚАЙТАРУ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кідіртілді"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Батареяны пайдалану"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Қосулы"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Өшірулі"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Шарлау тақтасы"</string>
-    <string name="start" msgid="6873794757232879664">"Бастау"</string>
-    <string name="center" msgid="4327473927066010960">"Орталық"</string>
-    <string name="end" msgid="125797972524818282">"Аяқтау"</string>
-    <string name="space" msgid="804232271282109749">"Аралық"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Формат"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Сол жақ"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Оң жақ"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Түйме түрі"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(әдепкі)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Буфер"</item>
+    <item msgid="5742013440802239414">"Перне коды"</item>
+    <item msgid="8748101184830239843">"Мәзір/пернетақта ауыстырғышы"</item>
+    <item msgid="8175437057325747277">"Ешқандай"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Бөлінген (әдепкі)"</item>
+    <item msgid="6210279084134579668">"Ортасына тураланған"</item>
+    <item msgid="89143234390889289">"Сол жағына тураланған"</item>
+    <item msgid="7715533883382410603">"Оң жағына тураланған"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Мәзір/пернетақта ауыстырғышы"</string>
-    <string name="select_button" msgid="1597989540662710653">"Қосу үшін түймені таңдаңыз"</string>
-    <string name="add_button" msgid="4134946063432258161">"Қосу түймесі"</string>
     <string name="save" msgid="2311877285724540644">"Сақтау"</string>
     <string name="reset" msgid="2448168080964209908">"Қайта реттеу"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Негізгі бет түймесі табылмады"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Негізгі бет түймесі осы құрылғыны шарлау үшін қажет. Сақтау алдында негізгі бет түймесін қосыңыз."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Түйме енін реттеу"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"\"Буфер\" элементтерді тікелей буферге сүйреуге мүмкіндік береді. Сондай-ақ, бар болса, элементтерді тікелей буферден сүйреп шығаруға болады."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Арнаулы шарлау түймесі"</string>
     <string name="keycode" msgid="7335281375728356499">"Кілт коды"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Кілт коды түймелері пернетақта пернелерін шарлау тақтасына қосуға мүмкіндік береді. Басқан кезде олар таңдалған пернетақта пернесін эмуляциялайды. Алдымен түйме үшін пернені, содан кейін түймеде көрсетілетін кескінді таңдау керек."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Пернетақта түймесін таңдау"</string>
-    <string name="preview" msgid="9077832302472282938">"Алдын ала қарау"</string>
+    <string name="icon" msgid="8732339849035837289">"Белгіше"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Қажеттерін сүйреп қойыңыз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Керексіздерін осы жерге сүйреңіз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон қызуда"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Сол жақ"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Оң жақ"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Таңбашаны реттеу"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Таңбаша"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Құпия сөзді сұрау"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Дабылдар"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоттар"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Қауіпсіздік"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Пайдаланушы күйі"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Жад"</string>
 </resources>

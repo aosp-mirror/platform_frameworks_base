@@ -337,16 +337,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"કસ્ટમ વિભક્ત કરો"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"સ્ક્રીનને ઉપરની તરફ વિભાજિત કરો"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"સ્ક્રીનને ડાબી તરફ વિભાજિત કરો"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"સ્ક્રીનને જમણી તરફ વિભાજિત કરો"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ચાર્જ થઈ ગયું"</string>
@@ -533,7 +526,24 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"અવાજ કરો અને સ્ક્રીન પર બતાવો"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
     <string name="notification_done" msgid="5279426047273930175">"થઈ ગયું"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> સૂચના નિયંત્રણો"</string>
+    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
+    <skip />
+    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
+    <skip />
+    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
+    <skip />
+    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
+    <skip />
+    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
+    <skip />
+    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
+    <skip />
+    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
+    <skip />
+    <!-- no translation found for snooze_undo (6074877317002985129) -->
+    <skip />
+    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
+    <skip />
     <string name="battery_panel_title" msgid="7944156115535366613">"બૅટરી વપરાશ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ચાર્જિંગ દરમિયાન બૅટરી બચતકર્તા ઉપલબ્ધ નથી"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"બૅટરી બચતકર્તા"</string>
@@ -595,25 +605,33 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"ચાલુ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"બંધ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"નેવિગેશન બાર"</string>
-    <string name="start" msgid="6873794757232879664">"પ્રારંભ કરો"</string>
-    <string name="center" msgid="4327473927066010960">"મધ્ય"</string>
-    <string name="end" msgid="125797972524818282">"સમાપ્ત"</string>
-    <string name="space" msgid="804232271282109749">"સ્પેસર"</string>
+    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
+    <skip />
+    <!-- no translation found for nav_bar_left (731491280511316123) -->
+    <skip />
+    <!-- no translation found for nav_bar_right (2523774879720231974) -->
+    <skip />
+    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
+    <skip />
+    <!-- no translation found for nav_bar_default (8587114043070993007) -->
+    <skip />
+    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
+    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
+    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
+    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
+    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
+    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
+    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
+    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
     <string name="menu_ime" msgid="4943221416525250684">"મેનૂ / કીબોર્ડ સ્વિચર"</string>
-    <string name="select_button" msgid="1597989540662710653">"ઉમેરવા માટે બટન પસંદ કરો"</string>
-    <string name="add_button" msgid="4134946063432258161">"બટન ઉમેરો"</string>
     <string name="save" msgid="2311877285724540644">"સાચવો"</string>
     <string name="reset" msgid="2448168080964209908">"ફરીથી સેટ કરો"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"કોઈ હોમ બટન મળ્યું નથી"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"આ ઉપકરણને નેવિગેટ કરવા માટે હોમ બટન આવશ્યક. કૃપા કરીને સાચવતાં પહેલાં એક હોમ બટન ઉમેરો."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"બટનની પહોળાઈ સમાયોજિત કરો"</string>
     <string name="clipboard" msgid="1313879395099896312">"ક્લિપબોર્ડ"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"ક્લિપબોર્ડ આઇટમ્સને સીધા જ ક્લિપબોર્ડ પર ખેંચવાની મંજૂરી આપે છે. જ્યારે હાજર હોય ત્યારે આઇટમ્સ ક્લિપબોર્ડ પરથી સીધી જ બહાર પણ ખેંચી શકાય છે."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"કસ્ટમ નેવિગેશન બટન"</string>
     <string name="keycode" msgid="7335281375728356499">"કીકોડ"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"કીકોડ બટન કીબોર્ડની કીઝને નેવિગેશન બારમાં ઉમેરવાની મંજૂરી આપે છે. જ્યારે દબાવવામાં આવે ત્યારે તે પસંદ કરેલ કીબોર્ડની કીનું અનુસરણ કરે છે. બટન માટે પહેલા કીબોર્ડની કીઝને પસંદ કરવી આવશ્યક છે, તે પછી બટન પર બતાવવામાં આવેલ છબી પસંદ કરવી આવશ્યક છે."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"કીબોર્ડ બટન પસંદ કરો"</string>
-    <string name="preview" msgid="9077832302472282938">"પૂર્વાવલોકન કરો"</string>
+    <!-- no translation found for icon (8732339849035837289) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ટાઇલ્સ ઉમેરવા માટે ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"દૂર કરવા માટે અહીં ખેંચો"</string>
     <string name="qs_edit" msgid="2232596095725105230">"સંપાદિત કરો"</string>
@@ -668,4 +686,24 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ફોન ગરમ થઈ રહ્યો છે"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ફોન ઠંડો થાય ત્યાં સુધી કેટલીક સુવિધાઓ મર્યાદિત હોય છે"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <skip />
+    <!-- no translation found for lockscreen_right (6093496261656102989) -->
+    <skip />
+    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
+    <skip />
+    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
+    <skip />
+    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
+    <skip />
+    <!-- no translation found for notification_channel_security (7345516133431326347) -->
+    <skip />
+    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
+    <skip />
+    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
+    <skip />
 </resources>

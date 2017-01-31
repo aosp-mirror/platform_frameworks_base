@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ಅಡ್ಡಲಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ಲಂಬವಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ಕಸ್ಟಮ್ ವಿಭಜಿಸಿದ"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"ವಜಾಗೊಳಿಸಿ"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"ತೆರೆಯಿರಿ"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"ಮೇಲ್ಭಾಗಕ್ಕೆ ಪರದೆಯನ್ನು ವಿಭಜಿಸಿ"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"ಎಡಕ್ಕೆ ಪರದೆಯನ್ನು ವಿಭಜಿಸಿ"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"ಬಲಕ್ಕೆ ಪರದೆಯನ್ನು ವಿಭಜಿಸಿ"</string>
@@ -528,7 +526,24 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ಪರದೆಯ ಮೇಲೆ ಧ್ವನಿಮಾಡಿ ಮತ್ತು ಪಾಪ್ ಮಾಡಿ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_done" msgid="5279426047273930175">"ಮುಗಿದಿದೆ"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
+    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
+    <skip />
+    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
+    <skip />
+    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
+    <skip />
+    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
+    <skip />
+    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
+    <skip />
+    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
+    <skip />
+    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
+    <skip />
+    <!-- no translation found for snooze_undo (6074877317002985129) -->
+    <skip />
+    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
+    <skip />
     <string name="battery_panel_title" msgid="7944156115535366613">"ಬ್ಯಾಟರಿ ಬಳಕೆ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ಚಾರ್ಜಿಂಗ್ ಸಮಯದಲ್ಲಿ ಬ್ಯಾಟರಿ ಸೇವರ್‌‌ ಲಭ್ಯವಿರುವುದಿಲ್ಲ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ಬ್ಯಾಟರಿ ಸೇವರ್‌‌"</string>
@@ -590,25 +605,33 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"ಆನ್"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ಆಫ್"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್"</string>
-    <string name="start" msgid="6873794757232879664">"ಪ್ರಾರಂಭ"</string>
-    <string name="center" msgid="4327473927066010960">"ಮಧ್ಯ"</string>
-    <string name="end" msgid="125797972524818282">"ಮುಕ್ತಾಯ"</string>
-    <string name="space" msgid="804232271282109749">"ಸ್ಪೇಸರ್"</string>
+    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
+    <skip />
+    <!-- no translation found for nav_bar_left (731491280511316123) -->
+    <skip />
+    <!-- no translation found for nav_bar_right (2523774879720231974) -->
+    <skip />
+    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
+    <skip />
+    <!-- no translation found for nav_bar_default (8587114043070993007) -->
+    <skip />
+    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
+    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
+    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
+    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
+    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
+    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
+    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
+    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
     <string name="menu_ime" msgid="4943221416525250684">"ಮೆನು / ಕೀಬೋರ್ಡ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
-    <string name="select_button" msgid="1597989540662710653">"ಸೇರಿಸಲು ಬಟನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="add_button" msgid="4134946063432258161">"ಬಟನ್ ಸೇರಿಸು"</string>
     <string name="save" msgid="2311877285724540644">"ಉಳಿಸು"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"ಯಾವುದೇ ಮುಖಪುಟ ಬಟನ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"ಈ ಸಾಧನವನ್ನು ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು ಮುಖಪುಟ ಬಟನ್ ಅಗತ್ಯವಿರುತ್ತದೆ. ಉಳಿಸುವ ಮೊದಲು ದಯವಿಟ್ಟು ಮುಖಪುಟ ಬಟನ್ ಸೇರಿಸಿ."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ಬಟನ್ ಅಳತೆ ಹೊಂದಿಸು"</string>
     <string name="clipboard" msgid="1313879395099896312">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"ಐಟಂಗಳನ್ನು ನೇರವಾಗಿ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಲು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್ ಅನುಮತಿಸುತ್ತದೆ. ಐಟಂಗಳು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವಾಗ ಅವುಗಳನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಿಂದ ನೇರವಾಗಿ ಹೊರಗೆ ಹಾಕಬಹುದಾಗಿರುತ್ತದೆ."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ಕಸ್ಟಮ್ ನ್ಯಾವಿಗೇಷನ್ ಬಟನ್"</string>
     <string name="keycode" msgid="7335281375728356499">"ಕೀಕೋಡ್"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"ಕೀಕೋಡ್ ಬಟನ್‌ಗಳು ಕೀಬೋರ್ಡ್ ಕೀಗಳನ್ನು ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್‌ಗೆ ಸೇರಿಸಲು ಆನುಮತಿಸುತ್ತದೆ. ಒತ್ತಿದಾಗ ಆಯ್ಕೆಮಾಡಲಾದ ಕೀಬೋರ್ಡ್ ಕೀಯನ್ನು ಅವುಗಳು ಅನುಕರಿಸುತ್ತವೆ. ಮೊದಲು ಬಟನ್‌ಗೆ ಕೀಯನ್ನು ಆಯ್ಕೆಮಾಡಬೇಕು ನಂತರ ಬಟನ್‌ನಲ್ಲಿ ತೋರಿಸಬೇಕಾದ ಚಿತ್ರವನ್ನು ಅನುಸರಿಸಬೇಕು."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"ಕೀಬೋರ್ಡ್ ಬಟನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="preview" msgid="9077832302472282938">"ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
+    <!-- no translation found for icon (8732339849035837289) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ಟೈಲ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ತೆಗೆದುಹಾಕಲು ಇಲ್ಲಿ ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ಎಡಿಟ್"</string>
@@ -663,4 +686,24 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <skip />
+    <!-- no translation found for lockscreen_right (6093496261656102989) -->
+    <skip />
+    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
+    <skip />
+    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
+    <skip />
+    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
+    <skip />
+    <!-- no translation found for notification_channel_security (7345516133431326347) -->
+    <skip />
+    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
+    <skip />
+    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
+    <skip />
 </resources>

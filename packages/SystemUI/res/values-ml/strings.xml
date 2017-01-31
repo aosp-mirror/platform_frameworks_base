@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേതിരിക്കുക"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"യാന്ത്രികം"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"അറിയിപ്പുകൾ"</string>
@@ -337,10 +337,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"ഒഴിവാക്കുക"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"തുറക്കുക"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"സ്ക്രീൻ മുകളിലേക്ക് പിളർത്തുക"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"സ്ക്രീൻ ഇടതുവശത്തേക്ക് പിളർത്തുക"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"സ്ക്രീൻ മുകളിലേക്ക് സ്പ്ലിറ്റ് ചെയ്യുക"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"സ്ക്രീൻ ഇടതുവശത്തേക്ക് സ്പ്ലിറ്റ് ചെയ്യുക"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"സ്ക്രീൻ വലതുവശത്തേക്ക് പിളർത്തുക"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
@@ -463,10 +461,10 @@
     <string name="stream_notification" msgid="2563720670905665031">"അറിയിപ്പ്"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ബ്ലൂടൂത്ത്"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ഡ്യുവൽ മൾട്ടി റ്റോൺ ഫ്രീക്വൻസി"</string>
-    <string name="stream_accessibility" msgid="301136219144385106">"പ്രവേശനക്ഷമത"</string>
+    <string name="stream_accessibility" msgid="301136219144385106">"ഉപയോഗസഹായി"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
@@ -528,7 +526,24 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ശബ്ദമുണ്ടാക്കുക, സ്ക്രീനിൽ കാണിക്കുക"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
+    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
+    <skip />
+    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
+    <skip />
+    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
+    <skip />
+    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
+    <skip />
+    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
+    <skip />
+    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
+    <skip />
+    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
+    <skip />
+    <!-- no translation found for snooze_undo (6074877317002985129) -->
+    <skip />
+    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
+    <skip />
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>
@@ -590,25 +605,33 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"ഓൺ"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ഓഫ്"</string>
     <string name="nav_bar" msgid="1993221402773877607">"നാവിഗേഷൻ ബാർ"</string>
-    <string name="start" msgid="6873794757232879664">"ആരംഭിക്കൂ"</string>
-    <string name="center" msgid="4327473927066010960">"മധ്യം"</string>
-    <string name="end" msgid="125797972524818282">"അവസാനിപ്പിക്കുക"</string>
-    <string name="space" msgid="804232271282109749">"സ്പേസർ"</string>
+    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
+    <skip />
+    <!-- no translation found for nav_bar_left (731491280511316123) -->
+    <skip />
+    <!-- no translation found for nav_bar_right (2523774879720231974) -->
+    <skip />
+    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
+    <skip />
+    <!-- no translation found for nav_bar_default (8587114043070993007) -->
+    <skip />
+    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
+    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
+    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
+    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
+    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
+    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
+    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
+    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
     <string name="menu_ime" msgid="4943221416525250684">"മെനു / കീബോർഡ് സ്വിച്ചർ"</string>
-    <string name="select_button" msgid="1597989540662710653">"ചേർക്കാൻ, ബട്ടൺ തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="add_button" msgid="4134946063432258161">"ബട്ടൺ ചേർക്കുക"</string>
     <string name="save" msgid="2311877285724540644">"സംരക്ഷിക്കുക"</string>
     <string name="reset" msgid="2448168080964209908">"പുനഃസജ്ജമാക്കുക"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"ഒരു ഹോം ബട്ടണും കണ്ടെത്തിയില്ല"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"ഈ ഉപകരണം നാവിഗേറ്റ് ചെയ്യുന്നതിന് ഒരു ഹോം ബട്ടൺ ആവശ്യമാണ്, സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഒരു ഹോം ബട്ടൺ ചേർക്കുക."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ബട്ടൺ വീതി ക്രമീകരിക്കുക"</string>
     <string name="clipboard" msgid="1313879395099896312">"ക്ലിപ്പ്ബോർഡ്"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"ഇനങ്ങളെ ക്ലിപ്പ്‌ബോർഡിലേക്ക് നേരിട്ട് വലിച്ചിടാൻ ക്ലിപ്പ്‌ബോർഡ് അനുവദിക്കുന്നു. ഇനങ്ങളെ ക്ലിപ്പ്‌ബോർഡിന് പുറത്തേക്ക് നേരിട്ട് വലിച്ചിടുകയുമാകാം."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ഇഷ്ടാനുസൃത നാവിഗേഷൻ ബട്ടൺ"</string>
     <string name="keycode" msgid="7335281375728356499">"കീകോഡ്"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"നാവിഗേഷൻ ബാറിലേക്ക് കീബോർഡ് കീകൾ ചേർക്കുന്നതിനെ കീകോഡ് ബട്ടണുകൾ അനുവദിക്കുന്നു. അമർത്തുമ്പോൾ, തിരഞ്ഞെടുത്ത കീയെ അവ അനുകരിക്കുന്നു. ആദ്യം ബട്ടണിനായി കീ തിരഞ്ഞെടുക്കണം, തുടർന്ന് ബട്ടണിൽ കാണിക്കാനുള്ള ചിത്രം തിരഞ്ഞെടുക്കണം."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"കീബോർഡ് ബട്ടൺ തിരഞ്ഞെടുക്കൂ"</string>
-    <string name="preview" msgid="9077832302472282938">"പ്രിവ്യു നടത്തുക"</string>
+    <!-- no translation found for icon (8732339849035837289) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ടൈലുകൾ ചേർക്കുന്നതിന് വലിച്ചിടുക"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"നീക്കംചെയ്യുന്നതിന് ഇവിടെ വലിച്ചിടുക"</string>
     <string name="qs_edit" msgid="2232596095725105230">"എഡിറ്റുചെയ്യുക"</string>
@@ -663,4 +686,24 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ഫോൺ ചൂടായിക്കൊണ്ടിരിക്കുന്നു"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"നിങ്ങളുടെ ഫോൺ സ്വയമേവ തണുക്കാൻ ശ്രമിക്കും. നിങ്ങൾക്ക് അപ്പോഴും ഫോൺ ഉപയോഗിക്കാമെങ്കിലും പ്രവർത്തനം മന്ദഗതിയിലായിരിക്കും.\n\nതണുത്തുകഴിഞ്ഞാൽ, ഫോൺ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കും."</string>
+    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <skip />
+    <!-- no translation found for lockscreen_right (6093496261656102989) -->
+    <skip />
+    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
+    <skip />
+    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
+    <skip />
+    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
+    <skip />
+    <!-- no translation found for notification_channel_security (7345516133431326347) -->
+    <skip />
+    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
+    <skip />
+    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
+    <skip />
 </resources>

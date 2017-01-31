@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"แยกในแนวนอน"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"แยกในแนวตั้ง"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"แยกแบบกำหนดเอง"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"ปิด"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"เปิด"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"แยกหน้าจอไปด้านบน"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"แยกหน้าจอไปทางซ้าย"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"แยกหน้าจอไปทางขวา"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ส่งเสียงและแสดงบนหน้าจอ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"ส่วนควบคุมการแจ้งเตือน"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 นาที"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 นาที"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ชั่วโมง"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"ไม่ต้องปิดเสียงเตือนชั่วคราว"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"เลิกทำ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"ปิดเสียงเตือนชั่วคราวไว้เป็นเวลา <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"เปิด"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ปิด"</string>
     <string name="nav_bar" msgid="1993221402773877607">"แถบนำทาง"</string>
-    <string name="start" msgid="6873794757232879664">"บนสุด"</string>
-    <string name="center" msgid="4327473927066010960">"กึ่งกลาง"</string>
-    <string name="end" msgid="125797972524818282">"ล่างสุด"</string>
-    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"การจัดวาง"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"ซ้าย"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"ขวา"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"ประเภทปุ่ม"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(ค่าเริ่มต้น)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"คลิปบอร์ด"</item>
+    <item msgid="5742013440802239414">"Keycode"</item>
+    <item msgid="8748101184830239843">"ปุ่มสลับเมนู/แป้นพิมพ์"</item>
+    <item msgid="8175437057325747277">"ไม่มี"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"แยก (ค่าเริ่มต้น)"</item>
+    <item msgid="6210279084134579668">"ตรงกลาง"</item>
+    <item msgid="89143234390889289">"จัดข้อความชิดซ้าย"</item>
+    <item msgid="7715533883382410603">"จัดข้อความชิดขวา"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"ปุ่มสลับเมนู/แป้นพิมพ์"</string>
-    <string name="select_button" msgid="1597989540662710653">"เลือกปุ่มที่จะเพิ่ม"</string>
-    <string name="add_button" msgid="4134946063432258161">"เพิ่มปุ่ม"</string>
     <string name="save" msgid="2311877285724540644">"บันทึก"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"ไม่พบปุ่มหน้าแรก"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"ต้องใช้ปุ่มหน้าแรกเพื่อให้สามารถไปยังส่วนต่างๆ ในอุปกรณ์นี้ โปรดเพิ่มปุ่มหน้าแรกก่อนที่จะบันทึก"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ปรับความกว้างของปุ่ม"</string>
     <string name="clipboard" msgid="1313879395099896312">"คลิปบอร์ด"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"คลิปบอร์ดช่วยให้สามารถลากรายการไปยังคลิปบอร์ดได้โดยตรง นอกจากนี้ คุณยังสามารถลากรายการออกจากคลิปบอร์ดได้โดยตรงหากมีรายการอยู่ในคลิปบอร์ด"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ปุ่มนำทางที่กำหนดเอง"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"ปุ่ม Keycode ช่วยให้สามารถเพิ่มแป้นของแป้นพิมพ์ไปยังแถบนำทาง เมื่อกดปุ่มนี้ ปุ่มจะเลียนแบบการทำงานของแป้นพิมพ์ที่เลือก โดยจะต้องเลือกแป้นให้กับปุ่มก่อน จากนั้นเลือกรูปภาพที่จะแสดงบนปุ่ม"</string>
-    <string name="select_keycode" msgid="7413765103381924584">"เลือกปุ่มแป้นพิมพ์"</string>
-    <string name="preview" msgid="9077832302472282938">"ดูตัวอย่าง"</string>
+    <string name="icon" msgid="8732339849035837289">"ไอคอน"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ลากเพื่อเพิ่มชิ้นส่วน"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"โทรศัพท์เริ่มเครื่องร้อน"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"คุณลักษณะบางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"โทรศัพท์จะพยายามลดอุณหภูมิลงโดยอัตโนมัติ คุณยังสามารถใช้โทรศัพท์ได้ แต่โทรศัพท์อาจทำงานช้าลง\n\nโทรศัพท์จะทำงานตามปกติเมื่อเย็นลงแล้ว"</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"ซ้าย"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"ขวา"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"ปรับแต่งทางลัด"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"ทางลัด"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"แจ้งให้ป้อนรหัสผ่าน"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"การแจ้งเตือน"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"ภาพหน้าจอ"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"ความปลอดภัย"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"สถานะของผู้ใช้"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
 </resources>
