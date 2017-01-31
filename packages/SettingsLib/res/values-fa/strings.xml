@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"داده سلولی همیشه فعال"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"کدک بلوتوث صوتی"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"انتخاب کدک صوتی بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"سرعت نمونه بلوتوث صوتی"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"انتخاب کدک صوتی بلوتوث:\nنرخ نمونه"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"بیت‌های بلوتوث صوتی در هر نمونه"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"انتخاب کدک صوتی بلوتوث:\nبیت در نمونه"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"حالت کانال بلوتوث‌ صوتی"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"انتخاب کدک صوتی بلوتوث:\nحالت کانال"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏کدک LDAC صوتی بلوتوث: کیفیت پخش"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏انتخاب کدک LDAC صوتی بلوتوث:\nکیفیت پخش"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"پخش جریانی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏وقتی فعال است، در شرایط پایین بودن سیگنال، Wi‑Fi برای واگذار کردن اتصال داده به شبکه سلولی فعال‌تر خواهد بود."</string>

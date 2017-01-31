@@ -61,16 +61,18 @@
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Жүйені таңдау (әдепкі)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="4260844283202960798">"aptX"</item>
-    <item msgid="500463122137421129">"aptX HD"</item>
-    <item msgid="2301339338870319651">"LDAC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Жүйені таңдау (әдепкі)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="1190434429082395888">"aptX"</item>
-    <item msgid="3093550793512117000">"aptX HD"</item>
-    <item msgid="508106435710925399">"LDAC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Жүйені таңдау (әдепкі)"</item>
@@ -109,14 +111,14 @@
     <item msgid="8883739882299884241">"Стерео"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="3411577996960199959">"Аудиомазмұн сапасы бойынша оңтайландыру (990 кб/сек не 909 кб/сек)"</item>
+    <item msgid="7158319962230727476">"Аудиомазмұн сапасы бойынша оңтайландырылды (990 кбит/сек не 909 кбит/сек)"</item>
     <item msgid="2921767058740704969">"Теңгерілген аудиомазмұн мен байланыс сапасы (660 кб/сек не 606 кб/сек)"</item>
-    <item msgid="3682554248829489641">"Байланыс сапасы бойынша оңтайландыру (330 кб/сек не 303 кб/сек)"</item>
+    <item msgid="8860982705384396512">"Байланыс сапасы бойынша оңтайландырылды (330 кбит/сек не 303 кбит/сек)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="7668834469173465015">"Аудиомазмұн сапасы бойынша оңтайландыру"</item>
+    <item msgid="6398189564246596868">"Аудиомазмұн сапасы үшін оңтайландырылды"</item>
     <item msgid="4327143584633311908">"Теңгерілген аудиомазмұн мен байланыс сапасы"</item>
-    <item msgid="6155648878105378550">"Байланыс сапасы бойынша оңтайландыру"</item>
+    <item msgid="4681409244565426925">"Байланыс сапасы бойынша оңтайландырылды"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Өшірулі"</item>

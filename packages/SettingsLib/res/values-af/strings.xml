@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Sellulêre data altyd aktief"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Deaktiveer absolute volume"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-oudiokodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Kies Bluetooth-oudiokodek"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth-oudiovoorbeeldkoers"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Kies Bluetooth-oudiokodek:\nVoorbeeldtempo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth-oudiobisse per voorbeeld"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Kies Bluetooth-oudiokodek:\nBis per voorbeeld"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth-oudiokanaalmodus"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Kies Bluetooth-oudiokodek:\nKanaalmodus"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-oudio-LDAC-kodek: Speelgehalte"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Kies Bluetooth-oudio-LDAC-kodek:\nSpeelgehalte"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Stroming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Wanneer dit geaktiveer is, sal Wi-Fi meer aggressief wees om die dataverbinding na selfoon oor te dra wanneer die Wi-Fi-sein swak is"</string>

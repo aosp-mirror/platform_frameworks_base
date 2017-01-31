@@ -59,64 +59,66 @@
     <item msgid="45075631231212732">"Utilitza sempre la comprovació HDCP"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="7065842274271279580">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="4260844283202960798">"aptX"</item>
-    <item msgid="500463122137421129">"aptX HD"</item>
-    <item msgid="2301339338870319651">"LDAC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="5062108632402595000">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="1190434429082395888">"aptX"</item>
-    <item msgid="3093550793512117000">"aptX HD"</item>
-    <item msgid="508106435710925399">"LDAC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="3093023430402746802">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="8895532488906185219">"44,1 kHz"</item>
     <item msgid="2909915718994807056">"48,0 kHz"</item>
     <item msgid="3347287377354164611">"88,2 kHz"</item>
     <item msgid="1234212100239985373">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="3214516120190965356">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="4482862757811638365">"44,1 kHz"</item>
     <item msgid="354495328188724404">"48,0 kHz"</item>
     <item msgid="7329816882213695083">"88,2 kHz"</item>
     <item msgid="6967397666254430476">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="2684127272582591429">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="5618929009984956469">"16 bits/mostra"</item>
     <item msgid="3412640499234627248">"24 bits/mostra"</item>
     <item msgid="121583001492929387">"32 bits/mostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="1081159789834584363">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="4726688794884191540">"16 bits/mostra"</item>
     <item msgid="305344756485516870">"24 bits/mostra"</item>
     <item msgid="244568657919675099">"32 bits/mostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="5226878858503393706">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="4106832974775067314">"Mono"</item>
     <item msgid="5571632958424639155">"Estèreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Selecció del sistema (predeterminada)"</item>
+    <item msgid="4118561796005528173">"Utilitza selecció del sistema (predeterminada)"</item>
     <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Estèreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="3411577996960199959">"Optimitza la qualitat de l\'àudio (990 kbps/909 kbps)"</item>
+    <item msgid="7158319962230727476">"Optimitzat per a la qualitat de l\'àudio (990 kbps / 909 kbps)"</item>
     <item msgid="2921767058740704969">"Qualitat equilibrada de l\'àudio i la connexió (660 kbps/606 kbps)"</item>
-    <item msgid="3682554248829489641">"Optimitza la qualitat de la connexió (330 kbps/303 kbps)"</item>
+    <item msgid="8860982705384396512">"Optimitzat per a la qualitat de la connexió (330 kbps / 303 kbps)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="7668834469173465015">"Optimitza la qualitat de l\'àudio"</item>
+    <item msgid="6398189564246596868">"Optimitzat per a la qualitat de l\'àudio"</item>
     <item msgid="4327143584633311908">"Qualitat equilibrada de l\'àudio i la connexió"</item>
-    <item msgid="6155648878105378550">"Optimitza la qualitat de la connexió"</item>
+    <item msgid="4681409244565426925">"Optimitzat per a la qualitat de la connexió"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"No"</item>

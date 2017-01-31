@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Palaging aktibo ang cellular data"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"I-disable ang absolute volume"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Piliin ang Audio Codec ng Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Sample na Rate ng Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Piliin ang Audio Codec ng Bluetooth:\nRate ng Sample"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits Per Sample ng Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Piliin ang Audio Codec ng Bluetooth:\nBit Kada Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Channel Mode ng Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Piliin ang Audio Codec ng Bluetooth:\nChannel Mode"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Audio LDAC Codec ng Bluetooth: Kalidad ng Pag-playback"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Piliin ang Audio LDAC Codec ng Bluetooth:\nKalidad ng Pag-playback"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kapag naka-enable, mas magiging agresibo ang Wi‑Fi sa paglipat ng koneksyon ng data sa Cellular, kapag mahina ang signal ng Wi‑Fi"</string>

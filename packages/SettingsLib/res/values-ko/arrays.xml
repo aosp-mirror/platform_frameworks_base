@@ -58,22 +58,68 @@
     <item msgid="3878793616631049349">"DRM 콘텐츠에 대해서만 HDCP 확인 사용"</item>
     <item msgid="45075631231212732">"항상 HDCP 확인 사용"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:0 (7065842274271279580) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (500463122137421129) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:0 (5062108632402595000) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (3093550793512117000) -->
-    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_titles:0 (3093023430402746802) -->
-    <!-- no translation found for bluetooth_a2dp_codec_sample_rate_summaries:0 (3214516120190965356) -->
-    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_titles:0 (2684127272582591429) -->
-    <!-- no translation found for bluetooth_a2dp_codec_bits_per_sample_summaries:0 (1081159789834584363) -->
-    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_titles:0 (5226878858503393706) -->
-    <!-- no translation found for bluetooth_a2dp_codec_channel_mode_summaries:0 (4118561796005528173) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:0 (3411577996960199959) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:1 (2921767058740704969) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:2 (3682554248829489641) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:0 (7668834469173465015) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:1 (4327143584633311908) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:2 (6155648878105378550) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"시스템 설정 사용(기본)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"시스템 설정 사용(기본)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="3093023430402746802">"시스템 설정 사용(기본)"</item>
+    <item msgid="8895532488906185219">"44.1kHz"</item>
+    <item msgid="2909915718994807056">"48.0kHz"</item>
+    <item msgid="3347287377354164611">"88.2kHz"</item>
+    <item msgid="1234212100239985373">"96.0kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="3214516120190965356">"시스템 설정 사용(기본)"</item>
+    <item msgid="4482862757811638365">"44.1kHz"</item>
+    <item msgid="354495328188724404">"48.0kHz"</item>
+    <item msgid="7329816882213695083">"88.2kHz"</item>
+    <item msgid="6967397666254430476">"96.0kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2684127272582591429">"시스템 설정 사용(기본)"</item>
+    <item msgid="5618929009984956469">"16비트/샘플"</item>
+    <item msgid="3412640499234627248">"24비트/샘플"</item>
+    <item msgid="121583001492929387">"32비트/샘플"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="1081159789834584363">"시스템 설정 사용(기본)"</item>
+    <item msgid="4726688794884191540">"16비트/샘플"</item>
+    <item msgid="305344756485516870">"24비트/샘플"</item>
+    <item msgid="244568657919675099">"32비트/샘플"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="5226878858503393706">"시스템 설정 사용(기본)"</item>
+    <item msgid="4106832974775067314">"모노"</item>
+    <item msgid="5571632958424639155">"스테레오"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="4118561796005528173">"시스템 설정 사용(기본)"</item>
+    <item msgid="8900559293912978337">"모노"</item>
+    <item msgid="8883739882299884241">"스테레오"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"오디오 품질(990kbps/909kbps)에 최적화됨"</item>
+    <item msgid="2921767058740704969">"오디오 및 연결 품질의 균형 유지(660Kbps/606Kbps)"</item>
+    <item msgid="8860982705384396512">"연결 품질(330kbps/303kbps)에 최적화됨"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"오디오 품질에 최적화됨"</item>
+    <item msgid="4327143584633311908">"오디오 및 연결 품질의 균형 유지"</item>
+    <item msgid="4681409244565426925">"연결 품질에 최적화됨"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"사용 안함"</item>
     <item msgid="1593289376502312923">"64K"</item>

@@ -61,16 +61,18 @@
   <string-array name="bluetooth_a2dp_codec_titles">
     <item msgid="7065842274271279580">"Выбор системы (по умолчанию)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
-    <item msgid="4260844283202960798">"aptX"</item>
-    <item msgid="500463122137421129">"aptX HD"</item>
-    <item msgid="2301339338870319651">"LDAC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="5062108632402595000">"Выбор системы (по умолчанию)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
-    <item msgid="1190434429082395888">"aptX"</item>
-    <item msgid="3093550793512117000">"aptX HD"</item>
-    <item msgid="508106435710925399">"LDAC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"Выбор системы (по умолчанию)"</item>
@@ -109,14 +111,14 @@
     <item msgid="8883739882299884241">"Стерео"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="3411577996960199959">"Оптимизация под качество аудио (990/909 кбит/с)"</item>
-    <item msgid="2921767058740704969">"Баланс качества аудио и скорости подключения (660/606 кбит/с)"</item>
-    <item msgid="3682554248829489641">"Оптимизация под скорость подключения (330/303 кбит/с)"</item>
+    <item msgid="7158319962230727476">"Оптимизировать качество звука (990/909 Кбит/с)"</item>
+    <item msgid="2921767058740704969">"Баланс качества звука и скорости подключения (660/606 кбит/с)"</item>
+    <item msgid="8860982705384396512">"Оптимизировать скорость подключения (330/303 Кбит/с)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="7668834469173465015">"Оптимизация под качество аудио"</item>
-    <item msgid="4327143584633311908">"Баланс качества аудио и скорости подключения"</item>
-    <item msgid="6155648878105378550">"Оптимизация под скорость подключения"</item>
+    <item msgid="6398189564246596868">"Оптимизировать качество звука"</item>
+    <item msgid="4327143584633311908">"Баланс качества звука и скорости подключения"</item>
+    <item msgid="4681409244565426925">"Оптимизировать скорость подключения"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Выкл."</item>

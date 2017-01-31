@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"모바일 데이터 항상 활성화"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"절대 볼륨 사용 안함"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"블루투스 오디오 코덱"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"블루투스 오디오 코덱 선택"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"블루투스 오디오 샘플링 비율"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"블루투스 오디오 코덱 선택:\n샘플링 비율"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"블루투스 오디오 샘플당 비트"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"블루투스 오디오 코덱 선택:\n샘플당 비트"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"블루투스 오디오 채널 모드"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"블루투스 오디오 코덱 선택:\n채널 모드"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"블루투스 오디오 LDAC 코덱: 재생 품질"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"블루투스 오디오 LDAC 코덱 선택:\n재생 품질"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"스트리밍: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시합니다."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"사용 설정하면 Wi-Fi 신호가 약할 때 데이터 연결을 Wi-Fi에서 데이터 네트워크로 더욱 적극적으로 핸드오버합니다."</string>

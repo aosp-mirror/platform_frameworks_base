@@ -171,15 +171,15 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಕೋಡೆಕ್"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth ಆಡಿಯೊ ಕೋಡೆಕ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ ಕೋಡೆಕ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಮಾದರಿ ದರ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Bluetooth ಆಡಿಯೋ ಕೋಡೆಕ್:\nಮಾದರಿ ದರ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್:\nಮಾದರಿ ದರ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ ಬಿಟ್ಸ್‌‌ನ ಪ್ರತಿ ಮಾದರಿ"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Bluetooth ಆಡಿಯೋ ಕೋಡೆಕ್‌:\nಬಿಟ್ಸ್ ಪ್ರತಿ ಮಾದರಿ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್‌:\nಬಿಟ್ಸ್ ಪ್ರತಿ ಮಾದರಿ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ಬ್ಲೂಟೂತ್ ಆಡಿಯೋ ಚಾನೆಲ್ ಮೋಡ್"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Bluetooth ಆಡಿಯೋ ಕೋಡೆಕ್:\nಚಾನೆಲ್ ಮೋಡ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth ಆಡಿಯೊ LDAC ಕೋಡೆಕ್: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth ಆಡಿಯೊ LDAC ಕೋಡೆಕ್:\nಪ್ಲೇಬ್ಯಾಕ್‌ ಗುಣಮಟ್ಟ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ ಕೋಡೆಕ್:\nಚಾನೆಲ್ ಮೋಡ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್: ಪ್ಲೇಬ್ಯಾಕ್ ಗುಣಮಟ್ಟ"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ LDAC ಕೋಡೆಕ್:\nಪ್ಲೇಬ್ಯಾಕ್‌ ಗುಣಮಟ್ಟ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ಸ್ಟ್ರೀಮಿಂಗ್: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>

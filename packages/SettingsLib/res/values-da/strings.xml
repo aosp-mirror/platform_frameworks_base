@@ -171,23 +171,16 @@
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobildata altid aktiveret"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Deaktiver absolut lydstyrke"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-lydcodec"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (4558347981670553665) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Vælg codec for Bluetooth-lyd"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Eksempelfrekvens for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (5628790207448471613) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Vælg codec for Bluetooth-lyd:\nSamplingfrekvens"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit pr. eksempel for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (4546131401358681321) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Vælg codec for Bluetooth-lyd:\nBits pr. sampling"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanaltilstand for Bluetooth-lyd"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (9133545781346216071) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality (3619694372407843405) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (3181967377574368400) -->
-    <skip />
-    <!-- no translation found for bluetooth_select_a2dp_codec_streaming_label (5347862512596240506) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Vælg codec for Bluetooth-lyd:\nKanaltilstand"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-codec for Bluetooth-lyd: Afspilningskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Vælg LDAC-codec for Bluetooth-lyd:\nAfspilningskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamer: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Når dette er aktiveret, gennemtvinges en overdragelse af dataforbindelsen fra Wi-Fi til mobilnetværk, når Wi-Fi-signalet er svagt"</string>
@@ -362,5 +355,5 @@
     <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Angiv adgangskode for at gendanne fabriksdata i demotilstand"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Næste"</string>
-    <string name="retail_demo_reset_title" msgid="696589204029930100">"Du skal angive en adgangskode"</string>
+    <string name="retail_demo_reset_title" msgid="696589204029930100">"Angiv en adgangskode"</string>
 </resources>
