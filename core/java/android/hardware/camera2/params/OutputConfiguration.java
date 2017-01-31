@@ -244,6 +244,8 @@ public final class OutputConfiguration implements Parcelable {
      * @param klass a non-{@code null} {@link Class} object reference that indicates the source of
      *            this surface. Only {@link android.view.SurfaceHolder SurfaceHolder.class} and
      *            {@link android.graphics.SurfaceTexture SurfaceTexture.class} are supported.
+     * @throws IllegalArgumentException if the Surface source class is not supported, or Surface
+     *         size is zero.
      */
     public <T> OutputConfiguration(@NonNull Size surfaceSize, @NonNull Class<T> klass) {
         checkNotNull(klass, "surfaceSize must not be null");
@@ -255,6 +257,10 @@ public final class OutputConfiguration implements Parcelable {
         } else {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
             throw new IllegalArgumentException("Unknow surface source class type");
+        }
+
+        if (surfaceSize.getWidth() == 0 || surfaceSize.getHeight() == 0) {
+            throw new IllegalArgumentException("Surface size needs to be non-zero");
         }
 
         mSurfaceGroupId = SURFACE_GROUP_ID_NONE;
@@ -340,7 +346,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @param surface The surface to be added.
      * @throws IllegalArgumentException if the Surface is invalid, the Surface's
-     *         size/dataspace/format doesn't match, or adding the Surface would exceed number of
+     *         dataspace/format doesn't match, or adding the Surface would exceed number of
      *         shared surfaces supported.
      * @throws IllegalStateException if the Surface was already added to this OutputConfiguration,
      *         or if the OutputConfiguration is not shared and it already has a surface associated
@@ -358,14 +364,14 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("Exceeds maximum number of surfaces");
         }
 
-        // TODO: b/34697112. This needs to be reverted once app fix is merged.
-        // Do not throw exception for below case:
-        // - OutputConfiguration(Size(0, 0), klass)
-        // - addSurface(surface)
-        if ((mConfiguredSize.getWidth() != 0 || mConfiguredSize.getHeight() != 0) &&
-                !mConfiguredSize.equals(SurfaceUtils.getSurfaceSize(surface))) {
-            throw new IllegalArgumentException("The size of added surface doesn't match");
+        // This will throw IAE is the surface was abandoned.
+        Size surfaceSize = SurfaceUtils.getSurfaceSize(surface);
+        if (!surfaceSize.equals(mConfiguredSize)) {
+            Log.w(TAG, "Added surface size " + surfaceSize +
+                    " is different than pre-configured size " + mConfiguredSize +
+                    ", the pre-configured size will be used.");
         }
+
         if (mConfiguredDataspace != SurfaceUtils.getSurfaceDataspace(surface)) {
             throw new IllegalArgumentException("The dataspace of added surface doesn't match");
         }
