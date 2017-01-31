@@ -488,7 +488,8 @@ public class WebViewClient {
      * @param view The WebView which needs to be cleaned up.
      * @param detail the reason why it exited.
      * @return true if the host application handled the situation that process has
-     *         exited, otherwise, application will crash.
+     *         exited, otherwise, application will crash if render process crashed,
+     *         or be killed if render process was killed by the system.
      */
     public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
         return false;
