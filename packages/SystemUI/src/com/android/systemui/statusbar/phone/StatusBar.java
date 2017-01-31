@@ -601,8 +601,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             new ArraySet<>();
     private long mLastVisibilityReportUptimeMs;
 
-    private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
-
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
@@ -1880,7 +1878,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateEmptyShadeView();
 
         updateQsExpansionEnabled();
-        mShadeUpdates.check();
 
         // Let's also update the icons
         mIconController.updateNotificationIcons(mNotificationData);
@@ -3075,24 +3072,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarView.collapsePanel(false /* animate */, false /* delayed */,
                         1.0f /* speedUpFactor */);
             }
-        }
-    }
-
-    @Override // CommandQueue
-    public void buzzBeepBlinked() {
-    }
-
-    @Override
-    public void notificationLightOff() {
-        if (mDozeServiceHost != null) {
-            mDozeServiceHost.fireNotificationLight(false);
-        }
-    }
-
-    @Override
-    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
-        if (mDozeServiceHost != null) {
-            mDozeServiceHost.fireNotificationLight(true);
         }
     }
 
@@ -5057,43 +5036,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mStatusBarKeyguardViewManager.isShowing();
     }
 
-    private final class ShadeUpdates {
-        private final ArraySet<String> mVisibleNotifications = new ArraySet<String>();
-        private final ArraySet<String> mNewVisibleNotifications = new ArraySet<String>();
-
-        public void check() {
-            mNewVisibleNotifications.clear();
-            ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
-            for (int i = 0; i < activeNotifications.size(); i++) {
-                final Entry entry = activeNotifications.get(i);
-                final boolean visible = entry.row != null
-                        && entry.row.getVisibility() == View.VISIBLE;
-                if (visible) {
-                    mNewVisibleNotifications.add(entry.key + entry.notification.getPostTime());
-                }
-            }
-            final boolean updates = !mVisibleNotifications.containsAll(mNewVisibleNotifications);
-            mVisibleNotifications.clear();
-            mVisibleNotifications.addAll(mNewVisibleNotifications);
-
-            // We have new notifications
-            if (updates && mDozeServiceHost != null) {
-                mDozeServiceHost.fireNewNotifications();
-            }
-        }
-    }
-
     private final class DozeServiceHost implements DozeHost {
-        // Amount of time to allow to update the time shown on the screen before releasing
-        // the wakelock.  This timeout is design to compensate for the fact that we don't
-        // currently have a way to know when time display contents have actually been
-        // refreshed once we've finished rendering a new frame.
-        private static final long PROCESSING_TIME = 500;
-
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
-
-        // Keeps the last reported state by fireNotificationLight.
-        private boolean mNotificationLightOn;
 
         @Override
         public String toString() {
@@ -5109,19 +5053,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void fireNotificationHeadsUp() {
             for (Callback callback : mCallbacks) {
                 callback.onNotificationHeadsUp();
-            }
-        }
-
-        public void fireNotificationLight(boolean on) {
-            mNotificationLightOn = on;
-            for (Callback callback : mCallbacks) {
-                callback.onNotificationLight(on);
-            }
-        }
-
-        public void fireNewNotifications() {
-            for (Callback callback : mCallbacks) {
-                callback.onNewNotifications();
             }
         }
 
@@ -5187,11 +5118,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         public boolean isPulsingBlocked() {
             return mFingerprintUnlockController.getMode()
                     == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
-        }
-
-        @Override
-        public boolean isNotificationLightOn() {
-            return mNotificationLightOn;
         }
 
         @Override

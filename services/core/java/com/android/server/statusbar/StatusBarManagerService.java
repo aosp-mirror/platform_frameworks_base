@@ -120,40 +120,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void buzzBeepBlinked() {
-            if (mBar != null) {
-                try {
-                    mBar.buzzBeepBlinked();
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-
-        @Override
-        public void notificationLightPulse(int argb, int onMillis, int offMillis) {
-            mNotificationLightOn = true;
-            if (mBar != null) {
-                try {
-                    mBar.notificationLightPulse(argb, onMillis, offMillis);
-                } catch (RemoteException ex) {
-                }
-            }
-        }
-
-        @Override
-        public void notificationLightOff() {
-            if (mNotificationLightOn) {
-                mNotificationLightOn = false;
-                if (mBar != null) {
-                    try {
-                        mBar.notificationLightOff();
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
-        }
-
-        @Override
         public void showScreenPinningRequest(int taskId) {
             if (mBar != null) {
                 try {

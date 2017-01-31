@@ -30,15 +30,12 @@ public interface DozeHost {
     void stopDozing();
     void dozeTimeTick();
     boolean isPowerSaveActive();
-    boolean isNotificationLightOn();
     boolean isPulsingBlocked();
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 
     interface Callback {
-        default void onNewNotifications() {}
         default void onNotificationHeadsUp() {}
-        default void onNotificationLight(boolean on) {}
         default void onPowerSaveChanged(boolean active) {}
     }
 
