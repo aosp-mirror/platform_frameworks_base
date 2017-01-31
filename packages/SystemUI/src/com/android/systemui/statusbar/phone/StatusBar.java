@@ -1599,8 +1599,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mHeadsUpManager.isHeadsUp(key)) {
             // A cancel() in repsonse to a remote input shouldn't be delayed, as it makes the
             // sending look longer than it takes.
+            // Also we should not defer the removal if reordering isn't allowed since otherwise
+            // some notifications can't disappear before the panel is closed.
             boolean ignoreEarliestRemovalTime = mRemoteInputController.isSpinning(key)
-                    && !FORCE_REMOTE_INPUT_HISTORY;
+                    && !FORCE_REMOTE_INPUT_HISTORY
+                    || !mVisualStabilityManager.isReorderingAllowed();
             deferRemoval = !mHeadsUpManager.removeNotification(key,  ignoreEarliestRemovalTime);
         }
         if (key.equals(mMediaNotificationKey)) {
