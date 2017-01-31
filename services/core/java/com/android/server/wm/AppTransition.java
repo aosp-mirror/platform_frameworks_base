@@ -1131,8 +1131,10 @@ public class AppTransition implements Dump {
                         // We scale the width and clip to the top/left square
                         float scale = thumbWidth /
                                 (appWidth - contentInsets.left - contentInsets.right);
-                        int unscaledThumbHeight = (int) (thumbHeight / scale);
-                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
+                        if (!mGridLayoutRecentsEnabled) {
+                            int unscaledThumbHeight = (int) (thumbHeight / scale);
+                            mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
+                        }
 
                         mNextAppTransitionInsets.set(contentInsets);
 
