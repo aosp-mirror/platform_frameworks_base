@@ -105,10 +105,9 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * Intent used to broadcast the change in the Audio Codec state of the
      * A2DP Source profile.
      *
-     * <p>This intent will have 3 extras:
+     * <p>This intent will have 2 extras:
      * <ul>
-     *   <li> {@link #EXTRA_CODEC_CONFIG} - The current codec configuration. </li>
-     *   <li> {@link #EXTRA_PREVIOUS_CODEC_CONFIG} - The previous codec configuration. </li>
+     *   <li> {@link BluetoothCodecStatus#EXTRA_CODEC_STATUS} - The codec status. </li>
      *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device if the device is currently
      *   connected, otherwise it is not included.</li>
      * </ul>
@@ -564,24 +563,24 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * Gets the current codec configuration.
+     * Gets the current codec status (configuration and capability).
      *
-     * @return the current codec configuration
+     * @return the current codec status
      * @hide
      */
-    public BluetoothCodecConfig getCodecConfig() {
-        if (DBG) Log.d(TAG, "getCodecConfig");
+    public BluetoothCodecStatus getCodecStatus() {
+        if (DBG) Log.d(TAG, "getCodecStatus");
         try {
             mServiceLock.readLock().lock();
             if (mService != null && isEnabled()) {
-                return mService.getCodecConfig();
+                return mService.getCodecStatus();
             }
             if (mService == null) {
                 Log.w(TAG, "Proxy not attached to service");
             }
             return null;
         } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to BT service in getCodecConfig()", e);
+            Log.e(TAG, "Error talking to BT service in getCodecStatus()", e);
             return null;
         } finally {
             mServiceLock.readLock().unlock();
