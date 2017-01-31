@@ -290,6 +290,10 @@ class LockSettingsStorage {
             hasFile(getLegacyLockPatternFilename(userId));
     }
 
+    public boolean hasCredential(int userId) {
+        return hasPassword(userId) || hasPattern(userId);
+    }
+
     private boolean hasFile(String name) {
         byte[] contents = readFile(name);
         return contents != null && contents.length > 0;
@@ -650,4 +654,5 @@ class LockSettingsStorage {
             }
         }
     }
+
 }

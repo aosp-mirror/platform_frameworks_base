@@ -137,6 +137,6 @@ public class LockSettingsShellCommandTest {
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "clear", "--old", "1234" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils).clearLock(mUserId);
+        verify(mLockPatternUtils).clearLock("1234", mUserId);
     }
 }

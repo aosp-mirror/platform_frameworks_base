@@ -116,7 +116,7 @@ class LockSettingsShellCommand extends ShellCommand {
     }
 
     private void runClear() throws RemoteException {
-        mLockPatternUtils.clearLock(mCurrentUserId);
+        mLockPatternUtils.clearLock(mOld, mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
     }
 
