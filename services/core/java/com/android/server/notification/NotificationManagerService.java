@@ -4559,18 +4559,18 @@ public class NotificationManagerService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyEnqueued(info, sbnToPost, importance, fromUser);
+                        notifyEnqueued(info, sbnToPost);
                     }
                 });
             }
         }
 
         private void notifyEnqueued(final ManagedServiceInfo info,
-                final StatusBarNotification sbn, int importance, boolean fromUser) {
+                final StatusBarNotification sbn) {
             final INotificationListener assistant = (INotificationListener) info.service;
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                assistant.onNotificationEnqueued(sbnHolder, importance, fromUser);
+                assistant.onNotificationEnqueued(sbnHolder);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
             }

@@ -34,6 +34,6 @@ oneway interface INotificationListener
     void onInterruptionFilterChanged(int interruptionFilter);
 
     // rankers only
-    void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder, int importance, boolean user);
+    void onNotificationEnqueued(in IStatusBarNotificationHolder notificationHolder);
     void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
 }
