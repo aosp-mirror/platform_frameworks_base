@@ -3735,32 +3735,30 @@ public class ListView extends AbsListView {
         }
     }
 
-    /* (non-Javadoc)
+    /**
      * @see android.view.View#findViewById(int)
-     * First look in our children, then in any header and footer views that may be scrolled off.
+     * @removed For internal use only. This should have been hidden.
      */
     @Override
-    protected View findViewTraversal(@IdRes int id) {
-        View v;
-        v = super.findViewTraversal(id);
+    protected <T extends View> T findViewTraversal(@IdRes int id) {
+        // First look in our children, then in any header and footer views that
+        // may be scrolled off.
+        View v = super.findViewTraversal(id);
         if (v == null) {
             v = findViewInHeadersOrFooters(mHeaderViewInfos, id);
             if (v != null) {
-                return v;
+                return (T) v;
             }
             v = findViewInHeadersOrFooters(mFooterViewInfos, id);
             if (v != null) {
-                return v;
+                return (T) v;
             }
         }
-        return v;
+        return (T) v;
     }
 
-    /* (non-Javadoc)
-     *
-     * Look in the passed in list of headers or footers for the view.
-     */
     View findViewInHeadersOrFooters(ArrayList<FixedViewInfo> where, int id) {
+        // Look in the passed in list of headers or footers for the view.
         if (where != null) {
             int len = where.size();
             View v;
@@ -3780,33 +3778,32 @@ public class ListView extends AbsListView {
         return null;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see android.view.View#findViewWithTag(Object)
-     * First look in our children, then in any header and footer views that may be scrolled off.
+     * @removed For internal use only. This should have been hidden.
      */
     @Override
-    protected View findViewWithTagTraversal(Object tag) {
-        View v;
-        v = super.findViewWithTagTraversal(tag);
+    protected <T extends View> T findViewWithTagTraversal(Object tag) {
+        // First look in our children, then in any header and footer views that
+        // may be scrolled off.
+        View v = super.findViewWithTagTraversal(tag);
         if (v == null) {
             v = findViewWithTagInHeadersOrFooters(mHeaderViewInfos, tag);
             if (v != null) {
-                return v;
+                return (T) v;
             }
 
             v = findViewWithTagInHeadersOrFooters(mFooterViewInfos, tag);
             if (v != null) {
-                return v;
+                return (T) v;
             }
         }
-        return v;
+        return (T) v;
     }
 
-    /* (non-Javadoc)
-     *
-     * Look in the passed in list of headers or footers for the view with the tag.
-     */
     View findViewWithTagInHeadersOrFooters(ArrayList<FixedViewInfo> where, Object tag) {
+        // Look in the passed in list of headers or footers for the view with
+        // the tag.
         if (where != null) {
             int len = where.size();
             View v;
@@ -3827,32 +3824,33 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * @hide
+     * First look in our children, then in any header and footer views that may
+     * be scrolled off.
+     *
      * @see android.view.View#findViewByPredicate(Predicate)
-     * First look in our children, then in any header and footer views that may be scrolled off.
+     * @hide
      */
     @Override
-    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
-        View v;
-        v = super.findViewByPredicateTraversal(predicate, childToSkip);
+    protected <T extends View> T findViewByPredicateTraversal(
+            Predicate<View> predicate, View childToSkip) {
+        View v = super.findViewByPredicateTraversal(predicate, childToSkip);
         if (v == null) {
             v = findViewByPredicateInHeadersOrFooters(mHeaderViewInfos, predicate, childToSkip);
             if (v != null) {
-                return v;
+                return (T) v;
             }
 
             v = findViewByPredicateInHeadersOrFooters(mFooterViewInfos, predicate, childToSkip);
             if (v != null) {
-                return v;
+                return (T) v;
             }
         }
-        return v;
+        return (T) v;
     }
 
-    /* (non-Javadoc)
-     *
-     * Look in the passed in list of headers or footers for the first view that matches
-     * the predicate.
+    /**
+     * Look in the passed in list of headers or footers for the first view that
+     * matches the predicate.
      */
     View findViewByPredicateInHeadersOrFooters(ArrayList<FixedViewInfo> where,
             Predicate<View> predicate, View childToSkip) {

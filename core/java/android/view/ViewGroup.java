@@ -4211,9 +4211,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@hide}
      */
     @Override
-    protected View findViewTraversal(@IdRes int id) {
+    protected <T extends View> T findViewTraversal(@IdRes int id) {
         if (id == mID) {
-            return this;
+            return (T) this;
         }
 
         final View[] where = mChildren;
@@ -4226,7 +4226,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 v = v.findViewById(id);
 
                 if (v != null) {
-                    return v;
+                    return (T) v;
                 }
             }
         }
@@ -4238,9 +4238,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@hide}
      */
     @Override
-    protected View findViewWithTagTraversal(Object tag) {
+    protected <T extends View> T findViewWithTagTraversal(Object tag) {
         if (tag != null && tag.equals(mTag)) {
-            return this;
+            return (T) this;
         }
 
         final View[] where = mChildren;
@@ -4253,7 +4253,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 v = v.findViewWithTag(tag);
 
                 if (v != null) {
-                    return v;
+                    return (T) v;
                 }
             }
         }
@@ -4265,9 +4265,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@hide}
      */
     @Override
-    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
+    protected <T extends View> T findViewByPredicateTraversal(Predicate<View> predicate,
+            View childToSkip) {
         if (predicate.apply(this)) {
-            return this;
+            return (T) this;
         }
 
         final View[] where = mChildren;
@@ -4280,7 +4281,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 v = v.findViewByPredicate(predicate);
 
                 if (v != null) {
-                    return v;
+                    return (T) v;
                 }
             }
         }
