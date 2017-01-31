@@ -1100,8 +1100,8 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
-        public void onNotificationEnqueued(IStatusBarNotificationHolder notificationHolder,
-                                           int importance, boolean user) throws RemoteException {
+        public void onNotificationEnqueued(IStatusBarNotificationHolder notificationHolder)
+                throws RemoteException {
             // no-op in the listener
         }
 

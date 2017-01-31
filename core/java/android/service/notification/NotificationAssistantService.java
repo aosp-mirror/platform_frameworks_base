@@ -77,12 +77,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * A notification was posted by an app. Called before alert.
      *
      * @param sbn the new notification
-     * @param importance the initial importance of the notification.
-     * @param user true if the initial importance reflects an explicit user preference.
      * @return an adjustment or null to take no action, within 100ms.
      */
-    abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
-          int importance, boolean user);
+    abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn);
 
     /**
      * Updates a notification.  N.B. this won’t cause
@@ -202,8 +199,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
 
     private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
-        public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder,
-                int importance, boolean user) {
+        public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder) {
             StatusBarNotification sbn;
             try {
                 sbn = sbnHolder.get();
@@ -214,8 +210,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
-            args.argi1 = importance;
-            args.argi2 = user ? 1 : 0;
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ENQUEUED,
                     args).sendToTarget();
         }
@@ -254,10 +248,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 case MSG_ON_NOTIFICATION_ENQUEUED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     StatusBarNotification sbn = (StatusBarNotification) args.arg1;
-                    final int importance = args.argi1;
-                    final boolean user = args.argi2 == 1;
                     args.recycle();
-                    Adjustment adjustment = onNotificationEnqueued(sbn, importance, user);
+                    Adjustment adjustment = onNotificationEnqueued(sbn);
                     if (adjustment != null) {
                         if (!isBound()) return;
                         try {
