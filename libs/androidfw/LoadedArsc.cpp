@@ -116,7 +116,10 @@ bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTab
                               LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
                               uint32_t* out_flags) const {
   ATRACE_CALL();
-  const TypeSpecPtr& ptr = type_specs_[type_idx];
+
+  // If the type IDs are offset in this package, we need to take that into account when searching
+  // for a type.
+  const TypeSpecPtr& ptr = type_specs_[type_idx - type_id_offset_];
   if (ptr == nullptr) {
     return false;
   }
@@ -334,6 +337,15 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
     loaded_package->dynamic_ = true;
   }
 
+  if (header->header.headerSize >= sizeof(ResTable_package)) {
+    uint32_t type_id_offset = dtohl(header->typeIdOffset);
+    if (type_id_offset > std::numeric_limits<uint8_t>::max()) {
+      LOG(ERROR) << "Type ID offset in RES_TABLE_PACKAGE_TYPE is too large.";
+      return {};
+    }
+    loaded_package->type_id_offset_ = static_cast<int>(type_id_offset);
+  }
+
   util::ReadUtf16StringFromDevice(header->name, arraysize(header->name),
                                   &loaded_package->package_name_);
 
@@ -385,7 +397,6 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
             LOG(ERROR) << "Too many type configurations, overflow detected.";
             return {};
           }
-
           loaded_package->type_specs_.editItemAt(last_type_idx) = std::move(type_spec_ptr);
 
           types_builder = {};
@@ -400,6 +411,12 @@ std::unique_ptr<LoadedPackage> LoadedPackage::Load(const Chunk& chunk) {
 
         if (type_spec->id == 0) {
           LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE has invalid ID 0.";
+          return {};
+        }
+
+        if (loaded_package->type_id_offset_ + static_cast<int>(type_spec->id) >
+            std::numeric_limits<uint8_t>::max()) {
+          LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE has out of range ID.";
           return {};
         }
 

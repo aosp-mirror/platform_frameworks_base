@@ -94,6 +94,7 @@ class LoadedPackage {
   std::string package_name_;
   int package_id_ = -1;
   bool dynamic_ = false;
+  int type_id_offset_ = 0;
 
   ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
