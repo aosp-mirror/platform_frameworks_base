@@ -469,7 +469,7 @@ class InstantAppRegistry {
             return;
         }
         final int appCount = uninstalledAppStates.size();
-        for (int i = 0; i < appCount; i++) {
+        for (int i = appCount - 1; i >= 0; --i) {
             UninstalledInstantAppState uninstalledAppState = uninstalledAppStates.get(i);
             if (!criteria.test(uninstalledAppState)) {
                 continue;
