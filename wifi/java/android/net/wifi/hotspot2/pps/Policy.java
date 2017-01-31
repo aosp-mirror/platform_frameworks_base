@@ -293,13 +293,13 @@ public final class Policy implements Parcelable {
                 && minRoamingDownlinkBandwidth == that.minRoamingDownlinkBandwidth
                 && minRoamingUplinkBandwidth == that.minRoamingUplinkBandwidth
                 && Arrays.equals(excludedSsidList, that.excludedSsidList)
-                && (requiredProtoPortMap == null) ? that.requiredProtoPortMap == null
-                        : requiredProtoPortMap.equals(that.requiredProtoPortMap)
+                && (requiredProtoPortMap == null ? that.requiredProtoPortMap == null
+                        : requiredProtoPortMap.equals(that.requiredProtoPortMap))
                 && maximumBssLoadValue == that.maximumBssLoadValue
-                && (preferredRoamingPartnerList == null) ? that.preferredRoamingPartnerList == null
-                        : preferredRoamingPartnerList.equals(that.preferredRoamingPartnerList)
-                && (policyUpdate == null) ? that.policyUpdate == null
-                        : policyUpdate.equals(that.policyUpdate);
+                && (preferredRoamingPartnerList == null ? that.preferredRoamingPartnerList == null
+                        : preferredRoamingPartnerList.equals(that.preferredRoamingPartnerList))
+                && (policyUpdate == null ? that.policyUpdate == null
+                        : policyUpdate.equals(that.policyUpdate));
     }
 
     /**
