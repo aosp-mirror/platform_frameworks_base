@@ -19,6 +19,7 @@ package android.view;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 import android.animation.LayoutTransition;
+import android.annotation.CallSuper;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
@@ -5412,100 +5413,60 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * HW-only, Rect-ignoring invalidation path.
-     *
-     * Returns false if this path was unable to complete successfully. This means
-     * it hit a ViewParent it doesn't recognize and needs to fall back to calculating
-     * damage area.
-     *
-     * Hardware acceleration ignores damage rectangles, since native computes damage for everything
-     * drawn by HWUI (and SW layer / drawing cache doesn't keep track of damage area).
-     *
-     * Ignores opaque dirty optimizations, always using the full PFLAG_DIRTY flag.
-     *
-     * Ignores FLAG_OPTIMIZE_INVALIDATE, since we're not computing a rect,
-     *         so no point in optimizing that.
-     * @hide
-     */
-    public boolean tryInvalidateChildHardware(View child) {
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo == null || !attachInfo.mHardwareAccelerated) {
-            return false;
+    @Override
+    @CallSuper
+    public void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
+        /*
+         * HW-only, Rect-ignoring damage codepath
+         *
+         * We don't deal with rectangles here, since RenderThread native code computes damage for
+         * everything drawn by HWUI (and SW layer / drawing cache doesn't keep track of damage area)
+         */
+
+        // if set, combine the animation flag into the parent
+        mPrivateFlags |= (target.mPrivateFlags & PFLAG_DRAW_ANIMATION);
+
+        if ((target.mPrivateFlags & ~PFLAG_DIRTY_MASK) != 0) {
+            // We lazily use PFLAG_DIRTY, since computing opaque isn't worth the potential
+            // optimization in provides in a DisplayList world.
+            mPrivateFlags = (mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DIRTY;
+
+            // simplified invalidateChildInParent behavior: clear cache validity to be safe...
+            mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
         }
 
-        // verify it's ViewGroups up to a ViewRootImpl
-        ViewRootImpl viewRoot = null;
-        ViewParent parent = getParent();
-        while (parent != null) {
-            if (parent instanceof ViewGroup) {
-                parent = parent.getParent();
-            } else if (parent instanceof ViewRootImpl) {
-                viewRoot = (ViewRootImpl) parent;
-                break;
-            } else {
-                // unknown parent type, abort
-                return false;
-            }
-        }
-        if (viewRoot == null) {
-            // unable to find ViewRoot
-            return false;
+        // ... and mark inval if in software layer that needs to repaint (hw handled in native)
+        if (mLayerType == LAYER_TYPE_SOFTWARE) {
+            // Layered parents should be invalidated. Escalate to a full invalidate (and note that
+            // we do this after consuming any relevant flags from the originating descendant)
+            mPrivateFlags |= PFLAG_INVALIDATED | PFLAG_DIRTY;
+            target = this;
         }
 
-        final boolean drawAnimation = (child.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0;
-
-        if (child.mLayerType != LAYER_TYPE_NONE) {
-            mPrivateFlags |= PFLAG_INVALIDATED;
+        if (mParent != null) {
+            mParent.onDescendantInvalidated(this, target);
         }
-
-        parent = this;
-        do {
-            if (parent != viewRoot) {
-                // Note: we cast here without checking isinstance, to avoid cost of isinstance again
-                ViewGroup viewGroup = (ViewGroup) parent;
-                if (drawAnimation) {
-                    viewGroup.mPrivateFlags |= PFLAG_DRAW_ANIMATION;
-                }
-
-                // We lazily use PFLAG_DIRTY, since computing opaque isn't worth the potential
-                // optimization in provides in a DisplayList world.
-                viewGroup.mPrivateFlags =
-                        (viewGroup.mPrivateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DIRTY;
-
-                // simplified invalidateChildInParent behavior: clear cache validity to be safe,
-                // and mark inval if in layer
-                viewGroup.mPrivateFlags &= ~PFLAG_DRAWING_CACHE_VALID;
-                if (viewGroup.mLayerType != LAYER_TYPE_NONE) {
-                    viewGroup.mPrivateFlags |= PFLAG_INVALIDATED;
-                }
-            } else {
-                if (drawAnimation) {
-                    viewRoot.mIsAnimating = true;
-                }
-                ((ViewRootImpl) parent).invalidate();
-                return true;
-            }
-
-            parent = parent.getParent();
-        } while (parent != null);
-        return true;
     }
 
 
     /**
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.
+     *
+     * @deprecated Use {@link #onDescendantInvalidated(View, View)} instead to observe updates to
+     * draw state in descendants.
      */
+    @Deprecated
     @Override
     public final void invalidateChild(View child, final Rect dirty) {
-        if (tryInvalidateChildHardware(child)) {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null && attachInfo.mHardwareAccelerated) {
+            // HW accelerated fast path
+            onDescendantInvalidated(child, child);
             return;
         }
 
         ViewParent parent = this;
-
-        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
             // If the child is drawing an animation, we want to copy this flag onto
             // ourselves and the parent to make sure the invalidate request goes
@@ -5608,7 +5569,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * This implementation returns null if this ViewGroup does not have a parent,
      * if this ViewGroup is already fully invalidated or if the dirty rectangle
      * does not intersect with this ViewGroup's bounds.
+     *
+     * @deprecated Use {@link #onDescendantInvalidated(View, View)} instead to observe updates to
+     * draw state in descendants.
      */
+    @Deprecated
     @Override
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
         if ((mPrivateFlags & (PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID)) != 0) {
@@ -5654,74 +5619,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         return null;
-    }
-
-    /**
-     * Native-calculated damage path
-     * Returns false if this path was unable to complete successfully. This means
-     * it hit a ViewParent it doesn't recognize and needs to fall back to calculating
-     * damage area
-     * @hide
-     */
-    public boolean damageChildDeferred() {
-        ViewParent parent = getParent();
-        while (parent != null) {
-            if (parent instanceof ViewGroup) {
-                parent = parent.getParent();
-            } else if (parent instanceof ViewRootImpl) {
-                ((ViewRootImpl) parent).invalidate();
-                return true;
-            } else {
-                parent = null;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Quick invalidation method called by View.invalidateViewProperty. This doesn't set the
-     * DRAWN flags and doesn't handle the Animation logic that the default invalidation methods
-     * do; all we want to do here is schedule a traversal with the appropriate dirty rect.
-     *
-     * @hide
-     */
-    public void damageChild(View child, final Rect dirty) {
-        if (damageChildDeferred()) {
-            return;
-        }
-
-        ViewParent parent = this;
-
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo != null) {
-            int left = child.mLeft;
-            int top = child.mTop;
-            if (!child.getMatrix().isIdentity()) {
-                child.transformRect(dirty);
-            }
-
-            do {
-                if (parent instanceof ViewGroup) {
-                    ViewGroup parentVG = (ViewGroup) parent;
-                    if (parentVG.mLayerType != LAYER_TYPE_NONE) {
-                        // Layered parents should be recreated, not just re-issued
-                        parentVG.invalidate();
-                        parent = null;
-                    } else {
-                        parent = parentVG.damageChildInParent(left, top, dirty);
-                        left = parentVG.mLeft;
-                        top = parentVG.mTop;
-                    }
-                } else {
-                    // Reached the top; this calls into the usual invalidate method in
-                    // ViewRootImpl, which schedules a traversal
-                    final int[] location = attachInfo.mInvalidateChildLocation;
-                    location[0] = left;
-                    location[1] = top;
-                    parent = parent.invalidateChildInParent(location, dirty);
-                }
-            } while (parent != null);
-        }
     }
 
     /**

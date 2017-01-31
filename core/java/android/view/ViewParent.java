@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
@@ -53,12 +54,36 @@ public interface ViewParent {
      */
     public void requestTransparentRegion(View child);
 
+
+    /**
+     * The target View has been invalidated, or has had a drawing property changed that
+     * requires the hierarchy to re-render.
+     *
+     * This method is called by the View hierarchy to signal ancestors that a View either needs to
+     * re-record its drawing commands, or drawing properties have changed. This is how Views
+     * schedule a drawing traversal.
+     *
+     * This signal is generally only dispatched for attached Views, since only they need to draw.
+     *
+     * @param child Direct child of this ViewParent containing target
+     * @param target The view that needs to redraw
+     */
+    default void onDescendantInvalidated(@NonNull View child, @NonNull View target) {
+        if (getParent() != null) {
+            // Note: should pass 'this' as default, but can't since we may not be a View
+            getParent().onDescendantInvalidated(child, target);
+        }
+    }
+
     /**
      * All or part of a child is dirty and needs to be redrawn.
      * 
      * @param child The child which is dirty
      * @param r The area within the child that is invalid
+     *
+     * @deprecated Use {@link #onDescendantInvalidated(View, View)} instead.
      */
+    @Deprecated
     public void invalidateChild(View child, Rect r);
 
     /**
@@ -80,7 +105,10 @@ public interface ViewParent {
      * @param r The area within the child that is invalid
      *
      * @return the parent of this ViewParent or null
+     *
+     * @deprecated Use {@link #onDescendantInvalidated(View, View)} instead.
      */
+    @Deprecated
     public ViewParent invalidateChildInParent(int[] location, Rect r);
 
     /**

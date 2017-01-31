@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
@@ -1063,6 +1064,14 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public boolean isLayoutRequested() {
         return mLayoutRequested;
+    }
+
+    @Override
+    public void onDescendantInvalidated(@NonNull View child, @NonNull View descendant) {
+        if ((descendant.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
+            mIsAnimating = true;
+        }
+        invalidate();
     }
 
     void invalidate() {
