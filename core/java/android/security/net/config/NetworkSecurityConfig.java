@@ -175,13 +175,14 @@ public final class NetworkSecurityConfig {
      *
      * @hide
      */
-    public static final Builder getDefaultBuilder(int targetSdkVersion, boolean ephemeralApp) {
+    public static final Builder getDefaultBuilder(int targetSdkVersion, int targetSandboxVesrsion) {
         Builder builder = new Builder()
-                .setCleartextTrafficPermitted(!ephemeralApp)
                 .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
                 // System certificate store, does not bypass static pins.
                 .addCertificatesEntryRef(
                         new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
+        final boolean cleartextTrafficPermitted = targetSandboxVesrsion < 2;
+        builder.setCleartextTrafficPermitted(cleartextTrafficPermitted);
         // Applications targeting N and above must opt in into trusting the user added certificate
         // store.
         if (targetSdkVersion <= Build.VERSION_CODES.M) {

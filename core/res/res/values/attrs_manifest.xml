@@ -1247,6 +1247,12 @@
          split that contains the defined component. -->
     <attr name="splitName" format="string" />
 
+    <!-- Specifies the target sandbox this app wants to use. Higher sanbox versions
+         will have increasing levels of security.
+
+         <p>The default value of this attribute is <code>1</code>. -->
+    <attr name="targetSandboxVersion" format="integer" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1274,6 +1280,7 @@
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />
         <attr name="isolatedSplits" />
+        <attr name="targetSandboxVersion" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components
