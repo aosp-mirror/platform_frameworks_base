@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"找不到工作設定檔應用程式，或工作設定檔應用程式已受損。因此，您的工作設定檔現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"無法在此裝置上再使用您的工作設定檔。"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"網絡流量現正受監控"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"輕按以瞭解詳情"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"輕按即可瞭解詳情"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"您的裝置將被清除"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"找不到管理員應用程式的元件，或管理員應用程式已受損並不能使用。您的裝置現在將被清除。請聯絡您的管理員以取得協助。"</string>
     <string name="me" msgid="6545696007631404292">"我本人"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"允許應用程式自行使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"讀取手機狀態和識別碼"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限允許應用程式確定手機號碼和裝置編號、是否正在通話中，以及所撥打的對方號碼。"</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"透過系統轉接來電"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"允許應用程式透過系統轉接來電，以改善通話體驗。"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"讀取電話號碼"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"允許應用程式存取裝置的電話號碼。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"刪除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
+    <string name="email" msgid="4560673117055050403">"電郵"</string>
+    <string name="dial" msgid="2275093056198652749">"撥號"</string>
+    <string name="map" msgid="5441053548030107189">"地圖"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確認裝置有 250 MB 的可用空間，然後重新啟動。"</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允許應用程式讀取安裝工作階段。應用程式將可查看目前安裝套裝的詳細資料。"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"要求安裝套件"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"允許應用程式要求安裝套件"</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"要求刪除套件"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"允許應用程式要求刪除套件。"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"要求忽略電池優化"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"允許應用程式要求就該應用程式忽略電池優化。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"輕觸兩下控制縮放"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致您的聽力受損。"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"以兩隻手指按住不放，即可啟用無障礙功能。"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"無障礙功能已啟用。"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"無障礙功能已取消。"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"無障礙功能快速鍵已開啟"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"同時按住兩個音量按鈕 3 秒即可啟用或停用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>。\n\n您可以前往「設定」&gt;「無障礙功能」變更這項服務。"</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"停用快速鍵"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"繼續啟用"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"無障礙功能快速鍵已啟用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"無障礙功能快速鍵已停用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"正在登出 <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"「<xliff:g id="LABEL">%1$s</xliff:g>」已停用"</string>
     <string name="conference_call" msgid="3751093130790472426">"會議通話"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"提示"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"遊戲"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"音樂和音訊"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"電影和影片"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"相片和圖片"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"社交和通訊"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"新聞和雜誌"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"地圖和導航"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"生產力應用程式"</string>
 </resources>

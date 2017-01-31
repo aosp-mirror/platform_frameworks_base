@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplikacioni i administratorit të profilit të punës mungon ose është dëmtuar. Si rezultat i kësaj, profili yt i punës dhe të dhënat përkatëse janë fshirë. Kontakto administratorin tënd për ndihmë."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profili yt i punës nuk është më i disponueshëm në këtë pajisje."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Trafiku i rrjetit po monitorohet"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Trokit për më shumë detaje"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Trokit për të mësuar më shumë"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Pajisja do të spastrohet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplikacionit të administratorit i mungojnë përbërësit ose është dëmtuar dhe nuk mund të përdoret. Pajisja jote tani do të fshihet. Kontakto administratorin tënd për ndihmë."</string>
     <string name="me" msgid="6545696007631404292">"Unë"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"lexo statusin e telefonit dhe identitetin"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Lejon aplikacionin të hyjë në funksionet telefonike të pajisjes. Kjo leje i mundëson aplikacionit të përcaktojë numrin e telefonit dhe ID-të e pajisjes, nëse një telefonatë është aktive apo nëse numri në distancë është i lidhur me një telefonatë."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kalon telefonatat përmes sistemit"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Lejon që aplikacioni të kalojë telefonatat përmes sistemit për të përmirësuar përvojën e telefonatës."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"lexo numrin e telefonit"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Lejon që aplikacioni të ketë qasje te numri i telefonit i pajisjes."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"parandalo kalimin e tabletit në fjetje"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Fshi"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metoda e hyrjes"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Veprimet e tekstit"</string>
+    <string name="email" msgid="4560673117055050403">"Dërgo mail"</string>
+    <string name="dial" msgid="2275093056198652749">"Formo numrin"</string>
+    <string name="map" msgid="5441053548030107189">"Harta"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lejon një aplikacion të lexojë sesionet e instalimit. Kjo e lejon atë të shohë detaje rreth instalimeve të paketave aktive."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"kërko paketat e instalimit"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lejon që një aplikacion të kërkojë instalimin e paketave."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"kërko fshirjen e paketave"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Lejon që një aplikacion të kërkojë fshirjen e paketave."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"kërko të shpërfillësh optimizimet e baterisë"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Lejon që një aplikacion të kërkojë leje për të shpërfillur optimizimet e baterisë për atë aplikacion."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Trokit dy herë për të kontrolluar zmadhimin"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Hiq"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Të ngrihet volumi mbi nivelin e rekomanduar?\n\nDëgjimi me volum të lartë për periudha të gjata mund të dëmtojë dëgjimin."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mbaji shtypur dy gishtat për të aktivizuar qasjen."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Qasja u aktivizua."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Qasja u anulua."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Shkurtorja e qasshmërisë është AKTIVE"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Aktivizo ose çaktivizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g> duke mbajtur poshtë dy butonat e volumit për 3 sekonda.\n\nMund ta ndryshosh shërbimin te Cilësimet &gt; Qasshmëria."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Çaktivizo shkurtoren"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Lëre aktive"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Shkurtorja e qasshmërisë e aktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Shkurtorja e qasshmërisë e çaktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Emri i përdoruesit aktual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Po kalon në <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> po del…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
     <string name="conference_call" msgid="3751093130790472426">"Telefonatë konferencë"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Këshilla për veglën"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Lojëra"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Muzikë dhe audio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filma dhe video"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Foto dhe imazhe"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Rrjete sociale dhe komunikim"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Lajme dhe revista"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Harta dhe navigim"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produktivitet"</string>
 </resources>

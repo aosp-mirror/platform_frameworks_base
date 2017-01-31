@@ -68,10 +68,10 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"येणारा कॉलर ID"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"केला जाणारा कॉलर ID"</string>
-    <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट केलेला रेखा ID"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट केलेला रेखा ID प्रतिबंध"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"येणारा कॉलर आयडी"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"केला जाणारा कॉलर आयडी"</string>
+    <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट केलेला रेखा आयडी"</string>
+    <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट केलेला रेखा आयडी प्रतिबंध"</string>
     <string name="CfMmi" msgid="5123218989141573515">"कॉल अग्रेषण"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल सोडून"</string>
@@ -83,12 +83,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"अवांछित त्रासदायक कॉल ला नकार"</string>
     <string name="CndMmi" msgid="3116446237081575808">"कॉल करणार्‍या नंबरचे वितरण"</string>
     <string name="DndMmi" msgid="1265478932418334331">"व्यत्यय आणू नका"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवेची तरतूद केलेली नाही."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर ID सेटिंग बदलू शकत नाही."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर आयडी सेटिंग बदलू शकत नाही."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आणीबाणी सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"व्हॉइस सेवा अवरोधित केली आहे."</string>
@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाईल प्रशासन अॅप गहाळ आहे किंवा दुषित आहे. यामुळे, आपले कार्य प्रोफाईल आणि संबंधित डेटा हटविला गेला आहे. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"आपले कार्य प्रोफाईल या डिव्‍डाइसवर यापुढे उपलब्‍ध नाही."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्क रहदारीचे परीक्षण केले जात आहे"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"अधिक तपशीलांसाठी टॅप करा"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"अधिक जाणून घेण्यासाठी टॅप करा"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"आपले डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"प्रशासन अॅपमध्ये घटक गहाळ किंवा दूषित आहेत आणि वापरला जाऊ शकत नाही. आपले डिव्हाइस आता मिटविले जाईल. सहाय्यासाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>
@@ -381,7 +381,9 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS कॉल सेवेमध्‍ये प्रवेश करा"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिती आणि ओळख वाचा"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस ID आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"डिव्हाइसच्या फोन वैशिष्ट्यांवर प्रवेश करण्यास अॅप ला अनुमती देते. ही परवानगी कॉल सक्रिय असला किंवा नसला तरीही, फोन नंबर आणि डिव्हाइस आयडी आणि कॉलद्वारे कनेक्ट केलेला रीमोट नंबर निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणालीच्या माध्यमातून कॉल रूट करा"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करण्याचा अनुभव सुधारण्यासाठी अॅपला त्याचे कॉल प्रणालीच्या माध्यमातून रूट करू देते."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"फोन नंबर वाचा"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"अॅपला डिव्हाइसच्या फोन नंबरमध्ये प्रवेश करण्याची अनुमती देते."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टॅबलेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"हटवा"</string>
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट पद्धत"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"मजकूर क्रिया"</string>
+    <string name="email" msgid="4560673117055050403">"ईमेल"</string>
+    <string name="dial" msgid="2275093056198652749">"डायल करा"</string>
+    <string name="map" msgid="5441053548030107189">"नकाशा"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"संचयन स्थान संपत आहे"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"अनुप्रयोगास स्‍थापना सत्र वाचण्‍याची अनुमती देते. हे सक्रिय पॅकेज स्‍थापनांविषयी तपशील पाहाण्‍याची यास अनुमती देते."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"पॅकेज स्थापित करण्यासाठी विनंती करा"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"पॅकेजच्या स्थापना करण्यासाठी अनुप्रयोगास अनुमती देते."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"पॅकेज हटवण्याची विनंती"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"अनुप्रयोगास पॅकेज हटवण्यासाठी विनंती करण्याची अनुमती देते."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"बॅटरी ऑप्टिमायझेशन दुर्लक्षित करण्‍यास सांगा"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"त्या अॅपसाठी बॅटरी ऑप्टिमायझेशन दुर्लक्षित करण्‍यासाठी अॅपला परवानगी मागण्याची अनुमती देते."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"झूम नियंत्रणासाठी दोनदा टॅप करा"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"प्रवेशयोग्यता सक्षम करण्यासाठी दोन बोटांनी खाली धरून ठेवा."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"प्रवेशयोग्यता सक्षम."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"प्रवेशयोग्यता रद्द."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"प्रवेशयोग्यता शॉर्टकट चालू आहे"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"दोन्ही व्हॉल्यूम बटणे 3 सेकंदांसाठी धरून ठेवून <xliff:g id="SERVICE_NAME">%1$s</xliff:g> चालू किंवा बंद करा.\n\nआपण सेटिंग्ज &gt; प्रवेशयोग्यता मधून सेवा बदलू शकता."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"शॉर्टकट बंद करा"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"तसेच सोडा"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> चालू केली"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केली"</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> लॉग आउट करीत आहे…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
     <string name="conference_call" msgid="3751093130790472426">"परिषद कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"गेम"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"संगीत आणि ऑडिओ"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"चित्रपट आणि व्हिडिओ"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"फोटो आणि प्रतिमा"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"सामाजिक आणि संप्रेषण"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"बातम्‍या आणि मासिके"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"नकाशे आणि नेव्हिगेशन"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादनक्षमता"</string>
 </resources>

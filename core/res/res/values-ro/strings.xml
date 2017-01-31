@@ -185,7 +185,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Aplicația de administrare a profilului de serviciu lipsește sau este deteriorată. Prin urmare, profilul de serviciu și datele asociate au fost șterse. Pentru asistență, contactați administratorul."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profilul de serviciu nu mai este disponibil pe acest dispozitiv."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Traficul de rețea este monitorizat"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Atingeți pentru mai multe detalii"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Atingeți ca să aflați mai multe"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Datele de pe dispozitiv vor fi șterse"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Aplicația de administrare nu poate fi utilizată, deoarece este deteriorată sau îi lipsesc componente. Datele de pe dispozitiv vor fi șterse. Pentru asistență, contactați administratorul."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
@@ -385,6 +385,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite aplicației să folosească serviciul IMS pentru apeluri, fără intervenția dvs."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"citește starea și identitatea telefonului"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite aplicației să acceseze funcțiile de telefon ale dispozitivului. Cu această permisiune aplicația stabilește numărul de telefon și ID-urile de dispozitiv, dacă un apel este activ, precum și numărul de la distanță conectat printr-un apel."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"să direcționeze apelurile prin intermediul sistemului"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permiteți aplicației să direcționeze apelurile prin intermediul sistemului pentru a îmbunătăți calitatea apelurilor."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"să citească numărul de telefon"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Permite aplicației să acceseze numărul de telefon al dispozitivului."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"împiedicarea computerului tablet PC să intre în repaus"</string>
@@ -967,6 +969,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Ștergeți"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acțiuni pentru text"</string>
+    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="dial" msgid="2275093056198652749">"Apelați"</string>
+    <string name="map" msgid="5441053548030107189">"Hartă"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Spațiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Este posibil ca unele funcții de sistem să nu funcționeze"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
@@ -1217,6 +1222,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite unei aplicații accesul la citirea sesiunilor de instalare. Aceasta poate vedea detalii despre instalările de pachete active."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"să solicite pachete de instalare"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite unei aplicații să solicite instalarea pachetelor."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"să solicite ștergerea pachetelor"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Permite unei aplicații să solicite ștergerea pachetelor."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"să solicite ignorarea optimizărilor bateriei"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite unei aplicații să solicite permisiunea de a ignora optimizările bateriei pentru aplicația respectivă."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Apăsați de două ori pentru a controla mărirea/micșorarea"</string>
@@ -1245,7 +1252,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Imagine de fundal"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Schimbați imaginea de fundal"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Serviciu de citire a notificărilor"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Instrument de ascultare pentru Realitatea virtuală"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Instrument de ascultare pentru RV"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Furnizor de condiții"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Serviciul de clasificare a notificărilor"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN activat"</string>
@@ -1444,9 +1451,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminați"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ridicați volumul mai sus de nivelul recomandat?\n\nAscultarea la volum ridicat pe perioade lungi de timp vă poate afecta auzul."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mențineți două degete pe ecran pentru a activa accesibilitatea."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Comanda rapidă de accesibilitate este activată"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Activați sau dezactivați <xliff:g id="SERVICE_NAME">%1$s</xliff:g> apăsând lung ambele butoane de volum timp de 3 secunde.\n\nPuteți schimba serviciul în Setări și Accesibilitate."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Dezactivați comanda rapidă"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Mențineți-o activată"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Comanda rapidă de accesibilitate a activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Comanda rapidă de accesibilitate a dezactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Se comută la <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Se deconectează utilizatorul <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1702,20 +1712,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> a fost dezactivat"</string>
     <string name="conference_call" msgid="3751093130790472426">"Conferință telefonică"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Balon explicativ"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Jocuri"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Muzică și audio"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filme și videoclipuri"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotografii și imagini"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Rețele sociale și comunicare"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Știri și reviste"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Hărți și navigare"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Productivitate"</string>
 </resources>

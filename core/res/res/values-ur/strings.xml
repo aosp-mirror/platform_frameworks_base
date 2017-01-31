@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"دفتری پروفائل کی منتظم ایپ یا تو غائب ہے یا خراب ہے۔ اس کی وجہ سے، آپ کا دفتری پروفائل اور متعلقہ ڈیٹا حذف کر دیے گئے ہیں۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"آپ کا دفتری پروفائل اس آلہ پر مزید دستیاب نہیں ہے۔"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"نیٹ ورک ٹریفک مانیٹر ہو رہی ہے"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"مزید معلومات کیلئے تھپتھپائیں"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"مزید جاننے کیلئے تھپتھپائیں"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"منتظم کی ایپ میں گمشدہ اجزاء ہیں یا وہ خراب ہے اور اسے استعمال نہیں کیا جا سکتا ہے۔ آپ کے آلہ کو اب صاف کر دیا جائے گا۔ مدد کیلئے اپنے منتظم سے رابطہ کریں۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"سسٹم کے ذریعہ کالز روٹ کریں"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"فون نمبر پڑھے"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ایپ کو آلہ کے فون نمبر تک رسائی کرنے دیتا ہے۔"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ٹیبلیٹ کو سلیپ وضع میں جانے سے روکیں"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف کریں"</string>
     <string name="inputMethod" msgid="1653630062304567879">"اندراج کا طریقہ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
+    <string name="email" msgid="4560673117055050403">"ای میل"</string>
+    <string name="dial" msgid="2275093056198652749">"ڈائل کریں"</string>
+    <string name="map" msgid="5441053548030107189">"نقشہ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ایک ایپلیکیشن کو انسٹال سیشنز پڑھنے کی اجازت دیتا ہے۔ یہ اسے فعال پیکیج انسٹالیشنز کے بارے میں تفصیلات دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"پیکجز انسٹال کرنے کی درخواست کریں"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ایک ایپلیکیشن کو پیکجز انسٹال کرنے کی اجازت دیتی ہے۔"</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"پیکیجز حذف کرنے کی درخواست کریں"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ایپلیکیشن کو پیکجز حذف کرنے کیلئے درخواست کرنے کی اجازت ہے۔"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"بیٹری کی بہتریاں نظر انداز کرنے کا پوچھیں"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"اس ایپ کیلئے ایک ایپ کو بیٹری کی کارکردگی  بہتر بنانے کو نظر انداز کرنے کی اجازت دیں۔"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"زوم کنٹرول کیلئے دوبار تھپتھپائیں"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ہٹائیں"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ایکسیسبیلٹی فعال کرنے کیلئے دو انگلیاں نیچے دبائے رکھیں۔"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ایکسیسبیلٹی فعال۔"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ایکسیسبیلٹی منسوخ ہوگئی۔"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ایکسیسبیلٹی شارٹ کٹ آن ہے"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"‏دونوں والیوم بٹنز کو 3 سیکنڈ تک دبائے رکھ کر <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن یا آف کریں۔\n\nآپ سروس کو ترتیبات &gt;ایکسیسبیلٹی میں تبدیل کر سکتے ہیں۔"</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"شارٹ کٹ آف کریں"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"فعال رہنے دیں"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کر دیا"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ایکسیسبیلٹی شارٹ کٹ نے <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آف کر دیا"</string>
     <string name="user_switched" msgid="3768006783166984410">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> لاگ آؤٹ ہو رہا ہے…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"غیر فعال کردہ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"کانفرنس کال"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ٹول ٹپ"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"گیمز"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"موسیقی اور آڈیو"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"موویز اور ویڈیو"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"فوٹوز اور تصاویر"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"سوشل اور مواصلات"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"خبریں اور میگزین"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"نقشے اور نیویگیشن"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"پروڈکٹیوٹی"</string>
 </resources>

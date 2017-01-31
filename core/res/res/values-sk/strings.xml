@@ -187,7 +187,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Správcovská aplikácia pracovného profilu buď chýba, alebo je poškodená. Z toho dôvodu boli váš pracovný profil a s ním súvisiace údaje odstránené. Ak potrebujete pomoc, kontaktujte svojho správcu."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Váš pracovný profil už nie je na tomto zariadení dostupný."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Sleduje sa sieťová premávka."</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"Ďalšie podrobnosti získate klepnutím"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Klepnutím získate ďalšie informácie"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Vaše zariadenie bude vymazané"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"V správcovskej aplikácii chýbajú komponenty alebo je poškodená, a preto sa nedá použiť. Vaše zariadenie bude vymazané. Ak potrebujete pomoc, kontaktujte svojho správcu."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
@@ -388,6 +388,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čítať stav a identitu telefónu"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikácii pristupovať k telefónnym funkciám zariadenia. Aplikácia s týmto povolením môže určiť telefónne číslo a ID zariadenia, či práve prebieha hovor, a vzdialené číslo, s ktorým je prostredníctvom hovoru nadviazané spojenie."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"presmerovanie hovorov cez systém"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Umožňuje aplikácii presmerovať hovory cez systém na účely zlepšenia kvality hovorov."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"čítanie telefónneho čísla"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"Umožňuje aplikácii pristupovať k telefónnemu číslu daného zariadenia."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"zabránenie prechodu tabletu do režimu spánku"</string>
@@ -987,6 +989,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Odstrániť"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metóda vstupu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
+    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="dial" msgid="2275093056198652749">"Vytočiť"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
@@ -1237,6 +1242,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Toto povolenie umožňuje aplikácii čítať relácie inštalácií a zobraziť tak podrobnosti o aktívnych inštaláciách balíkov."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"odosielanie žiadostí o inštaláciu balíkov"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Umožňuje aplikácii vyžiadať inštaláciu balíkov."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"vyžiadať odstránenie balíkov"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Umožňuje aplikácii vyžiadať odstránenie balíkov."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"požiadať o ignorovanie optimalizácií výdrže batérie"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Umožňuje aplikácii požiadať o povolenie ignorovať optimalizácie výdrže batérie pre danú aplikáciu."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dvojitým klepnutím môžete ovládať priblíženie"</string>
@@ -1465,9 +1472,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Odstrániť"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Zvýšiť hlasitosť nad odporúčanú úroveň?\n\nDlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Zjednodušenie ovládania povolíte dlhým stlačením dvoma prstami."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Zjednodušenie ovládania bolo zrušené."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"Skratka dostupnosti je ZAPNUTÁ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"Službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g> zapnete a vypnete podržaním oboch tlačidiel hlasitosti na tri sekundy.\n\nSlužbu môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"Vypnúť skratku"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"Ponechať zapnutú"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skratka dostupnosti zapla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skratka dostupnosti vypla službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"Prebieha odhlásenie používateľa <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1733,20 +1743,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Deaktivovaná miniaplikácia <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Konferenčný hovor"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Popis"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"Hry"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"Hudba a zvuk"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"Filmy a videá"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"Fotky a obrázky"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"Sociálne siete a komunikácia"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"Noviny a časopisy"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Mapy a navigácia"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Produktivita"</string>
 </resources>

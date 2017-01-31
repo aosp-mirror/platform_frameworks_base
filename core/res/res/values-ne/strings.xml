@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफाइल व्यवस्थापक अनुप्रयोग या त हराएको या त बिग्रेको छ। फलस्वरूप, तपाईँको कार्य प्रोफाइल र सम्बन्धित डेटा मेटिएको छ। सहयोगको लागि तपाईँको व्यवस्थापकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"यस यन्त्रमा तपाईँको कार्य प्रोफाइल अब उपलब्ध छैन।"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्कको ट्राफिकको अनुगमन गरिँदै छ"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"थप विवरणहरूको लागि ट्याप गर्नुहोस्"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"थप जान्न ट्याप गर्नुहोस्"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"व्यवस्थापक अनुप्रयोगमा कम्पोनेन्टहरू या त हराएको वा भ्रष्ट छन्, र यसैले प्रयोग गर्न सकिँदैन। तपाईंको यन्त्र अब मेटिनेछ। सहयोगको लागि आफ्नो व्यवस्थापकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="me" msgid="6545696007631404292">"मलाई"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"तपाईँको हस्तक्षेप बिना नै कल गर्न IMS सेवा प्रयोग गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फोन स्थिति र पहिचान पढ्नुहोस्"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"उपकरणको फोन विशेषताहरूको पहुँच गर्न अनुप्रयोगलाई अनुमति दिन्छ। यस अनुमतिले फोन नम्बर र उपकरणको IDs, कल सक्षम छ कि छैन र कलद्वारा जोडिएको टाढाको नम्बर निर्धारण गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"प्रणाली मार्फत कल गर्न दिनुहोस्‌"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कल गर्दाको अनुभवलाई सुधार्न यस अनुप्रयोगलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"फोन नम्बर पढ्ने"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"यस अनुप्रयोगलाई यस यन्त्रको फोन नम्बरमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ट्याब्लेटलाई निन्द्रामा जानबाट रोक्नुहोस्"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1653630062304567879">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"पाठ कार्यहरू"</string>
+    <string name="email" msgid="4560673117055050403">"इमेल"</string>
+    <string name="dial" msgid="2275093056198652749">"डायल गर्नुहोस्"</string>
+    <string name="map" msgid="5441053548030107189">"नक्सा"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
@@ -1203,6 +1208,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोगलाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरू बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"स्थापना प्याकेजहरू अनुरोध गर्नुहोस्"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"प्याकेजहरूको स्थापना अनुरोध गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"प्याकेजहरू मेटाउने अनुरोध गर्नुहोस्"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"अनुप्रयोगलाई प्याकेजहरू मेटाउने अनुरोध गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ब्याट्री सम्बन्धी अनुकूलनहरूलाई बेवास्ता गर्न सोध्नुहोस्"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"कुनै अनुप्रयोगलाई त्यसका ब्याट्री सम्बन्धी अनुकूलनहरूलाई बेवास्ता गर्नका लागि अनुमति माग्न दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"जुम नियन्त्रणको लागि दुई चोटि ट्याप गर्नुहोस्"</string>
@@ -1429,9 +1436,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"हटाउनुहोस्"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"उपलब्धता सक्षम पार्न दुईवटा औंलाहरूले थिचिरहनुहोस्।"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"पहुँच सक्षम गरिएको।"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुँचयोग्यता रद्द गरियो।"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"पहुँचको सर्टकट सक्रिय छ"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"दुबै भोल्युम बटनहरूलाई ३ सेकेन्ड सम्म थिचेर <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय वा निष्क्रिय पार्नुहोस्‌।\n\nतपाईँले सेटिङहरू &gt; पहुँचमा गएर यो सेवा परिवर्तन गर्न सक्नुहुन्छ।"</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"सर्टकट निष्क्रिय पार्नुहोस्"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"सक्रिय छोड्नुहोस्"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय पार्‍यो"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई निष्क्रिय पार्‍यो"</string>
     <string name="user_switched" msgid="3768006783166984410">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> मा स्विच गर्दै..."</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"लग आउट गर्दै <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1677,20 +1687,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> लाई असक्षम गरियो"</string>
     <string name="conference_call" msgid="3751093130790472426">"सम्मेलन कल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"उपकरणको वर्णन"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"खेलहरू"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"संगीत तथा अडियो"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"चलचित्र तथा भिडियो"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"तस्बिर तथा छविहरू"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"सामाजिक तथा सञ्चार"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"समाचार तथा पत्रिकाहरू"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"नक्सा तथा नेभिगेसन"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादकत्व"</string>
 </resources>

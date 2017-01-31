@@ -156,10 +156,10 @@
     <string name="httpErrorConnect" msgid="8714273236364640549">"सर्वर से कनेक्ट नहीं किया जा सका."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"सर्वर से संचार नहीं किया जा सका. बाद में पुन: प्रयास करें."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्वर से कनेक्‍शन का समय समाप्त हुआ."</string>
-    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"पृष्ठ में कई सर्वर रीडायरेक्‍ट हैं."</string>
+    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"पेज में कई सर्वर रीडायरेक्‍ट हैं."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"प्रोटोकॉल समर्थित नहीं है."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"सुरक्षित कनेक्शन स्थापित नहीं किया जा सका."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"URL अमान्‍य होने के कारण पृष्ठ नहीं खोला जा सका."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"URL अमान्‍य होने के कारण पेज नहीं खोला जा सका."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"फ़ाइल पर नहीं पहुंचा जा सका."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"अनुरोधित फ़ाइल नहीं मिल सकी."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बहुत सारे अनुरोधों का संसाधन हो रहा है. बाद में पुन: प्रयास करें."</string>
@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"कार्य प्रोफ़ाइल व्‍यवस्‍थापक ऐप या तो अनुपलब्‍ध है या दूषित है. परिणाम स्‍वरूप, आपकी कार्य प्रोफ़ाइल और संबंधित डेटा हटा दिया गया है. सहायता के लिए अपने नियंत्रक से संपर्क करें."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"आपकी कार्य प्रोफ़ाइल इस डिवाइस पर उपलब्‍ध नहीं है."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"नेटवर्क ट्रैफ़िक मॉनीटर किया जा रहा है"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"अधिक विवरण के लिए टैप करें"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"अधिक जानने के लिए टैप करें"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"आपके डिवाइस को मिटा दिया जाएगा"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"व्‍यवस्‍थापक ऐप में घटक अनुपलब्‍ध हैं या वह दूषित है और उसका उपयोग नहीं किया जा सकता. आपके डिवाइस को अब मिटा दिया जाएगा. सहायता के लिए अपने नियंत्रक से संपर्क करें."</string>
     <string name="me" msgid="6545696007631404292">"मैं"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"आपके हस्‍तक्षेप के बिना कॉल करने के लिए, ऐप को IMS सेवा का उपयोग करने देती है."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"फ़ोन की स्‍थिति और पहचान पढ़ें"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स  को डिवाइस की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और डिवाइस आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"सिस्टम के माध्यम से कॉल रूट करें"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करने के अनुभव को बेहतर बनाने के लिए ऐप्लिकेशन को सिस्टम के माध्यम से उसके कॉल रूट करने देती है."</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"फ़ोन नंबर पढ़ें"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"ऐप्लिकेशन को डिवाइस का फ़ोन नंबर एक्सेस करने देती है."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टेबलेट को निष्‍क्रिय होने से रोकें"</string>
@@ -773,12 +775,12 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST क्रिया केवल /system/app में इंस्‍टॉल किए गए पैकेज के लिए समर्थित है."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"ऐसा कोई पैकेज नहीं मिला था जो FACTORY_TEST कार्रवाई प्रदान करता हो."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"रीबूट करें"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पृष्ठ दर्शाता है:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"\'<xliff:g id="TITLE">%s</xliff:g>\' पर यह पेज दर्शाता है:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"मार्गदर्शक की दुबारा पूछें"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"इस पृष्ठ से आगे बढ़ें"</string>
-    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"इस पृष्ठ पर बने रहें"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nक्या आप वाकई इस पृष्ठ से दूर नेविगेट करना चाहते हैं?"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"इस पेज से आगे बढ़ें"</string>
+    <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"इस पेज पर बने रहें"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nक्या आप वाकई इस पेज से दूर नेविगेट करना चाहते हैं?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"दुबारा पूछें"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"युक्ति: ज़ूम इन और आउट करने के लिए डबल-टैप करें."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्‍वत: भरण"</string>
@@ -815,7 +817,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"अभी नहीं"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"याद रखें"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कभी नहीं"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"आपके पास इस पृष्ठ को खोलने की अनुमति नहीं है."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"आपके पास इस पेज को खोलने की अनुमति नहीं है."</string>
     <string name="text_copied" msgid="4985729524670131385">"लेख की क्‍लिपबोर्ड पर प्रतिलिपि बनाई गई."</string>
     <string name="more_item_label" msgid="4650918923083320495">"अधिक"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"मेनू+"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"हटाएं"</string>
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"लेख क्रियाएं"</string>
+    <string name="email" msgid="4560673117055050403">"ईमेल करें"</string>
+    <string name="dial" msgid="2275093056198652749">"डायल करें"</string>
+    <string name="map" msgid="5441053548030107189">"नक्शा"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"मेमोरी स्‍थान समाप्‍त हो रहा है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए पर्याप्त मेमोरी नहीं है. सुनिश्चित करें कि आपके पास 250MB का खाली स्थान है और फिर से प्रारंभ करें."</string>
@@ -1005,7 +1010,7 @@
     <string name="force_close" msgid="8346072094521265605">"ठीक है"</string>
     <string name="report" msgid="4060218260984795706">"रिपोर्ट करें"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा करें"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ प्रतिसाद नहीं दे रहा है.\n\nक्‍या आप इसे बंद करना चाहते हैं?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"पेज प्रतिसाद नहीं दे रहा है.\n\nक्‍या आप इसे बंद करना चाहते हैं?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"एप्‍लि. रीडायरेक्‍ट किया गया"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> अभी चल रहा है."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> को वास्‍तविक रूप से लॉन्‍च किया गया था."</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ऐप्लिकेशन को इंस्टॉल सत्रों को पढ़ने देती है. इससे उसे सक्रिय पैकेज इंस्टॉलेशन के बारे में विवरण देखने की अनुमति मिल जाती है."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"पैकेज इंस्टॉल करने का अनुरोध करें"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"किसी ऐप्लिकेशन को पैकेज इंस्टॉल करने के अनुरोध की अनुमति देता है."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"पैकेज हटाने का अनुरोध करें"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"किसी ऐप्लिकेशन को पैकेज हटाने का अनुरोध करने देती है."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"बैटरी ऑप्टिमाइज़ेशन पर ध्यान ना देने के लिए पूछें"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"किसी ऐप्लिकेशन को उस ऐप्लिकेशन के लिए बैटरी ऑप्टिमाइज़ेशन पर ध्यान ना देने की अनुमति के लिए पूछने देता है."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ज़ूम नियंत्रण के लिए दो बार टैप करें"</string>
@@ -1249,7 +1256,7 @@
     <string name="next_button_label" msgid="1080555104677992408">"आगे"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"अभी नहीं"</string>
     <string name="no_matches" msgid="8129421908915840737">"कोई मिलान नहीं"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"पृष्ठ पर ढूंढें"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"पेज पर ढूंढें"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर अधिक समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"आसान तरीका को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"आसान तरीका सक्षम कर दी है."</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"आसान तरीका रद्द की गई."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"एक्सेस-योग्यता शॉर्टकट चालू है"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"दोनों वॉल्‍यूम बटन 3 सेकंड तक दबाए रखकर <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू या बंद करें.\n\nआप सेटिंग &gt; एक्सेस-योग्यता में सेवा बदल सकते हैं."</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"शॉर्टकट बंद करें"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"चालू रखें"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"एक्सेस-योग्यता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू किया"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"एक्सेस-योग्यता शॉर्टकट ने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद किया"</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> द्वारा प्रस्‍थान किया जा रहा है…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"अक्षम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"कॉन्फ़्रेंस कॉल"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"टूलटिप"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"गेम"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"संगीत और ऑडियो"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"फ़िल्में और वीडियो"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"फ़ोटो और तस्वीरें"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"सामाजिक और संचार"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"समाचार और पत्रिकाएं"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"मानचित्र और मार्गदर्शक"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादकता"</string>
 </resources>

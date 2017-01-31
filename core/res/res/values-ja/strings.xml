@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"お使いの仕事用プロファイルはこの端末で使用できなくなりました"</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"ネットワーク トラフィックの監視中"</string>
-    <string name="network_logging_notification_text" msgid="4448072433371155729">"タップして詳細を表示します"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"詳細を確認するにはタップします"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理アプリの構成要素が不足しているか、アプリが破損しているため、ご利用になれません。端末のデータはこれから消去されます。管理者にサポートをご依頼ください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
@@ -382,6 +382,8 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末情報と ID の読み取り"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
+    <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"システム経由での通話転送"</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
     <string name="permlab_readPhoneNumber" msgid="6421295519255154171">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumber" msgid="9135856402838173711">"端末の電話番号へのアクセスをアプリに許可します。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
@@ -947,6 +949,9 @@
     <string name="deleteText" msgid="6979668428458199034">"削除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"テキスト操作"</string>
+    <string name="email" msgid="4560673117055050403">"メール"</string>
+    <string name="dial" msgid="2275093056198652749">"発信"</string>
+    <string name="map" msgid="5441053548030107189">"地図"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1197,6 +1202,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"インストールパッケージのリクエスト"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"パッケージの削除のリクエスト"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"パッケージの削除をリクエストすることをアプリに許可します。"</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"電池の最適化を無視するかどうかの確認"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"電池の最適化の無視についてアプリが確認することを許可します。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ダブルタップでズームします"</string>
@@ -1423,9 +1430,12 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ユーザー補助機能を有効にするには2本の指で押し続けてください。"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"ユーザー補助が有効になりました。"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="5998592821749881862">"ユーザー補助機能のショートカット ON"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="2987297770937717543">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を ON または OFF にするには、両方の音量ボタンを 3 秒ほど押し続けます。\n\nこのサービスは [設定] &gt; [ユーザー補助機能] で変更できます。"</string>
+    <string name="disable_accessibility_shortcut" msgid="3683951963271793789">"ショートカットを OFF にする"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="8762106842437042969">"ON のままにする"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は ON になっています"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は OFF になっています"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> をログアウトしています…"</string>
@@ -1671,20 +1681,12 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"停止済みの「<xliff:g id="LABEL">%1$s</xliff:g>」"</string>
     <string name="conference_call" msgid="3751093130790472426">"グループ通話"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ツールチップ"</string>
-    <!-- no translation found for app_category_game (5431836943981492993) -->
-    <skip />
-    <!-- no translation found for app_category_audio (1659853108734301647) -->
-    <skip />
-    <!-- no translation found for app_category_video (2728726078629384196) -->
-    <skip />
-    <!-- no translation found for app_category_image (4867854544519846048) -->
-    <skip />
-    <!-- no translation found for app_category_social (5842783057834965912) -->
-    <skip />
-    <!-- no translation found for app_category_news (7496506240743986873) -->
-    <skip />
-    <!-- no translation found for app_category_maps (5878491404538024367) -->
-    <skip />
-    <!-- no translation found for app_category_productivity (3742083261781538852) -->
-    <skip />
+    <string name="app_category_game" msgid="5431836943981492993">"ゲーム"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"音楽＆オーディオ"</string>
+    <string name="app_category_video" msgid="2728726078629384196">"映画＆動画"</string>
+    <string name="app_category_image" msgid="4867854544519846048">"写真＆画像"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"ソーシャル＆コミュニケーション"</string>
+    <string name="app_category_news" msgid="7496506240743986873">"ニュース＆雑誌"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"地図＆ナビ"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"仕事効率化"</string>
 </resources>
