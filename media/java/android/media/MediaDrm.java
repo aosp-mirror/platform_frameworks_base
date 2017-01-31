@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -213,7 +214,7 @@ public final class MediaDrm {
          * It's easier to create it here than in C++.
          */
         native_setup(new WeakReference<MediaDrm>(this),
-                getByteArrayFromUUID(uuid));
+                getByteArrayFromUUID(uuid),  ActivityThread.currentOpPackageName());
     }
 
     /**
@@ -1307,7 +1308,8 @@ public final class MediaDrm {
     public native final void release();
     private static native final void native_init();
 
-    private native final void native_setup(Object mediadrm_this, byte[] uuid);
+    private native final void native_setup(Object mediadrm_this, byte[] uuid,
+            String appPackageName);
 
     private native final void native_finalize();
 
