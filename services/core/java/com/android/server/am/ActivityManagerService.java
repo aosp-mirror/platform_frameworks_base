@@ -1438,7 +1438,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
-        static final int CHANGE_PROCESS_STATE = 1<<1;
         int changes;
         int uid;
         int pid;
@@ -4164,12 +4163,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     + item.uid + ": " + item.foregroundActivities);
                             observer.onForegroundActivitiesChanged(item.pid, item.uid,
                                     item.foregroundActivities);
-                        }
-                        if ((item.changes&ProcessChangeItem.CHANGE_PROCESS_STATE) != 0) {
-                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
-                                    "PROCSTATE CHANGED pid=" + item.pid + " uid=" + item.uid
-                                    + ": " + item.processState);
-                            observer.onProcessStateChanged(item.pid, item.uid, item.processState);
                         }
                     }
                 } catch (RemoteException e) {
@@ -21018,7 +21011,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app.repProcState != app.curProcState) {
             app.repProcState = app.curProcState;
-            changes |= ProcessChangeItem.CHANGE_PROCESS_STATE;
             if (app.thread != null) {
                 try {
                     if (false) {
@@ -21139,12 +21131,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mPendingProcessChanges.add(item);
             }
             item.changes |= changes;
-            item.processState = app.repProcState;
             item.foregroundActivities = app.repForegroundActivities;
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Item " + Integer.toHexString(System.identityHashCode(item))
                     + " " + app.toShortString() + ": changes=" + item.changes
-                    + " procState=" + item.processState
                     + " foreground=" + item.foregroundActivities
                     + " type=" + app.adjType + " source=" + app.adjSource
                     + " target=" + app.adjTarget);
