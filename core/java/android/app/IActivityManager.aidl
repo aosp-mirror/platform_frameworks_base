@@ -145,6 +145,7 @@ interface IActivityManager {
             int flags, in Bundle arguments, in IInstrumentationWatcher watcher,
             in IUiAutomationConnection connection, int userId,
             in String abiOverride);
+    void addInstrumentationResults(in IApplicationThread target, in Bundle results);
     void finishInstrumentation(in IApplicationThread target, int resultCode,
             in Bundle results);
     /**

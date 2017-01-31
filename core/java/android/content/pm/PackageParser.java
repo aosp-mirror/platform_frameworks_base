@@ -1623,6 +1623,7 @@ public class PackageParser {
             return parseApkLite(apkPath, parser, attrs, flags, signatures, certificates);
 
         } catch (XmlPullParserException | IOException | RuntimeException e) {
+            Slog.w(TAG, "Failed to parse " + apkPath, e);
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
                     "Failed to parse " + apkPath, e);
         } finally {
@@ -3159,6 +3160,10 @@ public class PackageParser {
         str = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestInstrumentation_targetPackage);
         a.info.targetPackage = str != null ? str.intern() : null;
+
+        str = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestInstrumentation_targetProcess);
+        a.info.targetProcess = str != null ? str.intern() : null;
 
         a.info.handleProfiling = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestInstrumentation_handleProfiling,

@@ -135,13 +135,7 @@ final class ProcessRecord {
     int lruSeq;                 // Sequence id for identifying LRU update cycles
     CompatibilityInfo compat;   // last used compatibility mode
     IBinder.DeathRecipient deathRecipient; // Who is watching for the death.
-    ComponentName instrumentationClass;// class installed to instrument app
-    ApplicationInfo instrumentationInfo; // the application being instrumented
-    String instrumentationProfileFile; // where to save profiling
-    IInstrumentationWatcher instrumentationWatcher; // who is waiting
-    IUiAutomationConnection instrumentationUiAutomationConnection; // Connection to use the UI introspection APIs.
-    Bundle instrumentationArguments;// as given to us
-    ComponentName instrumentationResultClass;// copy of instrumentationClass
+    ActiveInstrumentation instr;// Set to currently active instrumentation running in process
     boolean usingWrapper;       // Set to true when process was launched with a wrapper attached
     final ArraySet<BroadcastRecord> curReceivers = new ArraySet<BroadcastRecord>();// receivers currently running in the app
     long lastWakeTime;          // How long proc held wake lock at last check
@@ -248,19 +242,8 @@ final class ProcessRecord {
             pw.println("}");
         }
         pw.print(prefix); pw.print("compat="); pw.println(compat);
-        if (instrumentationClass != null || instrumentationProfileFile != null
-                || instrumentationArguments != null) {
-            pw.print(prefix); pw.print("instrumentationClass=");
-                    pw.print(instrumentationClass);
-                    pw.print(" instrumentationProfileFile=");
-                    pw.println(instrumentationProfileFile);
-            pw.print(prefix); pw.print("instrumentationArguments=");
-                    pw.println(instrumentationArguments);
-            pw.print(prefix); pw.print("instrumentationInfo=");
-                    pw.println(instrumentationInfo);
-            if (instrumentationInfo != null) {
-                instrumentationInfo.dump(new PrintWriterPrinter(pw), prefix + "  ");
-            }
+        if (instr != null) {
+            pw.print(prefix); pw.print("instr="); pw.println(instr);
         }
         pw.print(prefix); pw.print("thread="); pw.println(thread);
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");

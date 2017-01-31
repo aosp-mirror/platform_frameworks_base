@@ -186,11 +186,25 @@ public class Instrumentation {
             }
         }
     }
-    
+
+    /**
+     * Report some results in the middle of instrumentation execution.  Later results (including
+     * those provided by {@link #finish}) will be combined with {@link Bundle#putAll}.
+     */
+    public void addResults(Bundle results) {
+        IActivityManager am = ActivityManager.getService();
+        try {
+            am.addInstrumentationResults(mThread.getApplicationThread(), results);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Terminate instrumentation of the application.  This will cause the
      * application process to exit, removing this instrumentation from the next
-     * time the application is started. 
+     * time the application is started.  If multiple processes are currently running
+     * for this instrumentation, all of those processes will be killed.
      *  
      * @param resultCode Overall success/failure of instrumentation. 
      * @param results Any results to send back to the code that started the 
@@ -275,6 +289,18 @@ public class Instrumentation {
      */
     public Context getTargetContext() {
         return mAppContext;
+    }
+
+    /**
+     * Return the name of the process this instrumentation is running in.  Note this should
+     * only be used for testing and debugging.  If you are thinking about using this to,
+     * for example, conditionalize what is initialized in an Application class, it is strongly
+     * recommended to instead use lazy initialization (such as a getter for the state that
+     * only creates it when requested).  This can greatly reduce the work your process does
+     * when created for secondary things, such as to receive a broadcast.
+     */
+    public String getProcessName() {
+        return mThread.getProcessName();
     }
 
     /**
