@@ -260,7 +260,7 @@ static void nativeScreenshot(JNIEnv* env, jclass clazz, jobject displayTokenObj,
             }
             ScreenshotClient::capture(displayToken,
                     consumer->getIGraphicBufferProducer(), sourceCrop,
-                    width, height, uint32_t(minLayer), uint32_t(maxLayer),
+                    width, height, minLayer, maxLayer,
                     useIdentityTransform);
         }
     }
