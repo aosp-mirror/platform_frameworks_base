@@ -17,12 +17,14 @@
 #include "jni.h"
 #include "core_jni_helpers.h"
 
+#include "FontUtils.h"
 #include "GraphicsJNI.h"
 #include "ScopedPrimitiveArray.h"
 #include "SkTypeface.h"
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
 #include <hwui/Typeface.h>
+#include <minikin/FontFamily.h>
 
 using namespace android;
 
@@ -38,6 +40,23 @@ static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandl
         face = Typeface::createFromTypeface(family, (SkTypeface::Style)i);
     }
     return reinterpret_cast<jlong>(face);
+}
+
+static jlong Typeface_createFromTypefaceWithVariation(JNIEnv* env, jobject, jlong familyHandle,
+        jobject listOfAxis) {
+    std::vector<minikin::FontVariation> variations;
+    ListHelper list(env, listOfAxis);
+    for (jint i = 0; i < list.size(); i++) {
+        jobject axisObject = list.get(i);
+        if (axisObject == nullptr) {
+            continue;
+        }
+        AxisHelper axis(env, axisObject);
+        variations.push_back(minikin::FontVariation(axis.getTag(), axis.getStyleValue()));
+    }
+    Typeface* baseTypeface = reinterpret_cast<Typeface*>(familyHandle);
+    Typeface* result = Typeface::createFromTypefaceWithVariation(baseTypeface, variations);
+    return reinterpret_cast<jlong>(result);
 }
 
 static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle, jint weight) {
@@ -77,6 +96,8 @@ static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
 
 static const JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromTypeface", "(JI)J", (void*)Typeface_createFromTypeface },
+    { "nativeCreateFromTypefaceWithVariation", "(JLjava/util/List;)J",
+            (void*)Typeface_createFromTypefaceWithVariation },
     { "nativeCreateWeightAlias",  "(JI)J", (void*)Typeface_createWeightAlias },
     { "nativeUnref",              "(J)V",  (void*)Typeface_unref },
     { "nativeGetStyle",           "(J)I",  (void*)Typeface_getStyle },
