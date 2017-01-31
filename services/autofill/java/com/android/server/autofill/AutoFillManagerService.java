@@ -81,7 +81,6 @@ public final class AutoFillManagerService extends SystemService {
     protected static final int MSG_REQUEST_AUTO_FILL = 3;
 
     private final AutoFillManagerServiceStub mServiceStub;
-    private final AutoFillUI mUi;
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -146,7 +145,7 @@ public final class AutoFillManagerService extends SystemService {
         mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(), mHandlerCallback, true);
 
         mContext = context;
-        mUi = new AutoFillUI(context, this, mLock);
+
         mResolver = context.getContentResolver();
         mServiceStub = new AutoFillManagerServiceStub();
     }
@@ -186,7 +185,7 @@ public final class AutoFillManagerService extends SystemService {
             if (DEBUG) Slog.d(TAG, "no service info for " + serviceComponent);
             return null;
         }
-        return new AutoFillManagerServiceImpl(this, mUi, mContext, mLock, mRequestsHistory,
+        return new AutoFillManagerServiceImpl(this, mContext, mLock, mRequestsHistory,
                 FgThread.getHandler(), userId, serviceInfo.applicationInfo.uid, serviceComponent,
                 SERVICE_BINDING_LIFETIME_MS);
     }
@@ -326,7 +325,6 @@ public final class AutoFillManagerService extends SystemService {
                     }
                 }
             }
-            mUi.dump(pw);
             pw.println("Requests history:");
             mRequestsHistory.reverseDump(fd, pw, args);
         }
