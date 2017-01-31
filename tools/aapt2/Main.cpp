@@ -37,6 +37,7 @@ extern int Compile(const std::vector<android::StringPiece>& args);
 extern int Link(const std::vector<android::StringPiece>& args);
 extern int Dump(const std::vector<android::StringPiece>& args);
 extern int Diff(const std::vector<android::StringPiece>& args);
+extern int Strip(const std::vector<android::StringPiece>& args);
 
 }  // namespace aapt
 
@@ -59,6 +60,8 @@ int main(int argc, char** argv) {
       return aapt::Dump(args);
     } else if (command == "diff") {
       return aapt::Diff(args);
+    } else if (command == "strip") {
+      return aapt::Strip(args);
     } else if (command == "version") {
       return aapt::PrintVersion();
     }
@@ -67,7 +70,7 @@ int main(int argc, char** argv) {
     std::cerr << "no command specified\n";
   }
 
-  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|version] ..."
+  std::cerr << "\nusage: aapt2 [compile|link|dump|diff|strip|version] ..."
             << std::endl;
   return 1;
 }
