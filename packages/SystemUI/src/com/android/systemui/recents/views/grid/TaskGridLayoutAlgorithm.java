@@ -74,11 +74,8 @@ public class TaskGridLayoutAlgorithm  {
             yOffsets = new int[taskCount];
 
             int layoutTaskCount = Math.min(MAX_LAYOUT_TASK_COUNT, taskCount);
-
-            tasksPerLine = layoutTaskCount < 2 ? 1 : (
-                layoutTaskCount < 5 ? 2 : (
-                    layoutTaskCount < 7 ? 3 : 4));
-            lines = layoutTaskCount < 3 ? 1 : 2;
+            tasksPerLine = getTasksPerLine(layoutTaskCount);
+            lines = layoutTaskCount < 4 ? 1 : 2;
 
             // A couple of special cases.
             boolean landscapeWindow = mWindowRect.width() > mWindowRect.height();
@@ -129,6 +126,27 @@ public class TaskGridLayoutAlgorithm  {
                     emptySpaceX / 2 + mPaddingLeftRight + (taskWidth + mPaddingTaskView) * xIndex;
                 yOffsets[taskIndex] = mWindowRect.top +
                     emptySpaceY / 2 + mPaddingTopBottom + (taskHeight + mPaddingTaskView) * yIndex;
+            }
+        }
+
+        private int getTasksPerLine(int taskCount) {
+            switch(taskCount) {
+                case 0:
+                    return 0;
+                case 1:
+                    return 1;
+                case 2:
+                case 4:
+                    return 2;
+                case 3:
+                case 5:
+                case 6:
+                    return 3;
+                case 7:
+                case 8:
+                    return 4;
+                default:
+                    throw new IllegalArgumentException("Unsupported task count " + taskCount);
             }
         }
     }
