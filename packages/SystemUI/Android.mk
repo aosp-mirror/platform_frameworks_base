@@ -11,6 +11,14 @@ LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := SystemUI-tags
+
+LOCAL_SRC_FILES := src/com/android/systemui/EventLogTags.logtags
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
+
 # ------------------
 
 include $(CLEAR_VARS)
@@ -23,7 +31,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-unde
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
-    Keyguard \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
@@ -32,6 +39,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     framework-protos \
+    SystemUI-tags \
     SystemUI-proto
 
 LOCAL_JAVA_LIBRARIES := telephony-common
@@ -42,6 +50,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res-keyguard $(LOCAL_PATH)/res
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
@@ -51,6 +60,8 @@ ifneq ($(INCREMENTAL_BUILDS),)
 endif
 
 include frameworks/base/packages/SettingsLib/common.mk
+
+LOCAL_AAPT_FLAGS := --extra-packages com.android.keyguard
 
 include $(BUILD_PACKAGE)
 
