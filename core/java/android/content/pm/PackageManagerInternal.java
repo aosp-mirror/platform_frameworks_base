@@ -243,6 +243,12 @@ public abstract class PackageManagerInternal {
             int targetAppId, int ephemeralAppId);
 
     /**
+     * Prunes instant apps and state associated with uninstalled
+     * instant apps according to the current platform policy.
+     */
+    public abstract void pruneInstantApps();
+
+    /**
      * @return The SetupWizard package name.
      */
     public abstract String getSetupWizardPackageName();

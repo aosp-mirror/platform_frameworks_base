@@ -120,7 +120,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PROTECTION_FLAG_SETUP = 0x800;
 
-
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
      * to the <code>ephemeral</code> value of

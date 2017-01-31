@@ -23,7 +23,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
-import android.content.pm.EphemeralApplicationInfo;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
@@ -599,11 +599,11 @@ interface IPackageManager {
 
     String getPermissionControllerPackageName();
 
-    ParceledListSlice getEphemeralApplications(int userId);
-    byte[] getEphemeralApplicationCookie(String packageName, int userId);
-    boolean setEphemeralApplicationCookie(String packageName, in byte[] cookie, int userId);
-    Bitmap getEphemeralApplicationIcon(String packageName, int userId);
-    boolean isEphemeralApplication(String packageName, int userId);
+    ParceledListSlice getInstantApps(int userId);
+    byte[] getInstantAppCookie(String packageName, int userId);
+    boolean setInstantAppCookie(String packageName, in byte[] cookie, int userId);
+    Bitmap getInstantAppIcon(String packageName, int userId);
+    boolean isInstantApp(String packageName, int userId);
 
     boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
 

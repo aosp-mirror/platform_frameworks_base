@@ -9504,13 +9504,13 @@ public final class Settings {
         public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
 
         /**
-         * The duration for caching uninstalled ephemeral apps.
+         * The duration for caching uninstalled instant apps.
          * <p>
          * Type: long
          * @hide
          */
-        public static final String UNINSTALLED_EPHEMERAL_APP_CACHE_DURATION_MILLIS =
-                "uninstalled_ephemeral_app_cache_duration_millis";
+        public static final String UNINSTALLED_INSTANT_APP_CACHE_DURATION_MILLIS =
+                "uninstalled_instant_app_cache_duration_millis";
 
         /**
          * Allows switching users when system user is locked.

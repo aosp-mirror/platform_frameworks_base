@@ -95,7 +95,7 @@ final class BasePermission {
                 && (protectionLevel & PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0;
     }
 
-    public boolean isEphemeral() {
+    public boolean isInstant() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_EPHEMERAL) != 0;
     }
 }

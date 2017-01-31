@@ -1546,7 +1546,7 @@ public class SettingsProvider extends ContentProvider {
 
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
         ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
-        if (ai.isEphemeralApp()) {
+        if (ai.isInstantApp()) {
             return new ArrayList<String>(getEphemeralAccessibleSettings(settingsType));
         } else {
             return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
@@ -1558,7 +1558,7 @@ public class SettingsProvider extends ContentProvider {
             return;
         }
         ApplicationInfo ai = getCallingApplicationInfoOrThrow(userId);
-        if (!ai.isEphemeralApp()) {
+        if (!ai.isInstantApp()) {
             return;
         }
         if (!getEphemeralAccessibleSettings(settingsType).contains(settingName)) {

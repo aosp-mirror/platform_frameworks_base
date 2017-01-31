@@ -152,7 +152,7 @@ public class IntentFirewall {
         // component-filter that matches this intent
         List<Rule> candidateRules;
         candidateRules = resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/,
-                false /*visibleToEphemeral*/, false /*isEphemeral*/, 0);
+                false /*visibleToEphemeral*/, false /*isInstant*/, 0);
         if (candidateRules == null) {
             candidateRules = new ArrayList<Rule>();
         }

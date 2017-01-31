@@ -83,7 +83,6 @@ import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
-import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.OtaDexoptService;
@@ -1380,11 +1379,19 @@ public final class SystemServer {
                     traceEnd();
                 }
 
-                traceBeginAndSlog("StartBackgroundDexOptService");
+                traceBeginAndSlog("StartBackgroundDexOptJobService");
                 try {
-                    BackgroundDexOptService.schedule(context);
+                    BackgroundDexOptJobService.schedule(context);
                 } catch (Throwable e) {
-                    reportWtf("starting BackgroundDexOptService", e);
+                    reportWtf("starting StartBackgroundDexOptJobService", e);
+                }
+                traceEnd();
+
+                traceBeginAndSlog("StartPruneInstantAppsJobService");
+                try {
+                    PruneInstantAppsJobService.schedule(context);
+                } catch (Throwable e) {
+                    reportWtf("StartPruneInstantAppsJobService", e);
                 }
                 traceEnd();
             }
