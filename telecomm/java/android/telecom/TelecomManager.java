@@ -1517,6 +1517,10 @@ public class TelecomManager {
      *      otherwise.
      */
     public boolean isIncomingCallPermitted(PhoneAccountHandle phoneAccountHandle) {
+        if (phoneAccountHandle == null) {
+            return false;
+        }
+
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
