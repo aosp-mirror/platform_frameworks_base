@@ -792,8 +792,7 @@ public class CameraMetadataNative implements Parcelable {
     private Location getGpsLocation() {
         String processingMethod = get(CaptureResult.JPEG_GPS_PROCESSING_METHOD);
         double[] coords = get(CaptureResult.JPEG_GPS_COORDINATES);
-        // Location expects timestamp in [ms.]
-        Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP) * 1000;
+        Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP);
 
         if (areValuesAllNull(processingMethod, coords, timeStamp)) {
             return null;
@@ -801,7 +800,8 @@ public class CameraMetadataNative implements Parcelable {
 
         Location l = new Location(translateProcessToLocationProvider(processingMethod));
         if (timeStamp != null) {
-            l.setTime(timeStamp);
+            // Location expects timestamp in [ms.]
+            l.setTime(timeStamp * 1000);
         } else {
             Log.w(TAG, "getGpsLocation - No timestamp for GPS location.");
         }
