@@ -726,7 +726,8 @@ public class UsbDeviceManager {
                 }
                 mMidiEnabled = enabled;
             }
-            mUsbAlsaManager.setPeripheralMidiState(mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
+            mUsbAlsaManager.setPeripheralMidiState(
+                    mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
         }
 
         @Override
