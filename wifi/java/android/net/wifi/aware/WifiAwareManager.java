@@ -706,7 +706,11 @@ public class WifiAwareManager {
                             attachCallback.onAttachFailed();
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
-                            identityChangedListener.onIdentityChanged((byte[]) msg.obj);
+                            if (identityChangedListener == null) {
+                                Log.e(TAG, "CALLBACK_IDENTITY_CHANGED: null listener.");
+                            } else {
+                                identityChangedListener.onIdentityChanged((byte[]) msg.obj);
+                            }
                             break;
                         case CALLBACK_RANGING_SUCCESS: {
                             RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
