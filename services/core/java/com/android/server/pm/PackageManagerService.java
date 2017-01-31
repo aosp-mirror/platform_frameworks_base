@@ -16484,13 +16484,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        // Ephemeral apps must have target SDK >= O.
-        // TODO: Update conditional and error message when O gets locked down
-        if (ephemeral && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
-            res.setError(PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID,
-                    "Ephemeral apps must have target SDK version of at least O");
-            return;
-        }
+//        // Ephemeral apps must have target SDK >= O.
+//        // TODO: Update conditional and error message when O gets locked down
+//        if (ephemeral && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+//            res.setError(PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID,
+//                    "Ephemeral apps must have target SDK version of at least O");
+//            return;
+//        }
 
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
             // Static shared libraries have synthetic package names
