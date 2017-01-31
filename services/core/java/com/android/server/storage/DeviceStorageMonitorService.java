@@ -16,6 +16,7 @@
 
 package com.android.server.storage;
 
+import android.app.NotificationChannel;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.pm.InstructionSets;
@@ -139,6 +140,8 @@ public class DeviceStorageMonitorService extends SystemService {
      * This string is used for ServiceManager access to this class.
      */
     static final String SERVICE = "devicestoragemonitor";
+
+    private static final String NOTIFICATION_CHANNEL_ID = SERVICE;
 
     /**
     * Handler that checks the amount of disk space on the device and sends a
@@ -365,7 +368,8 @@ public class DeviceStorageMonitorService extends SystemService {
     @Override
     public void onStart() {
         // cache storage thresholds
-        final StorageManager sm = StorageManager.from(getContext());
+        Context context = getContext();
+        final StorageManager sm = StorageManager.from(context);
         mMemLowThreshold = sm.getStorageLowBytes(DATA_PATH);
         mMemFullThreshold = sm.getStorageFullBytes(DATA_PATH);
 
@@ -377,6 +381,21 @@ public class DeviceStorageMonitorService extends SystemService {
 
         mCacheFileDeletedObserver = new CacheFileDeletedObserver();
         mCacheFileDeletedObserver.startWatching();
+
+        // Ensure that the notification channel is set up
+        NotificationManager notificationMgr =
+            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        PackageManager packageManager = context.getPackageManager();
+        boolean isTv = packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+
+        int importance = isTv
+            ? NotificationManager.IMPORTANCE_HIGH   // Do not change: this is TV-specific
+            : NotificationManager.IMPORTANCE_LOW;
+        notificationMgr.createNotificationChannel(
+            new NotificationChannel(NOTIFICATION_CHANNEL_ID,
+                context.getString(
+                    com.android.internal.R.string.device_storage_monitor_notification_channel),
+                importance));
 
         publishBinderService(SERVICE, mRemoteService);
         publishLocalService(DeviceStorageMonitorInternal.class, mLocalService);
@@ -466,7 +485,7 @@ public class DeviceStorageMonitorService extends SystemService {
         Intent lowMemIntent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
         lowMemIntent.putExtra("memory", mFreeMem);
         lowMemIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        NotificationManager mNotificationMgr =
+        NotificationManager notificationMgr =
                 (NotificationManager)context.getSystemService(
                         Context.NOTIFICATION_SERVICE);
         CharSequence title = context.getText(
@@ -488,9 +507,11 @@ public class DeviceStorageMonitorService extends SystemService {
                       .bigText(details))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setCategory(Notification.CATEGORY_SYSTEM)
+                .setChannel(NOTIFICATION_CHANNEL_ID)
+                .extend(new Notification.TvExtender())
                 .build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
-        mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
+        notificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
         context.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
     }
