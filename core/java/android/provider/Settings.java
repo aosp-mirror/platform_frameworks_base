@@ -8082,6 +8082,17 @@ public final class Settings {
        public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
 
        /**
+        * The thresholds of the wifi throughput badging (SD, HD etc.) as a comma-delimited list of
+        * colon-delimited key-value pairs. The key is the badging enum value defined in
+        * android.net.ScoredNetwork and the value is the minimum sustained network throughput in
+        * kbps required for the badge. For example: "10:3000,20:5000,30:25000"
+        *
+        * @hide
+        */
+       @SystemApi
+       public static final String WIFI_BADGING_THRESHOLDS = "wifi_badging_thresholds";
+
+       /**
         * Whether Wifi display is enabled/disabled
         * 0=disabled. 1=enabled.
         * @hide
