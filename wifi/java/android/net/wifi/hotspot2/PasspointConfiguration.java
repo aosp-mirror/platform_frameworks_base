@@ -217,9 +217,9 @@ public final class PasspointConfiguration implements Parcelable {
         return (homeSp == null ? that.homeSp == null : homeSp.equals(that.homeSp))
                 && (credential == null ? that.credential == null
                         : credential.equals(that.credential))
-                && (policy == null) ? that.policy == null : policy.equals(that.policy)
-                && (subscriptionUpdate == null) ? that.subscriptionUpdate == null
-                        : subscriptionUpdate.equals(that.subscriptionUpdate)
+                && (policy == null ? that.policy == null : policy.equals(that.policy))
+                && (subscriptionUpdate == null ? that.subscriptionUpdate == null
+                        : subscriptionUpdate.equals(that.subscriptionUpdate))
                 && isTrustRootCertListEquals(trustRootCertList, that.trustRootCertList)
                 && updateIdentifier == that.updateIdentifier
                 && credentialPriority == that.credentialPriority
