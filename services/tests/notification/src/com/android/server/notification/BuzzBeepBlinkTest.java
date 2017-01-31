@@ -39,12 +39,14 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -53,6 +55,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -78,6 +81,9 @@ public class BuzzBeepBlinkTest {
     private int mPid = 2000;
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
 
+    private VibrateRepeatMatcher mVibrateOnceMatcher = new VibrateRepeatMatcher(-1);
+    private VibrateRepeatMatcher mVibrateLoopMatcher = new VibrateRepeatMatcher(0);
+
     private static final long[] CUSTOM_VIBRATION = new long[] {
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
             300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
@@ -90,7 +96,9 @@ public class BuzzBeepBlinkTest {
     private static final int CUSTOM_LIGHT_COLOR = Color.BLACK;
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
-    private static final long[] FALLBACK_VIBRATION = new long[] {100, 100, 100};
+    private static final long[] FALLBACK_VIBRATION_PATTERN = new long[] {100, 100, 100};
+    private static final VibrationEffect FALLBACK_VIBRATION =
+            VibrationEffect.createWaveform(FALLBACK_VIBRATION_PATTERN, -1);
 
     @Before
     public void setUp() {
@@ -108,7 +116,7 @@ public class BuzzBeepBlinkTest {
         mService.setHandler(mHandler);
         mService.setLights(mLight);
         mService.setScreenOn(false);
-        mService.setFallbackVibrationPattern(FALLBACK_VIBRATION);
+        mService.setFallbackVibrationPattern(FALLBACK_VIBRATION_PATTERN);
     }
 
     //
@@ -272,18 +280,18 @@ public class BuzzBeepBlinkTest {
     }
 
     private void verifyNeverVibrate() {
-        verify(mVibrator, never()).vibrate(anyInt(), anyString(), (long[]) anyObject(),
-                anyInt(), (AudioAttributes) anyObject());
+        verify(mVibrator, never()).vibrate(anyInt(), anyString(), (VibrationEffect) anyObject(),
+                (AudioAttributes) anyObject());
     }
 
     private void verifyVibrate() {
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), (long[]) anyObject(),
-                eq(-1), (AudioAttributes) anyObject());
+        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
+                (AudioAttributes) anyObject());
     }
 
     private void verifyVibrateLooped() {
-        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), (long[]) anyObject(),
-                eq(0), (AudioAttributes) anyObject());
+        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateLoopMatcher),
+                (AudioAttributes) anyObject());
     }
 
     private void verifyStopVibrate() {
@@ -485,8 +493,10 @@ public class BuzzBeepBlinkTest {
 
         mService.buzzBeepBlinkLocked(r);
 
-       verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(r.getVibration()),
-                    eq(-1), (AudioAttributes) anyObject());
+        VibrationEffect effect = VibrationEffect.createWaveform(r.getVibration(), -1);
+
+        verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(effect),
+                    (AudioAttributes) anyObject());
     }
 
     @Test
@@ -501,7 +511,7 @@ public class BuzzBeepBlinkTest {
         mService.buzzBeepBlinkLocked(r);
 
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), eq(FALLBACK_VIBRATION),
-                eq(-1), (AudioAttributes) anyObject());
+                (AudioAttributes) anyObject());
         verify(mRingtonePlayer, never()).playAsync
                 (anyObject(), anyObject(), anyBoolean(), anyObject());
     }
@@ -666,5 +676,28 @@ public class BuzzBeepBlinkTest {
         // quiet update should stop making noise
         mService.buzzBeepBlinkLocked(s);
         verifyStopVibrate();
+    }
+
+    static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {
+        private final int mRepeatIndex;
+
+        VibrateRepeatMatcher(int repeatIndex) {
+            mRepeatIndex = repeatIndex;
+        }
+
+        @Override
+        public boolean matches(VibrationEffect actual) {
+            if (actual instanceof VibrationEffect.Waveform &&
+                    ((VibrationEffect.Waveform) actual).getRepeatIndex() == mRepeatIndex) {
+                return true;
+            }
+            // All non-waveform effects are essentially one shots.
+            return mRepeatIndex == -1;
+        }
+
+        @Override
+        public String toString() {
+            return "repeatIndex=" + mRepeatIndex;
+        }
     }
 }
