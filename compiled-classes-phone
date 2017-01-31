@@ -633,6 +633,7 @@ android.bluetooth.BluetoothAudioConfig
 android.bluetooth.BluetoothClass
 android.bluetooth.BluetoothClass$1
 android.bluetooth.BluetoothCodecConfig
+android.bluetooth.BluetoothCodecStatus
 android.bluetooth.BluetoothDevice
 android.bluetooth.BluetoothDevice$1
 android.bluetooth.BluetoothDevice$2
