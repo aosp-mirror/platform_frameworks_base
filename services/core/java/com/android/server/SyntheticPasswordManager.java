@@ -63,6 +63,7 @@ public class SyntheticPasswordManager {
 
     private static final byte SYNTHETIC_PASSWORD_VERSION = 1;
     private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
+    private static final byte SYNTHETIC_PASSWORD_TOKEN_BASED = 1;
 
     // 256-bit synthetic password
     private static final byte SYNTHETIC_PASSWORD_LENGTH = 256 / 8;
@@ -113,13 +114,17 @@ public class SyntheticPasswordManager {
                     syntheticPassword.getBytes());
         }
 
-        public void initialize(byte[] P0, byte[] P1) {
+        private void initialize(byte[] P0, byte[] P1) {
             this.P1 = P1;
             this.syntheticPassword = String.valueOf(HexEncoding.encode(
                     SyntheticPasswordCrypto.personalisedHash(
                             PERSONALIZATION_SP_SPLIT, P0, P1)));
             this.E0 = SyntheticPasswordCrypto.encrypt(this.syntheticPassword.getBytes(),
                     PERSONALIZATION_E0, P0);
+        }
+
+        public void recreate(byte[] secret) {
+            initialize(secret, this.P1);
         }
 
         protected static AuthenticationToken create() {
@@ -293,6 +298,11 @@ public class SyntheticPasswordManager {
         saveState(SP_P1_NAME, authToken.P1, DEFAULT_HANDLE, userId);
     }
 
+    public boolean hasEscrowData(int userId) {
+        return hasState(SP_E0_NAME, DEFAULT_HANDLE, userId)
+                && hasState(SP_P1_NAME, DEFAULT_HANDLE, userId);
+    }
+
     public void destroyEscrowData(int userId) {
         destroyState(SP_E0_NAME, true, DEFAULT_HANDLE, userId);
         destroyState(SP_P1_NAME, true, DEFAULT_HANDLE, userId);
@@ -339,9 +349,60 @@ public class SyntheticPasswordManager {
         return handle;
     }
 
+    private ArrayMap<Integer, ArrayMap<Long, byte[]>> tokenMap = new ArrayMap<>();
+
+    public long createTokenBasedSyntheticPassword(byte[] token, int userId) {
+        long handle = generateHandle();
+        byte[] applicationId = transformUnderSecdiscardable(token,
+                createSecdiscardable(handle, userId));
+        if (!tokenMap.containsKey(userId)) {
+            tokenMap.put(userId, new ArrayMap<>());
+        }
+        tokenMap.get(userId).put(handle, applicationId);
+        return handle;
+    }
+
+    public Set<Long> getPendingTokensForUser(int userId) {
+        if (!tokenMap.containsKey(userId)) {
+            return Collections.emptySet();
+        }
+        return tokenMap.get(userId).keySet();
+    }
+
+    public boolean removePendingToken(long handle, int userId) {
+        if (!tokenMap.containsKey(userId)) {
+            return false;
+        }
+        return tokenMap.get(userId).remove(handle) != null;
+    }
+
+    public boolean activateTokenBasedSyntheticPassword(long handle, AuthenticationToken authToken,
+            int userId) {
+        if (!tokenMap.containsKey(userId)) {
+            return false;
+        }
+        byte[] applicationId = tokenMap.get(userId).get(handle);
+        if (applicationId == null) {
+            return false;
+        }
+        if (!loadEscrowData(authToken, userId)) {
+            Log.w(TAG, "User is not escrowable");
+            return false;
+        }
+        createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED, authToken,
+                applicationId, 0L, userId);
+        tokenMap.get(userId).remove(handle);
+        return true;
+    }
+
     private void createSyntheticPasswordBlob(long handle, byte type, AuthenticationToken authToken,
             byte[] applicationId, long sid, int userId) {
-        final byte[] secret = authToken.syntheticPassword.getBytes();
+        final byte[] secret;
+        if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
+            secret = authToken.computeP0();
+        } else {
+            secret = authToken.syntheticPassword.getBytes();
+        }
         byte[] content = createSPBlob(getHandleName(handle), secret, applicationId, sid);
         byte[] blob = new byte[content.length + 1 + 1];
         blob[0] = SYNTHETIC_PASSWORD_VERSION;
@@ -400,6 +461,32 @@ public class SyntheticPasswordManager {
         return result;
     }
 
+    /**
+     * Decrypt a synthetic password by supplying an escrow token and corresponding token
+     * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
+     * verification to referesh the SID & Auth token maintained by the system.
+     */
+    public @NonNull AuthenticationResult unwrapTokenBasedSyntheticPassword(
+            IGateKeeperService gatekeeper, long handle, byte[] token, int userId)
+                    throws RemoteException {
+        AuthenticationResult result = new AuthenticationResult();
+        byte[] applicationId = transformUnderSecdiscardable(token,
+                loadSecdiscardable(handle, userId));
+        result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED,
+                applicationId, userId);
+        if (result.authToken != null) {
+            result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
+            if (result.gkResponse == null) {
+                // The user currently has no password. return OK with null payload so null
+                // is propagated to unlockUser()
+                result.gkResponse = VerifyCredentialResponse.OK;
+            }
+        } else {
+            result.gkResponse = VerifyCredentialResponse.ERROR;
+        }
+        return result;
+    }
+
     private AuthenticationToken unwrapSyntheticPasswordBlob(long handle, byte type,
             byte[] applicationId, int userId) {
         byte[] blob = loadState(SP_BLOB_NAME, handle, userId);
@@ -419,7 +506,15 @@ public class SyntheticPasswordManager {
             return null;
         }
         AuthenticationToken result = new AuthenticationToken();
-        result.syntheticPassword = new String(secret);
+        if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
+            if (!loadEscrowData(result, userId)) {
+                Log.e(TAG, "User is not escrowable: " + userId);
+                return null;
+            }
+            result.recreate(secret);
+        } else {
+            result.syntheticPassword = new String(secret);
+        }
         return result;
     }
 
@@ -468,6 +563,11 @@ public class SyntheticPasswordManager {
 
     public boolean existsHandle(long handle, int userId) {
         return hasState(SP_BLOB_NAME, handle, userId);
+    }
+
+    public void destroyTokenBasedSyntheticPassword(long handle, int userId) {
+        destroySyntheticPassword(handle, userId);
+        destroyState(SECDISCARDABLE_NAME, true, handle, userId);
     }
 
     public void destroyPasswordBasedSyntheticPassword(long handle, int userId) {

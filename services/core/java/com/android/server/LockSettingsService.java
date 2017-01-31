@@ -1926,6 +1926,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
                 trustManager.setDeviceLockedForUser(userId, false);
             }
+            activateEscrowTokens(authResult.authToken, userId);
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
@@ -2024,6 +2025,132 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
         }
         notifyActivePasswordMetricsAvailable(credential, userId);
+
+    }
+
+    @Override
+    public long addEscrowToken(byte[] token, int userId) throws RemoteException {
+        ensureCallerSystemUid();
+        if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId);
+        synchronized (mSpManager) {
+            enableSyntheticPasswordLocked();
+            // Migrate to synthetic password based credentials if ther user has no password,
+            // the token can then be activated immediately.
+            AuthenticationToken auth = null;
+            if (!isUserSecure(userId)) {
+                if (shouldMigrateToSyntheticPasswordLocked(userId)) {
+                    auth = initializeSyntheticPasswordLocked(null, null,
+                            LockPatternUtils.CREDENTIAL_TYPE_NONE, userId);
+                } else /* isSyntheticPasswordBasedCredentialLocked(userId) */ {
+                    long pwdHandle = getSyntheticPasswordHandleLocked(userId);
+                    auth = mSpManager.unwrapPasswordBasedSyntheticPassword(getGateKeeperService(),
+                            pwdHandle, null, userId).authToken;
+                }
+            }
+            disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
+            if (!mSpManager.hasEscrowData(userId)) {
+                throw new SecurityException("Escrow token is disabled on the current user");
+            }
+            long handle = mSpManager.createTokenBasedSyntheticPassword(token, userId);
+            if (auth != null) {
+                mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
+            }
+            return handle;
+        }
+    }
+
+    private void activateEscrowTokens(AuthenticationToken auth, int userId) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
+        synchronized (mSpManager) {
+            for (long handle : mSpManager.getPendingTokensForUser(userId)) {
+                Slog.i(TAG, String.format("activateEscrowTokens: %x %d ", handle, userId));
+                mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
+            }
+        }
+    }
+
+    @Override
+    public boolean isEscrowTokenActive(long handle, int userId) throws RemoteException {
+        ensureCallerSystemUid();
+        synchronized (mSpManager) {
+            return mSpManager.existsHandle(handle, userId);
+        }
+    }
+
+    @Override
+    public boolean removeEscrowToken(long handle, int userId) throws RemoteException {
+        ensureCallerSystemUid();
+        synchronized (mSpManager) {
+            if (handle == getSyntheticPasswordHandleLocked(userId)) {
+                Slog.w(TAG, "Cannot remove password handle");
+                return false;
+            }
+            if (mSpManager.removePendingToken(handle, userId)) {
+                return true;
+            }
+            if (mSpManager.existsHandle(handle, userId)) {
+                mSpManager.destroyTokenBasedSyntheticPassword(handle, userId);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
+            byte[] token, int userId) throws RemoteException {
+        ensureCallerSystemUid();
+        boolean result;
+        synchronized (mSpManager) {
+            if (!mSpManager.hasEscrowData(userId)) {
+                throw new SecurityException("Escrow token is disabled on the current user");
+            }
+            result = setLockCredentialWithTokenInternal(credential, type, tokenHandle, token,
+                    userId);
+        }
+        if (result) {
+            synchronized (mSeparateChallengeLock) {
+                setSeparateProfileChallengeEnabled(userId, true, null);
+            }
+            notifyPasswordChanged(userId);
+        }
+        return result;
+    }
+
+    private boolean setLockCredentialWithTokenInternal(String credential, int type,
+            long tokenHandle, byte[] token, int userId) throws RemoteException {
+        synchronized (mSpManager) {
+            AuthenticationResult result = mSpManager.unwrapTokenBasedSyntheticPassword(
+                    getGateKeeperService(), tokenHandle, token, userId);
+            if (result.authToken == null) {
+                Slog.w(TAG, "Invalid escrow token supplied");
+                return false;
+            }
+            long oldHandle = getSyntheticPasswordHandleLocked(userId);
+            setLockCredentialWithAuthTokenLocked(credential, type, result.authToken, userId);
+            mSpManager.destroyPasswordBasedSyntheticPassword(oldHandle, userId);
+            return true;
+        }
+    }
+
+    @Override
+    public void unlockUserWithToken(long tokenHandle, byte[] token, int userId)
+            throws RemoteException {
+        ensureCallerSystemUid();
+        AuthenticationResult authResult;
+        synchronized (mSpManager) {
+            if (!mSpManager.hasEscrowData(userId)) {
+                throw new SecurityException("Escrow token is disabled on the current user");
+            }
+            authResult = mSpManager.unwrapTokenBasedSyntheticPassword(getGateKeeperService(),
+                    tokenHandle, token, userId);
+            if (authResult.authToken == null) {
+                Slog.w(TAG, "Invalid escrow token supplied");
+                return;
+            }
+        }
+        unlockUser(userId, null, authResult.authToken.deriveDiskEncryptionKey());
     }
 
     @Override
@@ -2058,4 +2185,41 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            // Managed profile should have escrow enabled
+            if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+                return;
+            }
+            DevicePolicyManager dpm = (DevicePolicyManager)
+                    mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            // Devices with Device Owner should have escrow enabled on all users.
+            if (dpm.getDeviceOwnerComponentOnAnyUser() != null) {
+                return;
+            }
+            // If the device is yet to be provisioned (still in SUW), there is still
+            // a chance that Device Owner will be set on the device later, so postpone
+            // disabling escrow token for now.
+            if (!dpm.isDeviceProvisioned()) {
+                return;
+            }
+            // Disable escrow token permanently on all other device/user types.
+            Slog.i(TAG, "Disabling escrow token on user " + userId);
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                mSpManager.destroyEscrowData(userId);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "disableEscrowTokenOnNonManagedDevices", e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void ensureCallerSystemUid() throws SecurityException {
+        final int callingUid = mInjector.binderGetCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Only system can call this API.");
+        }
+    }
 }
