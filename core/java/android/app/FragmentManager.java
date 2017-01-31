@@ -360,6 +360,18 @@ public abstract class FragmentManager {
     public abstract void unregisterFragmentLifecycleCallbacks(FragmentLifecycleCallbacks cb);
 
     /**
+     * Return the currently active primary navigation fragment for this FragmentManager.
+     *
+     * <p>The primary navigation fragment's
+     * {@link Fragment#getChildFragmentManager() child FragmentManager} will be called first
+     * to process delegated navigation actions such as {@link #popBackStack()} if no ID
+     * or transaction name is provided to pop to.</p>
+     *
+     * @return the fragment designated as the primary navigation fragment
+     */
+    public abstract Fragment getPrimaryNavigationFragment();
+
+    /**
      * Print the FragmentManager's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.
@@ -524,6 +536,7 @@ final class FragmentManagerState implements Parcelable {
     FragmentState[] mActive;
     int[] mAdded;
     BackStackState[] mBackStack;
+    int mPrimaryNavActiveIndex = -1;
     
     public FragmentManagerState() {
     }
@@ -532,6 +545,7 @@ final class FragmentManagerState implements Parcelable {
         mActive = in.createTypedArray(FragmentState.CREATOR);
         mAdded = in.createIntArray();
         mBackStack = in.createTypedArray(BackStackState.CREATOR);
+        mPrimaryNavActiveIndex = in.readInt();
     }
     
     public int describeContents() {
@@ -542,6 +556,7 @@ final class FragmentManagerState implements Parcelable {
         dest.writeTypedArray(mActive, flags);
         dest.writeIntArray(mAdded);
         dest.writeTypedArray(mBackStack, flags);
+        dest.writeInt(mPrimaryNavActiveIndex);
     }
     
     public static final Parcelable.Creator<FragmentManagerState> CREATOR
@@ -626,6 +641,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     FragmentHostCallback<?> mHost;
     FragmentContainer mContainer;
     Fragment mParent;
+    Fragment mPrimaryNav;
     
     boolean mNeedMenuInvalidate;
     boolean mStateSaved;
@@ -782,6 +798,16 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     private boolean popBackStackImmediate(String name, int id, int flags) {
         execPendingActions();
         ensureExecReady(true);
+
+        if (mPrimaryNav != null // We have a primary nav fragment
+                && id < 0 // No valid id (since they're local)
+                && name == null) { // no name to pop to (since they're local)
+            final FragmentManager childManager = mPrimaryNav.mChildFragmentManager;
+            if (childManager != null && childManager.popBackStackImmediate()) {
+                // We did something, just not to this specific FragmentManager. Return true.
+                return true;
+            }
+        }
 
         boolean executePop = popBackStackState(mTmpRecords, mTmpIsPop, name, id, flags);
         if (executePop) {
@@ -2038,11 +2064,12 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         if (mAdded != null) {
             mTmpAddedFragments.addAll(mAdded);
         }
+        Fragment oldPrimaryNav = getPrimaryNavigationFragment();
         for (int recordNum = startIndex; recordNum < endIndex; recordNum++) {
             final BackStackRecord record = records.get(recordNum);
             final boolean isPop = isRecordPop.get(recordNum);
             if (!isPop) {
-                record.expandReplaceOps(mTmpAddedFragments);
+                oldPrimaryNav = record.expandOps(mTmpAddedFragments, oldPrimaryNav);
             } else {
                 record.trackAddedFragmentsInPop(mTmpAddedFragments);
             }
@@ -2318,20 +2345,20 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
      */
     private boolean generateOpsForPendingActions(ArrayList<BackStackRecord> records,
             ArrayList<Boolean> isPop) {
-        int numActions;
+        boolean didSomething = false;
         synchronized (this) {
             if (mPendingActions == null || mPendingActions.size() == 0) {
                 return false;
             }
 
-            numActions = mPendingActions.size();
+            final int numActions = mPendingActions.size();
             for (int i = 0; i < numActions; i++) {
-                mPendingActions.get(i).generateOps(records, isPop);
+                didSomething |= mPendingActions.get(i).generateOps(records, isPop);
             }
             mPendingActions.clear();
             mHost.getHandler().removeCallbacks(mExecCommit);
         }
-        return numActions > 0;
+        return didSomething;
     }
 
     void doPendingDeferredStart() {
@@ -2618,6 +2645,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         fms.mActive = active;
         fms.mAdded = added;
         fms.mBackStack = backStack;
+        if (mPrimaryNav != null) {
+            fms.mPrimaryNavActiveIndex = mPrimaryNav.mIndex;
+        }
         return fms;
     }
     
@@ -2743,6 +2773,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             }
         } else {
             mBackStack = null;
+        }
+
+        if (fms.mPrimaryNavActiveIndex >= 0) {
+            mPrimaryNav = mActive.get(fms.mPrimaryNavActiveIndex);
         }
     }
     
@@ -2940,6 +2974,19 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 }
             }
         }
+    }
+
+    public void setPrimaryNavigationFragment(Fragment f) {
+        if (f != null && (f.getFragmentManager() != this || f.mIndex >= mActive.size()
+                || mActive.get(f.mIndex) != f)) {
+            throw new IllegalArgumentException("Fragment " + f
+                    + " is not an active fragment of FragmentManager " + this);
+        }
+        mPrimaryNav = f;
+    }
+
+    public Fragment getPrimaryNavigationFragment() {
+        return mPrimaryNav;
     }
 
     public void registerFragmentLifecycleCallbacks(FragmentLifecycleCallbacks cb,
@@ -3386,6 +3433,16 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         @Override
         public boolean generateOps(ArrayList<BackStackRecord> records,
                 ArrayList<Boolean> isRecordPop) {
+            if (mPrimaryNav != null // We have a primary nav fragment
+                    && mId < 0 // No valid id (since they're local)
+                    && mName == null) { // no name to pop to (since they're local)
+                final FragmentManager childManager = mPrimaryNav.mChildFragmentManager;
+                if (childManager != null && childManager.popBackStackImmediate()) {
+                    // We didn't add any operations for this FragmentManager even though
+                    // a child did do work.
+                    return false;
+                }
+            }
             return popBackStackState(records, isRecordPop, mName, mId, mFlags);
         }
     }
