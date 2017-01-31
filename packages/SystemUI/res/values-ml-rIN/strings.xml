@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേതിരിക്കുക"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേ തിരിക്കുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"യാന്ത്രികം"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"അറിയിപ്പുകൾ"</string>
@@ -463,8 +463,8 @@
     <item msgid="6761963760295549099"></item>
   </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. പ്രവേശനക്ഷമതാ സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
