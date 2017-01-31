@@ -755,11 +755,12 @@ public class UsbDeviceManager {
                     if (UsbManager.containsFunction(mCurrentFunctions,
                             UsbManager.USB_FUNCTION_ACCESSORY)) {
                         updateCurrentAccessory();
-                    } else if (!mConnected) {
-                        // restore defaults when USB is disconnected
-                        setEnabledFunctions(null, false, false);
                     }
                     if (mBootCompleted) {
+                        if (!mConnected) {
+                            // restore defaults when USB is disconnected
+                            setEnabledFunctions(null, false, false);
+                        }
                         updateUsbStateBroadcastIfNeeded(false);
                         updateUsbFunctions();
                     }
