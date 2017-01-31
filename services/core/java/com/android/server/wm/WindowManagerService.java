@@ -2171,7 +2171,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!win.mHasSurface) {
             result |= RELAYOUT_RES_SURFACE_CHANGED;
         }
-        WindowSurfaceController surfaceController = winAnimator.createSurfaceLocked();
+        WindowSurfaceController surfaceController = winAnimator.createSurfaceLocked(
+            win.mAttrs.type, win.mOwnerUid);
         if (surfaceController != null) {
             surfaceController.getSurface(outSurface);
             if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  OUT SURFACE " + outSurface + ": copied");

@@ -577,7 +577,7 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked() {
+    WindowSurfaceController createSurfaceLocked(int windowType, int ownerUid) {
         final WindowState w = mWin;
         if (w.restoreSavedSurface()) {
             if (DEBUG_ANIM) Slog.i(TAG,
@@ -653,7 +653,7 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
                     attrs.getTitle().toString(),
-                    width, height, format, flags, this);
+                    width, height, format, flags, this, windowType, ownerUid);
 
             w.setHasSurface(true);
 
