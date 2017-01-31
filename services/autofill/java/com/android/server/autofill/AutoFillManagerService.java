@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -287,6 +288,11 @@ public final class AutoFillManagerService extends SystemService {
             final IBinder activityToken = LocalServices.getService(ActivityManagerInternal.class)
                         .getTopVisibleActivity(uid);
             if (activityToken == null) {
+                // TODO(b/33197203, b/34819567, b/34171325): figure out proper way to handle it
+                if (uid == Process.SYSTEM_UID) {
+                    if (DEBUG) Log.w(TAG, "requestAutoFill(): ignoring call from system");
+                    return;
+                }
                 throw new SecurityException("uid " + uid + " does not own the top activity");
             }
 
