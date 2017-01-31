@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-
 package com.android.settingslib.wifi;
 
 import android.content.Context;
@@ -21,8 +20,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.net.NetworkBadging;
 import android.net.ScoredNetwork;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
@@ -48,12 +47,9 @@ public class AccessPointPreference extends Preference {
             R.attr.state_encrypted,
             R.attr.state_saved
     };
-    private static final int[] STATE_NONE = {};
 
-    private static final int[] wifi_signal_attributes = { R.attr.wifi_signal };
     private static final int[] wifi_friction_attributes = { R.attr.wifi_friction };
 
-    private final StateListDrawable mWifiSld;
     private final StateListDrawable mFrictionSld;
     private final int mBadgePadding;
     private final UserBadgeCache mBadgeCache;
@@ -65,8 +61,6 @@ public class AccessPointPreference extends Preference {
     private int mLevel;
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
-    private int mIconWidth;
-    private int mIconHeight;
     private int mWifiBadge = ScoredNetwork.BADGING_NONE;
 
     static final int[] WIFI_CONNECTION_STRENGTH = {
@@ -79,7 +73,6 @@ public class AccessPointPreference extends Preference {
     // Used for dummy pref.
     public AccessPointPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mWifiSld = null;
         mFrictionSld = null;
         mBadgePadding = 0;
         mBadgeCache = null;
@@ -94,11 +87,6 @@ public class AccessPointPreference extends Preference {
         mForSavedNetworks = forSavedNetworks;
         mAccessPoint.setTag(this);
         mLevel = -1;
-
-        mWifiSld = (StateListDrawable) context.getTheme()
-                .obtainStyledAttributes(wifi_signal_attributes).getDrawable(0);
-        // Save icon width and height to use for creating a badged icon
-        setIconWidthAndHeight();
 
         TypedArray frictionSld;
         try {
@@ -126,11 +114,6 @@ public class AccessPointPreference extends Preference {
         mLevel = -1;
         mDefaultIconResId = iconResId;
 
-        mWifiSld = (StateListDrawable) context.getTheme()
-                .obtainStyledAttributes(wifi_signal_attributes).getDrawable(0);
-        // Save icon width and height to use for creating a badged icon
-        setIconWidthAndHeight();
-
         TypedArray frictionSld;
         try {
             frictionSld = context.getTheme().obtainStyledAttributes(wifi_friction_attributes);
@@ -143,13 +126,6 @@ public class AccessPointPreference extends Preference {
         // Distance from the end of the title at which this AP's user badge should sit.
         mBadgePadding = context.getResources()
                 .getDimensionPixelSize(R.dimen.wifi_preference_badge_padding);
-    }
-
-    private void setIconWidthAndHeight() {
-        // TODO(sghuman): Refactor this defined widths and heights into a dimension resource and
-        // reference directly.
-        mIconWidth = mWifiSld.getIntrinsicWidth();
-        mIconHeight = mWifiSld.getIntrinsicHeight();
     }
 
     public AccessPoint getAccessPoint() {
@@ -185,35 +161,15 @@ public class AccessPointPreference extends Preference {
     protected void updateIcon(int level, Context context) {
         if (level == -1) {
             safeSetDefaultIcon();
+            return;
+        }
+        TronUtils.logWifiSettingsBadge(context, mWifiBadge);
+        Drawable drawable = NetworkBadging.getWifiIcon(level, mWifiBadge, getContext().getTheme());
+        if (!mForSavedNetworks && drawable != null) {
+            drawable.setTint(Utils.getColorAccent(getContext()));
+            setIcon(drawable);
         } else {
-            TronUtils.logWifiSettingsBadge(context, mWifiBadge);
-            if (mWifiBadge != ScoredNetwork.BADGING_NONE) {
-                // TODO(sghuman): Refactor this to reuse drawable to save memory and add to a
-                // special subclass of AccessPointPreference
-                LayerDrawable drawable = Utils.getBadgedWifiIcon(context, level, mWifiBadge);
-                drawable.setLayerSize(0, mIconWidth, mIconHeight);
-                drawable.setLayerSize(1, mIconWidth, mIconHeight);
-                drawable.setTint(Utils.getColorAccent(getContext()));
-                setIcon(drawable);
-                return;
-            }
-            if (getIcon() == null) {
-                // To avoid a drawing race condition, we first set the state (SECURE/NONE) and then
-                // set the icon (drawable) to that state's drawable.
-                // If sld is null then we are indexing and therefore do not have access to
-                // (nor need to display) the drawable.
-                if (mWifiSld != null) {
-                    mWifiSld.setState((mAccessPoint.getSecurity() != AccessPoint.SECURITY_NONE)
-                            ? STATE_SECURED
-                            : STATE_NONE);
-                    Drawable drawable = mWifiSld.getCurrent();
-                    if (!mForSavedNetworks && drawable != null) {
-                        setIcon(drawable);
-                        return;
-                    }
-                }
-                safeSetDefaultIcon();
-            }
+            safeSetDefaultIcon();
         }
     }
 
