@@ -19,7 +19,9 @@ package android.content;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +94,7 @@ public class ClipDescription implements Parcelable {
     final CharSequence mLabel;
     private final ArrayList<String> mMimeTypes;
     private PersistableBundle mExtras;
+    private long mTimeStamp;
 
     /**
      * Create a new clip.
@@ -113,6 +116,7 @@ public class ClipDescription implements Parcelable {
     public ClipDescription(ClipDescription o) {
         mLabel = o.mLabel;
         mMimeTypes = new ArrayList<String>(o.mMimeTypes);
+        mTimeStamp = o.mTimeStamp;
     }
 
     /**
@@ -139,6 +143,29 @@ public class ClipDescription implements Parcelable {
         }
 
         return false;
+    }
+
+    /**
+     * Used for setting the timestamp at which the associated {@link ClipData} is copied to
+     * global clipboard.
+     *
+     * @param timeStamp at which the associated {@link ClipData} is copeid to clipboard in
+     *                  {@link SystemClock#elapsedRealtime()} time base.
+     * @hide
+     */
+    public void setTimestamp(long timeStamp) {
+        mTimeStamp = timeStamp;
+    }
+
+    /**
+     * Return the timestamp at which the associated {@link ClipData} is copied to global clipboard
+     * in the {@link SystemClock#elapsedRealtime()} time base.
+     *
+     * @return timestamp at which the associated {@link ClipData} is copied to global clipboard
+     *         or {@code 0} if it is not copied to clipboard.
+     */
+    public long getTimestamp() {
+        return mTimeStamp;
     }
 
     /**
@@ -285,6 +312,13 @@ public class ClipDescription implements Parcelable {
             first = false;
             b.append(mExtras.toString());
         }
+        if (mTimeStamp > 0) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            TimeUtils.formatDuration(mTimeStamp, b);
+        }
         return !first;
     }
 
@@ -312,12 +346,14 @@ public class ClipDescription implements Parcelable {
         TextUtils.writeToParcel(mLabel, dest, flags);
         dest.writeStringList(mMimeTypes);
         dest.writePersistableBundle(mExtras);
+        dest.writeLong(mTimeStamp);
     }
 
     ClipDescription(Parcel in) {
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mMimeTypes = in.createStringArrayList();
         mExtras = in.readPersistableBundle();
+        mTimeStamp = in.readLong();
     }
 
     public static final Parcelable.Creator<ClipDescription> CREATOR =
