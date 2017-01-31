@@ -1013,7 +1013,8 @@ public class RelativeLayout extends ViewGroup {
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules(v.getLayoutDirection());
                 node = mGraph.mKeyNodes.get((rules[relation]));
-                if (node == null) return null;
+                // ignore self dependency. for more info look in git commit: da3003
+                if (node == null || v == node.view) return null;
                 v = node.view;
             }
 
