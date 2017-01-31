@@ -145,16 +145,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void showInvalidChargerNotification() {
-        final Notification.Builder nb = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_power_low)
-                .setWhen(0)
-                .setShowWhen(false)
-                .setOngoing(true)
-                .setContentTitle(mContext.getString(R.string.invalid_charger_title))
-                .setContentText(mContext.getString(R.string.invalid_charger_text))
-                .setChannel(NotificationChannels.ALERTS)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.ic_power_low)
+                        .setWhen(0)
+                        .setShowWhen(false)
+                        .setOngoing(true)
+                        .setContentTitle(mContext.getString(R.string.invalid_charger_title))
+                        .setContentText(mContext.getString(R.string.invalid_charger_text))
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
@@ -164,19 +164,19 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private void showWarningNotification() {
         final int textRes = R.string.battery_low_percent_format;
         final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
-        final Notification.Builder nb = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_power_low)
-                // Bump the notification when the bucket dropped.
-                .setWhen(mBucketDroppedNegativeTimeMs)
-                .setShowWhen(false)
-                .setContentTitle(mContext.getString(R.string.battery_low_title))
-                .setContentText(mContext.getString(textRes, percentage))
-                .setOnlyAlertOnce(true)
-                .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
-                .setChannel(NotificationChannels.ALERTS)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.battery_saver_mode_color));
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.ic_power_low)
+                        // Bump the notification when the bucket dropped.
+                        .setWhen(mBucketDroppedNegativeTimeMs)
+                        .setShowWhen(false)
+                        .setContentTitle(mContext.getString(R.string.battery_low_title))
+                        .setContentText(mContext.getString(textRes, percentage))
+                        .setOnlyAlertOnce(true)
+                        .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.battery_saver_mode_color));
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
         }
@@ -235,18 +235,18 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
         mTempWarning = true;
-        final Notification.Builder nb = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_device_thermostat_24)
-                .setWhen(0)
-                .setShowWhen(false)
-                .setContentTitle(mContext.getString(R.string.high_temp_title))
-                .setContentText(mContext.getString(R.string.high_temp_notif_message))
-                .setChannel(NotificationChannels.ALERTS)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentIntent(pendingBroadcast(ACTION_CLICKED_TEMP_WARNING))
-                .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.battery_saver_mode_color));
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.ic_device_thermostat_24)
+                        .setWhen(0)
+                        .setShowWhen(false)
+                        .setContentTitle(mContext.getString(R.string.high_temp_title))
+                        .setContentText(mContext.getString(R.string.high_temp_notif_message))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setContentIntent(pendingBroadcast(ACTION_CLICKED_TEMP_WARNING))
+                        .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.battery_saver_mode_color));
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);

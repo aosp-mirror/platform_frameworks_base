@@ -560,18 +560,20 @@ public class UserSwitcherController {
         private void showLogoutNotification(int userId) {
             PendingIntent logoutPI = PendingIntent.getBroadcastAsUser(mContext,
                     0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
-            Notification.Builder builder = new Notification.Builder(mContext)
-                    .setVisibility(Notification.VISIBILITY_SECRET)
-                    .setChannel(NotificationChannels.USER)
-                    .setSmallIcon(R.drawable.ic_person)
-                    .setContentTitle(mContext.getString(R.string.user_logout_notification_title))
-                    .setContentText(mContext.getString(R.string.user_logout_notification_text))
-                    .setContentIntent(logoutPI)
-                    .setOngoing(true)
-                    .setShowWhen(false)
-                    .addAction(R.drawable.ic_delete,
-                            mContext.getString(R.string.user_logout_notification_action),
-                            logoutPI);
+            Notification.Builder builder =
+                    new Notification.Builder(mContext, NotificationChannels.GENERAL)
+                            .setVisibility(Notification.VISIBILITY_SECRET)
+                            .setSmallIcon(R.drawable.ic_person)
+                            .setContentTitle(mContext.getString(
+                                    R.string.user_logout_notification_title))
+                            .setContentText(mContext.getString(
+                                    R.string.user_logout_notification_text))
+                            .setContentIntent(logoutPI)
+                            .setOngoing(true)
+                            .setShowWhen(false)
+                            .addAction(R.drawable.ic_delete,
+                                    mContext.getString(R.string.user_logout_notification_action),
+                                    logoutPI);
             SystemUI.overrideNotificationAppName(mContext, builder);
             NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER,
                     SystemMessage.NOTE_LOGOUT_USER, builder.build(), new UserHandle(userId));
@@ -584,17 +586,17 @@ public class UserSwitcherController {
         PendingIntent removeGuestPI = canSwitchUsers ? PendingIntent.getBroadcastAsUser(mContext,
                 0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM) : null;
 
-        Notification.Builder builder = new Notification.Builder(mContext)
-                .setVisibility(Notification.VISIBILITY_SECRET)
-                .setChannel(NotificationChannels.USER)
-                .setSmallIcon(R.drawable.ic_person)
-                .setContentTitle(mContext.getString(R.string.guest_notification_title))
-                .setContentText(mContext.getString(R.string.guest_notification_text))
-                .setContentIntent(removeGuestPI)
-                .setShowWhen(false)
-                .addAction(R.drawable.ic_delete,
-                        mContext.getString(R.string.guest_notification_remove_action),
-                        removeGuestPI);
+        Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.GENERAL)
+                        .setVisibility(Notification.VISIBILITY_SECRET)
+                        .setSmallIcon(R.drawable.ic_person)
+                        .setContentTitle(mContext.getString(R.string.guest_notification_title))
+                        .setContentText(mContext.getString(R.string.guest_notification_text))
+                        .setContentIntent(removeGuestPI)
+                        .setShowWhen(false)
+                        .addAction(R.drawable.ic_delete,
+                                mContext.getString(R.string.guest_notification_remove_action),
+                                removeGuestPI);
         SystemUI.overrideNotificationAppName(mContext, builder);
         NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST,
                 SystemMessage.NOTE_REMOVE_GUEST, builder.build(), new UserHandle(guestUserId));

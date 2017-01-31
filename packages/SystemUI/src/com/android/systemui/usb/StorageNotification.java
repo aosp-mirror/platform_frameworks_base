@@ -198,18 +198,19 @@ public class StorageNotification extends SystemUI {
                         rec.getNickname());
                 final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
 
-                Notification.Builder builder = new Notification.Builder(mContext)
-                        .setSmallIcon(R.drawable.ic_sd_card_48dp)
-                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                        .setContentTitle(title)
-                        .setContentText(text)
-                        .setContentIntent(buildForgetPendingIntent(rec))
-                        .setStyle(new Notification.BigTextStyle().bigText(text))
-                        .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setLocalOnly(true)
-                        .setChannel(NotificationChannels.STORAGE)
-                        .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setDeleteIntent(buildSnoozeIntent(fsUuid));
+                Notification.Builder builder =
+                        new Notification.Builder(mContext, NotificationChannels.STORAGE)
+                                .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                                .setColor(mContext.getColor(
+                                        R.color.system_notification_accent_color))
+                                .setContentTitle(title)
+                                .setContentText(text)
+                                .setContentIntent(buildForgetPendingIntent(rec))
+                                .setStyle(new Notification.BigTextStyle().bigText(text))
+                                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                                .setLocalOnly(true)
+                                .setCategory(Notification.CATEGORY_SYSTEM)
+                                .setDeleteIntent(buildSnoozeIntent(fsUuid));
                 SystemUI.overrideNotificationAppName(mContext, builder);
 
                 mNotificationManager.notifyAsUser(fsUuid, SystemMessage.NOTE_STORAGE_PRIVATE,
@@ -226,17 +227,17 @@ public class StorageNotification extends SystemUI {
             final CharSequence text = mContext.getString(
                     R.string.ext_media_unsupported_notification_message, disk.getDescription());
 
-            Notification.Builder builder = new Notification.Builder(mContext)
-                    .setChannel(NotificationChannels.STORAGE)
-                    .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
-                    .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                    .setContentTitle(title)
-                    .setContentText(text)
-                    .setContentIntent(buildInitPendingIntent(disk))
-                    .setStyle(new Notification.BigTextStyle().bigText(text))
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setLocalOnly(true)
-                    .setCategory(Notification.CATEGORY_ERROR);
+            Notification.Builder builder =
+                    new Notification.Builder(mContext, NotificationChannels.STORAGE)
+                            .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
+                            .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(text)
+                            .setContentIntent(buildInitPendingIntent(disk))
+                            .setStyle(new Notification.BigTextStyle().bigText(text))
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setLocalOnly(true)
+                            .setCategory(Notification.CATEGORY_ERROR);
             SystemUI.overrideNotificationAppName(mContext, builder);
 
             mNotificationManager.notifyAsUser(disk.getId(), SystemMessage.NOTE_STORAGE_DISK,
@@ -475,19 +476,19 @@ public class StorageNotification extends SystemUI {
             intent = buildWizardMigratePendingIntent(move);
         }
 
-        Notification.Builder builder = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_sd_card_48dp)
-                .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(intent)
-                .setStyle(new Notification.BigTextStyle().bigText(text))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setLocalOnly(true)
-                .setChannel(NotificationChannels.STORAGE)
-                .setCategory(Notification.CATEGORY_PROGRESS)
-                .setProgress(100, status, false)
-                .setOngoing(true);
+        Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.STORAGE)
+                        .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setContentIntent(intent)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true)
+                        .setCategory(Notification.CATEGORY_PROGRESS)
+                        .setProgress(100, status, false)
+                        .setOngoing(true);
         SystemUI.overrideNotificationAppName(mContext, builder);
 
         mNotificationManager.notifyAsUser(move.packageName, SystemMessage.NOTE_STORAGE_MOVE,
@@ -526,18 +527,18 @@ public class StorageNotification extends SystemUI {
             intent = null;
         }
 
-        Notification.Builder builder = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.ic_sd_card_48dp)
-                .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(intent)
-                .setStyle(new Notification.BigTextStyle().bigText(text))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setLocalOnly(true)
-                .setCategory(Notification.CATEGORY_SYSTEM)
-                .setChannel(NotificationChannels.STORAGE)
-                .setAutoCancel(true);
+        Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.STORAGE)
+                        .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setContentIntent(intent)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setAutoCancel(true);
         SystemUI.overrideNotificationAppName(mContext, builder);
 
         mNotificationManager.notifyAsUser(move.packageName, SystemMessage.NOTE_STORAGE_MOVE,
@@ -562,15 +563,15 @@ public class StorageNotification extends SystemUI {
 
     private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
             CharSequence text) {
-        Notification.Builder builder = new Notification.Builder(mContext)
-                .setChannel(NotificationChannels.STORAGE)
-                .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
-                .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(text)
-                .setStyle(new Notification.BigTextStyle().bigText(text))
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setLocalOnly(true);
+        Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.STORAGE)
+                        .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true);
         overrideNotificationAppName(mContext, builder);
         return builder;
     }

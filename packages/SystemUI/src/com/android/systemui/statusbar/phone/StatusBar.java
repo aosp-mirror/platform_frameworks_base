@@ -5776,20 +5776,21 @@ public class StatusBar extends SystemUI implements DemoMode,
                     PendingIntent.FLAG_CANCEL_CURRENT);
 
             final int colorRes = com.android.internal.R.color.system_notification_accent_color;
-            Notification.Builder note = new Notification.Builder(mContext)
-                    .setSmallIcon(R.drawable.ic_android)
-                    .setContentTitle(mContext.getString(R.string.hidden_notifications_title))
-                    .setContentText(mContext.getString(R.string.hidden_notifications_text))
-                    .setChannel(NotificationChannels.SECURITY)
-                    .setOngoing(true)
-                    .setColor(mContext.getColor(colorRes))
-                    .setContentIntent(setupIntent)
-                    .addAction(R.drawable.ic_close,
-                            mContext.getString(R.string.hidden_notifications_cancel),
-                            cancelIntent)
-                    .addAction(R.drawable.ic_settings,
-                            mContext.getString(R.string.hidden_notifications_setup),
-                            setupIntent);
+            Notification.Builder note =
+                    new Notification.Builder(mContext, NotificationChannels.GENERAL)
+                            .setSmallIcon(R.drawable.ic_android)
+                            .setContentTitle(mContext.getString(
+                                    R.string.hidden_notifications_title))
+                            .setContentText(mContext.getString(R.string.hidden_notifications_text))
+                            .setOngoing(true)
+                            .setColor(mContext.getColor(colorRes))
+                            .setContentIntent(setupIntent)
+                            .addAction(R.drawable.ic_close,
+                                    mContext.getString(R.string.hidden_notifications_cancel),
+                                    cancelIntent)
+                            .addAction(R.drawable.ic_settings,
+                                    mContext.getString(R.string.hidden_notifications_setup),
+                                    setupIntent);
             overrideNotificationAppName(mContext, note);
 
             NotificationManager noMan =
