@@ -7,7 +7,7 @@
     <string name="portal_notification_detail" msgid="2860620550281695686">"ਆਪਣੀ ਸੇਵਾ ਨੂੰ ਸਰਗਰਮ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="no_data_notification_detail" msgid="1757413358517680719">"ਕੋਈ ਸੇਵਾ ਨਹੀਂ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"ਕੈਪਟਿਵ ਪੋਰਟਲ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
-    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"ਨੈੱਟਵਰਕ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋ ਗਿਆ, ਕੀ ਤੁਸੀਂ ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"ਨੈੱਟਵਰਕ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋ ਗਿਆ, ਕੀ ਤੁਸੀਂ ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਕਰਨਾ ਚਾਹੋਂਗੇ?"</string>
     <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="quit" msgid="4392968039488794590">"ਛੱਡੋ"</string>
     <string name="wait" msgid="7902715035629500128">"ਉਡੀਕ ਕਰੋ"</string>

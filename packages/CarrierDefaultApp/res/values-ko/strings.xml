@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"이동통신사 기본 앱"</string>
+    <string name="portal_notification_id" msgid="267536768510843288">"서비스 활성화"</string>
+    <string name="no_data_notification_id" msgid="5216950045164991172">"데이터 서비스를 이용할 수 없음"</string>
+    <string name="portal_notification_detail" msgid="2860620550281695686">"탭하여 서비스 활성화"</string>
+    <string name="no_data_notification_detail" msgid="1757413358517680719">"서비스를 이용할 수 없습니다. 서비스 제공업체에 문의하세요."</string>
+    <string name="progress_dialogue_network_connection" msgid="4964125154591905581">"종속 포털에 연결 중..."</string>
+    <string name="alert_dialogue_network_timeout" msgid="4515760047815901797">"네트워크 제한 시간이 초과되었습니다. 다시 시도하시겠습니까?"</string>
+    <string name="alert_dialogue_network_timeout_title" msgid="3117252205484891837">"네트워크를 사용할 수 없음"</string>
+    <string name="quit" msgid="4392968039488794590">"종료"</string>
+    <string name="wait" msgid="7902715035629500128">"대기"</string>
+</resources>
