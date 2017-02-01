@@ -517,6 +517,7 @@
     <dimen name="item_touch_helper_swipe_escape_max_velocity">800dp</dimen>
 
     <!-- The elevation of AutoFill fill window-->
-    <dimen name="autofill_fill_elevation">2dp</dimen>
+    <dimen name="autofill_fill_elevation">4dp</dimen>
     <dimen name="autofill_fill_item_height">64dp</dimen>
+    <dimen name="autofill_fill_min_margin">16dp</dimen>
 </resources>

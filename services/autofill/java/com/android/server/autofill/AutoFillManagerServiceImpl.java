@@ -709,7 +709,9 @@ final class AutoFillManagerServiceImpl {
                     filterText = text.toString();
                 }
             }
-            getUiForShowing().showFillUi(viewState, response.getDatasets(), bounds, filterText);
+
+            getUiForShowing().showFillUi(mActivityToken, viewState, response.getDatasets(),
+                    bounds, filterText);
         }
 
         private void processResponseLocked(FillResponse response) {
