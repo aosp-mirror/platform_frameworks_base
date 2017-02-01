@@ -355,6 +355,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
             args[argpos++] = NULL;
             execvp(args[0], (char*const*)args);
             fprintf(stderr, "execvp failed: %s\n", strerror(errno));
+            free(args);
             return 1;
         } else {
             // parent
@@ -400,6 +401,7 @@ adb_incident_workaround(const char* adbSerial, const vector<string>& sections)
         }
     }
 
+    free(buffer);
     return 0;
 }
 
