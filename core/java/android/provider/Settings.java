@@ -843,6 +843,22 @@ public final class Settings {
             "android.settings.SYSTEM_UPDATE_SETTINGS";
 
     /**
+     * Activity Action: Show settings for managed profile settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGED_PROFILE_SETTINGS =
+            "android.settings.MANAGED_PROFILE_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of sync settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
