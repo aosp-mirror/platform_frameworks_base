@@ -26,6 +26,7 @@ import static java.lang.reflect.Modifier.isStatic;
 
 import android.annotation.TargetApi;
 
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.lang.reflect.Field;
@@ -36,8 +37,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /** Unit test for Settings. */
-@TargetApi(26)
+@TargetApi(25)
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class SettingsTest {
 
     /**
@@ -86,6 +88,7 @@ public class SettingsTest {
 
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
             newHashSet(
+                    Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
@@ -179,6 +182,7 @@ public class SettingsTest {
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                    Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
@@ -203,6 +207,8 @@ public class SettingsTest {
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
+                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
+                    Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                     Settings.Global.LOCK_SOUND,
                     Settings.Global.LOW_BATTERY_SOUND,
                     Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
@@ -242,6 +248,7 @@ public class SettingsTest {
                     Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
                     Settings.Global.NETWORK_SCORER_APP,
                     Settings.Global.NETWORK_SCORING_PROVISIONED,
+                    Settings.Global.NETWORK_SCORING_UI_ENABLED,
                     Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
                     Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
                     Settings.Global.NEW_CONTACT_AGGREGATOR,
@@ -265,6 +272,7 @@ public class SettingsTest {
                     Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS,
                     Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
                     Settings.Global.POLICY_CONTROL,
+                    Settings.Global.POWER_MANAGER_CONSTANTS,
                     Settings.Global.PREFERRED_NETWORK_MODE,
                     Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
                     Settings.Global.RADIO_BLUETOOTH,
