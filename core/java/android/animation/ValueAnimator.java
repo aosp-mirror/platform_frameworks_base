@@ -68,7 +68,7 @@ import java.util.HashMap;
  * </div>
  */
 @SuppressWarnings("unchecked")
-public class ValueAnimator extends Animator {
+public class ValueAnimator extends Animator implements AnimationHandler.AnimationFrameCallback {
     private static final String TAG = "ValueAnimator";
     private static final boolean DEBUG = false;
 
@@ -223,6 +223,12 @@ public class ValueAnimator extends Animator {
      * animation pulse.
      */
     private boolean mSelfPulse = true;
+
+    /**
+     * Whether or not the animator has been requested to start without pulsing. This flag gets set
+     * in startWithoutPulsing(), and reset in start().
+     */
+    private boolean mSuppressSelfPulseRequested = false;
 
     /**
      * The time interpolator to be used. The elapsed fraction of the animation will be passed
@@ -997,12 +1003,12 @@ public class ValueAnimator extends Animator {
      *
      * @param playBackwards Whether the ValueAnimator should start playing in reverse.
      */
-    private void start(boolean playBackwards, boolean selfPulse) {
+    private void start(boolean playBackwards) {
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         mReversing = playBackwards;
-        mSelfPulse = selfPulse;
+        mSelfPulse = !mSuppressSelfPulseRequested;
         // Special case: reversing from seek-to-0 should act as if not seeked at all.
         if (playBackwards && mSeekFraction != -1 && mSeekFraction != 0) {
             if (mRepeatCount == INFINITE) {
@@ -1041,12 +1047,18 @@ public class ValueAnimator extends Animator {
     }
 
     void startWithoutPulsing(boolean inReverse) {
-        start(inReverse, false);
+        mSuppressSelfPulseRequested = true;
+        if (inReverse) {
+            reverse();
+        } else {
+            start();
+        }
+        mSuppressSelfPulseRequested = false;
     }
 
     @Override
     public void start() {
-        start(false, true);
+        start(false);
     }
 
     @Override
@@ -1150,7 +1162,7 @@ public class ValueAnimator extends Animator {
             mReversing = !mReversing;
             end();
         } else {
-            start(true, true);
+            start(true);
         }
     }
 
@@ -1364,6 +1376,11 @@ public class ValueAnimator extends Animator {
         animateValue(endFraction);
     }
 
+    @Override
+    boolean isInitialized() {
+        return mInitialized;
+    }
+
     /**
      * Processes a frame of the animation, adjusting the start time if needed.
      *
@@ -1428,6 +1445,20 @@ public class ValueAnimator extends Animator {
             endAnimation();
         }
         return finished;
+    }
+
+    @Override
+    boolean pulseAnimationFrame(long frameTime) {
+        if (mSelfPulse) {
+            // Pulse animation frame will *always* be after calling start(). If mSelfPulse isn't
+            // set to false at this point, that means child animators did not call super's start().
+            // This can happen when the Animator is just a non-animating wrapper around a real
+            // functional animation. In this case, we can't really pulse a frame into the animation,
+            // because the animation cannot necessarily be properly initialized (i.e. no start/end
+            // values set).
+            return false;
+        }
+        return doAnimationFrame(frameTime);
     }
 
     private void addOneShotCommitCallback() {
@@ -1514,6 +1545,8 @@ public class ValueAnimator extends Animator {
         anim.mFirstFrameTime = -1;
         anim.mOverallFraction = 0;
         anim.mCurrentFraction = 0;
+        anim.mSelfPulse = true;
+        anim.mSuppressSelfPulseRequested = false;
 
         PropertyValuesHolder[] oldValues = mValues;
         if (oldValues != null) {
