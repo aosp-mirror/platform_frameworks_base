@@ -1489,4 +1489,19 @@ public class ApplicationsState {
             return mFirstFilter.filterApp(info) && mSecondFilter.filterApp(info);
         }
     }
+
+    public static final AppFilter FILTER_AUDIO = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            boolean isMusicApp;
+            synchronized(entry) {
+                isMusicApp = entry.info.category == ApplicationInfo.CATEGORY_AUDIO;
+            }
+            return isMusicApp;
+        }
+    };
 }

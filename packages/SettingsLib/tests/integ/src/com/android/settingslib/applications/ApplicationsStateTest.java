@@ -29,12 +29,10 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ApplicationsStateTest {
-    private ApplicationsState.AppFilter mFilter;
     private ApplicationsState.AppEntry mEntry;
 
     @Before
     public void setUp() {
-        mFilter = ApplicationsState.FILTER_GAMES;
         mEntry = mock(ApplicationsState.AppEntry.class);
         mEntry.info = mock(ApplicationInfo.class);
     }
@@ -43,14 +41,14 @@ public class ApplicationsStateTest {
     public void testGamesFilterAcceptsGameDeprecated() {
         mEntry.info.flags = ApplicationInfo.FLAG_IS_GAME;
 
-        assertThat(mFilter.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_GAMES.filterApp(mEntry)).isTrue();
     }
 
     @Test
     public void testGameFilterAcceptsCategorizedGame() {
         mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
 
-        assertThat(mFilter.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_GAMES.filterApp(mEntry)).isTrue();
     }
 
     @Test
@@ -58,13 +56,34 @@ public class ApplicationsStateTest {
         mEntry.info.flags = ApplicationInfo.FLAG_IS_GAME;
         mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
 
-        assertThat(mFilter.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_GAMES.filterApp(mEntry)).isTrue();
     }
 
     @Test
     public void testGamesFilterRejectsNotGame() {
         mEntry.info.category = ApplicationInfo.CATEGORY_UNDEFINED;
 
-        assertThat(mFilter.filterApp(mEntry)).isFalse();
+        assertThat(ApplicationsState.FILTER_GAMES.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testAudioFilterAcceptsCategorizedAudio() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_AUDIO;
+
+        assertThat(ApplicationsState.FILTER_AUDIO.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testAudiosFilterRejectsNotAudio() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
+
+        assertThat(ApplicationsState.FILTER_AUDIO.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testAudiosFilterRejectsDefaultCategory() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_UNDEFINED;
+
+        assertThat(ApplicationsState.FILTER_AUDIO.filterApp(mEntry)).isFalse();
     }
 }
