@@ -345,6 +345,10 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, false, user);
         // Disallow rebooting in safe mode - controlled by user 0
         um.setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, true, UserHandle.SYSTEM);
+        if (mIsCarrierDemoMode) {
+            // Enable SMS in carrier demo mode.
+            um.setUserRestriction(UserManager.DISALLOW_SMS, false, user);
+        }
 
         Settings.Secure.putIntForUser(mInjector.getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
