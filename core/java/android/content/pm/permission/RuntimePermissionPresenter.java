@@ -72,15 +72,6 @@ public final class RuntimePermissionPresenter {
                 List<RuntimePermissionPresentationInfo> permissions) {
             /* do nothing - stub */
         }
-
-        /**
-         * The result for {@link #getAppsUsingPermissions(boolean, List)}.
-         * @param system Whether to return only the system apps or only the non-system ones.
-         * @param apps The apps using runtime permissions.
-         */
-        public void getAppsUsingPermissions(boolean system, @NonNull List<ApplicationInfo> apps) {
-            /* do nothing - stub */
-        }
     }
 
     private static final Object sLock = new Object();
@@ -124,29 +115,6 @@ public final class RuntimePermissionPresenter {
         args.arg3 = handler;
         Message message = mRemoteService.obtainMessage(
                 RemoteService.MSG_GET_APP_PERMISSIONS, args);
-        mRemoteService.processMessage(message);
-    }
-
-    /**
-     * Gets the system apps that use runtime permissions. System apps are ones
-     * that are considered system for presentation purposes instead of ones
-     * that are preinstalled on the system image. System apps are ones that
-     * are on the system image, haven't been updated (a.k.a factory apps)
-     * that do not have a launcher icon.
-     *
-     * @param system If true only system apps are returned otherwise only
-     *        non-system ones are returned.
-     * @param callback Callback to receive the result.
-     * @param handler Handler on which to invoke the callback.
-     */
-    public void getAppsUsingPermissions(boolean system, @NonNull OnResultCallback callback,
-            @Nullable Handler handler) {
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = callback;
-        args.arg2 = handler;
-        args.argi1 = system ? 1 : 0;
-        Message message = mRemoteService.obtainMessage(
-                RemoteService.MSG_GET_APPS_USING_PERMISSIONS, args);
         mRemoteService.processMessage(message);
     }
 
@@ -250,51 +218,6 @@ public final class RuntimePermissionPresenter {
                         }, this));
                     } catch (RemoteException re) {
                         Log.e(TAG, "Error getting app permissions", re);
-                    }
-                    scheduleUnbind();
-                } break;
-
-                case MSG_GET_APPS_USING_PERMISSIONS: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    final OnResultCallback callback = (OnResultCallback) args.arg1;
-                    final Handler handler = (Handler) args.arg2;
-                    final boolean system = args.argi1 == 1;
-                    args.recycle();
-                    final IRuntimePermissionPresenter remoteInstance;
-                    synchronized (mLock) {
-                        remoteInstance = mRemoteInstance;
-                    }
-                    if (remoteInstance == null) {
-                        return;
-                    }
-                    try {
-                        remoteInstance.getAppsUsingPermissions(system, new RemoteCallback(
-                                new RemoteCallback.OnResultListener() {
-                            @Override
-                            public void onResult(Bundle result) {
-                                final List<ApplicationInfo> reportedApps;
-                                List<ApplicationInfo> apps = null;
-                                if (result != null) {
-                                    apps = result.getParcelableArrayList(KEY_RESULT);
-                                }
-                                if (apps == null) {
-                                    apps = Collections.emptyList();
-                                }
-                                reportedApps = apps;
-                                if (handler != null) {
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            callback.getAppsUsingPermissions(system, reportedApps);
-                                        }
-                                    });
-                                } else {
-                                    callback.getAppsUsingPermissions(system, reportedApps);
-                                }
-                            }
-                        }, this));
-                    } catch (RemoteException re) {
-                        Log.e(TAG, "Error getting apps using permissions", re);
                     }
                     scheduleUnbind();
                 } break;
