@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,40 +49,43 @@ public class PolicyTest {
      */
     private static Policy createPolicy() {
         Policy policy = new Policy();
-        policy.minHomeDownlinkBandwidth = 123;
-        policy.minHomeUplinkBandwidth = 345;
-        policy.minRoamingDownlinkBandwidth = 567;
-        policy.minRoamingUplinkBandwidth = 789;
-        policy.excludedSsidList = new String[] {"ssid1", "ssid2"};
-        policy.requiredProtoPortMap = new HashMap<>();
-        policy.requiredProtoPortMap.put(12, "23,342,123");
-        policy.requiredProtoPortMap.put(23, "789,372,1235");
-        policy.maximumBssLoadValue = 12;
+        policy.setMinHomeDownlinkBandwidth(123);
+        policy.setMinHomeUplinkBandwidth(345);
+        policy.setMinRoamingDownlinkBandwidth(567);
+        policy.setMinRoamingUplinkBandwidth(789);
+        policy.setExcludedSsidList(new String[] {"ssid1", "ssid2"});
+        Map<Integer, String> requiredProtoPortMap = new HashMap<>();
+        requiredProtoPortMap.put(12, "23,342,123");
+        requiredProtoPortMap.put(23, "789,372,1235");
+        policy.setRequiredProtoPortMap(requiredProtoPortMap);
+        policy.setMaximumBssLoadValue(12);
 
-        policy.preferredRoamingPartnerList = new ArrayList<>();
+        List<Policy.RoamingPartner> preferredRoamingPartnerList = new ArrayList<>();
         Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
-        partner1.fqdn = "partner1.com";
-        partner1.fqdnExactMatch = true;
-        partner1.priority = 12;
-        partner1.countries = "us,jp";
+        partner1.setFqdn("partner1.com");
+        partner1.setFqdnExactMatch(true);
+        partner1.setPriority(12);
+        partner1.setCountries("us,jp");
         Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
-        partner2.fqdn = "partner2.com";
-        partner2.fqdnExactMatch = false;
-        partner2.priority = 42;
-        partner2.countries = "ca,fr";
-        policy.preferredRoamingPartnerList.add(partner1);
-        policy.preferredRoamingPartnerList.add(partner2);
+        partner2.setFqdn("partner2.com");
+        partner2.setFqdnExactMatch(false);
+        partner2.setPriority(42);
+        partner2.setCountries("ca,fr");
+        preferredRoamingPartnerList.add(partner1);
+        preferredRoamingPartnerList.add(partner2);
+        policy.setPreferredRoamingPartnerList(preferredRoamingPartnerList);
 
-        policy.policyUpdate = new UpdateParameter();
-        policy.policyUpdate.updateIntervalInMinutes = 1712;
-        policy.policyUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
-        policy.policyUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
-        policy.policyUpdate.serverUri = "policy.update.com";
-        policy.policyUpdate.username = "username";
-        policy.policyUpdate.base64EncodedPassword =
-                Base64.encodeToString("password".getBytes(), Base64.DEFAULT);
-        policy.policyUpdate.trustRootCertUrl = "trust.cert.com";
-        policy.policyUpdate.trustRootCertSha256Fingerprint = new byte[32];
+        UpdateParameter policyUpdate = new UpdateParameter();
+        policyUpdate.setUpdateIntervalInMinutes(1712);
+        policyUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_OMADM);
+        policyUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_HOMESP);
+        policyUpdate.setServerUri("policy.update.com");
+        policyUpdate.setUsername("username");
+        policyUpdate.setBase64EncodedPassword(
+                Base64.encodeToString("password".getBytes(), Base64.DEFAULT));
+        policyUpdate.setTrustRootCertUrl("trust.cert.com");
+        policyUpdate.setTrustRootCertSha256Fingerprint(new byte[32]);
+        policy.setPolicyUpdate(policyUpdate);
 
         return policy;
     }
@@ -128,7 +132,7 @@ public class PolicyTest {
     @Test
     public void verifyParcelWithoutProtoPortMap() throws Exception {
         Policy policy = createPolicy();
-        policy.requiredProtoPortMap = null;
+        policy.setRequiredProtoPortMap(null);
         verifyParcel(policy);
     }
 
@@ -140,7 +144,7 @@ public class PolicyTest {
     @Test
     public void verifyParcelWithoutPreferredRoamingPartnerList() throws Exception {
         Policy policy = createPolicy();
-        policy.preferredRoamingPartnerList = null;
+        policy.setPreferredRoamingPartnerList(null);
         verifyParcel(policy);
     }
 
@@ -152,7 +156,7 @@ public class PolicyTest {
     @Test
     public void verifyParcelWithoutPolicyUpdate() throws Exception {
         Policy policy = createPolicy();
-        policy.policyUpdate = null;
+        policy.setPolicyUpdate(null);
         verifyParcel(policy);
     }
 
@@ -212,7 +216,7 @@ public class PolicyTest {
     @Test
     public void validatePolicyWithoutPolicyUpdate() throws Exception {
         Policy policy = createPolicy();
-        policy.policyUpdate = null;
+        policy.setPolicyUpdate(null);
         assertFalse(policy.validate());
     }
 
@@ -224,7 +228,7 @@ public class PolicyTest {
     @Test
     public void validatePolicyWithInvalidPolicyUpdate() throws Exception {
         Policy policy = createPolicy();
-        policy.policyUpdate = new UpdateParameter();
+        policy.setPolicyUpdate(new UpdateParameter());
         assertFalse(policy.validate());
     }
 
@@ -237,10 +241,10 @@ public class PolicyTest {
     public void validatePolicyWithRoamingPartnerWithoutFQDN() throws Exception {
         Policy policy = createPolicy();
         Policy.RoamingPartner partner = new Policy.RoamingPartner();
-        partner.fqdnExactMatch = true;
-        partner.priority = 12;
-        partner.countries = "us,jp";
-        policy.preferredRoamingPartnerList.add(partner);
+        partner.setFqdnExactMatch(true);
+        partner.setPriority(12);
+        partner.setCountries("us,jp");
+        policy.getPreferredRoamingPartnerList().add(partner);
         assertFalse(policy.validate());
     }
 
@@ -254,10 +258,10 @@ public class PolicyTest {
     public void validatePolicyWithRoamingPartnerWithoutCountries() throws Exception {
         Policy policy = createPolicy();
         Policy.RoamingPartner partner = new Policy.RoamingPartner();
-        partner.fqdn = "test.com";
-        partner.fqdnExactMatch = true;
-        partner.priority = 12;
-        policy.preferredRoamingPartnerList.add(partner);
+        partner.setFqdn("test.com");
+        partner.setFqdnExactMatch(true);
+        partner.setPriority(12);
+        policy.getPreferredRoamingPartnerList().add(partner);
         assertFalse(policy.validate());
     }
 
@@ -271,7 +275,8 @@ public class PolicyTest {
     public void validatePolicyWithInvalidPortStringInProtoPortMap() throws Exception {
         Policy policy = createPolicy();
         byte[] rawPortBytes = new byte[MAX_PORT_STRING_BYTES + 1];
-        policy.requiredProtoPortMap.put(324, new String(rawPortBytes, StandardCharsets.UTF_8));
+        policy.getRequiredProtoPortMap().put(
+                324, new String(rawPortBytes, StandardCharsets.UTF_8));
         assertFalse(policy.validate());
     }
 
@@ -283,8 +288,9 @@ public class PolicyTest {
     @Test
     public void validatePolicyWithSsidExclusionListSizeExceededMax() throws Exception {
         Policy policy = createPolicy();
-        policy.excludedSsidList = new String[MAX_NUMBER_OF_EXCLUDED_SSIDS + 1];
-        Arrays.fill(policy.excludedSsidList, "ssid");
+        String[] excludedSsidList = new String[MAX_NUMBER_OF_EXCLUDED_SSIDS + 1];
+        Arrays.fill(excludedSsidList, "ssid");
+        policy.setExcludedSsidList(excludedSsidList);
         assertFalse(policy.validate());
     }
 
@@ -298,7 +304,9 @@ public class PolicyTest {
         Policy policy = createPolicy();
         byte[] rawSsidBytes = new byte[MAX_SSID_BYTES + 1];
         Arrays.fill(rawSsidBytes, (byte) 'a');
-        policy.excludedSsidList = new String[] {new String(rawSsidBytes, StandardCharsets.UTF_8)};
+        String[] excludedSsidList = new String[] {
+                new String(rawSsidBytes, StandardCharsets.UTF_8)};
+        policy.setExcludedSsidList(excludedSsidList);
         assertFalse(policy.validate());
     }
 }

@@ -175,7 +175,7 @@ public final class ConfigBuilder {
         }
 
         // Credential is needed for storing the certificates and private client key.
-        if (config.credential == null) {
+        if (config.getCredential() == null) {
             throw new IOException("Passpoint profile missing credential");
         }
 
@@ -183,7 +183,7 @@ public final class ConfigBuilder {
         byte[] caCertData = mimeParts.get(TYPE_CA_CERT);
         if (caCertData != null) {
             try {
-                config.credential.caCertificate = parseCACert(caCertData);
+                config.getCredential().setCaCertificate(parseCACert(caCertData));
             } catch (CertificateException e) {
                 throw new IOException("Failed to parse CA Certificate");
             }
@@ -194,9 +194,9 @@ public final class ConfigBuilder {
         if (pkcs12Data != null) {
             try {
                 Pair<PrivateKey, List<X509Certificate>> clientKey = parsePkcs12(pkcs12Data);
-                config.credential.clientPrivateKey = clientKey.first;
-                config.credential.clientCertificateChain =
-                        clientKey.second.toArray(new X509Certificate[clientKey.second.size()]);
+                config.getCredential().setClientPrivateKey(clientKey.first);
+                config.getCredential().setClientCertificateChain(
+                        clientKey.second.toArray(new X509Certificate[clientKey.second.size()]));
             } catch(GeneralSecurityException | IOException e) {
                 throw new IOException("Failed to parse PCKS12 string");
             }
