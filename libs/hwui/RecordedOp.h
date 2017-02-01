@@ -37,6 +37,8 @@ namespace uirenderer {
 struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
+class DeferredLayerUpdater;
+
 struct Vertex;
 
 namespace VectorDrawable {
@@ -414,18 +416,18 @@ struct TextOnPathOp : RecordedOp {
 };
 
 struct TextureLayerOp : RecordedOp {
-    TextureLayerOp(BASE_PARAMS_PAINTLESS, GlLayer* layer)
+    TextureLayerOp(BASE_PARAMS_PAINTLESS, DeferredLayerUpdater* layer)
             : SUPER_PAINTLESS(TextureLayerOp)
-            , layer(layer) {}
+            , layerHandle(layer) {}
 
     // Copy an existing TextureLayerOp, replacing the underlying matrix
     TextureLayerOp(const TextureLayerOp& op, const Matrix4& replacementMatrix)
             : RecordedOp(RecordedOpId::TextureLayerOp, op.unmappedBounds, replacementMatrix,
                     op.localClip, op.paint)
-            , layer(op.layer) {
+            , layerHandle(op.layerHandle) {
 
     }
-    GlLayer* layer;
+    DeferredLayerUpdater* layerHandle;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

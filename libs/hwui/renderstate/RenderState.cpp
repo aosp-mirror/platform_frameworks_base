@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
 #include "VkLayer.h"
 #include <GpuMemoryTracker.h>
@@ -207,6 +208,14 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
             stencil().disable();
         }
     }
+}
+
+static void destroyLayerInUpdater(DeferredLayerUpdater* layerUpdater) {
+    layerUpdater->destroyLayer();
+}
+
+void RenderState::destroyLayersInUpdater() {
+    std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
 }
 
 class DecStrongTask : public renderthread::RenderTask {

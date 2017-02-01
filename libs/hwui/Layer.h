@@ -105,7 +105,8 @@ public:
     void postDecStrong();
 
 protected:
-    Layer(RenderState& renderState, Api api);
+    Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
+            SkBlendMode mode);
 
     RenderState& mRenderState;
 
@@ -115,7 +116,7 @@ private:
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkColorFilter* colorFilter = nullptr;
+    SkColorFilter* colorFilter;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.
@@ -125,12 +126,12 @@ private:
     /**
      * Opacity of the layer.
      */
-    int alpha = 255;
+    int alpha;
 
     /**
      * Blending mode of the layer.
      */
-    SkBlendMode mode = SkBlendMode::kSrcOver;
+    SkBlendMode mode;
 
     /**
      * Optional texture coordinates transform.

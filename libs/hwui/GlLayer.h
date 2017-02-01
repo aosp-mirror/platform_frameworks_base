@@ -31,7 +31,8 @@ class Caches;
  */
 class GlLayer : public Layer {
 public:
-    GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight);
+    GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
+            SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend);
     virtual ~GlLayer();
 
     uint32_t getWidth() const override {

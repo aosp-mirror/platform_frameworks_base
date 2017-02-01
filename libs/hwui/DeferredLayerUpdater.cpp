@@ -17,6 +17,7 @@
 
 #include "GlLayer.h"
 #include "VkLayer.h"
+#include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "utils/PaintUtils.h"
@@ -24,25 +25,32 @@
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
-        : mSurfaceTexture(nullptr)
+DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayerFn createLayerFn,
+        Layer::Api layerApi)
+        : mRenderState(renderState)
+        , mBlend(false)
+        , mSurfaceTexture(nullptr)
         , mTransform(nullptr)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
-        , mLayer(layer) {
-    mWidth = mLayer->getWidth();
-    mHeight = mLayer->getHeight();
-    mBlend = mLayer->isBlend();
-    mColorFilter = SkSafeRef(mLayer->getColorFilter());
-    mAlpha = mLayer->getAlpha();
-    mMode = mLayer->getMode();
+        , mLayer(nullptr)
+        , mLayerApi(layerApi)
+        , mCreateLayerFn(createLayerFn) {
+    renderState.registerDeferredLayerUpdater(this);
 }
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
     setTransform(nullptr);
-    mLayer->postDecStrong();
-    mLayer = nullptr;
+    mRenderState.unregisterDeferredLayerUpdater(this);
+    destroyLayer();
+}
+
+void DeferredLayerUpdater::destroyLayer() {
+    if (mLayer) {
+        mLayer->postDecStrong();
+        mLayer = nullptr;
+    }
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
@@ -53,6 +61,10 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
 }
 
 void DeferredLayerUpdater::apply() {
+    if (!mLayer) {
+        mLayer = mCreateLayerFn(mRenderState, mWidth, mHeight, mColorFilter, mAlpha, mMode, mBlend);
+    }
+
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 
