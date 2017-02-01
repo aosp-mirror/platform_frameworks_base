@@ -1313,18 +1313,20 @@ class WindowStateAnimator {
         float surfaceWidth = mSurfaceController.getWidth();
         float surfaceHeight = mSurfaceController.getHeight();
 
-        if ((task != null && task.mStack.getForceScaleToCrop()) || mForceScaleUntilResize) {
+        if ((task != null && task.mStack.getForceScaleToStack()) || mForceScaleUntilResize) {
             int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
             int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
             if (!mForceScaleUntilResize) {
                 mSurfaceController.forceScaleableInTransaction(true);
             }
+
+            task.mStack.getDimBounds(mTmpStackBounds);
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
-            mExtraHScale = (finalClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
-            mExtraVScale = (finalClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
+            mExtraHScale = (mTmpStackBounds.width() - hInsets) / (float)(surfaceWidth - hInsets);
+            mExtraVScale = (mTmpStackBounds.height() - vInsets) / (float)(surfaceHeight - vInsets);
 
-            // In the case of ForceScaleToCrop we scale entire tasks together,
+            // In the case of ForceScaleToStack we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
             // or parent and child windows would fall out of alignment.
             int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - mExtraHScale));
