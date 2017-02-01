@@ -777,6 +777,23 @@ final class DefaultPermissionGrantPolicy {
         }
     }
 
+    public void grantDefaultPermissionsToEnabledImsServicesLPr(String[] packageNames, int userId) {
+        Log.i(TAG, "Granting permissions to enabled ImsServices for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package imsServicePackage = getSystemPackageLPr(packageName);
+            if (imsServicePackage != null
+                    && doesPackageSupportRuntimePermissions(imsServicePackage)) {
+                grantRuntimePermissionsLPw(imsServicePackage, PHONE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(imsServicePackage, MICROPHONE_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(imsServicePackage, LOCATION_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(imsServicePackage, CAMERA_PERMISSIONS, userId);
+            }
+        }
+    }
+
     public void grantDefaultPermissionsToDefaultBrowserLPr(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
         if (packageName == null) {
