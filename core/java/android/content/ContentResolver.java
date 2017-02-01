@@ -307,6 +307,18 @@ public abstract class ContentResolver {
      */
     public static final String QUERY_ARG_SORT_COLLATION = "android:query-sort-collation";
 
+    /**
+     * Allows provider to report back to client which keys were honored.
+     *
+     * Key identifying a {@code String[]} containing all QUERY_ARG_SORT* arguments
+     * honored by the provider. Include this in {@link Cursor} extras {@link Bundle}
+     * when any QUERY_ARG_SORT* value was honored during the preparation of the
+     * results {@link Cursor}.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS, #QUERY_ARG_SORT_DIRECTION, #QUERY_ARG_SORT_COLLATION.
+     */
+    public static final String EXTRA_HONORED_ARGS = "android.content.extra.HONORED_ARGS";
+
     /** @hide */
     @IntDef(flag = false, value = {
             QUERY_SORT_DIRECTION_ASCENDING,
@@ -354,8 +366,9 @@ public abstract class ContentResolver {
     public static final String QUERY_ARG_LIMIT = "android:query-page-limit";
 
     /**
-     * Added to {@link Cursor} extras {@link Bundle} to indicate size of the
-     * full, un-offset, un-limited recordset.
+     * Added to {@link Cursor} extras {@link Bundle} to indicate total size of
+     * recordset when paging is active. Providers must include this when
+     * implementing paging support.
      *
      * <p>When full size of the recordset is unknown a provider may return -1
      * to indicate this.
@@ -364,7 +377,7 @@ public abstract class ContentResolver {
      * send content change notification once (if) full recordset size becomes
      * known.
      */
-    public static final String QUERY_RESULT_SIZE = "android:query-result-size";
+    public static final String EXTRA_TOTAL_SIZE = "android.content.extra.TOTAL_SIZE";
 
     /**
      * This is the Android platform's base MIME type for a content: URI
@@ -703,6 +716,13 @@ public abstract class ContentResolver {
      *
      * <li>Provide an explicit projection, to prevent reading data from storage
      * that aren't going to be used.
+     *
+     * Provider must identify which QUERY_ARG_SORT* arguments were honored during
+     * the preparation of the result set by including the respective argument keys
+     * in the {@link Cursor} extras {@link Bundle}. See {@link #EXTRA_HONORED_ARGS}
+     * for details.
+     *
+     * @see #QUERY_ARG_SORT_COLUMNS, #QUERY_ARG_SORT_DIRECTION, #QUERY_ARG_SORT_COLLATION.
      *
      * @param uri The URI, using the content:// scheme, for the content to
      *         retrieve.
@@ -3037,17 +3057,19 @@ public abstract class ContentResolver {
             query += " COLLATE NOCASE";
         }
 
-        switch (queryArgs.getInt(
-                QUERY_ARG_SORT_DIRECTION, Integer.MIN_VALUE)) {
-            case QUERY_SORT_DIRECTION_ASCENDING:
-                query += " ASC";
-                break;
-            case QUERY_SORT_DIRECTION_DESCENDING:
-                query += " DESC";
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported sort direction value."
-                        + " See ContentResolver documentation for details.");
+        int sortDir = queryArgs.getInt(QUERY_ARG_SORT_DIRECTION, Integer.MIN_VALUE);
+        if (sortDir != Integer.MIN_VALUE) {
+            switch (sortDir) {
+                case QUERY_SORT_DIRECTION_ASCENDING:
+                    query += " ASC";
+                    break;
+                case QUERY_SORT_DIRECTION_DESCENDING:
+                    query += " DESC";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported sort direction value."
+                            + " See ContentResolver documentation for details.");
+            }
         }
         return query;
     }
