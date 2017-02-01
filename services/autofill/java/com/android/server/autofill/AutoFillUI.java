@@ -41,6 +41,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
@@ -243,15 +244,18 @@ final class AutoFillUI {
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
     //allow two buttons for saving or not saving the autofill for instance as well.
     private void showSnackbar(View snackBar) {
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.FILL_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, // TODO(b/33197203) use TYPE_AUTO_FILL
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
-            PixelFormat.TRANSLUCENT);
-
-        params.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        final LayoutParams params = new LayoutParams();
+        params.setTitle("AutoFill Save");
+        params.type = LayoutParams.TYPE_PHONE; // TODO(b/33197203) use app window token
+        params.flags =
+                LayoutParams.FLAG_NOT_FOCUSABLE // don't receive input events,
+                | LayoutParams.FLAG_ALT_FOCUSABLE_IM // resize for soft input
+                | LayoutParams.FLAG_NOT_TOUCH_MODAL; // outside touches go to windows behind us
+        params.softInputMode =
+                LayoutParams.SOFT_INPUT_ADJUST_PAN; // pan with soft input
+        params.gravity = Gravity.BOTTOM | Gravity.START;
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
 
         UiThread.getHandler().runWithScissors(() -> {
             mSnackbar = snackBar;
