@@ -19,6 +19,7 @@ toolSources = [
     "diff/Diff.cpp",
     "dump/Dump.cpp",
     "link/Link.cpp",
+    "strip/Strip.cpp",
 ]
 
 cc_defaults {
