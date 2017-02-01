@@ -595,6 +595,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
     private class WrappedMultinetworkPolicyTracker extends MultinetworkPolicyTracker {
         public volatile boolean configRestrictsAvoidBadWifi;
+        public volatile int configMeteredMultipathPreference;
 
         public WrappedMultinetworkPolicyTracker(Context c, Handler h, Runnable r) {
             super(c, h, r);
@@ -603,6 +604,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         @Override
         public boolean configRestrictsAvoidBadWifi() {
             return configRestrictsAvoidBadWifi;
+        }
+
+        @Override
+        public int configMeteredMultipathPreference() {
+            return configMeteredMultipathPreference;
         }
     }
 
@@ -2280,6 +2286,26 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(cellNetworkCallback);
         mCm.unregisterNetworkCallback(validatedWifiCallback);
         mCm.unregisterNetworkCallback(defaultCallback);
+    }
+
+    @SmallTest
+    public void testMeteredMultipathPreferenceSetting() throws Exception {
+        final ContentResolver cr = mServiceContext.getContentResolver();
+        final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
+        final String settingName = Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE;
+
+        for (int config : Arrays.asList(0, 3, 2)) {
+            for (String setting: Arrays.asList(null, "0", "2", "1")) {
+                tracker.configMeteredMultipathPreference = config;
+                Settings.Global.putString(cr, settingName, setting);
+                tracker.reevaluate();
+                mService.waitForIdle();
+
+                final int expected = (setting != null) ? Integer.parseInt(setting) : config;
+                String msg = String.format("config=%d, setting=%s", config, setting);
+                assertEquals(msg, expected, mCm.getMultipathPreference(null));
+            }
+        }
     }
 
     /**

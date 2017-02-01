@@ -283,6 +283,11 @@
          Settings.Global.NETWORK_AVOID_BAD_WIFI. This is the default value of that setting. -->
     <integer translatable="false" name="config_networkAvoidBadWifi">1</integer>
 
+    <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
+         device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
+         This is the default value of that setting. -->
+    <integer translatable="false" name="config_networkMeteredMultipathPreference">3</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
