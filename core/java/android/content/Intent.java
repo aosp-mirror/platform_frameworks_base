@@ -668,7 +668,14 @@ public class Intent implements Parcelable, Cloneable {
      * preview. {@link #getClipData} contains an optional list of content URIs
      * if there is more than one item to preview. {@link #EXTRA_INDEX} is an
      * optional index of the URI in the clip data to show first.
+     * If {@link #EXTRA_QUICK_VIEW_PLAIN} is true, then the quick viewer should show
+     * basic UI without any extra features other than quick viewing the passed items.
+     * Especially, the quick viewer should not let users open the passed files
+     * in other apps, which includes sharing, opening, editing, printing, etc in the
+     * plain mode.
      * <p>Output: nothing.
+     * @see #EXTRA_QUICK_VIEW_HIDE_DEFAULT_ACTIONS
+     * @see #EXTRA_INDEX
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
@@ -4393,8 +4400,24 @@ public class Intent implements Parcelable, Cloneable {
      * Optional index with semantics depending on the intent action.
      *
      * <p>The value must be an integer greater or equal to 0.
+     * @see ACTION_QUICK_VIEW
      */
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
+
+    /**
+     * Shows a plain quick viewer UI which doesn't provide any extra features other than
+     * quick viewing the items.
+     *
+     * <p>Especially, the quick viewer should not let users open the quick viewed files
+     * in other apps, which includes sharing, opening, editing, printing, etc.
+     *
+     * <p>This feature is optional, and may not be handled by all quick viewers.
+     *
+     * <p>The value is boolean. By default false.
+     * @see ACTION_QUICK_VIEW
+     */
+    public static final String EXTRA_QUICK_VIEW_PLAIN =
+            "android.intent.extra.QUICK_VIEW_PLAIN";
 
     /**
      * Optional boolean extra indicating whether quiet mode has been switched on or off.
