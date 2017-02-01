@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Class representing configuration parameters for subscription or policy update in
@@ -239,6 +240,13 @@ public final class UpdateParameter implements Parcelable {
                 && TextUtils.equals(mTrustRootCertUrl, that.mTrustRootCertUrl)
                 && Arrays.equals(mTrustRootCertSha256Fingerprint,
                         that.mTrustRootCertSha256Fingerprint);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mUpdateIntervalInMinutes, mUpdateMethod, mRestriction, mServerUri,
+                mUsername, mBase64EncodedPassword, mTrustRootCertUrl,
+                mTrustRootCertSha256Fingerprint);
     }
 
     /**
