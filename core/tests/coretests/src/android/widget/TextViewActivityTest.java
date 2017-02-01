@@ -40,7 +40,6 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.replaceText;
-import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -78,16 +77,16 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testTypedTextIsOnScreen() throws Exception {
         final String helloWorld = "Hello world!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        // We use replaceText instead of typeTextIntoFocusedView to input text to avoid
+        // unintentional interactions with software keyboard.
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
 
         onView(withId(R.id.textview)).check(matches(withText(helloWorld)));
     }
 
     public void testPositionCursorAtTextAtIndex() throws Exception {
         final String helloWorld = "Hello world!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(helloWorld.indexOf("world")));
 
         // Delete text at specified index and see if we got the right one.
@@ -99,7 +98,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         // Arabic text. The expected cursorable boundary is
         // | \u0623 \u064F | \u067A | \u0633 \u0652 |
         final String text = "\u0623\u064F\u067A\u0633\u0652";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
@@ -119,7 +117,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     public void testPositionCursorAtTextAtIndex_devanagari() throws Exception {
         // Devanagari text. The expected cursorable boundary is | \u0915 \u093E |
         final String text = "\u0915\u093E";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
@@ -133,7 +130,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     public void testLongPressToSelect() throws Exception {
         final String helloWorld = "Hello Kirk!";
         onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(
                 longPressOnTextAtIndex(helloWorld.indexOf("Kirk")));
 
@@ -142,8 +139,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testLongPressEmptySpace() throws Exception {
         final String helloWorld = "Hello big round sun!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         // Move cursor somewhere else
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(helloWorld.indexOf("big")));
         // Long-press at end of line.
@@ -156,8 +152,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testLongPressAndDragToSelect() throws Exception {
         final String helloWorld = "Hello little handsome boy!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(
                 longPressAndDragOnText(helloWorld.indexOf("little"), helloWorld.indexOf(" boy!")));
 
@@ -166,7 +161,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testLongPressAndDragToSelect_emoji() throws Exception {
         final String text = "\uD83D\uDE00\uD83D\uDE01\uD83D\uDE02\uD83D\uDE03";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(longPressAndDragOnText(4, 6));
@@ -180,8 +174,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testDragAndDrop() throws Exception {
         final String text = "abc def ghi.";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf("e")));
 
         onView(withId(R.id.textview)).perform(
@@ -201,8 +194,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testDoubleTapToSelect() throws Exception {
         final String helloWorld = "Hello SuetYi!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
+
         onView(withId(R.id.textview)).perform(
                 doubleClickOnTextAtIndex(helloWorld.indexOf("SuetYi")));
 
@@ -211,8 +204,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testDoubleTapAndDragToSelect() throws Exception {
         final String helloWorld = "Hello young beautiful girl!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(
                 doubleTapAndDragOnText(helloWorld.indexOf("young"), helloWorld.indexOf(" girl!")));
 
@@ -221,7 +213,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testDoubleTapAndDragToSelect_multiLine() throws Exception {
         final String helloWorld = "abcd\n" + "efg\n" + "hijklm\n" + "nop";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(
                 doubleTapAndDragOnText(helloWorld.indexOf("m"), helloWorld.indexOf("a")));
@@ -230,8 +221,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectBackwordsByTouch() throws Exception {
         final String helloWorld = "Hello king of the Jungle!";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
         onView(withId(R.id.textview)).perform(
                 doubleTapAndDragOnText(helloWorld.indexOf(" Jungle!"), helloWorld.indexOf("king")));
 
@@ -240,9 +230,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testToolbarAppearsAfterSelection() throws Exception {
         final String text = "Toolbar appears after selection.";
-        onView(withId(R.id.textview)).perform(click());
         assertFloatingToolbarIsNotDisplayed();
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(
                 longPressOnTextAtIndex(text.indexOf("appears")));
 
@@ -250,7 +239,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarIsDisplayed();
 
         final String text2 = "Toolbar disappears after typing text.";
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text2));
+        onView(withId(R.id.textview)).perform(replaceText(text2));
+        sleepForFloatingToolbarPopup();
         assertFloatingToolbarIsNotDisplayed();
     }
 
@@ -271,7 +261,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         });
         getInstrumentation().waitForIdleSync();
 
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView("test"));
+        onView(withId(R.id.textview)).perform(replaceText("test"));
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(1));
         clickFloatingToolbarItem(
                 getActivity().getString(com.android.internal.R.string.cut));
@@ -283,8 +273,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testToolbarAndInsertionHandle() throws Exception {
         final String text = "text";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         assertFloatingToolbarIsNotDisplayed();
 
@@ -302,8 +291,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testToolbarAndSelectionHandle() throws Exception {
         final String text = "abcd efg hijk";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf("f")));
         sleepForFloatingToolbarPopup();
@@ -337,8 +325,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testInsertionHandle() throws Exception {
         final String text = "abcd efg hijk ";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
@@ -356,8 +343,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testInsertionHandle_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.length()));
@@ -375,12 +361,11 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles() throws Exception {
         final String text = "abcd efg hijk lmn";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(replaceText(text));
 
         assertNoSelectionHandles();
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .check(matches(isDisplayed()));
@@ -399,12 +384,11 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_bidi() throws Exception {
         final String text = "abc \u0621\u0622\u0623 def";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         assertNoSelectionHandles();
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('\u0622')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('\u0622')));
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .check(matches(isDisplayed()));
@@ -423,7 +407,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         onView(withId(R.id.textview)).check(hasSelection("\u0621\u0622\u0623"));
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
-                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u0623') + 1,
+                .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('\u0623'),
                         false));
         onView(withId(R.id.textview)).check(hasSelection("\u0623"));
 
@@ -443,9 +427,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
@@ -466,7 +449,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     public void testSelectionHandles_multiLine_japanese() throws Exception {
-        onView(withId(R.id.textview)).perform(click());
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < 100; ++i) {
@@ -477,8 +459,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 break;
             }
         }
-
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(3));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(3));
 
         final int lineEnd = textView.getLayout().getLineEnd(0);
         onHandleView(com.android.internal.R.id.selection_end_handle)
@@ -492,10 +473,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         final String text = "\u062A\u062B\u062C\n" + "\u062D\u062E\u062F\n"
                 + "\u0630\u0631\u0632\n" + "\u0633\u0634\u0635\n" + "\u0636\u0637\u0638\n"
                 + "\u0639\u063A\u063B";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
-        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('\u0634')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('\u0634')));
 
         final TextView textView = (TextView)getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
@@ -521,16 +500,15 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_doesNotPassAnotherHandle() throws Exception {
         final String text = "abcd efg hijk lmn";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('l')));
         onView(withId(R.id.textview)).check(hasSelection("g"));
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('f')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
         onView(withId(R.id.textview)).check(hasSelection("e"));
@@ -538,16 +516,15 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_doesNotPassAnotherHandle_multiLine() throws Exception {
         final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n" + "opqr";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
         onHandleView(com.android.internal.R.id.selection_start_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('r') + 1));
         onView(withId(R.id.textview)).check(hasSelection("k"));
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('a')));
         onView(withId(R.id.textview)).check(hasSelection("h"));
@@ -555,9 +532,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_snapToWordBoundary() throws Exception {
         final String text = "abcd efg hijk lmn opqr";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
@@ -582,7 +558,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('b')));
         onView(withId(R.id.textview)).check(hasSelection("bcd efg hijk"));
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
 
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('n')));
@@ -607,9 +584,8 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSelectionHandles_snapToWordBoundary_multiLine() throws Exception {
         final String text = "abcd efg\n" + "hijk lmn\n" + "opqr stu";
-        onView(withId(R.id.textview)).perform(click());
-        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('m')));
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('m')));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
 
@@ -625,7 +601,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
                 .perform(dragHandle(textView, Handle.SELECTION_START, text.indexOf('m')));
         onView(withId(R.id.textview)).check(hasSelection("lmn"));
 
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('i')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('i')));
 
         onHandleView(com.android.internal.R.id.selection_end_handle)
                 .perform(dragHandle(textView, Handle.SELECTION_END, text.indexOf('u')));
@@ -642,7 +618,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testSetSelectionAndActionMode() throws Exception {
         final String text = "abc def";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
@@ -654,7 +629,7 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         assertFloatingToolbarIsNotDisplayed();
         // Make sure that "Select All" is included in the selection action mode when the entire text
         // is not selected.
-        onView(withId(R.id.textview)).perform(doubleClickOnTextAtIndex(text.indexOf('e')));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('e')));
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarIsDisplayed();
         // Changing the selection range by API should not interrupt the selection action mode.
@@ -705,7 +680,6 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
 
     public void testTransientState() throws Exception {
         final String text = "abc def";
-        onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         final TextView textView = (TextView) getActivity().findViewById(R.id.textview);
