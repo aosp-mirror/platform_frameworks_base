@@ -3584,6 +3584,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 || (prevState == ActivityState.PAUSED
                     && (mode == FINISH_AFTER_PAUSE || mStackId == PINNED_STACK_ID))
                 || finishingActivityInNonFocusedStack
+                || prevState == ActivityState.STOPPING
                 || prevState == ActivityState.STOPPED
                 || prevState == ActivityState.INITIALIZING) {
             r.makeFinishingLocked();
