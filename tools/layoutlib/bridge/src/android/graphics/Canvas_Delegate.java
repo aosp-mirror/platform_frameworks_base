@@ -209,20 +209,20 @@ public final class Canvas_Delegate extends BaseCanvas_Delegate {
     }
 
     @LayoutlibDelegate
-    public static void nRestore(long nativeCanvas, boolean throwOnUnderflow) {
+    public static boolean nRestore(long nativeCanvas) {
         // FIXME: implement throwOnUnderflow.
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
-            return;
+            return false;
         }
 
         canvasDelegate.restore();
+        return true;
     }
 
     @LayoutlibDelegate
-    public static void nRestoreToCount(long nativeCanvas, int saveCount,
-            boolean throwOnUnderflow) {
+    public static void nRestoreToCount(long nativeCanvas, int saveCount) {
         // FIXME: implement throwOnUnderflow.
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(nativeCanvas);
@@ -427,7 +427,7 @@ public final class Canvas_Delegate extends BaseCanvas_Delegate {
     }
 
     @LayoutlibDelegate
-    public static void nGetCTM(long canvas, long matrix) {
+    public static void nGetMatrix(long canvas, long matrix) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
         if (canvasDelegate == null) {

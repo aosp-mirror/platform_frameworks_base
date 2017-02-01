@@ -156,7 +156,7 @@ public class VectorDrawable_Delegate {
         bounds.offsetTo(0, 0);
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
 
-        Canvas_Delegate.nRestore(canvasWrapperPtr, true);
+        Canvas_Delegate.nRestore(canvasWrapperPtr);
 
         return bounds.width() * bounds.height();
     }
@@ -1122,7 +1122,7 @@ public class VectorDrawable_Delegate {
                     drawPath(currentGroup, childPath, canvasPtr, w, h, filterPtr);
                 }
             }
-            Canvas_Delegate.nRestore(canvasPtr, true);
+            Canvas_Delegate.nRestore(canvasPtr);
         }
 
         public void draw(long canvasPtr, long filterPtr, int w, int h) {
