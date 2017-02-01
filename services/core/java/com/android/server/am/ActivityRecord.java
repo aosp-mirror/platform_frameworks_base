@@ -749,6 +749,9 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     void removeWindowContainer() {
+        // Resume key dispatching if it is currently paused before we remove the container.
+        resumeKeyDispatchingLocked();
+
         mWindowContainerController.removeContainer(getDisplayId());
         mWindowContainerController = null;
     }
