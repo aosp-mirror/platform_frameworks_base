@@ -19,6 +19,7 @@ package android.provider;
 import android.accounts.Account;
 import android.annotation.SystemApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -30,6 +31,7 @@ import android.content.CursorEntityIterator;
 import android.content.Entity;
 import android.content.EntityIterator;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -8170,27 +8172,9 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table.  Requests to this URI can be
          * performed on the UI thread because they are always unblocking.
-         *
-         * <p>Note when you listen on this URI (or any other sub-URIs), you'll be notified for
-         * regular contact change notifications too, which will be sent on the root URI.
-         * If you only want to be notified for provider status change notifications, listen on
-         * {@link #STATUS_CHANGE_NOTIFICATION_CONTENT_URI} instead.
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "provider_status");
-
-        /**
-         * URI to listen to provider status changes without listening to regular
-         * contact changes.  If a client only wants to monitor {@link ProviderStatus} with
-         * {@link android.app.job.JobScheduler}, then this URI should be used instead of
-         * {@link #CONTENT_URI}, because a job on {@link #CONTENT_URI} will also be invoked
-         * when contacts are changed.
-         *
-         * <p>Note this URI cannot be queried.  A query should be always made on
-         * {@link #CONTENT_URI}.
-         */
-        public static final Uri STATUS_CHANGE_NOTIFICATION_CONTENT_URI =
-                Uri.parse("content://com.android.contacts.provider_status");
 
         /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
@@ -8794,13 +8778,13 @@ public final class ContactsContract {
          * This is the intent that is fired when the contacts database is created. <p> The
          * READ_CONTACT permission is required to receive these broadcasts.
          *
-         * <p>As of O, this broadcast will no longer be sent.  Applications can use
-         * use {@link android.app.job.JobScheduler} to monitor
-         * {@link ProviderStatus#STATUS_CHANGE_NOTIFICATION_CONTENT_URI}, and read
-         * {@link ProviderStatus#DATABASE_CREATION_TIMESTAMP} to get when
-         * the contacts database was initialized.
+         * <p>Because this is an implicit broadcast, apps targeting Android O will no longer
+         * receive this broadcast via a manifest broadcast receiver.  (Broadcast receivers
+         * registered at runtime with
+         * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)} will still receive it.)
+         * Instead, an app can use {@link ProviderStatus#DATABASE_CREATION_TIMESTAMP} to see if the
+         * contacts database has been initialized when it starts.
          */
-        @Deprecated
         public static final String CONTACTS_DATABASE_CREATED =
                 "android.provider.Contacts.DATABASE_CREATED";
 
