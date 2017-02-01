@@ -2634,20 +2634,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!calledFromValidUser()) {
             return;
         }
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mMethodMap) {
-                if (!calledWithValidToken(token)) {
-                    final int uid = Binder.getCallingUid();
-                    Slog.e(TAG, "Ignoring clearLastInputMethodWindowForTransition due to an "
-                            + "invalid token. uid:" + uid + " token:" + token);
-                    return;
-                }
+        synchronized (mMethodMap) {
+            if (!calledWithValidToken(token)) {
+                final int uid = Binder.getCallingUid();
+                Slog.e(TAG, "Ignoring clearLastInputMethodWindowForTransition due to an "
+                        + "invalid token. uid:" + uid + " token:" + token);
+                return;
             }
-            mWindowManagerInternal.clearLastInputMethodWindowForTransition();
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
+        mWindowManagerInternal.clearLastInputMethodWindowForTransition();
     }
 
     @Override
