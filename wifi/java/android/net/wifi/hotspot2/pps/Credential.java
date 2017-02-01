@@ -31,6 +31,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -267,6 +268,12 @@ public final class Credential implements Parcelable {
                     && TextUtils.equals(mNonEapInnerMethod, that.mNonEapInnerMethod);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUsername, mPassword, mMachineManaged, mSoftTokenApp,
+                    mAbleToShare, mEapType, mNonEapInnerMethod);
+        }
+
         /**
          * Validate the configuration data.
          *
@@ -418,6 +425,11 @@ public final class Credential implements Parcelable {
                     && Arrays.equals(mCertSha256Fingerprint, that.mCertSha256Fingerprint);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(mCertType, mCertSha256Fingerprint);
+        }
+
         /**
          * Validate the configuration data.
          *
@@ -531,6 +543,11 @@ public final class Credential implements Parcelable {
             SimCredential that = (SimCredential) thatObject;
             return TextUtils.equals(mImsi, that.mImsi)
                     && mEapType == that.mEapType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mImsi, mEapType);
         }
 
         @Override
@@ -729,6 +746,13 @@ public final class Credential implements Parcelable {
                 && isX509CertificateEquals(mCaCertificate, that.mCaCertificate)
                 && isX509CertificatesEquals(mClientCertificateChain, that.mClientCertificateChain)
                 && isPrivateKeyEquals(mClientPrivateKey, that.mClientPrivateKey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRealm, mCreationTimeInMs, mExpirationTimeInMs,
+                mCheckAAAServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
+                mCaCertificate, mClientCertificateChain, mClientPrivateKey);
     }
 
     /**

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class representing HomeSP subtree in PerProviderSubscription (PPS)
@@ -234,6 +235,12 @@ public final class HomeSP implements Parcelable {
                 && Arrays.equals(mMatchAnyOIs, that.mMatchAnyOIs)
                 && Arrays.equals(mOtherHomePartners, that.mOtherHomePartners)
                 && Arrays.equals(mRoamingConsortiumOIs, that.mRoamingConsortiumOIs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mFqdn, mFriendlyName, mIconUrl, mHomeNetworkIds, mMatchAllOIs,
+                mMatchAnyOIs, mOtherHomePartners, mRoamingConsortiumOIs);
     }
 
     /**
