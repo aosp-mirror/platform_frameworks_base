@@ -1977,6 +1977,24 @@ public final class TvContract {
         public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
 
         /**
+         * The flag indicating whether this TV program is browsable or not.
+         *
+         * <p>This column can only be set by system apps. For other applications, it is a read-only
+         * column. Trying to modify it may cause {@link SecurityException}.
+         *
+         * <p>A value of 1 indicates that the program is browsable and can be shown to users in
+         * the UI. A value of 0 indicates that the program should be hidden from users and the
+         * application who changes this value to 0 should send
+         * {@link TvInputManager#ACTION_PROGRAM_BROWSABLE_DISABLED} to the owner of the program
+         * to notify this change.
+         *
+         * <p>This value is set to 1 (browsable) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_BROWSABLE = "browsable";
+
+        /**
          * The internal ID used by individual TV input services.
          *
          * <p>This is internal to the provider that inserted it, and should not be decoded by other

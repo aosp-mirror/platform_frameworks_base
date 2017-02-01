@@ -325,22 +325,38 @@ public final class TvInputManager {
             "android.media.tv.action.VIEW_RECORDING_SCHEDULES";
 
     /**
+     * Action sent by the system to tell the target TV input that one of its program's browsable
+     * state is disabled, i.e., it will no longer be shown to users, which, for example, might
+     * be a result of users' interaction with UI.
+     *
+     * <p>The intent must contain the following bundle parameter:
+     * <ul>
+     *     <li>{@link #EXTRA_PROGRAM_ID} the program ID as a long integer.
+     * </ul>
+     */
+    public static final String ACTION_PROGRAM_BROWSABLE_DISABLED =
+            "android.media.tv.action.PROGRAM_BROWSABLE_DISABLED";
+
+    /**
      * Action sent by an application telling the system to set the given channel as browsable.
      *
      * <p>The intent must contain the following bundle parameters:
      * <ul>
-     *     <li>{@link #EXTRA_CHANNEL_ID} then channel ID as an integer.
+     *     <li>{@link #EXTRA_CHANNEL_ID} the channel ID as a long integer.
      *     <li>{@link #EXTRA_PACKAGE_NAME} the package name of the requesting application.
      * </ul>
      */
     public static final String ACTION_MAKE_CHANNEL_BROWSABLE
             = "android.media.tv.action.MAKE_CHANNEL_BROWSABLE";
 
-    /** The key for a bundle parameter containing a channel ID as an integer */
+    /** The key for a bundle parameter containing a channel ID as a long integer */
     public static final String EXTRA_CHANNEL_ID = "android.media.tv.extra.CHANNEL_ID";
 
     /** The key for a bundle parameter containing a package name as a string. */
     public static final String EXTRA_PACKAGE_NAME = "android.media.tv.extra.PACKAGE_NAME";
+
+    /** The key for a bundle parameter containing a program ID as a long integer */
+    public static final String EXTRA_PROGRAM_ID = "android.media.tv.extra.PROGRAM_ID";
 
     private final ITvInputManager mService;
 
