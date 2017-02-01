@@ -46,7 +46,7 @@ TextureCache::TextureCache()
 }
 
 TextureCache::~TextureCache() {
-    mCache.clear();
+    this->clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,6 +214,10 @@ void TextureCache::clearGarbage() {
 
 void TextureCache::clear() {
     mCache.clear();
+    for(auto& iter: mHardwareTextures) {
+        iter.second->deleteTexture();
+    }
+    mHardwareTextures.clear();
     TEXTURE_LOGD("TextureCache:clear(), mSize = %d", mSize);
 }
 
