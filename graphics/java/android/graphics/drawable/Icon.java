@@ -294,7 +294,7 @@ public final class Icon implements Parcelable {
                         resPackage = context.getPackageName();
                     }
                     if ("android".equals(resPackage)) {
-                        mObj1 = Resources.getSystem();
+                        mObj1 = context.getResources();
                     } else {
                         final PackageManager pm = context.getPackageManager();
                         try {
