@@ -1880,6 +1880,26 @@ public class AudioTrack extends PlayerBase
         if (mState != STATE_INITIALIZED) {
             throw new IllegalStateException("play() called on uninitialized AudioTrack.");
         }
+        //FIXME use lambda to pass startImpl to superclass
+        final int delay = getStartDelayMs();
+        if (delay == 0) {
+            startImpl();
+        } else {
+            new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    baseSetStartDelayMs(0);
+                    startImpl();
+                }
+            }.start();
+        }
+    }
+
+    private void startImpl() {
         synchronized(mPlayStateLock) {
             baseStart();
             native_start();

@@ -25,4 +25,6 @@ interface IPlayer {
     oneway void pause();
     oneway void stop();
     oneway void setVolume(float vol);
+    oneway void setPan(float pan);
+    oneway void setStartDelayMs(int delayMs);
 }

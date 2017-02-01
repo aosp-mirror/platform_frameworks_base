@@ -688,7 +688,7 @@ public class AudioService extends IAudioService.Stub
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
 
-        mMediaFocusControl = new MediaFocusControl(mContext);
+        mMediaFocusControl = new MediaFocusControl(mContext, mPlaybackMonitor);
 
         readAndSetLowRamDevice();
 
@@ -5579,6 +5579,10 @@ public class AudioService extends IAudioService.Stub
 
     public int getCurrentAudioFocus() {
         return mMediaFocusControl.getCurrentAudioFocus();
+    }
+
+    public int getFocusRampTimeMs(int focusGain, AudioAttributes attr) {
+        return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
     private boolean readCameraSoundForced() {

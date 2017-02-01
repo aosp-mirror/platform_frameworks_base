@@ -58,14 +58,17 @@ public abstract class PlayerBase {
     // for AppOps
     private IAppOpsService mAppOps;
     private IAppOpsCallback mAppOpsCallback;
-    private boolean mHasAppOpsPlayAudio = true;
-    private final Object mAppOpsLock = new Object();
+    private boolean mHasAppOpsPlayAudio = true; // sync'd on mLock
+    private final Object mLock = new Object();
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
     private int mPlayerIId;
 
-    private int mState;
+    private int mState; // sync'd on mLock
+    private int mStartDelayMs = 0; // sync'd on mLock
+    private float mPanMultiplierL = 1.0f; // sync'd on mLock
+    private float mPanMultiplierR = 1.0f; // sync'd on mLock
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -89,11 +92,13 @@ public abstract class PlayerBase {
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
         // initialize mHasAppOpsPlayAudio
-        updateAppOpsPlayAudio_sync();
+        synchronized (mLock) {
+            updateAppOpsPlayAudio_sync();
+        }
         // register a callback to monitor whether the OP_PLAY_AUDIO is still allowed
         mAppOpsCallback = new IAppOpsCallback.Stub() {
             public void opChanged(int op, int uid, String packageName) {
-                synchronized (mAppOpsLock) {
+                synchronized (mLock) {
                     if (op == AppOpsManager.OP_PLAY_AUDIO) {
                         updateAppOpsPlayAudio_sync();
                     }
@@ -130,7 +135,7 @@ public abstract class PlayerBase {
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
         }
-        synchronized (mAppOpsLock) {
+        synchronized (mLock) {
             mAttributes = attr;
             updateAppOpsPlayAudio_sync();
         }
@@ -139,23 +144,39 @@ public abstract class PlayerBase {
     void baseStart() {
         if (DEBUG) { Log.v(TAG, "baseStart() piid=" + mPlayerIId); }
         try {
-            mState = AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
-            getService().playerEvent(mPlayerIId, mState);
+            synchronized (mLock) {
+                mState = AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
+                getService().playerEvent(mPlayerIId, mState);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
         }
-        synchronized (mAppOpsLock) {
+        synchronized (mLock) {
             if (isRestricted_sync()) {
                 playerSetVolume(true/*muting*/,0, 0);
             }
         }
     }
 
+    void baseSetStartDelayMs(int delayMs) {
+        synchronized(mLock) {
+            mStartDelayMs = Math.max(delayMs, 0);
+        }
+    }
+
+    protected int getStartDelayMs() {
+        synchronized(mLock) {
+            return mStartDelayMs;
+        }
+    }
+
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
         try {
-            mState = AudioPlaybackConfiguration.PLAYER_STATE_PAUSED;
-            getService().playerEvent(mPlayerIId, mState);
+            synchronized (mLock) {
+                mState = AudioPlaybackConfiguration.PLAYER_STATE_PAUSED;
+                getService().playerEvent(mPlayerIId, mState);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, PAUSED state will not be tracked", e);
         }
@@ -164,26 +185,45 @@ public abstract class PlayerBase {
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
         try {
-            mState = AudioPlaybackConfiguration.PLAYER_STATE_STOPPED;
-            getService().playerEvent(mPlayerIId, mState);
+            synchronized (mLock) {
+                mState = AudioPlaybackConfiguration.PLAYER_STATE_STOPPED;
+                getService().playerEvent(mPlayerIId, mState);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, STOPPED state will not be tracked", e);
         }
     }
 
+    void baseSetPan(float pan) {
+        final float p = Math.min(Math.max(-1.0f, pan), 1.0f);
+        synchronized (mLock) {
+            if (p >= 0.0f) {
+                mPanMultiplierL = 1.0f - p;
+                mPanMultiplierR = 1.0f;
+            } else {
+                mPanMultiplierL = 1.0f;
+                mPanMultiplierR = 1.0f + p;
+            }
+        }
+        baseSetVolume(mLeftVolume, mRightVolume);
+    }
+
     void baseSetVolume(float leftVolume, float rightVolume) {
-        synchronized (mAppOpsLock) {
+        final boolean hasAppOpsPlayAudio;
+        synchronized (mLock) {
             mLeftVolume = leftVolume;
             mRightVolume = rightVolume;
+            hasAppOpsPlayAudio = mHasAppOpsPlayAudio;
             if (isRestricted_sync()) {
                 return;
             }
         }
-        playerSetVolume(false/*muting*/,leftVolume, rightVolume);
+        playerSetVolume(!hasAppOpsPlayAudio/*muting*/,
+                leftVolume * mPanMultiplierL, rightVolume * mPanMultiplierR);
     }
 
     int baseSetAuxEffectSendLevel(float level) {
-        synchronized (mAppOpsLock) {
+        synchronized (mLock) {
             mAuxEffectSendLevel = level;
             if (isRestricted_sync()) {
                 return AudioSystem.SUCCESS;
@@ -199,9 +239,11 @@ public abstract class PlayerBase {
     void baseRelease() {
         if (DEBUG) { Log.v(TAG, "baseRelease() piid=" + mPlayerIId + " state=" + mState); }
         try {
-            if (mState != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
-                getService().releasePlayer(mPlayerIId);
-                mState = AudioPlaybackConfiguration.PLAYER_STATE_RELEASED;
+            synchronized (mLock) {
+                if (mState != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
+                    getService().releasePlayer(mPlayerIId);
+                    mState = AudioPlaybackConfiguration.PLAYER_STATE_RELEASED;
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, the player will still be tracked", e);
@@ -215,7 +257,7 @@ public abstract class PlayerBase {
 
     /**
      * To be called whenever a condition that might affect audibility of this player is updated.
-     * Must be called synchronized on mAppOpsLock.
+     * Must be called synchronized on mLock.
      */
     void updateAppOpsPlayAudio_sync() {
         boolean oldHasAppOpsPlayAudio = mHasAppOpsPlayAudio;
@@ -237,7 +279,8 @@ public abstract class PlayerBase {
                         Log.v(TAG, "updateAppOpsPlayAudio: unmuting player, vol=" + mLeftVolume
                                 + "/" + mRightVolume);
                     }
-                    playerSetVolume(false/*muting*/, mLeftVolume, mRightVolume);
+                    playerSetVolume(false/*muting*/,
+                            mLeftVolume * mPanMultiplierL, mRightVolume * mPanMultiplierR);
                     playerSetAuxEffectSendLevel(false/*muting*/, mAuxEffectSendLevel);
                 } else {
                     if (DEBUG_APP_OPS) {
@@ -297,6 +340,14 @@ public abstract class PlayerBase {
         return sService;
     }
 
+    /**
+     * @hide
+     * @param delayMs
+     */
+    public void setStartDelayMs(int delayMs) {
+        baseSetStartDelayMs(delayMs);
+    }
+
     //=====================================================================
     // Abstract methods a subclass needs to implement
     /**
@@ -334,6 +385,16 @@ public abstract class PlayerBase {
         @Override
         public void setVolume(float vol) {
             baseSetVolume(vol, vol);
+        }
+
+        @Override
+        public void setPan(float pan) {
+            baseSetPan(pan);
+        }
+
+        @Override
+        public void setStartDelayMs(int delayMs) {
+            baseSetStartDelayMs(delayMs);
         }
     };
 

@@ -40,16 +40,24 @@ import java.text.DateFormat;
  * @hide
  *
  */
-public class MediaFocusControl {
+public class MediaFocusControl implements PlayerFocusEnforcer {
 
     private static final String TAG = "MediaFocusControl";
 
+    /**
+     * set to true so the framework enforces ducking itself, without communicating to apps
+     * that they lost focus.
+     */
+    static final boolean ENFORCE_DUCKING = false;
+
     private final Context mContext;
     private final AppOpsManager mAppOps;
+    private PlayerFocusEnforcer mFocusEnforcer; // never null
 
-    protected MediaFocusControl(Context cntxt) {
+    protected MediaFocusControl(Context cntxt, PlayerFocusEnforcer pfe) {
         mContext = cntxt;
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mFocusEnforcer = pfe;
     }
 
     protected void dump(PrintWriter pw) {
@@ -58,6 +66,17 @@ public class MediaFocusControl {
         dumpFocusStack(pw);
     }
 
+    //=================================================================
+    // PlayerFocusEnforcer implementation
+    @Override
+    public boolean duckPlayers(FocusRequester winner, FocusRequester loser) {
+        return mFocusEnforcer.duckPlayers(winner, loser);
+    }
+
+    @Override
+    public void unduckPlayers(FocusRequester winner) {
+        mFocusEnforcer.unduckPlayers(winner);
+    }
 
     //==========================================================================================
     // AudioFocus
@@ -75,7 +94,7 @@ public class MediaFocusControl {
             if (!mFocusStack.empty()) {
                 // notify the current focus owner it lost focus after removing it from stack
                 final FocusRequester exFocusOwner = mFocusStack.pop();
-                exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS);
+                exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null);
                 exFocusOwner.release();
             }
         }
@@ -97,12 +116,12 @@ public class MediaFocusControl {
      * Focus is requested, propagate the associated loss throughout the stack.
      * @param focusGain the new focus gain that will later be added at the top of the stack
      */
-    private void propagateFocusLossFromGain_syncAf(int focusGain) {
+    private void propagateFocusLossFromGain_syncAf(int focusGain, final FocusRequester fr) {
         // going through the audio focus stack to signal new focus, traversing order doesn't
         // matter as all entries respond to the same external focus gain
         Iterator<FocusRequester> stackIterator = mFocusStack.iterator();
         while(stackIterator.hasNext()) {
-            stackIterator.next().handleExternalFocusGain(focusGain);
+            stackIterator.next().handleExternalFocusGain(focusGain, fr);
         }
     }
 
@@ -237,7 +256,7 @@ public class MediaFocusControl {
             Log.e(TAG, "No exclusive focus owner found in propagateFocusLossFromGain_syncAf()",
                     new Exception());
             // no exclusive owner, push at top of stack, focus is granted, propagate change
-            propagateFocusLossFromGain_syncAf(nfr.getGainRequest());
+            propagateFocusLossFromGain_syncAf(nfr.getGainRequest(), nfr);
             mFocusStack.push(nfr);
             return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
         } else {
@@ -381,6 +400,38 @@ public class MediaFocusControl {
         }
     }
 
+    /**
+     * Return the volume ramp time expected before playback with the given AudioAttributes would
+     * start after gaining audio focus.
+     * @param attr attributes of the sound about to start playing
+     * @return time in ms
+     */
+    protected int getFocusRampTimeMs(int focusGain, AudioAttributes attr) {
+        switch (attr.getUsage()) {
+            case AudioAttributes.USAGE_MEDIA:
+            case AudioAttributes.USAGE_GAME:
+                return 1000;
+            case AudioAttributes.USAGE_ALARM:
+            case AudioAttributes.USAGE_NOTIFICATION_RINGTONE:
+            case AudioAttributes.USAGE_ASSISTANT:
+            case AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY:
+            case AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+                return 700;
+            case AudioAttributes.USAGE_VOICE_COMMUNICATION:
+            case AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING:
+            case AudioAttributes.USAGE_NOTIFICATION:
+            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST:
+            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT:
+            case AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED:
+            case AudioAttributes.USAGE_NOTIFICATION_EVENT:
+            case AudioAttributes.USAGE_ASSISTANCE_SONIFICATION:
+                return 500;
+            case AudioAttributes.USAGE_UNKNOWN:
+            default:
+                return 0;
+        }
+    }
+
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
     protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
@@ -463,7 +514,7 @@ public class MediaFocusControl {
             } else {
                 // propagate the focus change through the stack
                 if (!mFocusStack.empty()) {
-                    propagateFocusLossFromGain_syncAf(focusChangeHint);
+                    propagateFocusLossFromGain_syncAf(focusChangeHint, nfr);
                 }
 
                 // push focus requester at the top of the audio focus stack

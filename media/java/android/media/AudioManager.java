@@ -2430,6 +2430,23 @@ public class AudioManager {
 
     /**
      * @hide
+     * Return the volume ramping time for a sound to be played after the given focus request,
+     *   and to play a sound of the given attributes
+     * @param focusGain
+     * @param attr
+     * @return
+     */
+    public int getFocusRampTimeMs(int focusGain, AudioAttributes attr) {
+        IAudioService service = getService();
+        try {
+            return service.getFocusRampTimeMs(focusGain, attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Used internally by telephony package to abandon audio focus, typically after a call or
      * when ringing ends and the call is rejected or not answered.
      * Should match one or more calls to {@link #requestAudioFocusForCall(int, int)}.

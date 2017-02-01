@@ -52,10 +52,9 @@ public class PlayerProxy {
     // Methods matching the IPlayer interface
     /**
      * @hide
-     * @throws IllegalStateException
      */
     @SystemApi
-    public void start() throws IllegalStateException {
+    public void start() {
         try {
             mConf.getIPlayer().start();
         } catch (NullPointerException|RemoteException e) {
@@ -66,10 +65,9 @@ public class PlayerProxy {
 
     /**
      * @hide
-     * @throws IllegalStateException
      */
     @SystemApi
-    public void pause() throws IllegalStateException {
+    public void pause() {
         try {
             mConf.getIPlayer().pause();
         } catch (NullPointerException|RemoteException e) {
@@ -80,10 +78,9 @@ public class PlayerProxy {
 
     /**
      * @hide
-     * @throws IllegalStateException
      */
     @SystemApi
-    public void stop() throws IllegalStateException {
+    public void stop() {
         try {
             mConf.getIPlayer().stop();
         } catch (NullPointerException|RemoteException e) {
@@ -94,15 +91,44 @@ public class PlayerProxy {
 
     /**
      * @hide
-     * @throws IllegalStateException
+     * @param vol
      */
     @SystemApi
-    public void setVolume(float vol) throws IllegalStateException {
+    public void setVolume(float vol) {
         try {
             mConf.getIPlayer().setVolume(vol);
         } catch (NullPointerException|RemoteException e) {
             throw new IllegalStateException(
                     "No player to proxy for setVolume operation, player already released?", e);
+        }
+    }
+
+    /**
+     * @hide
+     * @param pan
+     */
+    @SystemApi
+    public void setPan(float pan) {
+        try {
+            mConf.getIPlayer().setPan(pan);
+        } catch (NullPointerException|RemoteException e) {
+            throw new IllegalStateException(
+                    "No player to proxy for setPan operation, player already released?", e);
+        }
+    }
+
+    /**
+     * @hide
+     * @param delayMs
+     */
+    @SystemApi
+    public void setStartDelayMs(int delayMs) {
+        try {
+            mConf.getIPlayer().setStartDelayMs(delayMs);
+        } catch (NullPointerException|RemoteException e) {
+            throw new IllegalStateException(
+                    "No player to proxy for setStartDelayMs operation, player already released?",
+                    e);
         }
     }
 
