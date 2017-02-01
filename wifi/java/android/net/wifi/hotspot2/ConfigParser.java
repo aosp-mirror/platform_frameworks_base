@@ -41,8 +41,6 @@ import java.util.Map;
 
 /**
  * Utility class for building PasspointConfiguration from an installation file.
- *
- * @hide
  */
 public final class ConfigParser {
     private static final String TAG = "ConfigParser";
@@ -100,6 +98,11 @@ public final class ConfigParser {
          */
         public String encodingType = null;
     }
+
+    /**
+     * @hide
+     */
+    public ConfigParser() {}
 
     /**
      * Parse the Hotspot 2.0 Release 1 configuration data into a {@link PasspointConfiguration}
