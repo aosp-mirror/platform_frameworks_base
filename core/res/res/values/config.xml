@@ -2288,7 +2288,7 @@
     <string name="config_ims_package"/>
 
     <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
-    <bool name="config_dynamic_bind_ims">true</bool>
+    <bool name="config_dynamic_bind_ims">false</bool>
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
