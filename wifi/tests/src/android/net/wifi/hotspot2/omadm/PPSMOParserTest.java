@@ -39,6 +39,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.omadm.PPSMOParser}.
@@ -86,107 +88,115 @@ public class PPSMOParserTest {
      */
     private PasspointConfiguration generateConfigurationFromPPSMOTree() throws Exception {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.updateIdentifier = 12;
-        config.credentialPriority = 99;
-
-        // AAA Server trust root.
-        config.trustRootCertList = new HashMap<>();
         byte[] certFingerprint = new byte[32];
         Arrays.fill(certFingerprint, (byte) 0x1f);
-        config.trustRootCertList.put("server1.trust.root.com", certFingerprint);
+
+        PasspointConfiguration config = new PasspointConfiguration();
+        config.setUpdateIdentifier(12);
+        config.setCredentialPriority(99);
+
+        // AAA Server trust root.
+        Map<String, byte[]> trustRootCertList = new HashMap<>();
+        trustRootCertList.put("server1.trust.root.com", certFingerprint);
+        config.setTrustRootCertList(trustRootCertList);
 
         // Subscription update.
-        config.subscriptionUpdate = new UpdateParameter();
-        config.subscriptionUpdate.updateIntervalInMinutes = 120;
-        config.subscriptionUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_SSP;
-        config.subscriptionUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER;
-        config.subscriptionUpdate.serverUri = "subscription.update.com";
-        config.subscriptionUpdate.username = "subscriptionUser";
-        config.subscriptionUpdate.base64EncodedPassword = "subscriptionPass";
-        config.subscriptionUpdate.trustRootCertUrl = "subscription.update.cert.com";
-        config.subscriptionUpdate.trustRootCertSha256Fingerprint = new byte[32];
-        Arrays.fill(config.subscriptionUpdate.trustRootCertSha256Fingerprint, (byte) 0x1f);
+        UpdateParameter subscriptionUpdate = new UpdateParameter();
+        subscriptionUpdate.setUpdateIntervalInMinutes(120);
+        subscriptionUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_SSP);
+        subscriptionUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER);
+        subscriptionUpdate.setServerUri("subscription.update.com");
+        subscriptionUpdate.setUsername("subscriptionUser");
+        subscriptionUpdate.setBase64EncodedPassword("subscriptionPass");
+        subscriptionUpdate.setTrustRootCertUrl("subscription.update.cert.com");
+        subscriptionUpdate.setTrustRootCertSha256Fingerprint(certFingerprint);
+        config.setSubscriptionUpdate(subscriptionUpdate);
 
         // Subscription parameters.
-        config.subscriptionCreationTimeInMs = format.parse("2016-02-01T10:00:00Z").getTime();
-        config.subscriptionExpirationTimeInMs = format.parse("2016-03-01T10:00:00Z").getTime();
-        config.subscriptionType = "Gold";
-        config.usageLimitDataLimit = 921890;
-        config.usageLimitStartTimeInMs = format.parse("2016-12-01T10:00:00Z").getTime();
-        config.usageLimitTimeLimitInMinutes = 120;
-        config.usageLimitUsageTimePeriodInMinutes = 99910;
+        config.setSubscriptionCreationTimeInMs(format.parse("2016-02-01T10:00:00Z").getTime());
+        config.setSubscriptionExpirationTimeInMs(format.parse("2016-03-01T10:00:00Z").getTime());
+        config.setSubscriptionType("Gold");
+        config.setUsageLimitDataLimit(921890);
+        config.setUsageLimitStartTimeInMs(format.parse("2016-12-01T10:00:00Z").getTime());
+        config.setUsageLimitTimeLimitInMinutes(120);
+        config.setUsageLimitUsageTimePeriodInMinutes(99910);
 
         // HomeSP configuration.
-        config.homeSp = new HomeSP();
-        config.homeSp.friendlyName = "Century House";
-        config.homeSp.fqdn = "mi6.co.uk";
-        config.homeSp.roamingConsortiumOIs = new long[] {0x112233L, 0x445566L};
-        config.homeSp.iconUrl = "icon.test.com";
-        config.homeSp.homeNetworkIds = new HashMap<>();
-        config.homeSp.homeNetworkIds.put("TestSSID", 0x12345678L);
-        config.homeSp.homeNetworkIds.put("NullHESSID", null);
-        config.homeSp.matchAllOIs = new long[] {0x11223344};
-        config.homeSp.matchAnyOIs = new long[] {0x55667788};
-        config.homeSp.otherHomePartners = new String[] {"other.fqdn.com"};
+        HomeSP homeSp = new HomeSP();
+        homeSp.setFriendlyName("Century House");
+        homeSp.setFqdn("mi6.co.uk");
+        homeSp.setRoamingConsortiumOIs(new long[] {0x112233L, 0x445566L});
+        homeSp.setIconUrl("icon.test.com");
+        Map<String, Long> homeNetworkIds = new HashMap<>();
+        homeNetworkIds.put("TestSSID", 0x12345678L);
+        homeNetworkIds.put("NullHESSID", null);
+        homeSp.setHomeNetworkIds(homeNetworkIds);
+        homeSp.setMatchAllOIs(new long[] {0x11223344});
+        homeSp.setMatchAnyOIs(new long[] {0x55667788});
+        homeSp.setOtherHomePartners(new String[] {"other.fqdn.com"});
+        config.setHomeSp(homeSp);
 
         // Credential configuration.
-        config.credential = new Credential();
-        config.credential.creationTimeInMs = format.parse("2016-01-01T10:00:00Z").getTime();
-        config.credential.expirationTimeInMs = format.parse("2016-02-01T10:00:00Z").getTime();
-        config.credential.realm = "shaken.stirred.com";
-        config.credential.checkAAAServerCertStatus = true;
-        config.credential.userCredential = new Credential.UserCredential();
-        config.credential.userCredential.username = "james";
-        config.credential.userCredential.password = "Ym9uZDAwNw==";
-        config.credential.userCredential.machineManaged = true;
-        config.credential.userCredential.softTokenApp = "TestApp";
-        config.credential.userCredential.ableToShare = true;
-        config.credential.userCredential.eapType = 21;
-        config.credential.userCredential.nonEapInnerMethod = "MS-CHAP-V2";
-        config.credential.certCredential = new Credential.CertificateCredential();
-        config.credential.certCredential.certType = "x509v3";
-        config.credential.certCredential.certSha256FingerPrint = new byte[32];
-        Arrays.fill(config.credential.certCredential.certSha256FingerPrint, (byte)0x1f);
-        config.credential.simCredential = new Credential.SimCredential();
-        config.credential.simCredential.imsi = "imsi";
-        config.credential.simCredential.eapType = 24;
+        Credential credential = new Credential();
+        credential.setCreationTimeInMs(format.parse("2016-01-01T10:00:00Z").getTime());
+        credential.setExpirationTimeInMs(format.parse("2016-02-01T10:00:00Z").getTime());
+        credential.setRealm("shaken.stirred.com");
+        credential.setCheckAAAServerCertStatus(true);
+        Credential.UserCredential userCredential = new Credential.UserCredential();
+        userCredential.setUsername("james");
+        userCredential.setPassword("Ym9uZDAwNw==");
+        userCredential.setMachineManaged(true);
+        userCredential.setSoftTokenApp("TestApp");
+        userCredential.setAbleToShare(true);
+        userCredential.setEapType(21);
+        userCredential.setNonEapInnerMethod("MS-CHAP-V2");
+        credential.setUserCredential(userCredential);
+        Credential.CertificateCredential certCredential = new Credential.CertificateCredential();
+        certCredential.setCertType("x509v3");
+        certCredential.setCertSha256Fingerprint(certFingerprint);
+        credential.setCertCredential(certCredential);
+        Credential.SimCredential simCredential = new Credential.SimCredential();
+        simCredential.setImsi("imsi");
+        simCredential.setEapType(24);
+        credential.setSimCredential(simCredential);
+        config.setCredential(credential);
 
         // Policy configuration.
-        config.policy = new Policy();
-        config.policy.preferredRoamingPartnerList = new ArrayList<>();
+        Policy policy = new Policy();
+        List<Policy.RoamingPartner> preferredRoamingPartnerList = new ArrayList<>();
         Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
-        partner1.fqdn = "test1.fqdn.com";
-        partner1.fqdnExactMatch = true;
-        partner1.priority = 127;
-        partner1.countries = "us,fr";
+        partner1.setFqdn("test1.fqdn.com");
+        partner1.setFqdnExactMatch(true);
+        partner1.setPriority(127);
+        partner1.setCountries("us,fr");
         Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
-        partner2.fqdn = "test2.fqdn.com";
-        partner2.fqdnExactMatch = false;
-        partner2.priority = 200;
-        partner2.countries = "*";
-        config.policy.preferredRoamingPartnerList.add(partner1);
-        config.policy.preferredRoamingPartnerList.add(partner2);
-        config.policy.minHomeDownlinkBandwidth = 23412;
-        config.policy.minHomeUplinkBandwidth = 9823;
-        config.policy.minRoamingDownlinkBandwidth = 9271;
-        config.policy.minRoamingUplinkBandwidth = 2315;
-        config.policy.excludedSsidList = new String[] {"excludeSSID"};
-        config.policy.requiredProtoPortMap = new HashMap<>();
-        config.policy.requiredProtoPortMap.put(12, "34,92,234");
-        config.policy.maximumBssLoadValue = 23;
-        config.policy.policyUpdate = new UpdateParameter();
-        config.policy.policyUpdate.updateIntervalInMinutes = 120;
-        config.policy.policyUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
-        config.policy.policyUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
-        config.policy.policyUpdate.serverUri = "policy.update.com";
-        config.policy.policyUpdate.username = "updateUser";
-        config.policy.policyUpdate.base64EncodedPassword = "updatePass";
-        config.policy.policyUpdate.trustRootCertUrl = "update.cert.com";
-        config.policy.policyUpdate.trustRootCertSha256Fingerprint = new byte[32];
-        Arrays.fill(config.policy.policyUpdate.trustRootCertSha256Fingerprint, (byte) 0x1f);
-
+        partner2.setFqdn("test2.fqdn.com");
+        partner2.setFqdnExactMatch(false);
+        partner2.setPriority(200);
+        partner2.setCountries("*");
+        preferredRoamingPartnerList.add(partner1);
+        preferredRoamingPartnerList.add(partner2);
+        policy.setPreferredRoamingPartnerList(preferredRoamingPartnerList);
+        policy.setMinHomeDownlinkBandwidth(23412);
+        policy.setMinHomeUplinkBandwidth(9823);
+        policy.setMinRoamingDownlinkBandwidth(9271);
+        policy.setMinRoamingUplinkBandwidth(2315);
+        policy.setExcludedSsidList(new String[] {"excludeSSID"});
+        Map<Integer, String> requiredProtoPortMap = new HashMap<>();
+        requiredProtoPortMap.put(12, "34,92,234");
+        policy.setRequiredProtoPortMap(requiredProtoPortMap);
+        policy.setMaximumBssLoadValue(23);
+        UpdateParameter policyUpdate = new UpdateParameter();
+        policyUpdate.setUpdateIntervalInMinutes(120);
+        policyUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_OMADM);
+        policyUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_HOMESP);
+        policyUpdate.setServerUri("policy.update.com");
+        policyUpdate.setUsername("updateUser");
+        policyUpdate.setBase64EncodedPassword("updatePass");
+        policyUpdate.setTrustRootCertUrl("update.cert.com");
+        policyUpdate.setTrustRootCertSha256Fingerprint(certFingerprint);
+        policy.setPolicyUpdate(policyUpdate);
+        config.setPolicy(policy);
         return config;
     }
 
@@ -249,10 +259,3 @@ public class PPSMOParserTest {
                 loadResourceFile(PPS_MO_XML_FILE_INVALID_NAME)));
     }
 }
-
-
-
-
-
-
-

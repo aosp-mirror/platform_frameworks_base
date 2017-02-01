@@ -23,10 +23,11 @@ import android.net.wifi.EAPConstants;
 import android.net.wifi.FakeKeys;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -55,16 +56,16 @@ public class CredentialTest {
                                                X509Certificate[] clientCertificateChain,
                                                PrivateKey clientPrivateKey) {
         Credential cred = new Credential();
-        cred.creationTimeInMs = 123455L;
-        cred.expirationTimeInMs = 2310093L;
-        cred.realm = "realm";
-        cred.checkAAAServerCertStatus = true;
-        cred.userCredential = userCred;
-        cred.certCredential = certCred;
-        cred.simCredential = simCred;
-        cred.caCertificate = caCert;
-        cred.clientCertificateChain = clientCertificateChain;
-        cred.clientPrivateKey = clientPrivateKey;
+        cred.setCreationTimeInMs(123455L);
+        cred.setExpirationTimeInMs(2310093L);
+        cred.setRealm("realm");
+        cred.setCheckAAAServerCertStatus(true);
+        cred.setUserCredential(userCred);
+        cred.setCertCredential(certCred);
+        cred.setSimCredential(simCred);
+        cred.setCaCertificate(caCert);
+        cred.setClientCertificateChain(clientCertificateChain);
+        cred.setClientPrivateKey(clientPrivateKey);
         return cred;
     }
 
@@ -73,10 +74,12 @@ public class CredentialTest {
      *
      * @return {@link Credential}
      */
-    private static Credential createCredentialWithCertificateCredential() {
+    private static Credential createCredentialWithCertificateCredential()
+            throws NoSuchAlgorithmException, CertificateEncodingException {
         Credential.CertificateCredential certCred = new Credential.CertificateCredential();
-        certCred.certType = "x509v3";
-        certCred.certSha256FingerPrint = new byte[32];
+        certCred.setCertType("x509v3");
+        certCred.setCertSha256Fingerprint(
+                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded()));
         return createCredential(null, certCred, null, FakeKeys.CA_CERT0,
                 new X509Certificate[] {FakeKeys.CLIENT_CERT}, FakeKeys.RSA_KEY1);
     }
@@ -88,8 +91,8 @@ public class CredentialTest {
      */
     private static Credential createCredentialWithSimCredential() {
         Credential.SimCredential simCred = new Credential.SimCredential();
-        simCred.imsi = "1234*";
-        simCred.eapType = EAPConstants.EAP_SIM;
+        simCred.setImsi("1234*");
+        simCred.setEapType(EAPConstants.EAP_SIM);
         return createCredential(null, null, simCred, null, null, null);
     }
 
@@ -100,15 +103,14 @@ public class CredentialTest {
      */
     private static Credential createCredentialWithUserCredential() {
         Credential.UserCredential userCred = new Credential.UserCredential();
-        userCred.username = "username";
-        userCred.password = "password";
-        userCred.machineManaged = true;
-        userCred.ableToShare = true;
-        userCred.softTokenApp = "TestApp";
-        userCred.eapType = EAPConstants.EAP_TTLS;
-        userCred.nonEapInnerMethod = "MS-CHAP";
-        return createCredential(userCred, null, null, FakeKeys.CA_CERT0,
-                new X509Certificate[] {FakeKeys.CLIENT_CERT}, FakeKeys.RSA_KEY1);
+        userCred.setUsername("username");
+        userCred.setPassword("password");
+        userCred.setMachineManaged(true);
+        userCred.setAbleToShare(true);
+        userCred.setSoftTokenApp("TestApp");
+        userCred.setEapType(EAPConstants.EAP_TTLS);
+        userCred.setNonEapInnerMethod("MS-CHAP");
+        return createCredential(userCred, null, null, FakeKeys.CA_CERT0, null, null);
     }
 
     private static void verifyParcel(Credential writeCred) {
@@ -166,14 +168,7 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredential() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
         assertTrue(cred.validate());
     }
 
@@ -184,13 +179,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithoutCaCert() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
+        Credential cred = createCredentialWithUserCredential();
+        cred.setCaCertificate(null);
         assertFalse(cred.validate());
     }
 
@@ -201,14 +191,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithEapTls() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
+        cred.getUserCredential().setEapType(EAPConstants.EAP_TLS);
         assertFalse(cred.validate());
     }
 
@@ -220,13 +204,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithoutRealm() throws Exception {
-        Credential cred = new Credential();
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
+        cred.setRealm(null);
         assertFalse(cred.validate());
     }
 
@@ -237,13 +216,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithoutUsername() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
+        cred.getUserCredential().setUsername(null);
         assertFalse(cred.validate());
     }
 
@@ -254,13 +228,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithoutPassword() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
+        cred.getUserCredential().setPassword(null);
         assertFalse(cred.validate());
     }
 
@@ -271,13 +240,8 @@ public class CredentialTest {
      */
     @Test
     public void validateUserCredentialWithoutAuthMethod() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
+        cred.getUserCredential().setNonEapInnerMethod(null);
         assertFalse(cred.validate());
     }
 
@@ -290,17 +254,7 @@ public class CredentialTest {
      */
     @Test
     public void validateCertCredential() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup certificate credential.
-        cred.certCredential = new Credential.CertificateCredential();
-        cred.certCredential.certType = "x509v3";
-        cred.certCredential.certSha256FingerPrint =
-                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded());
-        // Setup certificates and private key.
-        cred.caCertificate = FakeKeys.CA_CERT0;
-        cred.clientCertificateChain = new X509Certificate[] {FakeKeys.CLIENT_CERT};
-        cred.clientPrivateKey = FakeKeys.RSA_KEY1;
+        Credential cred = createCredentialWithCertificateCredential();
         assertTrue(cred.validate());
     }
 
@@ -310,16 +264,8 @@ public class CredentialTest {
      * @throws Exception
      */
     public void validateCertCredentialWithoutCaCert() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup certificate credential.
-        cred.certCredential = new Credential.CertificateCredential();
-        cred.certCredential.certType = "x509v3";
-        cred.certCredential.certSha256FingerPrint =
-                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded());
-        // Setup certificates and private key.
-        cred.clientCertificateChain = new X509Certificate[] {FakeKeys.CLIENT_CERT};
-        cred.clientPrivateKey = FakeKeys.RSA_KEY1;
+        Credential cred = createCredentialWithCertificateCredential();
+        cred.setCaCertificate(null);
         assertFalse(cred.validate());
     }
 
@@ -330,16 +276,8 @@ public class CredentialTest {
      */
     @Test
     public void validateCertCredentialWithoutClientCertChain() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup certificate credential.
-        cred.certCredential = new Credential.CertificateCredential();
-        cred.certCredential.certType = "x509v3";
-        cred.certCredential.certSha256FingerPrint =
-                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded());
-        // Setup certificates and private key.
-        cred.caCertificate = FakeKeys.CA_CERT0;
-        cred.clientPrivateKey = FakeKeys.RSA_KEY1;
+        Credential cred = createCredentialWithCertificateCredential();
+        cred.setClientCertificateChain(null);
         assertFalse(cred.validate());
     }
 
@@ -350,16 +288,8 @@ public class CredentialTest {
      */
     @Test
     public void validateCertCredentialWithoutClientPrivateKey() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup certificate credential.
-        cred.certCredential = new Credential.CertificateCredential();
-        cred.certCredential.certType = "x509v3";
-        cred.certCredential.certSha256FingerPrint =
-                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CLIENT_CERT.getEncoded());
-        // Setup certificates and private key.
-        cred.caCertificate = FakeKeys.CA_CERT0;
-        cred.clientCertificateChain = new X509Certificate[] {FakeKeys.CLIENT_CERT};
+        Credential cred = createCredentialWithCertificateCredential();
+        cred.setClientPrivateKey(null);
         assertFalse(cred.validate());
     }
 
@@ -371,17 +301,8 @@ public class CredentialTest {
      */
     @Test
     public void validateCertCredentialWithMismatchFingerprint() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup certificate credential.
-        cred.certCredential = new Credential.CertificateCredential();
-        cred.certCredential.certType = "x509v3";
-        cred.certCredential.certSha256FingerPrint = new byte[32];
-        Arrays.fill(cred.certCredential.certSha256FingerPrint, (byte)0);
-        // Setup certificates and private key.
-        cred.caCertificate = FakeKeys.CA_CERT0;
-        cred.clientCertificateChain = new X509Certificate[] {FakeKeys.CLIENT_CERT};
-        cred.clientPrivateKey = FakeKeys.RSA_KEY1;
+        Credential cred = createCredentialWithCertificateCredential();
+        cred.getCertCredential().setCertSha256Fingerprint(new byte[32]);
         assertFalse(cred.validate());
     }
 
@@ -392,12 +313,7 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithEapSim() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_SIM;
+        Credential cred = createCredentialWithSimCredential();
         assertTrue(cred.validate());
     }
 
@@ -408,12 +324,8 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithEapAka() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_AKA;
+        Credential cred = createCredentialWithSimCredential();
+        cred.getSimCredential().setEapType(EAPConstants.EAP_AKA);
         assertTrue(cred.validate());
     }
 
@@ -424,12 +336,8 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithEapAkaPrime() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_AKA_PRIME;
+        Credential cred = createCredentialWithSimCredential();
+        cred.getSimCredential().setEapType(EAPConstants.EAP_AKA_PRIME);
         assertTrue(cred.validate());
     }
 
@@ -440,11 +348,8 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithoutIMSI() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.eapType = EAPConstants.EAP_SIM;
+        Credential cred = createCredentialWithSimCredential();
+        cred.getSimCredential().setImsi(null);
         assertFalse(cred.validate());
     }
 
@@ -455,12 +360,8 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithInvalidIMSI() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "dummy";
-        cred.simCredential.eapType = EAPConstants.EAP_SIM;
+        Credential cred = createCredentialWithSimCredential();
+        cred.getSimCredential().setImsi("dummy");
         assertFalse(cred.validate());
     }
 
@@ -471,12 +372,8 @@ public class CredentialTest {
      */
     @Test
     public void validateSimCredentialWithEapTls() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_TLS;
+        Credential cred = createCredentialWithSimCredential();
+        cred.getSimCredential().setEapType(EAPConstants.EAP_TLS);
         assertFalse(cred.validate());
     }
 
@@ -487,19 +384,12 @@ public class CredentialTest {
      */
     @Test
     public void validateCredentialWithUserAndSimCredential() throws Exception {
-        Credential cred = new Credential();
-        cred.realm = "realm";
-        // Setup user credential with EAP-TTLS.
-        cred.userCredential = new Credential.UserCredential();
-        cred.userCredential.username = "username";
-        cred.userCredential.password = "password";
-        cred.userCredential.eapType = EAPConstants.EAP_TTLS;
-        cred.userCredential.nonEapInnerMethod = "MS-CHAP";
-        cred.caCertificate = FakeKeys.CA_CERT0;
+        Credential cred = createCredentialWithUserCredential();
         // Setup SIM credential.
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_SIM;
+        Credential.SimCredential simCredential = new Credential.SimCredential();
+        simCredential.setImsi("1234*");
+        simCredential.setEapType(EAPConstants.EAP_SIM);
+        cred.setSimCredential(simCredential);
         assertFalse(cred.validate());
     }
 
