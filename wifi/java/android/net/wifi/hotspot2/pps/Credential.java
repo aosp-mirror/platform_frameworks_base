@@ -42,8 +42,6 @@ import java.util.Set;
  *
  * In addition to the fields in the Credential subtree, this will also maintain necessary
  * information for the private key and certificates associated with this credential.
- *
- * @hide
  */
 public final class Credential implements Parcelable {
     private static final String TAG = "Credential";
