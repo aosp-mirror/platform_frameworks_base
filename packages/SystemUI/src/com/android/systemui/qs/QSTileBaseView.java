@@ -47,17 +47,12 @@ public class QSTileBaseView extends LinearLayout {
 
     private static final String TAG = "QSTileBaseView";
     private final H mHandler = new H();
-    private final ImageView mBg;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
     private Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
     private boolean mCollapsedView;
-    private final int mColorActive;
-    private final int mColorInactive;
-    private final int mColorDisabled;
-    private int mCircleColor;
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -72,19 +67,11 @@ public class QSTileBaseView extends LinearLayout {
         frame.setForegroundGravity(Gravity.CENTER);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(frame, new LayoutParams(size, size));
-        mBg = new ImageView(getContext());
-        mBg.setScaleType(ScaleType.FIT_CENTER);
-        mBg.setImageResource(R.drawable.ic_qs_circle);
-        frame.addView(mBg);
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, padding, 0, padding);
         frame.addView(mIcon, params);
-        mColorActive = Utils.getColorAttr(context, android.R.attr.textColorPrimary);
-        mColorDisabled = Utils.getDisabled(context,
-                Utils.getColorAttr(context, android.R.attr.textColorTertiary));
-        mColorInactive = Utils.getColorAttr(context, android.R.attr.textColorSecondary);
 
         mTileBackground = newTileBackground();
         if (mTileBackground instanceof RippleDrawable) {
@@ -98,10 +85,6 @@ public class QSTileBaseView extends LinearLayout {
         setClipToPadding(false);
         mCollapsedView = collapsedView;
         setFocusable(true);
-    }
-
-    public View getBgCicle() {
-        return mBg;
     }
 
     protected Drawable newTileBackground() {
@@ -167,16 +150,6 @@ public class QSTileBaseView extends LinearLayout {
     }
 
     protected void handleStateChanged(QSTile.State state) {
-        int circleColor = getCircleColor(state.state);
-        if (circleColor != mCircleColor) {
-            if (mBg.isShown()) {
-                QSIconView.animateGrayScale(mCircleColor, circleColor, mBg);
-            } else {
-                QSIconView.setTint(mBg, circleColor);
-            }
-            mCircleColor = circleColor;
-        }
-
         mIcon.setIcon(state);
         if (mCollapsedView && !TextUtils.isEmpty(state.minimalContentDescription)) {
             setContentDescription(state.minimalContentDescription);
@@ -190,19 +163,6 @@ public class QSTileBaseView extends LinearLayout {
         }
         if (state instanceof QSTile.BooleanState) {
             mTileState = ((QSTile.BooleanState) state).value;
-        }
-    }
-
-    private int getCircleColor(int state) {
-        switch (state) {
-            case Tile.STATE_ACTIVE:
-                return mColorActive;
-            case Tile.STATE_INACTIVE:
-            case Tile.STATE_UNAVAILABLE:
-                return mColorDisabled;
-            default:
-                Log.e(TAG, "Invalid state " + state);
-                return 0;
         }
     }
 

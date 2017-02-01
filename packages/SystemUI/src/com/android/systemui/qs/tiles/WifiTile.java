@@ -150,6 +150,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mDetailAdapter.setItemsVisible(cb.enabled);
             fireToggleStateChanged(cb.enabled);
         }
+        state.dualTarget = true;
         state.value = cb.enabled;
         state.connected = wifiConnected;
         state.activityIn = cb.enabled && cb.activityIn;

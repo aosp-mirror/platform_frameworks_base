@@ -126,6 +126,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         } else {
             state.icon = ResourceIcon.get(iconId);
         }
+        state.dualTarget = true;
         state.isOverlayIconWide = cb.isDataTypeIconWide;
         state.autoMirrorDrawable = !cb.noSim;
         state.filter = iconId != R.drawable.ic_qs_no_sim;

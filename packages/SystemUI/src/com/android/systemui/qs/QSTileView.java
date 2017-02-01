@@ -39,6 +39,7 @@ import libcore.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
 
+    private final View mDivider;
     protected TextView mLabel;
     private ImageView mPadLock;
     private int mState;
@@ -57,6 +58,8 @@ public class QSTileView extends QSTileBaseView {
 
         setClickable(true);
         setId(View.generateViewId());
+        mDivider = LayoutInflater.from(context).inflate(R.layout.divider, this, false);
+        addView(mDivider);
         createLabel();
         setOrientation(VERTICAL);
         setGravity(Gravity.CENTER);
@@ -95,6 +98,7 @@ public class QSTileView extends QSTileBaseView {
             mState = state.state;
             mLabel.setText(state.label);
         }
+        mDivider.setVisibility(state.dualTarget ? View.VISIBLE : View.INVISIBLE);
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
     }

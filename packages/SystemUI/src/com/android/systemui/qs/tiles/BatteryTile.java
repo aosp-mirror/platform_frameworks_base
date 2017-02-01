@@ -118,6 +118,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         int level = (arg != null) ? (Integer) arg : mLevel;
         String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
 
+        state.dualTarget = true;
         state.state = mCharging ? Tile.STATE_UNAVAILABLE
                 : mPowerSave ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = ResourceIcon.get(R.drawable.ic_qs_battery_saver);
