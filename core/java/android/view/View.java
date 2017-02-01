@@ -6409,7 +6409,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
-        return allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE;
+        return (allowAutoFocus
+                ? getFocusable() != NOT_FOCUSABLE
+                : getFocusable() == FOCUSABLE) && isFocusable();
     }
 
     /**

@@ -1114,7 +1114,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // TODO This should probably be super.hasFocusable, but that would change behavior
-        if (allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE) {
+        if ((allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE)
+                && isFocusable()) {
             return true;
         }
 
