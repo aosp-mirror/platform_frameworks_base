@@ -33,7 +33,7 @@ import android.net.StaticIpConfiguration;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
-import android.net.util.AvoidBadWifiTracker;
+import android.net.util.MultinetworkPolicyTracker;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
@@ -398,7 +398,7 @@ public class IpManager extends StateMachine {
     private final NetlinkTracker mNetlinkTracker;
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
-    private final AvoidBadWifiTracker mAvoidBadWifiTracker;
+    private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
     private final LocalLog mLocalLog;
     private final LocalLog mConnectivityPacketLog;
     private final MessageHandlingLogger mMsgStateLogger;
@@ -492,7 +492,7 @@ public class IpManager extends StateMachine {
         mLinkProperties = new LinkProperties();
         mLinkProperties.setInterfaceName(mInterfaceName);
 
-        mAvoidBadWifiTracker = new AvoidBadWifiTracker(mContext, getHandler(),
+        mMultinetworkPolicyTracker = new MultinetworkPolicyTracker(mContext, getHandler(),
                 () -> { mLocalLog.log("OBSERVED AvoidBadWifi changed"); });
 
         mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
@@ -527,7 +527,7 @@ public class IpManager extends StateMachine {
             Log.e(mTag, "Couldn't register NetlinkTracker: " + e.toString());
         }
 
-        mAvoidBadWifiTracker.start();
+        mMultinetworkPolicyTracker.start();
     }
 
     @Override
@@ -538,7 +538,7 @@ public class IpManager extends StateMachine {
     // Shut down this IpManager instance altogether.
     public void shutdown() {
         stop();
-        mAvoidBadWifiTracker.shutdown();
+        mMultinetworkPolicyTracker.shutdown();
         quit();
     }
 
@@ -767,7 +767,7 @@ public class IpManager extends StateMachine {
         // Note that we can still be disconnected by IpReachabilityMonitor
         // if the IPv6 default gateway (but not the IPv6 DNS servers; see
         // accompanying code in IpReachabilityMonitor) is unreachable.
-        final boolean ignoreIPv6ProvisioningLoss = !mAvoidBadWifiTracker.currentValue();
+        final boolean ignoreIPv6ProvisioningLoss = !mMultinetworkPolicyTracker.getAvoidBadWifi();
 
         // Additionally:
         //
@@ -1045,7 +1045,7 @@ public class IpManager extends StateMachine {
                             mCallback.onReachabilityLost(logMsg);
                         }
                     },
-                    mAvoidBadWifiTracker);
+                    mMultinetworkPolicyTracker);
         } catch (IllegalArgumentException iae) {
             // Failed to start IpReachabilityMonitor. Log it and call
             // onProvisioningFailure() immediately.
