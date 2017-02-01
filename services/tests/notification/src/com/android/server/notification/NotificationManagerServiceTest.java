@@ -223,10 +223,7 @@ public class NotificationManagerServiceTest {
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
-        NotificationManagerService.EnqueueNotificationRunnable enqueue =
-                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
-                        r);
-        assertTrue(enqueue.isBlocked(r, usageStats));
+        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
         verify(usageStats, times(1)).registerSuspendedByAdmin(eq(r));
     }
 
@@ -240,10 +237,7 @@ public class NotificationManagerServiceTest {
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setImportance(NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
-        NotificationManagerService.EnqueueNotificationRunnable enqueue =
-                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
-                        r);
-        assertTrue(enqueue.isBlocked(r, usageStats));
+        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
         verify(usageStats, times(1)).registerBlocked(eq(r));
     }
 
@@ -257,10 +251,7 @@ public class NotificationManagerServiceTest {
                 NotificationManager.IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
         r.setUserImportance(NotificationManager.IMPORTANCE_NONE);
-        NotificationManagerService.EnqueueNotificationRunnable enqueue =
-                mNotificationManagerService.new EnqueueNotificationRunnable(UserHandle.USER_SYSTEM,
-                        r);
-        assertTrue(enqueue.isBlocked(r, usageStats));
+        assertTrue(mNotificationManagerService.isBlocked(r, usageStats));
         verify(usageStats, times(1)).registerBlocked(eq(r));
     }
 
