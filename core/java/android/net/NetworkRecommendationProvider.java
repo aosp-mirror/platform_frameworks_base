@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -27,8 +25,6 @@ public abstract class NetworkRecommendationProvider {
             "android.net.extra.RECOMMENDATION_RESULT";
     /** The key into the callback Bundle where the sequence will be found. */
     public static final String EXTRA_SEQUENCE = "android.net.extra.SEQUENCE";
-    private static final String EXTRA_RECOMMENDATION_REQUEST =
-            "android.net.extra.RECOMMENDATION_REQUEST";
     private final IBinder mService;
 
     /**
@@ -39,7 +35,7 @@ public abstract class NetworkRecommendationProvider {
         if (handler == null) {
             throw new IllegalArgumentException("The provided handler cannot be null.");
         }
-        mService = new ServiceWrapper(new ServiceHandler(handler.getLooper()));
+        mService = new ServiceWrapper(handler);
     }
 
     /**
@@ -125,42 +121,10 @@ public abstract class NetworkRecommendationProvider {
         }
     }
 
-    private final class ServiceHandler extends Handler {
-        static final int MSG_GET_RECOMMENDATION = 1;
-        static final int MSG_REQUEST_SCORES = 2;
-
-        ServiceHandler(Looper looper) {
-            super(looper, null /*callback*/, true /*async*/);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final int what = msg.what;
-            switch (what) {
-                case MSG_GET_RECOMMENDATION:
-                    final IRemoteCallback callback = (IRemoteCallback) msg.obj;
-                    final int seq = msg.arg1;
-                    final RecommendationRequest request =
-                            msg.getData().getParcelable(EXTRA_RECOMMENDATION_REQUEST);
-                    final ResultCallback resultCallback = new ResultCallback(callback, seq);
-                    onRequestRecommendation(request, resultCallback);
-                    break;
-
-                case MSG_REQUEST_SCORES:
-                    final NetworkKey[] networks = (NetworkKey[]) msg.obj;
-                    onRequestScores(networks);
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Unknown message: " + what);
-            }
-        }
-    }
-
     /**
-     * A wrapper around INetworkRecommendationProvider that sends calls to the internal Handler.
+     * A wrapper around INetworkRecommendationProvider that dispatches to the provided Handler.
      */
-    private static final class ServiceWrapper extends INetworkRecommendationProvider.Stub {
+    private final class ServiceWrapper extends INetworkRecommendationProvider.Stub {
         private final Handler mHandler;
 
         ServiceWrapper(Handler handler) {
@@ -168,20 +132,26 @@ public abstract class NetworkRecommendationProvider {
         }
 
         @Override
-        public void requestRecommendation(RecommendationRequest request, IRemoteCallback callback,
-                int sequence) throws RemoteException {
-            final Message msg = mHandler.obtainMessage(
-                    ServiceHandler.MSG_GET_RECOMMENDATION, sequence, 0 /*arg2*/, callback);
-            final Bundle data = new Bundle();
-            data.putParcelable(EXTRA_RECOMMENDATION_REQUEST, request);
-            msg.setData(data);
-            msg.sendToTarget();
+        public void requestRecommendation(final RecommendationRequest request,
+                final IRemoteCallback callback, final int sequence) throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    ResultCallback resultCallback = new ResultCallback(callback, sequence);
+                    onRequestRecommendation(request, resultCallback);
+                }
+            });
         }
 
         @Override
-        public void requestScores(NetworkKey[] networks) throws RemoteException {
+        public void requestScores(final NetworkKey[] networks) throws RemoteException {
             if (networks != null && networks.length > 0) {
-                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_SCORES, networks).sendToTarget();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onRequestScores(networks);
+                    }
+                });
             }
         }
     }
