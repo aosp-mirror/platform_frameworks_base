@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class representing Policy subtree in PerProviderSubscription (PPS)
@@ -249,6 +250,11 @@ public final class Policy implements Parcelable {
                     && TextUtils.equals(mCountries, that.mCountries);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFqdn, mFqdnExactMatch, mPriority, mCountries);
+        }
+
         /**
          * Validate RoamingParnter data.
          *
@@ -379,6 +385,14 @@ public final class Policy implements Parcelable {
                         : mPreferredRoamingPartnerList.equals(that.mPreferredRoamingPartnerList))
                 && (mPolicyUpdate == null ? that.mPolicyUpdate == null
                         : mPolicyUpdate.equals(that.mPolicyUpdate));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mMinHomeDownlinkBandwidth, mMinHomeUplinkBandwidth,
+                mMinRoamingDownlinkBandwidth, mMinRoamingUplinkBandwidth, mExcludedSsidList,
+                mRequiredProtoPortMap, mMaximumBssLoadValue, mPreferredRoamingPartnerList,
+                mPolicyUpdate);
     }
 
     /**
