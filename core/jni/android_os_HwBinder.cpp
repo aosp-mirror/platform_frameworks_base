@@ -302,6 +302,14 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
+    auto manager = hardware::defaultServiceManager();
+
+    if (manager == nullptr) {
+        LOG(ERROR) << "Could not get hwservicemanager.";
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        return NULL;
+    }
+
     const char *ifaceName = env->GetStringUTFChars(ifaceNameObj, NULL);
     if (ifaceName == NULL) {
         return NULL; // XXX exception already pending?
@@ -312,31 +320,25 @@ static jobject JHwBinder_native_getService(
         return NULL; // XXX exception already pending?
     }
 
-    LOG(INFO) << "looking for service '"
-              << serviceName
-              << "'";
-
-    auto manager = hardware::defaultServiceManager();
-
-    if (manager == nullptr) {
-        LOG(ERROR) << "Could not get hwservicemanager.";
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-        return NULL;
-    }
+    LOG(INFO) << "Looking for service "
+              << ifaceName
+              << "/"
+              << serviceName;
 
     Return<sp<hidl::base::V1_0::IBase>> ret = manager->get(ifaceName, serviceName);
-
-    if (!ret.isOk()) {
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-    }
-
-    sp<hardware::IBinder> service = hardware::toBinder<
-            hidl::base::V1_0::IBase, hidl::base::V1_0::BpHwBase>(ret);
 
     env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
     ifaceName = NULL;
     env->ReleaseStringUTFChars(serviceNameObj, serviceName);
     serviceName = NULL;
+
+    if (!ret.isOk()) {
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        return NULL;
+    }
+
+    sp<hardware::IBinder> service = hardware::toBinder<
+            hidl::base::V1_0::IBase, hidl::base::V1_0::BpHwBase>(ret);
 
     if (service == NULL) {
         signalExceptionForError(env, NAME_NOT_FOUND);
