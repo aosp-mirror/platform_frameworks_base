@@ -34,6 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for {@link android.net.wifi.hotspot2.PasspointConfiguration}.
@@ -50,9 +52,9 @@ public class PasspointConfigurationTest {
      */
     private static HomeSP createHomeSp() {
         HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        homeSp.friendlyName = "friendly name";
-        homeSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
+        homeSp.setFqdn("fqdn");
+        homeSp.setFriendlyName("friendly name");
+        homeSp.setRoamingConsortiumOIs(new long[] {0x55, 0x66});
         return homeSp;
     }
 
@@ -63,15 +65,15 @@ public class PasspointConfigurationTest {
      */
     private static Credential createCredential() {
         Credential cred = new Credential();
-        cred.realm = "realm";
-        cred.userCredential = null;
-        cred.certCredential = null;
-        cred.simCredential = new Credential.SimCredential();
-        cred.simCredential.imsi = "1234*";
-        cred.simCredential.eapType = EAPConstants.EAP_SIM;
-        cred.caCertificate = null;
-        cred.clientCertificateChain = null;
-        cred.clientPrivateKey = null;
+        cred.setRealm("realm");
+        cred.setUserCredential(null);
+        cred.setCertCredential(null);
+        cred.setSimCredential(new Credential.SimCredential());
+        cred.getSimCredential().setImsi("1234*");
+        cred.getSimCredential().setEapType(EAPConstants.EAP_SIM);
+        cred.setCaCertificate(null);
+        cred.setClientCertificateChain(null);
+        cred.setClientPrivateKey(null);
         return cred;
     }
 
@@ -82,56 +84,59 @@ public class PasspointConfigurationTest {
      */
     private static Policy createPolicy() {
         Policy policy = new Policy();
-        policy.minHomeDownlinkBandwidth = 123;
-        policy.minHomeUplinkBandwidth = 345;
-        policy.minRoamingDownlinkBandwidth = 567;
-        policy.minRoamingUplinkBandwidth = 789;
-        policy.maximumBssLoadValue = 12;
-        policy.excludedSsidList = new String[] {"ssid1", "ssid2"};
-        policy.requiredProtoPortMap = new HashMap<>();
-        policy.requiredProtoPortMap.put(12, "23,342,123");
-        policy.requiredProtoPortMap.put(23, "789,372,1235");
+        policy.setMinHomeDownlinkBandwidth(123);
+        policy.setMinHomeUplinkBandwidth(345);
+        policy.setMinRoamingDownlinkBandwidth(567);
+        policy.setMinRoamingUplinkBandwidth(789);
+        policy.setMaximumBssLoadValue(12);
+        policy.setExcludedSsidList(new String[] {"ssid1", "ssid2"});
+        HashMap<Integer, String> requiredProtoPortMap = new HashMap<>();
+        requiredProtoPortMap.put(12, "23,342,123");
+        requiredProtoPortMap.put(23, "789,372,1235");
+        policy.setRequiredProtoPortMap(requiredProtoPortMap);
 
-        policy.preferredRoamingPartnerList = new ArrayList<>();
+        List<Policy.RoamingPartner> preferredRoamingPartnerList = new ArrayList<>();
         Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
-        partner1.fqdn = "partner1.com";
-        partner1.fqdnExactMatch = true;
-        partner1.priority = 12;
-        partner1.countries = "us,jp";
+        partner1.setFqdn("partner1.com");
+        partner1.setFqdnExactMatch(true);
+        partner1.setPriority(12);
+        partner1.setCountries("us,jp");
         Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
-        partner2.fqdn = "partner2.com";
-        partner2.fqdnExactMatch = false;
-        partner2.priority = 42;
-        partner2.countries = "ca,fr";
-        policy.preferredRoamingPartnerList.add(partner1);
-        policy.preferredRoamingPartnerList.add(partner2);
+        partner2.setFqdn("partner2.com");
+        partner2.setFqdnExactMatch(false);
+        partner2.setPriority(42);
+        partner2.setCountries("ca,fr");
+        preferredRoamingPartnerList.add(partner1);
+        preferredRoamingPartnerList.add(partner2);
+        policy.setPreferredRoamingPartnerList(preferredRoamingPartnerList);
 
-        policy.policyUpdate = new UpdateParameter();
-        policy.policyUpdate.updateIntervalInMinutes = 1712;
-        policy.policyUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
-        policy.policyUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
-        policy.policyUpdate.serverUri = "policy.update.com";
-        policy.policyUpdate.username = "username";
-        policy.policyUpdate.base64EncodedPassword =
-                Base64.encodeToString("password".getBytes(), Base64.DEFAULT);
-        policy.policyUpdate.trustRootCertUrl = "trust.cert.com";
-        policy.policyUpdate.trustRootCertSha256Fingerprint =
-                new byte[CERTIFICATE_FINGERPRINT_BYTES];
+        UpdateParameter policyUpdate = new UpdateParameter();
+        policyUpdate.setUpdateIntervalInMinutes(1712);
+        policyUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_OMADM);
+        policyUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_HOMESP);
+        policyUpdate.setServerUri("policy.update.com");
+        policyUpdate.setUsername("username");
+        policyUpdate.setBase64EncodedPassword(
+                Base64.encodeToString("password".getBytes(), Base64.DEFAULT));
+        policyUpdate.setTrustRootCertUrl("trust.cert.com");
+        policyUpdate.setTrustRootCertSha256Fingerprint(
+                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        policy.setPolicyUpdate(policyUpdate);
 
         return policy;
     }
 
     private static UpdateParameter createSubscriptionUpdate() {
         UpdateParameter subUpdate = new UpdateParameter();
-        subUpdate.updateIntervalInMinutes = 9021;
-        subUpdate.updateMethod = UpdateParameter.UPDATE_METHOD_SSP;
-        subUpdate.restriction = UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER;
-        subUpdate.serverUri = "subscription.update.com";
-        subUpdate.username = "subUsername";
-        subUpdate.base64EncodedPassword =
-                Base64.encodeToString("subPassword".getBytes(), Base64.DEFAULT);
-        subUpdate.trustRootCertUrl = "subscription.trust.cert.com";
-        subUpdate.trustRootCertSha256Fingerprint = new byte[CERTIFICATE_FINGERPRINT_BYTES];
+        subUpdate.setUpdateIntervalInMinutes(9021);
+        subUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_SSP);
+        subUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER);
+        subUpdate.setServerUri("subscription.update.com");
+        subUpdate.setUsername("subUsername");
+        subUpdate.setBase64EncodedPassword(
+                Base64.encodeToString("subPassword".getBytes(), Base64.DEFAULT));
+        subUpdate.setTrustRootCertUrl("subscription.trust.cert.com");
+        subUpdate.setTrustRootCertSha256Fingerprint(new byte[CERTIFICATE_FINGERPRINT_BYTES]);
         return subUpdate;
     }
     /**
@@ -141,24 +146,25 @@ public class PasspointConfigurationTest {
      */
     private static PasspointConfiguration createConfig() {
         PasspointConfiguration config = new PasspointConfiguration();
-        config.homeSp = createHomeSp();
-        config.credential = createCredential();
-        config.policy = createPolicy();
-        config.subscriptionUpdate = createSubscriptionUpdate();
-        config.trustRootCertList = new HashMap<>();
-        config.trustRootCertList.put("trustRoot.cert1.com",
+        config.setHomeSp(createHomeSp());
+        config.setCredential(createCredential());
+        config.setPolicy(createPolicy());
+        config.setSubscriptionUpdate(createSubscriptionUpdate());
+        Map<String, byte[]> trustRootCertList = new HashMap<>();
+        trustRootCertList.put("trustRoot.cert1.com",
                 new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        config.trustRootCertList.put("trustRoot.cert2.com",
+        trustRootCertList.put("trustRoot.cert2.com",
                 new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        config.updateIdentifier = 1;
-        config.credentialPriority = 120;
-        config.subscriptionCreationTimeInMs = 231200;
-        config.subscriptionExpirationTimeInMs = 2134232;
-        config.subscriptionType = "Gold";
-        config.usageLimitUsageTimePeriodInMinutes = 3600;
-        config.usageLimitStartTimeInMs = 124214213;
-        config.usageLimitDataLimit = 14121;
-        config.usageLimitTimeLimitInMinutes = 78912;
+        config.setTrustRootCertList(trustRootCertList);
+        config.setUpdateIdentifier(1);
+        config.setCredentialPriority(120);
+        config.setSubscriptionCreationTimeInMs(231200);
+        config.setSubscriptionExpirationTimeInMs(2134232);
+        config.setSubscriptionType("Gold");
+        config.setUsageLimitUsageTimePeriodInMinutes(3600);
+        config.setUsageLimitStartTimeInMs(124214213);
+        config.setUsageLimitDataLimit(14121);
+        config.setUsageLimitTimeLimitInMinutes(78912);
         return config;
     }
 
@@ -206,7 +212,7 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithoutHomeSP() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.homeSp = null;
+        config.setHomeSp(null);
         verifyParcel(config);
     }
 
@@ -218,7 +224,7 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithoutCredential() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.credential = null;
+        config.setCredential(null);
         verifyParcel(config);
     }
 
@@ -230,7 +236,7 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithoutPolicy() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.policy = null;
+        config.setPolicy(null);
         verifyParcel(config);
     }
 
@@ -242,7 +248,7 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithoutSubscriptionUpdate() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.subscriptionUpdate = null;
+        config.setSubscriptionUpdate(null);
         verifyParcel(config);
     }
 
@@ -255,7 +261,7 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithoutTrustRootCertList() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.trustRootCertList = null;
+        config.setTrustRootCertList(null);
         verifyParcel(config);
     }
 
@@ -289,7 +295,7 @@ public class PasspointConfigurationTest {
     @Test
     public void validateConfigWithoutCredential() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.credential = null;
+        config.setCredential(null);
         assertFalse(config.validate());
     }
 
@@ -301,7 +307,7 @@ public class PasspointConfigurationTest {
     @Test
     public void validateConfigWithoutHomeSp() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.homeSp = null;
+        config.setHomeSp(null);
         assertFalse(config.validate());
     }
 
@@ -314,7 +320,7 @@ public class PasspointConfigurationTest {
     @Test
     public void validateConfigWithoutPolicy() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.policy = null;
+        config.setPolicy(null);
         assertTrue(config.validate());
     }
 
@@ -327,7 +333,7 @@ public class PasspointConfigurationTest {
     @Test
     public void validateConfigWithoutSubscriptionUpdate() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.subscriptionUpdate = null;
+        config.setSubscriptionUpdate(null);
         assertTrue(config.validate());
     }
 
@@ -341,13 +347,16 @@ public class PasspointConfigurationTest {
     public void validateConfigWithInvalidTrustRootCertUrl() throws Exception {
         PasspointConfiguration config = createConfig();
         byte[] rawUrlBytes = new byte[MAX_URL_BYTES + 1];
+        Map<String, byte[]> trustRootCertList = new HashMap<>();
         Arrays.fill(rawUrlBytes, (byte) 'a');
-        config.trustRootCertList.put(new String(rawUrlBytes, StandardCharsets.UTF_8),
+        trustRootCertList.put(new String(rawUrlBytes, StandardCharsets.UTF_8),
                 new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
 
-        config.trustRootCertList = new HashMap<>();
-        config.trustRootCertList.put(null, new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        trustRootCertList = new HashMap<>();
+        trustRootCertList.put(null, new byte[CERTIFICATE_FINGERPRINT_BYTES]);
+        config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
     }
 
@@ -359,16 +368,19 @@ public class PasspointConfigurationTest {
     @Test
     public void validateConfigWithInvalidTrustRootCertFingerprint() throws Exception {
         PasspointConfiguration config = createConfig();
-        config.trustRootCertList = new HashMap<>();
-        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES + 1]);
+        Map<String, byte[]> trustRootCertList = new HashMap<>();
+        trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES + 1]);
+        config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
 
-        config.trustRootCertList = new HashMap<>();
-        config.trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES - 1]);
+        trustRootCertList = new HashMap<>();
+        trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES - 1]);
+        config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
 
-        config.trustRootCertList = new HashMap<>();
-        config.trustRootCertList.put("test.cert.com", null);
+        trustRootCertList = new HashMap<>();
+        trustRootCertList.put("test.cert.com", null);
+        config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
     }
 
