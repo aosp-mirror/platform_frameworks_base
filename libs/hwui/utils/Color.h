@@ -83,7 +83,7 @@ namespace uirenderer {
     static constexpr int BrightColorsCount = sizeof(BrightColors) / sizeof(Color::Color);
 
     // Opto-electronic conversion function for the sRGB color space
-    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
+    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
     static constexpr float OECF_sRGB(float linear) {
         // IEC 61966-2-1:1999
         return linear <= 0.0031308f ?
@@ -91,7 +91,7 @@ namespace uirenderer {
     }
 
     // Opto-electronic conversion function for the sRGB color space
-    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
+    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
     // This function returns the input unmodified if linear blending is not enabled
     static constexpr float OECF(float linear) {
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
@@ -102,14 +102,14 @@ namespace uirenderer {
     }
 
     // Electro-optical conversion function for the sRGB color space
-    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
+    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
     static constexpr float EOCF_sRGB(float srgb) {
         // IEC 61966-2-1:1999
         return srgb <= 0.04045f ? srgb / 12.92f : powf((srgb + 0.055f) / 1.055f, 2.4f);
     }
 
     // Electro-optical conversion function for the sRGB color space
-    // Takes a linear sRGB value and converts it to a gamma-encoded sRGB value
+    // Takes a gamma-encoded sRGB value and converts it to a linear sRGB value
     // This function returns the input unmodified if linear blending is not enabled
     static constexpr float EOCF(float srgb) {
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
