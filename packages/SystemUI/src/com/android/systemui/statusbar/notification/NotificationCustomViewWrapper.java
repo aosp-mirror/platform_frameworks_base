@@ -41,10 +41,12 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     private final ViewInvertHelper mInvertHelper;
     private final Paint mGreyPaint = new Paint();
     private boolean mShowingLegacyBackground;
+    private int mLegacyColor;
 
     protected NotificationCustomViewWrapper(View view, ExpandableNotificationRow row) {
         super(view, row);
         mInvertHelper = new ViewInvertHelper(view, NotificationPanelView.DOZE_ANIMATION_DURATION);
+        mLegacyColor = row.getContext().getColor(R.color.notification_legacy_background_color);
     }
 
     @Override
@@ -100,6 +102,15 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         mView.setAlpha(visible ? 1.0f : 0.0f);
+    }
+
+    @Override
+    public int getCustomBackgroundColor() {
+        int customBackgroundColor = super.getCustomBackgroundColor();
+        if (customBackgroundColor == 0 && mShowingLegacyBackground) {
+            return mLegacyColor;
+        }
+        return customBackgroundColor;
     }
 
     @Override

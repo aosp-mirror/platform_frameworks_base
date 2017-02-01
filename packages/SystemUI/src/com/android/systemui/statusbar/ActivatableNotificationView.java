@@ -38,7 +38,6 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -140,8 +139,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private ValueAnimator mBackgroundColorAnimator;
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
-    private boolean mShowingLegacyBackground;
-    private final int mLegacyColor;
     private final int mNormalColor;
     private final int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
@@ -192,7 +189,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
         setClipChildren(false);
         setClipToPadding(false);
-        mLegacyColor = context.getColor(R.color.notification_legacy_background_color);
         mNormalColor = context.getColor(R.color.notification_material_background_color);
         mLowPriorityColor = context.getColor(
                 R.color.notification_material_background_low_priority_color);
@@ -487,11 +483,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void setNormalBackgroundVisibilityAmount(float normalBackgroundVisibilityAmount) {
         mNormalBackgroundVisibilityAmount = normalBackgroundVisibilityAmount;
         updateOutlineAlpha();
-    }
-
-    public void setShowingLegacyBackground(boolean showing) {
-        mShowingLegacyBackground = showing;
-        updateBackgroundTint();
     }
 
     @Override
@@ -950,8 +941,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         if (withTint && mBgTint != NO_COLOR) {
             return mBgTint;
-        } else if (mShowingLegacyBackground) {
-            return mLegacyColor;
         } else if (mIsBelowSpeedBump) {
             return mLowPriorityColor;
         } else {
@@ -961,8 +950,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     protected int getRippleColor() {
         if (mBgTint != 0) {
-            return mTintedRippleColor;
-        } else if (mShowingLegacyBackground) {
             return mTintedRippleColor;
         } else if (mIsBelowSpeedBump) {
             return mLowPriorityRippleColor;
@@ -1009,7 +996,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void reset() {
         setTintColor(0);
         resetBackgroundAlpha();
-        setShowingLegacyBackground(false);
         setBelowSpeedBump(false);
     }
 
