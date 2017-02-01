@@ -714,14 +714,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Supply the construction arguments for this fragment.  This can only
-     * be called before the fragment has been attached to its activity; that
-     * is, you should call it immediately after constructing the fragment.  The
-     * arguments supplied here will be retained across fragment destroy and
+     * Supply the construction arguments for this fragment.
+     * The arguments supplied here will be retained across fragment destroy and
      * creation.
+     *
+     * <p>This method cannot be called if the fragment is added to a FragmentManager and
+     * if {@link #isStateSaved()} would return true. Prior to {@link Build.VERSION_CODES#O},
+     * this method may only be called if the fragment has not yet been added to a FragmentManager.
+     * </p>
      */
     public void setArguments(Bundle args) {
-        if (mIndex >= 0) {
+        // The isStateSaved requirement below was only added in Android O and is compatible
+        // because it loosens previous requirements rather than making them more strict.
+        // See method javadoc.
+        if (mIndex >= 0 && isStateSaved()) {
             throw new IllegalStateException("Fragment already active");
         }
         mArguments = args;
@@ -732,6 +738,21 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     final public Bundle getArguments() {
         return mArguments;
+    }
+
+    /**
+     * Returns true if this fragment is added and its state has already been saved
+     * by its host. Any operations that would change saved state should not be performed
+     * if this method returns true, and some operations such as {@link #setArguments(Bundle)}
+     * will fail.
+     *
+     * @return true if this fragment's state has already been saved by its host
+     */
+    public final boolean isStateSaved() {
+        if (mFragmentManager == null) {
+            return false;
+        }
+        return mFragmentManager.isStateSaved();
     }
 
     /**

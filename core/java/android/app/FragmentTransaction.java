@@ -304,6 +304,22 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction setAllowOptimization(boolean allowOptimization);
 
     /**
+     * Add a Runnable to this transaction that will be run after this transaction has
+     * been committed. If fragment transactions are {@link #setAllowOptimization(boolean) optimized}
+     * this may be after other subsequent fragment operations have also taken place, or operations
+     * in this transaction may have been optimized out due to the presence of a subsequent
+     * fragment transaction in the batch.
+     *
+     * <p><code>postOnCommit</code> may not be used with transactions
+     * {@link #addToBackStack(String) added to the back stack} as Runnables cannot be persisted
+     * with back stack state.</p>
+     *
+     * @param runnable Runnable to add
+     * @return this FragmentTransaction
+     */
+    public abstract FragmentTransaction postOnCommit(Runnable runnable);
+
+    /**
      * Schedules a commit of this transaction.  The commit does
      * not happen immediately; it will be scheduled as work on the main thread
      * to be done the next time that thread is ready.
