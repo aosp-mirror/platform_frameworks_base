@@ -119,6 +119,7 @@ cc_library_host_static {
         "java/JavaClassGenerator.cpp",
         "java/ManifestClassGenerator.cpp",
         "java/ProguardRules.cpp",
+        "LoadedApk.cpp",
         "Locale.cpp",
         "Resource.cpp",
         "ResourceParser.cpp",

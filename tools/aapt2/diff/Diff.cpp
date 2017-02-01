@@ -17,12 +17,10 @@
 #include "android-base/macros.h"
 
 #include "Flags.h"
-#include "ResourceTable.h"
+#include "LoadedApk.h"
 #include "ValueVisitor.h"
-#include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
-#include "unflatten/BinaryResourceParser.h"
 
 using android::StringPiece;
 
@@ -50,61 +48,6 @@ class DiffContext : public IAaptContext {
   NameMangler name_mangler_ = NameMangler(NameManglerPolicy{});
   SymbolTable symbol_table_;
 };
-
-class LoadedApk {
- public:
-  LoadedApk(const Source& source, std::unique_ptr<io::IFileCollection> apk,
-            std::unique_ptr<ResourceTable> table)
-      : source_(source), apk_(std::move(apk)), table_(std::move(table)) {}
-
-  io::IFileCollection* GetFileCollection() { return apk_.get(); }
-
-  ResourceTable* GetResourceTable() { return table_.get(); }
-
-  const Source& GetSource() { return source_; }
-
- private:
-  Source source_;
-  std::unique_ptr<io::IFileCollection> apk_;
-  std::unique_ptr<ResourceTable> table_;
-
-  DISALLOW_COPY_AND_ASSIGN(LoadedApk);
-};
-
-static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
-                                                  const StringPiece& path) {
-  Source source(path);
-  std::string error;
-  std::unique_ptr<io::ZipFileCollection> apk =
-      io::ZipFileCollection::Create(path, &error);
-  if (!apk) {
-    context->GetDiagnostics()->Error(DiagMessage(source) << error);
-    return {};
-  }
-
-  io::IFile* file = apk->FindFile("resources.arsc");
-  if (!file) {
-    context->GetDiagnostics()->Error(DiagMessage(source)
-                                     << "no resources.arsc found");
-    return {};
-  }
-
-  std::unique_ptr<io::IData> data = file->OpenAsData();
-  if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(source)
-                                     << "could not open resources.arsc");
-    return {};
-  }
-
-  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  BinaryResourceParser parser(context, table.get(), source, data->data(),
-                              data->size());
-  if (!parser.Parse()) {
-    return {};
-  }
-
-  return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
-}
 
 static void EmitDiffLine(const Source& source, const StringPiece& message) {
   std::cerr << source << ": " << message << "\n";
@@ -413,9 +356,9 @@ int Diff(const std::vector<StringPiece>& args) {
   }
 
   std::unique_ptr<LoadedApk> apk_a =
-      LoadApkFromPath(&context, flags.GetArgs()[0]);
+      LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[0]);
   std::unique_ptr<LoadedApk> apk_b =
-      LoadApkFromPath(&context, flags.GetArgs()[1]);
+      LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[1]);
   if (!apk_a || !apk_b) {
     return 1;
   }
