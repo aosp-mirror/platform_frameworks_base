@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class representing Passpoint configuration.  This contains configurations specified in
@@ -320,6 +321,14 @@ public final class PasspointConfiguration implements Parcelable {
                 && mUsageLimitStartTimeInMs == that.mUsageLimitStartTimeInMs
                 && mUsageLimitDataLimit == that.mUsageLimitDataLimit
                 && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mHomeSp, mCredential, mPolicy, mSubscriptionUpdate, mTrustRootCertList,
+                mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMs,
+                mSubscriptionExpirationTimeInMs, mUsageLimitUsageTimePeriodInMinutes,
+                mUsageLimitStartTimeInMs, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes);
     }
 
     /**
