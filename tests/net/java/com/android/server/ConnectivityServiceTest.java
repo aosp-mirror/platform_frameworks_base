@@ -53,7 +53,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.metrics.IpConnectivityLog;
-import android.net.util.AvoidBadWifiTracker;
+import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -155,25 +155,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     /**
      * Block until the given handler becomes idle, or until timeoutMs has passed.
      */
-    private static void waitForIdleHandler(HandlerThread handler, int timeoutMs) {
+    private static void waitForIdleHandler(HandlerThread handlerThread, int timeoutMs) {
         final ConditionVariable cv = new ConditionVariable();
-        final MessageQueue queue = handler.getLooper().getQueue();
-        final IdleHandler idleHandler = () -> {
-            synchronized (queue) {
-                cv.open();
-                return false; // Remove the idleHandler.
-            }
-        };
-        synchronized (queue) {
-            if (queue.isIdle()) {
-                return;
-            }
-            queue.addIdleHandler(idleHandler);
-        }
+        final Handler handler = new Handler(handlerThread.getLooper());
+        handler.post(() -> cv.open());
         if (!cv.block(timeoutMs)) {
-            fail("HandlerThread " + handler.getName() +
+            fail("HandlerThread " + handlerThread.getName() +
                     " did not become idle after " + timeoutMs + " ms");
-            queue.removeIdleHandler(idleHandler);
         }
     }
 
@@ -605,10 +593,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    private class WrappedAvoidBadWifiTracker extends AvoidBadWifiTracker {
+    private class WrappedMultinetworkPolicyTracker extends MultinetworkPolicyTracker {
         public volatile boolean configRestrictsAvoidBadWifi;
 
-        public WrappedAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
+        public WrappedMultinetworkPolicyTracker(Context c, Handler h, Runnable r) {
             super(c, h, r);
         }
 
@@ -619,7 +607,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class WrappedConnectivityService extends ConnectivityService {
-        public WrappedAvoidBadWifiTracker wrappedAvoidBadWifiTracker;
+        public WrappedMultinetworkPolicyTracker wrappedMultinetworkPolicyTracker;
         private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
@@ -666,14 +654,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public AvoidBadWifiTracker createAvoidBadWifiTracker(
+        public MultinetworkPolicyTracker createMultinetworkPolicyTracker(
                 Context c, Handler h, Runnable r) {
-            final WrappedAvoidBadWifiTracker tracker = new WrappedAvoidBadWifiTracker(c, h, r);
+            final WrappedMultinetworkPolicyTracker tracker = new WrappedMultinetworkPolicyTracker(c, h, r);
             return tracker;
         }
 
-        public WrappedAvoidBadWifiTracker getAvoidBadWifiTracker() {
-            return (WrappedAvoidBadWifiTracker) mAvoidBadWifiTracker;
+        public WrappedMultinetworkPolicyTracker getMultinetworkPolicyTracker() {
+            return (WrappedMultinetworkPolicyTracker) mMultinetworkPolicyTracker;
         }
 
         @Override
@@ -692,22 +680,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public void waitForIdle() {
             waitForIdle(TIMEOUT_MS);
-        }
-    }
-
-    private interface Criteria {
-        public boolean get();
-    }
-
-    /**
-     * Wait up to 500ms for {@code criteria.get()} to become true, polling.
-     * Fails if 500ms goes by before {@code criteria.get()} to become true.
-     */
-    static private void waitFor(Criteria criteria) {
-        int delays = 0;
-        while (!criteria.get()) {
-            sleepFor(50);
-            if (++delays == 10) fail();
         }
     }
 
@@ -846,8 +818,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(mCm.getAllNetworks()[0].equals(mCellNetworkAgent.getNetwork()) ||
                 mCm.getAllNetworks()[1].equals(mCellNetworkAgent.getNetwork()));
         // Test cellular linger timeout.
-        waitFor(new Criteria() {
-                public boolean get() { return mCm.getAllNetworks().length == 1; } });
+        waitFor(mCellNetworkAgent.getDisconnectedCV());
+        mService.waitForIdle();
+        assertEquals(1, mCm.getAllNetworks().length);
         verifyActiveNetwork(TRANSPORT_WIFI);
         assertEquals(1, mCm.getAllNetworks().length);
         assertEquals(mCm.getAllNetworks()[0], mCm.getActiveNetwork());
@@ -1622,8 +1595,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         ConditionVariable cv = mCellNetworkAgent.getDisconnectedCV();
         mCellNetworkAgent.connectWithoutInternet();
         waitFor(cv);
-        waitFor(new Criteria() {
-                public boolean get() { return mCm.getAllNetworks().length == 0; } });
+        mService.waitForIdle();
+        assertEquals(0, mCm.getAllNetworks().length);
         verifyNoNetwork();
         // Test bringing up validated WiFi.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -1982,7 +1955,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Disconnect wifi and check that cell is foreground again.
         mWiFiNetworkAgent.disconnect();
-        mService.waitForIdle();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -2152,7 +2124,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @SmallTest
     public void testAvoidBadWifiSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
+        final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
         final String settingName = Settings.Global.NETWORK_AVOID_BAD_WIFI;
 
         tracker.configRestrictsAvoidBadWifi = false;
@@ -2162,7 +2134,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             tracker.reevaluate();
             mService.waitForIdle();
             String msg = String.format("config=false, setting=%s", values[i]);
-            assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
+            assertTrue(mService.avoidBadWifi());
             assertFalse(msg, tracker.shouldNotifyWifiUnvalidated());
         }
 
@@ -2171,26 +2143,26 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         Settings.Global.putInt(cr, settingName, 0);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
+        assertFalse(mService.avoidBadWifi());
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putInt(cr, settingName, 1);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> mService.avoidBadWifi(), 50);
+        assertTrue(mService.avoidBadWifi());
         assertFalse(tracker.shouldNotifyWifiUnvalidated());
 
         Settings.Global.putString(cr, settingName, null);
         tracker.reevaluate();
         mService.waitForIdle();
-        assertEventuallyTrue(() -> !mService.avoidBadWifi(), 50);
+        assertFalse(mService.avoidBadWifi());
         assertTrue(tracker.shouldNotifyWifiUnvalidated());
     }
 
     @SmallTest
     public void testAvoidBadWifi() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
+        final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
 
         // Pretend we're on a carrier that restricts switching away from bad wifi.
         tracker.configRestrictsAvoidBadWifi = true;
@@ -2404,17 +2376,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         networkCallback.assertNoCallback();
     }
 
-    public void assertEventuallyTrue(BooleanSupplier fn, long maxWaitingTimeMs) {
-        long start = SystemClock.elapsedRealtime();
-        while (SystemClock.elapsedRealtime() <= start + maxWaitingTimeMs) {
-            if (fn.getAsBoolean()) {
-                return;
-            }
-            sleepFor(15);
-        }
-        assertTrue(fn.getAsBoolean());
-    }
-
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
 
         public static enum CallbackType { ON_STARTED, ON_STOPPED, ON_ERROR };
@@ -2575,12 +2536,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         ka = mCm.startNattKeepalive(myNet, 25, callback, myIPv4, 12345, dstIPv4);
         callback.expectStarted();
         mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         callback.expectError(PacketKeepalive.ERROR_INVALID_NETWORK);
 
         // ... and that stopping it after that has no adverse effects.
-        // TODO: investigate assertEventuallyTrue is needed and waitForIdle() is not enough
+        mService.waitForIdle();
         final Network myNetAlias = myNet;
-        assertEventuallyTrue(() -> mCm.getNetworkCapabilities(myNetAlias) == null, 100);
+        assertNull(mCm.getNetworkCapabilities(myNetAlias));
         ka.stop();
 
         // Reconnect.
@@ -2592,6 +2554,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         callback.expectStarted();
         ka.stop();
         mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
         mService.waitForIdle();
         callback.expectStopped();
 
