@@ -155,25 +155,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     /**
      * Block until the given handler becomes idle, or until timeoutMs has passed.
      */
-    private static void waitForIdleHandler(HandlerThread handler, int timeoutMs) {
+    private static void waitForIdleHandler(HandlerThread handlerThread, int timeoutMs) {
         final ConditionVariable cv = new ConditionVariable();
-        final MessageQueue queue = handler.getLooper().getQueue();
-        final IdleHandler idleHandler = () -> {
-            synchronized (queue) {
-                cv.open();
-                return false; // Remove the idleHandler.
-            }
-        };
-        synchronized (queue) {
-            if (queue.isIdle()) {
-                return;
-            }
-            queue.addIdleHandler(idleHandler);
-        }
+        final Handler handler = new Handler(handlerThread.getLooper());
+        handler.post(() -> cv.open());
         if (!cv.block(timeoutMs)) {
-            fail("HandlerThread " + handler.getName() +
+            fail("HandlerThread " + handlerThread.getName() +
                     " did not become idle after " + timeoutMs + " ms");
-            queue.removeIdleHandler(idleHandler);
         }
     }
 
