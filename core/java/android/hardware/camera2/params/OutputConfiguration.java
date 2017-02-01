@@ -293,7 +293,8 @@ public final class OutputConfiguration implements Parcelable {
      * case is to create a capture session with that output configuration. For example, if the
      * camera device uses the same private buffer format between a SurfaceView/SurfaceTexture and a
      * MediaRecorder/MediaCodec, {@link CameraDevice#createCaptureSessionByOutputConfigurations}
-     * will succeed. Otherwise, it throws {@code IllegalArgumentException}.
+     * will succeed. Otherwise, it fails with {@link
+     * CameraCaptureSession.StateCallback#onConfigureFailed}.
      * </ol>
      *
      * <p>To enable surface sharing, this function must be called before {@link
