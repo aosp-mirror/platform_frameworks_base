@@ -39,8 +39,7 @@ class SurfaceControl;
 class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
-                BootAnimation();
-    virtual     ~BootAnimation();
+    BootAnimation();
 
     sp<SurfaceComposerClient> session() const;
 
@@ -66,6 +65,16 @@ private:
         int mSystemWd;
         int mTimeWd;
         BootAnimation* mBootAnimation;
+    };
+
+    class InitAudioThread : public Thread {
+    public:
+        InitAudioThread(uint8_t* exampleAudioData, int mExampleAudioLength);
+    private:
+        virtual bool threadLoop();
+
+        uint8_t* mExampleAudioData;
+        int mExampleAudioLength;
     };
 
     struct Texture {
@@ -156,7 +165,8 @@ private:
     bool        mSystemBoot;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
-    sp<TimeCheckThread> mTimeCheckThread;
+    sp<TimeCheckThread> mTimeCheckThread = nullptr;
+    sp<InitAudioThread> mInitAudioThread = nullptr;
 };
 
 // ---------------------------------------------------------------------------
