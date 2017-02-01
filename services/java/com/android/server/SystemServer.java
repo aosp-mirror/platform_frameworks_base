@@ -125,8 +125,13 @@ import static android.view.Display.DEFAULT_DISPLAY;
 public final class SystemServer {
     private static final String TAG = "SystemServer";
 
+    // Tag for timing measurement of main thread.
+    private static final String SYSTEM_SERVER_TIMING_TAG = "SystemServerTiming";
+    // Tag for timing measurement of non-main asynchronous operations.
+    private static final String SYSTEM_SERVER_TIMING_ASYNC_TAG = SYSTEM_SERVER_TIMING_TAG + "Async";
+
     private static final BootTimingsTraceLog BOOT_TIMINGS_TRACE_LOG
-            = new BootTimingsTraceLog("SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
+            = new BootTimingsTraceLog(SYSTEM_SERVER_TIMING_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
 
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
@@ -227,8 +232,11 @@ public final class SystemServer {
     private boolean mFirstBoot;
     private final boolean mRuntimeRestart;
 
+    private static final String START_SENSOR_SERVICE = "StartSensorService";
+    private Future<?> mSensorServiceStart;
+
     /**
-     * Start the sensor service.
+     * Start the sensor service. This is a blocking call and can take time.
      */
     private static native void startSensorService();
 
@@ -382,7 +390,7 @@ public final class SystemServer {
             MetricsLogger.histogram(null, "boot_system_server_ready", uptimeMillis);
             final int MAX_UPTIME_MILLIS = 60 * 1000;
             if (uptimeMillis > MAX_UPTIME_MILLIS) {
-                Slog.wtf("SystemServerTiming",
+                Slog.wtf(SYSTEM_SERVER_TIMING_TAG,
                         "SystemServer init took too long. uptimeMillis=" + uptimeMillis);
             }
         }
@@ -584,9 +592,15 @@ public final class SystemServer {
 
         // The sensor service needs access to package manager service, app ops
         // service, and permissions service, therefore we start it after them.
-        traceBeginAndSlog("StartSensorService");
-        startSensorService();
-        traceEnd();
+        // Start sensor service in a separate thread. Completion should be checked
+        // before using it.
+        mSensorServiceStart = SystemServerInitThreadPool.get().submit(() -> {
+            BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+                    SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+            traceLog.traceBegin(START_SENSOR_SERVICE);
+            startSensorService();
+            traceLog.traceEnd();
+        }, START_SENSOR_SERVICE);
     }
 
     /**
@@ -742,6 +756,9 @@ public final class SystemServer {
             traceEnd();
 
             traceBeginAndSlog("StartWindowManagerService");
+            // WMS needs sensor service ready
+            ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
+            mSensorServiceStart = null;
             wm = WindowManagerService.main(context, inputManager,
                     mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
                     !mFirstBoot, mOnlyCore, new PhoneWindowManager());
@@ -1590,7 +1607,7 @@ public final class SystemServer {
                 webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
                     Slog.i(TAG, WEBVIEW_PREPARATION);
                     BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
-                            "SystemServerTiming", Trace.TRACE_TAG_SYSTEM_SERVER);
+                            SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(WEBVIEW_PREPARATION);
                     mWebViewUpdateService.prepareWebViewInSystemServer();
                     traceLog.traceEnd();
@@ -1651,13 +1668,13 @@ public final class SystemServer {
             Watchdog.getInstance().start();
             traceEnd();
 
-            if (webviewPrep != null) {
-                ConcurrentUtils.waitForFutureNoInterrupt(webviewPrep, WEBVIEW_PREPARATION);
-            }
-
             // It is now okay to let the various system services start their
             // third party code...
             traceBeginAndSlog("PhaseThirdPartyAppsCanStart");
+            // confirm webview completion before starting 3rd party
+            if (webviewPrep != null) {
+                ConcurrentUtils.waitForFutureNoInterrupt(webviewPrep, WEBVIEW_PREPARATION);
+            }
             mSystemServiceManager.startBootPhase(
                     SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
             traceEnd();
