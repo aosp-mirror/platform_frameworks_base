@@ -683,22 +683,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    private interface Criteria {
-        public boolean get();
-    }
-
-    /**
-     * Wait up to 500ms for {@code criteria.get()} to become true, polling.
-     * Fails if 500ms goes by before {@code criteria.get()} to become true.
-     */
-    static private void waitFor(Criteria criteria) {
-        int delays = 0;
-        while (!criteria.get()) {
-            sleepFor(50);
-            if (++delays == 10) fail();
-        }
-    }
-
     /**
      * Wait up to TIMEOUT_MS for {@code conditionVariable} to open.
      * Fails if TIMEOUT_MS goes by before {@code conditionVariable} opens.
@@ -834,8 +818,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(mCm.getAllNetworks()[0].equals(mCellNetworkAgent.getNetwork()) ||
                 mCm.getAllNetworks()[1].equals(mCellNetworkAgent.getNetwork()));
         // Test cellular linger timeout.
-        waitFor(new Criteria() {
-                public boolean get() { return mCm.getAllNetworks().length == 1; } });
+        waitFor(mCellNetworkAgent.getDisconnectedCV());
+        mService.waitForIdle();
+        assertEquals(1, mCm.getAllNetworks().length);
         verifyActiveNetwork(TRANSPORT_WIFI);
         assertEquals(1, mCm.getAllNetworks().length);
         assertEquals(mCm.getAllNetworks()[0], mCm.getActiveNetwork());
@@ -1610,8 +1595,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         ConditionVariable cv = mCellNetworkAgent.getDisconnectedCV();
         mCellNetworkAgent.connectWithoutInternet();
         waitFor(cv);
-        waitFor(new Criteria() {
-                public boolean get() { return mCm.getAllNetworks().length == 0; } });
+        mService.waitForIdle();
+        assertEquals(0, mCm.getAllNetworks().length);
         verifyNoNetwork();
         // Test bringing up validated WiFi.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
