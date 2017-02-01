@@ -7048,6 +7048,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final RemoteViews bigContentView = entry.cachedBigContentView;
         final RemoteViews headsUpContentView = entry.cachedHeadsUpContentView;
         final RemoteViews publicContentView = entry.cachedPublicContentView;
+        final RemoteViews ambientContentView = entry.cachedAmbientContentView;
 
         // Reapply the RemoteViews
         contentView.reapply(mContext, entry.getContentView(), mOnClickHandler);
@@ -7064,6 +7065,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (publicContentView != null && entry.getPublicContentView() != null) {
             publicContentView.reapply(sbn.getPackageContext(mContext),
                     entry.getPublicContentView(), mOnClickHandler);
+        }
+        if (ambientContentView != null && entry.getAmbientContentView() != null) {
+            ambientContentView.reapply(sbn.getPackageContext(mContext),
+                    entry.getAmbientContentView(), mOnClickHandler);
         }
         // update the contentIntent
         mNotificationClicker.register(entry.row, sbn);
