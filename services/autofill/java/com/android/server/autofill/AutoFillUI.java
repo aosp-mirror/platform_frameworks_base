@@ -71,8 +71,6 @@ final class AutoFillUI {
     private AnchoredWindow mFillWindow;
     private DatasetPicker mFillView;
     private ViewState mViewState;
-    private Rect mBounds;
-    private String mFilterText;
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
@@ -117,8 +115,6 @@ final class AutoFillUI {
         }
 
         mViewState = null;
-        mBounds = null;
-        mFilterText = null;
         mFillView = null;
         mFillWindow = null;
     }
@@ -146,23 +142,14 @@ final class AutoFillUI {
                             mSession.autoFillApp(dataset);
                             hideFillUi();
                         });
-                mFillWindow = new AnchoredWindow(
-                        mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
+                mFillWindow = new AnchoredWindow(mWm, mAppToken, mFillView);
 
-                if (DEBUG) Slog.d(TAG, "show FillUi");
+                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed");
             }
 
-            if (!bounds.equals(mBounds)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi bounds: " + mBounds);
-                mBounds = bounds;
-                mFillWindow.show(mBounds);
-            }
-
-            if (!filterText.equals(mFilterText)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi filter text: " + mFilterText);
-                mFilterText = filterText;
-                mFillView.update(mFilterText);
-            }
+            if (DEBUG) Slog.d(TAG, "showFillUi(): bounds=" + bounds + ", filterText=" + filterText);
+            mFillView.update(filterText);
+            mFillWindow.show(bounds);
         }, 0);
     }
 
@@ -251,8 +238,6 @@ final class AutoFillUI {
         pw.print(prefix); pw.print("mSessionId: "); pw.println(mSession.mId);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
         pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
-        pw.print(prefix); pw.print("mBounds: "); pw.println(mBounds);
-        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
     }
 
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
