@@ -55,14 +55,14 @@ public class HomeSPTest {
      */
     private static HomeSP createHomeSp(Map<String, Long> homeNetworkIds) {
         HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        homeSp.friendlyName = "friendly name";
-        homeSp.iconUrl = "icon.url";
-        homeSp.homeNetworkIds = homeNetworkIds;
-        homeSp.matchAllOIs = new long[] {0x11L, 0x22L};
-        homeSp.matchAnyOIs = new long[] {0x33L, 0x44L};
-        homeSp.otherHomePartners = new String[] {"partner1", "partner2"};
-        homeSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
+        homeSp.setFqdn("fqdn");
+        homeSp.setFriendlyName("friendly name");
+        homeSp.setIconUrl("icon.url");
+        homeSp.setHomeNetworkIds(homeNetworkIds);
+        homeSp.setMatchAllOIs(new long[] {0x11L, 0x22L});
+        homeSp.setMatchAnyOIs(new long[] {0x33L, 0x44L});
+        homeSp.setOtherHomePartners(new String[] {"partner1", "partner2"});
+        homeSp.setRoamingConsortiumOIs(new long[] {0x55, 0x66});
         return homeSp;
     }
 
@@ -136,9 +136,7 @@ public class HomeSPTest {
      */
     @Test
     public void validateValidHomeSP() throws Exception {
-        HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        homeSp.friendlyName = "friendly name";
+        HomeSP homeSp = createHomeSpWithHomeNetworkIds();
         assertTrue(homeSp.validate());
     }
 
@@ -149,8 +147,8 @@ public class HomeSPTest {
      */
     @Test
     public void validateHomeSpWithoutFqdn() throws Exception {
-        HomeSP homeSp = new HomeSP();
-        homeSp.friendlyName = "friendly name";
+        HomeSP homeSp = createHomeSpWithHomeNetworkIds();
+        homeSp.setFqdn(null);
         assertFalse(homeSp.validate());
     }
 
@@ -161,36 +159,9 @@ public class HomeSPTest {
      */
     @Test
     public void validateHomeSpWithoutFriendlyName() throws Exception {
-        HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        assertFalse(homeSp.validate());
-    }
-
-    /**
-     * Verify that a HomeSP is valid when the optional Roaming Consortium OIs are
-     * provided.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateHomeSpWithRoamingConsoritums() throws Exception {
-        HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        homeSp.friendlyName = "friendly name";
-        homeSp.roamingConsortiumOIs = new long[] {0x55, 0x66};
-        assertTrue(homeSp.validate());
-    }
-
-    /**
-     * Verify that a HomeSP is valid when the optional Home Network IDs are
-     * provided.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void validateHomeSpWithHomeNetworkIds() throws Exception {
         HomeSP homeSp = createHomeSpWithHomeNetworkIds();
-        assertTrue(homeSp.validate());
+        homeSp.setFriendlyName(null);
+        assertFalse(homeSp.validate());
     }
 
     /**
@@ -213,14 +184,14 @@ public class HomeSPTest {
      */
     @Test
     public void validateHomeSpWithInvalidHomeNetworkIds() throws Exception {
-        HomeSP homeSp = new HomeSP();
-        homeSp.fqdn = "fqdn";
-        homeSp.friendlyName = "friendly name";
-        homeSp.homeNetworkIds = new HashMap<>();
+        HomeSP homeSp = createHomeSpWithoutHomeNetworkIds();
+        // HomeNetworkID with SSID exceeding the maximum length.
+        Map<String, Long> homeNetworkIds = new HashMap<>();
         byte[] rawSsidBytes = new byte[33];
         Arrays.fill(rawSsidBytes, (byte) 'a');
-        homeSp.homeNetworkIds.put(
+        homeNetworkIds.put(
                 StringFactory.newStringFromBytes(rawSsidBytes, StandardCharsets.UTF_8), 0x1234L);
+        homeSp.setHomeNetworkIds(homeNetworkIds);
         assertFalse(homeSp.validate());
     }
 

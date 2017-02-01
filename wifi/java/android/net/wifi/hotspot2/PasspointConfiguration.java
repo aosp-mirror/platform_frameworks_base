@@ -58,21 +58,58 @@ public final class PasspointConfiguration implements Parcelable {
      */
     private static final int NULL_VALUE = -1;
 
-    public HomeSP homeSp = null;
-    public Credential credential = null;
-    public Policy policy = null;
+    /**
+     * Configurations under HomeSP subtree.
+     */
+    private HomeSP mHomeSp = null;
+    public void setHomeSp(HomeSP homeSp) { mHomeSp = homeSp; }
+    public HomeSP getHomeSp() { return mHomeSp; }
+
+    /**
+     * Configurations under Credential subtree.
+     */
+    private Credential mCredential = null;
+    public void setCredential(Credential credential) {
+        mCredential = credential;
+    }
+    public Credential getCredential() {
+        return mCredential;
+    }
+
+    /**
+     * Configurations under Policy subtree.
+     */
+    private Policy mPolicy = null;
+    public void setPolicy(Policy policy) {
+        mPolicy = policy;
+    }
+    public Policy getPolicy() {
+        return mPolicy;
+    }
 
     /**
      * Meta data for performing subscription update.
      */
-    public UpdateParameter subscriptionUpdate = null;
+    private UpdateParameter mSubscriptionUpdate = null;
+    public void setSubscriptionUpdate(UpdateParameter subscriptionUpdate) {
+        mSubscriptionUpdate = subscriptionUpdate;
+    }
+    public UpdateParameter getSubscriptionUpdate() {
+        return mSubscriptionUpdate;
+    }
 
     /**
      * List of HTTPS URL for retrieving trust root certificate and the corresponding SHA-256
      * fingerprint of the certificate.  The certificates are used for verifying AAA server's
      * identity during EAP authentication.
      */
-    public Map<String, byte[]> trustRootCertList = null;
+    private Map<String, byte[]> mTrustRootCertList = null;
+    public void setTrustRootCertList(Map<String, byte[]> trustRootCertList) {
+        mTrustRootCertList = trustRootCertList;
+    }
+    public Map<String, byte[]> getTrustRootCertList() {
+        return mTrustRootCertList;
+    }
 
     /**
      * Set by the subscription server, updated every time the configuration is updated by
@@ -80,14 +117,26 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Integer.MIN_VALUE to indicate unset value.
      */
-    public int updateIdentifier = Integer.MIN_VALUE;
+    private int mUpdateIdentifier = Integer.MIN_VALUE;
+    public void setUpdateIdentifier(int updateIdentifier) {
+        mUpdateIdentifier = updateIdentifier;
+    }
+    public int getUpdateIdentififer() {
+        return mUpdateIdentifier;
+    }
 
     /**
      * The priority of the credential.
      *
      * Use Integer.MIN_VALUE to indicate unset value.
      */
-    public int credentialPriority = Integer.MIN_VALUE;
+    private int mCredentialPriority = Integer.MIN_VALUE;
+    public void setCredentialPriority(int credentialPriority) {
+        mCredentialPriority = credentialPriority;
+    }
+    public int getCredentialPriority() {
+        return mCredentialPriority;
+    }
 
     /**
      * The time this subscription is created. It is in the format of number
@@ -95,7 +144,13 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    public long subscriptionCreationTimeInMs = Long.MIN_VALUE;
+    private long mSubscriptionCreationTimeInMs = Long.MIN_VALUE;
+    public void setSubscriptionCreationTimeInMs(long subscriptionCreationTimeInMs) {
+        mSubscriptionCreationTimeInMs = subscriptionCreationTimeInMs;
+    }
+    public long getSubscriptionCreationTimeInMs() {
+        return mSubscriptionCreationTimeInMs;
+    }
 
     /**
      * The time this subscription will expire. It is in the format of number
@@ -103,20 +158,38 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    public long subscriptionExpirationTimeInMs = Long.MIN_VALUE;
+    private long mSubscriptionExpirationTimeInMs = Long.MIN_VALUE;
+    public void setSubscriptionExpirationTimeInMs(long subscriptionExpirationTimeInMs) {
+        mSubscriptionExpirationTimeInMs = subscriptionExpirationTimeInMs;
+    }
+    public long getSubscriptionExpirationTimeInMs() {
+        return mSubscriptionExpirationTimeInMs;
+    }
 
     /**
      * The type of the subscription.  This is defined by the provider and the value is provider
      * specific.
      */
-    public String subscriptionType = null;
+    private String mSubscriptionType = null;
+    public void setSubscriptionType(String subscriptionType) {
+        mSubscriptionType = subscriptionType;
+    }
+    public String getSubscriptionType() {
+        return mSubscriptionType;
+    }
 
     /**
      * The time period for usage statistics accumulation. A value of zero means that usage
      * statistics are not accumulated on a periodic basis (e.g., a one-time limit for
      * “pay as you go” - PAYG service). A non-zero value specifies the usage interval in minutes.
      */
-    public long usageLimitUsageTimePeriodInMinutes = Long.MIN_VALUE;
+    private long mUsageLimitUsageTimePeriodInMinutes = Long.MIN_VALUE;
+    public void setUsageLimitUsageTimePeriodInMinutes(long usageLimitUsageTimePeriodInMinutes) {
+        mUsageLimitUsageTimePeriodInMinutes = usageLimitUsageTimePeriodInMinutes;
+    }
+    public long getUsageLimitUsageTimePeriodInMinutes() {
+        return mUsageLimitUsageTimePeriodInMinutes;
+    }
 
     /**
      * The time at which usage statistic accumulation  begins.  It is in the format of number
@@ -124,7 +197,13 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    public long usageLimitStartTimeInMs = Long.MIN_VALUE;
+    private long mUsageLimitStartTimeInMs = Long.MIN_VALUE;
+    public void setUsageLimitStartTimeInMs(long usageLimitStartTimeInMs) {
+        mUsageLimitStartTimeInMs = usageLimitStartTimeInMs;
+    }
+    public long getUsageLimitStartTimeInMs() {
+        return mUsageLimitStartTimeInMs;
+    }
 
     /**
      * The cumulative data limit in megabytes for the {@link #usageLimitUsageTimePeriodInMinutes}.
@@ -132,14 +211,25 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    public long usageLimitDataLimit = Long.MIN_VALUE;
+    private long mUsageLimitDataLimit = Long.MIN_VALUE;
+    public void setUsageLimitDataLimit(long usageLimitDataLimit) {
+        mUsageLimitDataLimit = usageLimitDataLimit;
+    }
+    public long getUsageLimitDataLimit() {
+        return mUsageLimitDataLimit;
+    }
 
     /**
      * The cumulative time limit in minutes for the {@link #usageLimitUsageTimePeriodInMinutes}.
      * A value of zero indicate unlimited time usage.
      */
-    public long usageLimitTimeLimitInMinutes = Long.MIN_VALUE;
-
+    private long mUsageLimitTimeLimitInMinutes = Long.MIN_VALUE;
+    public void setUsageLimitTimeLimitInMinutes(long usageLimitTimeLimitInMinutes) {
+        mUsageLimitTimeLimitInMinutes = usageLimitTimeLimitInMinutes;
+    }
+    public long getUsageLimitTimeLimitInMinutes() {
+        return mUsageLimitTimeLimitInMinutes;
+    }
 
     /**
      * Constructor for creating PasspointConfiguration with default values.
@@ -156,30 +246,30 @@ public final class PasspointConfiguration implements Parcelable {
             return;
         }
 
-        if (source.homeSp != null) {
-            homeSp = new HomeSP(source.homeSp);
+        if (source.mHomeSp != null) {
+            mHomeSp = new HomeSP(source.mHomeSp);
         }
-        if (source.credential != null) {
-            credential = new Credential(source.credential);
+        if (source.mCredential != null) {
+            mCredential = new Credential(source.mCredential);
         }
-        if (source.policy != null) {
-            policy = new Policy(source.policy);
+        if (source.mPolicy != null) {
+            mPolicy = new Policy(source.mPolicy);
         }
-        if (source.trustRootCertList != null) {
-            trustRootCertList = Collections.unmodifiableMap(source.trustRootCertList);
+        if (source.mTrustRootCertList != null) {
+            mTrustRootCertList = Collections.unmodifiableMap(source.mTrustRootCertList);
         }
-        if (source.subscriptionUpdate != null) {
-            subscriptionUpdate = new UpdateParameter(source.subscriptionUpdate);
+        if (source.mSubscriptionUpdate != null) {
+            mSubscriptionUpdate = new UpdateParameter(source.mSubscriptionUpdate);
         }
-        updateIdentifier = source.updateIdentifier;
-        credentialPriority = source.credentialPriority;
-        subscriptionCreationTimeInMs = source.subscriptionCreationTimeInMs;
-        subscriptionExpirationTimeInMs = source.subscriptionExpirationTimeInMs;
-        subscriptionType = source.subscriptionType;
-        usageLimitDataLimit = source.usageLimitDataLimit;
-        usageLimitStartTimeInMs = source.usageLimitStartTimeInMs;
-        usageLimitTimeLimitInMinutes = source.usageLimitTimeLimitInMinutes;
-        usageLimitUsageTimePeriodInMinutes = source.usageLimitUsageTimePeriodInMinutes;
+        mUpdateIdentifier = source.mUpdateIdentifier;
+        mCredentialPriority = source.mCredentialPriority;
+        mSubscriptionCreationTimeInMs = source.mSubscriptionCreationTimeInMs;
+        mSubscriptionExpirationTimeInMs = source.mSubscriptionExpirationTimeInMs;
+        mSubscriptionType = source.mSubscriptionType;
+        mUsageLimitDataLimit = source.mUsageLimitDataLimit;
+        mUsageLimitStartTimeInMs = source.mUsageLimitStartTimeInMs;
+        mUsageLimitTimeLimitInMinutes = source.mUsageLimitTimeLimitInMinutes;
+        mUsageLimitUsageTimePeriodInMinutes = source.mUsageLimitUsageTimePeriodInMinutes;
     }
 
     @Override
@@ -189,20 +279,20 @@ public final class PasspointConfiguration implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(homeSp, flags);
-        dest.writeParcelable(credential, flags);
-        dest.writeParcelable(policy, flags);
-        dest.writeParcelable(subscriptionUpdate, flags);
-        writeTrustRootCerts(dest, trustRootCertList);
-        dest.writeInt(updateIdentifier);
-        dest.writeInt(credentialPriority);
-        dest.writeLong(subscriptionCreationTimeInMs);
-        dest.writeLong(subscriptionExpirationTimeInMs);
-        dest.writeString(subscriptionType);
-        dest.writeLong(usageLimitUsageTimePeriodInMinutes);
-        dest.writeLong(usageLimitStartTimeInMs);
-        dest.writeLong(usageLimitDataLimit);
-        dest.writeLong(usageLimitTimeLimitInMinutes);
+        dest.writeParcelable(mHomeSp, flags);
+        dest.writeParcelable(mCredential, flags);
+        dest.writeParcelable(mPolicy, flags);
+        dest.writeParcelable(mSubscriptionUpdate, flags);
+        writeTrustRootCerts(dest, mTrustRootCertList);
+        dest.writeInt(mUpdateIdentifier);
+        dest.writeInt(mCredentialPriority);
+        dest.writeLong(mSubscriptionCreationTimeInMs);
+        dest.writeLong(mSubscriptionExpirationTimeInMs);
+        dest.writeString(mSubscriptionType);
+        dest.writeLong(mUsageLimitUsageTimePeriodInMinutes);
+        dest.writeLong(mUsageLimitStartTimeInMs);
+        dest.writeLong(mUsageLimitDataLimit);
+        dest.writeLong(mUsageLimitTimeLimitInMinutes);
     }
 
     @Override
@@ -214,22 +304,22 @@ public final class PasspointConfiguration implements Parcelable {
             return false;
         }
         PasspointConfiguration that = (PasspointConfiguration) thatObject;
-        return (homeSp == null ? that.homeSp == null : homeSp.equals(that.homeSp))
-                && (credential == null ? that.credential == null
-                        : credential.equals(that.credential))
-                && (policy == null ? that.policy == null : policy.equals(that.policy))
-                && (subscriptionUpdate == null ? that.subscriptionUpdate == null
-                        : subscriptionUpdate.equals(that.subscriptionUpdate))
-                && isTrustRootCertListEquals(trustRootCertList, that.trustRootCertList)
-                && updateIdentifier == that.updateIdentifier
-                && credentialPriority == that.credentialPriority
-                && subscriptionCreationTimeInMs == that.subscriptionCreationTimeInMs
-                && subscriptionExpirationTimeInMs == that.subscriptionExpirationTimeInMs
-                && TextUtils.equals(subscriptionType, that.subscriptionType)
-                && usageLimitUsageTimePeriodInMinutes == that.usageLimitUsageTimePeriodInMinutes
-                && usageLimitStartTimeInMs == that.usageLimitStartTimeInMs
-                && usageLimitDataLimit == that.usageLimitDataLimit
-                && usageLimitTimeLimitInMinutes == that .usageLimitTimeLimitInMinutes;
+        return (mHomeSp == null ? that.mHomeSp == null : mHomeSp.equals(that.mHomeSp))
+                && (mCredential == null ? that.mCredential == null
+                        : mCredential.equals(that.mCredential))
+                && (mPolicy == null ? that.mPolicy == null : mPolicy.equals(that.mPolicy))
+                && (mSubscriptionUpdate == null ? that.mSubscriptionUpdate == null
+                        : mSubscriptionUpdate.equals(that.mSubscriptionUpdate))
+                && isTrustRootCertListEquals(mTrustRootCertList, that.mTrustRootCertList)
+                && mUpdateIdentifier == that.mUpdateIdentifier
+                && mCredentialPriority == that.mCredentialPriority
+                && mSubscriptionCreationTimeInMs == that.mSubscriptionCreationTimeInMs
+                && mSubscriptionExpirationTimeInMs == that.mSubscriptionExpirationTimeInMs
+                && TextUtils.equals(mSubscriptionType, that.mSubscriptionType)
+                && mUsageLimitUsageTimePeriodInMinutes == that.mUsageLimitUsageTimePeriodInMinutes
+                && mUsageLimitStartTimeInMs == that.mUsageLimitStartTimeInMs
+                && mUsageLimitDataLimit == that.mUsageLimitDataLimit
+                && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes;
     }
 
     /**
@@ -238,20 +328,20 @@ public final class PasspointConfiguration implements Parcelable {
      * @return true on success or false on failure
      */
     public boolean validate() {
-        if (homeSp == null || !homeSp.validate()) {
+        if (mHomeSp == null || !mHomeSp.validate()) {
             return false;
         }
-        if (credential == null || !credential.validate()) {
+        if (mCredential == null || !mCredential.validate()) {
             return false;
         }
-        if (policy != null && !policy.validate()) {
+        if (mPolicy != null && !mPolicy.validate()) {
             return false;
         }
-        if (subscriptionUpdate != null && !subscriptionUpdate.validate()) {
+        if (mSubscriptionUpdate != null && !mSubscriptionUpdate.validate()) {
             return false;
         }
-        if (trustRootCertList != null) {
-            for (Map.Entry<String, byte[]> entry : trustRootCertList.entrySet()) {
+        if (mTrustRootCertList != null) {
+            for (Map.Entry<String, byte[]> entry : mTrustRootCertList.entrySet()) {
                 String url = entry.getKey();
                 byte[] certFingerprint = entry.getValue();
                 if (TextUtils.isEmpty(url)) {
@@ -283,20 +373,20 @@ public final class PasspointConfiguration implements Parcelable {
             @Override
             public PasspointConfiguration createFromParcel(Parcel in) {
                 PasspointConfiguration config = new PasspointConfiguration();
-                config.homeSp = in.readParcelable(null);
-                config.credential = in.readParcelable(null);
-                config.policy = in.readParcelable(null);
-                config.subscriptionUpdate = in.readParcelable(null);
-                config.trustRootCertList = readTrustRootCerts(in);
-                config.updateIdentifier = in.readInt();
-                config.credentialPriority = in.readInt();
-                config.subscriptionCreationTimeInMs = in.readLong();
-                config.subscriptionExpirationTimeInMs = in.readLong();
-                config.subscriptionType = in.readString();
-                config.usageLimitUsageTimePeriodInMinutes = in.readLong();
-                config.usageLimitStartTimeInMs = in.readLong();
-                config.usageLimitDataLimit = in.readLong();
-                config.usageLimitTimeLimitInMinutes = in.readLong();
+                config.setHomeSp(in.readParcelable(null));
+                config.setCredential(in.readParcelable(null));
+                config.setPolicy(in.readParcelable(null));
+                config.setSubscriptionUpdate(in.readParcelable(null));
+                config.setTrustRootCertList(readTrustRootCerts(in));
+                config.setUpdateIdentifier(in.readInt());
+                config.setCredentialPriority(in.readInt());
+                config.setSubscriptionCreationTimeInMs(in.readLong());
+                config.setSubscriptionExpirationTimeInMs(in.readLong());
+                config.setSubscriptionType(in.readString());
+                config.setUsageLimitUsageTimePeriodInMinutes(in.readLong());
+                config.setUsageLimitStartTimeInMs(in.readLong());
+                config.setUsageLimitDataLimit(in.readLong());
+                config.setUsageLimitTimeLimitInMinutes(in.readLong());
                 return config;
             }
 

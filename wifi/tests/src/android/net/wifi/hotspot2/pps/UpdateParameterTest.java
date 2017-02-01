@@ -50,15 +50,15 @@ public class UpdateParameterTest {
      */
     private static UpdateParameter createUpdateParameter() {
         UpdateParameter updateParam = new UpdateParameter();
-        updateParam.updateIntervalInMinutes = 1712;
-        updateParam.updateMethod = UpdateParameter.UPDATE_METHOD_OMADM;
-        updateParam.restriction = UpdateParameter.UPDATE_RESTRICTION_HOMESP;
-        updateParam.serverUri = "server.pdate.com";
-        updateParam.username = "username";
-        updateParam.base64EncodedPassword =
-                Base64.encodeToString("password".getBytes(), Base64.DEFAULT);
-        updateParam.trustRootCertUrl = "trust.cert.com";
-        updateParam.trustRootCertSha256Fingerprint = new byte[32];
+        updateParam.setUpdateIntervalInMinutes(1712);
+        updateParam.setUpdateMethod(UpdateParameter.UPDATE_METHOD_OMADM);
+        updateParam.setRestriction(UpdateParameter.UPDATE_RESTRICTION_HOMESP);
+        updateParam.setServerUri("server.pdate.com");
+        updateParam.setUsername("username");
+        updateParam.setBase64EncodedPassword(
+                Base64.encodeToString("password".getBytes(), Base64.DEFAULT));
+        updateParam.setTrustRootCertUrl("trust.cert.com");
+        updateParam.setTrustRootCertSha256Fingerprint(new byte[32]);
         return updateParam;
     }
 
@@ -152,7 +152,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithUnknowMethod() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.updateMethod = "adsfasd";
+        updateParam.setUpdateMethod("adsfasd");
         assertFalse(updateParam.validate());
     }
 
@@ -164,7 +164,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithUnknowRestriction() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.restriction = "adsfasd";
+        updateParam.setRestriction("adsfasd");
         assertFalse(updateParam.validate());
     }
 
@@ -178,7 +178,7 @@ public class UpdateParameterTest {
         UpdateParameter updateParam = createUpdateParameter();
         byte[] rawUsernameBytes = new byte[MAX_USERNAME_BYTES + 1];
         Arrays.fill(rawUsernameBytes, (byte) 'a');
-        updateParam.username = new String(rawUsernameBytes, StandardCharsets.UTF_8);
+        updateParam.setUsername(new String(rawUsernameBytes, StandardCharsets.UTF_8));
         assertFalse(updateParam.validate());
     }
 
@@ -190,7 +190,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithEmptyUsername() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.username = null;
+        updateParam.setUsername(null);
         assertFalse(updateParam.validate());
     }
 
@@ -204,7 +204,7 @@ public class UpdateParameterTest {
         UpdateParameter updateParam = createUpdateParameter();
         byte[] rawPasswordBytes = new byte[MAX_PASSWORD_BYTES + 1];
         Arrays.fill(rawPasswordBytes, (byte) 'a');
-        updateParam.base64EncodedPassword = new String(rawPasswordBytes, StandardCharsets.UTF_8);
+        updateParam.setBase64EncodedPassword(new String(rawPasswordBytes, StandardCharsets.UTF_8));
         assertFalse(updateParam.validate());
     }
 
@@ -216,7 +216,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithEmptyPassword() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.base64EncodedPassword = null;
+        updateParam.setBase64EncodedPassword(null);
         assertFalse(updateParam.validate());
     }
 
@@ -229,7 +229,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithPasswordContainedInvalidPadding() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.base64EncodedPassword = updateParam.base64EncodedPassword + "=";
+        updateParam.setBase64EncodedPassword(updateParam.getBase64EncodedPassword() + "=");
         assertFalse(updateParam.validate());
     }
 
@@ -241,7 +241,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithoutTrustRootCertUrl() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.trustRootCertUrl = null;
+        updateParam.setTrustRootCertUrl(null);
         assertFalse(updateParam.validate());
     }
 
@@ -255,7 +255,7 @@ public class UpdateParameterTest {
         UpdateParameter updateParam = createUpdateParameter();
         byte[] rawUrlBytes = new byte[MAX_URL_BYTES + 1];
         Arrays.fill(rawUrlBytes, (byte) 'a');
-        updateParam.trustRootCertUrl = new String(rawUrlBytes, StandardCharsets.UTF_8);
+        updateParam.setTrustRootCertUrl(new String(rawUrlBytes, StandardCharsets.UTF_8));
         assertFalse(updateParam.validate());
     }
 
@@ -268,7 +268,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithouttrustRootCertSha256Fingerprint() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.trustRootCertSha256Fingerprint = null;
+        updateParam.setTrustRootCertSha256Fingerprint(null);
         assertFalse(updateParam.validate());
     }
 
@@ -281,10 +281,10 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithInvalidtrustRootCertSha256Fingerprint() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.trustRootCertSha256Fingerprint = new byte[CERTIFICATE_SHA256_BYTES + 1];
+        updateParam.setTrustRootCertSha256Fingerprint(new byte[CERTIFICATE_SHA256_BYTES + 1]);
         assertFalse(updateParam.validate());
 
-        updateParam.trustRootCertSha256Fingerprint = new byte[CERTIFICATE_SHA256_BYTES - 1];
+        updateParam.setTrustRootCertSha256Fingerprint(new byte[CERTIFICATE_SHA256_BYTES - 1]);
         assertFalse(updateParam.validate());
     }
 
@@ -296,7 +296,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithoutServerUri() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.serverUri = null;
+        updateParam.setServerUri(null);
         assertFalse(updateParam.validate());
     }
 
@@ -310,7 +310,7 @@ public class UpdateParameterTest {
         UpdateParameter updateParam = createUpdateParameter();
         byte[] rawUriBytes = new byte[MAX_URI_BYTES + 1];
         Arrays.fill(rawUriBytes, (byte) 'a');
-        updateParam.serverUri = new String(rawUriBytes, StandardCharsets.UTF_8);
+        updateParam.setServerUri(new String(rawUriBytes, StandardCharsets.UTF_8));
         assertFalse(updateParam.validate());
     }
 
@@ -323,14 +323,14 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithNoServerCheck() throws Exception {
         UpdateParameter updateParam = new UpdateParameter();
-        updateParam.updateIntervalInMinutes = UpdateParameter.UPDATE_CHECK_INTERVAL_NEVER;
-        updateParam.username = null;
-        updateParam.base64EncodedPassword = null;
-        updateParam.updateMethod = null;
-        updateParam.restriction = null;
-        updateParam.serverUri = null;
-        updateParam.trustRootCertUrl = null;
-        updateParam.trustRootCertSha256Fingerprint = null;
+        updateParam.setUpdateIntervalInMinutes(UpdateParameter.UPDATE_CHECK_INTERVAL_NEVER);
+        updateParam.setUsername(null);
+        updateParam.setBase64EncodedPassword(null);
+        updateParam.setUpdateMethod(null);
+        updateParam.setRestriction(null);
+        updateParam.setServerUri(null);
+        updateParam.setTrustRootCertUrl(null);
+        updateParam.setTrustRootCertSha256Fingerprint(null);
         assertTrue(updateParam.validate());
     }
 
@@ -342,7 +342,7 @@ public class UpdateParameterTest {
     @Test
     public void validateUpdateParameterWithoutUpdateInterval() throws Exception {
         UpdateParameter updateParam = createUpdateParameter();
-        updateParam.updateIntervalInMinutes = Long.MIN_VALUE;
+        updateParam.setUpdateIntervalInMinutes(Long.MIN_VALUE);
         assertFalse(updateParam.validate());
     }
 }
