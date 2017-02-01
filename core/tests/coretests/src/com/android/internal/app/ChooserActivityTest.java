@@ -211,6 +211,119 @@ public class ChooserActivityTest {
         assertThat(activity.isFinishing(), is(true));
     }
 
+    @Test
+    public void hasOtherProfileOneOption() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(2);
+        ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        // The other entry is filtered to the other profile slot
+        assertThat(activity.getAdapter().getCount(), is(1));
+
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        ChooserWrapperActivity.sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+
+        // Make a stable copy of the components as the original list may be modified
+        List<ResolvedComponentInfo> stableCopy =
+                createResolvedComponentsForTestWithOtherProfile(2);
+        // Check that the "Other Profile" activity is put in the right spot
+        onView(withId(R.id.profile_button)).check(matches(
+                withText(stableCopy.get(0).getResolveInfoAt(0).activityInfo.name)));
+        onView(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name))
+                .perform(click());
+        waitForIdle();
+        assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void hasOtherProfileTwoOptionsAndUserSelectsOne() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3);
+        ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getLastChosen())
+                .thenReturn(resolvedComponentInfos.get(0).getResolveInfoAt(0));
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        // The other entry is filtered to the other profile slot
+        assertThat(activity.getAdapter().getCount(), is(2));
+
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        ChooserWrapperActivity.sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+
+        // Make a stable copy of the components as the original list may be modified
+        List<ResolvedComponentInfo> stableCopy =
+                createResolvedComponentsForTestWithOtherProfile(3);
+        // Check that the "Other Profile" activity is put in the right spot
+        onView(withId(R.id.profile_button)).check(matches(
+                withText(stableCopy.get(0).getResolveInfoAt(0).activityInfo.name)));
+        onView(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name))
+                .perform(click());
+        waitForIdle();
+        assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void hasLastChosenActivityAndOtherProfile() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3);
+        ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        // The other entry is filtered to the last used slot
+        assertThat(activity.getAdapter().getCount(), is(2));
+
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        ChooserWrapperActivity.sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+
+        // Make a stable copy of the components as the original list may be modified
+        List<ResolvedComponentInfo> stableCopy =
+                createResolvedComponentsForTestWithOtherProfile(3);
+        // Check that the "Other Profile" activity is put in the right spot
+        onView(withId(R.id.profile_button)).check(matches(
+                withText(stableCopy.get(0).getResolveInfoAt(0).activityInfo.name)));
+        onView(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name))
+                .perform(click());
+        waitForIdle();
+        assertThat(chosen[0], is(toChoose));
+    }
+
     private Intent createSendImageIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -223,6 +336,19 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
             infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+        }
+        return infoList;
+    }
+
+    private List<ResolvedComponentInfo> createResolvedComponentsForTestWithOtherProfile(
+            int numberOfResults) {
+        List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
+        for (int i = 0; i < numberOfResults; i++) {
+            if (i == 0) {
+                infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i));
+            } else {
+                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+            }
         }
         return infoList;
     }

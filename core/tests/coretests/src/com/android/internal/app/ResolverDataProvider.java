@@ -32,9 +32,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class ResolverDataProvider {
 
+    static private int USER_SOMEONE_ELSE = 10;
+
     static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfo(int i) {
         return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
-                createResolverIntent(i), createResolveInfo(i));
+                createResolverIntent(i), createResolveInfo(i, UserHandle.USER_CURRENT));
+    }
+
+    static ResolverActivity.ResolvedComponentInfo createResolvedComponentInfoWithOtherId(int i) {
+        return new ResolverActivity.ResolvedComponentInfo(createComponentName(i),
+                createResolverIntent(i), createResolveInfo(i, USER_SOMEONE_ELSE));
     }
 
     static ComponentName createComponentName(int i) {
@@ -42,10 +49,10 @@ class ResolverDataProvider {
         return new ComponentName("foo.bar." + name, name);
     }
 
-    static ResolveInfo createResolveInfo(int i) {
+    static ResolveInfo createResolveInfo(int i, int userId) {
         final ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = createActivityInfo(i);
-        resolveInfo.targetUserId = UserHandle.USER_CURRENT;
+        resolveInfo.targetUserId = userId;
         return resolveInfo;
     }
 

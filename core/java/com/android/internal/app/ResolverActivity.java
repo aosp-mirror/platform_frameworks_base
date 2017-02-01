@@ -20,22 +20,11 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
-import android.os.AsyncTask;
-import android.os.RemoteException;
-import android.provider.MediaStore;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.Slog;
-import android.widget.AbsListView;
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
-
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -50,16 +39,23 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
+import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.MediaStore;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -67,7 +63,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.ResolverDrawerLayout;
@@ -92,7 +90,6 @@ public class ResolverActivity extends Activity {
 
     protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
-    private boolean mAlwaysUseOption;
     private AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
@@ -108,13 +105,15 @@ public class ResolverActivity extends Activity {
     private CharSequence mTitle;
     private int mDefaultTitleResId;
 
+    // Whether or not this activity supports choosing a default handler for the intent.
+    private boolean mSupportsAlwaysUseOption;
     protected ResolverDrawerLayout mResolverDrawerLayout;
     protected PackageManager mPm;
     protected int mLaunchedFromUid;
 
     private static final String TAG = "ResolverActivity";
     private static final boolean DEBUG = false;
-    private Runnable mPostListBuildRunnable;
+    private Runnable mPostListReadyRunnable;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -230,13 +229,14 @@ public class ResolverActivity extends Activity {
      */
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, Intent[] initialIntents,
-            List<ResolveInfo> rList, boolean alwaysUseOption) {
-        onCreate(savedInstanceState, intent, title, 0, initialIntents, rList, alwaysUseOption);
+            List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {
+        onCreate(savedInstanceState, intent, title, 0, initialIntents, rList,
+                supportsAlwaysUseOption);
     }
 
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, int defaultTitleRes, Intent[] initialIntents,
-            List<ResolveInfo> rList, boolean alwaysUseOption) {
+            List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {
         setTheme(R.style.Theme_DeviceDefault_Resolver);
         super.onCreate(savedInstanceState);
 
@@ -262,7 +262,7 @@ public class ResolverActivity extends Activity {
         mPackageMonitor.register(this, getMainLooper(), false);
         mRegistered = true;
         mReferrerPackage = getReferrerPackageName();
-        mAlwaysUseOption = alwaysUseOption;
+        mSupportsAlwaysUseOption = supportsAlwaysUseOption;
 
         final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
@@ -378,8 +378,11 @@ public class ResolverActivity extends Activity {
         final DisplayResolveInfo dri = mAdapter.getOtherProfile();
         if (dri != null) {
             mProfileView.setVisibility(View.VISIBLE);
-            final TextView text = (TextView) mProfileView.findViewById(R.id.profile_button);
-            text.setText(dri.getDisplayLabel());
+            View text = mProfileView.findViewById(R.id.profile_button);
+            if (!(text instanceof TextView)) {
+                text = mProfileView.findViewById(R.id.text1);
+            }
+            ((TextView) text).setText(dri.getDisplayLabel());
         } else {
             mProfileView.setVisibility(View.GONE);
         }
@@ -421,7 +424,7 @@ public class ResolverActivity extends Activity {
         final ActionTitle title = mResolvingHome ? ActionTitle.HOME : ActionTitle.forAction(action);
         // While there may already be a filtered item, we can only use it in the title if the list
         // is already sorted and all information relevant to it is already in the list.
-        final boolean named = mAdapter.getFilteredPosition() > 0;
+        final boolean named = mAdapter.getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
         } else {
@@ -512,15 +515,16 @@ public class ResolverActivity extends Activity {
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mPostListBuildRunnable != null) {
-            getMainThreadHandler().removeCallbacks(mPostListBuildRunnable);
+        if (mPostListReadyRunnable != null) {
+            getMainThreadHandler().removeCallbacks(mPostListReadyRunnable);
+            mPostListReadyRunnable = null;
         }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (mAlwaysUseOption) {
+        if (mSupportsAlwaysUseOption) {
             final int checkedPos = mAdapterView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             mLastSelected = checkedPos;
@@ -575,17 +579,18 @@ public class ResolverActivity extends Activity {
 
     public void onButtonClick(View v) {
         final int id = v.getId();
-        startSelected(mAlwaysUseOption ?
-                        mAdapterView.getCheckedItemPosition() : mAdapter.getFilteredPosition(),
+        startSelected(mAdapter.hasFilteredItem() ?
+                        mAdapter.getFilteredPosition():
+                        mAdapterView.getCheckedItemPosition(),
                 id == R.id.button_always,
-                mAlwaysUseOption);
+                !mAdapter.hasFilteredItem());
     }
 
-    public void startSelected(int which, boolean always, boolean filtered) {
+    public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {
         if (isFinishing()) {
             return;
         }
-        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, filtered);
+        ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
         if (mResolvingHome && hasManagedProfile() && !supportsManagedProfiles(ri)) {
             Toast.makeText(this, String.format(getResources().getString(
                     com.android.internal.R.string.activity_resolver_work_profiles_support),
@@ -594,15 +599,15 @@ public class ResolverActivity extends Activity {
             return;
         }
 
-        TargetInfo target = mAdapter.targetInfoForPosition(which, filtered);
+        TargetInfo target = mAdapter.targetInfoForPosition(which, hasIndexBeenFiltered);
         if (target == null) {
             return;
         }
         if (onTargetSelected(target, always)) {
-            if (always && filtered) {
+            if (always && mSupportsAlwaysUseOption) {
                 MetricsLogger.action(
                         this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_ALWAYS);
-            } else if (filtered) {
+            } else if (mSupportsAlwaysUseOption) {
                 MetricsLogger.action(
                         this, MetricsProto.MetricsEvent.ACTION_APP_DISAMBIG_JUST_ONCE);
             } else {
@@ -627,7 +632,7 @@ public class ResolverActivity extends Activity {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
-        if (intent != null && (mAlwaysUseOption || mAdapter.hasFilteredItem())
+        if (intent != null && (mSupportsAlwaysUseOption || mAdapter.hasFilteredItem())
                 && mAdapter.mUnfilteredResolveList != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
@@ -714,7 +719,18 @@ public class ResolverActivity extends Activity {
 
             if (filter != null) {
                 final int N = mAdapter.mUnfilteredResolveList.size();
-                ComponentName[] set = new ComponentName[N];
+                ComponentName[] set;
+                // If we don't add back in the component for forwarding the intent to a managed
+                // profile, the preferred activity may not be updated correctly (as the set of
+                // components we tell it we knew about will have changed).
+                final boolean needToAddBackProfileForwardingComponent
+                        = mAdapter.mOtherProfile != null;
+                if (!needToAddBackProfileForwardingComponent) {
+                    set = new ComponentName[N];
+                } else {
+                    set = new ComponentName[N + 1];
+                }
+
                 int bestMatch = 0;
                 for (int i=0; i<N; i++) {
                     ResolveInfo r = mAdapter.mUnfilteredResolveList.get(i).getResolveInfoAt(0);
@@ -722,6 +738,13 @@ public class ResolverActivity extends Activity {
                             r.activityInfo.name);
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
+
+                if (needToAddBackProfileForwardingComponent) {
+                    set[N] = mAdapter.mOtherProfile.getResolvedComponentName();
+                    final int otherProfileMatch = mAdapter.mOtherProfile.getResolveInfo().match;
+                    if (otherProfileMatch > bestMatch) bestMatch = otherProfileMatch;
+                }
+
                 if (alwaysCheck) {
                     final int userId = getUserId();
                     final PackageManager pm = getPackageManager();
@@ -859,15 +882,15 @@ public class ResolverActivity extends Activity {
         // a more complicated UI that the current voice interaction flow is not able
         // to handle.
         mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
-                mLaunchedFromUid, mAlwaysUseOption && !isVoiceInteraction());
+                mLaunchedFromUid, mSupportsAlwaysUseOption && !isVoiceInteraction());
         boolean rebuildCompleted = mAdapter.rebuildList();
 
-        if (mAdapter.hasFilteredItem()) {
+        if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
-            mAlwaysUseOption = false;
         } else {
             mLayoutId = getLayoutResource();
         }
+        setContentView(mLayoutId);
 
         int count = mAdapter.getUnfilteredCount();
 
@@ -887,22 +910,21 @@ public class ResolverActivity extends Activity {
             }
         }
 
-        setContentView(mLayoutId);
+
         mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
 
         if (count == 0 && mAdapter.mPlaceholderCount == 0) {
-            final TextView empty = (TextView) findViewById(R.id.empty);
-            empty.setVisibility(View.VISIBLE);
+            final TextView emptyView = (TextView) findViewById(R.id.empty);
+            emptyView.setVisibility(View.VISIBLE);
             mAdapterView.setVisibility(View.GONE);
         } else {
             mAdapterView.setVisibility(View.VISIBLE);
-            onPrepareAdapterView(mAdapterView, mAdapter, mAlwaysUseOption);
+            onPrepareAdapterView(mAdapterView, mAdapter);
         }
         return false;
     }
 
-    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
-            boolean alwaysUseOption) {
+    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter) {
         final boolean useHeader = adapter.hasFilteredItem();
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
 
@@ -912,7 +934,7 @@ public class ResolverActivity extends Activity {
         adapterView.setOnItemClickListener(listener);
         adapterView.setOnItemLongClickListener(listener);
 
-        if (alwaysUseOption) {
+        if (mSupportsAlwaysUseOption) {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         }
 
@@ -969,16 +991,19 @@ public class ResolverActivity extends Activity {
     }
 
     public void resetAlwaysOrOnceButtonBar() {
-        if (mAlwaysUseOption || mAdapter.mLastChosen != null) {
+        if (mSupportsAlwaysUseOption) {
             final ViewGroup buttonLayout = (ViewGroup) findViewById(R.id.button_bar);
             if (buttonLayout != null) {
                 buttonLayout.setVisibility(View.VISIBLE);
                 mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
                 mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+            } else {
+                Log.e(TAG, "Layout unexpectedly does not have a button bar");
             }
         }
 
-        if (mAdapter.getFilteredPosition() >= 0) {
+        if (useLayoutWithDefault()
+                && mAdapter.getFilteredPosition() != ListView.INVALID_POSITION) {
             setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
             mOnceButton.setEnabled(true);
             return;
@@ -990,6 +1015,10 @@ public class ResolverActivity extends Activity {
             setAlwaysButtonEnabled(true, mAdapterView.getCheckedItemPosition(), true);
             mOnceButton.setEnabled(true);
         }
+    }
+
+    private boolean useLayoutWithDefault() {
+        return mSupportsAlwaysUseOption && mAdapter.hasFilteredItem();
     }
 
     /**
@@ -1293,6 +1322,7 @@ public class ResolverActivity extends Activity {
             mPlaceholderCount = count;
         }
 
+        @Nullable
         public DisplayResolveInfo getFilteredItem() {
             if (mFilterLastUsed && mLastChosenPosition >= 0) {
                 // Not using getItem since it offsets to dodge this position for the list
@@ -1336,14 +1366,10 @@ public class ResolverActivity extends Activity {
          */
         protected boolean rebuildList() {
             List<ResolvedComponentInfo> currentResolveList = null;
-            try {
-                mLastChosen = mResolverListController.getLastChosen();
-            } catch (RemoteException re) {
-                Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
-            }
-
             // Clear the value of mOtherProfile from previous call.
             mOtherProfile = null;
+            mLastChosen = null;
+            mLastChosenPosition = -1;
             mDisplayList.clear();
             if (mBaseResolveList != null) {
                 currentResolveList = mUnfilteredResolveList = new ArrayList<>();
@@ -1366,6 +1392,30 @@ public class ResolverActivity extends Activity {
                     mUnfilteredResolveList = originalList;
                 }
             }
+
+            // So far we only support a single other profile at a time.
+            // The first one we see gets special treatment.
+            for (ResolvedComponentInfo info : currentResolveList) {
+                if (info.getResolveInfoAt(0).targetUserId != UserHandle.USER_CURRENT) {
+                    mOtherProfile = new DisplayResolveInfo(info.getIntentAt(0),
+                            info.getResolveInfoAt(0),
+                            info.getResolveInfoAt(0).loadLabel(mPm),
+                            info.getResolveInfoAt(0).loadLabel(mPm),
+                            getReplacementIntent(info.getResolveInfoAt(0).activityInfo,
+                                    info.getIntentAt(0)));
+                    currentResolveList.remove(info);
+                    break;
+                }
+            }
+
+            if (mOtherProfile == null) {
+                try {
+                    mLastChosen = mResolverListController.getLastChosen();
+                } catch (RemoteException re) {
+                    Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
+                }
+            }
+
             int N;
             if ((currentResolveList != null) && ((N = currentResolveList.size()) > 0)) {
                 // We only care about fixing the unfilteredList if the current resolve list and
@@ -1402,19 +1452,7 @@ public class ResolverActivity extends Activity {
                         }
                     };
                     sortingTask.execute(currentResolveList);
-                    if (mPostListBuildRunnable == null) {
-                        mPostListBuildRunnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                setTitleAndIcon();
-                                resetAlwaysOrOnceButtonBar();
-                                onListRebuilt();
-                                disableLastChosenIfNeeded();
-                                mPostListBuildRunnable = null;
-                            }
-                        };
-                        getMainThreadHandler().post(mPostListBuildRunnable);
-                    }
+                    postListReadyRunnable();
                     return false;
                 } else {
                     processSortedList(currentResolveList);
@@ -1425,16 +1463,6 @@ public class ResolverActivity extends Activity {
                 return true;
             }
         }
-
-        private void disableLastChosenIfNeeded() {
-            // Layout doesn't handle both profile button and last chosen
-            // so disable last chosen if profile button is present.
-            if (mOtherProfile != null && mLastChosenPosition >= 0) {
-                mLastChosenPosition = -1;
-                mFilterLastUsed = false;
-            }
-        }
-
 
         private void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
             int N;
@@ -1503,10 +1531,27 @@ public class ResolverActivity extends Activity {
                 processGroup(sortedComponents, start, (N - 1), rci0, r0Label);
             }
 
-            setTitleAndIcon();
-            resetAlwaysOrOnceButtonBar();
-            disableLastChosenIfNeeded();
-            onListRebuilt();
+            postListReadyRunnable();
+        }
+
+        /**
+         * Some necessary methods for creating the list are initiated in onCreate and will also
+         * determine the layout known. We therefore can't update the UI inline and post to the
+         * handler thread to update after the current task is finished.
+         */
+        private void postListReadyRunnable() {
+            if (mPostListReadyRunnable == null) {
+                mPostListReadyRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        setTitleAndIcon();
+                        resetAlwaysOrOnceButtonBar();
+                        onListRebuilt();
+                        mPostListReadyRunnable = null;
+                    }
+                };
+                getMainThreadHandler().post(mPostListReadyRunnable);
+            }
         }
 
         public void onListRebuilt() {
@@ -1588,6 +1633,11 @@ public class ResolverActivity extends Activity {
         }
 
         private void updateLastChosenPosition(ResolveInfo info) {
+            // If another profile is present, ignore the last chosen entry.
+            if (mOtherProfile != null) {
+                mLastChosenPosition = -1;
+                return;
+            }
             if (mLastChosen != null
                     && mLastChosen.activityInfo.packageName.equals(info.activityInfo.packageName)
                     && mLastChosen.activityInfo.name.equals(info.activityInfo.name)) {
@@ -1595,12 +1645,10 @@ public class ResolverActivity extends Activity {
             }
         }
 
+        // We assume that at this point we've already filtered out the only intent for a different
+        // targetUserId which we're going to use.
         private void addResolveInfo(DisplayResolveInfo dri) {
-            if (dri.mResolveInfo.targetUserId != UserHandle.USER_CURRENT && mOtherProfile == null) {
-                // So far we only support a single other profile at a time.
-                // The first one we see gets special treatment.
-                mOtherProfile = dri;
-            } else {
+            if (dri.mResolveInfo.targetUserId == UserHandle.USER_CURRENT) {
                 mDisplayList.add(dri);
             }
         }
@@ -1841,7 +1889,8 @@ public class ResolverActivity extends Activity {
 
             final int checkedPos = mAdapterView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
-            if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
+            if (!useLayoutWithDefault()
+                    && (!hasValidSelection || mLastSelected != checkedPos)) {
                 setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
                 mOnceButton.setEnabled(hasValidSelection);
                 if (hasValidSelection) {

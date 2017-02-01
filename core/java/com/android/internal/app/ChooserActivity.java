@@ -340,8 +340,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
-            boolean alwaysUseOption) {
+    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter) {
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
         mChooserListAdapter = (ChooserListAdapter) adapter;
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
@@ -367,6 +366,9 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
+        // Note that this is only safe because the Intent handled by the ChooserActivity is
+        // guaranteed to contain no extras unknown to the local ClassLoader. That is why this
+        // method can not be replaced in the ResolverActivity whole hog.
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE,
                 super.shouldAutoLaunchSingleChoice(target));
     }
