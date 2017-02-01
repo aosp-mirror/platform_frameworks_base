@@ -19,11 +19,10 @@
 
 #include "androidfw/StringPiece.h"
 
-#include "io/ZipArchive.h"
 #include "ResourceTable.h"
+#include "flatten/Archive.h"
+#include "io/ZipArchive.h"
 #include "unflatten/BinaryResourceParser.h"
-
-using android::StringPiece;
 
 namespace aapt {
 
@@ -42,8 +41,14 @@ class LoadedApk {
 
   const Source& GetSource() { return source_; }
 
-  static std::unique_ptr<LoadedApk> LoadApkFromPath(
-      IAaptContext* context, const StringPiece& path);
+  /**
+   * Writes the APK on disk at the given path, while also removing the resource
+   * files that are not referenced in the resource table.
+   */
+  bool WriteToArchive(IAaptContext* context, IArchiveWriter* writer);
+
+  static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
+                                                    const android::StringPiece& path);
 
  private:
   Source source_;
