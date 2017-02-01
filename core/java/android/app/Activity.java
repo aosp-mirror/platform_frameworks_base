@@ -969,7 +969,9 @@ public class Activity extends ContextThemeWrapper
                     ? mLastNonConfigurationInstances.fragments : null);
         }
         mFragments.dispatchCreate();
-        getApplication().dispatchActivityCreated(this, savedInstanceState);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityCreated(this, savedInstanceState);
+        }
         if (mVoiceInteractor != null) {
             mVoiceInteractor.attachActivity(this);
         }
@@ -1197,8 +1199,9 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         mFragments.doLoaderStart();
-
-        getApplication().dispatchActivityStarted(this);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityStarted(this);
+        }
     }
 
     /**
@@ -1259,7 +1262,9 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
-        getApplication().dispatchActivityResumed(this);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityResumed(this);
+        }
         mActivityTransitionState.onResume(this, isTopOfTask());
         mCalled = true;
     }
@@ -1426,6 +1431,9 @@ public class Activity extends ContextThemeWrapper
         saveManagedDialogs(outState);
         mActivityTransitionState.saveState(outState);
         storeHasCurrentPermissionRequest(outState);
+        if (isAtLeastO()) {
+            getApplication().dispatchActivitySaveInstanceState(this, outState);
+        }
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState);
     }
 
@@ -1442,6 +1450,9 @@ public class Activity extends ContextThemeWrapper
         onSaveInstanceState(outState, outPersistentState);
         saveManagedDialogs(outState);
         storeHasCurrentPermissionRequest(outState);
+        if (isAtLeastO()) {
+            getApplication().dispatchActivitySaveInstanceState(this, outState);
+        }
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onSaveInstanceState " + this + ": " + outState +
                 ", " + outPersistentState);
     }
@@ -1497,7 +1508,9 @@ public class Activity extends ContextThemeWrapper
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
         }
-        getApplication().dispatchActivitySaveInstanceState(this, outState);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivitySaveInstanceState(this, outState);
+        }
     }
 
     /**
@@ -1595,7 +1608,9 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onPause() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
-        getApplication().dispatchActivityPaused(this);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityPaused(this);
+        }
         mCalled = true;
     }
 
@@ -1795,7 +1810,9 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         mActivityTransitionState.onStop();
-        getApplication().dispatchActivityStopped(this);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityStopped(this);
+        }
         mTranslucentCallback = null;
         mCalled = true;
     }
@@ -1865,8 +1882,9 @@ public class Activity extends ContextThemeWrapper
         if (mActionBar != null) {
             mActionBar.onDestroy();
         }
-
-        getApplication().dispatchActivityDestroyed(this);
+        if (!isAtLeastO()) {
+            getApplication().dispatchActivityDestroyed(this);
+        }
     }
 
     /**
@@ -6750,25 +6768,33 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
-    final void performCreateCommon() {
+    final void performCreateCommon(Bundle icicle) {
+        mActivityTransitionState.readState(icicle);
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityCreated(this, icicle);
+        }
     }
 
     final void performCreate(Bundle icicle) {
         restoreHasCurrentPermissionRequest(icicle);
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityPreCreated(this, icicle);
+        }
         onCreate(icicle);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
+        performCreateCommon(icicle);
     }
 
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         restoreHasCurrentPermissionRequest(icicle);
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityPreCreated(this, icicle);
+        }
         onCreate(icicle, persistentState);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
+        performCreateCommon(icicle);
     }
 
     final void performStart() {
@@ -6811,6 +6837,9 @@ public class Activity extends ContextThemeWrapper
         }
 
         mActivityTransitionState.enterReady(this);
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityStarted(this);
+        }
     }
 
     final void performRestart() {
@@ -6886,7 +6915,9 @@ public class Activity extends ContextThemeWrapper
 
         mFragments.dispatchResume();
         mFragments.execPendingActions();
-
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityResumed(this);
+        }
         onPostResume();
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -6901,13 +6932,15 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         onPause();
         mResumed = false;
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityPaused(this);
+        }
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
             throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onPause()");
         }
-        mResumed = false;
     }
 
     final void performUserLeaving() {
@@ -6918,7 +6951,7 @@ public class Activity extends ContextThemeWrapper
     final void performStop(boolean preserveWindow) {
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
-
+        boolean dispatchActivityStopped = !mStopped;
         if (!mStopped) {
             if (mWindow != null) {
                 mWindow.closeAllPanels();
@@ -6955,6 +6988,9 @@ public class Activity extends ContextThemeWrapper
             mStopped = true;
         }
         mResumed = false;
+        if (dispatchActivityStopped && isAtLeastO()) {
+            getApplication().dispatchActivityStopped(this);
+        }
     }
 
     final void performDestroy() {
@@ -6966,6 +7002,13 @@ public class Activity extends ContextThemeWrapper
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
         }
+        if (isAtLeastO()) {
+            getApplication().dispatchActivityDestroyed(this);
+        }
+    }
+
+    private boolean isAtLeastO() {
+        return getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O;
     }
 
     final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
