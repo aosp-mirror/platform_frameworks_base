@@ -78,7 +78,7 @@ import android.net.Uri;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
-import android.net.util.AvoidBadWifiTracker;
+import android.net.util.MultinetworkPolicyTracker;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -499,7 +499,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final IpConnectivityLog mMetricsLog;
 
     @VisibleForTesting
-    final AvoidBadWifiTracker mAvoidBadWifiTracker;
+    final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -849,9 +849,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
 
-        mAvoidBadWifiTracker = createAvoidBadWifiTracker(
+        mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
-        mAvoidBadWifiTracker.start();
+        mMultinetworkPolicyTracker.start();
     }
 
     private NetworkRequest createInternetRequestForTransport(
@@ -2784,7 +2784,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     public boolean avoidBadWifi() {
-        return mAvoidBadWifiTracker.currentValue();
+        return mMultinetworkPolicyTracker.getAvoidBadWifi();
     }
 
     private void rematchForAvoidBadWifiUpdate() {
@@ -2797,9 +2797,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // TODO: Evaluate whether this is of interest to other consumers of
-    // AvoidBadWifiTracker and worth moving out of here.
+    // MultinetworkPolicyTracker and worth moving out of here.
     private void dumpAvoidBadWifiSettings(IndentingPrintWriter pw) {
-        final boolean configRestrict = mAvoidBadWifiTracker.configRestrictsAvoidBadWifi();
+        final boolean configRestrict = mMultinetworkPolicyTracker.configRestrictsAvoidBadWifi();
         if (!configRestrict) {
             pw.println("Bad Wi-Fi avoidance: unrestricted");
             return;
@@ -2809,7 +2809,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.increaseIndent();
         pw.println("Config restrict:   " + configRestrict);
 
-        final String value = mAvoidBadWifiTracker.getSettingsValue();
+        final String value = mMultinetworkPolicyTracker.getAvoidBadWifiSetting();
         String description;
         // Can't use a switch statement because strings are legal case labels, but null is not.
         if ("0".equals(value)) {
@@ -2877,7 +2877,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("handleNetworkUnvalidated " + nai.name() + " cap=" + nc);
 
         if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
-            mAvoidBadWifiTracker.shouldNotifyWifiUnvalidated()) {
+            mMultinetworkPolicyTracker.shouldNotifyWifiUnvalidated()) {
             showValidationNotification(nai, NotificationType.LOST_INTERNET);
         }
     }
@@ -5545,8 +5545,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @VisibleForTesting
-    AvoidBadWifiTracker createAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
-        return new AvoidBadWifiTracker(c, h, r);
+    MultinetworkPolicyTracker createMultinetworkPolicyTracker(Context c, Handler h, Runnable r) {
+        return new MultinetworkPolicyTracker(c, h, r);
     }
 
     @VisibleForTesting

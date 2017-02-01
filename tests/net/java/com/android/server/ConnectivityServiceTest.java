@@ -53,7 +53,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.metrics.IpConnectivityLog;
-import android.net.util.AvoidBadWifiTracker;
+import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -593,10 +593,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
-    private class WrappedAvoidBadWifiTracker extends AvoidBadWifiTracker {
+    private class WrappedMultinetworkPolicyTracker extends MultinetworkPolicyTracker {
         public volatile boolean configRestrictsAvoidBadWifi;
 
-        public WrappedAvoidBadWifiTracker(Context c, Handler h, Runnable r) {
+        public WrappedMultinetworkPolicyTracker(Context c, Handler h, Runnable r) {
             super(c, h, r);
         }
 
@@ -607,7 +607,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class WrappedConnectivityService extends ConnectivityService {
-        public WrappedAvoidBadWifiTracker wrappedAvoidBadWifiTracker;
+        public WrappedMultinetworkPolicyTracker wrappedMultinetworkPolicyTracker;
         private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
@@ -654,14 +654,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public AvoidBadWifiTracker createAvoidBadWifiTracker(
+        public MultinetworkPolicyTracker createMultinetworkPolicyTracker(
                 Context c, Handler h, Runnable r) {
-            final WrappedAvoidBadWifiTracker tracker = new WrappedAvoidBadWifiTracker(c, h, r);
+            final WrappedMultinetworkPolicyTracker tracker = new WrappedMultinetworkPolicyTracker(c, h, r);
             return tracker;
         }
 
-        public WrappedAvoidBadWifiTracker getAvoidBadWifiTracker() {
-            return (WrappedAvoidBadWifiTracker) mAvoidBadWifiTracker;
+        public WrappedMultinetworkPolicyTracker getMultinetworkPolicyTracker() {
+            return (WrappedMultinetworkPolicyTracker) mMultinetworkPolicyTracker;
         }
 
         @Override
@@ -2140,7 +2140,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @SmallTest
     public void testAvoidBadWifiSetting() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
+        final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
         final String settingName = Settings.Global.NETWORK_AVOID_BAD_WIFI;
 
         tracker.configRestrictsAvoidBadWifi = false;
@@ -2178,7 +2178,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @SmallTest
     public void testAvoidBadWifi() throws Exception {
         final ContentResolver cr = mServiceContext.getContentResolver();
-        final WrappedAvoidBadWifiTracker tracker = mService.getAvoidBadWifiTracker();
+        final WrappedMultinetworkPolicyTracker tracker = mService.getMultinetworkPolicyTracker();
 
         // Pretend we're on a carrier that restricts switching away from bad wifi.
         tracker.configRestrictsAvoidBadWifi = true;
