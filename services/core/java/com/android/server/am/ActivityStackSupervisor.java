@@ -1333,18 +1333,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Because we could be starting an Activity in the system process this may not go across
             // a Binder interface which would create a new Configuration. Consequently we have to
             // always create a new Configuration here.
-
-            final Configuration globalConfiguration =
-                new Configuration(mService.getGlobalConfiguration());
-            r.setLastReportedGlobalConfiguration(globalConfiguration);
-            final Configuration mergedOverrideConfiguration =
-                new Configuration(task.getMergedOverrideConfiguration());
-            r.setLastReportedMergedOverrideConfiguration(mergedOverrideConfiguration);
-
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
-                    globalConfiguration,
-                    mergedOverrideConfiguration, r.compat,
+                    new Configuration(mService.getGlobalConfiguration()),
+                    new Configuration(task.getMergedOverrideConfiguration()), r.compat,
                     r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
                     r.persistentState, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profilerInfo);
@@ -1739,7 +1731,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // We'll update with whatever configuration it now says
             // it used to launch.
             if (config != null) {
-                r.setLastReportedGlobalConfiguration(config);
+                r.setLastReportedConfiguration(config);
             }
 
             // We are now idle.  If someone is waiting for a thumbnail from
