@@ -19,16 +19,16 @@ package android.net.wifi;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
-import android.os.Handler;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
 import android.net.ScoredNetwork;
+import android.os.Handler;
+import android.os.Process;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -76,7 +76,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     public WifiNetworkScoreCache(Context context, @Nullable CacheListener listener) {
         mContext = context.getApplicationContext();
         mListener = listener;
-        mNetworkCache = new HashMap<String, ScoredNetwork>();
+        mNetworkCache = new HashMap<>();
     }
 
     @Override public final void updateScores(List<ScoredNetwork> networks) {
@@ -210,7 +210,9 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
 
     @Override protected final void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
-        writer.println("WifiNetworkScoreCache");
+        String header = String.format("WifiNetworkScoreCache (%s/%d)",
+                mContext.getPackageName(), Process.myUid());
+        writer.println(header);
         writer.println("  All score curves:");
         for (Map.Entry<String, ScoredNetwork> entry : mNetworkCache.entrySet()) {
             ScoredNetwork scoredNetwork = entry.getValue();
