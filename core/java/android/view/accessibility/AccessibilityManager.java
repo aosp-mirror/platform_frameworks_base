@@ -633,6 +633,28 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Report a fingerprint gesture to accessibility. Only available for the system process.
+     *
+     * @param keyCode The key code of the gesture
+     * @return {@code true} if accessibility consumes the event. {@code false} if not.
+     * @hide
+     */
+    public boolean sendFingerprintGesture(int keyCode) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.sendFingerprintGesture(keyCode);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Sets the current state and notifies listeners, if necessary.
      *
      * @param stateFlags The state flags.

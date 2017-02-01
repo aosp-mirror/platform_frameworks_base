@@ -25,6 +25,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -116,34 +117,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int CAPABILITY_CAN_PERFORM_GESTURES = 0x00000020;
 
-    private static final SparseArray<CapabilityInfo> sAvailableCapabilityInfos =
-            new SparseArray<CapabilityInfo>();
-    static {
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT,
-                new CapabilityInfo(CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT,
-                        R.string.capability_title_canRetrieveWindowContent,
-                        R.string.capability_desc_canRetrieveWindowContent));
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION,
-                new CapabilityInfo(CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION,
-                        R.string.capability_title_canRequestTouchExploration,
-                        R.string.capability_desc_canRequestTouchExploration));
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                new CapabilityInfo(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
-                        R.string.capability_title_canRequestEnhancedWebAccessibility,
-                        R.string.capability_desc_canRequestEnhancedWebAccessibility));
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
-                new CapabilityInfo(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
-                        R.string.capability_title_canRequestFilterKeyEvents,
-                        R.string.capability_desc_canRequestFilterKeyEvents));
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
-                new CapabilityInfo(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
-                        R.string.capability_title_canControlMagnification,
-                        R.string.capability_desc_canControlMagnification));
-        sAvailableCapabilityInfos.put(CAPABILITY_CAN_PERFORM_GESTURES,
-                new CapabilityInfo(CAPABILITY_CAN_PERFORM_GESTURES,
-                        R.string.capability_title_canPerformGestures,
-                        R.string.capability_desc_canPerformGestures));
-    }
+    /**
+     * Capability: This accessibility service can capture gestures from the fingerprint sensor
+     * @see android.R.styleable#AccessibilityService_canCaptureFingerprintGestures
+     */
+    public static final int CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES = 0x00000040;
+
+    private static SparseArray<CapabilityInfo> sAvailableCapabilityInfos;
 
     /**
      * Denotes spoken feedback.
@@ -325,6 +305,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      * {@link android.media.AudioManager#STREAM_ACCESSIBILITY} volume.
      */
     public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 0x00000080;
+
+    /**
+     * This flag requests that all fingerprint gestures be sent to the accessibility service.
+     * It is handled in {@link FingerprintGestureController}
+     */
+    public static final int FLAG_CAPTURE_FINGERPRINT_GESTURES = 0x00000200;
 
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
@@ -534,6 +520,10 @@ public class AccessibilityServiceInfo implements Parcelable {
             if (asAttributes.getBoolean(com.android.internal.R.styleable
                     .AccessibilityService_canPerformGestures, false)) {
                 mCapabilities |= CAPABILITY_CAN_PERFORM_GESTURES;
+            }
+            if (asAttributes.getBoolean(com.android.internal.R.styleable
+                    .AccessibilityService_canCaptureFingerprintGestures, false)) {
+                mCapabilities |= CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES;
             }
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
@@ -946,6 +936,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_RETRIEVE_INTERACTIVE_WINDOWS";
             case FLAG_ENABLE_ACCESSIBILITY_VOLUME:
                 return "FLAG_ENABLE_ACCESSIBILITY_VOLUME";
+            case FLAG_CAPTURE_FINGERPRINT_GESTURES:
+                return "FLAG_CAPTURE_FINGERPRINT_GESTURES";
             default:
                 return null;
         }
@@ -973,6 +965,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_CONTROL_MAGNIFICATION";
             case CAPABILITY_CAN_PERFORM_GESTURES:
                 return "CAPABILITY_CAN_PERFORM_GESTURES";
+            case CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES:
+                return "CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES";
             default:
                 return "UNKNOWN";
         }
@@ -981,22 +975,72 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * @hide
      * @return The list of {@link CapabilityInfo} objects.
+     * @deprecated The version that takes a context works better.
      */
     public List<CapabilityInfo> getCapabilityInfos() {
+        return getCapabilityInfos(null);
+    }
+
+    /**
+     * @hide
+     * @param context A valid context
+     * @return The list of {@link CapabilityInfo} objects.
+     */
+    public List<CapabilityInfo> getCapabilityInfos(Context context) {
         if (mCapabilities == 0) {
             return Collections.emptyList();
         }
         int capabilities = mCapabilities;
         List<CapabilityInfo> capabilityInfos = new ArrayList<CapabilityInfo>();
+        SparseArray<CapabilityInfo> capabilityInfoSparseArray =
+                getCapabilityInfoSparseArray(context);
         while (capabilities != 0) {
             final int capabilityBit = 1 << Integer.numberOfTrailingZeros(capabilities);
             capabilities &= ~capabilityBit;
-            CapabilityInfo capabilityInfo = sAvailableCapabilityInfos.get(capabilityBit);
+            CapabilityInfo capabilityInfo = capabilityInfoSparseArray.get(capabilityBit);
             if (capabilityInfo != null) {
                 capabilityInfos.add(capabilityInfo);
             }
         }
         return capabilityInfos;
+    }
+
+    private static SparseArray<CapabilityInfo> getCapabilityInfoSparseArray(Context context) {
+        if (sAvailableCapabilityInfos == null) {
+            sAvailableCapabilityInfos = new SparseArray<CapabilityInfo>();
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT,
+                    new CapabilityInfo(CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT,
+                            R.string.capability_title_canRetrieveWindowContent,
+                            R.string.capability_desc_canRetrieveWindowContent));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION,
+                    new CapabilityInfo(CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION,
+                            R.string.capability_title_canRequestTouchExploration,
+                            R.string.capability_desc_canRequestTouchExploration));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
+                    new CapabilityInfo(CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY,
+                            R.string.capability_title_canRequestEnhancedWebAccessibility,
+                            R.string.capability_desc_canRequestEnhancedWebAccessibility));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
+                    new CapabilityInfo(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
+                            R.string.capability_title_canRequestFilterKeyEvents,
+                            R.string.capability_desc_canRequestFilterKeyEvents));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                    new CapabilityInfo(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                            R.string.capability_title_canControlMagnification,
+                            R.string.capability_desc_canControlMagnification));
+            sAvailableCapabilityInfos.put(CAPABILITY_CAN_PERFORM_GESTURES,
+                    new CapabilityInfo(CAPABILITY_CAN_PERFORM_GESTURES,
+                            R.string.capability_title_canPerformGestures,
+                            R.string.capability_desc_canPerformGestures));
+            if ((context == null)
+                    || context.getSystemService(FingerprintManager.class).isHardwareDetected()) {
+                sAvailableCapabilityInfos.put(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
+                        new CapabilityInfo(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
+                                R.string.capability_title_canCaptureFingerprintGestures,
+                                R.string.capability_desc_canCaptureFingerprintGestures));
+            }
+        }
+        return sAvailableCapabilityInfos;
     }
 
     /**

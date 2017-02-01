@@ -1,5 +1,4 @@
-/* //device/java/android/android/app/INotificationManager.aidl
-**
+/*
 ** Copyright 2009, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,4 +61,7 @@ interface IAccessibilityManager {
 
     // Requires WRITE_SECURE_SETTINGS
     void performAccessibilityShortcut();
+
+    // System process only
+    boolean sendFingerprintGesture(int gestureKeyCode);
 }

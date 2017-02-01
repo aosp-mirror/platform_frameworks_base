@@ -182,6 +182,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/display/IVirtualDisplayCallback.aidl \
 	core/java/android/hardware/fingerprint/IFingerprintService.aidl \
 	core/java/android/hardware/fingerprint/IFingerprintServiceLockoutResetCallback.aidl \
+	core/java/android/hardware/fingerprint/IFingerprintClientActiveCallback.aidl \
 	core/java/android/hardware/fingerprint/IFingerprintServiceReceiver.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlCallback.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlService.aidl \

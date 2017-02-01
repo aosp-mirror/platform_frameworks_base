@@ -63,11 +63,13 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.hardware.fingerprint.IFingerprintService;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
@@ -202,6 +204,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private KeyEventDispatcher mKeyEventDispatcher;
 
     private MotionEventInjector mMotionEventInjector;
+
+    private FingerprintGestureDispatcher mFingerprintGestureDispatcher;
 
     private final Set<ComponentName> mTempComponentNameSet = new HashSet<>();
 
@@ -1374,6 +1378,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_INPUT_FILTER, userState).sendToTarget();
     }
 
+    private void scheduleUpdateFingerprintGestureHandling(UserState userState) {
+        mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_FINGERPRINT, userState).sendToTarget();
+    }
+
     private void updateInputFilter(UserState userState) {
         boolean setInputFilter = false;
         AccessibilityInputFilter inputFilter = null;
@@ -1501,6 +1509,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateDisplayInversionLocked(userState);
         updateMagnificationLocked(userState);
         updateSoftKeyboardShowModeLocked(userState);
+        scheduleUpdateFingerprintGestureHandling(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1919,6 +1928,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private void updateFingerprintGestureHandling(UserState userState) {
+        final List<Service> services;
+        synchronized (mLock) {
+            // Only create the controller when a service wants to use the feature
+            services = userState.mBoundServices;
+            int numServices = services.size();
+            for (int i = 0; i < numServices; i++) {
+                if (services.get(i).isCapturingFingerprintGestures()) {
+                    final long identity = Binder.clearCallingIdentity();
+                    IFingerprintService service = null;
+                    try {
+                        service = IFingerprintService.Stub.asInterface(
+                                ServiceManager.getService(Context.FINGERPRINT_SERVICE));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                    if (service != null) {
+                        mFingerprintGestureDispatcher = new FingerprintGestureDispatcher(
+                                service, mLock);
+                        break;
+                    }
+                }
+            }
+        }
+        if (mFingerprintGestureDispatcher != null) {
+            mFingerprintGestureDispatcher.updateClientList(services);
+        }
+    }
+
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
         IBinder windowToken = mGlobalWindowTokens.get(windowId);
         if (windowToken == null) {
@@ -1999,6 +2037,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (userState.mEnabledServices.remove(componentName)) {
             onUserStateChangedLocked(userState);
         }
+    }
+
+    /**
+     * AIDL-exposed method. System only.
+     * Inform accessibility that a fingerprint gesture was performed
+     *
+     * @param gestureKeyCode The key code corresponding to the fingerprint gesture.
+     * @return {@code true} if accessibility consumes the fingerprint gesture, {@code false} if it
+     * doesn't.
+     */
+    @Override
+    public boolean sendFingerprintGesture(int gestureKeyCode) {
+        synchronized(mLock) {
+            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+                throw new SecurityException("Only SYSTEM can call sendFingerprintGesture");
+            }
+        }
+        if (mFingerprintGestureDispatcher == null) {
+            return false;
+        }
+        return mFingerprintGestureDispatcher.onFingerprintGesture(gestureKeyCode);
     }
 
     private class SettingsStringHelper {
@@ -2131,6 +2190,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_KEY_EVENT_TO_INPUT_FILTER = 8;
         public static final int MSG_CLEAR_ACCESSIBILITY_FOCUS = 9;
         public static final int MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS = 10;
+        public static final int MSG_UPDATE_FINGERPRINT = 11;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2198,6 +2258,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 case MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS: {
                     notifyClientsOfServicesStateChange();
+                } break;
+
+                case MSG_UPDATE_FINGERPRINT: {
+                    updateFingerprintGestureHandling((UserState) msg.obj);
                 } break;
             }
         }
@@ -2329,7 +2393,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * connection for the service.
      */
     class Service extends IAccessibilityServiceConnection.Stub
-            implements ServiceConnection, DeathRecipient, KeyEventDispatcher.KeyEventFilter {;
+            implements ServiceConnection, DeathRecipient, KeyEventDispatcher.KeyEventFilter,
+            FingerprintGestureDispatcher.FingerprintGestureClient {
 
         final int mUserId;
 
@@ -2358,6 +2423,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         boolean mRequestFilterKeyEvents;
 
         boolean mRetrieveInteractiveWindows;
+
+        boolean mCaptureFingerprintGestures;
 
         int mFetchFlags;
 
@@ -2438,6 +2505,47 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         }
 
+        @Override
+        public boolean isCapturingFingerprintGestures() {
+            return (mServiceInterface != null)
+                    && mSecurityPolicy.canCaptureFingerprintGestures(this)
+                    && mCaptureFingerprintGestures;
+        }
+
+        @Override
+        public void onFingerprintGestureDetectionActiveChanged(boolean active) {
+            if (!isCapturingFingerprintGestures()) {
+                return;
+            }
+            IAccessibilityServiceClient serviceInterface;
+            synchronized (mLock) {
+                serviceInterface = mServiceInterface;
+            }
+            if (serviceInterface != null) {
+                try {
+                    mServiceInterface.onFingerprintCapturingGesturesChanged(active);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
+        @Override
+        public void onFingerprintGesture(int gesture) {
+            if (!isCapturingFingerprintGestures()) {
+                return;
+            }
+            IAccessibilityServiceClient serviceInterface;
+            synchronized (mLock) {
+                serviceInterface = mServiceInterface;
+            }
+            if (serviceInterface != null) {
+                try {
+                    mServiceInterface.onFingerprintGesture(gesture);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
         public void setDynamicallyConfigurableProperties(AccessibilityServiceInfo info) {
             mEventTypes = info.eventTypes;
             mFeedbackType = info.feedbackType;
@@ -2471,6 +2579,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
             mRetrieveInteractiveWindows = (info.flags
                     & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
+            mCaptureFingerprintGestures = (info.flags
+                    & AccessibilityServiceInfo.FLAG_CAPTURE_FINGERPRINT_GESTURES) != 0;
         }
 
         /**
@@ -3057,6 +3167,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public boolean isFingerprintGestureDetectionAvailable() {
+            return isCapturingFingerprintGestures()
+                    && (mFingerprintGestureDispatcher != null)
+                    && mFingerprintGestureDispatcher.isFingerprintGestureDetectionAvailable();
         }
 
         @Override
@@ -4232,6 +4349,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean canPerformGestures(Service service) {
             return (service.mAccessibilityServiceInfo.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) != 0;
+        }
+
+        public boolean canCaptureFingerprintGestures(Service service) {
+            return (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES) != 0;
         }
 
         private int resolveProfileParentLocked(int userId) {
