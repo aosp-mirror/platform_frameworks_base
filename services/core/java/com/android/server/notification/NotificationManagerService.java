@@ -854,9 +854,6 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
-                if (mStatusBar != null) {
-                    mStatusBar.notificationLightOff();
-                }
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 // reload per-user settings
@@ -925,15 +922,6 @@ public class NotificationManagerService extends SystemService {
     private SettingsObserver mSettingsObserver;
     private ZenModeHelper mZenModeHelper;
 
-    private final Runnable mBuzzBeepBlinked = new Runnable() {
-        @Override
-        public void run() {
-            if (mStatusBar != null) {
-                mStatusBar.buzzBeepBlinked();
-            }
-        }
-    };
-
     static long[] getLongArray(Resources r, int resid, int maxlen, long[] def) {
         int[] ar = r.getIntArray(resid);
         if (ar == null) {
@@ -963,14 +951,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void setStatusBarManager(StatusBarManagerInternal statusBar) {
-        mStatusBar = statusBar;
-    }
-
-    @VisibleForTesting
     void setLights(Light light) {
         mNotificationLight = light;
         mAttentionLight = light;
+        mNotificationPulseEnabled = true;
     }
 
     @VisibleForTesting
@@ -3468,7 +3452,6 @@ public class NotificationManagerService extends SystemService {
                         .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
                 EventLogTags.writeNotificationAlert(key,
                         buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
-                mHandler.post(mBuzzBeepBlinked);
             }
         }
     }
@@ -4253,9 +4236,6 @@ public class NotificationManagerService extends SystemService {
         // Don't flash while we are in a call or screen is on
         if (ledNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
-            if (mStatusBar != null) {
-                mStatusBar.notificationLightOff();
-            }
         } else {
             final Notification ledno = ledNotification.sbn.getNotification();
             int ledARGB = ledno.ledARGB;
@@ -4271,10 +4251,6 @@ public class NotificationManagerService extends SystemService {
                 // pulse repeatedly
                 mNotificationLight.setFlashing(ledARGB, Light.LIGHT_FLASH_TIMED,
                         ledOnMS, ledOffMS);
-            }
-            if (mStatusBar != null) {
-                // let SystemUI make an independent decision
-                mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
             }
         }
     }
