@@ -2775,7 +2775,12 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         // Slot the activity into the history stack and proceed
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack to task " + task,
                 new RuntimeException("here").fillInStackTrace());
-        r.createWindowContainer();
+        // TODO: Need to investigate if it is okay for the controller to already be created by the
+        // time we get to this point. I think it is, but need to double check.
+        // Use test in b/34179495 to trace the call path.
+        if (r.getWindowContainerController() == null) {
+            r.createWindowContainer();
+        }
         task.setFrontOfTask();
 
         if (!isHomeOrRecentsStack() || numActivities() > 0) {
@@ -2952,8 +2957,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                             + targetTask + " Callers=" + Debug.getCallers(4));
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                             "Pushing next activity " + p + " out to target's task " + target.task);
-                    p.setTask(targetTask, null);
-                    targetTask.addActivityAtBottom(p);
+                    p.reparent(targetTask, 0 /* position - bottom */, "resetTargetTaskIfNeeded");
                 }
 
                 mWindowContainerController.positionChildAtBottom(

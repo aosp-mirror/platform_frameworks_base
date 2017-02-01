@@ -37,6 +37,8 @@ import static android.content.pm.ActivityInfo.FLAG_MULTIPROCESS;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
@@ -773,7 +775,10 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         // Remove the activity from the old task and add it to the new task
         prevTask.removeActivity(this);
-        setTask(newTask, null);
+        // TODO(b/34179495): This should really be set to null in removeActivity() call above,
+        // but really bad things that I can't track down right now happen when I do that.
+        // So, setting it here now and will change later when there is time for investigation.
+        task = null;
         newTask.addActivityAtIndex(position, this);
     }
 
@@ -821,19 +826,8 @@ final class ActivityRecord implements AppWindowContainerListener {
         }
     }
 
-    void setTask(TaskRecord newTask, TaskRecord taskToAffiliateWith) {
-        if (task != null && task.removeActivity(this) && task != newTask
-                && task.getStack() != null) {
-            task.getStack().removeTask(task, "setTask");
-        }
-        task = newTask;
-        setTaskToAffiliateWith(taskToAffiliateWith);
-    }
-
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
-        if (taskToAffiliateWith != null &&
-                launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE &&
-                launchMode != ActivityInfo.LAUNCH_SINGLE_TASK) {
+        if (launchMode != LAUNCH_SINGLE_INSTANCE && launchMode != LAUNCH_SINGLE_TASK) {
             task.setTaskToAffiliateWith(taskToAffiliateWith);
         }
     }

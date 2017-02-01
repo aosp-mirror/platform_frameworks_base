@@ -51,6 +51,7 @@ import android.util.Slog;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
+import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.TaskWindowContainerListener;
 
@@ -1033,6 +1034,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      * be in the current task or unparented to any task.
      */
     void addActivityAtIndex(int index, ActivityRecord r) {
+        if (r.task != null && r.task != this) {
+            throw new IllegalArgumentException("Can not add r=" + " to task=" + this
+                    + " current parent=" + r.task);
+        }
+        r.task = this;
+
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.fullscreen) {
             // Was not previously in list.
@@ -1063,6 +1070,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             }
         }
 
+        index = Math.min(size, index);
         mActivities.add(index, r);
         updateEffectiveIntent();
         if (r.isPersistable()) {
@@ -1071,7 +1079,12 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
         // Sync. with window manager
         updateOverrideConfigurationFromLaunchBounds();
-        mWindowContainerController.positionChildAt(r.getWindowContainerController(), index);
+        final AppWindowContainerController appController = r.getWindowContainerController();
+        if (appController != null) {
+            // Only attempt to move in WM if the child has a controller. It is possible we haven't
+            // created controller for the activity we are starting yet.
+            mWindowContainerController.positionChildAt(appController, index);
+        }
         r.onOverrideConfigurationSent();
     }
 
