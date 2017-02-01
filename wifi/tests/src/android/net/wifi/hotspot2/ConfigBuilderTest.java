@@ -83,27 +83,33 @@ public class ConfigBuilderTest {
         PasspointConfiguration config = new PasspointConfiguration();
 
         // HomeSP configuration.
-        config.homeSp = new HomeSP();
-        config.homeSp.friendlyName = "Century House";
-        config.homeSp.fqdn = "mi6.co.uk";
-        config.homeSp.roamingConsortiumOIs = new long[] {0x112233L, 0x445566L};
+        HomeSP homeSp = new HomeSP();
+        homeSp.setFriendlyName("Century House");
+        homeSp.setFqdn("mi6.co.uk");
+        homeSp.setRoamingConsortiumOIs(new long[] {0x112233L, 0x445566L});
+        config.setHomeSp(homeSp);
 
         // Credential configuration.
-        config.credential = new Credential();
-        config.credential.realm = "shaken.stirred.com";
-        config.credential.userCredential = new Credential.UserCredential();
-        config.credential.userCredential.username = "james";
-        config.credential.userCredential.password = "Ym9uZDAwNw==";
-        config.credential.userCredential.eapType = 21;
-        config.credential.userCredential.nonEapInnerMethod = "MS-CHAP-V2";
-        config.credential.certCredential = new Credential.CertificateCredential();
-        config.credential.certCredential.certType = "x509v3";
-        config.credential.certCredential.certSha256FingerPrint = new byte[32];
-        Arrays.fill(config.credential.certCredential.certSha256FingerPrint, (byte)0x1f);
-        config.credential.simCredential = new Credential.SimCredential();
-        config.credential.simCredential.imsi = "imsi";
-        config.credential.simCredential.eapType = 24;
-        config.credential.caCertificate = FakeKeys.CA_CERT0;
+        Credential credential = new Credential();
+        credential.setRealm("shaken.stirred.com");
+        Credential.UserCredential userCredential = new Credential.UserCredential();
+        userCredential.setUsername("james");
+        userCredential.setPassword("Ym9uZDAwNw==");
+        userCredential.setEapType(21);
+        userCredential.setNonEapInnerMethod("MS-CHAP-V2");
+        credential.setUserCredential(userCredential);
+        Credential.CertificateCredential certCredential = new Credential.CertificateCredential();
+        certCredential.setCertType("x509v3");
+        byte[] certSha256Fingerprint = new byte[32];
+        Arrays.fill(certSha256Fingerprint, (byte)0x1f);
+        certCredential.setCertSha256Fingerprint(certSha256Fingerprint);
+        credential.setCertCredential(certCredential);
+        Credential.SimCredential simCredential = new Credential.SimCredential();
+        simCredential.setImsi("imsi");
+        simCredential.setEapType(24);
+        credential.setSimCredential(simCredential);
+        credential.setCaCertificate(FakeKeys.CA_CERT0);
+        config.setCredential(credential);
         return config;
     }
 
