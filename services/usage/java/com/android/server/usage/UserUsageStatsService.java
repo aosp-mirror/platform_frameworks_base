@@ -231,7 +231,7 @@ class UserUsageStatsService {
      * provided to select the stats to use from the IntervalStats object.
      */
     private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
-            StatCombiner<T> combiner) {
+            int flags, StatCombiner<T> combiner) {
         if (intervalType == UsageStatsManager.INTERVAL_BEST) {
             intervalType = mDatabase.findBestFitBucket(beginTime, endTime);
             if (intervalType < 0) {
@@ -271,7 +271,7 @@ class UserUsageStatsService {
 
         // Get the stats from disk.
         List<T> results = mDatabase.queryUsageStats(intervalType, beginTime,
-                truncatedEndTime, combiner);
+                truncatedEndTime, flags, combiner);
         if (DEBUG) {
             Slog.d(TAG, "Got " + (results != null ? results.size() : 0) + " results from disk");
             Slog.d(TAG, "Current stats beginTime=" + currentStats.beginTime +
@@ -297,17 +297,20 @@ class UserUsageStatsService {
     }
 
     List<UsageStats> queryUsageStats(int bucketType, long beginTime, long endTime) {
-        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime,
+                UsageStatsDatabase.QUERY_FLAG_FETCH_PACKAGES, sUsageStatsCombiner);
     }
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
-        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime,
+                UsageStatsDatabase.QUERY_FLAG_FETCH_CONFIGURATIONS, sConfigStatsCombiner);
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime) {
         final ArraySet<String> names = new ArraySet<>();
         List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
-                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+                beginTime, endTime, UsageStatsDatabase.QUERY_FLAG_FETCH_EVENTS,
+                new StatCombiner<UsageEvents.Event>() {
                     @Override
                     public void combine(IntervalStats stats, boolean mutable,
                             List<UsageEvents.Event> accumulatedResult) {
