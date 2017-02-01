@@ -42,8 +42,8 @@ import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
  * This enables the device to switch to another form of connectivity, like
  * mobile, if it's available and working.
  *
- * The Runnable |cb|, if given, is called on the supplied Handler's thread
- * whether the computed "avoid bad wifi" value changes.
+ * The Runnable |avoidBadWifiCallback|, if given, is posted to the supplied
+ * Handler' whenever the computed "avoid bad wifi" value changes.
  *
  * Disabling this reverts the device to a level of networking sophistication
  * circa 2012-13 by disabling disparate code paths each of which contribute to
@@ -51,28 +51,30 @@ import static android.provider.Settings.Global.NETWORK_AVOID_BAD_WIFI;
  *
  * @hide
  */
-public class AvoidBadWifiTracker {
-    private static String TAG = AvoidBadWifiTracker.class.getSimpleName();
+public class MultinetworkPolicyTracker {
+    private static String TAG = MultinetworkPolicyTracker.class.getSimpleName();
 
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mReevaluateRunnable;
-    private final Uri mUri;
+    private final Uri mAvoidBadWifiUri;
     private final ContentResolver mResolver;
     private final SettingObserver mSettingObserver;
     private final BroadcastReceiver mBroadcastReceiver;
 
     private volatile boolean mAvoidBadWifi = true;
 
-    public AvoidBadWifiTracker(Context ctx, Handler handler) {
+    public MultinetworkPolicyTracker(Context ctx, Handler handler) {
         this(ctx, handler, null);
     }
 
-    public AvoidBadWifiTracker(Context ctx, Handler handler, Runnable cb) {
+    public MultinetworkPolicyTracker(Context ctx, Handler handler, Runnable avoidBadWifiCallback) {
         mContext = ctx;
         mHandler = handler;
-        mReevaluateRunnable = () -> { if (update() && cb != null) cb.run(); };
-        mUri = Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI);
+        mReevaluateRunnable = () -> {
+            if (updateAvoidBadWifi() && avoidBadWifiCallback != null) avoidBadWifiCallback.run();
+        };
+        mAvoidBadWifiUri = Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI);
         mResolver = mContext.getContentResolver();
         mSettingObserver = new SettingObserver();
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -82,11 +84,11 @@ public class AvoidBadWifiTracker {
             }
         };
 
-        update();
+        updateAvoidBadWifi();
     }
 
     public void start() {
-        mResolver.registerContentObserver(mUri, false, mSettingObserver);
+        mResolver.registerContentObserver(mAvoidBadWifiUri, false, mSettingObserver);
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -102,7 +104,7 @@ public class AvoidBadWifiTracker {
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
-    public boolean currentValue() {
+    public boolean getAvoidBadWifi() {
         return mAvoidBadWifi;
     }
 
@@ -117,10 +119,10 @@ public class AvoidBadWifiTracker {
      * Whether we should display a notification when wifi becomes unvalidated.
      */
     public boolean shouldNotifyWifiUnvalidated() {
-        return configRestrictsAvoidBadWifi() && getSettingsValue() == null;
+        return configRestrictsAvoidBadWifi() && getAvoidBadWifiSetting() == null;
     }
 
-    public String getSettingsValue() {
+    public String getAvoidBadWifiSetting() {
         return Settings.Global.getString(mResolver, NETWORK_AVOID_BAD_WIFI);
     }
 
@@ -129,8 +131,8 @@ public class AvoidBadWifiTracker {
         mHandler.post(mReevaluateRunnable);
     }
 
-    public boolean update() {
-        final boolean settingAvoidBadWifi = "1".equals(getSettingsValue());
+    public boolean updateAvoidBadWifi() {
+        final boolean settingAvoidBadWifi = "1".equals(getAvoidBadWifiSetting());
         final boolean prev = mAvoidBadWifi;
         mAvoidBadWifi = settingAvoidBadWifi || !configRestrictsAvoidBadWifi();
         return mAvoidBadWifi != prev;
@@ -148,7 +150,7 @@ public class AvoidBadWifiTracker {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (!mUri.equals(uri)) return;
+            if (!mAvoidBadWifiUri.equals(uri)) return;
             reevaluate();
         }
     }
