@@ -316,6 +316,7 @@ LOCAL_SRC_FILES += \
     tests/unit/StringUtilsTests.cpp \
     tests/unit/TestUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
+    tests/unit/TextureCacheTests.cpp \
     tests/unit/VectorDrawableTests.cpp \
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
