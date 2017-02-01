@@ -33,6 +33,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
@@ -55,6 +56,7 @@ public abstract class PanelView extends FrameLayout {
     private static final int PEEK_ANIMATION_DURATION = 360;
     private long mDownTime;
     private float mMinExpandHeight;
+    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -423,8 +425,8 @@ public abstract class PanelView extends FrameLayout {
                         float displayDensity = mStatusBar.getDisplayDensity();
                         int heightDp = (int) Math.abs((y - mInitialTouchY) / displayDensity);
                         int velocityDp = (int) Math.abs(vel / displayDensity);
-                        EventLogTags.writeSysuiLockscreenGesture(
-                                EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_UP_UNLOCK,
+                        mLockscreenGestureLogger.write(
+                                MetricsEvent.ACTION_LS_UNLOCK,
                                 heightDp, velocityDp);
                     }
             fling(vel, expand, isFalseTouch(x, y));

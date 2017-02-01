@@ -43,6 +43,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v17-leanback
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    metrics-helper-lib \
     android-support-test \
     mockito-updated-target-minus-junit4 \
     SystemUI-proto \

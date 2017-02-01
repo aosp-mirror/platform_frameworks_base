@@ -3275,7 +3275,6 @@ message MetricsEvent {
     // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
     DEFAULT_APP_PICKER_CONFIRMATION_DIALOG = 791;
 
-
     // OPEN: Settings > Apps > Default Apps > Default autofill app
     DEFAULT_AUTOFILL_PICKER = 792;
 
@@ -3352,7 +3351,8 @@ message MetricsEvent {
     BACKUP_SETTINGS = 818;
 
     // ACTION: Picture-in-picture was explicitly entered for an activity
-    // VALUE: true if it was entered while hiding as a result of moving to another task, false otherwise
+    // VALUE: true if it was entered while hiding as a result of moving to
+    // another task, false otherwise
     ACTION_PICTURE_IN_PICTURE_ENTERED = 819;
 
     // ACTION: The activity currently in picture-in-picture was expanded back to fullscreen
@@ -3377,6 +3377,16 @@ message MetricsEvent {
 
     // The current aspect ratio of the PiP, logged when it changes.
     PICTURE_IN_PICTURE_ASPECT_RATIO = 825;
+
+    // FIELD - length in dp of ACTION_LS_* gestures, or zero if not applicable
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    FIELD_GESTURE_LENGTH = 826;
+
+    // FIELD - velocity in dp (per second?) of ACTION_LS_* gestures, or zero if not applicable
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O
+    FIELD_GESTURE_VELOCITY = 827;
 
     // ---- End O Constants, all O constants go above this line ----
 
