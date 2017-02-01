@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Del horisontalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Del vertikalt"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Del tilpasset"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Avvis"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Åpne"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Delt skjerm øverst"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Delt skjerm til venstre"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Delt skjerm til høyre"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Lag lyd og vis i forgrunnen"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere innstillinger"</string>
     <string name="notification_done" msgid="5279426047273930175">"Ferdig"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Varselinnstillinger for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"varselinnstillinger"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"utsettelsesalternativer for varsler"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minutter"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minutter"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 time"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Ikke slumre"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ANGRE"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Slumrer i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteribruk"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparing er ikke tilgjengelig under lading"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparing"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"På"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Av"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigasjonsrad"</string>
-    <string name="start" msgid="6873794757232879664">"Start"</string>
-    <string name="center" msgid="4327473927066010960">"Midtstilt"</string>
-    <string name="end" msgid="125797972524818282">"Slutt"</string>
-    <string name="space" msgid="804232271282109749">"Mellomrom"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Oppsett"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Venstre"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Høyre"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Knappetype"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(standard)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Utklippstavle"</item>
+    <item msgid="5742013440802239414">"Nøkkelkode"</item>
+    <item msgid="8748101184830239843">"Bytteknapp for meny/tastatur"</item>
+    <item msgid="8175437057325747277">"Ingen"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Delt (standardt)"</item>
+    <item msgid="6210279084134579668">"Midtstilt"</item>
+    <item msgid="89143234390889289">"Venstrejustert"</item>
+    <item msgid="7715533883382410603">"Høyrejustert"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Bytteknapp for meny/tastatur"</string>
-    <string name="select_button" msgid="1597989540662710653">"Velg en knapp du vil legge til"</string>
-    <string name="add_button" msgid="4134946063432258161">"Legg til knapp"</string>
     <string name="save" msgid="2311877285724540644">"Lagre"</string>
     <string name="reset" msgid="2448168080964209908">"Tilbakestill"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Fant ingen startsideknapp"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Det kreves en startsideknapp for å kunne navigere på denne enheten. Legg til en startsideknapp før du lagrer."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Juster bredden på knappen"</string>
     <string name="clipboard" msgid="1313879395099896312">"Utklippstavle"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Med Clipboard-funksjonen kan elementer dras direkte til utklippstavlen. Hvis det finnes elementer på utklippstavlen, kan de også dras ut derfra."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Spesialtilpasset navigasjonsknapp"</string>
     <string name="keycode" msgid="7335281375728356499">"Nøkkelkode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Du kan bruke nøkkelkodeknapper for å legge tastaturtaster direkte på navigasjonsraden. Når du trykker på disse knappene, fungerer de på samme måte som de valgte tastaturtastene. Du må først velge hvilken tast hver knapp skal fungere som, og deretter et bilde som vises på knappen."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Velg tastaturtast"</string>
-    <string name="preview" msgid="9077832302472282938">"Forhåndsvisning"</string>
+    <string name="icon" msgid="8732339849035837289">"Ikon"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til fliser"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Dra hit for å fjerne"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Endre"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonen begynner å bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Venstre"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Høyre"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Tilpass snarvei"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Snarvei"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Påminnelse for passord"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Varsler"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skjermdumper"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Sikkerhet"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Brukerstatus"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Lagring"</string>
 </resources>

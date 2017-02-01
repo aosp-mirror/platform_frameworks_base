@@ -341,8 +341,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"פיצול אופקי"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"פיצול אנכי"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"פיצול מותאם אישית"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"סגור"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"פתח"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"פיצול מסך למעלה"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"פיצול מסך לשמאל"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"פיצול מסך לימין"</string>
@@ -532,7 +530,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"השמע צליל והצג במסך"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"הגדרות נוספות"</string>
     <string name="notification_done" msgid="5279426047273930175">"סיום"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> פקדי הודעות"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"בקרת הודעות"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"אפשרויות של דחיית הודעות לטיפול בהמשך"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 דקות"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 דקות"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"שעה אחת"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"אל תדחה לטיפול בהמשך"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"בטל"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"שימוש בסוללה"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"תכונת החיסכון בסוללה אינה זמינה בעת טעינת המכשיר"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"חיסכון בסוללה"</string>
@@ -594,25 +600,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"פועל"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"כבוי"</string>
     <string name="nav_bar" msgid="1993221402773877607">"סרגל ניווט"</string>
-    <string name="start" msgid="6873794757232879664">"התחלה"</string>
-    <string name="center" msgid="4327473927066010960">"מרכז"</string>
-    <string name="end" msgid="125797972524818282">"סיום"</string>
-    <string name="space" msgid="804232271282109749">"רווח"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"פריסה"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"צד שמאל"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"צד ימין"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"סוג לחצן"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(ברירת מחדל)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"לוח"</item>
+    <item msgid="5742013440802239414">"קוד מפתח"</item>
+    <item msgid="8748101184830239843">"מחליף תפריט / מקלדת"</item>
+    <item msgid="8175437057325747277">"ללא"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"מחולק (ברירת מחדל)"</item>
+    <item msgid="6210279084134579668">"ממורכז"</item>
+    <item msgid="89143234390889289">"מיושר לשמאל"</item>
+    <item msgid="7715533883382410603">"מיושר לימין"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"מחליף תפריט / מקלדת"</string>
-    <string name="select_button" msgid="1597989540662710653">"בחירת לחצן להוספה"</string>
-    <string name="add_button" msgid="4134946063432258161">"הוסף לחצן"</string>
     <string name="save" msgid="2311877285724540644">"שמור"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"לחצן הבית לא נמצא"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"לחצן הבית נדרש כדי לנווט במכשיר הזה. הוסף לחצן בית לפני השמירה."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"שינוי של רוחב לחצן"</string>
     <string name="clipboard" msgid="1313879395099896312">"לוח"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"בעזרת האפשרות \'לוח\', ניתן לגרור פריטים ישירות ללוח. ניתן גם לגרור פריטים ישירות מהלוח, כשהוא זמין."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"לחצן לניווט מותאם אישית"</string>
     <string name="keycode" msgid="7335281375728356499">"קוד מפתח"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"לחצנים של קוד מפתח מאפשרים להוסיף מקשי מקלדת לסרגל הניווט. בעת הלחיצה הם מדמים את מקש המקלדת שנבחר. תחילה יש לבחור את המקש ללחצן, ולאחר מכן יש לבחור תמונה שתוצג בלחצן."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"בחירת לחצן מקלדת"</string>
-    <string name="preview" msgid="9077832302472282938">"תצוגה מקדימה"</string>
+    <string name="icon" msgid="8732339849035837289">"סמל"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"גרור כדי להוסיף משבצות"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"גרור לכאן כדי להסיר"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ערוך"</string>
@@ -667,4 +679,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"הטלפון מתחמם"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"צד שמאל"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"צד ימין"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"התאם אישית את קיצור הדרך"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"קיצור דרך"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"בקש סיסמה"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"התראות"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"צילומי מסך"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"אבטחה"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"סטטוס המשתמש"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"אחסון"</string>
 </resources>

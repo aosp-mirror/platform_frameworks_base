@@ -341,8 +341,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divizare pe orizontală"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divizare pe verticală"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divizare personalizată"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Respingeți"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Deschideți"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Divizați ecranul în partea de sus"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Divizați ecranul la stânga"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Divizați ecranul la dreapta"</string>
@@ -532,7 +530,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Se emite un sunet și se evidențiază pe ecran"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Mai multe setări"</string>
     <string name="notification_done" msgid="5279426047273930175">"Terminat"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Opțiuni privind notificările pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"comenzile notificării"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opțiuni de amânare a notificării"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minute"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 de minute"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 oră"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Nu amânați"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ANULAȚI"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Amânată <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilizarea bateriei"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economisirea bateriei"</string>
@@ -594,25 +600,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Activați"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Dezactivați"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Bară de navigare"</string>
-    <string name="start" msgid="6873794757232879664">"La început"</string>
-    <string name="center" msgid="4327473927066010960">"În centru"</string>
-    <string name="end" msgid="125797972524818282">"La final"</string>
-    <string name="space" msgid="804232271282109749">"Buton de spațiu"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Aspect"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Stânga"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Dreapta"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tip de buton"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(prestabilit)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Clipboard"</item>
+    <item msgid="5742013440802239414">"Cod de tastă"</item>
+    <item msgid="8748101184830239843">"Comutator meniu/tastatură"</item>
+    <item msgid="8175437057325747277">"Niciunul"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Împărțită (prestabilit)"</item>
+    <item msgid="6210279084134579668">"Centrată"</item>
+    <item msgid="89143234390889289">"Aliniată la stânga"</item>
+    <item msgid="7715533883382410603">"Aliniată la dreapta"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Comutator meniu/tastatură"</string>
-    <string name="select_button" msgid="1597989540662710653">"Selectați butonul de adăugat"</string>
-    <string name="add_button" msgid="4134946063432258161">"Adăugați un buton"</string>
     <string name="save" msgid="2311877285724540644">"Salvați"</string>
     <string name="reset" msgid="2448168080964209908">"Resetați"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Nu s-a găsit niciun buton Ecran de pornire"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Pentru a naviga pe acest dispozitiv este necesar un buton Ecran de pornire. Adăugați un buton Ecran de pornire înainte să salvați."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Ajustați lățimea butonului"</string>
     <string name="clipboard" msgid="1313879395099896312">"Clipboard"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Folosind butonul Clipboard puteți să trageți elemente direct în clipboard. De asemenea, elementele pot fi trase direct din clipboard atunci când există."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Buton personalizat pentru navigare"</string>
     <string name="keycode" msgid="7335281375728356499">"Cod de tastă"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Folosind butoanele cu coduri de taste puteți să adăugați taste de la tastatură în Bara de navigare. Când le apăsați, acestea simulează tasta selectată de la tastatură. Mai întâi, trebuie să selectați o tastă pentru un buton, apoi o imagine care să apară pe buton."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Selectați butonul de la tastatură"</string>
-    <string name="preview" msgid="9077832302472282938">"Previzualizare"</string>
+    <string name="icon" msgid="8732339849035837289">"Pictogramă"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Trageți pentru a adăuga sectoare"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trageți aici pentru a elimina"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editați"</string>
@@ -667,4 +679,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonul se încălzește"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Anumite funcții sunt limitate în timp ce telefonul se răcește"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonul va încerca automat să se răcească. Puteți folosi telefonul în continuare, dar este posibil să funcționeze mai lent.\n\nDupă ce se răcește, telefonul va funcționa normal."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Stânga"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Dreapta"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Personalizați comanda rapidă"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Comandă rapidă"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Solicitați parola"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerte"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturi de ecran"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Securitate"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Stare utilizator"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Stocare"</string>
 </resources>

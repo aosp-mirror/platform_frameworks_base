@@ -337,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хоризонтално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Вертикално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Персонализирано разделяне"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Отхвърляне"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Отваряне"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Разделяне на екрана нагоре"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Разделяне на екрана наляво"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Разделяне на екрана надясно"</string>
@@ -528,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Възпроизвеждане на звук и показване на изскачащ прозорец на екрана"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Още настройки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Контроли за известията от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"контроли за известията"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"опции за отлагане на известията"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 минути"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 минути"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 час"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Без отлагане"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ОТМЯНА"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Отложено за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ползв. на батерията"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режимът за запазване на батерията не е налице при зареждане"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим за запазване на батерията"</string>
@@ -590,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Вкл."</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Изкл."</string>
     <string name="nav_bar" msgid="1993221402773877607">"Лента за навигация"</string>
-    <string name="start" msgid="6873794757232879664">"Начало"</string>
-    <string name="center" msgid="4327473927066010960">"Център"</string>
-    <string name="end" msgid="125797972524818282">"Край"</string>
-    <string name="space" msgid="804232271282109749">"Разстояние между бутоните"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Оформление"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Вляво"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Вдясно"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Тип бутон"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(по подразбиране)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Буферна памет"</item>
+    <item msgid="5742013440802239414">"Клавишен код"</item>
+    <item msgid="8748101184830239843">"Превключвател на менюто/клавиатурата"</item>
+    <item msgid="8175437057325747277">"Няма"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Разделено (по подразбиране)"</item>
+    <item msgid="6210279084134579668">"Центрирано"</item>
+    <item msgid="89143234390889289">"Подравнено вляво"</item>
+    <item msgid="7715533883382410603">"Подравнено вдясно"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Превкл. на менюто/клавиатурата"</string>
-    <string name="select_button" msgid="1597989540662710653">"Избиране на бутон за добавяне"</string>
-    <string name="add_button" msgid="4134946063432258161">"Добавяне на бутон"</string>
     <string name="save" msgid="2311877285724540644">"Запазване"</string>
     <string name="reset" msgid="2448168080964209908">"Повторно задаване"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Няма намерен бутон „Начало“"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"За да се придвижвате в това устройство, е необходим бутон „Начало“. Моля, добавете такъв, преди да запазите."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Коригиране на ширината на бутона"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буферна памет"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Този бутон ви дава възможност да премествате с плъзгане елементи директно в буферната памет, а също и извън нея."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Персонализиран бутон за навигация"</string>
     <string name="keycode" msgid="7335281375728356499">"Клавишен код"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Бутоните с клавишни кодове ви дават възможност да добавяте клавиши от клавиатурата към лентата за навигация. При докосване на такъв бутон се симулира натискане на съответния клавиш. Първо, трябва да изберете клавиш за бутона, а след това – изображение, което да се показва върху него."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Избиране на клавиш от клавиатурата"</string>
-    <string name="preview" msgid="9077832302472282938">"Визуализация"</string>
+    <string name="icon" msgid="8732339849035837289">"Икона"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Преместете с плъзгане, за да добавите плочки"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Преместете тук с плъзгане за премахване"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редактиране"</string>
@@ -663,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефонът загрява"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Някои функции са ограничени, докато телефонът се охлажда"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонът ви автоматично ще направи опит за охлаждане. Пак можете да го използвате, но той може да работи по-бавно.\n\nСлед като се охлади, ще работи нормално."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Вляво"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Вдясно"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Персонализиране на прекия път"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Пряк път"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Подкана за парола"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Сигнали"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Екранни снимки"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Сигурност"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Състояние на потребителя"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Хранилище"</string>
 </resources>

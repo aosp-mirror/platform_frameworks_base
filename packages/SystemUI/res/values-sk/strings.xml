@@ -343,8 +343,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Rozdeliť vodorovné"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Rozdeliť zvislé"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Rozdeliť vlastné"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"Odmietnuť"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"Otvoriť"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Rozdelená obrazovka hore"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Rozdelená obrazovka naľavo"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Rozdelená obrazovka napravo"</string>
@@ -534,7 +532,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Vydať zvukový signál a vyskočiť na obrazovku"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ďalšie nastavenia"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"Ovládacie prvky pre upozornenia z aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"ovládacie prvky pre upozornenia"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"možnosti stlmenia upozornení"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minút"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minút"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 hod."</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Nestlmiť"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"SPÄŤ"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Stlmené na <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Využitie batérie"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Počas nabíjania nie je Šetrič batérie k dispozícii"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Šetrič batérie"</string>
@@ -596,25 +602,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Zapnuté"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Vypnuté"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigačný panel"</string>
-    <string name="start" msgid="6873794757232879664">"Začiatok"</string>
-    <string name="center" msgid="4327473927066010960">"Stred"</string>
-    <string name="end" msgid="125797972524818282">"Koniec"</string>
-    <string name="space" msgid="804232271282109749">"Medzerník"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Rozloženie"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Doľava"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Doprava"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Typ tlačidla"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(predvolené)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Schránka"</item>
+    <item msgid="5742013440802239414">"Kód klávesnice"</item>
+    <item msgid="8748101184830239843">"Prepínač – ponuka/klávesnica"</item>
+    <item msgid="8175437057325747277">"Žiadne"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Rozdelené (predvolené)"</item>
+    <item msgid="6210279084134579668">"V strede"</item>
+    <item msgid="89143234390889289">"Zarovnané doľava"</item>
+    <item msgid="7715533883382410603">"Zarovnané doprava"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Prepínač – ponuka/klávesnica"</string>
-    <string name="select_button" msgid="1597989540662710653">"Výber tlačidla"</string>
-    <string name="add_button" msgid="4134946063432258161">"Pridať tlačidlo"</string>
     <string name="save" msgid="2311877285724540644">"Uložiť"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Nenašlo sa tlačidlo plochy"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Ak chcete používať navigáciu v tomto zariadení, musíte použiť tlačidlo plochy. Pred uložením pridajte tlačidlo plochy."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Upraviť šírku tlačidla"</string>
     <string name="clipboard" msgid="1313879395099896312">"Schránka"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Schránka umožňuje presunúť položky priamo do schránky. Ak ju máte k dispozícii, môžete ich z nej aj priamo vytiahnuť."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Vlastné tlačidlo navigácie"</string>
     <string name="keycode" msgid="7335281375728356499">"Kód klávesnice"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Tlačidlá kódov klávesnice umožňujú pridanie klávesov na navigačný panel. Po stlačení simulujú funkcie vybraných klávesov. Najprv musíte pre tlačidlo vybrať kláves a následne musí byť na tlačidle obrázok."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Výber tlačidla klávesnice"</string>
-    <string name="preview" msgid="9077832302472282938">"Ukážka"</string>
+    <string name="icon" msgid="8732339849035837289">"Ikona"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dlaždice pridáte presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Presunutím sem odstránite"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Upraviť"</string>
@@ -669,4 +681,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Teplota telefónu stúpa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Niektoré funkcie budú obmedzené, dokým neklesne teplota telefónu"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Váš telefón sa automaticky pokúsi schladiť. Môžete ho naďalej používať, ale môže fungovať pomalšie.\n\nPo poklese teploty bude telefón fungovať ako normálne."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"Vľavo"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Vpravo"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Prispôsobiť skratku"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Skratka"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Požadovať heslo"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovky"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"Zabezpečenie"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"Stav používateľa"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Úložisko"</string>
 </resources>

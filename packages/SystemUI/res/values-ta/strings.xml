@@ -321,12 +321,9 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"பணிப் பயன்முறை"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"இரவு ஒளி"</string>
-    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
-    <skip />
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC முடக்கப்பட்டது"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC இயக்கப்பட்டது"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"சமீபத்திய பணிகள் இல்லை"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"எல்லாவற்றையும் அழித்துவிட்டீர்கள்"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"பயன்பாட்டு தகவல்"</string>
@@ -340,8 +337,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"செங்குத்தாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"தனிவிருப்பத்தில் பிரி"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"நிராகரி"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"திற"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"திரையை மேல்புறமாகப் பிரி"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"திரையை இடப்புறமாகப் பிரி"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"திரையை வலப்புறமாகப் பிரி"</string>
@@ -425,24 +420,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNஐத் துண்டி"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"உங்கள் சாதனத்தை நிர்வகிப்பது: <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"உங்கள் சாதனத்தை நிர்வகிக்க, <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> பயன்பாட்டை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> பயன்படுத்தும்."</string>
-    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
-    <skip />
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"உங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், பயன்பாடுகள், சாதனத்துடன் தொடர்புடைய தரவு, சாதன இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"மேலும் அறிக"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN அமைப்புகளைத் திற"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"உங்கள் நிர்வாகி நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார், இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN இணைப்பை அமைக்க, பயன்பாட்டிற்கு அனுமதி வழங்கியுள்ளீர்கள்.\n\nஇந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட, உங்கள் சாதனத்தையும் நெட்வொர்க் செயல்பாட்டையும் கண்காணிக்க முடியும்."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது.\n\nஉங்கள் நிர்வாகியால் பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்.\n\nஉங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய VPN உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"உங்கள் பணி விவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டது.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"உங்கள் பணி சுயவிவரத்தை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளதால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் பணியிட நெட்வொர்க் செயல்பாட்டை அதனால் கண்காணிக்க முடியும்.\n\nமேலும் <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளதால், உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டையும் அதனால் கண்காணிக்க முடியும்."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
@@ -535,7 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ஒலியெழுப்பி, திரையில் காட்டும்"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_done" msgid="5279426047273930175">"முடிந்தது"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> அறிவிப்புக் கட்டுப்பாடுகள்"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"அறிவிப்புக் கட்டுப்பாடுகள்"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 நிமிடங்கள்"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 நிமிடங்கள்"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 மணிநேரம்"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"உறக்கநிலையில் வைக்காதே"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"செயல்தவிர்"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"பேட்டரி உபயோகம்"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"பேட்டரி சேமிப்பான்"</string>
@@ -597,25 +596,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"இயக்கு"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"முடக்கு"</string>
     <string name="nav_bar" msgid="1993221402773877607">"வழிசெலுத்தல் பட்டி"</string>
-    <string name="start" msgid="6873794757232879664">"தொடங்கு"</string>
-    <string name="center" msgid="4327473927066010960">"மையம்"</string>
-    <string name="end" msgid="125797972524818282">"முடிவு"</string>
-    <string name="space" msgid="804232271282109749">"இடைவெளி"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"தளவமைப்பு"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"இடது"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"வலது"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"பொத்தான் வகை"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(இயல்பு)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"கிளிப்போர்டு"</item>
+    <item msgid="5742013440802239414">"விசைக்குறியீடு"</item>
+    <item msgid="8748101184830239843">"மெனு / விசைப்பலகை மாற்றி"</item>
+    <item msgid="8175437057325747277">"ஏதுமில்லை"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"பிரிக்கப்பட்டது (இயல்பு)"</item>
+    <item msgid="6210279084134579668">"மையப்படுத்தப்பட்டது"</item>
+    <item msgid="89143234390889289">"இடப்புறமாகச் சீரமைக்கப்பட்டது"</item>
+    <item msgid="7715533883382410603">"வலப்புறமாகச் சீரமைக்கப்பட்டது"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"மெனு / விசைப்பலகை மாற்றி"</string>
-    <string name="select_button" msgid="1597989540662710653">"சேர்க்க, பொத்தானை தேர்வுசெய்க"</string>
-    <string name="add_button" msgid="4134946063432258161">"பொத்தானைச் சேர்"</string>
     <string name="save" msgid="2311877285724540644">"சேமி"</string>
     <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"முகப்புப் பொத்தான் இல்லை"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"இந்தச் சாதனத்தில் வழிசெலுத்த, முகப்புப் பொத்தான் தேவை. சேமிக்கும் முன், முகப்புப் பொத்தானைச் சேர்க்கவும்."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"பொத்தானின் அகலத்தை மாற்று"</string>
     <string name="clipboard" msgid="1313879395099896312">"கிளிப்போர்டு"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"கிளிப்ஃபோர்டில் உருப்படிகளை இழுத்து விடுவதற்கு கிளிப்போர்டு அனுமதிக்கும். கிளிப்போர்டில் உள்ள உருப்படிகளை வெளியேயும் இழுத்து விடலாம்."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"தனிப்பயன் வழிசெலுத்தல் பொத்தான்"</string>
     <string name="keycode" msgid="7335281375728356499">"விசைக்குறியீடு"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"விசைக்குறியீட்டுப் பொத்தான்கள் மூலம் விசைப்பலகை விசைகளை வழிசெலுத்தல் பட்டியில் சேர்க்கலாம். அழுத்தும் போது, தேர்ந்தெடுத்த விசைப்பலகை விசையாக அது செயல்படும். பொத்தானுக்கான விசையை முதலில் தேர்ந்தெடுக்க வேண்டும், பிறகு பொத்தானில் காட்ட வேண்டிய படத்தைத் தேர்வுசெய்யவும்."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"விசைப்பலகைப் பொத்தானைத் தேர்ந்தெடுக்கவும்"</string>
-    <string name="preview" msgid="9077832302472282938">"மாதிரிக்காட்சி"</string>
+    <string name="icon" msgid="8732339849035837289">"ஐகான்"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"கட்டங்களைச் சேர்க்க, இழுக்கவும்"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"அகற்ற, இங்கே இழுக்கவும்"</string>
     <string name="qs_edit" msgid="2232596095725105230">"மாற்று"</string>
@@ -670,4 +675,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"இடது"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"வலது"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"குறுக்குவழியைத் தனிப்பயனாக்கு"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"குறுக்குவழி"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"கடவுச்சொல்லைக் கேள்"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"ஸ்கிரீன் ஷாட்டுகள்"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"பாதுகாப்பு"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"பயனர் நிலை"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"சேமிப்பிடம்"</string>
 </resources>

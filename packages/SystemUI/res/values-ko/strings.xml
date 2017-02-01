@@ -323,12 +323,9 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 경고"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"작업 모드"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"야간 조명"</string>
-    <!-- no translation found for quick_settings_nfc_label (9012153754816969325) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_off (6883274004315134333) -->
-    <skip />
-    <!-- no translation found for quick_settings_nfc_on (6680317193676884311) -->
-    <skip />
+    <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
+    <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 사용 중지됨"</string>
+    <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 사용 설정됨"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"최근 항목이 없습니다."</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"모든 항목을 삭제했습니다."</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>
@@ -342,8 +339,6 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
-    <string name="recents_accessibility_dismissed" msgid="2354459747918667050">"닫기"</string>
-    <string name="recents_accessibility_open" msgid="1651449827614876864">"열기"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"위쪽으로 화면 분할"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"왼쪽으로 화면 분할"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"오른쪽으로 화면 분할"</string>
@@ -427,24 +422,20 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN 연결 해제"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>에서 관리하는 기기입니다."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>이(가) <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>을(를) 사용하여 내 기기를 관리합니다."</string>
-    <!-- no translation found for monitoring_description_do_body (3639594537660975895) -->
-    <skip />
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"관리자는 설정, 기업 액세스, 앱, 기기에 연결된 데이터 및 기기의 위치 정보를 모니터링하고 관리할 수 있습니다."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"자세히 알아보기"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"공개 VPN 설정"</string>
-    <!-- no translation found for monitoring_description_network_logging (7223505523384076027) -->
-    <skip />
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"관리자가 기기에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN 연결을 설정할 수 있는 권한을 앱에 부여했습니다.\n\n이 앱에서 이메일, 앱, 웹사이트와 같은 내 네트워크 활동 및 기기를 모니터링할 수 있습니다."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2958019119161161530) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 직장 프로필을 관리합니다.\n\n관리자가 이메일, 앱, 웹사이트를 비롯한 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 정보는 관리자에게 문의하세요.\n\n또한 VPN에 연결되어 있으며, VPN에서 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
-    <!-- no translation found for monitoring_description_app_work (7777228449969022305) -->
-    <skip />
+    <string name="monitoring_description_app_work" msgid="7777228449969022305">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 직장 프로필을 관리합니다. 직장 프로필은 <xliff:g id="APPLICATION">%2$s</xliff:g>에 연결되며, 이 애플리케이션에서 이메일, 앱, 웹사이트를 비롯한 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다. 이는 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>에 연결되어 있으며 여기에서 이메일, 앱, 웹사이트와 같은 직장 네트워크 활동을 모니터링할 수 있습니다.\n\n또한 <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>에 연결되어 있으며, 여기에서 내 개인 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
@@ -537,7 +528,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"소리 및 화면 표시로 알림"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 관리"</string>
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"알림 관리"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"알림 일시 중지 옵션"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15분"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30분"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1시간"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"일시 중지 사용 안함"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"실행취소"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> 동안 일시 중지됨"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
@@ -599,25 +598,31 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"사용"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"사용 안함"</string>
     <string name="nav_bar" msgid="1993221402773877607">"탐색 메뉴"</string>
-    <string name="start" msgid="6873794757232879664">"시작"</string>
-    <string name="center" msgid="4327473927066010960">"중앙"</string>
-    <string name="end" msgid="125797972524818282">"끝"</string>
-    <string name="space" msgid="804232271282109749">"공백"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"레이아웃"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"왼쪽"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"오른쪽"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"버튼 유형"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(기본)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"클립보드"</item>
+    <item msgid="5742013440802239414">"키 코드"</item>
+    <item msgid="8748101184830239843">"메뉴/키보드 전환 도구"</item>
+    <item msgid="8175437057325747277">"없음"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"분할(기본)"</item>
+    <item msgid="6210279084134579668">"가운데 맞춤"</item>
+    <item msgid="89143234390889289">"왼쪽 정렬됨"</item>
+    <item msgid="7715533883382410603">"오른쪽 정렬됨"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"메뉴/키보드 전환 도구"</string>
-    <string name="select_button" msgid="1597989540662710653">"추가할 버튼 선택"</string>
-    <string name="add_button" msgid="4134946063432258161">"버튼 추가"</string>
     <string name="save" msgid="2311877285724540644">"저장"</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"홈 버튼을 찾지 못함"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"이 기기를 탐색하려면 홈 버튼을 사용해야 합니다. 홈 버튼을 추가한 다음 저장하세요."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"버튼 너비 조정"</string>
     <string name="clipboard" msgid="1313879395099896312">"클립보드"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"클립보드를 사용하면 항목을 클립보드로 바로 드래그할 수 있습니다. 또한 발표 시 항목을 클립보드 밖으로 바로 드래그할 수도 있습니다."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"맞춤 탐색 버튼"</string>
     <string name="keycode" msgid="7335281375728356499">"키 코드"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"키 코드 버튼을 사용하면 키보드 키를 탐색 메뉴에 추가할 수 있습니다. 키 코드 버튼을 누르면 선택된 키보드 키가 에뮬레이션됩니다. 먼저 버튼에 대해 키를 선택하고 그다음 버튼에 표시될 이미지를 선택해야 합니다."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"키보드 버튼 선택"</string>
-    <string name="preview" msgid="9077832302472282938">"미리보기"</string>
+    <string name="icon" msgid="8732339849035837289">"아이콘"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"삭제하려면 여기를 드래그"</string>
     <string name="qs_edit" msgid="2232596095725105230">"수정"</string>
@@ -672,4 +677,14 @@
     <string name="high_temp_title" msgid="4589508026407318374">"휴대전화 온도가 높음"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"휴대전화 온도를 낮추는 동안 일부 기능이 제한됩니다."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"휴대전화 온도를 자동으로 낮추려고 시도합니다. 휴대전화를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n휴대전화 온도가 낮아지면 정상적으로 작동됩니다."</string>
+    <string name="lockscreen_left" msgid="6806490081187499505">"왼쪽"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"오른쪽"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"바로가기 맞춤설정"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"바로가기"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"비밀번호 요청"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
+    <string name="notification_channel_security" msgid="7345516133431326347">"보안"</string>
+    <string name="notification_channel_user_status" msgid="1436913581465146650">"사용자 상태"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"저장소"</string>
 </resources>

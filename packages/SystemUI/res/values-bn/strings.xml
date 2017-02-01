@@ -337,16 +337,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উল্লম্ব স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"কাস্টম স্প্লিট করুন"</string>
-    <!-- no translation found for recents_accessibility_dismissed (2354459747918667050) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_open (1651449827614876864) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_top (9056056469282256287) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_left (8987144699630620019) -->
-    <skip />
-    <!-- no translation found for recents_accessibility_split_screen_right (275069779299592867) -->
-    <skip />
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"স্ক্রিনটি উপরের দিকে বিভক্ত করুন"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"স্ক্রিনটি বাঁদিকে বিভক্ত করুন"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"স্ক্রিনটি ডানদিকে বিভক্ত করুন"</string>
   <string-array name="recents_blacklist_array">
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"চার্জ হয়েছে"</string>
@@ -533,7 +526,24 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"শব্দ করে ও স্ক্রীনে ভেসে ওঠে"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
-    <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> বিজ্ঞপ্তির নিয়ন্ত্রণগুলি"</string>
+    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
+    <skip />
+    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
+    <skip />
+    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
+    <skip />
+    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
+    <skip />
+    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
+    <skip />
+    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
+    <skip />
+    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
+    <skip />
+    <!-- no translation found for snooze_undo (6074877317002985129) -->
+    <skip />
+    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
+    <skip />
     <string name="battery_panel_title" msgid="7944156115535366613">"ব্যাটারির ব্যবহার"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"চার্জ করার সময় ব্যাটারি সেভার উপলব্ধ নয়"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ব্যাটারি সেভার"</string>
@@ -595,25 +605,33 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"চালু আছে"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"বন্ধ আছে"</string>
     <string name="nav_bar" msgid="1993221402773877607">"নেভিগেশন দন্ড"</string>
-    <string name="start" msgid="6873794757232879664">"শুরু করুন"</string>
-    <string name="center" msgid="4327473927066010960">"কেন্দ্র"</string>
-    <string name="end" msgid="125797972524818282">"শেষ"</string>
-    <string name="space" msgid="804232271282109749">"স্পেসার"</string>
+    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
+    <skip />
+    <!-- no translation found for nav_bar_left (731491280511316123) -->
+    <skip />
+    <!-- no translation found for nav_bar_right (2523774879720231974) -->
+    <skip />
+    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
+    <skip />
+    <!-- no translation found for nav_bar_default (8587114043070993007) -->
+    <skip />
+    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
+    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
+    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
+    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
+    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
+    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
+    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
+    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
     <string name="menu_ime" msgid="4943221416525250684">"মেনু / কীবোর্ড স্যুইচার"</string>
-    <string name="select_button" msgid="1597989540662710653">"যোগ করার জন্য বোতাম নির্বাচন করুন"</string>
-    <string name="add_button" msgid="4134946063432258161">"বোতাম যোগ করুন"</string>
     <string name="save" msgid="2311877285724540644">"সংরক্ষণ করুন"</string>
     <string name="reset" msgid="2448168080964209908">"পুনরায় সেট করুন"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"কোনো হোম বোতাম পাওয়া যায় নি"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"এই ডিভাইসটিকে নেভিগেট করার জন্য একটি হোম বোতামের প্রয়োজন। সংরক্ষণ করার আগে অনুগ্রহ করে একটি হোম বোতাম যোগ করুন।"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"বোতামের প্রস্থ সমন্বয় করুন"</string>
     <string name="clipboard" msgid="1313879395099896312">"ক্লিপবোর্ড"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"ক্লিপবোর্ড আইটেমগুলিকে সরাসরি ক্লিপবোর্ডে টেনে আনার অনুমতি দেয়। ক্লিপবোর্ডের বাইরে হাজির থাকার সময়েও আইটেমগুলিকে সরাসরি টেনে আনা যায়।"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"কাস্টম নেভিগেশান বোতাম"</string>
     <string name="keycode" msgid="7335281375728356499">"কীকোড"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"কীকোড বোতামগুলি নেভিগেশান দন্ডে কীবোর্ডের কীগুলি যোগ করার অনুমতি দেয়। চাপ দেওয়ার সময়ে সেগুলি নির্বাচিত কীবোর্ডের কী কে অনুকরণ করে। বোতামে দেখানো হয়েছে এমন একটি চিত্রকে অনুসরণ করে অবশ্যই প্রথমে বোতামের জন্য কী নির্বাচন করতে হবে।"</string>
-    <string name="select_keycode" msgid="7413765103381924584">"কীবোর্ডের বোতাম নির্বাচন করুন"</string>
-    <string name="preview" msgid="9077832302472282938">"পূর্বরূপ দেখুন"</string>
+    <!-- no translation found for icon (8732339849035837289) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"টাইলগুলি যোগ করার জন্য টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>
@@ -668,4 +686,24 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ফোনটি গরম হচ্ছে"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ফোনটি ঠান্ডা হওয়ার সময় কিছু বৈশিষ্ট্য সীমিত হতে পারে"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"আপনার ফোনটি নিজে থেকেই ঠান্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠান্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
+    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <skip />
+    <!-- no translation found for lockscreen_right (6093496261656102989) -->
+    <skip />
+    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
+    <skip />
+    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
+    <skip />
+    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
+    <skip />
+    <!-- no translation found for notification_channel_security (7345516133431326347) -->
+    <skip />
+    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
+    <skip />
+    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
+    <skip />
 </resources>
