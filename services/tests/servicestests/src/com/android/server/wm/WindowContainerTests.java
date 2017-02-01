@@ -388,32 +388,6 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_childSpecified() throws Exception {
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
-            SCREEN_ORIENTATION_LANDSCAPE);
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-            SCREEN_ORIENTATION_UNSET);
-    }
-
-    private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
-        int expectedOrientation) {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
-        final TestWindowContainer root = builder.setLayer(0).build();
-        root.setFillsParent(true);
-
-        builder.setIsVisible(childVisible);
-
-        if (childOrientation != SCREEN_ORIENTATION_UNSET) {
-            builder.setOrientation(childOrientation);
-        }
-
-        final TestWindowContainer child1 = root.addChildWindow(builder);
-        child1.setFillsParent(true);
-
-        assertTrue(root.getOrientation() == expectedOrientation);
-    }
-
-    @Test
     public void testGetOrientation_Unset() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
@@ -433,17 +407,18 @@ public class WindowContainerTests extends WindowTestsBase {
         invisibleChild1VisibleAndSet.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         // Landscape well because the container is visible and that is what we set on it above.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, invisibleChild1VisibleAndSet.getOrientation());
-        // Landscape because even though the container isn't visible it has a child that is
-        // specifying it can influence the orientation by being visible.
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, invisible.getOrientation());
-        // Landscape because the grandchild is visible and therefore can participate.
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
+        // Unset because the container isn't visible even though it has a child that thinks it is
+        // visible.
+        assertEquals(SCREEN_ORIENTATION_UNSET, invisible.getOrientation());
+        // Unspecified because we are visible and we didn't specify an orientation and there isn't
+        // a visible child.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
 
         builder.setIsVisible(true).setLayer(-3);
         final TestWindowContainer visibleUnset = root.addChildWindow(builder);
         visibleUnset.setOrientation(SCREEN_ORIENTATION_UNSET);
         assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnset.getOrientation());
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
 
     }
 
@@ -715,7 +690,6 @@ public class WindowContainerTests extends WindowTestsBase {
         private boolean mIsAnimating;
         private boolean mIsVisible;
         private boolean mFillsParent;
-        private Integer mOrientation;
 
         private boolean mOnParentSetCalled;
 
@@ -734,13 +708,11 @@ public class WindowContainerTests extends WindowTestsBase {
             return 1;
         };
 
-        TestWindowContainer(int layer, boolean isAnimating, boolean isVisible,
-            Integer orientation) {
+        TestWindowContainer(int layer, boolean isAnimating, boolean isVisible) {
             mLayer = layer;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;
             mFillsParent = true;
-            mOrientation = orientation;
         }
 
         TestWindowContainer getParentWindow() {
@@ -786,11 +758,6 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
-        int getOrientation() {
-            return mOrientation != null ? mOrientation : super.getOrientation();
-        }
-
-        @Override
         boolean fillsParent() {
             return mFillsParent;
         }
@@ -804,7 +771,6 @@ public class WindowContainerTests extends WindowTestsBase {
         private int mLayer;
         private boolean mIsAnimating;
         private boolean mIsVisible;
-        private Integer mOrientation;
 
         public TestWindowContainerBuilder() {
             reset();
@@ -825,21 +791,15 @@ public class WindowContainerTests extends WindowTestsBase {
             return this;
         }
 
-        TestWindowContainerBuilder setOrientation(int orientation) {
-            mOrientation = orientation;
-            return this;
-        }
-
         TestWindowContainerBuilder reset() {
             mLayer = 0;
             mIsAnimating = false;
             mIsVisible = false;
-            mOrientation = null;
             return this;
         }
 
         TestWindowContainer build() {
-            return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible, mOrientation);
+            return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible);
         }
     }
 }
