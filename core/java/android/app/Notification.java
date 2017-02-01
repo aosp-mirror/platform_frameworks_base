@@ -338,7 +338,9 @@ public class Notification implements Parcelable
      * <p>
      * To play the default notification sound, see {@link #defaults}.
      * </p>
+     * @deprecated use {@link NotificationChannel#getSound()}.
      */
+    @Deprecated
     public Uri sound;
 
     /**
@@ -346,7 +348,7 @@ public class Notification implements Parcelable
      * the default stream type for notifications be used.  Currently the
      * default stream type is {@link AudioManager#STREAM_NOTIFICATION}.
      *
-     * @deprecated Use {@link #audioAttributes} instead.
+     * @deprecated Use {@link NotificationChannel#getAudioAttributes()} instead.
      */
     @Deprecated
     public static final int STREAM_DEFAULT = -1;
@@ -371,7 +373,10 @@ public class Notification implements Parcelable
 
     /**
      * The {@link AudioAttributes audio attributes} to use when playing the sound.
+     *
+     * @deprecated use {@link NotificationChannel#getAudioAttributes()} instead.
      */
+    @Deprecated
     public AudioAttributes audioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
 
     /**
@@ -381,12 +386,10 @@ public class Notification implements Parcelable
      * To vibrate the default pattern, see {@link #defaults}.
      * </p>
      *
-     * <p>
-     * A notification that vibrates is more likely to be presented as a heads-up notification.
-     * </p>
-     *
      * @see android.os.Vibrator#vibrate(long[],int)
+     * @deprecated use {@link NotificationChannel#getVibrationPattern()}.
      */
+    @Deprecated
     public long[] vibrate;
 
     /**
@@ -394,8 +397,10 @@ public class Notification implements Parcelable
      *
      * @see #FLAG_SHOW_LIGHTS
      * @see #flags
+     * @deprecated use {@link NotificationChannel#shouldShowLights()}.
      */
     @ColorInt
+    @Deprecated
     public int ledARGB;
 
     /**
@@ -404,7 +409,9 @@ public class Notification implements Parcelable
      *
      * @see #FLAG_SHOW_LIGHTS
      * @see #flags
+     * @deprecated use {@link NotificationChannel#shouldShowLights()}.
      */
+    @Deprecated
     public int ledOnMS;
 
     /**
@@ -413,7 +420,10 @@ public class Notification implements Parcelable
      *
      * @see #FLAG_SHOW_LIGHTS
      * @see #flags
+     *
+     * @deprecated use {@link NotificationChannel#shouldShowLights()}.
      */
+    @Deprecated
     public int ledOffMS;
 
     /**
@@ -423,7 +433,12 @@ public class Notification implements Parcelable
      * {@link #DEFAULT_VIBRATE}, {@link #DEFAULT_LIGHTS}. For all default
      * values, use {@link #DEFAULT_ALL}.
      * </p>
+     *
+     * @deprecated use {@link NotificationChannel#getSound()} and
+     * {@link NotificationChannel#shouldShowLights()} and
+     * {@link NotificationChannel#shouldVibrate()}.
      */
+    @Deprecated
     public int defaults;
 
     /**
@@ -443,7 +458,9 @@ public class Notification implements Parcelable
      * <p>
      * The alpha channel must be set for forward compatibility.
      *
+     * @deprecated use {@link NotificationChannel#shouldShowLights()}.
      */
+    @Deprecated
     public static final int FLAG_SHOW_LIGHTS        = 0x00000001;
 
     /**
@@ -532,33 +549,48 @@ public class Notification implements Parcelable
     /**
      * Default notification {@link #priority}. If your application does not prioritize its own
      * notifications, use this value for all notifications.
+     *
+     * @deprecated use {@link NotificationManager#IMPORTANCE_DEFAULT} instead.
      */
+    @Deprecated
     public static final int PRIORITY_DEFAULT = 0;
 
     /**
      * Lower {@link #priority}, for items that are less important. The UI may choose to show these
      * items smaller, or at a different position in the list, compared with your app's
      * {@link #PRIORITY_DEFAULT} items.
+     *
+     * @deprecated use {@link NotificationManager#IMPORTANCE_LOW} instead.
      */
+    @Deprecated
     public static final int PRIORITY_LOW = -1;
 
     /**
      * Lowest {@link #priority}; these items might not be shown to the user except under special
      * circumstances, such as detailed notification logs.
+     *
+     * @deprecated use {@link NotificationManager#IMPORTANCE_MIN} instead.
      */
+    @Deprecated
     public static final int PRIORITY_MIN = -2;
 
     /**
      * Higher {@link #priority}, for more important notifications or alerts. The UI may choose to
      * show these items larger, or at a different position in notification lists, compared with
      * your app's {@link #PRIORITY_DEFAULT} items.
+     *
+     * @deprecated use {@link NotificationManager#IMPORTANCE_HIGH} instead.
      */
+    @Deprecated
     public static final int PRIORITY_HIGH = 1;
 
     /**
      * Highest {@link #priority}, for your application's most important items that require the
      * user's prompt attention or input.
+     *
+     * @deprecated use {@link NotificationManager#IMPORTANCE_HIGH} instead.
      */
+    @Deprecated
     public static final int PRIORITY_MAX = 2;
 
     /**
@@ -575,8 +607,10 @@ public class Notification implements Parcelable
      * as a heads-up notification.
      * </p>
      *
+     * @deprecated use {@link NotificationChannel#getImportance()} instead.
      */
     @Priority
+    @Deprecated
     public int priority;
 
     /**
@@ -2956,8 +2990,9 @@ public class Notification implements Parcelable
          * It will be played using the {@link #AUDIO_ATTRIBUTES_DEFAULT default audio attributes}
          * for notifications.
          *
-         * @see Notification#sound
+         * @deprecated use {@link NotificationChannel#setSound(Uri, AudioAttributes)} instead.
          */
+        @Deprecated
         public Builder setSound(Uri sound) {
             mN.sound = sound;
             mN.audioAttributes = AUDIO_ATTRIBUTES_DEFAULT;
@@ -2969,8 +3004,7 @@ public class Notification implements Parcelable
          *
          * See {@link android.media.AudioManager} for the <code>STREAM_</code> constants.
          *
-         * @deprecated use {@link #setSound(Uri, AudioAttributes)} instead.
-         * @see Notification#sound
+         * @deprecated use {@link NotificationChannel#setSound(Uri, AudioAttributes)}.
          */
         @Deprecated
         public Builder setSound(Uri sound, int streamType) {
@@ -2984,8 +3018,10 @@ public class Notification implements Parcelable
          * Set the sound to play, along with specific {@link AudioAttributes audio attributes} to
          * use during playback.
          *
+         * @deprecated use {@link NotificationChannel#setSound(Uri, AudioAttributes)} instead.
          * @see Notification#sound
          */
+        @Deprecated
         public Builder setSound(Uri sound, AudioAttributes audioAttributes) {
             mN.sound = sound;
             mN.audioAttributes = audioAttributes;
@@ -3002,8 +3038,10 @@ public class Notification implements Parcelable
          * A notification that vibrates is more likely to be presented as a heads-up notification.
          * </p>
          *
+         * @deprecated use {@link NotificationChannel#setVibrationPattern(long[])} instead.
          * @see Notification#vibrate
          */
+        @Deprecated
         public Builder setVibrate(long[] pattern) {
             mN.vibrate = pattern;
             return this;
@@ -3016,11 +3054,12 @@ public class Notification implements Parcelable
 
          * Not all devices will honor all (or even any) of these values.
          *
-
+         * @deprecated use {@link NotificationChannel#setLights(boolean)} instead.
          * @see Notification#ledARGB
          * @see Notification#ledOnMS
          * @see Notification#ledOffMS
          */
+        @Deprecated
         public Builder setLights(@ColorInt int argb, int onMs, int offMs) {
             mN.ledARGB = argb;
             mN.ledOnMS = onMs;
@@ -3108,7 +3147,12 @@ public class Notification implements Parcelable
          * {@link #DEFAULT_SOUND}, {@link #DEFAULT_VIBRATE}, {@link #DEFAULT_LIGHTS}.
          * <p>
          * For all default values, use {@link #DEFAULT_ALL}.
+         *
+         * @deprecated use {@link NotificationChannel#enableVibration(boolean)} and
+         * {@link NotificationChannel#setLights(boolean)} and
+         * {@link NotificationChannel#setSound(Uri, AudioAttributes)} instead.
          */
+        @Deprecated
         public Builder setDefaults(int defaults) {
             mN.defaults = defaults;
             return this;
@@ -3118,7 +3162,9 @@ public class Notification implements Parcelable
          * Set the priority of this notification.
          *
          * @see Notification#priority
+         * @deprecated use {@link NotificationChannel#setImportance(int)} instead.
          */
+        @Deprecated
         public Builder setPriority(@Priority int pri) {
             mN.priority = pri;
             return this;
