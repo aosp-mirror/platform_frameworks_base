@@ -767,7 +767,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         // We'll have the FragmentManager check that for validity when we move
         // the fragments to a valid state.
         final FragmentManager mine = getFragmentManager();
-        final FragmentManager theirs = fragment.getFragmentManager();
+        final FragmentManager theirs = fragment != null ? fragment.getFragmentManager() : null;
         if (mine != null && theirs != null && mine != theirs) {
             throw new IllegalArgumentException("Fragment " + fragment
                     + " must share the same FragmentManager to be set as a target fragment");
