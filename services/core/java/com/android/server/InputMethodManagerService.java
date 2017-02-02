@@ -932,7 +932,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         final InputMethodInfo defIm = suitableImes.get(0);
-        Slog.i(TAG, "Default found, using " + defIm.getId());
+        if (DEBUG) {
+            Slog.i(TAG, "Default found, using " + defIm.getId());
+        }
         setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
     }
 
@@ -1123,6 +1125,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return true;
         }
+        // TODO(b/34886274): The semantics of this verification is actually not well-defined.
         Slog.w(TAG, "--- IPC called from background users. Ignore. callers="
                 + Debug.getCallers(10));
         return false;
@@ -1134,8 +1137,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param token The window token given to the input method when it was started.
      * @return true if and only if non-null valid token is specified.
      */
-    private boolean calledWithValidToken(IBinder token) {
-        if (token == null || mCurToken != token) {
+    private boolean calledWithValidToken(@Nullable IBinder token) {
+        if (token == null && Binder.getCallingPid() == Process.myPid()) {
+            if (DEBUG) {
+                // TODO(b/34851776): Basically it's the caller's fault if we reach here.
+                Slog.d(TAG, "Bug 34851776 is detected callers=" + Debug.getCallers(10));
+            }
+            return false;
+        }
+        if (token == null || token != mCurToken) {
+            // TODO(b/34886274): The semantics of this verification is actually not well-defined.
+            Slog.e(TAG, "Ignoring " + Debug.getCaller() + " due to an invalid token."
+                    + " uid:" + Binder.getCallingUid() + " token:" + token);
             return false;
         }
         return true;
@@ -1338,8 +1351,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // because if the focus changes some time before or after, the
                 // next client receiving focus that has any interest in input will
                 // be calling through here after that change happens.
-                Slog.w(TAG, "Starting input on non-focused client " + cs.client
-                        + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                if (DEBUG) {
+                    Slog.w(TAG, "Starting input on non-focused client " + cs.client
+                            + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                }
                 return null;
             }
         } catch (RemoteException e) {
@@ -1457,7 +1472,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurId = info.getId();
             mCurToken = new Binder();
             try {
-                if (true || DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
+                if (DEBUG) Slog.v(TAG, "Adding window token: " + mCurToken);
                 mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
@@ -1662,9 +1677,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void updateStatusIcon(IBinder token, String packageName, int iconId) {
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring updateStatusIcon due to an invalid token. uid:" + uid
-                        + " token:" + token);
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
@@ -1767,9 +1779,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         if (!calledWithValidToken(token)) {
-            final int uid = Binder.getCallingUid();
-            Slog.e(TAG, "Ignoring setImeWindowStatus due to an invalid token. uid:" + uid
-                    + " token:" + token);
             return;
         }
 
@@ -1789,9 +1798,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // Caution! This method is called in this class. Handle multi-user carefully
     private void updateSystemUiLocked(IBinder token, int vis, int backDisposition) {
         if (!calledWithValidToken(token)) {
-            final int uid = Binder.getCallingUid();
-            Slog.e(TAG, "Ignoring updateSystemUiLocked due to an invalid token. uid:" + uid
-                    + " token:" + token);
             return;
         }
 
@@ -2259,8 +2265,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // because if the focus changes some time before or after, the
                         // next client receiving focus that has any interest in input will
                         // be calling through here after that change happens.
-                        Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                                + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                        if (DEBUG) {
+                            Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                                    + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                        }
                         return null;
                     }
                 } catch (RemoteException e) {
@@ -2275,8 +2283,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (mCurFocusedWindow == windowToken) {
-                    Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
-                            + " attribute=" + attribute + ", token = " + windowToken);
+                    if (DEBUG) {
+                        Slog.w(TAG, "Window already focused, ignoring focus gain of: " + client
+                                + " attribute=" + attribute + ", token = " + windowToken);
+                    }
                     if (attribute != null) {
                         return startInputUncheckedLocked(cs, inputContext, missingMethods,
                                 attribute, controlFlags);
@@ -2519,9 +2529,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring switchToNextInputMethod due to an invalid token. uid:" + uid
-                        + " token:" + token);
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
@@ -2543,9 +2550,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring shouldOfferSwitchingToNextInputMethod due to an invalid "
-                        + "token. uid:" + uid + " token:" + token);
                 return false;
             }
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
@@ -2636,9 +2640,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring clearLastInputMethodWindowForTransition due to an "
-                        + "invalid token. uid:" + uid + " token:" + token);
                 return;
             }
         }
@@ -2702,9 +2703,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring hideInputMethod due to an invalid token. uid:"
-                        + uid + " token:" + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -2723,9 +2721,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         synchronized (mMethodMap) {
             if (!calledWithValidToken(token)) {
-                final int uid = Binder.getCallingUid();
-                Slog.e(TAG, "Ignoring showMySoftInput due to an invalid token. uid:"
-                        + uid + " token:" + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -3076,7 +3071,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             if (!enabledImeFound) {
-                Slog.i(TAG, "All the enabled IMEs are gone. Reset default enabled IMEs.");
+                if (DEBUG) {
+                    Slog.i(TAG, "All the enabled IMEs are gone. Reset default enabled IMEs.");
+                }
                 resetDefaultEnabledIme = true;
                 resetSelectedInputMethodAndSubtypeLocked("");
             }
