@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ShortcutInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -223,13 +224,11 @@ public class Notification implements Parcelable
      * superimposed over the icon in the status bar. Starting with
      * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, the template used by
      * {@link Notification.Builder} has displayed the number in the expanded notification view.
+     * Starting with {@link android.os.Build.VERSION_CODES#O}, the number may be displayed as a
+     * badge icon in Launchers that support badging.
      *
-     * If the number is 0 or negative, it is never shown.
-     *
-     * @deprecated this number is not shown anymore
      */
-    @Deprecated
-    public int number;
+    public int number = 1;
 
     /**
      * The intent to execute when the expanded status entry is clicked.  If
@@ -1074,6 +1073,26 @@ public class Notification implements Parcelable
     private String mChannelId;
     private long mTimeout;
 
+    private String mShortcutId;
+
+    /**
+     * If this notification is being shown as a badge, always show as a number.
+     */
+    public static final int BADGE_ICON_NONE = 0;
+
+    /**
+     * If this notification is being shown as a badge, use the {@link #getSmallIcon()} to
+     * represent this notification.
+     */
+    public static final int BADGE_ICON_SMALL = 1;
+
+    /**
+     * If this notification is being shown as a badge, use the {@link #getLargeIcon()} to
+     * represent this notification.
+     */
+    public static final int BADGE_ICON_LARGE = 2;
+    private int mBadgeIcon = BADGE_ICON_LARGE;
+
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
@@ -1818,6 +1837,12 @@ public class Notification implements Parcelable
             mChannelId = parcel.readString();
         }
         mTimeout = parcel.readLong();
+
+        if (parcel.readInt() != 0) {
+            mShortcutId = parcel.readString();
+        }
+
+        mBadgeIcon = parcel.readInt();
     }
 
     @Override
@@ -2042,7 +2067,7 @@ public class Notification implements Parcelable
         }
         try {
             // IMPORTANT: Add marshaling code in writeToParcelImpl as we
-            // want to intercept all pending events written to the pacel.
+            // want to intercept all pending events written to the parcel.
             writeToParcelImpl(parcel, flags);
             // Must be written last!
             parcel.writeArraySet(allPendingIntents);
@@ -2185,6 +2210,15 @@ public class Notification implements Parcelable
             parcel.writeInt(0);
         }
         parcel.writeLong(mTimeout);
+
+        if (mShortcutId != null) {
+            parcel.writeInt(1);
+            parcel.writeString(mShortcutId);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        parcel.writeInt(mBadgeIcon);
     }
 
     /**
@@ -2382,10 +2416,27 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Returns the time at which this notification should be canceled, if it's not canceled already.
+     * Returns the time at which this notification should be canceled by the system, if it's not
+     * canceled already.
      */
     public long getTimeout() {
         return mTimeout;
+    }
+
+    /**
+     * Returns what icon should be shown for this notification if it is being displayed in a
+     * Launcher that supports badging. Will be one of {@link #BADGE_ICON_NONE},
+     * {@link #BADGE_ICON_SMALL}, or {@link #BADGE_ICON_LARGE}.
+     */
+    public int getBadgeIcon() {
+        return mBadgeIcon;
+    }
+
+    /**
+     * Returns the {@link ShortcutInfo#getId() id} that this notification supersedes, if any.
+     */
+    public String getShortcutId() {
+        return mShortcutId;
     }
 
     /**
@@ -2611,6 +2662,35 @@ public class Notification implements Parcelable
         }
 
         /**
+         * If this notification is duplicative of a Launcher shortcut, sets the
+         * {@link ShortcutInfo#getId() id} of the shortcut, in case the Launcher wants to hide
+         * the shortcut.
+         *
+         * This field will be ignored by Launchers that don't support badging or
+         * {@link android.content.pm.ShortcutManager shortcuts}.
+         *
+         * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
+         *                   supersedes
+         */
+        public Builder setShortcutId(String shortcutId) {
+            mN.mShortcutId = shortcutId;
+            return this;
+        }
+
+        /**
+         * Sets which icon to display as a badge for this notification.
+         *
+         * Must be one of {@link #BADGE_ICON_NONE}, {@link #BADGE_ICON_SMALL},
+         * {@link #BADGE_ICON_LARGE}.
+         *
+         * Note: This value might be ignored, for launchers that don't support badge icons.
+         */
+        public Builder chooseBadgeIcon(int icon) {
+            mN.mBadgeIcon = icon;
+            return this;
+        }
+
+        /**
          * Specifies the channel the notification should be delivered on.
          */
         public Builder setChannel(String channelId) {
@@ -2805,13 +2885,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the large number at the right-hand side of the notification.  This is
-         * equivalent to setContentInfo, although it might show the number in a different
-         * font size for readability.
-         *
-         * @deprecated this number is not shown anywhere anymore
+         * Sets the number of items this notification represents. May be displayed as a badge count
+         * for Launchers that support badging.
          */
-        @Deprecated
         public Builder setNumber(int number) {
             mN.number = number;
             return this;
