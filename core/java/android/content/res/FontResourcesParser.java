@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class FontResourcesParser {
     private static final int NORMAL_WEIGHT = 400;
-    private static final String ITALIC = "italic";
+    private static final int ITALIC = 1;
 
     public static FontConfig parse(XmlPullParser parser, Resources resources)
             throws XmlPullParserException, IOException {
@@ -82,9 +82,12 @@ public class FontResourcesParser {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamilyFont);
         int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight, NORMAL_WEIGHT);
-        boolean isItalic = ITALIC.equals(array.getString(R.styleable.FontFamilyFont_fontStyle));
+        boolean isItalic = ITALIC == array.getInt(R.styleable.FontFamilyFont_fontStyle, 0);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
         array.recycle();
+        while (parser.next() != XmlPullParser.END_TAG) {
+            skip(parser);
+        }
         return new FontConfig.Font(filename, 0, null, weight, isItalic);
     }
 
