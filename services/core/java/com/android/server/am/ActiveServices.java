@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import java.io.FileDescriptor;
@@ -1391,8 +1393,7 @@ public final class ActiveServices {
         }
         if (r != null) {
             if (mAm.checkComponentPermission(r.permission,
-                    callingPid, callingUid, r.appInfo.uid, r.exported)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    callingPid, callingUid, r.appInfo.uid, r.exported) != PERMISSION_GRANTED) {
                 if (!r.exported) {
                     Slog.w(TAG, "Permission Denial: Accessing service " + r.name
                             + " from pid=" + callingPid
@@ -2775,16 +2776,15 @@ public final class ActiveServices {
         return info;
     }
 
-    List<ActivityManager.RunningServiceInfo> getRunningServiceInfoLocked(int maxNum, int flags) {
+    List<ActivityManager.RunningServiceInfo> getRunningServiceInfoLocked(int maxNum, int flags,
+        int callingUid, boolean allowed) {
         ArrayList<ActivityManager.RunningServiceInfo> res
                 = new ArrayList<ActivityManager.RunningServiceInfo>();
 
-        final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (ActivityManager.checkUidPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    uid) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL, callingUid)
+                == PERMISSION_GRANTED) {
                 int[] users = mAm.mUserController.getUsers();
                 for (int ui=0; ui<users.length && res.size() < maxNum; ui++) {
                     ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(users[ui]);
@@ -2802,16 +2802,20 @@ public final class ActiveServices {
                     res.add(info);
                 }
             } else {
-                int userId = UserHandle.getUserId(uid);
+                int userId = UserHandle.getUserId(callingUid);
                 ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(userId);
                 for (int i=0; i<alls.size() && res.size() < maxNum; i++) {
                     ServiceRecord sr = alls.valueAt(i);
-                    res.add(makeRunningServiceInfoLocked(sr));
+
+                    if (allowed || (sr.app != null && sr.app.uid == callingUid)) {
+                        res.add(makeRunningServiceInfoLocked(sr));
+                    }
                 }
 
                 for (int i=0; i<mRestartingServices.size() && res.size() < maxNum; i++) {
                     ServiceRecord r = mRestartingServices.get(i);
-                    if (r.userId == userId) {
+                    if (r.userId == userId
+                        && (allowed || (r.app != null && r.app.uid == callingUid))) {
                         ActivityManager.RunningServiceInfo info =
                                 makeRunningServiceInfoLocked(r);
                         info.restarting = r.nextRestartTime;
