@@ -456,7 +456,8 @@ public class NotificationContentView extends FrameLayout {
                     isTransitioningFromTo(VISIBLE_TYPE_HEADSUP, VISIBLE_TYPE_EXPANDED) ||
                     isTransitioningFromTo(VISIBLE_TYPE_EXPANDED, VISIBLE_TYPE_HEADSUP);
             boolean pinned = !isVisibleOrTransitioning(VISIBLE_TYPE_CONTRACTED)
-                    && (mIsHeadsUp || mHeadsupDisappearRunning);
+                    && (mIsHeadsUp || mHeadsupDisappearRunning)
+                    && !mContainingNotification.isOnKeyguard();
             if (transitioningBetweenHunAndExpanded || pinned) {
                 return Math.min(mHeadsUpChild.getHeight(), mExpandedChild.getHeight());
             }
@@ -560,7 +561,7 @@ public class NotificationContentView extends FrameLayout {
     public int getMaxHeight() {
         if (mExpandedChild != null) {
             return mExpandedChild.getHeight();
-        } else if (mIsHeadsUp && mHeadsUpChild != null) {
+        } else if (mIsHeadsUp && mHeadsUpChild != null && !mContainingNotification.isOnKeyguard()) {
             return mHeadsUpChild.getHeight();
         }
         return mContractedChild.getHeight();
@@ -840,7 +841,8 @@ public class NotificationContentView extends FrameLayout {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
-        if ((mIsHeadsUp || mHeadsupDisappearRunning) && mHeadsUpChild != null) {
+        if ((mIsHeadsUp || mHeadsupDisappearRunning) && mHeadsUpChild != null
+                && !mContainingNotification.isOnKeyguard()) {
             if (viewHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;
             } else {
@@ -1086,7 +1088,7 @@ public class NotificationContentView extends FrameLayout {
         mExpandable = expandable;
         // if the expanded child has the same height as the collapsed one we hide it.
         if (mExpandedChild != null && mExpandedChild.getHeight() != 0) {
-            if ((!mIsHeadsUp || mHeadsUpChild == null)) {
+            if (!mIsHeadsUp || mHeadsUpChild == null || mContainingNotification.isOnKeyguard()) {
                 if (mExpandedChild.getHeight() == mContractedChild.getHeight()) {
                     expandable = false;
                 }
