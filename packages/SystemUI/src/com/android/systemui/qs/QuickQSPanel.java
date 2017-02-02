@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Space;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSTile.State;
@@ -62,13 +63,13 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(mNumTiles, NUM_QUICK_TILES);
+        Dependency.get(TunerService.class).addTunable(mNumTiles, NUM_QUICK_TILES);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        TunerService.get(mContext).removeTunable(mNumTiles);
+        Dependency.get(TunerService.class).removeTunable(mNumTiles);
     }
 
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
@@ -141,7 +142,7 @@ public class QuickQSPanel extends QSPanel {
     };
 
     public int getNumQuickTiles(Context context) {
-        return TunerService.get(context).getValue(NUM_QUICK_TILES, 6);
+        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {

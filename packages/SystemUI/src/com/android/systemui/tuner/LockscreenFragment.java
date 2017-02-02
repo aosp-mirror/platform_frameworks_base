@@ -43,6 +43,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
@@ -71,7 +72,7 @@ public class LockscreenFragment extends PreferenceFragment {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        mTunerService = TunerService.get(getContext());
+        mTunerService = Dependency.get(TunerService.class);
         mHandler = new Handler();
         addPreferencesFromResource(R.xml.lockscreen_settings);
         setupGroup((PreferenceGroup) findPreference(KEY_LEFT), LOCKSCREEN_LEFT_BUTTON,

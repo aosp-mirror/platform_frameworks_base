@@ -19,6 +19,7 @@ package com.android.systemui.doze;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.doze.DozeProvider;
@@ -47,7 +48,7 @@ public class DozeService extends DreamService implements DozeMachine.Service {
             return;
         }
 
-        DozeProvider provider = PluginManager.getInstance(this)
+        DozeProvider provider = Dependency.get(PluginManager.class)
                 .getOneShotPlugin(DozeProvider.ACTION, DozeProvider.VERSION);
         mDozeMachine = new DozeFactory(provider).assembleMachine(this);
     }

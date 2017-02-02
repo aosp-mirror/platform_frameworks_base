@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
@@ -82,10 +83,21 @@ public class NotificationMenuRow extends FrameLayout
     public NotificationMenuRow(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs);
-        PluginManager.getInstance(getContext()).addPluginListener(
+        mMenuItems.addAll(getDefaultNotificationMenuItems());
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Dependency.get(PluginManager.class).addPluginListener(
                 NotificationMenuRowProvider.ACTION, this,
                 NotificationMenuRowProvider.VERSION, false /* Allow multiple */);
-        mMenuItems.addAll(getDefaultNotificationMenuItems());
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(PluginManager.class).removePluginListener(this);
     }
 
     @Override

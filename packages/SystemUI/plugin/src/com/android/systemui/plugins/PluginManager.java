@@ -70,7 +70,7 @@ public class PluginManager extends BroadcastReceiver {
     private boolean mListening;
     private boolean mHasOneShot;
 
-    private PluginManager(Context context) {
+    public PluginManager(Context context) {
         this(context, new PluginInstanceManagerFactory(),
                 Build.IS_DEBUGGABLE, Thread.getDefaultUncaughtExceptionHandler());
     }
@@ -250,13 +250,6 @@ public class PluginManager extends BroadcastReceiver {
     public Context getContext(ApplicationInfo info, String pkg) throws NameNotFoundException {
         ClassLoader classLoader = getClassLoader(info.sourceDir, pkg);
         return new PluginContextWrapper(mContext.createApplicationContext(info, 0), classLoader);
-    }
-
-    public static PluginManager getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new PluginManager(context.getApplicationContext());
-        }
-        return sInstance;
     }
 
     private class AllPluginClassLoader extends ClassLoader {

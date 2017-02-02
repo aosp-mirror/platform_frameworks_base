@@ -19,13 +19,17 @@ import android.app.Fragment;
 import android.app.FragmentController;
 import android.app.FragmentHostCallback;
 import android.app.FragmentManagerNonConfig;
+import android.graphics.PixelFormat;
 import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import com.android.systemui.utils.ViewUtils;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.After;
@@ -45,7 +49,6 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
 
     private static final int VIEW_ID = 42;
     private final Class<? extends Fragment> mCls;
-    private HandlerThread mHandlerThread;
     private Handler mHandler;
     private FrameLayout mView;
     protected FragmentController mFragments;
@@ -59,9 +62,7 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
     public void setupFragment() throws IllegalAccessException, InstantiationException {
         mView = new FrameLayout(mContext);
         mView.setId(VIEW_ID);
-        mHandlerThread = new HandlerThread("FragmentTestThread");
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler = new Handler(Looper.getMainLooper());
         mFragment = mCls.newInstance();
         postAndWait(() -> {
             mFragments = FragmentController.createController(new HostCallbacks());
@@ -78,7 +79,6 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
             // Set mFragments to null to let it know not to destroy.
             postAndWait(() -> mFragments.dispatchDestroy());
         }
-        mHandlerThread.quit();
     }
 
     @Test
@@ -97,6 +97,26 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
     public void testResumePause() {
         postAndWait(() -> mFragments.dispatchResume());
         postAndWait(() -> mFragments.dispatchPause());
+    }
+
+    @Test
+    public void testAttachDetach() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                LayoutParams.TYPE_SYSTEM_ALERT,
+                0, PixelFormat.TRANSLUCENT);
+        postAndWait(() -> mFragments.dispatchResume());
+        attachFragmentToWindow();
+        detachFragmentToWindow();
+        postAndWait(() -> mFragments.dispatchPause());
+    }
+
+    protected void attachFragmentToWindow() {
+        ViewUtils.attachView(mView);
+    }
+
+    protected void detachFragmentToWindow() {
+        ViewUtils.detachView(mView);
     }
 
     @Test

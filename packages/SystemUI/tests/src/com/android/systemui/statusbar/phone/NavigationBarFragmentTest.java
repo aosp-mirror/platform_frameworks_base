@@ -40,6 +40,7 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
         mContext.putComponent(Recents.class, mock(Recents.class));
         mContext.putComponent(Divider.class, mock(Divider.class));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mock(WindowManager.class));
+        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test

@@ -220,7 +220,7 @@ public class SignalClusterView
         int endPadding = mMobileSignalGroup.getChildCount() > 0 ? mMobileSignalGroupEndPadding : 0;
         mMobileSignalGroup.setPaddingRelative(0, 0, endPadding, 0);
 
-        TunerService.get(mContext).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
 
         apply();
         applyIconTint();
@@ -231,7 +231,7 @@ public class SignalClusterView
     @Override
     protected void onDetachedFromWindow() {
         mMobileSignalGroup.removeAllViews();
-        TunerService.get(mContext).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
         mSecurityController.removeCallback(this);
         mNetworkController.removeCallback(this);
 

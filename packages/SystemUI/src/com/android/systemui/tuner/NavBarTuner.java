@@ -51,6 +51,7 @@ import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.widget.EditText;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -104,12 +105,12 @@ public class NavBarTuner extends PreferenceFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mTunables.forEach(t -> TunerService.get(getContext()).removeTunable(t));
+        mTunables.forEach(t -> Dependency.get(TunerService.class).removeTunable(t));
     }
 
     private void addTunable(Tunable tunable, String... keys) {
         mTunables.add(tunable);
-        TunerService.get(getContext()).addTunable(tunable, keys);
+        Dependency.get(TunerService.class).addTunable(tunable, keys);
     }
 
     private void bindLayout(ListPreference preference) {
@@ -123,7 +124,7 @@ public class NavBarTuner extends PreferenceFragment {
         preference.setOnPreferenceChangeListener((preference1, newValue) -> {
             String val = (String) newValue;
             if ("default".equals(val)) val = null;
-            TunerService.get(getContext()).setValue(NAV_BAR_VIEWS, val);
+            Dependency.get(TunerService.class).setValue(NAV_BAR_VIEWS, val);
             return true;
         });
     }
@@ -215,7 +216,7 @@ public class NavBarTuner extends PreferenceFragment {
             }
             button = button + KEY_CODE_START + code + KEY_IMAGE_DELIM + uri + KEY_CODE_END;
         }
-        TunerService.get(getContext()).setValue(setting, button);
+        Dependency.get(TunerService.class).setValue(setting, button);
     }
 
     private void setupIcons(ListPreference icon) {

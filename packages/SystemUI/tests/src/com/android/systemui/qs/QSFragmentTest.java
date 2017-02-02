@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,11 +61,7 @@ public class QSFragmentTest extends FragmentTestCase {
     public void addLeakCheckDependencies() {
         injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
         injectMockDependency(UserSwitcherController.class);
-        injectLeakCheckedDependencies(BluetoothController.class, LocationController.class,
-                RotationLockController.class, NetworkController.class, ZenModeController.class,
-                HotspotController.class, CastController.class, FlashlightController.class,
-                UserInfoController.class, KeyguardMonitor.class, SecurityController.class,
-                BatteryController.class, NextAlarmController.class);
+        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test
@@ -88,6 +85,6 @@ public class QSFragmentTest extends FragmentTestCase {
 
         host.destroy();
         // Ensure the tuner cleans up its persistent listeners.
-        TunerService.get(mContext).destroy();
+        Dependency.get(TunerService.class).destroy();
     }
 }
