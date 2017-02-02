@@ -3064,6 +3064,7 @@
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Tap to disable USB debugging.</string>
+    <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
 
     <!-- Title of notification shown to indicate that bug report is being collected. -->
     <string name="taking_remote_bugreport_notification_title">Taking bug report\u2026</string>
@@ -4468,4 +4469,6 @@
 
     <!-- Channel name for DeviceStorageMonitor notifications -->
     <string name="device_storage_monitor_notification_channel">Device storage</string>
+    <!-- Channel name for UsbDeviceManager adb debugging notifications -->
+    <string name="adb_debugging_notification_channel_tv">USB debugging</string>
 </resources>

@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -134,6 +135,8 @@ public class UsbDeviceManager {
 
     private static final String BOOT_MODE_PROPERTY = "ro.bootmode";
 
+    private static final String ADB_NOTIFICATION_CHANNEL_ID_TV = "usbdevicemanager.adb.tv";
+
     private UsbHandler mHandler;
     private boolean mBootCompleted;
 
@@ -239,6 +242,16 @@ public class UsbDeviceManager {
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // Ensure that the notification channels are set up
+        if (isTv()) {
+            // TV-specific notification channel
+            mNotificationManager.createNotificationChannel(
+                    new NotificationChannel(ADB_NOTIFICATION_CHANNEL_ID_TV,
+                        mContext.getString(
+                            com.android.internal.R.string.adb_debugging_notification_channel_tv),
+                        NotificationManager.IMPORTANCE_HIGH));
+        }
+
         // We do not show the USB notification if the primary volume supports mass storage.
         // The legacy mass storage UI will be used instead.
         boolean massStorageSupported = false;
@@ -323,6 +336,10 @@ public class UsbDeviceManager {
         } catch (IOException e) {
            Slog.e(TAG, "failed to write to " + RNDIS_ETH_ADDR_PATH);
         }
+    }
+
+    private boolean isTv() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     private final class UsbHandler extends Handler {
@@ -928,9 +945,9 @@ public class UsbDeviceManager {
                     CharSequence message = r.getText(
                             com.android.internal.R.string.adb_active_notification_message);
 
-                    Intent intent = Intent.makeRestartActivityTask(
-                            new ComponentName("com.android.settings",
-                                    "com.android.settings.DevelopmentSettings"));
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
 
@@ -947,6 +964,8 @@ public class UsbDeviceManager {
                             .setContentText(message)
                             .setContentIntent(pi)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .extend(new Notification.TvExtender()
+                                    .setChannel(ADB_NOTIFICATION_CHANNEL_ID_TV))
                             .build();
                     mAdbNotificationShown = true;
                     mNotificationManager.notifyAsUser(null, id, notification,
