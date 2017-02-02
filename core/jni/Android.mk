@@ -84,6 +84,7 @@ LOCAL_SRC_FILES:= \
     android_os_MessageQueue.cpp \
     android_os_Parcel.cpp \
     android_os_SELinux.cpp \
+    android_os_seccomp.cpp \
     android_os_SystemClock.cpp \
     android_os_SystemProperties.cpp \
     android_os_Trace.cpp \
@@ -214,6 +215,9 @@ LOCAL_C_INCLUDES += \
     frameworks/minikin/include \
     external/freetype/include
 # TODO: clean up Minikin so it doesn't need the freetype include
+
+LOCAL_STATIC_LIBRARIES := \
+    libseccomp_policy \
 
 LOCAL_SHARED_LIBRARIES := \
     libmemtrack \
