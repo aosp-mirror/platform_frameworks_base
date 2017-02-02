@@ -377,6 +377,8 @@ public class BatteryStatsImpl extends BatteryStats {
     int mScreenBrightnessBin = -1;
     final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
 
+    boolean mPretendScreenOff;
+
     boolean mInteractive;
     StopwatchTimer mInteractiveTimer;
 
@@ -3395,6 +3397,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mNoAutoReset = enabled;
     }
 
+    public void setPretendScreenOff(boolean pretendScreenOff) {
+        mPretendScreenOff = pretendScreenOff;
+        noteScreenStateLocked(pretendScreenOff ? Display.STATE_OFF : Display.STATE_ON);
+    }
+
     private String mInitialAcquireWakeName;
     private int mInitialAcquireWakeUid = -1;
 
@@ -3698,6 +3705,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteScreenStateLocked(int state) {
+        state = mPretendScreenOff ? Display.STATE_OFF : state;
         if (mScreenState != state) {
             recordDailyStatsIfNeededLocked(true);
             final int oldState = mScreenState;

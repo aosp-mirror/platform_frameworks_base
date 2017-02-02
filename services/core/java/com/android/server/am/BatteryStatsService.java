@@ -51,8 +51,8 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
 import android.util.Slog;
-
 import android.util.TimeUtils;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
@@ -1127,6 +1127,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("      full-history: include additional detailed events in battery history:");
         pw.println("          wake_lock_in, alarms and proc events");
         pw.println("      no-auto-reset: don't automatically reset stats when unplugged");
+        pw.println("      pretend-screen-off: pretend the screen is off, even if screen state changes");
     }
 
     private int doEnableOrDisable(PrintWriter pw, int i, String[] args, boolean enable) {
@@ -1143,6 +1144,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } else if ("no-auto-reset".equals(args[i])) {
             synchronized (mStats) {
                 mStats.setNoAutoReset(enable);
+            }
+        } else if ("pretend-screen-off".equals(args[i])) {
+            synchronized (mStats) {
+                mStats.setPretendScreenOff(enable);
             }
         } else {
             pw.println("Unknown enable/disable option: " + args[i]);
