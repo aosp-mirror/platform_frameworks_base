@@ -1062,8 +1062,6 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nSetWordSpacing(long nativePaint, float wordSpacing) {
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_TEXT_RENDERING,
-                "Paint.setWordSpacing() not supported.", null, null);
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
             return;

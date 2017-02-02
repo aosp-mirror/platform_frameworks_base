@@ -75,7 +75,8 @@ public class StaticLayout_Delegate {
     /*package*/ static void nSetupParagraph(long nativeBuilder, char[] text, int length,
             float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, int breakStrategy,
-            int hyphenationFrequency) {
+            int hyphenationFrequency, boolean isJustified) {
+        // TODO: implement justified alignment
         Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         if (builder == null) {
             return;
