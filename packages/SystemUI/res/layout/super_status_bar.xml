@@ -72,7 +72,7 @@
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:visibility="invisible" />
 
     <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
