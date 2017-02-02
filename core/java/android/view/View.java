@@ -4080,6 +4080,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     int mNextClusterForwardId = View.NO_ID;
 
+    /**
+     * Whether this View should use a default focus highlight when it gets focused but doesn't
+     * have {@link android.R.attr#state_focused} defined in its background.
+     */
+    boolean mDefaultFocusHighlightEnabled = true;
+
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
@@ -5062,6 +5068,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_importantForAutofill:
                     if (a.peekValue(attr) != null) {
                         setImportantForAutofill(a.getInt(attr, IMPORTANT_FOR_AUTOFILL_AUTO));
+                    }
+                    break;
+                case R.styleable.View_defaultFocusHighlightEnabled:
+                    if (a.peekValue(attr) != null) {
+                        setDefaultFocusHighlightEnabled(a.getBoolean(attr, true));
                     }
                     break;
             }
@@ -9927,6 +9938,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean dispatchUnhandledMove(View focused, @FocusRealDirection int direction) {
         return false;
+    }
+
+    /**
+     * Sets whether this View should use a default focus highlight when it gets focused but doesn't
+     * have {@link android.R.attr#state_focused} defined in its background.
+     *
+     * @param defaultFocusHighlightEnabled {@code true} to set this view to use a default focus
+     *                                      highlight, {@code false} otherwise.
+     *
+     * @attr ref android.R.styleable#View_defaultFocusHighlightEnabled
+     */
+    public void setDefaultFocusHighlightEnabled(boolean defaultFocusHighlightEnabled) {
+        mDefaultFocusHighlightEnabled = defaultFocusHighlightEnabled;
+    }
+
+    /**
+
+    /**
+     * Returns whether this View should use a default focus highlight when it gets focused but
+     * doesn't have {@link android.R.attr#state_focused} defined in its background.
+     *
+     * @return True if this View should use a default focus highlight.
+     * @attr ref android.R.styleable#View_defaultFocusHighlightEnabled
+     */
+    @ViewDebug.ExportedProperty(category = "defaultFocusHighlightEnabled")
+    public final boolean getDefaultFocusHighlightEnabled() {
+        return mDefaultFocusHighlightEnabled;
     }
 
     /**
