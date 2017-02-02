@@ -743,11 +743,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             Task toTask = new Task();
             TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask,
                     windowOverrideRect);
-            // When using a grid layout, the header is already visible on screen at the target
-            // location, making it unnecessary to draw it in the transition thumbnail.
-            Bitmap thumbnail = stackView.useGridLayout()
-                    ? mThumbTransitionBitmapCache.createAshmemBitmap()
-                    : drawThumbnailTransitionBitmap(toTask, toTransform,
+            Bitmap thumbnail = drawThumbnailTransitionBitmap(toTask, toTransform,
                             mThumbTransitionBitmapCache);
             if (thumbnail != null) {
                 RectF toTaskRect = toTransform.rect;

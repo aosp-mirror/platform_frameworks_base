@@ -951,9 +951,9 @@ public class AppTransition implements Dump {
         float scaleW = appWidth / thumbWidth;
         getNextAppTransitionStartRect(taskId, mTmpRect);
         final float fromX;
-        final float fromY;
+        float fromY;
         final float toX;
-        final float toY;
+        float toY;
         final float pivotX;
         final float pivotY;
         if (shouldScaleDownThumbnailTransition(uiMode, orientation)) {
@@ -966,6 +966,12 @@ public class AppTransition implements Dump {
             toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
             pivotX = mTmpRect.width() / 2;
             pivotY = appRect.height() / 2 / scaleW;
+            if (mGridLayoutRecentsEnabled) {
+                // In the grid layout, the header is displayed above the thumbnail instead of
+                // overlapping it.
+                fromY -= thumbHeightI;
+                toY -= thumbHeightI * scaleW;
+            }
         } else {
             pivotX = 0;
             pivotY = 0;
@@ -1014,7 +1020,10 @@ public class AppTransition implements Dump {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            set.addAnimation(alpha);
+            if (!mGridLayoutRecentsEnabled) {
+                // In the grid layout, the header should be shown for the whole animation.
+                set.addAnimation(alpha);
+            }
             set.addAnimation(translate);
             set.addAnimation(clipAnim);
             a = set;
@@ -1033,7 +1042,10 @@ public class AppTransition implements Dump {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            set.addAnimation(alpha);
+            if (!mGridLayoutRecentsEnabled) {
+                // In the grid layout, the header should be shown for the whole animation.
+                set.addAnimation(alpha);
+            }
             set.addAnimation(translate);
             a = set;
 
