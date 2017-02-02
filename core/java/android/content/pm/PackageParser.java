@@ -2747,15 +2747,15 @@ public class PackageParser {
         String cls = clsSeq.toString();
         char c = cls.charAt(0);
         if (c == '.') {
-            return (pkg + cls).intern();
+            return pkg + cls;
         }
         if (cls.indexOf('.') < 0) {
             StringBuilder b = new StringBuilder(pkg);
             b.append('.');
             b.append(cls);
-            return b.toString().intern();
+            return b.toString();
         }
-        return cls.intern();
+        return cls;
     }
 
     private static String buildCompoundName(String pkg,
@@ -2775,7 +2775,7 @@ public class PackageParser {
                         + pkg + ": " + nameError;
                 return null;
             }
-            return (pkg + proc).intern();
+            return pkg + proc;
         }
         String nameError = validateName(proc, true, false);
         if (nameError != null && !"system".equals(proc)) {
@@ -2783,7 +2783,7 @@ public class PackageParser {
                     + pkg + ": " + nameError;
             return null;
         }
-        return proc.intern();
+        return proc;
     }
 
     private static String buildProcessName(String pkg, String defProc,
@@ -5103,7 +5103,7 @@ public class PackageParser {
             if (v != null) {
                 if (v.type == TypedValue.TYPE_STRING) {
                     CharSequence cs = v.coerceToString();
-                    data.putString(name, cs != null ? cs.toString().intern() : null);
+                    data.putString(name, cs != null ? cs.toString() : null);
                 } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
                     data.putBoolean(name, v.data != 0);
                 } else if (v.type >= TypedValue.TYPE_FIRST_INT
