@@ -1496,7 +1496,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
         } else {
             Divider divider = getComponent(Divider.class);
-            if (divider != null && divider.isMinimized()) {
+            if (divider != null && divider.isMinimized() && !divider.isHomeStackResizable()) {
                 // Undocking from the minimized state is not supported
                 return false;
             } else {

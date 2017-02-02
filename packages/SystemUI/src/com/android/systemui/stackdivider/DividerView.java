@@ -1241,7 +1241,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public final void onBusEvent(UndockingTaskEvent undockingTaskEvent) {
         int dockSide = mWindowManagerProxy.getDockSide();
-        if (dockSide != WindowManager.DOCKED_INVALID && !mDockedStackMinimized) {
+        if (dockSide != WindowManager.DOCKED_INVALID && (mHomeStackResizable
+                || !mDockedStackMinimized)) {
             startDragging(false /* animate */, false /* touching */);
             SnapTarget target = dockSideTopLeft(dockSide)
                     ? mSnapAlgorithm.getDismissEndTarget()

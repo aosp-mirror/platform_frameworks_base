@@ -72,6 +72,10 @@ public class Divider extends SystemUI {
         return mMinimized;
     }
 
+    public boolean isHomeStackResizable() {
+        return mHomeStackResizable;
+    }
+
     private void addDivider(Configuration configuration) {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
@@ -119,6 +123,7 @@ public class Divider extends SystemUI {
         mView.post(new Runnable() {
             @Override
             public void run() {
+                mHomeStackResizable = isHomeStackResizable;
                 if (mMinimized != minimized) {
                     mMinimized = minimized;
                     updateTouchable();
