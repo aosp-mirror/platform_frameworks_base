@@ -630,6 +630,10 @@ public class WebViewUpdateServiceImpl {
          */
         public boolean isValidProvider(WebViewProviderInfo configInfo,
                 PackageInfo packageInfo) {
+            // Ensure the provider targets this framework release (or a later one).
+            if (!UserPackage.hasCorrectTargetSdkVersion(packageInfo)) {
+                return false;
+            }
             if (!versionCodeGE(packageInfo.versionCode, getMinimumVersionCode())
                     && !mSystemInterface.systemIsDebuggable()) {
                 // Webview providers may be downgraded arbitrarily low, prevent that by enforcing
