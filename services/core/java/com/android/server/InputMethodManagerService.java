@@ -3028,22 +3028,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                 mSettings.getCurrentUserId());
 
-        final HashMap<String, List<InputMethodSubtype>> additionalSubtypes =
+        final HashMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
                 mFileManager.getAllAdditionalInputMethodSubtypes();
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
             ServiceInfo si = ri.serviceInfo;
-            ComponentName compName = new ComponentName(si.packageName, si.name);
-            if (!android.Manifest.permission.BIND_INPUT_METHOD.equals(
-                    si.permission)) {
-                Slog.w(TAG, "Skipping input method " + compName
+            final String imeId = InputMethodInfo.computeId(ri);
+            if (!android.Manifest.permission.BIND_INPUT_METHOD.equals(si.permission)) {
+                Slog.w(TAG, "Skipping input method " + imeId
                         + ": it does not require the permission "
                         + android.Manifest.permission.BIND_INPUT_METHOD);
                 continue;
             }
 
-            if (DEBUG) Slog.d(TAG, "Checking " + compName);
+            if (DEBUG) Slog.d(TAG, "Checking " + imeId);
 
+            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypeMap.get(imeId);
             try {
                 InputMethodInfo p = new InputMethodInfo(mContext, ri, additionalSubtypes);
                 mMethodList.add(p);
@@ -3054,7 +3054,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.d(TAG, "Found an input method " + p);
                 }
             } catch (Exception e) {
-                Slog.wtf(TAG, "Unable to load input method " + compName, e);
+                Slog.wtf(TAG, "Unable to load input method " + imeId, e);
             }
         }
 
