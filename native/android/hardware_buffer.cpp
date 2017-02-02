@@ -26,10 +26,11 @@
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <binder/Binder.h>
 #include <binder/Parcel.h>
-#include <cutils/native_handle.h>
 #include <binder/IServiceManager.h>
+#include <cutils/native_handle.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/IGraphicBufferAlloc.h>
+#include <hardware/gralloc1.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/Flattenable.h>
 #include <utils/Log.h>
@@ -96,10 +97,14 @@ int AHardwareBuffer_allocate(const AHardwareBuffer_Desc* desc,
     }
 
     status_t err;
-    uint32_t usage = android_hardware_HardwareBuffer_convertToGrallocUsageBits(
-            desc->usage0, desc->usage1);
+    uint64_t producerUsage = 0;
+    uint64_t consumerUsage = 0;
+    android_hardware_HardwareBuffer_convertToGrallocUsageBits(desc->usage0,
+            desc->usage1, &producerUsage, &consumerUsage);
     sp<GraphicBuffer> gbuffer = allocator->createGraphicBuffer(desc->width,
-            desc->height, format, desc->layers, usage, &err);
+            desc->height, format, desc->layers, producerUsage, consumerUsage,
+            std::string("AHardwareBuffer pid [") + std::to_string(getpid()) +
+            "]", &err);
     if (err != NO_ERROR) {
         return err;
     }
@@ -131,7 +136,7 @@ void AHardwareBuffer_describe(const AHardwareBuffer* buffer,
     outDesc->layers = gbuffer->getLayerCount();
     outDesc->usage0 =
             android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
-                    gbuffer->getUsage());
+                    gbuffer->getUsage(), gbuffer->getUsage());
     outDesc->usage1 = 0;
     outDesc->format = android_hardware_HardwareBuffer_convertFromPixelFormat(
             static_cast<uint32_t>(gbuffer->getPixelFormat()));
@@ -148,15 +153,19 @@ int AHardwareBuffer_lock(AHardwareBuffer* buffer, uint64_t usage0,
         return BAD_VALUE;
     }
 
-    uint32_t usage = android_hardware_HardwareBuffer_convertToGrallocUsageBits(
-            usage0, 0);
+    uint64_t producerUsage = 0;
+    uint64_t consumerUsage = 0;
+    android_hardware_HardwareBuffer_convertToGrallocUsageBits(usage0, 0,
+            &producerUsage, &consumerUsage);
     GraphicBuffer* gBuffer = AHardwareBuffer_to_GraphicBuffer(buffer);
+    Rect bounds;
     if (!rect) {
-        return gBuffer->lockAsync(usage, outVirtualAddress, fence);
+        bounds.set(Rect(gBuffer->getWidth(), gBuffer->getHeight()));
     } else {
-        Rect bounds(rect->left, rect->top, rect->right, rect->bottom);
-        return gBuffer->lockAsync(usage, bounds, outVirtualAddress, fence);
+        bounds.set(Rect(rect->left, rect->top, rect->right, rect->bottom));
     }
+    return gBuffer->lockAsync(producerUsage, consumerUsage, bounds,
+            outVirtualAddress, fence);
 }
 
 int AHardwareBuffer_unlock(AHardwareBuffer* buffer, int32_t* fence) {

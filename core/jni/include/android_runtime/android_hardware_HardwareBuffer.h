@@ -40,12 +40,13 @@ extern uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(
       uint32_t format);
 
 /* Convert from AHARDWAREBUFFER_USAGE* flags to to gralloc usage flags. */
-extern uint32_t android_hardware_HardwareBuffer_convertToGrallocUsageBits(
-      uint64_t usage0, uint64_t usage1);
+extern void android_hardware_HardwareBuffer_convertToGrallocUsageBits(
+      uint64_t usage0, uint64_t usage1, uint64_t* outProducerUsage,
+      uint64_t* outConsumerUsage);
 
 /* Convert from gralloc usage flags to to AHARDWAREBUFFER_USAGE0* flags. */
 extern uint64_t android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
-      uint64_t usage0);
+      uint64_t producerUsage, uint64_t consumerUsage);
 
 } // namespace android
 
