@@ -951,19 +951,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         inflateStatusBarWindow(context);
         mStatusBarWindow.setService(this);
-        mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                checkUserAutohide(v, event);
-                checkRemoteInputOutside(event);
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (mExpandedVisible) {
-                        animateCollapsePanels();
-                    }
-                }
-                return mStatusBarWindow.onTouchEvent(event);
-            }
-        });
+        mStatusBarWindow.setOnTouchListener(getStatusBarWindowTouchListener());
 
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
                 R.id.notification_panel);
@@ -1224,6 +1212,23 @@ public class StatusBar extends SystemUI implements DemoMode,
             ViewGroup parent = (ViewGroup) emergencyViewStub.getParent();
             parent.removeView(emergencyViewStub);
         }
+    }
+
+    /**
+     * Returns the {@link android.view.View.OnTouchListener} that will be invoked when the
+     * background window of the status bar is clicked.
+     */
+    protected View.OnTouchListener getStatusBarWindowTouchListener() {
+        return (v, event) -> {
+            checkUserAutohide(v, event);
+            checkRemoteInputOutside(event);
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (mExpandedVisible) {
+                    animateCollapsePanels();
+                }
+            }
+            return mStatusBarWindow.onTouchEvent(event);
+        };
     }
 
     private void inflateShelf() {

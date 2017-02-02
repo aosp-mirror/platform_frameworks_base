@@ -302,4 +302,34 @@
     <item type="id" name="action_split_task_to_right" />
     <item type="id" name="action_split_task_to_top" />
 
+    <!-- Whether or not the gear icon on notifications should be shown. The gear is shown when the
+         the notification is not swiped enough to dismiss it. -->
+    <bool name="config_showNotificationGear">true</bool>
+
+    <!-- Whether or not a background should be drawn behind a notification. -->
+    <bool name="config_drawNotificationBackground">true</bool>
+
+    <!-- Whether or not the edit icon on the quick settings header is shown. -->
+    <bool name="config_showQuickSettingsEditingIcon">true</bool>
+
+    <!-- Whether or not the multi-user switcher should be visible even if the quick settings are
+         not expanded. If there are not multiple users on the system, the switcher will still
+         hide itself. -->
+    <bool name="config_alwaysShowMultiUserSwitcher">false</bool>
+
+    <!-- Whether or not the expand indicator is visible for manually expanding the quick settings
+         panel. -->
+    <bool name="config_showQuickSettingsExpandIndicator">true</bool>
+
+    <!-- Whether or not to display the row of quick settings icons separate from the full quick
+         settings panel. -->
+    <bool name="config_showQuickSettingsRow">true</bool>
+
+    <!-- Whether or not the quick settings should be revealed on an overscroll of the
+         notifications panel. -->
+    <bool name="config_enableQuickSettingsOverscrollExpansion">true</bool>
+
+    <!-- Whether or the notifications can be shown and dismissed with a drag. -->
+    <bool name="config_enableNotificationShadeDrag">true</bool>
+
 </resources>

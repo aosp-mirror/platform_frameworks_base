@@ -23,13 +23,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v4.graphics.ColorUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -49,7 +49,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             = new PathInterpolator(0f, 0, 0.7f, 1f);
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
-    private static final float SCRIM_BEHIND_ALPHA = 0.62f;
     protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
@@ -66,7 +65,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final View mHeadsUpScrim;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
-    protected float mScrimBehindAlpha = SCRIM_BEHIND_ALPHA;
+    protected float mScrimBehindAlpha;
     protected float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
     protected float mScrimBehindAlphaUnlocking = SCRIM_BEHIND_ALPHA_UNLOCKING;
 
@@ -109,6 +108,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mLightBarController = lightBarController;
+        mScrimBehindAlpha = context.getResources().getFloat(R.dimen.scrim_behind_alpha);
+
         updateHeadsUpScrim(false);
     }
 
