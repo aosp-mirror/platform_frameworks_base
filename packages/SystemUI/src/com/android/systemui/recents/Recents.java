@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
+
 import android.app.ActivityManager;
 import android.app.UiModeManager;
 import android.content.ComponentName;
@@ -38,6 +40,7 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -59,6 +62,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.tv.RecentsTvImpl;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,7 +74,7 @@ import java.util.Set;
  * users.
  */
 public class Recents extends SystemUI
-        implements RecentsComponent {
+        implements RecentsComponent, CommandQueue.Callbacks {
 
     private final static String TAG = "Recents";
     private final static boolean DEBUG = false;
@@ -201,6 +205,7 @@ public class Recents extends SystemUI
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
+        getComponent(CommandQueue.class).addCallbacks(this);
         UiModeManager uiModeManager = (UiModeManager) mContext.
                 getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
@@ -247,7 +252,7 @@ public class Recents extends SystemUI
      * Shows the Recents.
      */
     @Override
-    public void showRecents(boolean triggeredFromAltTab, boolean fromHome) {
+    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -256,6 +261,10 @@ public class Recents extends SystemUI
 
         if (proxyToOverridePackage(ACTION_SHOW_RECENTS)) {
             return;
+        }
+        try {
+            ActivityManager.getService().closeSystemDialogs(SYSTEM_DIALOG_REASON_RECENT_APPS);
+        } catch (RemoteException e) {
         }
 
         int recentsGrowTarget = getComponent(Divider.class).getView().growsRecents();
@@ -287,7 +296,7 @@ public class Recents extends SystemUI
      * Hides the Recents.
      */
     @Override
-    public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -316,6 +325,11 @@ public class Recents extends SystemUI
                 }
             }
         }
+    }
+
+    @Override
+    public void toggleRecentApps() {
+        toggleRecents(mContext.getSystemService(WindowManager.class).getDefaultDisplay());
     }
 
     /**
@@ -387,7 +401,7 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public void cancelPreloadingRecents() {
+    public void cancelPreloadRecentApps() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {

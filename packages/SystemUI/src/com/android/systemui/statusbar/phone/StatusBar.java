@@ -270,8 +270,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected static final int MSG_TOGGLE_RECENTS_APPS = 1021;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
-    protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
-    protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
     protected static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU = 1026;
     protected static final int MSG_DISMISS_KEYBOARD_SHORTCUTS_MENU = 1027;
 
@@ -281,8 +279,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     // Should match the values in PhoneWindowManager
-    public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
     public static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+    public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
     private static final String BANNER_ACTION_CANCEL =
             "com.android.systemui.statusbar.banner_action_cancel";
@@ -2760,28 +2758,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void handleMessage(Message m) {
             switch (m.what) {
-                // start old BaseStatusBar.H handling.
-                case MSG_SHOW_RECENT_APPS:
-                    showRecents(m.arg1 > 0, m.arg2 != 0);
-                    break;
-                case MSG_HIDE_RECENT_APPS:
-                    hideRecents(m.arg1 > 0, m.arg2 > 0);
-                    break;
-                case MSG_TOGGLE_RECENTS_APPS:
-                    toggleRecents();
-                    break;
-                case MSG_PRELOAD_RECENT_APPS:
-                    preloadRecents();
-                    break;
-                case MSG_CANCEL_PRELOAD_RECENT_APPS:
-                    cancelPreloadingRecents();
-                    break;
-                case MSG_SHOW_NEXT_AFFILIATED_TASK:
-                    showRecentsNextAffiliatedTask();
-                    break;
-                case MSG_SHOW_PREV_AFFILIATED_TASK:
-                    showRecentsPreviousAffiliatedTask();
-                    break;
                 case MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU:
                     toggleKeyboardShortcuts(m.arg1);
                     break;
@@ -6087,26 +6063,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
-        int msg = MSG_SHOW_RECENT_APPS;
-        mHandler.removeMessages(msg);
-        mHandler.obtainMessage(msg, triggeredFromAltTab ? 1 : 0, fromHome ? 1 : 0).sendToTarget();
-    }
-
-    @Override
-    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        int msg = MSG_HIDE_RECENT_APPS;
-        mHandler.removeMessages(msg);
-        mHandler.obtainMessage(msg, triggeredFromAltTab ? 1 : 0,
-                triggeredFromHomeKey ? 1 : 0).sendToTarget();
-    }
-
-    @Override
-    public void toggleRecentApps() {
-        toggleRecents();
-    }
-
-    @Override
     public void toggleSplitScreen() {
         toggleSplitScreenMode(-1 /* metricsDockAction */, -1 /* metricsUndockAction */);
     }
@@ -6139,51 +6095,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHandler.obtainMessage(msg, deviceId, 0).sendToTarget();
     }
 
-    /** Jumps to the next affiliated task in the group. */
-    public void showNextAffiliatedTask() {
-        int msg = MSG_SHOW_NEXT_AFFILIATED_TASK;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
-    /** Jumps to the previous affiliated task in the group. */
-    public void showPreviousAffiliatedTask() {
-        int msg = MSG_SHOW_PREV_AFFILIATED_TASK;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
-    }
-
     protected void sendCloseSystemWindows(String reason) {
         try {
             ActivityManager.getService().closeSystemDialogs(reason);
         } catch (RemoteException e) {
-        }
-    }
-
-    /** Proxy for RecentsComponent */
-
-    protected void showRecents(boolean triggeredFromAltTab, boolean fromHome) {
-        if (mRecents != null) {
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
-            mRecents.showRecents(triggeredFromAltTab, fromHome);
-        }
-    }
-
-    protected void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        if (mRecents != null) {
-            mRecents.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
-        }
-    }
-
-    protected void toggleRecents() {
-        if (mRecents != null) {
-            mRecents.toggleRecents(mDisplay);
-        }
-    }
-
-    protected void preloadRecents() {
-        if (mRecents != null) {
-            mRecents.preloadRecents();
         }
     }
 
@@ -6193,24 +6108,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void dismissKeyboardShortcuts() {
         KeyboardShortcuts.dismiss();
-    }
-
-    protected void cancelPreloadingRecents() {
-        if (mRecents != null) {
-            mRecents.cancelPreloadingRecents();
-        }
-    }
-
-    protected void showRecentsNextAffiliatedTask() {
-        if (mRecents != null) {
-            mRecents.showNextAffiliatedTask();
-        }
-    }
-
-    protected void showRecentsPreviousAffiliatedTask() {
-        if (mRecents != null) {
-            mRecents.showPrevAffiliatedTask();
-        }
     }
 
     /**
