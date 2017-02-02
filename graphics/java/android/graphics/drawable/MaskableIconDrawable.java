@@ -726,6 +726,9 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         int width = -1;
         for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
             final ChildDrawable r = mLayerState.mChildren[i];
+            if (r.mDrawable == null) {
+                continue;
+            }
             final int w = r.mDrawable.getIntrinsicWidth();
             if (w > width) {
                 width = w;
@@ -743,6 +746,9 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         int height = -1;
         for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
             final ChildDrawable r = mLayerState.mChildren[i];
+            if (r.mDrawable == null) {
+                continue;
+            }
             final int h = r.mDrawable.getIntrinsicHeight();
             if (h > height) {
                 height = h;
