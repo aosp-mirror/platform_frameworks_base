@@ -6273,12 +6273,6 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
-         * Whether brightness should automatically adjust based on twilight state.
-         * @hide
-         */
-        public static final String BRIGHTNESS_USE_TWILIGHT = "brightness_use_twilight";
-
-        /**
          * Names of the service components that the current user has explicitly allowed to
          * be a VR mode listener, separated by ':'.
          *

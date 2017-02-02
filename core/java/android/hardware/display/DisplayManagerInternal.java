@@ -213,9 +213,6 @@ public abstract class DisplayManagerInternal {
         public int dozeScreenBrightness;
         public int dozeScreenState;
 
-        // If true, use twilight to affect the brightness.
-        public boolean useTwilight;
-
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
             useProximitySensor = false;
@@ -251,7 +248,6 @@ public abstract class DisplayManagerInternal {
             boostScreenBrightness = other.boostScreenBrightness;
             dozeScreenBrightness = other.dozeScreenBrightness;
             dozeScreenState = other.dozeScreenState;
-            useTwilight = other.useTwilight;
         }
 
         @Override
@@ -272,8 +268,7 @@ public abstract class DisplayManagerInternal {
                     && lowPowerMode == other.lowPowerMode
                     && boostScreenBrightness == other.boostScreenBrightness
                     && dozeScreenBrightness == other.dozeScreenBrightness
-                    && dozeScreenState == other.dozeScreenState
-                    && useTwilight == other.useTwilight;
+                    && dozeScreenState == other.dozeScreenState;
         }
 
         @Override
@@ -293,8 +288,7 @@ public abstract class DisplayManagerInternal {
                     + ", lowPowerMode=" + lowPowerMode
                     + ", boostScreenBrightness=" + boostScreenBrightness
                     + ", dozeScreenBrightness=" + dozeScreenBrightness
-                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState)
-                    + ", useTwilight=" + useTwilight;
+                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState);
         }
 
         public static String policyToString(int policy) {

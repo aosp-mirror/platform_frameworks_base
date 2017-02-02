@@ -502,15 +502,6 @@ public final class PowerManager {
     }
 
     /**
-     * Returns true if the twilight service should be used to adjust screen brightness
-     * policy.  This setting is experimental and disabled by default.
-     * @hide
-     */
-    public static boolean useTwilightAdjustmentFeature() {
-        return SystemProperties.getBoolean("persist.power.usetwilightadj", false);
-    }
-
-    /**
      * Creates a new wake lock with the specified level and flags.
      * <p>
      * The {@code levelAndFlags} parameter specifies a wake lock level and optional flags
