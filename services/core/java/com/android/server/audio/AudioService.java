@@ -5933,7 +5933,7 @@ public class AudioService extends IAudioService.Stub
         final AccessibilityManager accessibilityManager =
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
-        updateA11yVolumeAlias(accessibilityManager.isEnabled());
+        updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
         accessibilityManager.addTouchExplorationStateChangeListener(this);
         accessibilityManager.addAccessibilityServicesStateChangeListener(this);
     }
@@ -6066,6 +6066,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mSafeMediaVolumeState=");
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
+        pw.print("  sIndependentA11yVolume="); pw.println(sIndependentA11yVolume);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
