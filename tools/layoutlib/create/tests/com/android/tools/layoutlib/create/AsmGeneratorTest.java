@@ -137,6 +137,11 @@ public class AsmGeneratorTest {
             }
 
             @Override
+            public String[] getPromotedClasses() {
+                return EMPTY_STRING_ARRAY;
+            }
+
+            @Override
             public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
                 return Collections.emptyMap();
             }
@@ -207,6 +212,11 @@ public class AsmGeneratorTest {
 
             @Override
             public String[] getPromotedFields() {
+                return EMPTY_STRING_ARRAY;
+            }
+
+            @Override
+            public String[] getPromotedClasses() {
                 return EMPTY_STRING_ARRAY;
             }
 
@@ -293,6 +303,11 @@ public class AsmGeneratorTest {
             }
 
             @Override
+            public String[] getPromotedClasses() {
+                return EMPTY_STRING_ARRAY;
+            }
+
+            @Override
             public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
                 return Collections.emptyMap();
             }
@@ -366,6 +381,11 @@ public class AsmGeneratorTest {
 
             @Override
             public String[] getPromotedFields() {
+                return EMPTY_STRING_ARRAY;
+            }
+
+            @Override
+            public String[] getPromotedClasses() {
                 return EMPTY_STRING_ARRAY;
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,48 @@
 package com.android.tools.layoutlib.create;
 
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
- * Promotes given fields to public visibility.
+ * Promotes given classes to public visibility.
  */
-public class PromoteFieldClassAdapter extends ClassVisitor {
+public class PromoteClassClassAdapter extends ClassVisitor {
 
-    private final Set<String> mFieldNames;
+    private final Set<String> mClassNames;
     private static final int CLEAR_PRIVATE_MASK = ~(ACC_PRIVATE | ACC_PROTECTED);
 
-    public PromoteFieldClassAdapter(ClassVisitor cv, Set<String> fieldNames) {
+    public PromoteClassClassAdapter(ClassVisitor cv, Set<String> classNames) {
         super(Main.ASM_VERSION, cv);
-        mFieldNames = fieldNames;
+        mClassNames =
+                classNames.stream().map(name -> name.replace(".", "/")).collect(Collectors.toSet());
     }
 
     @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature,
-            Object value) {
-        if (mFieldNames.contains(name)) {
+    public void visit(int version, int access, String name, String signature, String superName,
+            String[] interfaces) {
+        if (mClassNames.contains(name)) {
             if ((access & ACC_PUBLIC) == 0) {
                 access = (access & CLEAR_PRIVATE_MASK) | ACC_PUBLIC;
             }
         }
-        return super.visitField(access, name, desc, signature, value);
+
+        super.visit(version, access, name, signature, superName, interfaces);
+    }
+
+    @Override
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        if (mClassNames.contains(name)) {
+            if ((access & ACC_PUBLIC) == 0) {
+                access = (access & CLEAR_PRIVATE_MASK) | ACC_PUBLIC;
+            }
+        }
+
+        super.visitInnerClass(name, outerName, innerName, access);
     }
 }

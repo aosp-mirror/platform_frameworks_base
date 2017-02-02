@@ -78,6 +78,11 @@ public interface ICreateInfo {
     String[] getPromotedFields();
 
     /**
+     * Returns a list of classes to be promoted to public visibility.
+     */
+    String[] getPromotedClasses();
+
+    /**
      * Returns a map from binary FQCN className to {@link InjectMethodRunnable} which will be
      * called to inject methods into a class.
      * Can be empty but must not be null.

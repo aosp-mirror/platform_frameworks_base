@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
+import java.util.stream.Collectors;
 
 /**
  * Class that generates a new JAR from a list of classes, some of which are to be kept as-is
@@ -78,6 +79,8 @@ public class AsmGenerator {
     private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
     /** A map { FQCN => set { field names } } which should be promoted to public visibility */
     private final Map<String, Set<String>> mPromotedFields;
+    /** A list of classes to be promoted to public visibility */
+    private final Set<String> mPromotedClasses;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -179,6 +182,9 @@ public class AsmGenerator {
         addToMap(createInfo.getPromotedFields(), mPromotedFields);
 
         mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
+
+        mPromotedClasses =
+                Arrays.stream(createInfo.getPromotedClasses()).collect(Collectors.toSet());
     }
 
     /**
@@ -400,7 +406,11 @@ public class AsmGenerator {
         if (promoteFields != null && !promoteFields.isEmpty()) {
             cv = new PromoteFieldClassAdapter(cv, promoteFields);
         }
+        if (!mPromotedClasses.isEmpty()) {
+            cv = new PromoteClassClassAdapter(cv, mPromotedClasses);
+        }
         cr.accept(cv, 0);
+
         return cw.toByteArray();
     }
 
