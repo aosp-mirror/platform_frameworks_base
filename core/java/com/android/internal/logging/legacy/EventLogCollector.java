@@ -45,8 +45,6 @@ public class EventLogCollector {
 
     private EventLogCollector() {
         mTagParsers = new ArrayMap<>();
-        addParser(new LockscreenGestureParser());
-        addParser(new StatusBarStateParser());
         addParser(new PowerScreenStateParser());
         addParser(new SysuiMultiActionParser());
 

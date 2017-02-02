@@ -43,6 +43,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
@@ -212,6 +213,7 @@ public class NotificationPanelView extends PanelView implements
     private int mIndicationBottomPadding;
     private boolean mIsFullWidth;
     private boolean mDark;
+    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -710,10 +712,9 @@ public class NotificationPanelView extends PanelView implements
     private void logQsSwipeDown(float y) {
         float vel = getCurrentQSVelocity();
         final int gesture = mStatusBarState == StatusBarState.KEYGUARD
-                ? EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_QS
-                : EventLogConstants.SYSUI_SHADE_GESTURE_SWIPE_DOWN_QS;
-        EventLogTags.writeSysuiLockscreenGesture(
-                gesture,
+                ? MetricsEvent.ACTION_LS_QS
+                : MetricsEvent.ACTION_SHADE_QS_PULL;
+        mLockscreenGestureLogger.write(gesture,
                 (int) ((y - mInitialTouchY) / mStatusBar.getDisplayDensity()),
                 (int) (vel / mStatusBar.getDisplayDensity()));
     }
@@ -1819,9 +1820,7 @@ public class NotificationPanelView extends PanelView implements
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, false /* expand */, null, true /* isClick */);
             } else if (mQsExpansionEnabled) {
-                EventLogTags.writeSysuiLockscreenGesture(
-                        EventLogConstants.SYSUI_TAP_TO_OPEN_QS,
-                        0, 0);
+                mLockscreenGestureLogger.write(MetricsEvent.ACTION_SHADE_QS_TAP, 0, 0);
                 flingSettings(0 /* vel */, true /* expand */, null, true /* isClick */);
             }
         }
@@ -1836,8 +1835,7 @@ public class NotificationPanelView extends PanelView implements
         int lengthDp = Math.abs((int) (translation / displayDensity));
         int velocityDp = Math.abs((int) (vel / displayDensity));
         if (start) {
-            EventLogTags.writeSysuiLockscreenGesture(
-                    EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DIALER, lengthDp, velocityDp);
+            mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_DIALER, lengthDp, velocityDp);
 
             mFalsingManager.onLeftAffordanceOn();
             if (mFalsingManager.shouldEnforceBouncer()) {
@@ -1855,9 +1853,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             if (KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE.equals(
                     mLastCameraLaunchSource)) {
-                EventLogTags.writeSysuiLockscreenGesture(
-                        EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_CAMERA,
-                        lengthDp, velocityDp);
+                mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_CAMERA, lengthDp, velocityDp);
             }
             mFalsingManager.onCameraOn();
             if (mFalsingManager.shouldEnforceBouncer()) {
@@ -2152,8 +2148,8 @@ public class NotificationPanelView extends PanelView implements
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
                 if (!mDozingOnDown) {
-                    EventLogTags.writeSysuiLockscreenGesture(
-                            EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_TAP_UNLOCK_HINT,
+                    mLockscreenGestureLogger.write(
+                            MetricsEvent.ACTION_LS_HINT,
                             0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
                     startUnlockHintAnimation();
                 }

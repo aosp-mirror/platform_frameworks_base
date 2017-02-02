@@ -69,6 +69,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -406,7 +407,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowManager mStatusBarWindowManager;
-    private UnlockMethodCache mUnlockMethodCache;
+    protected UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
@@ -706,6 +707,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NetworkController mNetworkController;
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
+    private LogMaker mStatusBarStateLog;
+    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -3828,6 +3831,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 isSecure,
                 canSkipBouncer);
         if (stateFingerprint != mLastLoggedStateFingerprint) {
+            if (mStatusBarStateLog == null) {
+                mStatusBarStateLog = new LogMaker(MetricsEvent.VIEW_UNKNOWN);
+            }
+            MetricsLogger.action(mStatusBarStateLog
+                    .setCategory(isBouncerShowing ? MetricsEvent.BOUNCER : MetricsEvent.LOCKSCREEN)
+                    .setType(isShowing ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
+                    .setSubtype(isSecure ? 1 : 0));
             EventLogTags.writeSysuiStatusBarState(mState,
                     isShowing ? 1 : 0,
                     isOccluded ? 1 : 0,
@@ -4508,8 +4518,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onActivated(ActivatableNotificationView view) {
-        EventLogTags.writeSysuiLockscreenGesture(
-                EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_TAP_NOTIFICATION_ACTIVATE,
+        mLockscreenGestureLogger.write(
+                MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         mKeyguardIndicationController.showTransientIndication(R.string.notification_tap_again);
         ActivatableNotificationView previousView = mStackScroller.getActivatedChild();
@@ -4626,8 +4636,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public boolean onDraggedDown(View startingChild, int dragLengthY) {
         if (hasActiveNotifications() && (!isDozing() || isPulsing())) {
-            EventLogTags.writeSysuiLockscreenGesture(
-                    EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_FULL_SHADE,
+            mLockscreenGestureLogger.write(
+                    MetricsEvent.ACTION_LS_SHADE,
                     (int) (dragLengthY / mDisplayMetrics.density),
                     0 /* velocityDp - N/A */);
 

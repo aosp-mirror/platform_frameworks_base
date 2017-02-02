@@ -24,14 +24,6 @@ import java.util.Queue;
 
 /** @hide */
 public class LegacyConversionLogger implements TronLogger {
-    public static final String VIEW_KEY = "view";
-    public static final String TYPE_KEY = "type";
-    public static final String EVENT_KEY = "data";
-
-    public static final int TYPE_COUNTER = 1;
-    public static final int TYPE_HISTOGRAM = 2;
-    public static final int TYPE_EVENT = 3;
-
     private final Queue<LogMaker> mQueue;
     private HashMap<String, Boolean> mConfig;
 

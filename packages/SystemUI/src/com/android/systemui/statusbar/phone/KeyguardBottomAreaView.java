@@ -35,6 +35,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.AssetFileDescriptor.AutoCloseOutputStream;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -58,6 +59,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -164,6 +166,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private IntentButton mLeftDefault = mLeftButton;
     private IntentButton mLeftPlugin;
     private String mLeftButtonStr;
+    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -445,8 +448,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void handleTrustCircleClick() {
-        EventLogTags.writeSysuiLockscreenGesture(
-                EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_TAP_LOCK, 0 /* lengthDp - N/A */,
+        mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_LOCK, 0 /* lengthDp - N/A */,
                 0 /* velocityDp - N/A */);
         mIndicationController.showTransientIndication(
                 R.string.keyguard_indication_trust_disabled);
