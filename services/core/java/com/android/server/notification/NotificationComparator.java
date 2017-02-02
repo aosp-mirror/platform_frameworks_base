@@ -31,6 +31,8 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import com.android.internal.util.NotificationMessagingUtil;
+
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -40,18 +42,15 @@ import java.util.Objects;
 public class NotificationComparator
         implements Comparator<NotificationRecord> {
 
-    private final String DEFAULT_SMS_APP_SETTING = Settings.Secure.SMS_DEFAULT_APPLICATION;
-
     private final Context mContext;
+    private final NotificationMessagingUtil mMessagingUtil;
     private String mDefaultPhoneApp;
-    private ArrayMap<Integer, String> mDefaultSmsApp = new ArrayMap<>();
 
     public NotificationComparator(Context context) {
         mContext = context;
         mContext.registerReceiver(mPhoneAppBroadcastReceiver,
                 new IntentFilter(TelecomManager.ACTION_DEFAULT_DIALER_CHANGED));
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(DEFAULT_SMS_APP_SETTING), false, mSmsContentObserver);
+        mMessagingUtil = new NotificationMessagingUtil(mContext);
     }
 
     @Override
@@ -73,9 +72,15 @@ public class NotificationComparator
             return -1 * Boolean.compare(leftImportantOngoing, rightImportantOngoing);
         }
 
+        boolean leftMessaging = isImportantMessaging(left);
+        boolean rightMessaging = isImportantMessaging(right);
+        if (leftMessaging != rightMessaging) {
+            return -1 * Boolean.compare(leftMessaging, rightMessaging);
+        }
+
         // Next: sufficiently import person to person communication
-        boolean leftPeople = isImportantMessaging(left);
-        boolean rightPeople = isImportantMessaging(right);
+        boolean leftPeople = isImportantPeople(left);
+        boolean rightPeople = isImportantPeople(right);
 
         if (leftPeople && rightPeople){
             // by contact proximity, close to far. if same proximity, check further fields.
@@ -128,48 +133,29 @@ public class NotificationComparator
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
-
         // TODO: add whitelist
 
         return isCall(record) || isMediaNotification(record);
     }
 
-    protected boolean isImportantMessaging(NotificationRecord record) {
+    protected boolean isImportantPeople(NotificationRecord record) {
         if (record.getImportance() < NotificationManager.IMPORTANCE_LOW) {
             return false;
         }
-
-        Class<? extends Notification.Style> style = getNotificationStyle(record);
-        if (Notification.MessagingStyle.class.equals(style)) {
-            return true;
-        }
-
         if (record.getContactAffinity() > ValidateNotificationPeople.NONE) {
             return true;
         }
-
-        if (record.getNotification().category == Notification.CATEGORY_MESSAGE
-                && isDefaultMessagingApp(record)) {
-            return true;
-        }
-
         return false;
+    }
+
+    protected boolean isImportantMessaging(NotificationRecord record) {
+        return mMessagingUtil.isImportantMessaging(record.sbn, record.getImportance());
     }
 
     private boolean isOngoing(NotificationRecord record) {
         final int ongoingFlags =
                 Notification.FLAG_FOREGROUND_SERVICE | Notification.FLAG_ONGOING_EVENT;
         return (record.getNotification().flags & ongoingFlags) != 0;
-    }
-
-    private Class<? extends Notification.Style> getNotificationStyle(NotificationRecord record) {
-        String templateClass =
-                record.getNotification().extras.getString(Notification.EXTRA_TEMPLATE);
-
-        if (!TextUtils.isEmpty(templateClass)) {
-            return Notification.getNotificationStyleClass(templateClass);
-        }
-        return null;
     }
 
     private boolean isMediaNotification(NotificationRecord record) {
@@ -191,36 +177,11 @@ public class NotificationComparator
         return Objects.equals(pkg, mDefaultPhoneApp);
     }
 
-    @SuppressWarnings("deprecation")
-    private boolean isDefaultMessagingApp(NotificationRecord record) {
-        final int userId = record.getUserId();
-        if (userId == UserHandle.USER_NULL || userId == UserHandle.USER_ALL) return false;
-        if (mDefaultSmsApp.get(userId) == null) {
-            mDefaultSmsApp.put(userId, Settings.Secure.getStringForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.SMS_DEFAULT_APPLICATION, userId));
-        }
-        return Objects.equals(mDefaultSmsApp.get(userId), record.sbn.getPackageName());
-    }
-
     private final BroadcastReceiver mPhoneAppBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mDefaultPhoneApp =
                     intent.getStringExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME);
-        }
-    };
-
-    private final ContentObserver mSmsContentObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (Settings.Secure.getUriFor(DEFAULT_SMS_APP_SETTING).equals(uri)) {
-                mDefaultSmsApp.put(userId, Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.SMS_DEFAULT_APPLICATION, userId));
-
-            }
         }
     };
 }

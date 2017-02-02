@@ -126,13 +126,13 @@ public class NotificationData {
         }
 
         public boolean cacheContentViews(Context ctx, Notification updatedNotification,
-                boolean isLowPriority) {
+                boolean isLowPriority, boolean useIncreasedCollapsedView) {
             boolean applyInPlace = false;
             if (updatedNotification != null) {
                 final Notification.Builder updatedNotificationBuilder
                         = Notification.Builder.recoverBuilder(ctx, updatedNotification);
                 final RemoteViews newContentView = createContentView(updatedNotificationBuilder,
-                        isLowPriority);
+                        isLowPriority, useIncreasedCollapsedView);
                 final RemoteViews newBigContentView = createBigContentView(
                         updatedNotificationBuilder, isLowPriority);
                 final RemoteViews newHeadsUpContentView =
@@ -162,7 +162,8 @@ public class NotificationData {
                 final Notification.Builder builder
                         = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
 
-                cachedContentView = createContentView(builder, isLowPriority);
+                cachedContentView = createContentView(builder, isLowPriority,
+                        useIncreasedCollapsedView);
                 cachedBigContentView = createBigContentView(builder, isLowPriority);
                 cachedHeadsUpContentView = builder.createHeadsUpContentView();
                 cachedPublicContentView = builder.makePublicContentView();
@@ -188,11 +189,11 @@ public class NotificationData {
         }
 
         private RemoteViews createContentView(Notification.Builder builder,
-                boolean isAmbient) {
-            if (isAmbient) {
+                boolean isLowPriority, boolean useLarge) {
+            if (isLowPriority) {
                 return builder.makeLowPriorityContentView(false /* useRegularSubtext */);
             }
-            return builder.createContentView();
+            return builder.createContentView(useLarge);
         }
 
         // Returns true if the RemoteViews are the same.

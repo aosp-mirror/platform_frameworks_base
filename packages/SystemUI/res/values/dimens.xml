@@ -69,6 +69,9 @@
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">92dp</dimen>
 
+    <!-- Height of a small notification in the status bar if it is a large (like messaging)-->
+    <dimen name="notification_min_height_large">132dp</dimen>
+
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
