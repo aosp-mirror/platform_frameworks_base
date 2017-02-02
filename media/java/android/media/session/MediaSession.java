@@ -77,13 +77,19 @@ public final class MediaSession {
     /**
      * Set this flag on the session to indicate that it can handle media button
      * events.
+     * @deprecated This flag is no longer used. All media sessions are expected to handle media
+     * button events now.
      */
+    @Deprecated
     public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1 << 0;
 
     /**
      * Set this flag on the session to indicate that it handles transport
      * control commands through its {@link Callback}.
+     * @deprecated This flag is no longer used. All media sessions are expected to handle transport
+     * controls now.
      */
+    @Deprecated
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
     /**

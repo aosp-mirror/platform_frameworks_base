@@ -6555,7 +6555,7 @@ public class AudioService extends IAudioService.Stub
 
     public void registerPlaybackCallback(IPlaybackConfigDispatcher pcdb) {
         final boolean isPrivileged =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         mPlaybackMonitor.registerPlaybackCallback(pcdb, isPrivileged);
     }
@@ -6566,7 +6566,7 @@ public class AudioService extends IAudioService.Stub
 
     public List<AudioPlaybackConfiguration> getActivePlaybackConfigurations() {
         final boolean isPrivileged =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         return mPlaybackMonitor.getActivePlaybackConfigurations(isPrivileged);
     }
