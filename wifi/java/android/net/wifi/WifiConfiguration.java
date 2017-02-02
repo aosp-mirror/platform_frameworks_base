@@ -373,6 +373,12 @@ public class WifiConfiguration implements Parcelable {
     public String providerFriendlyName;
 
     /**
+     * Flag indicating if this network is provided by a home Passpoint provider or a roaming
+     * Passpoint provider.
+     */
+    public boolean isHomeProviderNetwork;
+
+    /**
      * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
      * passpoint credential will be considered valid
      */
@@ -1888,6 +1894,7 @@ public class WifiConfiguration implements Parcelable {
             FQDN = source.FQDN;
             roamingConsortiumIds = source.roamingConsortiumIds.clone();
             providerFriendlyName = source.providerFriendlyName;
+            isHomeProviderNetwork = source.isHomeProviderNetwork;
             preSharedKey = source.preSharedKey;
 
             mNetworkSelectionStatus.copy(source.getNetworkSelectionStatus());
@@ -1969,6 +1976,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(apChannel);
         dest.writeString(FQDN);
         dest.writeString(providerFriendlyName);
+        dest.writeInt(isHomeProviderNetwork ? 1 : 0);
         dest.writeInt(roamingConsortiumIds.length);
         for (long roamingConsortiumId : roamingConsortiumIds) {
             dest.writeLong(roamingConsortiumId);
@@ -2035,6 +2043,7 @@ public class WifiConfiguration implements Parcelable {
                 config.apChannel = in.readInt();
                 config.FQDN = in.readString();
                 config.providerFriendlyName = in.readString();
+                config.isHomeProviderNetwork = in.readInt() != 0;
                 int numRoamingConsortiumIds = in.readInt();
                 config.roamingConsortiumIds = new long[numRoamingConsortiumIds];
                 for (int i = 0; i < numRoamingConsortiumIds; i++) {
