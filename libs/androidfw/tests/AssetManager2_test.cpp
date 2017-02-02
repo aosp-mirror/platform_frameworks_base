@@ -26,6 +26,7 @@
 #include "data/lib_two/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
+#include "data/system/R.h"
 
 namespace app = com::android::app;
 namespace appaslib = com::android::appaslib::app;
@@ -59,16 +60,20 @@ class AssetManager2Test : public ::testing::Test {
 
     appaslib_assets_ = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
     ASSERT_NE(nullptr, appaslib_assets_);
+
+    system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
+    ASSERT_NE(nullptr, system_assets_);
   }
 
  protected:
-  std::unique_ptr<ApkAssets> basic_assets_;
-  std::unique_ptr<ApkAssets> basic_de_fr_assets_;
-  std::unique_ptr<ApkAssets> style_assets_;
-  std::unique_ptr<ApkAssets> lib_one_assets_;
-  std::unique_ptr<ApkAssets> lib_two_assets_;
-  std::unique_ptr<ApkAssets> libclient_assets_;
-  std::unique_ptr<ApkAssets> appaslib_assets_;
+  std::unique_ptr<const ApkAssets> basic_assets_;
+  std::unique_ptr<const ApkAssets> basic_de_fr_assets_;
+  std::unique_ptr<const ApkAssets> style_assets_;
+  std::unique_ptr<const ApkAssets> lib_one_assets_;
+  std::unique_ptr<const ApkAssets> lib_two_assets_;
+  std::unique_ptr<const ApkAssets> libclient_assets_;
+  std::unique_ptr<const ApkAssets> appaslib_assets_;
+  std::unique_ptr<const ApkAssets> system_assets_;
 };
 
 TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
@@ -289,6 +294,131 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   EXPECT_EQ(Res_value::TYPE_INT_DEC, bag_two->entries[4].value.dataType);
   EXPECT_EQ(3u, bag_two->entries[4].value.data);
   EXPECT_EQ(0, bag_two->entries[4].cookie);
+}
+
+TEST_F(AssetManager2Test, ResolveReferenceToResource) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get()});
+
+  Res_value value;
+  ResTable_config selected_config;
+  uint32_t flags;
+  ApkAssetsCookie cookie =
+      assetmanager.GetResource(basic::R::integer::ref1, false /*may_be_bag*/,
+                               0u /*density_override*/, &value, &selected_config, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(basic::R::integer::ref2, value.data);
+
+  ResTable_ref last_ref;
+  cookie = assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_ref);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(12000u, value.data);
+  EXPECT_EQ(basic::R::integer::ref2, last_ref.ident);
+}
+
+TEST_F(AssetManager2Test, ResolveReferenceToBag) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get()});
+
+  Res_value value;
+  ResTable_config selected_config;
+  uint32_t flags;
+  ApkAssetsCookie cookie =
+      assetmanager.GetResource(basic::R::integer::number2, true /*may_be_bag*/,
+                               0u /*density_override*/, &value, &selected_config, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(basic::R::array::integerArray1, value.data);
+
+  ResTable_ref last_ref;
+  cookie = assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_ref);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(basic::R::array::integerArray1, value.data);
+  EXPECT_EQ(basic::R::array::integerArray1, last_ref.ident);
+}
+
+static bool IsConfigurationPresent(const std::set<ResTable_config>& configurations,
+                                   const ResTable_config& configuration) {
+  return configurations.count(configuration) > 0;
+}
+
+TEST_F(AssetManager2Test, GetResourceConfigurations) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get(), basic_de_fr_assets_.get()});
+
+  std::set<ResTable_config> configurations = assetmanager.GetResourceConfigurations();
+
+  // We expect the locale sv from the system assets, and de and fr from basic_de_fr assets.
+  // And one extra for the default configuration.
+  EXPECT_EQ(4u, configurations.size());
+
+  ResTable_config expected_config;
+  memset(&expected_config, 0, sizeof(expected_config));
+  expected_config.language[0] = 's';
+  expected_config.language[1] = 'v';
+  EXPECT_TRUE(IsConfigurationPresent(configurations, expected_config));
+
+  expected_config.language[0] = 'd';
+  expected_config.language[1] = 'e';
+  EXPECT_TRUE(IsConfigurationPresent(configurations, expected_config));
+
+  expected_config.language[0] = 'f';
+  expected_config.language[1] = 'r';
+  EXPECT_TRUE(IsConfigurationPresent(configurations, expected_config));
+
+  // Take out the system assets.
+  configurations = assetmanager.GetResourceConfigurations(true /* exclude_system */);
+
+  // We expect de and fr from basic_de_fr assets.
+  EXPECT_EQ(2u, configurations.size());
+
+  expected_config.language[0] = 's';
+  expected_config.language[1] = 'v';
+  EXPECT_FALSE(IsConfigurationPresent(configurations, expected_config));
+
+  expected_config.language[0] = 'd';
+  expected_config.language[1] = 'e';
+  EXPECT_TRUE(IsConfigurationPresent(configurations, expected_config));
+
+  expected_config.language[0] = 'f';
+  expected_config.language[1] = 'r';
+  EXPECT_TRUE(IsConfigurationPresent(configurations, expected_config));
+}
+
+TEST_F(AssetManager2Test, GetResourceLocales) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({system_assets_.get(), basic_de_fr_assets_.get()});
+
+  std::set<std::string> locales = assetmanager.GetResourceLocales();
+
+  // We expect the locale sv from the system assets, and de and fr from basic_de_fr assets.
+  EXPECT_EQ(3u, locales.size());
+  EXPECT_GT(locales.count("sv"), 0u);
+  EXPECT_GT(locales.count("de"), 0u);
+  EXPECT_GT(locales.count("fr"), 0u);
+
+  locales = assetmanager.GetResourceLocales(true /*exclude_system*/);
+  // We expect the de and fr locales from basic_de_fr assets.
+  EXPECT_EQ(2u, locales.size());
+  EXPECT_GT(locales.count("de"), 0u);
+  EXPECT_GT(locales.count("fr"), 0u);
+}
+
+TEST_F(AssetManager2Test, GetResourceId) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get()});
+
+  EXPECT_EQ(basic::R::layout::main,
+            assetmanager.GetResourceId("com.android.basic:layout/main", "", ""));
+  EXPECT_EQ(basic::R::layout::main,
+            assetmanager.GetResourceId("layout/main", "", "com.android.basic"));
+  EXPECT_EQ(basic::R::layout::main,
+            assetmanager.GetResourceId("main", "layout", "com.android.basic"));
 }
 
 TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {}

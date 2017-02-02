@@ -37,6 +37,12 @@
     <public type="integer" name="number2" id="0x7f040001" />
     <integer name="number2">@array/integerArray1</integer>
 
+    <public type="integer" name="ref1" id="0x7f040002" />
+    <integer name="ref1">@integer/ref2</integer>
+
+    <public type="integer" name="ref2" id="0x7f040003" />
+    <integer name="ref2">12000</integer>
+
     <public type="style" name="Theme1" id="0x7f050000" />
     <style name="Theme1">
         <item name="com.android.basic:attr1">100</item>

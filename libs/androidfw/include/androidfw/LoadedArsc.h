@@ -18,6 +18,7 @@
 #define LOADEDARSC_H_
 
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "android-base/macros.h"
@@ -68,19 +69,37 @@ class LoadedPackage {
                  LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
                  uint32_t* out_flags) const;
 
+  // Returns the string pool where type names are stored.
   inline const ResStringPool* GetTypeStringPool() const { return &type_string_pool_; }
 
+  // Returns the string pool where the names of resource entries are stored.
   inline const ResStringPool* GetKeyStringPool() const { return &key_string_pool_; }
 
   inline const std::string& GetPackageName() const { return package_name_; }
 
   inline int GetPackageId() const { return package_id_; }
 
+  // Returns true if this package is dynamic (shared library) and needs to have an ID assigned.
   inline bool IsDynamic() const { return dynamic_; }
 
+  // Returns true if this package originates from a system provided resource.
+  inline bool IsSystem() const { return system_; }
+
+  // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
+  // package could have been assigned a different package ID than what this LoadedPackage was
+  // compiled with. AssetManager rewrites the package IDs so that they are compatible at runtime.
   inline const std::vector<DynamicPackageEntry>& GetDynamicPackageMap() const {
     return dynamic_package_map_;
   }
+
+  // Populates a set of ResTable_config structs, possibly excluding configurations defined for
+  // the mipmap type.
+  void CollectConfigurations(bool exclude_mipmap, std::set<ResTable_config>* out_configs) const;
+
+  // Populates a set of strings representing locales.
+  // If `canonicalize` is set to true, each locale is transformed into its canonical format
+  // before being inserted into the set. This may cause some equivalent locales to de-dupe.
+  void CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
@@ -93,8 +112,9 @@ class LoadedPackage {
   ResStringPool key_string_pool_;
   std::string package_name_;
   int package_id_ = -1;
-  bool dynamic_ = false;
   int type_id_offset_ = 0;
+  bool dynamic_ = false;
+  bool system_ = false;
 
   ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
@@ -104,10 +124,14 @@ class LoadedPackage {
 // when loading, including offsets and lengths.
 class LoadedArsc {
  public:
-  // Load the resource table from memory. The data's lifetime must out-live the
-  // object returned from this method.
-  static std::unique_ptr<LoadedArsc> Load(const void* data, size_t len,
-                                          bool load_as_shared_library = false);
+  // Load a resource table from memory pointed to by `data` of size `len`.
+  // The lifetime of `data` must out-live the LoadedArsc returned from this method.
+  // If `system` is set to true, the LoadedArsc is considered as a system provided resource.
+  // If `load_as_shared_library` is set to true, the application package (0x7f) is treated
+  // as a shared library (0x00). When loaded into an AssetManager, the package will be assigned an
+  // ID.
+  static std::unique_ptr<const LoadedArsc> Load(const void* data, size_t len, bool system = false,
+                                                bool load_as_shared_library = false);
 
   ~LoadedArsc();
 
@@ -125,6 +149,10 @@ class LoadedArsc {
   // Gets a pointer to the name of the package in `resid`, or nullptr if the package doesn't exist.
   const LoadedPackage* GetPackageForId(uint32_t resid) const;
 
+  // Returns true if this is a system provided resource.
+  inline bool IsSystem() const { return system_; }
+
+  // Returns a vector of LoadedPackage pointers, representing the packages in this LoadedArsc.
   inline const std::vector<std::unique_ptr<const LoadedPackage>>& GetPackages() const {
     return packages_;
   }
@@ -137,6 +165,7 @@ class LoadedArsc {
 
   ResStringPool global_string_pool_;
   std::vector<std::unique_ptr<const LoadedPackage>> packages_;
+  bool system_ = false;
 };
 
 }  // namespace android

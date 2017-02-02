@@ -38,7 +38,7 @@ constexpr const static char* kFrameworkPath = "/system/framework/framework-res.a
 static void BM_AssetManagerLoadAssets(benchmark::State& state) {
   std::string path = GetTestDataPath() + "/basic/basic.apk";
   while (state.KeepRunning()) {
-    std::unique_ptr<ApkAssets> apk = ApkAssets::Load(path);
+    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
     AssetManager2 assets;
     assets.SetApkAssets({apk.get()});
   }
@@ -61,7 +61,7 @@ BENCHMARK(BM_AssetManagerLoadAssetsOld);
 static void BM_AssetManagerLoadFrameworkAssets(benchmark::State& state) {
   std::string path = kFrameworkPath;
   while (state.KeepRunning()) {
-    std::unique_ptr<ApkAssets> apk = ApkAssets::Load(path);
+    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
     AssetManager2 assets;
     assets.SetApkAssets({apk.get()});
   }
@@ -84,10 +84,10 @@ BENCHMARK(BM_AssetManagerLoadFrameworkAssetsOld);
 static void GetResourceBenchmark(const std::vector<std::string>& paths,
                                  const ResTable_config* config, uint32_t resid,
                                  benchmark::State& state) {
-  std::vector<std::unique_ptr<ApkAssets>> apk_assets;
+  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
   std::vector<const ApkAssets*> apk_assets_ptrs;
   for (const std::string& path : paths) {
-    std::unique_ptr<ApkAssets> apk = ApkAssets::Load(path);
+    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
     if (apk == nullptr) {
       state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
       return;
@@ -187,7 +187,7 @@ static void BM_AssetManagerGetResourceFrameworkLocaleOld(benchmark::State& state
 BENCHMARK(BM_AssetManagerGetResourceFrameworkLocaleOld);
 
 static void BM_AssetManagerGetBag(benchmark::State& state) {
-  std::unique_ptr<ApkAssets> apk = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
+  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
   if (apk == nullptr) {
     state.SkipWithError("Failed to load assets");
     return;
@@ -233,5 +233,41 @@ static void BM_AssetManagerGetBagOld(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_AssetManagerGetBagOld);
+
+static void BM_AssetManagerGetResourceLocales(benchmark::State& state) {
+  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
+  if (apk == nullptr) {
+    state.SkipWithError("Failed to load assets");
+    return;
+  }
+
+  AssetManager2 assets;
+  assets.SetApkAssets({apk.get()});
+
+  while (state.KeepRunning()) {
+    std::set<std::string> locales =
+        assets.GetResourceLocales(false /*exclude_system*/, true /*merge_equivalent_languages*/);
+    benchmark::DoNotOptimize(locales);
+  }
+}
+BENCHMARK(BM_AssetManagerGetResourceLocales);
+
+static void BM_AssetManagerGetResourceLocalesOld(benchmark::State& state) {
+  AssetManager assets;
+  if (!assets.addAssetPath(String8(kFrameworkPath), nullptr /*cookie*/, false /*appAsLib*/,
+                           false /*isSystemAssets*/)) {
+    state.SkipWithError("Failed to load assets");
+    return;
+  }
+
+  const ResTable& table = assets.getResources(true);
+
+  while (state.KeepRunning()) {
+    Vector<String8> locales;
+    table.getLocales(&locales, true /*includeSystemLocales*/, true /*mergeEquivalentLangs*/);
+    benchmark::DoNotOptimize(locales);
+  }
+}
+BENCHMARK(BM_AssetManagerGetResourceLocalesOld);
 
 }  // namespace android

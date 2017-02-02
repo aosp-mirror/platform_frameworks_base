@@ -53,6 +53,8 @@ struct R {
     enum : uint32_t {
       number1 = 0x7f040000,
       number2 = 0x7f040001,
+      ref1 = 0x7f040002,
+      ref2 = 0x7f040003,
 
       // From feature
       number3 = 0x7f090000,
