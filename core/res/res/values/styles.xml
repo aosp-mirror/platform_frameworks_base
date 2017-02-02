@@ -322,6 +322,7 @@ please see styles_device_defaults.xml.
         <item name="scrollbars">vertical</item>
         <item name="fadingEdge">vertical</item>
         <item name="fastScrollStyle">?attr/fastScrollStyle</item>
+        <item name="defaultFocusHighlightEnabled">false</item>
     </style>
 
     <style name="Widget.GestureOverlayView">
@@ -538,6 +539,7 @@ please see styles_device_defaults.xml.
         <item name="gravity">center_vertical</item>
         <item name="breakStrategy">simple</item>
         <item name="hyphenationFrequency">normal</item>
+        <item name="defaultFocusHighlightEnabled">false</item>
     </style>
 
     <style name="Widget.ExpandableListView" parent="Widget.ListView">
