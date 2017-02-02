@@ -2203,7 +2203,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    void wipeDataLocked(int flags) {
+    void wipeDataNoLock(int flags) {
         // If the SD card is encrypted and non-removable, we have to force a wipe.
         boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
         boolean wipeExtRequested = (flags&DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0;
@@ -2234,18 +2234,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                wipeDeviceOrUserLocked(flags, userHandle);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            wipeDeviceNoLock(flags, userHandle);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void wipeDeviceOrUserLocked(int flags, final int userHandle) {
+    private void wipeDeviceNoLock(int flags, final int userHandle) {
         if (userHandle == UserHandle.USER_OWNER) {
-            wipeDataLocked(flags);
+            wipeDataNoLock(flags);
         } else {
             lockNowUnchecked();
             mHandler.post(new Runnable() {
@@ -2361,23 +2361,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
-        synchronized (this) {
-            DevicePolicyData policy = getUserData(userHandle);
-            long ident = Binder.clearCallingIdentity();
-            try {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            boolean wipeData = false;
+            synchronized (this) {
+                DevicePolicyData policy = getUserData(userHandle);
                 policy.mFailedPasswordAttempts++;
                 saveSettingsLocked(userHandle);
                 if (mHasFeature) {
                     int max = getMaximumFailedPasswordsForWipe(null, userHandle);
                     if (max > 0 && policy.mFailedPasswordAttempts >= max) {
-                        wipeDeviceOrUserLocked(0, userHandle);
+                        wipeData = true;
                     }
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+            if (wipeData) {
+                wipeDeviceNoLock(0, userHandle);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
