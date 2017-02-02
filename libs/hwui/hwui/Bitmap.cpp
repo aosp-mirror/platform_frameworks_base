@@ -152,6 +152,23 @@ private:
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
 };
 
+class AutoGlTexture {
+public:
+    AutoGlTexture(uirenderer::Caches& caches)
+            : mCaches(caches) {
+        glGenTextures(1, &mTexture);
+        caches.textureState().bindTexture(mTexture);
+    }
+
+    ~AutoGlTexture() {
+        mCaches.textureState().deleteTexture(mTexture);
+    }
+
+private:
+    uirenderer::Caches& mCaches;
+    GLuint mTexture = 0;
+};
+
 static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bitmap,
         GraphicBuffer& buffer, GLint format, GLint type) {
     SkAutoLockPixels alp(bitmap);
@@ -159,10 +176,6 @@ static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bi
     LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY,
                 "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
                 uirenderer::renderthread::EglManager::eglErrorString());
-    // These objects are initialized below but the default "null"
-    // values are used to cleanup properly at any point in the
-    // initialization sequenc
-    GLuint texture = 0;
     // We use an EGLImage to access the content of the GraphicBuffer
     // The EGL image is later bound to a 2D texture
     EGLClientBuffer clientBuffer = (EGLClientBuffer) buffer.getNativeBuffer();
@@ -172,8 +185,7 @@ static bool uploadBitmapToGraphicBuffer(uirenderer::Caches& caches, SkBitmap& bi
                 uirenderer::renderthread::EglManager::eglErrorString());
         return false;
     }
-    glGenTextures(1, &texture);
-    caches.textureState().bindTexture(texture);
+    AutoGlTexture glTexture(caches);
     glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, autoImage.image);
 
     GL_CHECKPOINT(MODERATE);
