@@ -5033,9 +5033,7 @@ public class PackageParser {
     }
 
     private boolean isWebBrowsableIntent(IntentInfo intent) {
-        return intent.hasAction(Intent.ACTION_VIEW)
-                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
-                && (intent.hasDataScheme("http") || intent.hasDataScheme("https"));
+        return intent.hasCategory(Intent.CATEGORY_BROWSABLE);
     }
 
     private boolean parseAllMetaData(Resources res, XmlResourceParser parser, String tag,
