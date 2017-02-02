@@ -33,6 +33,7 @@ import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
@@ -63,6 +64,7 @@ final class AutoFillUI {
 
     private final Context mContext;
     private final Session mSession;
+    private final IBinder mAppToken;
     private final WindowManager mWm;
 
     // Fill UI variables
@@ -77,9 +79,10 @@ final class AutoFillUI {
      */
     private View mSnackbar;
 
-    AutoFillUI(Context context, Session session) {
+    AutoFillUI(Context context, Session session, IBinder appToken) {
         mContext = context;
         mSession = session;
+        mAppToken = appToken;
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 

@@ -813,7 +813,7 @@ final class AutoFillManagerServiceImpl {
         final int mId;
 
         private Session(int id, IBinder activityToken) {
-            mUi = new AutoFillUI(mContext, this);
+            mUi = new AutoFillUI(mContext, this, activityToken);
             mId = id;
             mActivityToken = new WeakReference<>(activityToken);
         }
