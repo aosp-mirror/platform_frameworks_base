@@ -3332,6 +3332,75 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         MoreAsserts.assertEmpty(targetUsers);
     }
 
+    public void testLockTaskPackagesAllowedForAffiliatedUsers() throws Exception {
+        // Setup a device owner.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // Lock task packages are updated when loading user data.
+        verify(mContext.iactivityManager)
+                .updateLockTaskPackages(eq(UserHandle.USER_SYSTEM), eq(new String[0]));
+
+        // Set up a managed profile managed by different package (package name shouldn't matter)
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
+        final ComponentName adminDifferentPackage =
+                new ComponentName("another.package", "whatever.class");
+        addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
+        verify(mContext.iactivityManager)
+                .updateLockTaskPackages(eq(MANAGED_PROFILE_USER_ID), eq(new String[0]));
+
+        // The DO can still set lock task packages
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        final String[] doPackages = {"doPackage1", "doPackage2"};
+        dpm.setLockTaskPackages(admin1, doPackages);
+        MoreAsserts.assertEquals(doPackages, dpm.getLockTaskPackages(admin1));
+        assertTrue(dpm.isLockTaskPermitted("doPackage1"));
+        assertFalse(dpm.isLockTaskPermitted("anotherPackage"));
+        verify(mContext.iactivityManager)
+                .updateLockTaskPackages(eq(UserHandle.USER_SYSTEM), eq(doPackages));
+
+        // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        final String[] poPackages = {"poPackage1", "poPackage2"};
+        try {
+            dpm.setLockTaskPackages(adminDifferentPackage, poPackages);
+            fail("Didn't throw expected security exception.");
+        } catch (SecurityException expected) {
+        }
+        try {
+            dpm.getLockTaskPackages(adminDifferentPackage);
+            fail("Didn't throw expected security exception.");
+        } catch (SecurityException expected) {
+        }
+        assertFalse(dpm.isLockTaskPermitted("doPackage1"));
+
+        // Setting same affiliation ids
+        final List<String> userAffiliationIds = Arrays.asList("some-affiliation-id");
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        dpm.setAffiliationIds(admin1, userAffiliationIds);
+
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        dpm.setAffiliationIds(adminDifferentPackage, userAffiliationIds);
+
+        // Now the managed profile can set lock task packages.
+        dpm.setLockTaskPackages(adminDifferentPackage, poPackages);
+        MoreAsserts.assertEquals(poPackages, dpm.getLockTaskPackages(adminDifferentPackage));
+        assertTrue(dpm.isLockTaskPermitted("poPackage1"));
+        assertFalse(dpm.isLockTaskPermitted("doPackage2"));
+        verify(mContext.iactivityManager)
+                .updateLockTaskPackages(eq(MANAGED_PROFILE_USER_ID), eq(poPackages));
+
+        // Unaffiliate the profile, lock task mode no longer available on the profile.
+        dpm.setAffiliationIds(adminDifferentPackage, Collections.<String>emptyList());
+        assertFalse(dpm.isLockTaskPermitted("poPackage1"));
+        // Lock task packages cleared when loading user data and when the user becomes unaffiliated.
+        verify(mContext.iactivityManager, times(2))
+                .updateLockTaskPackages(eq(MANAGED_PROFILE_USER_ID), eq(new String[0]));
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        assertTrue(dpm.isLockTaskPermitted("doPackage1"));
+    }
+
     public void testIsDeviceManaged() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();

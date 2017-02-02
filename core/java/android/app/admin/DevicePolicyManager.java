@@ -6073,20 +6073,24 @@ public class DevicePolicyManager {
     /**
      * Sets which packages may enter lock task mode.
      * <p>
-     * Any packages that shares uid with an allowed package will also be allowed to activate lock
+     * Any packages that share uid with an allowed package will also be allowed to activate lock
      * task. From {@link android.os.Build.VERSION_CODES#M} removing packages from the lock task
-     * package list results in locked tasks belonging to those packages to be finished. This
-     * function can only be called by the device owner.
+     * package list results in locked tasks belonging to those packages to be finished.
+     * <p>
+     * This function can only be called by the device owner or by a profile owner of a user/profile
+     * that is affiliated with the device owner user. See {@link #setAffiliationIds}. Any packages
+     * set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
+     * an affiliated user or profile.
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
      * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
      * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
-    public void setLockTaskPackages(@NonNull ComponentName admin, String[] packages)
+    public void setLockTaskPackages(@NonNull ComponentName admin, @NonNull String[] packages)
             throws SecurityException {
         throwIfParentInstance("setLockTaskPackages");
         if (mService != null) {
@@ -6099,9 +6103,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * This function returns the list of packages allowed to start the lock task mode.
+     * Returns the list of packages allowed to start the lock task mode.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
+     * an affiliated user or profile.
+     * @see #setLockTaskPackages
+     *
      * @hide
      */
     public @NonNull String[] getLockTaskPackages(@NonNull ComponentName admin) {
@@ -6113,7 +6120,7 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return null;
+        return new String[0];
     }
 
     /**
