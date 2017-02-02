@@ -1615,7 +1615,7 @@ class ActivityStarter {
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                     mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity.mActivityType);
-            mStartActivity.setTask(task, taskToAffiliate);
+            addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
             if (mLaunchBounds != null) {
                 final int stackId = mTargetStack.mStackId;
                 if (StackId.resizeStackWithLaunchBounds(stackId)) {
@@ -1625,11 +1625,14 @@ class ActivityStarter {
                     mStartActivity.task.updateOverrideConfiguration(mLaunchBounds);
                 }
             }
-            if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                    "Starting new activity " +
-                            mStartActivity + " in new task " + mStartActivity.task);
+            if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
+                    + " in new task " + mStartActivity.task);
         } else {
-            mStartActivity.setTask(mReuseTask, taskToAffiliate);
+            addOrReparentStartingActivity(mReuseTask, "setTaskFromReuseOrCreateNewTask");
+        }
+
+        if (taskToAffiliate != null) {
+            mStartActivity.setTaskToAffiliateWith(taskToAffiliate);
         }
 
         if (mSupervisor.isLockTaskModeViolation(mStartActivity.task)) {
@@ -1719,7 +1722,7 @@ class ActivityStarter {
 
         // An existing activity is starting this new activity, so we want to keep the new one in
         // the same task as the one that is starting it.
-        mStartActivity.setTask(sourceTask, null);
+        addOrReparentStartingActivity(sourceTask, "setTaskFromSourceRecord");
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                 + " in existing task " + mStartActivity.task + " from source " + mSourceRecord);
         return START_SUCCESS;
@@ -1752,7 +1755,8 @@ class ActivityStarter {
         // Check whether we should actually launch the new activity in to the task,
         // or just reuse the current activity on top.
         ActivityRecord top = mInTask.getTopActivity();
-        if (top != null && top.realActivity.equals(mStartActivity.realActivity) && top.userId == mStartActivity.userId) {
+        if (top != null && top.realActivity.equals(mStartActivity.realActivity)
+                && top.userId == mStartActivity.userId) {
             if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                     || mLaunchSingleTop || mLaunchSingleTask) {
                 ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.task);
@@ -1761,7 +1765,8 @@ class ActivityStarter {
                     // anything if that is the case, so this is it!
                     return START_RETURN_INTENT_TO_CALLER;
                 }
-                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+                        mStartActivity.launchedFromPackage);
                 return START_DELIVERED_TO_TOP;
             }
         }
@@ -1773,9 +1778,9 @@ class ActivityStarter {
             return START_TASK_TO_FRONT;
         }
 
-        mStartActivity.setTask(mInTask, null);
-        if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                "Starting new activity " + mStartActivity + " in explicit task " + mStartActivity.task);
+        addOrReparentStartingActivity(mInTask, "setTaskFromInTask");
+        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
+                + " in explicit task " + mStartActivity.task);
 
         return START_SUCCESS;
     }
@@ -1790,10 +1795,18 @@ class ActivityStarter {
         final TaskRecord task = (prev != null) ? prev.task : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
                 mIntent, null, null, true, mStartActivity.mActivityType);
-        mStartActivity.setTask(task, null);
-        mStartActivity.task.getStack().positionChildWindowContainerAtTop(mStartActivity.task);
-        if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                "Starting new activity " + mStartActivity + " in new guessed " + mStartActivity.task);
+        addOrReparentStartingActivity(task, "setTaskToCurrentTopOrCreateNewTask");
+        mTargetStack.positionChildWindowContainerAtTop(task);
+        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
+                + " in new guessed " + mStartActivity.task);
+    }
+
+    private void addOrReparentStartingActivity(TaskRecord parent, String reason) {
+        if (mStartActivity.task == null) {
+            parent.addActivityToTop(mStartActivity);
+        } else {
+            mStartActivity.reparent(parent, parent.mActivities.size() /* top */, reason);
+        }
     }
 
     private int adjustLaunchFlagsToDocumentMode(ActivityRecord r, boolean launchSingleInstance,
