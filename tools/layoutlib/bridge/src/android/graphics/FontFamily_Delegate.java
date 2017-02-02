@@ -313,7 +313,8 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontFromAsset(long builderPtr, AssetManager mgr, String path) {
+    /*package*/ static boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr, String path,
+            int cookie, boolean isAsset) {
         FontFamily_Delegate ffd = sManager.getDelegate(builderPtr);
         if (ffd == null) {
             return false;
@@ -388,6 +389,10 @@ public class FontFamily_Delegate {
         return false;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static void nAbort(long builderPtr) {
+        sManager.removeJavaReferenceFor(builderPtr);
+    }
 
     // ---- private helper methods ----
 

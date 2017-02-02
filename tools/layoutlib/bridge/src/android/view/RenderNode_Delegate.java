@@ -57,7 +57,7 @@ public class RenderNode_Delegate {
     private String mName;
 
     @LayoutlibDelegate
-    /*package*/ static long nCreate(RenderNode thisRenderNode, String name) {
+    /*package*/ static long nCreate(String name) {
         RenderNode_Delegate renderNodeDelegate = new RenderNode_Delegate();
         renderNodeDelegate.mName = name;
         return sManager.addNewDelegate(renderNodeDelegate);

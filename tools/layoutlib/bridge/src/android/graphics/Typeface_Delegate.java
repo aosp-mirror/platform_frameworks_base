@@ -16,12 +16,14 @@
 
 package android.graphics;
 
-import android.text.FontConfig;
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.NonNull;
 import android.graphics.FontFamily_Delegate.FontVariant;
+import android.text.FontConfig;
 
 import java.awt.Font;
 import java.io.File;
@@ -157,6 +159,18 @@ public final class Typeface_Delegate {
 
         return sManager.addNewDelegate(new Typeface_Delegate(delegate.mFontFamilies, style,
                 delegate.mWeight));
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static synchronized long nativeCreateFromTypefaceWithVariation(long native_instance,
+            List<FontConfig.Axis> axes) {
+        long newInstance = nativeCreateFromTypeface(native_instance, 0);
+
+        if (newInstance != 0) {
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                    "nativeCreateFromTypefaceWithVariation is not supported", null, null);
+        }
+        return newInstance;
     }
 
     @LayoutlibDelegate
