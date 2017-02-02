@@ -27,12 +27,16 @@ message NetworkStatsServiceDumpProto {
 
     repeated NetworkInterfaceProto active_uid_interfaces = 2;
 
+    // Device level network stats, which may include non-IP layer traffic.
     NetworkStatsRecorderProto dev_stats = 3;
 
+    // IP-layer traffic stats.
     NetworkStatsRecorderProto xt_stats = 4;
 
+    // Per-UID network stats.
     NetworkStatsRecorderProto uid_stats = 5;
 
+    // Per-UID, per-tag network stats, excluding the default tag (i.e. tag=0).
     NetworkStatsRecorderProto uid_tag_stats = 6;
 }
 
