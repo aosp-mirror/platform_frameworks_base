@@ -34,6 +34,7 @@ public class PipTouchState {
     private final PointF mLastTouch = new PointF();
     private final PointF mLastDelta = new PointF();
     private final PointF mVelocity = new PointF();
+    private boolean mIsUserInteracting = false;
     private boolean mIsDragging = false;
     private boolean mStartedDragging = false;
     private boolean mAllowDraggingOffscreen = false;
@@ -57,6 +58,7 @@ public class PipTouchState {
                 mIsDragging = false;
                 mStartedDragging = false;
                 mAllowDraggingOffscreen = true;
+                mIsUserInteracting = true;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -107,6 +109,7 @@ public class PipTouchState {
                 // Fall through to clean up
             }
             case MotionEvent.ACTION_CANCEL: {
+                mIsUserInteracting = false;
                 recycleVelocityTracker();
                 break;
             }
@@ -148,6 +151,13 @@ public class PipTouchState {
      */
     public boolean isDragging() {
         return mIsDragging;
+    }
+
+    /**
+     * @return whether the user is currently interacting with the PiP.
+     */
+    public boolean isUserInteracting() {
+        return mIsUserInteracting;
     }
 
     /**

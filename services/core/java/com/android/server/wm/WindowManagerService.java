@@ -2829,36 +2829,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mDockedStackCreateBounds = bounds;
     }
 
-    @Override
-    public Rect getPictureInPictureDefaultBounds(int displayId) {
-        synchronized (mWindowMap) {
-            if (!mSupportsPictureInPicture) {
-                return null;
-            }
-
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            return displayContent.getPinnedStackController().getDefaultBounds();
-        }
-    }
-
-    @Override
-    public Rect getPictureInPictureMovementBounds(int displayId) {
-        synchronized (mWindowMap) {
-            if (!mSupportsPictureInPicture) {
-                return null;
-            }
-
-            final Rect stackBounds = new Rect();
-            getStackBounds(PINNED_STACK_ID, stackBounds);
-            if (stackBounds.isEmpty()) {
-                return stackBounds;
-            }
-
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            return displayContent.getPinnedStackController().getMovementBounds(stackBounds);
-        }
-    }
-
     public Rect getPictureInPictureBounds(int displayId, float aspectRatio) {
         synchronized (mWindowMap) {
             if (!mSupportsPictureInPicture) {
@@ -2871,6 +2841,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 return null;
             }
 
+            final PinnedStackController pinnedStackController =
+                    displayContent.getPinnedStackController();
             final TaskStack stack = displayContent.getStackById(PINNED_STACK_ID);
             if (stack != null) {
                 // If the stack exists, then use its final bounds to calculate the new aspect ratio
@@ -2879,11 +2851,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 stack.getAnimatingBounds(stackBounds);
             } else {
                 // Otherwise, just calculate the aspect ratio bounds from the default bounds
-                stackBounds = displayContent.getPinnedStackController().getDefaultBounds();
+                stackBounds = pinnedStackController.getDefaultBounds();
             }
-            return displayContent.getPinnedStackController().getAspectRatioBounds(stackBounds,
-                    aspectRatio);
+
+            if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
+                return pinnedStackController.transformBoundsToAspectRatio(stackBounds, aspectRatio);
+            } else {
+                return stackBounds;
+            }
         }
+    }
+
+    public boolean isValidPictureInPictureAspectRatio(int displayId, float aspectRatio) {
+        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+        return displayContent.getPinnedStackController().isValidPictureInPictureAspectRatio(
+                aspectRatio);
     }
 
     @Override

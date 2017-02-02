@@ -16,21 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
-import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
-import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
-import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
-
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -47,8 +36,6 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.os.BackgroundThread;
-import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -60,23 +47,14 @@ import com.android.systemui.tuner.TunerService;
  */
 public class PipTouchHandler implements TunerService.Tunable {
     private static final String TAG = "PipTouchHandler";
-    private static final boolean DEBUG_ALLOW_OUT_OF_BOUNDS_STACK = false;
 
     // These values are used for metrics and should never change
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
     private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
     private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
-    private static final String TUNER_KEY_ALLOW_MINIMIZE = "pip_allow_minimize";
 
-    private static final int SNAP_STACK_DURATION = 225;
-    private static final int DISMISS_STACK_DURATION = 375;
-    private static final int EXPAND_STACK_DURATION = 225;
-    private static final int MINIMIZE_STACK_MAX_DURATION = 200;
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 200;
-
-    // The fraction of the stack width that the user has to drag offscreen to minimize the PIP
-    private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.2f;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -86,34 +64,28 @@ public class PipTouchHandler implements TunerService.Tunable {
     private IPinnedStackController mPinnedStackController;
 
     private PipInputEventReceiver mInputEventReceiver;
-    private PipMenuActivityController mMenuController;
-    private PipDismissViewController mDismissViewController;
+    private final PipMenuActivityController mMenuController;
+    private final PipDismissViewController mDismissViewController;
     private final PipSnapAlgorithm mSnapAlgorithm;
-    private PipMotionHelper mMotionHelper;
 
     // Allow dragging the PIP to a location to close it
     private boolean mEnableDragToDismiss = false;
-    // Allow the PIP to be "docked" slightly offscreen
-    private boolean mEnableMinimizing = true;
 
-    private final Rect mStableInsets = new Rect();
-    private final Rect mPinnedStackBounds = new Rect();
-    private final Rect mBoundedPinnedStackBounds = new Rect();
-    private ValueAnimator mPinnedStackBoundsAnimator = null;
-    private ValueAnimator.AnimatorUpdateListener mUpdatePinnedStackBoundsListener =
-            new AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            mPinnedStackBounds.set((Rect) animation.getAnimatedValue());
-        }
-    };
+    // The current movement bounds
+    private Rect mMovementBounds = new Rect();
+
+    // The reference bounds used to calculate the normal/expanded target bounds
+    private Rect mNormalBounds = new Rect();
+    private Rect mNormalMovementBounds = new Rect();
+    private Rect mExpandedBounds = new Rect();
+    private Rect mExpandedMovementBounds = new Rect();
 
     private Handler mHandler = new Handler();
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
             if (mEnableDragToDismiss) {
-                mDismissViewController.showDismissTarget(mPinnedStackBounds);
+                mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
         }
     };
@@ -121,13 +93,18 @@ public class PipTouchHandler implements TunerService.Tunable {
     // Behaviour states
     private boolean mIsTappingThrough;
     private boolean mIsMinimized;
+    private boolean mIsMenuVisible;
+    private boolean mIsImeShowing;
+    private int mImeHeight;
+    private float mSavedSnapFraction = -1f;
 
     // Touch state
     private final PipTouchState mTouchState;
     private final FlingAnimationUtils mFlingAnimationUtils;
     private final PipTouchGesture[] mGestures;
+    private final PipMotionHelper mMotionHelper;
 
-    // Temporary vars
+    // Temp vars
     private final Rect mTmpBounds = new Rect();
 
     /**
@@ -160,32 +137,25 @@ public class PipTouchHandler implements TunerService.Tunable {
     private class PipMenuListener implements PipMenuActivityController.Listener {
         @Override
         public void onPipMenuVisibilityChanged(boolean visible) {
-            if (!visible) {
-                mIsTappingThrough = false;
-                registerInputConsumer();
-            } else {
-                unregisterInputConsumer();
-            }
-            MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                    visible);
+            setMenuVisibilityState(visible);
         }
 
         @Override
         public void onPipExpand() {
             if (!mIsMinimized) {
-                expandPinnedStackToFullscreen();
+                mMotionHelper.expandPip();
             }
         }
 
         @Override
         public void onPipMinimize() {
-            setMinimizedState(true);
-            animateToClosestMinimizedTarget();
+            setMinimizedStateInternal(true);
+            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, mMenuController);
         }
 
         @Override
         public void onPipDismiss() {
-            BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
+            mMotionHelper.dismissPip();
             MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                     METRIC_VALUE_DISMISSED_BY_TAP);
         }
@@ -208,13 +178,12 @@ public class PipTouchHandler implements TunerService.Tunable {
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
-        mMotionHelper = new PipMotionHelper(BackgroundThread.getHandler());
+        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mSnapAlgorithm,
+                mFlingAnimationUtils);
         registerInputConsumer();
-        setSnapToEdge(true);
 
         // Register any tuner settings changes
-        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_DRAG_TO_DISMISS,
-                TUNER_KEY_ALLOW_MINIMIZE);
+        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_DRAG_TO_DISMISS);
     }
 
     @Override
@@ -222,16 +191,11 @@ public class PipTouchHandler implements TunerService.Tunable {
         if (newValue == null) {
             // Reset back to default
             mEnableDragToDismiss = false;
-            mEnableMinimizing = true;
-            setMinimizedState(false);
             return;
         }
         switch (key) {
             case TUNER_KEY_DRAG_TO_DISMISS:
                 mEnableDragToDismiss = Integer.parseInt(newValue) != 0;
-                break;
-            case TUNER_KEY_ALLOW_MINIMIZE:
-                mEnableMinimizing = Integer.parseInt(newValue) != 0;
                 break;
         }
     }
@@ -243,26 +207,70 @@ public class PipTouchHandler implements TunerService.Tunable {
             registerInputConsumer();
         }
         if (mIsMinimized) {
-            setMinimizedState(false);
+            setMinimizedStateInternal(false);
         }
     }
 
     public void onConfigurationChanged() {
-        mSnapAlgorithm.onConfigurationChanged();
-        updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
+        mMotionHelper.onConfigurationChanged();
+        mMotionHelper.synchronizePinnedStackBounds();
     }
 
-    public void onMinimizedStateChanged(boolean isMinimized) {
-        if (mIsMinimized != isMinimized) {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
-                    isMinimized);
+    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+        mIsImeShowing = imeVisible;
+        mImeHeight = imeHeight;
+    }
+
+    public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+            boolean fromImeAdjustement) {
+        // Re-calculate the expanded bounds
+        mNormalBounds = normalBounds;
+        Rect normalMovementBounds = new Rect();
+        mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalMovementBounds,
+                mIsImeShowing ? mImeHeight : 0);
+        // TODO: Figure out the expanded size policy
+        mExpandedBounds = new Rect(normalBounds);
+        Rect expandedMovementBounds = new Rect();
+        mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
+                mIsImeShowing ? mImeHeight : 0);
+
+
+        // If this is from an IME adjustment, then we should move the PiP so that it is not occluded
+        // by the IME
+        if (fromImeAdjustement) {
+            if (mTouchState.isUserInteracting()) {
+                // Defer the update of the current movement bounds until after the user finishes
+                // touching the screen
+            } else {
+                final Rect bounds = new Rect(mMotionHelper.getBounds());
+                final Rect toMovementBounds = mIsMenuVisible
+                        ? expandedMovementBounds
+                        : normalMovementBounds;
+                if (mIsImeShowing) {
+                    // IME visible
+                    if (bounds.top == mMovementBounds.bottom) {
+                        // If the PIP is currently resting on top of the IME, then adjust it with
+                        // the hiding IME
+                        bounds.offsetTo(bounds.left, toMovementBounds.bottom);
+                    } else {
+                        bounds.offset(0, Math.min(0, toMovementBounds.bottom - bounds.top));
+                    }
+                } else {
+                    // IME hidden
+                    if (bounds.top == mMovementBounds.bottom) {
+                        // If the PIP is resting on top of the IME, then adjust it with the hiding IME
+                        bounds.offsetTo(bounds.left, toMovementBounds.bottom);
+                    }
+                }
+                mMotionHelper.animateToBounds(bounds);
+            }
         }
-        mIsMinimized = isMinimized;
-        mSnapAlgorithm.setMinimized(isMinimized);
-    }
 
-    public void onSnapToEdgeStateChanged(boolean isSnapToEdge) {
-        mSnapAlgorithm.setSnapToEdge(isSnapToEdge);
+        // Update the movement bounds after doing the calculations based on the old movement bounds
+        // above
+        mNormalMovementBounds = normalMovementBounds;
+        mExpandedMovementBounds = expandedMovementBounds;
+        updateMovementBounds();
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -276,19 +284,10 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                // Cancel any existing animations on the pinned stack
-                if (mPinnedStackBoundsAnimator != null) {
-                    mPinnedStackBoundsAnimator.cancel();
-                }
+                mMotionHelper.synchronizePinnedStackBounds();
 
-                updateBoundedPinnedStackBounds(true /* updatePinnedStackBounds */);
                 for (PipTouchGesture gesture : mGestures) {
                     gesture.onDown(mTouchState);
-                }
-                try {
-                    mPinnedStackController.setInInteractiveMode(true);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not set dragging state", e);
                 }
                 break;
             }
@@ -303,7 +302,7 @@ public class PipTouchHandler implements TunerService.Tunable {
             case MotionEvent.ACTION_UP: {
                 // Update the movement bounds again if the state has changed since the user started
                 // dragging (ie. when the IME shows)
-                updateBoundedPinnedStackBounds(false /* updatePinnedStackBounds */);
+                updateMovementBounds();
 
                 for (PipTouchGesture gesture : mGestures) {
                     if (gesture.onUp(mTouchState)) {
@@ -314,25 +313,10 @@ public class PipTouchHandler implements TunerService.Tunable {
                 // Fall through to clean up
             }
             case MotionEvent.ACTION_CANCEL: {
-                try {
-                    mPinnedStackController.setInInteractiveMode(false);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not set dragging state", e);
-                }
                 break;
             }
         }
         return !mIsTappingThrough;
-    }
-
-    /**
-     * @return whether the current touch state places the pip partially offscreen.
-     */
-    private boolean isDraggingOffscreen(PipTouchState touchState) {
-        PointF lastDelta = touchState.getLastTouchDelta();
-        PointF downDelta = touchState.getDownTouchDelta();
-        float left = mPinnedStackBounds.left + lastDelta.x;
-        return !(mBoundedPinnedStackBounds.left <= left && left <= mBoundedPinnedStackBounds.right);
     }
 
     /**
@@ -374,27 +358,30 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
-     * Sets the snap-to-edge state and notifies the controller.
+     * Sets the minimized state.
      */
-    private void setSnapToEdge(boolean snapToEdge) {
-        onSnapToEdgeStateChanged(snapToEdge);
-
-        if (mPinnedStackController != null) {
-            try {
-                mPinnedStackController.setSnapToEdge(snapToEdge);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Could not set snap mode to edge", e);
-            }
-        }
+    void setMinimizedStateInternal(boolean isMinimized) {
+        setMinimizedState(isMinimized, false /* fromController */);
     }
 
     /**
-     * Sets the minimized state and notifies the controller.
+     * Sets the minimized state.
      */
-    private void setMinimizedState(boolean isMinimized) {
-        onMinimizedStateChanged(isMinimized);
+    void setMinimizedState(boolean isMinimized, boolean fromController) {
+        if (mIsMinimized != isMinimized) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
+                    isMinimized);
+        }
+        mIsMinimized = isMinimized;
+        mSnapAlgorithm.setMinimized(isMinimized);
 
-        if (mPinnedStackController != null) {
+        if (fromController) {
+            if (isMinimized) {
+                // Move the PiP to the new bounds immediately if minimized
+                mMotionHelper.movePip(mMotionHelper.getClosestMinimizedBounds(mNormalBounds,
+                        mMovementBounds));
+            }
+        } else if (mPinnedStackController != null) {
             try {
                 mPinnedStackController.setIsMinimized(isMinimized);
             } catch (RemoteException e) {
@@ -404,178 +391,43 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     /**
-     * @return whether the given {@param pinnedStackBounds} indicates the PIP should be minimized.
+     * Sets the menu visibility.
      */
-    private boolean shouldMinimizedPinnedStack() {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        if (mPinnedStackBounds.left < 0) {
-            float offscreenFraction = (float) -mPinnedStackBounds.left / mPinnedStackBounds.width();
-            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
-        } else if (mPinnedStackBounds.right > displaySize.x) {
-            float offscreenFraction = (float) (mPinnedStackBounds.right - displaySize.x) /
-                    mPinnedStackBounds.width();
-            return offscreenFraction >= MINIMIZE_OFFSCREEN_FRACTION;
+    void setMenuVisibilityState(boolean isMenuVisible) {
+        if (!isMenuVisible) {
+            mIsTappingThrough = false;
+            registerInputConsumer();
         } else {
-            return false;
+            unregisterInputConsumer();
         }
-    }
+        MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
+                isMenuVisible);
 
-    /**
-     * Flings the minimized PIP to the closest minimized snap target.
-     */
-    private void flingToMinimizedSnapTarget(float velocityY) {
-        // We currently only allow flinging the minimized stack up and down, so just lock the
-        // movement bounds to the current stack bounds horizontally
-        Rect movementBounds = new Rect(mPinnedStackBounds.left, mBoundedPinnedStackBounds.top,
-                mPinnedStackBounds.left, mBoundedPinnedStackBounds.bottom);
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(movementBounds, mPinnedStackBounds,
-                0 /* velocityX */, velocityY);
-        if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
-                    toBounds, 0, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
-            mFlingAnimationUtils.apply(mPinnedStackBoundsAnimator, 0,
-                    distanceBetweenRectOffsets(mPinnedStackBounds, toBounds),
-                    velocityY);
-            mPinnedStackBoundsAnimator.start();
-        }
-    }
-
-    /**
-     * Animates the PIP to the minimized state, slightly offscreen.
-     */
-    private void animateToClosestMinimizedTarget() {
-        Point displaySize = new Point();
-        mContext.getDisplay().getRealSize(displaySize);
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
-                mPinnedStackBounds);
-        mSnapAlgorithm.applyMinimizedOffset(toBounds, mBoundedPinnedStackBounds, displaySize,
-                mStableInsets);
-        mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
-                toBounds, MINIMIZE_STACK_MAX_DURATION, LINEAR_OUT_SLOW_IN,
-                mUpdatePinnedStackBoundsListener);
-        mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mMenuController.hideMenu();
+        if (isMenuVisible != mIsMenuVisible) {
+            if (isMenuVisible) {
+                // Save the current snap fraction and if we do not drag or move the PiP, then
+                // we store back to this snap fraction.  Otherwise, we'll reset the snap
+                // fraction and snap to the closest edge
+                Rect expandedBounds = new Rect(mExpandedBounds);
+                mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
+                        mMovementBounds, mExpandedMovementBounds);
+            } else {
+                // Try and restore the PiP to the closest edge, using the saved snap fraction
+                // if possible
+                Rect normalBounds = new Rect(mNormalBounds);
+                mMotionHelper.animateToUnexpandedState(normalBounds, mSavedSnapFraction,
+                        mNormalMovementBounds);
             }
-        });
-        mPinnedStackBoundsAnimator.start();
-    }
-
-    /**
-     * Flings the PIP to the closest snap target.
-     */
-    private Rect flingToSnapTarget(float velocity, float velocityX, float velocityY) {
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
-                mPinnedStackBounds, velocityX, velocityY);
-        if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
-                toBounds, 0, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
-            mFlingAnimationUtils.apply(mPinnedStackBoundsAnimator, 0,
-                distanceBetweenRectOffsets(mPinnedStackBounds, toBounds),
-                velocity);
-            mPinnedStackBoundsAnimator.start();
-        }
-        return toBounds;
-    }
-
-    /**
-     * Animates the PIP to the closest snap target.
-     */
-    private Rect animateToClosestSnapTarget() {
-        Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
-                mPinnedStackBounds);
-        if (!mPinnedStackBounds.equals(toBounds)) {
-            mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
-                toBounds, SNAP_STACK_DURATION, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
-            mPinnedStackBoundsAnimator.start();
-        }
-        return toBounds;
-    }
-
-    /**
-     * Animates the dismissal of the PIP over the dismiss target bounds.
-     */
-    private void animateDismissPinnedStack(Rect dismissBounds) {
-        Rect toBounds = new Rect(dismissBounds.centerX(),
-            dismissBounds.centerY(),
-            dismissBounds.centerX() + 1,
-            dismissBounds.centerY() + 1);
-        mPinnedStackBoundsAnimator = mMotionHelper.createAnimationToBounds(mPinnedStackBounds,
-            toBounds, DISMISS_STACK_DURATION, FAST_OUT_LINEAR_IN, mUpdatePinnedStackBoundsListener);
-        mPinnedStackBoundsAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
-            }
-        });
-        mPinnedStackBoundsAnimator.start();
-    }
-
-    /**
-     * Resizes the pinned stack back to fullscreen.
-     */
-    void expandPinnedStackToFullscreen() {
-        BackgroundThread.getHandler().post(() -> {
-            try {
-                mActivityManager.resizeStack(PINNED_STACK_ID, null /* bounds */,
-                        true /* allowResizeInDockedMode */, true /* preserveWindows */,
-                        true /* animate */, EXPAND_STACK_DURATION);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error showing PIP menu activity", e);
-            }
-        });
-    }
-
-    /**
-     * Tries to the move the pinned stack to the given {@param bounds}.
-     */
-    private void movePinnedStack(Rect bounds) {
-        if (!bounds.equals(mPinnedStackBounds)) {
-            mPinnedStackBounds.set(bounds);
-            if (mEnableDragToDismiss) {
-                mDismissViewController.updateDismissTarget(bounds);
-            }
-            mMotionHelper.resizeToBounds(mPinnedStackBounds);
+            mIsMenuVisible = isMenuVisible;
+            updateMovementBounds();
         }
     }
 
     /**
-     * Dismisses the pinned stack.
+     * @return the motion helper.
      */
-    private void dismissPinnedStack() {
-        try {
-            mActivityManager.removeStack(PINNED_STACK_ID);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove PIP", e);
-        }
-    }
-
-    /**
-     * Updates the movement bounds of the pinned stack.
-     */
-    private void updateBoundedPinnedStackBounds(boolean updatePinnedStackBounds) {
-        try {
-            StackInfo info = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            if (info != null) {
-                if (updatePinnedStackBounds) {
-                    mPinnedStackBounds.set(info.bounds);
-                }
-                mWindowManager.getStableInsets(info.displayId, mStableInsets);
-                mBoundedPinnedStackBounds.set(mWindowManager.getPictureInPictureMovementBounds(
-                        info.displayId));
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not fetch PIP movement bounds.", e);
-        }
-    }
-
-    /**
-     * @return the distance between points {@param p1} and {@param p2}.
-     */
-    private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
-        return PointF.length(r1.left - r2.left, r1.top - r2.top);
+    public PipMotionHelper getMotionHelper() {
+        return mMotionHelper;
     }
 
     /**
@@ -593,25 +445,31 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         @Override
         boolean onMove(PipTouchState touchState) {
+            if (touchState.startedDragging()) {
+                mSavedSnapFraction = -1f;
+            }
+
             if (touchState.startedDragging() && mEnableDragToDismiss) {
                 mHandler.removeCallbacks(mShowDismissAffordance);
-                mDismissViewController.showDismissTarget(mPinnedStackBounds);
+                mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
 
             if (touchState.isDragging()) {
                 // Move the pinned stack freely
-                PointF lastDelta = touchState.getLastTouchDelta();
-                float left = mPinnedStackBounds.left + lastDelta.x;
-                float top = mPinnedStackBounds.top + lastDelta.y;
+                mTmpBounds.set(mMotionHelper.getBounds());
+                final PointF lastDelta = touchState.getLastTouchDelta();
+                float left = mTmpBounds.left + lastDelta.x;
+                float top = mTmpBounds.top + lastDelta.y;
                 if (!touchState.allowDraggingOffscreen()) {
-                    left = Math.max(mBoundedPinnedStackBounds.left, Math.min(
-                            mBoundedPinnedStackBounds.right, left));
+                    left = Math.max(mMovementBounds.left, Math.min(mMovementBounds.right, left));
                 }
-                top = Math.max(mBoundedPinnedStackBounds.top, Math.min(
-                        mBoundedPinnedStackBounds.bottom, top));
-                mTmpBounds.set(mPinnedStackBounds);
+                top = Math.max(mMovementBounds.top, Math.min(mMovementBounds.bottom, top));
                 mTmpBounds.offsetTo((int) left, (int) top);
-                movePinnedStack(mTmpBounds);
+                mMotionHelper.movePip(mTmpBounds);
+
+                if (mEnableDragToDismiss) {
+                    mDismissViewController.updateDismissTarget(mTmpBounds);
+                }
                 return true;
             }
             return false;
@@ -626,9 +484,12 @@ public class PipTouchHandler implements TunerService.Tunable {
                     final float velocity = PointF.length(vel.x, vel.y);
                     if (touchState.isDragging()
                             && velocity < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                        if (mDismissViewController.shouldDismiss(mPinnedStackBounds)) {
+                        if (mDismissViewController.shouldDismiss(mMotionHelper.getBounds())) {
                             Rect dismissBounds = mDismissViewController.getDismissBounds();
-                            animateDismissPinnedStack(dismissBounds);
+                            mMotionHelper.animateDismissFromDrag(dismissBounds);
+                            MetricsLogger.action(mContext,
+                                    MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
+                                    METRIC_VALUE_DISMISSED_BY_DRAG);
                             return true;
                         }
                     }
@@ -638,34 +499,34 @@ public class PipTouchHandler implements TunerService.Tunable {
             }
             if (touchState.isDragging()) {
                 PointF vel = mTouchState.getVelocity();
-                if (!mIsMinimized && (shouldMinimizedPinnedStack()
+                if (!mIsMinimized && (mMotionHelper.shouldMinimizePip()
                         || isHorizontalFlingTowardsCurrentEdge(vel))) {
                     // Pip should be minimized
-                    setMinimizedState(true);
-                    animateToClosestMinimizedTarget();
+                    setMinimizedStateInternal(true);
+                    mMotionHelper.animateToClosestMinimizedState(mMovementBounds, mMenuController);
                     return true;
                 }
                 if (mIsMinimized) {
                     // If we're dragging and it wasn't a minimize gesture
                     // then we shouldn't be minimized.
-                    setMinimizedState(false);
+                    setMinimizedStateInternal(false);
                 }
 
                 final float velocity = PointF.length(vel.x, vel.y);
                 if (velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
-                    flingToSnapTarget(velocity, vel.x, vel.y);
+                    mMotionHelper.flingToSnapTarget(velocity, vel.x, vel.y, mMovementBounds);
                 } else {
-                    animateToClosestSnapTarget();
+                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
                 }
             } else if (mIsMinimized) {
                 // This was a tap, so no longer minimized
-                animateToClosestSnapTarget();
-                setMinimizedState(false);
+                mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
+                setMinimizedStateInternal(false);
             } else if (!mIsTappingThrough) {
                 mMenuController.showMenu();
                 mIsTappingThrough = true;
             } else {
-                expandPinnedStackToFullscreen();
+                mMotionHelper.expandPip();
             }
             return true;
         }
@@ -679,17 +540,30 @@ public class PipTouchHandler implements TunerService.Tunable {
         final boolean isHorizontal = Math.abs(vel.x) > Math.abs(vel.y);
         final boolean isFling = PointF.length(vel.x, vel.y) > mFlingAnimationUtils
                 .getMinVelocityPxPerSecond();
-        final boolean towardsCurrentEdge = onEdge(true /* left */) && vel.x < 0
-                || onEdge(false /* right */) && vel.x > 0;
+        final boolean towardsCurrentEdge = isOverEdge(true /* left */) && vel.x < 0
+                || isOverEdge(false /* right */) && vel.x > 0;
         return towardsCurrentEdge && isHorizontal && isFling;
     }
 
-    private boolean onEdge(boolean checkLeft) {
+    /**
+     * @return whether the given bounds are on the left or right edge (depending on
+     *         {@param checkLeft})
+     */
+    private boolean isOverEdge(boolean checkLeft) {
+        final Rect bounds = mMotionHelper.getBounds();
         if (checkLeft) {
-            return mPinnedStackBounds.left <= mBoundedPinnedStackBounds.left;
+            return bounds.left <= mMovementBounds.left;
         } else {
-            return mPinnedStackBounds.right >= mBoundedPinnedStackBounds.right
-                    + mPinnedStackBounds.width();
+            return bounds.right >= mMovementBounds.right + bounds.width();
         }
+    }
+
+    /**
+     * Updates the current movement bounds based on whether the menu is currently visible.
+     */
+    private void updateMovementBounds() {
+        mMovementBounds = mIsMenuVisible
+                ? mExpandedMovementBounds
+                : mNormalMovementBounds;
     }
 }

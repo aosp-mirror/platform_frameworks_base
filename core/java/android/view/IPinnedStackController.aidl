@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.graphics.Rect;
-
 /**
  * An interface to the PinnedStackController to update it of state changes, and to query
  * information based on the current state.
@@ -27,17 +25,7 @@ import android.graphics.Rect;
 interface IPinnedStackController {
 
     /**
-     * Notifies the controller that the user is currently interacting with the PIP.
-     */
-    oneway void setInInteractiveMode(boolean inInteractiveMode);
-
-    /**
-     * Notifies the controller that the PIP is currently minimized.
+     * Notifies the controller that the PiP is currently minimized.
      */
     oneway void setIsMinimized(boolean isMinimized);
-
-    /**
-     * Notifies the controller that the desired snap mode is to the closest edge.
-     */
-    oneway void setSnapToEdge(boolean snapToEdge);
 }

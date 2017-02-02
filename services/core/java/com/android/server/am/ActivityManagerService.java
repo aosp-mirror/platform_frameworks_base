@@ -1627,10 +1627,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     int mThumbnailHeight;
     float mFullscreenThumbnailScale;
 
-    /** The aspect ratio bounds of the PIP. */
-    float mMinPipAspectRatio;
-    float mMaxPipAspectRatio;
-
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final UiHandler mUiHandler;
@@ -7665,12 +7661,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     r.pictureInPictureArgs.copyOnlySet(args);
                     final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                     final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                    final Rect bounds = isValidPictureInPictureAspectRatio(aspectRatio)
-                            ? mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY, aspectRatio)
-                            : mWindowManager.getPictureInPictureDefaultBounds(DEFAULT_DISPLAY);
+                    final Rect bounds = mWindowManager.getPictureInPictureBounds(DEFAULT_DISPLAY,
+                            aspectRatio);
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
                             bounds, true /* moveHomeStackToFront */);
-                    mStackSupervisor.getStack(PINNED_STACK_ID).setPictureInPictureActions(actions);
+                    final ActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
+                    stack.setPictureInPictureAspectRatio(aspectRatio);
+                    stack.setPictureInPictureActions(actions);
 
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
                             r.supportsPictureInPictureWhilePausing);
@@ -7747,10 +7744,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
-        return mMinPipAspectRatio <= aspectRatio && aspectRatio <= mMaxPipAspectRatio;
-    }
-
     /**
      * Checks the state of the system and the activity associated with the given {@param token} to
      * verify that picture-in-picture is supported for that activity.
@@ -7781,10 +7774,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (args.hasSetAspectRatio()
-                && !isValidPictureInPictureAspectRatio(args.getAspectRatio())) {
+                && !mWindowManager.isValidPictureInPictureAspectRatio(r.getStack().mDisplayId,
+                        args.getAspectRatio())) {
+            final float minAspectRatio = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+            final float maxAspectRatio = mContext.getResources().getFloat(
+                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             throw new IllegalArgumentException(String.format(caller
                     + ": Aspect ratio is too extreme (must be between %f and %f).",
-                            mMinPipAspectRatio, mMaxPipAspectRatio));
+                            minAspectRatio, maxAspectRatio));
         }
 
         if (args.hasSetActions()
@@ -13469,10 +13467,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
-            mMinPipAspectRatio = res.getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-            mMaxPipAspectRatio = res.getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(

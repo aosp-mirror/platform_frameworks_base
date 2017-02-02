@@ -16,20 +16,16 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackInfo;
-import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -94,7 +90,7 @@ public class PipManager {
                 }
             }
             if (expandPipToFullscreen) {
-                mTouchHandler.expandPinnedStackToFullscreen();
+                mTouchHandler.getMotionHelper().expandPip();
             } else {
                 Log.w(TAG, "Can not expand PiP to fullscreen via intent from the same package.");
             }
@@ -114,28 +110,31 @@ public class PipManager {
         }
 
         @Override
-        public void onBoundsChanged(boolean adjustedForIme) {
-            // Do nothing
-        }
-
-        @Override
-        public void onActionsChanged(ParceledListSlice actions) {
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mHandler.post(() -> {
-                mMenuController.setAppActions(actions);
+                mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
             });
         }
 
         @Override
         public void onMinimizedStateChanged(boolean isMinimized) {
             mHandler.post(() -> {
-                mTouchHandler.onMinimizedStateChanged(isMinimized);
+                mTouchHandler.setMinimizedState(isMinimized, true /* fromController */);
             });
         }
 
         @Override
-        public void onSnapToEdgeStateChanged(boolean isSnapToEdge) {
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                boolean fromImeAdjustement) {
             mHandler.post(() -> {
-                mTouchHandler.onSnapToEdgeStateChanged(isSnapToEdge);
+                mTouchHandler.onMovementBoundsChanged(insetBounds, normalBounds, fromImeAdjustement);
+            });
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {
+            mHandler.post(() -> {
+                mMenuController.setAppActions(actions);
             });
         }
     }

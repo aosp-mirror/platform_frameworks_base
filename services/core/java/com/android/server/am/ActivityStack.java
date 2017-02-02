@@ -544,6 +544,10 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         mWindowContainerController.setPictureInPictureAspectRatio(aspectRatio);
     }
 
+    void setPictureInPictureActions(List<RemoteAction> actions) {
+        mWindowContainerController.setPictureInPictureActions(actions);
+    }
+
     void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds, Rect outTempInsetBounds,
             boolean ignoreVisibility) {
         mWindowContainerController.getStackDockedModeBounds(outBounds, outTempBounds,
@@ -552,10 +556,6 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     void prepareFreezingTaskBounds() {
         mWindowContainerController.prepareFreezingTaskBounds();
-    }
-
-    void setPictureInPictureActions(List<RemoteAction> actions) {
-        mWindowContainerController.setPictureInPictureActions(actions);
     }
 
     void getWindowContainerBounds(Rect outBounds) {

@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.session.MediaController;
@@ -39,6 +40,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -51,6 +54,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN;
 
 /**
@@ -159,6 +164,8 @@ public class PipManager {
     private boolean mOnboardingShown;
     private String[] mLastPackagesResourceGranted;
 
+    private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
+
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
         @Override
         public void run() {
@@ -196,6 +203,32 @@ public class PipManager {
                 }
             };
 
+    /**
+     * Handler for messages from the PIP controller.
+     */
+    private class PinnedStackListener extends IPinnedStackListener.Stub {
+
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {}
+
+        @Override
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {}
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                boolean fromImeAdjustement) {
+            mHandler.post(() -> {
+                mDefaultPipBounds.set(normalBounds);
+            });
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {}
+    }
+
     private PipManager() { }
 
     /**
@@ -221,16 +254,16 @@ public class PipManager {
         mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+
+        try {
+            mWindowManager.registerPinnedStackListener(DEFAULT_DISPLAY, mPinnedStackListener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register pinned stack listener", e);
+        }
     }
 
     private void loadConfigurationsAndApply() {
         Resources res = mContext.getResources();
-        try {
-            mDefaultPipBounds = mWindowManager.getPictureInPictureDefaultBounds(
-                    Display.DEFAULT_DISPLAY);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get default PIP bounds", e);
-        }
         mSettingsPipBounds = Rect.unflattenFromString(res.getString(
                 R.string.pip_settings_bounds));
         mMenuModePipBounds = Rect.unflattenFromString(res.getString(

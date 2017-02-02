@@ -1761,14 +1761,6 @@
         not appear on production builds ever. -->
     <string name="pip_drag_to_dismiss_summary" translatable="false">Drag to the dismiss target at the bottom of the screen to close the PIP</string>
 
-    <!-- PIP allow minimize title. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_allow_minimize_title" translatable="false">Allow PIP to minimize</string>
-
-    <!-- PIP allow minimize description. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_allow_minimize_summary" translatable="false">Allow PIP to minimize slightly offscreen</string>
-
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
