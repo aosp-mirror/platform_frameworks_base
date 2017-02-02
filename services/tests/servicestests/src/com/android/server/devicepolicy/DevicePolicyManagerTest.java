@@ -2089,9 +2089,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.getAffiliationIds(admin2).isEmpty());
         assertFalse(dpm.isAffiliatedUser());
 
+        // Set affiliation ids again, then clear PO to check that the user becomes unaffiliated
+        dpm.setAffiliationIds(admin2, userAffiliationIds);
+        assertTrue(dpm.isAffiliatedUser());
+        dpm.clearProfileOwner(admin2);
+        assertFalse(dpm.isAffiliatedUser());
+
         // Check that the system user remains affiliated.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         assertTrue(dpm.isAffiliatedUser());
+
+        // Clear the device owner - the user becomes unaffiliated.
+        clearDeviceOwner();
+        assertFalse(dpm.isAffiliatedUser());
     }
 
     public void testGetUserProvisioningState_defaultResult() {
