@@ -1195,7 +1195,6 @@
   <java-symbol type="drawable" name="btn_check_off" />
   <java-symbol type="color" name="lock_pattern_view_regular_color" />
   <java-symbol type="color" name="lock_pattern_view_success_color" />
-  <java-symbol type="color" name="lock_pattern_view_error_color" />
   <java-symbol type="dimen" name="lock_pattern_dot_line_width" />
   <java-symbol type="dimen" name="lock_pattern_dot_size" />
   <java-symbol type="dimen" name="lock_pattern_dot_size_activated" />
@@ -2310,7 +2309,6 @@
   <java-symbol type="layout" name="select_dialog_singlechoice_material" />
   <java-symbol type="layout" name="select_dialog_multichoice_material" />
   <java-symbol type="array" name="no_ems_support_sim_operators" />
-  <java-symbol type="color" name="battery_saver_mode_color" />
   <java-symbol type="color" name="system_notification_accent_color" />
   <java-symbol type="dimen" name="text_handle_min_size" />
   <java-symbol type="id" name="transitionTransform" />
@@ -2880,6 +2878,8 @@
   <java-symbol type="string" name="alert_windows_notification_message" />
   <java-symbol type="string" name="alert_windows_notification_turn_off_action" />
   <java-symbol type="drawable" name="alert_window_layer" />
+  <java-symbol type="style" name="Widget.LockPatternView" />
+  <java-symbol type="attr" name="lockPatternStyle" />
 
   <!-- Colon separated list of package names that should be granted Notification Listener access -->
   <java-symbol type="string" name="config_defaultListenerAccessPackages" />

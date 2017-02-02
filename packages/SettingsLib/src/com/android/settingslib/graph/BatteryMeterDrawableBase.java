@@ -29,7 +29,8 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.provider.Settings;
+import android.util.TypedValue;
+
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
@@ -97,9 +98,13 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         final int N = levels.length();
         mColors = new int[2 * N];
-        for (int i = 0; i < N; i++) {
+        for (int i=0; i < N; i++) {
             mColors[2 * i] = levels.getInt(i, 0);
-            mColors[2 * i + 1] = colors.getColor(i, 0);
+            if (colors.getType(i) == TypedValue.TYPE_ATTRIBUTE) {
+                mColors[2 * i + 1] = Utils.getColorAttr(context, colors.getResourceId(i, 0));
+            } else {
+                mColors[2 * i + 1] = colors.getColor(i, 0);
+            }
         }
         levels.recycle();
         colors.recycle();

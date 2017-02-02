@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -175,8 +176,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setOnlyAlertOnce(true)
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setColor(mContext.getColor(
-                                com.android.internal.R.color.battery_saver_mode_color));
+                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
         }
@@ -245,8 +245,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setContentIntent(pendingBroadcast(ACTION_CLICKED_TEMP_WARNING))
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
-                        .setColor(mContext.getColor(
-                                com.android.internal.R.color.battery_saver_mode_color));
+                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);

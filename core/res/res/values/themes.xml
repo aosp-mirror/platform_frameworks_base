@@ -63,6 +63,7 @@ please see themes_device_defaults.xml.
         <item name="colorControlHighlight">@color/legacy_button_pressed</item>
         <item name="colorButtonNormal">@color/legacy_button_normal</item>
         <item name="colorEdgeEffect">?attr/colorPrimary</item>
+        <item name="colorError">@color/red</item>
 
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
@@ -93,7 +94,6 @@ please see themes_device_defaults.xml.
         <item name="textColorLink">@color/link_text_dark</item>
         <item name="textColorLinkInverse">@color/link_text_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_light_disable_only</item>
-        <item name="textColorError">@color/red</item>
 
         <item name="textAppearanceLarge">@style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@style/TextAppearance.Medium</item>

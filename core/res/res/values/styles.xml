@@ -1475,4 +1475,10 @@ please see styles_device_defaults.xml.
         <item name="padding">16dp</item>
     </style>
 
+    <style name="Widget.LockPatternView">
+        <item name="regularColor">@color/lock_pattern_view_regular_color</item>
+        <item name="errorColor">?attr/colorError</item>
+        <item name="successColor">@color/lock_pattern_view_success_color</item>
+    </style>
+
 </resources>

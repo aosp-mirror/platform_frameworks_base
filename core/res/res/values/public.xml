@@ -2780,7 +2780,7 @@
         <public name="targetProcess" />
         <public name="nextClusterForward" />
         <public name="__removed1" />
-        <public name="textColorError" />
+        <public name="colorError" />
         <public name="focusedByDefault" />
         <public name="appCategory" />
         <public name="autoSizeMaxTextSize" />

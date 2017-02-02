@@ -46,6 +46,7 @@
 
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
+    <color name="error_color_material">#F4511E</color>
 
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
@@ -64,9 +65,6 @@
     <color name="primary_text_default_material_dark">#ffffffff</color>
     <!-- 70% white -->
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
-
-    <color name="error_text_material_light">@color/material_red_A700</color>
-    <color name="error_text_material_dark">@color/material_red_A100</color>
 
     <item name="hint_alpha_material_dark" format="float" type="dimen">0.50</item>
     <item name="hint_alpha_material_light" format="float" type="dimen">0.38</item>
