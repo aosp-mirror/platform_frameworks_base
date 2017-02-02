@@ -235,6 +235,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.location.LocationManager;
+import android.metrics.LogMaker;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -312,6 +313,7 @@ import android.view.WindowManager;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.AssistUtils;
@@ -322,6 +324,8 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.IResultReceiver;
@@ -6730,7 +6734,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
                 ActivityRecord r =
-                        mStackSupervisor.activityIdleInternalLocked(token, false, config);
+                        mStackSupervisor.activityIdleInternalLocked(token, false /* fromTimeout */,
+                                false /* processPausingActivities */, config);
                 if (stopProfiling) {
                     if ((mProfileProc == r.app) && (mProfileFd != null)) {
                         try {
@@ -7610,7 +7615,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Activity supports picture-in-picture, now check that we can enter PiP at this
                 // point, if it is
-                if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode")) {
+                if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
+                        false /* noThrow */)) {
                     return false;
                 }
 
@@ -7625,6 +7631,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
                             bounds, true /* moveHomeStackToFront */);
                     mStackSupervisor.getStack(PINNED_STACK_ID).setPictureInPictureActions(actions);
+
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
+                            r.supportsPictureInPictureWhilePausing);
+                    logPictureInPictureArgs(args);
                 };
 
                 if (isKeyguardLocked()) {
@@ -7678,9 +7688,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stack.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio());
                     stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
+                logPictureInPictureArgs(args);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void logPictureInPictureArgs(PictureInPictureArgs args) {
+        if (args.hasSetActions()) {
+            MetricsLogger.histogram(mContext, "tron_varz_picture_in_picture_actions_count",
+                    args.getActions().size());
+        }
+        if (args.hasSetAspectRatio()) {
+            LogMaker lm = new LogMaker(MetricsEvent.ACTION_PICTURE_IN_PICTURE_ASPECT_RATIO_CHANGED);
+            lm.addTaggedData(MetricsEvent.PICTURE_IN_PICTURE_ASPECT_RATIO, args.getAspectRatio());
+            MetricsLogger.action(lm);
         }
     }
 

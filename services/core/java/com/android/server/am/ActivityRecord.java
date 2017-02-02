@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.ENABLE_TASK_SNAPSHOTS;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -947,34 +948,43 @@ final class ActivityRecord implements AppWindowContainerListener {
 
     /**
      * @return whether this activity is currently allowed to enter PIP, throwing an exception if
-     *         the activity is not currently visible.
+     *         the activity is not currently visible and {@param noThrow} is not set.
      */
-    boolean checkEnterPictureInPictureState(String caller) {
+    boolean checkEnterPictureInPictureState(String caller, boolean noThrow) {
+        boolean isCurrentAppLocked = mStackSupervisor.getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         boolean isKeyguardLocked = service.isKeyguardLocked();
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
+        // Don't return early if !isNotLocked, since we want to throw an exception if the activity
+        // is in an incorrect state
+        boolean isNotLocked = !isKeyguardLocked && !isCurrentAppLocked;
         switch (state) {
             case RESUMED:
-                // When visible, allow entering PiP if not on the lockscreen.  If there is another
-                // PiP activity, the logic to handle that comes later in enterPictureInPictureMode()
-                return !isKeyguardLocked;
+                // When visible, allow entering PiP if not on the lockscreen and if the task is not
+                // locked
+                return isNotLocked;
             case PAUSING:
             case PAUSED:
-                // When pausing, only allow enter PiP if not on the lockscreen and there is not
-                // already an existing PiP activity
-                return !isKeyguardLocked && !hasPinnedStack && supportsPictureInPictureWhilePausing
+                // When pausing, then only allow enter PiP as in the resume state, and in addition,
+                // require that there is not an existing PiP activity and that the current system
+                // state supports entering PiP
+                return isNotLocked && !hasPinnedStack && supportsPictureInPictureWhilePausing
                         && checkEnterPictureInPictureOnHideAppOpsState();
             case STOPPING:
                 // When stopping in a valid state, then only allow enter PiP as in the pause state.
                 // Otherwise, fall through to throw an exception if the caller is trying to enter
                 // PiP in an invalid stopping state.
                 if (supportsPictureInPictureWhilePausing) {
-                    return !isKeyguardLocked && !hasPinnedStack
+                    return isNotLocked && !hasPinnedStack
                             && checkEnterPictureInPictureOnHideAppOpsState();
                 }
             default:
-                throw new IllegalStateException(caller
-                        + ": Current activity is not visible (state=" + state.name() + ") "
-                        + "r=" + this);
+                if (noThrow) {
+                    return false;
+                } else {
+                    throw new IllegalStateException(caller
+                            + ": Current activity is not visible (state=" + state.name() + ") "
+                            + "r=" + this);
+                }
         }
     }
 
@@ -1672,7 +1682,8 @@ final class ActivityRecord implements AppWindowContainerListener {
                 if (!idle) {
                     // Instead of doing the full stop routine here, let's just hide any activities
                     // we now can, and let them stop when the normal idle happens.
-                    mStackSupervisor.processStoppingActivitiesLocked(false);
+                    mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
+                            false /* remove */, true /* processPausingActivities */);
                 } else {
                     // If this activity was already idle, then we now need to make sure we perform
                     // the full stop of any activities that are waiting to do so. This is because
@@ -2153,7 +2164,7 @@ final class ActivityRecord implements AppWindowContainerListener {
             // if the app is relaunched when it's stopped, and we're not resuming,
             // put it back into stopped state.
             if (stopped) {
-                getStack().addToStopping(this, true /* immediate */);
+                getStack().addToStopping(this, true /* scheduleIdle */, false /* idleDelayed */);
             }
         }
 

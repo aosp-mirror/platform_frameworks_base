@@ -1139,6 +1139,18 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
     }
 
     /**
+     * Schedule a pause timeout in case the app doesn't respond. We don't give it much time because
+     * this directly impacts the responsiveness seen by the user.
+     */
+    private void schedulePauseTimeout(ActivityRecord r) {
+        final Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG);
+        msg.obj = r;
+        r.pauseTime = SystemClock.uptimeMillis();
+        mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
+        if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Waiting for pause to complete...");
+    }
+
+    /**
      * Start pausing the currently resumed activity.  It is an error to call this if there
      * is already an activity being paused or there is no resumed activity.
      *
@@ -1244,14 +1256,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 return false;
 
             } else {
-                // Schedule a pause timeout in case the app doesn't respond.
-                // We don't give it much time because this directly impacts the
-                // responsiveness seen by the user.
-                Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG);
-                msg.obj = prev;
-                prev.pauseTime = SystemClock.uptimeMillis();
-                mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Waiting for pause to complete...");
+                schedulePauseTimeout(prev);
                 return true;
             }
 
@@ -1332,7 +1337,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                         || mService.isSleepingOrShuttingDownLocked()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
-                    addToStopping(prev, true /* immediate */);
+                    addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */);
                 }
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "App died during pause, not stopping: " + prev);
@@ -1398,7 +1403,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         mStackSupervisor.ensureActivitiesVisibleLocked(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    void addToStopping(ActivityRecord r, boolean immediate) {
+    void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             mStackSupervisor.mStoppingActivities.add(r);
         }
@@ -1409,11 +1414,14 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         // be cleared immediately.
         boolean forceIdle = mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE
                 || (r.frontOfTask && mTaskHistory.size() <= 1);
-
-        if (immediate || forceIdle) {
+        if (scheduleIdle || forceIdle) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Scheduling idle now: forceIdle="
-                    + forceIdle + "immediate=" + immediate);
-            mStackSupervisor.scheduleIdleLocked();
+                    + forceIdle + "immediate=" + !idleDelayed);
+            if (!idleDelayed) {
+                mStackSupervisor.scheduleIdleLocked();
+            } else {
+                mStackSupervisor.scheduleIdleTimeoutLocked(r);
+            }
         } else {
             mStackSupervisor.checkReadyForSleepLocked();
         }
@@ -1993,7 +2001,14 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                     if (visibleBehind == r) {
                         releaseBackgroundResources(r);
                     } else {
-                        addToStopping(r, true /* immediate */);
+                        // If this activity is in a state where it can currently enter
+                        // picture-in-picture, then don't immediately schedule the idle now in case
+                        // the activity tries to enterPictureInPictureMode() later. Otherwise,
+                        // we will try and stop the activity next time idle is processed.
+                        final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
+                                "makeInvisible", true /* noThrow */);
+                        addToStopping(r, true /* scheduleIdle */,
+                                canEnterPictureInPicture /* idleDelayed */);
                     }
                     break;
 
@@ -3555,7 +3570,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
                 && next != null && !next.nowVisible) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                addToStopping(r, false /* immediate */);
+                addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */);
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");
@@ -3809,7 +3824,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         mWindowManager.notifyAppRelaunchesCleared(r.appToken);
     }
 
-    private void removeTimeoutsForActivityLocked(ActivityRecord r) {
+    void removeTimeoutsForActivityLocked(ActivityRecord r) {
         mStackSupervisor.removeTimeoutsForActivityLocked(r);
         mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
         mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
@@ -5074,6 +5089,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         // If the activity was previously pausing, then ensure we transfer that as well
         if (setPause) {
             mPausingActivity = r;
+            schedulePauseTimeout(r);
         }
         // Move the stack in which we are placing the activity to the front. The call will also
         // make sure the activity focus is set.
@@ -5115,6 +5131,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         }
         if (wasPaused) {
             prevStack.mPausingActivity = null;
+            prevStack.removeTimeoutsForActivityLocked(r);
         }
     }
 

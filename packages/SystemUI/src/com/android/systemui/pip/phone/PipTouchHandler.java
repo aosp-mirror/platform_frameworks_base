@@ -44,6 +44,8 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
@@ -57,6 +59,10 @@ import com.android.systemui.tuner.TunerService;
 public class PipTouchHandler implements TunerService.Tunable {
     private static final String TAG = "PipTouchHandler";
     private static final boolean DEBUG_ALLOW_OUT_OF_BOUNDS_STACK = false;
+
+    // These values are used for metrics and should never change
+    private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
+    private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
     private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
     private static final String TUNER_KEY_ALLOW_MINIMIZE = "pip_allow_minimize";
@@ -147,6 +153,8 @@ public class PipTouchHandler implements TunerService.Tunable {
             } else {
                 unregisterInputConsumer();
             }
+            MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
+                    visible);
         }
 
         @Override
@@ -165,6 +173,8 @@ public class PipTouchHandler implements TunerService.Tunable {
         @Override
         public void onPipDismiss() {
             BackgroundThread.getHandler().post(PipTouchHandler.this::dismissPinnedStack);
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
+                    METRIC_VALUE_DISMISSED_BY_TAP);
         }
     }
 
@@ -230,6 +240,10 @@ public class PipTouchHandler implements TunerService.Tunable {
     }
 
     public void onMinimizedStateChanged(boolean isMinimized) {
+        if (mIsMinimized != isMinimized) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
+                    isMinimized);
+        }
         mIsMinimized = isMinimized;
         mSnapAlgorithm.setMinimized(isMinimized);
     }
@@ -439,7 +453,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     /**
      * Flings the PIP to the closest snap target.
      */
-    private void flingToSnapTarget(float velocity, float velocityX, float velocityY) {
+    private Rect flingToSnapTarget(float velocity, float velocityX, float velocityY) {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
                 mPinnedStackBounds, velocityX, velocityY);
         if (!mPinnedStackBounds.equals(toBounds)) {
@@ -450,12 +464,13 @@ public class PipTouchHandler implements TunerService.Tunable {
                 velocity);
             mPinnedStackBoundsAnimator.start();
         }
+        return toBounds;
     }
 
     /**
      * Animates the PIP to the closest snap target.
      */
-    private void animateToClosestSnapTarget() {
+    private Rect animateToClosestSnapTarget() {
         Rect toBounds = mSnapAlgorithm.findClosestSnapBounds(mBoundedPinnedStackBounds,
                 mPinnedStackBounds);
         if (!mPinnedStackBounds.equals(toBounds)) {
@@ -463,6 +478,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 toBounds, SNAP_STACK_DURATION, FAST_OUT_SLOW_IN, mUpdatePinnedStackBoundsListener);
             mPinnedStackBoundsAnimator.start();
         }
+        return toBounds;
     }
 
     /**
@@ -576,6 +592,9 @@ public class PipTouchHandler implements TunerService.Tunable {
                         PointF lastTouch = touchState.getLastTouchPosition();
                         if (dismissBounds.contains((int) lastTouch.x, (int) lastTouch.y)) {
                             animateDismissPinnedStack(dismissBounds);
+                            MetricsLogger.action(mContext,
+                                    MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
+                                            METRIC_VALUE_DISMISSED_BY_DRAG);
                             return true;
                         }
                     }
