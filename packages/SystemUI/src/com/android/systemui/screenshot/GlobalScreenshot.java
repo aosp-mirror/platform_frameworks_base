@@ -178,20 +178,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .bigPicture(picture.createAshmemBitmap());
 
         // The public notification will show similar info but with the actual screenshot omitted
-        mPublicNotificationBuilder = new Notification.Builder(context)
-                .setChannel(NotificationChannels.SCREENSHOTS)
-                .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                .setContentText(r.getString(R.string.screenshot_saving_text))
-                .setSmallIcon(R.drawable.stat_notify_image)
-                .setCategory(Notification.CATEGORY_PROGRESS)
-                .setWhen(now)
-                .setShowWhen(true)
-                .setColor(r.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+        mPublicNotificationBuilder =
+                new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
+                        .setContentTitle(r.getString(R.string.screenshot_saving_title))
+                        .setContentText(r.getString(R.string.screenshot_saving_text))
+                        .setSmallIcon(R.drawable.stat_notify_image)
+                        .setCategory(Notification.CATEGORY_PROGRESS)
+                        .setWhen(now)
+                        .setShowWhen(true)
+                        .setColor(r.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
         SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
 
-        mNotificationBuilder = new Notification.Builder(context)
-            .setChannel(NotificationChannels.SCREENSHOTS)
+        mNotificationBuilder = new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
@@ -335,7 +334,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             // Update the text and the icon for the existing notification
             mPublicNotificationBuilder
-                    .setChannel(NotificationChannels.SCREENSHOTS)
                     .setContentTitle(r.getString(R.string.screenshot_saved_title))
                     .setContentText(r.getString(R.string.screenshot_saved_text))
                     .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
@@ -344,7 +342,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     .setColor(context.getColor(
                             com.android.internal.R.color.system_notification_accent_color));
             mNotificationBuilder
-                .setChannel(NotificationChannels.SCREENSHOTS)
                 .setContentTitle(r.getString(R.string.screenshot_saved_title))
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
@@ -858,7 +855,7 @@ class GlobalScreenshot {
         String errorMsg = r.getString(msgResId);
 
         // Repurpose the existing notification to notify the user of the error
-        Notification.Builder b = new Notification.Builder(context)
+        Notification.Builder b = new Notification.Builder(context, NotificationChannels.ALERTS)
             .setTicker(r.getString(R.string.screenshot_failed_title))
             .setContentTitle(r.getString(R.string.screenshot_failed_title))
             .setContentText(errorMsg)

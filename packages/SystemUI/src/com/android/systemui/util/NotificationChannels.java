@@ -27,8 +27,7 @@ import java.util.Arrays;
 public class NotificationChannels extends SystemUI {
     public static String ALERTS      = "ALR";
     public static String SCREENSHOTS = "SCN";
-    public static String SECURITY    = "SEC";
-    public static String USER        = "USR";
+    public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
 
     @VisibleForTesting
@@ -42,14 +41,10 @@ public class NotificationChannels extends SystemUI {
                 new NotificationChannel(
                         SCREENSHOTS,
                         context.getString(R.string.notification_channel_screenshot),
-                        NotificationManager.IMPORTANCE_DEFAULT),
+                        NotificationManager.IMPORTANCE_LOW),
                 new NotificationChannel(
-                        SECURITY,
-                        context.getString(R.string.notification_channel_security),
-                        NotificationManager.IMPORTANCE_HIGH),
-                new NotificationChannel(
-                        USER,
-                        context.getString(R.string.notification_channel_user_status),
+                        GENERAL,
+                        context.getString(R.string.notification_channel_general),
                         NotificationManager.IMPORTANCE_MIN),
                 new NotificationChannel(
                         STORAGE,
