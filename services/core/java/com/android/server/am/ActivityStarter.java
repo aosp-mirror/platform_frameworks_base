@@ -1802,7 +1802,7 @@ class ActivityStarter {
     }
 
     private void addOrReparentStartingActivity(TaskRecord parent, String reason) {
-        if (mStartActivity.task == null) {
+        if (mStartActivity.task == null || mStartActivity.task == parent) {
             parent.addActivityToTop(mStartActivity);
         } else {
             mStartActivity.reparent(parent, parent.mActivities.size() /* top */, reason);
