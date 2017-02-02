@@ -17,6 +17,7 @@
 package android.security.keystore;
 
 import android.security.Credentials;
+import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
@@ -235,7 +236,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         spec.isUserAuthenticationRequired(),
                         spec.getUserAuthenticationValidityDurationSeconds(),
                         spec.isUserAuthenticationValidWhileOnBody(),
-                        spec.isInvalidatedByBiometricEnrollment());
+                        spec.isInvalidatedByBiometricEnrollment(),
+                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -275,7 +277,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 spec.isUserAuthenticationRequired(),
                 spec.getUserAuthenticationValidityDurationSeconds(),
                 spec.isUserAuthenticationValidWhileOnBody(),
-                spec.isInvalidatedByBiometricEnrollment());
+                spec.isInvalidatedByBiometricEnrollment(),
+                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,
