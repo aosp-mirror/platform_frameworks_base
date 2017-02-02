@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
+import android.net.NetworkScorerAppManager;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -130,4 +131,6 @@ interface INetworkScoreService
      */
     oneway void requestRecommendationAsync(in RecommendationRequest request,
                                            in RemoteCallback remoteCallback);
+
+    NetworkScorerAppManager.NetworkScorerAppData getActiveScorer();
 }
