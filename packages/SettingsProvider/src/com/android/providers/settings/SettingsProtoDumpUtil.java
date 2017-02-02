@@ -1399,9 +1399,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.NIGHT_DISPLAY_CUSTOM_END_TIME,
                 SecureSettingsProto.NIGHT_DISPLAY_CUSTOM_END_TIME);
         dumpSetting(s, p,
-                Settings.Secure.BRIGHTNESS_USE_TWILIGHT,
-                SecureSettingsProto.BRIGHTNESS_USE_TWILIGHT);
-        dumpSetting(s, p,
                 Settings.Secure.ENABLED_VR_LISTENERS,
                 SecureSettingsProto.ENABLED_VR_LISTENERS);
         dumpSetting(s, p,

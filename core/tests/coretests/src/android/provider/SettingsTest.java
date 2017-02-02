@@ -392,7 +392,6 @@ public class SettingsTest {
                  Settings.Secure.BACKUP_PROVISIONED,
                  Settings.Secure.BACKUP_TRANSPORT,
                  Settings.Secure.BLUETOOTH_HCI_LOG,
-                 Settings.Secure.BRIGHTNESS_USE_TWILIGHT,  // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
