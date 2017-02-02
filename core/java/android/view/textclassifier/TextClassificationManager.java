@@ -55,7 +55,7 @@ public final class TextClassificationManager {
     /**
      * Returns the default text classifier.
      */
-    public TextClassifier getDefaultTextClassifier() {
+    public synchronized TextClassifier getDefaultTextClassifier() {
         if (mDefault == null) {
             try {
                 mFd = ParcelFileDescriptor.open(
@@ -95,7 +95,7 @@ public final class TextClassificationManager {
         return Collections.emptyList();
     }
 
-    private LangId getLanguageDetector() {
+    private synchronized LangId getLanguageDetector() {
         if (mLangId == null) {
             // TODO: Use a file descriptor as soon as we start to depend on a model file
             // for language detection.
