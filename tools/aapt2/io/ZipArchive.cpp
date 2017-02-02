@@ -66,7 +66,7 @@ ZipFileCollectionIterator::ZipFileCollectionIterator(
 bool ZipFileCollectionIterator::HasNext() { return current_ != end_; }
 
 IFile* ZipFileCollectionIterator::Next() {
-  IFile* result = current_->second.get();
+  IFile* result = current_->get();
   ++current_;
   return result;
 }
@@ -110,8 +110,10 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
         std::string(reinterpret_cast<const char*>(zip_entry_name.name),
                     zip_entry_name.name_length);
     std::string nested_path = path.to_string() + "@" + zip_entry_path;
-    collection->files_[zip_entry_path] = util::make_unique<ZipFile>(
-        collection->handle_, zip_data, Source(nested_path));
+    std::unique_ptr<IFile> file =
+        util::make_unique<ZipFile>(collection->handle_, zip_data, Source(nested_path));
+    collection->files_by_name_[zip_entry_path] = file.get();
+    collection->files_.push_back(std::move(file));
   }
 
   if (result != -1) {
@@ -122,9 +124,9 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
 }
 
 IFile* ZipFileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_.find(path.to_string());
-  if (iter != files_.end()) {
-    return iter->second.get();
+  auto iter = files_by_name_.find(path.to_string());
+  if (iter != files_by_name_.end()) {
+    return iter->second;
   }
   return nullptr;
 }

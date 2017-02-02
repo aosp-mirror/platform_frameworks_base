@@ -57,7 +57,7 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
   io::IFile* Next() override;
 
  private:
-  std::map<std::string, std::unique_ptr<IFile>>::const_iterator current_, end_;
+  std::vector<std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
 /**
@@ -78,7 +78,8 @@ class ZipFileCollection : public IFileCollection {
   ZipFileCollection();
 
   ZipArchiveHandle handle_;
-  std::map<std::string, std::unique_ptr<IFile>> files_;
+  std::vector<std::unique_ptr<IFile>> files_;
+  std::map<std::string, IFile*> files_by_name_;
 };
 
 }  // namespace io
