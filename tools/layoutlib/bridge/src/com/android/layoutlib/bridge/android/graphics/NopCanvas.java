@@ -31,14 +31,18 @@ import android.graphics.RectF;
  * Canvas implementation that does not do any rendering
  */
 public class NopCanvas extends Canvas {
+    private boolean mIsHardwareAccelerated = true;
+
     public NopCanvas() {
         super();
+        // We return true the first time so there are no allocations for the software renderer in
+        // the constructor
+        mIsHardwareAccelerated = false;
     }
 
     @Override
     public boolean isHardwareAccelerated() {
-        // Return true so there is no allocations for the software renderer in the constructor
-        return true;
+        return mIsHardwareAccelerated;
     }
 
     @Override
