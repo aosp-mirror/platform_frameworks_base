@@ -2980,7 +2980,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    private void wipeDataLocked(boolean wipeExtRequested, String reason) {
+    private void wipeDataNoLock(boolean wipeExtRequested, String reason) {
         // If the SD card is encrypted and non-removable, we have to force a wipe.
         boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
 
@@ -3007,13 +3007,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceCrossUserPermission(userHandle);
+        final String source;
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             final ActiveAdmin admin = getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_WIPE_DATA);
 
-            final String source;
             final ComponentName cname = admin.info.getComponent();
             if (cname != null) {
                 source = cname.flattenToShortString();
@@ -3035,34 +3035,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         manager.wipe();
                     }
                 }
-                boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
-                wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
-                        "DevicePolicyManager.wipeData() from " + source);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+        boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
+        wipeDeviceNoLock(wipeExtRequested, userHandle,
+                "DevicePolicyManager.wipeData() from " + source);
     }
 
-    private void wipeDeviceOrUserLocked(boolean wipeExtRequested, final int userHandle, String reason) {
-        if (userHandle == UserHandle.USER_OWNER) {
-            wipeDataLocked(wipeExtRequested, reason);
-        } else {
-            mHandler.post(new Runnable() {
-                public void run() {
-                    try {
-                        IActivityManager am = ActivityManagerNative.getDefault();
-                        if (am.getCurrentUser().id == userHandle) {
-                            am.switchUser(UserHandle.USER_OWNER);
+    private void wipeDeviceNoLock(boolean wipeExtRequested, final int userHandle, String reason) {
+        final long iden = Binder.clearCallingIdentity();
+        try {
+            if (userHandle == UserHandle.USER_OWNER) {
+                wipeDataNoLock(wipeExtRequested, reason);
+            } else {
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            IActivityManager am = ActivityManagerNative.getDefault();
+                            if (am.getCurrentUser().id == userHandle) {
+                                am.switchUser(UserHandle.USER_OWNER);
+                            }
+                            if (!mUserManager.removeUser(userHandle)) {
+                                Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
+                            }
+                        } catch (RemoteException re) {
+                            // Shouldn't happen
                         }
-                        if (!mUserManager.removeUser(userHandle)) {
-                            Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
-                        }
-                    } catch (RemoteException re) {
-                        // Shouldn't happen
                     }
-                }
-            });
+                });
+            }
+        } finally {
+            Binder.restoreCallingIdentity(iden);
         }
     }
 
@@ -3201,7 +3206,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (wipeData) {
                 // Call without holding lock.
-                wipeDeviceOrUserLocked(false, identifier,
+                wipeDeviceNoLock(false, identifier,
                         "reportFailedPasswordAttempt()");
             }
         } finally {
