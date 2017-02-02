@@ -19,6 +19,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
@@ -38,7 +39,7 @@ public class PluginFragmentListener implements PluginListener<Plugin> {
             Class<? extends FragmentBase> expectedInterface) {
         mTag = tag;
         mFragmentHostManager = FragmentHostManager.get(view);
-        mPluginManager = PluginManager.getInstance(view.getContext());
+        mPluginManager = Dependency.get(PluginManager.class);
         mExpectedInterface = expectedInterface;
         mDefaultClass = defaultFragment;
     }

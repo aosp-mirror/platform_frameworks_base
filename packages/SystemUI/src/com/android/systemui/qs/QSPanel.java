@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QS.DetailAdapter;
@@ -126,7 +127,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(mContext).addTunable(this, QS_SHOW_BRIGHTNESS);
+        Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS);
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
@@ -134,8 +135,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     @Override
     protected void onDetachedFromWindow() {
-        TunerService.get(mContext).removeTunable(this);
-        mHost.removeCallback(this);
+        Dependency.get(TunerService.class).removeTunable(this);
+        if (mHost != null) {
+            mHost.removeCallback(this);
+        }
         for (TileRecord record : mRecords) {
             record.tile.removeCallbacks();
         }

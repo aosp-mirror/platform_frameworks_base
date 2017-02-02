@@ -76,7 +76,7 @@ public class BatteryMeterView extends ImageView implements
         mDrawable.setBatteryController(mBatteryController);
         mBatteryController.addCallback(this);
         mDrawable.startListening();
-        TunerService.get(getContext()).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class BatteryMeterView extends ImageView implements
         super.onDetachedFromWindow();
         mBatteryController.removeCallback(this);
         mDrawable.stopListening();
-        TunerService.get(getContext()).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     @Override

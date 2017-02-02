@@ -14,6 +14,7 @@
 
 package com.android.systemui;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -23,6 +24,7 @@ import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -56,9 +58,11 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -167,11 +171,17 @@ public class Dependency extends SystemUI {
         mProviders.put(DeviceProvisionedController.class.getName(), () ->
                 new DeviceProvisionedControllerImpl(mContext));
 
+        mProviders.put(PluginManager.class.getName(), () ->
+                new PluginManager(mContext));
+
         mProviders.put(AssistManager.class.getName(), () ->
                 new AssistManager(getDependency(DeviceProvisionedController.class), mContext));
 
         mProviders.put(SecurityController.class.getName(), () ->
                 new SecurityControllerImpl(mContext));
+
+        mProviders.put(TunerService.class.getName(), () ->
+                new TunerService(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
@@ -218,6 +228,17 @@ public class Dependency extends SystemUI {
 
     public interface DependencyProvider<T> {
         T createDependency();
+    }
+
+    /**
+     * Used in separate processes (like tuner settings) to init the dependencies.
+     */
+    public static void initDependencies(Context context) {
+        if (sDependency != null) return;
+        Dependency d = new Dependency();
+        d.mContext = context.getApplicationContext();
+        d.mComponents = new HashMap<>();
+        d.start();
     }
 
     public static <T> T get(Class<T> cls) {

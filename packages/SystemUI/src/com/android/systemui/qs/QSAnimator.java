@@ -20,6 +20,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
@@ -105,7 +106,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onViewAttachedToWindow(View v) {
-        TunerService.get(mQs.getContext()).addTunable(this, ALLOW_FANCY_ANIMATION,
+        Dependency.get(TunerService.class).addTunable(this, ALLOW_FANCY_ANIMATION,
                 MOVE_FULL_ROWS, QuickQSPanel.NUM_QUICK_TILES);
     }
 
@@ -114,7 +115,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mHost != null) {
             mHost.removeCallback(this);
         }
-        TunerService.get(mQs.getContext()).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     @Override

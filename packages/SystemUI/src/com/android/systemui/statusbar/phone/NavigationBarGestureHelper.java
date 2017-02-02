@@ -29,6 +29,7 @@ import android.view.ViewConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
@@ -87,7 +88,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mTaskSwitcherDetector = new GestureDetector(context, this);
-        TunerService.get(context).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
+        Dependency.get(TunerService.class).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
+    }
+
+    public void destroy() {
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     public void setComponents(RecentsComponent recentsComponent, Divider divider,

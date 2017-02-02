@@ -65,7 +65,7 @@ public abstract class SysuiTestCase {
         waitForIdleSync(mHandler);
     }
 
-    protected void waitForIdleSync(Handler h) {
+    public static void waitForIdleSync(Handler h) {
         validateThread(h.getLooper());
         Idler idler = new Idler(null);
         h.getLooper().getQueue().addIdleHandler(idler);

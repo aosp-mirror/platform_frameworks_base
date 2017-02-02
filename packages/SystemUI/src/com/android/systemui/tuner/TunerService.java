@@ -40,6 +40,7 @@ import android.util.ArraySet;
 
 import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.DemoMode;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIApplication;
@@ -51,7 +52,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 
-public class TunerService extends SystemUI {
+public class TunerService {
 
     public static final String ACTION_CLEAR = "com.android.systemui.action.CLEAR_TUNER";
 
@@ -64,13 +65,14 @@ public class TunerService extends SystemUI {
     private final ArrayMap<Uri, String> mListeningUris = new ArrayMap<>();
     // Map of settings keys to the listener.
     private final HashMap<String, Set<Tunable>> mTunableLookup = new HashMap<>();
+    private final Context mContext;
 
     private ContentResolver mContentResolver;
     private int mCurrentUser;
     private CurrentUserTracker mUserTracker;
 
-    @Override
-    public void start() {
+    public TunerService(Context context) {
+        mContext = context;
         mContentResolver = mContext.getContentResolver();
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
@@ -79,7 +81,6 @@ public class TunerService extends SystemUI {
                 upgradeTuner(getValue(TUNER_VERSION, 0), CURRENT_TUNER_VERSION);
             }
         }
-        putComponent(TunerService.class, this);
 
         mCurrentUser = ActivityManager.getCurrentUser();
         mUserTracker = new CurrentUserTracker(mContext) {
@@ -209,32 +210,6 @@ public class TunerService extends SystemUI {
         }
     }
 
-    // Only used in other processes, such as the tuner.
-    private static TunerService sInstance;
-
-    public static TunerService get(Context context) {
-        TunerService service = null;
-        if (context.getApplicationContext() instanceof SystemUIApplication) {
-            SystemUIApplication sysUi = (SystemUIApplication) context.getApplicationContext();
-            service = sysUi.getComponent(TunerService.class);
-        }
-        if (service == null) {
-            // Can't get it as a component, must in the tuner, lets just create one for now.
-            return getStaticService(context);
-        }
-        return service;
-    }
-
-    private static TunerService getStaticService(Context context) {
-        if (sInstance == null) {
-            sInstance = new TunerService();
-            sInstance.mContext = context.getApplicationContext();
-            sInstance.mComponents = new HashMap<>();
-            sInstance.start();
-        }
-        return sInstance;
-    }
-
     public static final void showResetRequest(final Context context, final Runnable onDisabled) {
         SystemUIDialog dialog = new SystemUIDialog(context);
         dialog.setShowForAllUsers(true);
@@ -310,7 +285,7 @@ public class TunerService extends SystemUI {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLEAR.equals(intent.getAction())) {
-                get(context).clearAll();
+                Dependency.get(TunerService.class).clearAll();
             }
         }
     }

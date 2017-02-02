@@ -24,6 +24,7 @@ import android.support.v7.preference.PreferenceScreen;
 import android.util.Log;
 
 import com.android.settingslib.drawer.SettingsDrawerActivity;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 public class TunerActivity extends SettingsDrawerActivity implements
@@ -36,6 +37,7 @@ public class TunerActivity extends SettingsDrawerActivity implements
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Dependency.initDependencies(this);
 
         if (getFragmentManager().findFragmentByTag(TAG_TUNER) == null) {
             final String action = getIntent().getAction();

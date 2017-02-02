@@ -46,6 +46,7 @@ import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.plugins.PluginListener;
@@ -200,7 +201,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mVertical = false;
         mShowMenu = false;
-        mGestureHelper = new NavigationBarGestureHelper(context);
 
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
@@ -633,6 +633,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void updateTaskSwitchHelper() {
+        if (mGestureHelper == null) return;
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
         mGestureHelper.setBarState(mVertical, isRtl);
     }
@@ -752,14 +753,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        PluginManager.getInstance(getContext()).addPluginListener(NavGesture.ACTION, this,
+        onPluginDisconnected(null); // Create default gesture helper
+        Dependency.get(PluginManager.class).addPluginListener(NavGesture.ACTION, this,
                 NavGesture.VERSION, false /* Only one */);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        PluginManager.getInstance(getContext()).removePluginListener(this);
+        Dependency.get(PluginManager.class).removePluginListener(this);
+        if (mGestureHelper != null) {
+            mGestureHelper.destroy();
+        }
     }
 
     @Override
@@ -772,6 +777,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void onPluginDisconnected(NavGesture plugin) {
         NavigationBarGestureHelper defaultHelper = new NavigationBarGestureHelper(getContext());
         defaultHelper.setComponents(mRecentsComponent, mDivider, this);
+        if (mGestureHelper != null) {
+            mGestureHelper.destroy();
+        }
         mGestureHelper = defaultHelper;
         updateTaskSwitchHelper();
     }

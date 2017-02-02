@@ -260,11 +260,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAccessibilityController.addStateChangedCallback(this);
-        PluginManager.getInstance(getContext()).addPluginListener(RIGHT_BUTTON_PLUGIN,
+        Dependency.get(PluginManager.class).addPluginListener(RIGHT_BUTTON_PLUGIN,
                 mRightListener, IntentButtonProvider.VERSION, false /* Only allow one */);
-        PluginManager.getInstance(getContext()).addPluginListener(LEFT_BUTTON_PLUGIN,
+        Dependency.get(PluginManager.class).addPluginListener(LEFT_BUTTON_PLUGIN,
                 mLeftListener, IntentButtonProvider.VERSION, false /* Only allow one */);
-        TunerService.get(getContext()).addTunable(this, LockscreenFragment.LOCKSCREEN_LEFT_BUTTON,
+        Dependency.get(TunerService.class).addTunable(this, LockscreenFragment.LOCKSCREEN_LEFT_BUTTON,
                 LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON);
     }
 
@@ -272,9 +272,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAccessibilityController.removeStateChangedCallback(this);
-        PluginManager.getInstance(getContext()).removePluginListener(mRightListener);
-        PluginManager.getInstance(getContext()).removePluginListener(mLeftListener);
-        TunerService.get(getContext()).removeTunable(this);
+        Dependency.get(PluginManager.class).removePluginListener(mRightListener);
+        Dependency.get(PluginManager.class).removePluginListener(mLeftListener);
+        Dependency.get(TunerService.class).removeTunable(this);
     }
 
     private void initAccessibility() {
@@ -575,7 +575,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             AsyncTask.execute(runnable);
         } else {
             boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
-                    && TunerService.get(getContext()).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
+                    && Dependency.get(TunerService.class).getValue(LOCKSCREEN_RIGHT_UNLOCK, 1) != 0;
             mStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
                     dismissShade, false /* afterKeyguardGone */, true /* deferred */);
         }
@@ -596,7 +596,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             });
         } else {
             boolean dismissShade = !TextUtils.isEmpty(mLeftButtonStr)
-                    && TunerService.get(getContext()).getValue(LOCKSCREEN_LEFT_UNLOCK, 1) != 0;
+                    && Dependency.get(TunerService.class).getValue(LOCKSCREEN_LEFT_UNLOCK, 1) != 0;
             mActivityStarter.startActivity(mLeftButton.getIntent(), dismissShade);
         }
     }

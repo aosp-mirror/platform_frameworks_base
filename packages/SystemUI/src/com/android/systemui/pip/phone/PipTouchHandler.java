@@ -49,6 +49,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.PipMotionHelper;
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.tuner.TunerService;
 
@@ -200,7 +201,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         setSnapToEdge(true);
 
         // Register any tuner settings changes
-        TunerService.get(context).addTunable(this, TUNER_KEY_DRAG_TO_DISMISS,
+        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_DRAG_TO_DISMISS,
                 TUNER_KEY_ALLOW_MINIMIZE);
     }
 

@@ -69,6 +69,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -165,7 +166,7 @@ public class VolumeDialog implements TunerService.Tunable {
 
         controller.addCallback(mControllerCallbackH, mHandler);
         controller.getState();
-        TunerService.get(mContext).addTunable(this, SHOW_FULL_ZEN);
+        Dependency.get(TunerService.class).addTunable(this, SHOW_FULL_ZEN);
 
         final Configuration currentConfig = mContext.getResources().getConfiguration();
         mDensity = currentConfig.densityDpi;

@@ -89,7 +89,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 
         mServices = new TileServices(this, Dependency.get(Dependency.BG_LOOPER));
 
-        TunerService.get(mContext).addTunable(this, TILES_SETTING);
+        Dependency.get(TunerService.class).addTunable(this, TILES_SETTING);
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
         mAutoTiles = new AutoTileManager(context, this);
     }
@@ -101,7 +101,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     public void destroy() {
         mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
-        TunerService.get(mContext).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
         mServices.destroy();
     }
 

@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
@@ -135,15 +136,16 @@ public class NavigationBarInflaterView extends FrameLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        TunerService.get(getContext()).addTunable(this, NAV_BAR_VIEWS, NAV_BAR_LEFT,
+        Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS, NAV_BAR_LEFT,
                 NAV_BAR_RIGHT);
-        PluginManager.getInstance(getContext()).addPluginListener(NavBarButtonProvider.ACTION, this,
+        Dependency.get(PluginManager.class).addPluginListener(NavBarButtonProvider.ACTION, this,
                 NavBarButtonProvider.VERSION, true /* Allow multiple */);
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        TunerService.get(getContext()).removeTunable(this);
+        Dependency.get(TunerService.class).removeTunable(this);
+        Dependency.get(PluginManager.class).removePluginListener(this);
         super.onDetachedFromWindow();
     }
 
@@ -278,10 +280,10 @@ public class NavigationBarInflaterView extends FrameLayout
         View v = null;
         String button = extractButton(buttonSpec);
         if (LEFT.equals(button)) {
-            buttonSpec = TunerService.get(mContext).getValue(NAV_BAR_LEFT, NAVSPACE);
+            buttonSpec = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, NAVSPACE);
             button = extractButton(buttonSpec);
         } else if (RIGHT.equals(button)) {
-            buttonSpec = TunerService.get(mContext).getValue(NAV_BAR_RIGHT, MENU_IME);
+            buttonSpec = Dependency.get(TunerService.class).getValue(NAV_BAR_RIGHT, MENU_IME);
             button = extractButton(buttonSpec);
         }
         // Let plugins go first so they can override a standard view if they want.

@@ -20,6 +20,7 @@ import static org.mockito.Mockito.doAnswer;
 import android.util.ArrayMap;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -55,6 +57,25 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
 
     private final Map<String, Tracker> mTrackers = new HashMap<>();
     private final Map<Class, Object> mLeakCheckers = new ArrayMap<>();
+
+    public static final Class<?>[] ALL_SUPPORTED_CLASSES = new Class[] {
+            BluetoothController.class,
+            LocationController.class,
+            RotationLockController.class,
+            ZenModeController.class,
+            CastController.class,
+            HotspotController.class,
+            FlashlightController.class,
+            UserInfoController.class,
+            KeyguardMonitor.class,
+            BatteryController.class,
+            SecurityController.class,
+            ManagedProfileController.class,
+            NextAlarmController.class,
+            NetworkController.class,
+            PluginManager.class,
+            TunerService.class,
+    };
 
     @Rule
     public TestWatcher successWatcher = new TestWatcher() {
@@ -96,6 +117,10 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
                 obj = new FakeNextAlarmController(this);
             } else if (cls == NetworkController.class) {
                 obj = new FakeNetworkController(this);
+            } else if (cls == PluginManager.class) {
+                obj = new FakePluginManager(mContext, this);
+            } else if (cls == TunerService.class) {
+                obj = new FakeTunerService(mContext, this);
             } else {
                 Assert.fail(cls.getName() + " is not supported by LeakCheckedTest yet");
             }

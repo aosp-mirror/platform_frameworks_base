@@ -76,7 +76,7 @@ public class PluginInflateContainer extends AutoReinflateContainer
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (mAction != null) {
-            PluginManager.getInstance(getContext()).addPluginListener(mAction, this, mVersion);
+            Dependency.get(PluginManager.class).addPluginListener(mAction, this, mVersion);
         }
     }
 
@@ -84,7 +84,7 @@ public class PluginInflateContainer extends AutoReinflateContainer
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (mAction != null) {
-            PluginManager.getInstance(getContext()).removePluginListener(this);
+            Dependency.get(PluginManager.class).removePluginListener(this);
         }
     }
 

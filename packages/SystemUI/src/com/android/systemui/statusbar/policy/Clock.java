@@ -108,7 +108,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
 
             getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
                     null, Dependency.get(Dependency.TIME_TICK_HANDLER));
-            TunerService.get(getContext()).addTunable(this, CLOCK_SECONDS,
+            Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
         }
 
@@ -129,7 +129,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
             mAttached = false;
-            TunerService.get(getContext()).removeTunable(this);
+            Dependency.get(TunerService.class).removeTunable(this);
         }
     }
 
