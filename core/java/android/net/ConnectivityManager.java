@@ -46,6 +46,7 @@ import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
@@ -1240,36 +1241,27 @@ public class ConnectivityManager {
 
     private NetworkCapabilities networkCapabilitiesForFeature(int networkType, String feature) {
         if (networkType == TYPE_MOBILE) {
-            int cap = -1;
-            if ("enableMMS".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_MMS;
-            } else if ("enableSUPL".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_SUPL;
-            } else if ("enableDUN".equals(feature) || "enableDUNAlways".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_DUN;
-            } else if ("enableHIPRI".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_INTERNET;
-            } else if ("enableFOTA".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_FOTA;
-            } else if ("enableIMS".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_IMS;
-            } else if ("enableCBS".equals(feature)) {
-                cap = NetworkCapabilities.NET_CAPABILITY_CBS;
-            } else {
-                return null;
+            switch (feature) {
+                case "enableCBS":
+                    return networkCapabilitiesForType(TYPE_MOBILE_CBS);
+                case "enableDUN":
+                case "enableDUNAlways":
+                    return networkCapabilitiesForType(TYPE_MOBILE_DUN);
+                case "enableFOTA":
+                    return networkCapabilitiesForType(TYPE_MOBILE_FOTA);
+                case "enableHIPRI":
+                    return networkCapabilitiesForType(TYPE_MOBILE_HIPRI);
+                case "enableIMS":
+                    return networkCapabilitiesForType(TYPE_MOBILE_IMS);
+                case "enableMMS":
+                    return networkCapabilitiesForType(TYPE_MOBILE_MMS);
+                case "enableSUPL":
+                    return networkCapabilitiesForType(TYPE_MOBILE_SUPL);
+                default:
+                    return null;
             }
-            NetworkCapabilities netCap = new NetworkCapabilities();
-            netCap.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).addCapability(cap);
-            netCap.maybeMarkCapabilitiesRestricted();
-            return netCap;
-        } else if (networkType == TYPE_WIFI) {
-            if ("p2p".equals(feature)) {
-                NetworkCapabilities netCap = new NetworkCapabilities();
-                netCap.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-                netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
-                netCap.maybeMarkCapabilitiesRestricted();
-                return netCap;
-            }
+        } else if (networkType == TYPE_WIFI && "p2p".equals(feature)) {
+            return networkCapabilitiesForType(TYPE_WIFI_P2P);
         }
         return null;
     }
@@ -1475,6 +1467,59 @@ public class ConnectivityManager {
         unregisterNetworkCallback(l.networkCallback);
         l.clearDnsBinding();
         return true;
+    }
+
+    private static final SparseIntArray sLegacyTypeToTransport = new SparseIntArray();
+    static {
+        sLegacyTypeToTransport.put(TYPE_MOBILE,       NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_CBS,   NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_DUN,   NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_FOTA,  NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_HIPRI, NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_IMS,   NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_MMS,   NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_MOBILE_SUPL,  NetworkCapabilities.TRANSPORT_CELLULAR);
+        sLegacyTypeToTransport.put(TYPE_WIFI,         NetworkCapabilities.TRANSPORT_WIFI);
+        sLegacyTypeToTransport.put(TYPE_WIFI_P2P,     NetworkCapabilities.TRANSPORT_WIFI);
+        sLegacyTypeToTransport.put(TYPE_BLUETOOTH,    NetworkCapabilities.TRANSPORT_BLUETOOTH);
+        sLegacyTypeToTransport.put(TYPE_ETHERNET,     NetworkCapabilities.TRANSPORT_ETHERNET);
+    }
+
+    private static final SparseIntArray sLegacyTypeToCapability = new SparseIntArray();
+    static {
+        sLegacyTypeToCapability.put(TYPE_MOBILE_CBS,  NetworkCapabilities.NET_CAPABILITY_CBS);
+        sLegacyTypeToCapability.put(TYPE_MOBILE_DUN,  NetworkCapabilities.NET_CAPABILITY_DUN);
+        sLegacyTypeToCapability.put(TYPE_MOBILE_FOTA, NetworkCapabilities.NET_CAPABILITY_FOTA);
+        sLegacyTypeToCapability.put(TYPE_MOBILE_IMS,  NetworkCapabilities.NET_CAPABILITY_IMS);
+        sLegacyTypeToCapability.put(TYPE_MOBILE_MMS,  NetworkCapabilities.NET_CAPABILITY_MMS);
+        sLegacyTypeToCapability.put(TYPE_MOBILE_SUPL, NetworkCapabilities.NET_CAPABILITY_SUPL);
+        sLegacyTypeToCapability.put(TYPE_WIFI_P2P,    NetworkCapabilities.NET_CAPABILITY_WIFI_P2P);
+    }
+
+    /**
+     * Given a legacy type (TYPE_WIFI, ...) returns a NetworkCapabilities
+     * instance suitable for registering a request or callback.  Throws an
+     * IllegalArgumentException if no mapping from the legacy type to
+     * NetworkCapabilities is known.
+     *
+     * @hide
+     */
+    public static NetworkCapabilities networkCapabilitiesForType(int type) {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+
+        // Map from type to transports.
+        final int NOT_FOUND = -1;
+        final int transport = sLegacyTypeToTransport.get(type, NOT_FOUND);
+        if (transport == NOT_FOUND) {
+            throw new IllegalArgumentException("unknown legacy type: " + type);
+        }
+        nc.addTransportType(transport);
+
+        // Map from type to capabilities.
+        nc.addCapability(sLegacyTypeToCapability.get(
+                type, NetworkCapabilities.NET_CAPABILITY_INTERNET));
+        nc.maybeMarkCapabilitiesRestricted();
+        return nc;
     }
 
     /** @hide */
