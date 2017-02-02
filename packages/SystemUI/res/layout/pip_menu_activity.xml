@@ -27,7 +27,7 @@
         android:layout_height="48dp"
         android:layout_gravity="top|end"
         android:padding="10dp"
-        android:contentDescription="@string/pip_phone_dismiss"
+        android:contentDescription="@string/pip_phone_close"
         android:src="@drawable/ic_close_white"
         android:background="?android:selectableItemBackgroundBorderless" />
 

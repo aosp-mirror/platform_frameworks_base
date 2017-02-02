@@ -1746,8 +1746,8 @@
     <!-- Label for PIP action to Minimize the PIP [CHAR LIMIT=25] -->
     <string name="pip_phone_minimize">Minimize</string>
 
-    <!-- Label for PIP action to Dismiss the PIP -->
-    <string name="pip_phone_dismiss">Dismiss</string>
+    <!-- Label for PIP the drag to close zone [CHAR LIMIT=NONE]-->
+    <string name="pip_phone_close">Close</string>
 
     <!-- PIP section of the tuner. Non-translatable since it should
         not appear on production builds ever. -->
