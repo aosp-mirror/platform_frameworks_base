@@ -636,6 +636,20 @@ public final class Bitmap_Delegate {
                 Bitmap.getDefaultDensity());
     }
 
+    @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCreateHardwareBitmap(GraphicBuffer buffer) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.nativeCreateHardwareBitmap() is not supported", null /*data*/);
+        return null;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap) {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.nativeCreateGraphicBufferHandle() is not supported", null /*data*/);
+        return null;
+    }
+
     // ---- Private delegate/helper methods ----
 
     private Bitmap_Delegate(BufferedImage image, Config config) {
