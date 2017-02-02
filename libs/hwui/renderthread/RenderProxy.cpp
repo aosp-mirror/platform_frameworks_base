@@ -667,11 +667,17 @@ CREATE_BRIDGE3(copyGraphicBufferInto, RenderThread* thread, GraphicBuffer* buffe
 }
 
 int RenderProxy::copyGraphicBufferInto(GraphicBuffer* buffer, SkBitmap* bitmap) {
-    SETUP_TASK(copyGraphicBufferInto);
-    args->thread = &RenderThread::getInstance();
-    args->bitmap = bitmap;
-    args->buffer = buffer;
-    return static_cast<int>(reinterpret_cast<intptr_t>(staticPostAndWait(task)));
+    RenderThread& thread = RenderThread::getInstance();
+    if (Properties::isSkiaEnabled() && gettid() == thread.getTid()) {
+        //TODO: fix everything that hits this. We should never be triggering a readback ourselves.
+        return (int) thread.readback().copyGraphicBufferInto(buffer, bitmap);
+    } else {
+        SETUP_TASK(copyGraphicBufferInto);
+        args->thread = &thread;
+        args->bitmap = bitmap;
+        args->buffer = buffer;
+        return static_cast<int>(reinterpret_cast<intptr_t>(staticPostAndWait(task)));
+    }
 }
 
 void RenderProxy::post(RenderTask* task) {
@@ -690,6 +696,7 @@ void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {
 
 void* RenderProxy::staticPostAndWait(MethodInvokeRenderTask* task) {
     RenderThread& thread = RenderThread::getInstance();
+    LOG_ALWAYS_FATAL_IF(gettid() == thread.getTid());
     void* retval;
     task->setReturnPtr(&retval);
     thread.queueAndWait(task);
