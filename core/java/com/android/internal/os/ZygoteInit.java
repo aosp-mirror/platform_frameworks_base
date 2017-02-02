@@ -28,6 +28,7 @@ import android.net.LocalServerSocket;
 import android.os.IInstalld;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Seccomp;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
@@ -681,6 +682,9 @@ public class ZygoteInit {
 
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
+
+            // Set seccomp policy
+            Seccomp.setPolicy();
 
             ZygoteHooks.stopZygoteNoThreadCreation();
 
