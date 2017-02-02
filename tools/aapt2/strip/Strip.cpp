@@ -22,6 +22,7 @@
 #include "Diagnostics.h"
 #include "Flags.h"
 #include "LoadedApk.h"
+#include "split/TableSplitter.h"
 
 using android::StringPiece;
 
@@ -78,7 +79,21 @@ class StripCommand {
       context_->GetDiagnostics()->Note(DiagMessage() << "Stripping APK...");
     }
 
-    // TODO(lecesne): Implement stripping here.
+    // TODO(lecesne): Add support for more than one density.
+    if (options_.target_configs.size() > 1) {
+      context_->GetDiagnostics()->Error(DiagMessage()
+                                        << "Multiple densities not supported at the moment");
+      return 1;
+    }
+
+    // Stripping the APK using the TableSplitter with no splits and the target
+    // density as the preferred density. The resource table is modified in
+    // place in the LoadedApk.
+    TableSplitterOptions splitter_options;
+    splitter_options.preferred_density = options_.target_configs[0].density;
+    std::vector<SplitConstraints> splits;
+    TableSplitter splitter(splits, splitter_options);
+    splitter.SplitTable(apk->GetResourceTable());
 
     std::unique_ptr<IArchiveWriter> writer =
         CreateZipFileArchiveWriter(context_->GetDiagnostics(), options_.output_path);
