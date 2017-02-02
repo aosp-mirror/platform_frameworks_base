@@ -2077,8 +2077,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             } else {
                 record.trackAddedFragmentsInPop(mTmpAddedFragments);
             }
-            final int bumpAmount = isPop ? -1 : 1;
-            record.bumpBackStackNesting(bumpAmount);
             addToBackStack = addToBackStack || record.mAddToBackStack;
         }
         mTmpAddedFragments.clear();
@@ -2281,8 +2279,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             final BackStackRecord record = records.get(i);
             final boolean isPop = isRecordPop.get(i);
             if (isPop) {
+                record.bumpBackStackNesting(-1);
                 record.executePopOps();
             } else {
+                record.bumpBackStackNesting(1);
                 record.executeOps();
             }
         }
