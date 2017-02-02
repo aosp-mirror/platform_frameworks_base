@@ -737,6 +737,12 @@ public class BitmapDrawable extends Drawable {
                 || super.isStateful();
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mBitmapState.mTint != null && mBitmapState.mTint.hasFocusStateSpecified();
+    }
+
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {

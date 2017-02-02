@@ -26,6 +26,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -709,6 +710,25 @@ public abstract class Drawable {
      * @see #setState(int[])
      */
     public boolean isStateful() {
+        return false;
+    }
+
+    /**
+     * Indicates whether this drawable has at least one state spec explicitly
+     * specifying {@link android.R.attr#state_focused}.
+     *
+     * <p>Note: A View uses a {@link Drawable} instance as its background and it
+     * changes its appearance based on a state. On keyboard devices, it should
+     * specify its {@link android.R.attr#state_focused} to make sure the user
+     * knows which view is holding the focus.</p>
+     *
+     * @return {@code true} if {@link android.R.attr#state_focused} is specified
+     * for this drawable.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean hasFocusStateSpecified() {
         return false;
     }
 
