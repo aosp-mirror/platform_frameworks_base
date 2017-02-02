@@ -90,6 +90,12 @@ public class StateListDrawable extends DrawableContainer {
         return true;
     }
 
+    /** @hide */
+    @Override
+    public boolean hasFocusStateSpecified() {
+        return mStateListState.hasFocusStateSpecified();
+    }
+
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final boolean changed = super.onStateChange(stateSet);
@@ -340,6 +346,10 @@ public class StateListDrawable extends DrawableContainer {
                 }
             }
             return -1;
+        }
+
+        boolean hasFocusStateSpecified() {
+            return StateSet.containsAttribute(mStateSets, R.attr.state_focused);
         }
 
         @Override
