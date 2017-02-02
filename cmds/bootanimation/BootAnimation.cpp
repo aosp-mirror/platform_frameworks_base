@@ -18,6 +18,7 @@
 #define LOG_TAG "BootAnimation"
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <sys/inotify.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
@@ -35,6 +36,7 @@
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/Log.h>
+#include <utils/SystemClock.h>
 
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
@@ -350,6 +352,7 @@ bool BootAnimation::threadLoop()
 
 bool BootAnimation::android()
 {
+    ALOGD("BootAnimationShownTiming: BootAnimation start time: %" PRId64 "ms", elapsedRealtime());
     initTexture(&mAndroid[0], mAssets, "images/android-logo-mask.png");
     initTexture(&mAndroid[1], mAssets, "images/android-logo-shine.png");
 
@@ -854,8 +857,8 @@ bool BootAnimation::movie()
         mTimeCheckThread = nullptr;
     }
 
+    // We should have joined mInitAudioThread thread in playAnimation
     if (mInitAudioThread != nullptr) {
-        mInitAudioThread->requestExit();
         mInitAudioThread = nullptr;
     }
 
@@ -875,6 +878,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
     const int animationX = (mWidth - animation.width) / 2;
     const int animationY = (mHeight - animation.height) / 2;
 
+    ALOGD("BootAnimationShownTiming: BootAnimation start time: %" PRId64 "ms", elapsedRealtime());
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
