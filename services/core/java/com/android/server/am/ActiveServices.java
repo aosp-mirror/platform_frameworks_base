@@ -723,6 +723,39 @@ public final class ActiveServices {
             if (notification == null) {
                 throw new IllegalArgumentException("null notification");
             }
+            // Instant apps need permission to create foreground services.
+            if (r.appInfo.isInstantApp()) {
+                final int mode = mAm.mAppOpsService.checkOperation(
+                        AppOpsManager.OP_INSTANT_APP_START_FOREGROUND,
+                        r.appInfo.uid,
+                        r.appInfo.packageName);
+                switch (mode) {
+                    case AppOpsManager.MODE_ALLOWED:
+                        break;
+                    case AppOpsManager.MODE_IGNORED:
+                        Slog.w(TAG, "Instant app " + r.appInfo.packageName
+                                + " does not have permission to create foreground services"
+                                + ", ignoring.");
+                        return;
+                    case AppOpsManager.MODE_ERRORED:
+                        throw new SecurityException("Instant app " + r.appInfo.packageName
+                                + " does not have permission to create foreground services");
+                    default:
+                        try {
+                            if (AppGlobals.getPackageManager().checkPermission(
+                                    android.Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
+                                    r.appInfo.packageName,
+                                    r.appInfo.uid) != PackageManager.PERMISSION_GRANTED) {
+                                throw new SecurityException("Instant app " + r.appInfo.packageName
+                                        + " does not have permission to create foreground"
+                                        + "services");
+                            }
+                        } catch (RemoteException e) {
+                            throw new SecurityException("Failed to check instant app permission." ,
+                                    e);
+                        }
+                }
+            }
             if (r.foregroundId != id) {
                 cancelForegroudNotificationLocked(r);
                 r.foregroundId = id;
