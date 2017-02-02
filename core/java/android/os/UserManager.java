@@ -516,6 +516,7 @@ public class UserManager {
      * <li>{@link LayoutParams#TYPE_SYSTEM_ALERT}</li>
      * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
      * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
+     * <li>{@link LayoutParams#TYPE_APPLICATION_OVERLAY}</li>
      *
      * <p>This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.

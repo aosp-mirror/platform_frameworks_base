@@ -2185,7 +2185,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     && !mService.mInputMethodTarget.isInMultiWindowMode();
         }
 
-        final int aboveAppLayer = (mService.mPolicy.windowTypeToLayerLw(TYPE_APPLICATION) + 1)
+        final int aboveAppLayer = (mService.mPolicy.getWindowLayerFromTypeLw(TYPE_APPLICATION) + 1)
                 * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
         final MutableBoolean mutableIncludeFullDisplay = new MutableBoolean(includeFullDisplay);
         synchronized(mService.mWindowMap) {
@@ -2728,8 +2728,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         private final Comparator<WindowToken> mWindowComparator = (token1, token2) ->
                 // Tokens with higher base layer are z-ordered on-top.
-                mService.mPolicy.windowTypeToLayerLw(token1.windowType)
-                < mService.mPolicy.windowTypeToLayerLw(token2.windowType) ? -1 : 1;
+                mService.mPolicy.getWindowLayerFromTypeLw(token1.windowType,
+                        token1.mOwnerCanManageAppTokens)
+                < mService.mPolicy.getWindowLayerFromTypeLw(token2.windowType,
+                        token2.mOwnerCanManageAppTokens) ? -1 : 1;
 
         private final Predicate<WindowState> mGetOrientingWindow = w -> {
             if (!w.isVisibleLw() || !w.mPolicyVisibilityAfterAnim) {

@@ -57,7 +57,8 @@ public class WindowFrameTests {
         final Task mTask;
         boolean mDockedResizingForTest = false;
         WindowStateWithTask(WindowManager.LayoutParams attrs, Task t) {
-            super(sWm, null, mIWindow, mWindowToken, null, 0, 0, attrs, 0, 0);
+            super(sWm, null, mIWindow, mWindowToken, null, 0, 0, attrs, 0, 0,
+                    false /* ownerCanAddInternalSystemWindow */);
             mTask = t;
         }
 
@@ -106,7 +107,7 @@ public class WindowFrameTests {
         sWm.mSystemDecorLayer = 10000;
 
         mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
-                sWm.getDefaultDisplayContentLocked());
+                sWm.getDefaultDisplayContentLocked(), false /* ownerCanManageAppTokens */);
         mStubStack = new TaskStack(sWm, 0);
     }
 

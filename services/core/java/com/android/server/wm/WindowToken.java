@@ -77,6 +77,9 @@ class WindowToken extends WindowContainer<WindowState> {
     // The display this token is on.
     protected DisplayContent mDisplayContent;
 
+    /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
+    final boolean mOwnerCanManageAppTokens;
+
     /**
      * Compares two child window of this token and returns -1 if the first is lesser than the
      * second in terms of z-order and 1 otherwise.
@@ -98,11 +101,12 @@ class WindowToken extends WindowContainer<WindowState> {
     };
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc) {
+            DisplayContent dc, boolean ownerCanManageAppTokens) {
         mService = service;
         token = _token;
         windowType = type;
         mPersistOnEmpty = persistOnEmpty;
+        mOwnerCanManageAppTokens = ownerCanManageAppTokens;
         onDisplayChanged(dc);
     }
 

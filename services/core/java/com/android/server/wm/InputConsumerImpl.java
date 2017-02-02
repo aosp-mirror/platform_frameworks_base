@@ -77,7 +77,7 @@ class InputConsumerImpl {
     }
 
     private int getLayerLw(int windowType) {
-        return mService.mPolicy.windowTypeToLayerLw(windowType)
+        return mService.mPolicy.getWindowLayerFromTypeLw(windowType)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
                 + WindowManagerService.TYPE_LAYER_OFFSET;
     }

@@ -192,7 +192,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc) {
-        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc);
+        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
+                false /* ownerCanManageAppTokens */);
         appToken = token;
         mVoiceInteraction = voiceInteraction;
         mInputApplicationHandle = new InputApplicationHandle(this);
