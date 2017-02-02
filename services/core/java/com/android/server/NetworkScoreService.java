@@ -183,11 +183,12 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 // connection.
                 if (DBG) Log.d(TAG, "No active scorers available.");
                 unbindFromScoringServiceIfNeeded();
-            } else if (activeScorer.packageName.equals(scorerPackageName)) {
+            } else if (activeScorer.getRecommendationServicePackageName().equals(scorerPackageName))
+            {
                 // The active scoring service changed in some way.
                 if (DBG) {
                     Log.d(TAG, "Possible change to the active scorer: "
-                            + activeScorer.packageName);
+                            + activeScorer.getRecommendationServicePackageName());
                 }
                 if (forceUnbind) {
                     unbindFromScoringServiceIfNeeded();
@@ -198,7 +199,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 // bound to the correct scoring app. The logic in bindToScoringServiceIfNeeded()
                 // will sort that out to leave us bound to the most recent active scorer.
                 if (DBG) {
-                    Log.d(TAG, "Binding to " + activeScorer.packageName + " if needed.");
+                    Log.d(TAG, "Binding to " + activeScorer.getRecommendationServiceComponent()
+                            + " if needed.");
                 }
                 bindToScoringServiceIfNeeded(activeScorer);
             }
@@ -334,22 +336,19 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         bindToScoringServiceIfNeeded(scorerData);
     }
 
-    private void bindToScoringServiceIfNeeded(NetworkScorerAppData scorerData) {
-        if (DBG) Log.d(TAG, "bindToScoringServiceIfNeeded(" + scorerData + ")");
-        if (scorerData != null && scorerData.recommendationServiceClassName != null) {
-            ComponentName componentName = new ComponentName(scorerData.packageName,
-                    scorerData.recommendationServiceClassName);
+    private void bindToScoringServiceIfNeeded(NetworkScorerAppData appData) {
+        if (DBG) Log.d(TAG, "bindToScoringServiceIfNeeded(" + appData + ")");
+        if (appData != null) {
             synchronized (mServiceConnectionLock) {
                 // If we're connected to a different component then drop it.
                 if (mServiceConnection != null
-                        && !mServiceConnection.mComponentName.equals(componentName)) {
+                        && !mServiceConnection.mAppData.equals(appData)) {
                     unbindFromScoringServiceIfNeeded();
                 }
 
                 // If we're not connected at all then create a new connection.
                 if (mServiceConnection == null) {
-                    mServiceConnection = new ScoringServiceConnection(componentName,
-                            scorerData.packageUid);
+                    mServiceConnection = new ScoringServiceConnection(appData);
                 }
 
                 // Make sure the connection is connected (idempotent)
@@ -672,7 +671,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean isCallerActiveScorer(int callingUid) {
         synchronized (mServiceConnectionLock) {
-            return mServiceConnection != null && mServiceConnection.mScoringAppUid == callingUid;
+            return mServiceConnection != null
+                    && mServiceConnection.mAppData.packageUid == callingUid;
         }
     }
 
@@ -686,7 +686,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public String getActiveScorerPackage() {
         synchronized (mServiceConnectionLock) {
             if (mServiceConnection != null) {
-                return mServiceConnection.mComponentName.getPackageName();
+                return mServiceConnection.getPackageName();
             }
         }
         return null;
@@ -881,7 +881,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 writer.println("Scoring is disabled.");
                 return;
             }
-            writer.println("Current scorer: " + currentScorer.packageName);
+            writer.println("Current scorer: " + currentScorer);
 
             sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
                 @Override
@@ -966,21 +966,19 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     }
 
     private static class ScoringServiceConnection implements ServiceConnection {
-        private final ComponentName mComponentName;
-        private final int mScoringAppUid;
+        private final NetworkScorerAppData mAppData;
         private volatile boolean mBound = false;
         private volatile boolean mConnected = false;
         private volatile INetworkRecommendationProvider mRecommendationProvider;
 
-        ScoringServiceConnection(ComponentName componentName, int scoringAppUid) {
-            mComponentName = componentName;
-            mScoringAppUid = scoringAppUid;
+        ScoringServiceConnection(NetworkScorerAppData appData) {
+            mAppData = appData;
         }
 
         void connect(Context context) {
             if (!mBound) {
                 Intent service = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
-                service.setComponent(mComponentName);
+                service.setComponent(mAppData.getRecommendationServiceComponent());
                 mBound = context.bindServiceAsUser(service, this,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
                         UserHandle.SYSTEM);
@@ -1010,6 +1008,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             return mRecommendationProvider;
         }
 
+        String getPackageName() {
+            return mAppData.getRecommendationServiceComponent().getPackageName();
+        }
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DBG) Log.d(TAG, "ScoringServiceConnection: " + name.flattenToString());
@@ -1027,7 +1029,9 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
 
         public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-            writer.println("ScoringServiceConnection: " + mComponentName + ", bound: " + mBound
+            writer.println("ScoringServiceConnection: "
+                    + mAppData.getRecommendationServiceComponent()
+                    + ", bound: " + mBound
                     + ", connected: " + mConnected);
         }
     }

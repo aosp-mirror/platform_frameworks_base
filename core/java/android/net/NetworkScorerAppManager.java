@@ -18,6 +18,7 @@ package android.net;
 
 import android.Manifest.permission;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Internal class for discovering and managing the network scorer/recommendation application.
@@ -53,33 +55,43 @@ public class NetworkScorerAppManager {
      * Holds metadata about a discovered network scorer/recommendation application.
      */
     public static class NetworkScorerAppData {
-        /** Package name of this scorer app. */
-        public final String packageName;
-
         /** UID of the scorer app. */
         public final int packageUid;
+        private final ComponentName mRecommendationService;
 
-        /**
-         * Name of the recommendation service we can bind to.
-         */
-        public final String recommendationServiceClassName;
-
-        public NetworkScorerAppData(String packageName, int packageUid,
-                String recommendationServiceClassName) {
-            this.packageName = packageName;
+        public NetworkScorerAppData(int packageUid, ComponentName recommendationServiceComp) {
             this.packageUid = packageUid;
-            this.recommendationServiceClassName = recommendationServiceClassName;
+            this.mRecommendationService = recommendationServiceComp;
+        }
+
+        public String getRecommendationServicePackageName() {
+            return mRecommendationService.getPackageName();
+        }
+
+        public ComponentName getRecommendationServiceComponent() {
+            return mRecommendationService;
         }
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("NetworkScorerAppData{");
-            sb.append("mPackageName='").append(packageName).append('\'');
-            sb.append(", packageUid=").append(packageUid);
-            sb.append(", recommendationServiceClassName='")
-                    .append(recommendationServiceClassName).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "NetworkScorerAppData{" +
+                    "packageUid=" + packageUid +
+                    ", mRecommendationService=" + mRecommendationService +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NetworkScorerAppData that = (NetworkScorerAppData) o;
+            return packageUid == that.packageUid &&
+                    Objects.equals(mRecommendationService, that.mRecommendationService);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(packageUid, mRecommendationService);
         }
     }
 
@@ -110,16 +122,16 @@ public class NetworkScorerAppManager {
             return null;
         }
 
-        final PackageManager pm = mContext.getPackageManager();
         for (int i = 0; i < potentialPkgs.size(); i++) {
             final String potentialPkg = potentialPkgs.get(i);
 
             // Look for the recommendation service class and required receiver.
             final ResolveInfo resolveServiceInfo = findRecommendationService(potentialPkg);
             if (resolveServiceInfo != null) {
-                return new NetworkScorerAppData(potentialPkg,
-                    resolveServiceInfo.serviceInfo.applicationInfo.uid,
-                    resolveServiceInfo.serviceInfo.name);
+                final ComponentName componentName =
+                        new ComponentName(potentialPkg, resolveServiceInfo.serviceInfo.name);
+                return new NetworkScorerAppData(resolveServiceInfo.serviceInfo.applicationInfo.uid,
+                        componentName);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, potentialPkg + " does not have the required components, skipping.");

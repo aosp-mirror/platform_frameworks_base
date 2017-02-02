@@ -117,6 +117,8 @@ public class NetworkScoreServiceTest {
     private static final String SSID = "ssid";
     private static final String SSID_2 = "ssid_2";
     private static final String SSID_3 = "ssid_3";
+    private static final ComponentName RECOMMENDATION_SERVICE_COMP =
+            new ComponentName("newPackageName", "newScoringServiceClass");
     private static final ScoredNetwork SCORED_NETWORK =
             new ScoredNetwork(new NetworkKey(new WifiKey(quote(SSID), "00:00:00:00:00:00")),
                     null /* rssiCurve*/);
@@ -124,7 +126,7 @@ public class NetworkScoreServiceTest {
             new ScoredNetwork(new NetworkKey(new WifiKey(quote(SSID_2), "00:00:00:00:00:00")),
                     null /* rssiCurve*/);
     private static final NetworkScorerAppData NEW_SCORER =
-        new NetworkScorerAppData("newPackageName", 1, "newScoringServiceClass");
+        new NetworkScorerAppData(1, RECOMMENDATION_SERVICE_COMP);
 
     @Mock private NetworkScorerAppManager mNetworkScorerAppManager;
     @Mock private Context mContext;
@@ -203,8 +205,7 @@ public class NetworkScoreServiceTest {
 
         verify(mContext).bindServiceAsUser(MockUtils.checkIntent(
                 new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS)
-                        .setComponent(new ComponentName(NEW_SCORER.packageName,
-                                NEW_SCORER.recommendationServiceClassName))),
+                        .setComponent(RECOMMENDATION_SERVICE_COMP)),
                 any(ServiceConnection.class),
                 eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE),
                 eq(UserHandle.SYSTEM));
@@ -657,7 +658,8 @@ public class NetworkScoreServiceTest {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
         mNetworkScoreService.systemRunning();
 
-        assertEquals(NEW_SCORER.packageName, mNetworkScoreService.getActiveScorerPackage());
+        assertEquals(NEW_SCORER.getRecommendationServicePackageName(),
+                mNetworkScoreService.getActiveScorerPackage());
     }
 
     @Test
@@ -829,8 +831,6 @@ public class NetworkScoreServiceTest {
 
     // "injects" the mock INetworkRecommendationProvider into the NetworkScoreService.
     private void injectProvider() {
-        final ComponentName componentName = new ComponentName(NEW_SCORER.packageName,
-                NEW_SCORER.recommendationServiceClassName);
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
         when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
                 isA(UserHandle.class))).thenAnswer(new Answer<Boolean>() {
@@ -840,7 +840,8 @@ public class NetworkScoreServiceTest {
                 when(mockBinder.queryLocalInterface(anyString()))
                         .thenReturn(mRecommendationProvider);
                 invocation.getArgumentAt(1, ServiceConnection.class)
-                        .onServiceConnected(componentName, mockBinder);
+                        .onServiceConnected(NEW_SCORER.getRecommendationServiceComponent(),
+                                mockBinder);
                 return true;
             }
         });
@@ -849,8 +850,8 @@ public class NetworkScoreServiceTest {
 
     private void bindToScorer(boolean callerIsScorer) {
         final int callingUid = callerIsScorer ? Binder.getCallingUid() : 0;
-        NetworkScorerAppData appData = new NetworkScorerAppData(NEW_SCORER.packageName,
-                callingUid, NEW_SCORER.recommendationServiceClassName);
+        NetworkScorerAppData appData =
+                new NetworkScorerAppData(callingUid, RECOMMENDATION_SERVICE_COMP);
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(appData);
         when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
                 isA(UserHandle.class))).thenReturn(true);
