@@ -27,7 +27,8 @@ import com.android.internal.os.IResultReceiver;
 // TODO(b/33197203): document class and methods
 oneway interface IAutoFillService {
     // TODO(b/33197203): rename method to make them more consistent
-    void autoFill(in AssistStructure structure, in IAutoFillServerCallback callback, int flags);
+    void autoFill(in AssistStructure structure, in IAutoFillServerCallback callback);
+    void save(in AssistStructure structure, in IAutoFillServerCallback callback, in Bundle extras);
     void authenticateFillResponse(in Bundle extras, int flags);
     void authenticateDataset(in Bundle extras, int flags);
     void onConnected();

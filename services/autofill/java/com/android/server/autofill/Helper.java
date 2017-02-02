@@ -25,6 +25,7 @@ import java.util.Set;
 final class Helper {
 
     static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
+    static final boolean VERBOSE = false;
     static final String REDACTED = "[REDACTED]";
 
     static void append(StringBuilder builder, Bundle bundle) {

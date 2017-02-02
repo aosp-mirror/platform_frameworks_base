@@ -29,6 +29,15 @@ import android.view.autofill.VirtualViewDelegate;
  * View.onProvideStructure}.
  */
 public abstract class ViewStructure {
+
+    /**
+     * Flag used when adding virtual views for auto-fill, it indicates the contents of the view
+     * (such as * {@link android.app.assist.AssistStructure.ViewNode#getText()} and
+     * {@link android.app.assist.AssistStructure.ViewNode#getAutoFillValue()})
+     * can be passed to the {@link android.service.autofill.AutoFillService}.
+     */
+    public static final int AUTO_FILL_FLAG_SANITIZED = 0x1;
+
     /**
      * Set the identifier for this view.
      *
@@ -264,8 +273,14 @@ public abstract class ViewStructure {
     /**
      * Like {@link #newChild(int)}, but providing a {@code virtualId} to the child so it can be
      * auto-filled by {@link VirtualViewDelegate#autoFill(int, AutoFillValue)}.
+     *
+     * @param index child index
+     * @param virtualId child's id as defined by {@link VirtualViewDelegate#autoFill(int,
+     * AutoFillValue)}.
+     * @param flags currently either {@code 0} or {@link #AUTO_FILL_FLAG_SANITIZED}.
      */
-    public abstract ViewStructure newChild(int index, int virtualId);
+    // TODO(b/33197203, b/33802548): add CTS/unit test
+    public abstract ViewStructure newChild(int index, int virtualId, int flags);
 
     /**
      * Like {@link #newChild}, but allows the caller to asynchronously populate the returned
@@ -280,13 +295,34 @@ public abstract class ViewStructure {
     /**
      * Like {@link #asyncNewChild(int)}, but providing a {@code virtualId} to the child so it can be
      * auto-filled by {@link VirtualViewDelegate#autoFill(int, AutoFillValue)}.
+     *
+     * @param index child index
+     * @param virtualId child's id as defined by {@link VirtualViewDelegate#autoFill(int,
+     * AutoFillValue)}.
+     * @param flags currently either {@code 0} or {@link #AUTO_FILL_FLAG_SANITIZED}.
      */
-    public abstract ViewStructure asyncNewChild(int index, int virtualId);
+    // TODO(b/33197203, b/33802548): add CTS/unit test
+    public abstract ViewStructure asyncNewChild(int index, int virtualId, int flags);
 
     /**
      * Sets the {@link AutoFillType} that can be used to auto-fill this node.
      */
+    // TODO(b/33197203, b/33802548): add CTS/unit test
     public abstract void setAutoFillType(AutoFillType info);
+
+    /**
+     * Sets the {@link AutoFillValue} representing the current value of this node.
+     */
+    // TODO(b/33197203, b/33802548): add CTS/unit test
+    public abstract void setAutoFillValue(AutoFillValue value);
+
+    /**
+     * @hide
+     *
+     * TODO(b/33197203, b/33269702): temporary set it as not sanitized until
+     * AssistStructure automaticaly sets sanitization based on text coming from resources
+     */
+    public abstract void setSanitized(boolean sensitive);
 
     /**
      * Call when done populating a {@link ViewStructure} returned by

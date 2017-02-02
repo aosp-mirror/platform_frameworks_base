@@ -29,6 +29,7 @@ public final class AutoFillId implements Parcelable {
     private boolean mVirtual;
     private int mVirtualId;
 
+    // TODO(b/33197203): use factory and cache values, since they're immutable
     /** @hide */
     public AutoFillId(int id) {
         mVirtual = false;

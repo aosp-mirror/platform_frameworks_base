@@ -3207,7 +3207,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void dispatchProvideStructure(ViewStructure structure) {
         super.dispatchProvideStructure(structure);
-        dispatchProvideStructureForAssistOrAutoFill(structure, 0);
+        dispatchProvideStructureForAssistOrAutoFill(structure, false);
     }
 
     /**
@@ -3219,16 +3219,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
         super.dispatchProvideAutoFillStructure(structure, flags);
-        dispatchProvideStructureForAssistOrAutoFill(structure, flags);
+        dispatchProvideStructureForAssistOrAutoFill(structure, true);
     }
 
-    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-        boolean forAutoFill = (flags
-                & (View.AUTO_FILL_FLAG_TYPE_FILL
-                        | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
-
+    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure,
+            boolean forAutoFill) {
         boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
 
         if (!blocked) {
@@ -3295,7 +3290,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                         // Must explicitly check which recursive method to call.
                         if (forAutoFill) {
-                            child.dispatchProvideAutoFillStructure(cstructure, flags);
+                            // NOTE: flags are not currently supported, hence 0
+                            child.dispatchProvideAutoFillStructure(cstructure, 0);
                         } else {
                             child.dispatchProvideStructure(cstructure);
                         }

@@ -39,7 +39,6 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
-import android.app.Application.OnProvideAssistDataListener;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -4023,39 +4022,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
 
-
-    /**
-     * Set when a request was made to decide if views in an {@link android.app.Activity} can be
-     * auto-filled by an {@link android.service.autofill.AutoFillService}.
-     *
-     * <p>Since this request is made without a explicit user consent, the resulting
-     * {@link android.app.assist.AssistStructure} should not contain any PII
-     * (Personally Identifiable Information).
-     *
-     * <p>Examples:
-     * <ul>
-     * <li>{@link android.widget.TextView} texts should only be included when they were set by
-     * static resources.
-     * <li>{@link android.webkit.WebView} virtual children should be restricted to a subset of
-     * input fields and tags (like {@code id}).
-     * </ul>
-     */
-    // TODO(b/33197203): cannot conflict with flags defined on AutoFillManager until they're removed
-    // (when save is refactored).
-    public static final int AUTO_FILL_FLAG_TYPE_FILL = 0x10000000;
-
-    /**
-     * Set when the user explicitly asked a {@link android.service.autofill.AutoFillService} to save
-     * the value of the {@link View}s in an {@link android.app.Activity}.
-     *
-     * <p>The resulting {@link android.app.assist.AssistStructure} can contain any kind of PII
-     * (Personally Identifiable Information). For example, the text of password fields should be
-     * included since that's what's typically saved.
-     */
-    // TODO(b/33197203): cannot conflict with flags defined on AutoFillManager until they're removed
-    // (when save is refactored).
-    public static final int AUTO_FILL_FLAG_TYPE_SAVE = 0x20000000;
-
     /**
      * Set to true when drawing cache is enabled and cannot be created.
      *
@@ -6914,7 +6880,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * fills in all data that can be inferred from the view itself.
      */
     public void onProvideStructure(ViewStructure structure) {
-        onProvideStructureForAssistOrAutoFill(structure, 0);
+        onProvideStructureForAssistOrAutoFill(structure, false);
     }
 
     /**
@@ -6925,19 +6891,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param structure Fill in with structured view data.  The default implementation
      * fills in all data that can be inferred from the view itself.
-     * @param flags optional flags (see {@link #AUTO_FILL_FLAG_TYPE_FILL} and
-     * {@link #AUTO_FILL_FLAG_TYPE_SAVE} for more info).
+     * @param flags optional flags (currently {@code 0}).
      */
     public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        onProvideStructureForAssistOrAutoFill(structure, flags);
+        onProvideStructureForAssistOrAutoFill(structure, true);
     }
 
-    private void onProvideStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-        boolean forAutoFill = (flags
-                & (View.AUTO_FILL_FLAG_TYPE_FILL
-                        | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
+    private void onProvideStructureForAssistOrAutoFill(ViewStructure structure,
+            boolean forAutoFill) {
         final int id = mID;
         if (id != NO_ID && !isViewIdGenerated(id)) {
             String pkg, type, entry;
@@ -7011,7 +6972,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * optimal implementation providing this data.
      */
     public void onProvideVirtualStructure(ViewStructure structure) {
-        onProvideVirtualStructureForAssistOrAutoFill(structure, 0);
+        onProvideVirtualStructureForAssistOrAutoFill(structure, false);
     }
 
     /**
@@ -7026,14 +6987,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@code flags} parameter - see the documentation on each flag for more details.
      *
      * @param structure Fill in with structured view data.
-     * @param flags optional flags (see {@link #AUTO_FILL_FLAG_TYPE_FILL} and
-     * {@link #AUTO_FILL_FLAG_TYPE_SAVE} for more info).
+     * @param flags optional flags (currently {@code 0}).
      */
     public void onProvideAutoFillVirtualStructure(ViewStructure structure, int flags) {
-        onProvideVirtualStructureForAssistOrAutoFill(structure, flags);
+        onProvideVirtualStructureForAssistOrAutoFill(structure, true);
     }
 
-    private void onProvideVirtualStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
+    private void onProvideVirtualStructureForAssistOrAutoFill(ViewStructure structure,
+            boolean forAutoFill) {
         // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
         // this method should take a boolean with the type of request.
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
@@ -7041,7 +7002,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             ViewStructure root = structure.newChild(0);
-            populateVirtualStructure(root, provider, info, flags);
+            populateVirtualStructure(root, provider, info, forAutoFill);
             info.recycle();
         }
     }
@@ -7051,9 +7012,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * this view.
      *
      * <p>By default returns {@code null} but should be overridden when view provides a virtual
-     * hierachy on {@link OnProvideAssistDataListener} that takes flags used by the AutoFill
-     * Framework (such as {@link #AUTO_FILL_FLAG_TYPE_FILL} and
-     * {@link #AUTO_FILL_FLAG_TYPE_SAVE}).
+     * hierachy on {@link #onProvideAutoFillVirtualStructure(ViewStructure, int)}.
      */
     @Nullable
     public VirtualViewDelegate getAutoFillVirtualViewDelegate(
@@ -7109,12 +7068,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void populateVirtualStructure(ViewStructure structure,
-            AccessibilityNodeProvider provider, AccessibilityNodeInfo info, int flags) {
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-
-        final boolean sanitized = (flags & View.AUTO_FILL_FLAG_TYPE_FILL) != 0;
-
+            AccessibilityNodeProvider provider, AccessibilityNodeInfo info, boolean forAutoFill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, null);
         Rect rect = structure.getTempRect();
@@ -7152,7 +7106,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
-        if (!sanitized && (info.getText() != null || info.getError() != null)) {
+        if (!forAutoFill && (info.getText() != null || info.getError() != null)) {
             // TODO(b/33197203) (b/33269702): when sanitized, try to use the Accessibility API to
             // just set sanitized values (like text coming from resource files), rather than not
             // setting it at all.
@@ -7166,7 +7120,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 ViewStructure child = structure.newChild(i);
-                populateVirtualStructure(child, provider, cinfo, flags);
+                populateVirtualStructure(child, provider, cinfo, forAutoFill);
                 cinfo.recycle();
             }
         }
@@ -7178,7 +7132,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideVirtualStructure}.
      */
     public void dispatchProvideStructure(ViewStructure structure) {
-        dispatchProvideStructureForAssistOrAutoFill(structure, 0);
+        dispatchProvideStructureForAssistOrAutoFill(structure, false);
     }
 
     /**
@@ -7191,25 +7145,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * and {@link #onProvideAutoFillVirtualStructure(ViewStructure, int)}.
      *
      * @param structure Fill in with structured view data.
-     * @param flags optional flags (see {@link #AUTO_FILL_FLAG_TYPE_FILL} and
-     * {@link #AUTO_FILL_FLAG_TYPE_SAVE} for more info).
+     * @param flags optional flags (currently {@code 0}).
      */
     public void dispatchProvideAutoFillStructure(ViewStructure structure, int flags) {
-        dispatchProvideStructureForAssistOrAutoFill(structure, flags);
+        dispatchProvideStructureForAssistOrAutoFill(structure, true);
     }
 
-    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-        boolean forAutoFill = (flags
-                & (View.AUTO_FILL_FLAG_TYPE_FILL
-                        | View.AUTO_FILL_FLAG_TYPE_SAVE)) != 0;
-
+    private void dispatchProvideStructureForAssistOrAutoFill(ViewStructure structure,
+            boolean forAutoFill) {
         boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
         if (!blocked) {
             if (forAutoFill) {
-                onProvideAutoFillStructure(structure, flags);
-                onProvideAutoFillVirtualStructure(structure, flags);
+                // NOTE: flags are not currently supported, hence 0
+                onProvideAutoFillStructure(structure, 0);
+                onProvideAutoFillVirtualStructure(structure, 0);
             } else {
                 onProvideStructure(structure);
                 onProvideVirtualStructure(structure);

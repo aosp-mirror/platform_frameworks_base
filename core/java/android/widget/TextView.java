@@ -711,6 +711,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Contains the sorted set of desired text sizes in pixels to pick from when auto-sizing text.
     private int[] mAutoSizeTextSizesInPx;
 
+    // Watcher used to notify changes to auto-fill manager.
+    private AutoFillChangeWatcher mAutoFillChangeWatcher;
+
     /**
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -9699,24 +9702,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onProvideStructure(ViewStructure structure) {
         super.onProvideStructure(structure);
-        onProvideAutoStructureForAssistOrAutoFill(structure, 0);
+        onProvideAutoStructureForAssistOrAutoFill(structure, false);
     }
 
     @Override
     public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
         super.onProvideAutoFillStructure(structure, flags);
-        onProvideAutoStructureForAssistOrAutoFill(structure, flags);
+        onProvideAutoStructureForAssistOrAutoFill(structure, true);
     }
 
-    private void onProvideAutoStructureForAssistOrAutoFill(ViewStructure structure, int flags) {
-        // NOTE: currently flags are only used for AutoFill; if they're used for Assist as well,
-        // this method should take a boolean with the type of request.
-        final boolean forAutoFillSave =
-                (flags & AUTO_FILL_FLAG_TYPE_SAVE) != 0;
-
+    private void onProvideAutoStructureForAssistOrAutoFill(ViewStructure structure,
+            boolean forAutoFill) {
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (!isPassword || forAutoFillSave) {
+        if (forAutoFill) {
+            // TODO(b/33197203, b/33269702): temporary set it as not sanitized until
+            // AssistStructure automaticaly sets sanitization based on text coming from resources
+            structure.setSanitized(!isPassword);
+            if (mAutoFillChangeWatcher == null && isTextEditable()) {
+                mAutoFillChangeWatcher = new AutoFillChangeWatcher();
+                addTextChangedListener(mAutoFillChangeWatcher);
+                // TODO(b/33197203): remove mAutoFillValueListener auto-fill session is finished
+            }
+        }
+
+        if (!isPassword || forAutoFill) {
             if (mLayout == null) {
                 assumeLayout();
             }
@@ -9724,7 +9734,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int lineCount = layout.getLineCount();
             if (lineCount <= 1) {
                 // Simple case: this is a single line.
-                structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+                final CharSequence text = getText();
+                structure.setText(text, getSelectionStart(), getSelectionEnd());
+                if (forAutoFill && isTextEditable()) {
+                    structure.setAutoFillValue(AutoFillValue.forText(text));
+                }
             } else {
                 // Complex case: multi-line, could be scrolled or within a scroll container
                 // so some lines are not visible.
@@ -9781,6 +9795,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     text = text.subSequence(expandedTopChar, expandedBottomChar);
                 }
                 structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
+                if (forAutoFill && isTextEditable()) {
+                    structure.setAutoFillValue(AutoFillValue.forText(text));
+                }
                 final int[] lineOffsets = new int[bottomLine - topLine + 1];
                 final int[] lineBaselines = new int[bottomLine - topLine + 1];
                 final int baselineOffset = getBaselineOffset();
@@ -9828,7 +9845,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final CharSequence text = value.getTextValue();
 
         if (text != null && isTextEditable()) {
-            setText(text);
+            if (mAutoFillChangeWatcher == null || mAutoFillChangeWatcher.mOnAutoFill) {
+                setText(text, mBufferType, true, 0);
+            } else {
+                // Must disable listener first so it's not triggered.
+                mAutoFillChangeWatcher.mOnAutoFill = true;
+                try {
+                    setText(text, mBufferType, true, 0);
+                } finally {
+                    mAutoFillChangeWatcher.mOnAutoFill = false;
+                }
+            }
         }
     }
 
@@ -11180,6 +11207,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean isStopped() {
             return mStatus == MARQUEE_STOPPED;
+        }
+    }
+
+    // TODO(b/33197203): implements SpanWatcher too?
+    private final class AutoFillChangeWatcher implements TextWatcher {
+
+        private boolean mOnAutoFill;
+        private final AutoFillManager mAfm = mContext.getSystemService(AutoFillManager.class);
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (mOnAutoFill) {
+                if (DEBUG_AUTOFILL) {
+                    Log.v(LOG_TAG, "AutoFillChangeWatcher.afterTextChanged() skipped during "
+                            + "autoFill(): s=" + s);
+                }
+                return;
+            }
+            if (mAfm != null) {
+                if (DEBUG_AUTOFILL) {
+                    Log.v(LOG_TAG, "AutoFillChangeWatcher.afterTextChanged(): s=" + s);
+                }
+                mAfm.onValueChanged(TextView.this, AutoFillValue.forText(s));
+            }
         }
     }
 

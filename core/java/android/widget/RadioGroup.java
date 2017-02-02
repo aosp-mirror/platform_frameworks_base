@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStructure;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
@@ -404,6 +405,12 @@ public class RadioGroup extends LinearLayout {
     }
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+
+    @Override
+    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
+        super.onProvideAutoFillStructure(structure, flags);
+        structure.setAutoFillValue(AutoFillValue.forList(getCheckedRadioButtonId()));
+    }
 
     @Override
     public void autoFill(AutoFillValue value) {

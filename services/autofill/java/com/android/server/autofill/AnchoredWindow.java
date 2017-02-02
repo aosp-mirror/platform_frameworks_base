@@ -64,7 +64,7 @@ final class AnchoredWindow {
      * @param bounds the rectangular region this window should be anchored to
      */
     void show(Rect bounds) {
-        LayoutParams params = createBaseLayoutParams();
+        final LayoutParams params = createBaseLayoutParams();
         params.x = bounds.left;
         params.y = bounds.bottom;
 
@@ -83,6 +83,7 @@ final class AnchoredWindow {
      */
     void hide() {
         if (DEBUG) Slog.d(TAG, "removing view " + mView);
+
         if (mIsShowing) {
             mWm.removeView(mRootView);
         }
@@ -93,13 +94,13 @@ final class AnchoredWindow {
      * Wraps a view with a SelfRemovingView and sets its requested width and height.
      */
     private View wrapView(View view, int width, int height) {
-        ViewGroup viewGroup = new SelfRemovingView(view.getContext());
+        final ViewGroup viewGroup = new SelfRemovingView(view.getContext());
         viewGroup.addView(view, new ViewGroup.LayoutParams(width, height));
         return viewGroup;
     }
 
     private static LayoutParams createBaseLayoutParams() {
-        LayoutParams params = new LayoutParams();
+        final LayoutParams params = new LayoutParams();
         // TODO(b/33197203): LayoutParams.TYPE_AUTOFILL
         params.type = LayoutParams.TYPE_SYSTEM_ALERT;
         params.flags =
@@ -113,6 +114,13 @@ final class AnchoredWindow {
         params.width = LayoutParams.WRAP_CONTENT;
         params.height = LayoutParams.WRAP_CONTENT;
         return params;
+    }
+
+    @Override
+    public String toString() {
+        if (!DEBUG) return super.toString();
+
+        return "AnchoredWindow: [width=" + mWidth + ", height=" + mHeight + ", view=" + mView + "]";
     }
 
     void dump(PrintWriter pw) {

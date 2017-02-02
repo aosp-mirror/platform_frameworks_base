@@ -36,15 +36,11 @@ public final class AutoFillManager {
     /**
      * Flag used to show the auto-fill UI affordance for a view.
      */
-    // TODO(b/33197203): cannot conflict with flags defined on View until they're removed (when
-    // save is refactored).
     public static final int FLAG_UPDATE_UI_SHOW = 0x1;
 
     /**
      * Flag used to hide the auto-fill UI affordance for a view.
      */
-    // TODO(b/33197203): cannot conflict with flags defined on View until they're removed (when
-    // save is refactored).
     public static final int FLAG_UPDATE_UI_HIDE = 0x2;
 
     private final IAutoFillManagerService mService;
@@ -71,7 +67,7 @@ public final class AutoFillManager {
         final Rect bounds = new Rect();
         view.getBoundsOnScreen(bounds);
 
-        requestAutoFill(new AutoFillId(view.getAccessibilityViewId()), bounds, flags);
+        requestAutoFill(getAutoFillId(view), bounds, flags);
     }
 
     /**
@@ -92,7 +88,30 @@ public final class AutoFillManager {
         requestAutoFill(new AutoFillId(parent.getAccessibilityViewId(), childId), bounds, flags);
     }
 
+    /**
+     * Notifies the framework that the value of a view changed.
+     * @param view view whose value was updated
+     * @param value new value.
+     */
+    public void onValueChanged(View view, AutoFillValue value) {
+        // TODO(b/33197203): optimize it by not calling service when the view does not belong to
+        // the session.
+        final AutoFillId id = getAutoFillId(view);
+        if (DEBUG) Log.v(TAG, "onValueChanged(): id=" + id + ", value=" + value);
+        try {
+            mService.onValueChanged(id, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private AutoFillId getAutoFillId(View view) {
+        return new AutoFillId(view.getAccessibilityViewId());
+    }
+
     private void requestAutoFill(AutoFillId id, Rect bounds, int flags) {
+        // TODO(b/33197203): optimize it by not calling service when the view does not belong to
+        // the session.
         if (DEBUG) {
             Log.v(TAG, "requestAutoFill(): id=" + id + ", bounds=" + bounds + ", flags=" + flags);
         }
