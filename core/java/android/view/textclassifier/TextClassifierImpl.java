@@ -18,6 +18,7 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -157,18 +158,29 @@ final class TextClassifierImpl implements TextClassifier {
                 .setEntityType(type, 1.0f /* confidence */)
                 .setIntent(intent)
                 .setOnClickListener(TextClassificationResult.createStartActivityOnClick(
-                        mContext, intent))
-                .setLabel(IntentFactory.getLabel(mContext, type));
+                        mContext, intent));
         final PackageManager pm = mContext.getPackageManager();
         final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-        // TODO: If the resolveInfo is the "chooser", do not set the package name and use a default
-        // icon for this classification type.
-        intent.setPackage(resolveInfo.activityInfo.packageName);
-        Drawable icon = resolveInfo.activityInfo.loadIcon(pm);
-        if (icon == null) {
-            icon = resolveInfo.loadIcon(pm);
+        if (resolveInfo != null && resolveInfo.activityInfo != null) {
+            final String packageName = resolveInfo.activityInfo.packageName;
+            if ("android".equals(packageName)) {
+                // Requires the chooser to find an activity to handle the intent.
+                builder.setLabel(IntentFactory.getLabel(mContext, type));
+            } else {
+                // A default activity will handle the intent.
+                intent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
+                Drawable icon = resolveInfo.activityInfo.loadIcon(pm);
+                if (icon == null) {
+                    icon = resolveInfo.loadIcon(pm);
+                }
+                builder.setIcon(icon);
+                CharSequence label = resolveInfo.activityInfo.loadLabel(pm);
+                if (label == null) {
+                    label = resolveInfo.loadLabel(pm);
+                }
+                builder.setLabel(label != null ? label.toString() : null);
+            }
         }
-        builder.setIcon(icon);
         return builder.build();
     }
 
@@ -211,9 +223,12 @@ final class TextClassifierImpl implements TextClassifier {
                     final String type =
                             smartSelection.classifyText(text, selectionStart, selectionEnd);
                     if (matches(type, linkMask)) {
-                        final ClickableSpan span = createSpan(
-                                context, type, text.substring(selectionStart, selectionEnd));
-                        spans.add(new SpanSpec(selectionStart, selectionEnd, span));
+                        final Intent intent = IntentFactory.create(
+                                type, text.substring(selectionStart, selectionEnd));
+                        if (hasActivityHandler(context, intent)) {
+                            final ClickableSpan span = createSpan(context, intent);
+                            spans.add(new SpanSpec(selectionStart, selectionEnd, span));
+                        }
                     }
                 }
                 start = end;
@@ -279,15 +294,22 @@ final class TextClassifierImpl implements TextClassifier {
             return result;
         }
 
-        private static ClickableSpan createSpan(
-                final Context context, final String type, final String text) {
+        private static ClickableSpan createSpan(final Context context, final Intent intent) {
             return new ClickableSpan() {
                 // TODO: Style this span.
                 @Override
                 public void onClick(View widget) {
-                    context.startActivity(IntentFactory.create(type, text));
+                    context.startActivity(intent);
                 }
             };
+        }
+
+        private static boolean hasActivityHandler(Context context, @Nullable Intent intent) {
+            if (intent == null) {
+                return false;
+            }
+            final ResolveInfo resolveInfo = context.getPackageManager().resolveActivity(intent, 0);
+            return resolveInfo != null && resolveInfo.activityInfo != null;
         }
 
         /**

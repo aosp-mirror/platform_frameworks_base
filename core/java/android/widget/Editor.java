@@ -3917,12 +3917,18 @@ public class Editor {
         private void updateAssistMenuItem(
                 Menu menu, TextClassificationResult textClassificationResult) {
             menu.removeItem(TextView.ID_ASSIST);
-            if (textClassificationResult != null
-                    && textClassificationResult.getIcon() != null
-                    && textClassificationResult.getOnClickListener() != null) {
-                menu.add(Menu.NONE, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, null)
-                        .setIcon(textClassificationResult.getIcon())
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+            if (textClassificationResult != null) {
+                final Drawable icon = textClassificationResult.getIcon();
+                final CharSequence label = textClassificationResult.getLabel();
+                final OnClickListener onClickListener =
+                        textClassificationResult.getOnClickListener();
+                final Intent intent = textClassificationResult.getIntent();
+                if ((icon != null || !TextUtils.isEmpty(label))
+                        && (onClickListener != null || intent != null)) {
+                    menu.add(Menu.NONE, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
+                            .setIcon(icon)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                }
             }
         }
 
@@ -3935,9 +3941,22 @@ public class Editor {
             if (customCallback != null && customCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-            if (TextView.ID_ASSIST == item.getItemId() && mTextClassificationResult != null) {
-                mTextClassificationResult.getOnClickListener().onClick(mTextView);
+            final TextClassificationResult textClassificationResult = mTextClassificationResult;
+            if (TextView.ID_ASSIST == item.getItemId() && textClassificationResult != null) {
+                final OnClickListener onClickListener =
+                        textClassificationResult.getOnClickListener();
+                if (onClickListener != null) {
+                    onClickListener.onClick(mTextView);
+                } else {
+                    final Intent intent = textClassificationResult.getIntent();
+                    if (intent != null) {
+                        TextClassificationResult.createStartActivityOnClick(
+                                mTextView.getContext(), intent)
+                                .onClick(mTextView);
+                    }
+                }
                 stopTextActionMode();
+                return true;
             }
             return mTextView.onTextContextMenuItem(item.getItemId());
         }
