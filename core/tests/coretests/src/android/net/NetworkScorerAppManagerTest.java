@@ -23,12 +23,14 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.test.InstrumentationTestCase;
 
@@ -154,6 +156,62 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         assertEquals(924, activeScorer.packageUid);
     }
 
+    public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityNotSet()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                null /* enableUseOpenWifiPackageActivityPackage*/);
+
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNotNull(activeScorer);
+        assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
+        assertEquals(924, activeScorer.packageUid);
+        assertNull(activeScorer.getEnableUseOpenWifiActivity());
+    }
+
+    public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityNotResolved()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                "package2" /* enableUseOpenWifiPackageActivityPackage*/);
+
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNotNull(activeScorer);
+        assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
+        assertEquals(924, activeScorer.packageUid);
+        assertNull(activeScorer.getEnableUseOpenWifiActivity());
+    }
+
+    public void testGetActiveScorer_providerAvailable_enableUseOpenWifiActivityResolved()
+            throws Exception {
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        final ComponentName enableUseOpenWifiComponent = new ComponentName("package2", "class2");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */,
+                enableUseOpenWifiComponent.getPackageName());
+        mockEnableUseOpenWifiActivity(enableUseOpenWifiComponent);
+
+        ContentResolver cr = mTargetContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
+
+        final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
+        assertNotNull(activeScorer);
+        assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
+        assertEquals(924, activeScorer.packageUid);
+        assertEquals(enableUseOpenWifiComponent, activeScorer.getEnableUseOpenWifiActivity());
+    }
+
     public void testGetActiveScorer_providerNotAvailable()
             throws Exception {
         ContentResolver cr = mTargetContext.getContentResolver();
@@ -194,14 +252,25 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     }
 
     private void mockRecommendationServiceAvailable(final ComponentName compName, int packageUid) {
+        mockRecommendationServiceAvailable(compName, packageUid, null);
+    }
+
+    private void mockRecommendationServiceAvailable(final ComponentName compName, int packageUid,
+            String enableUseOpenWifiActivityPackage) {
         final ResolveInfo serviceInfo = new ResolveInfo();
         serviceInfo.serviceInfo = new ServiceInfo();
         serviceInfo.serviceInfo.name = compName.getClassName();
         serviceInfo.serviceInfo.packageName = compName.getPackageName();
         serviceInfo.serviceInfo.applicationInfo = new ApplicationInfo();
         serviceInfo.serviceInfo.applicationInfo.uid = packageUid;
+        if (enableUseOpenWifiActivityPackage != null) {
+            serviceInfo.serviceInfo.metaData = new Bundle();
+            serviceInfo.serviceInfo.metaData.putString(
+                    NetworkScoreManager.USE_OPEN_WIFI_PACKAGE_META_DATA,
+                    enableUseOpenWifiActivityPackage);
+        }
 
-        final int flags = 0;
+        final int flags = PackageManager.GET_META_DATA;
         when(mMockPm.resolveService(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
@@ -212,5 +281,23 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                                 && compName.getPackageName().equals(intent.getPackage());
                     }
                 }), Mockito.eq(flags))).thenReturn(serviceInfo);
+    }
+
+    private void mockEnableUseOpenWifiActivity(final ComponentName useOpenWifiComp) {
+        final ResolveInfo resolveActivityInfo = new ResolveInfo();
+        resolveActivityInfo.activityInfo = new ActivityInfo();
+        resolveActivityInfo.activityInfo.name = useOpenWifiComp.getClassName();
+        resolveActivityInfo.activityInfo.packageName = useOpenWifiComp.getPackageName();
+
+        final int flags = 0;
+        when(mMockPm.resolveActivity(
+                Mockito.argThat(new ArgumentMatcher<Intent>() {
+                    @Override
+                    public boolean matches(Object object) {
+                        Intent intent = (Intent) object;
+                        return NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(intent.getAction())
+                                && useOpenWifiComp.getPackageName().equals(intent.getPackage());
+                    }
+                }), Mockito.eq(flags))).thenReturn(resolveActivityInfo);
     }
 }

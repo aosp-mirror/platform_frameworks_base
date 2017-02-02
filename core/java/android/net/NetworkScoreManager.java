@@ -96,15 +96,22 @@ public class NetworkScoreManager {
     public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
 
     /**
-     * Activity action: launch a custom activity for configuring a scorer before enabling it.
-     * Scorer applications may choose to specify an activity for this action, in which case the
-     * framework will launch that activity which should return RESULT_OK if scoring was enabled.
-     *
-     * <p>If no activity is included in a scorer which implements this action, the system dialog for
-     * selecting a scorer will be shown instead.
+     * Activity action: launch an activity for configuring a provider for the feature that connects
+     * and secures open wifi networks available before enabling it. Applications that enable this
+     * feature must provide an activity for this action. The framework will launch this activity
+     * which must return RESULT_OK if the feature should be enabled.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
+
+    /**
+     * Meta-data specified on a {@link NetworkRecommendationProvider} that specified the package
+     * name of the application that connects and secures open wifi networks automatically. The
+     * specified package must provide an Activity for {@link #ACTION_CUSTOM_ENABLE}.
+     * @hide
+     */
+    public static final String USE_OPEN_WIFI_PACKAGE_META_DATA =
+            "android.net.wifi.use_open_wifi_package";
 
     /**
      * Broadcast action: the active scorer has been changed. Scorer apps may listen to this to
