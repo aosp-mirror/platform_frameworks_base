@@ -323,9 +323,10 @@ public abstract class QSTile<TState extends State> {
                 return Utils.getDisabled(context,
                         Utils.getColorAttr(context, android.R.attr.textColorTertiary));
             case Tile.STATE_INACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+                return Utils.getDisabled(context,
+                        Utils.getColorAttr(context, android.R.attr.colorForeground));
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.colorPrimary);
+                return Utils.getColorAttr(context, android.R.attr.colorForeground);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;
@@ -548,6 +549,7 @@ public abstract class QSTile<TState extends State> {
         public CharSequence minimalContentDescription;
         public boolean autoMirrorDrawable = true;
         public boolean disabledByPolicy;
+        public boolean dualTarget = false;
         public EnforcedAdmin enforcedAdmin;
         public String minimalAccessibilityClassName;
         public String expandedAccessibilityClassName;
@@ -569,7 +571,8 @@ public abstract class QSTile<TState extends State> {
                     expandedAccessibilityClassName)
                     || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
                     || !Objects.equals(other.state, state)
-                    || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
+                    || !Objects.equals(other.enforcedAdmin, enforcedAdmin)
+                    || !Objects.equals(other.dualTarget, dualTarget);
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
@@ -580,6 +583,7 @@ public abstract class QSTile<TState extends State> {
             other.autoMirrorDrawable = autoMirrorDrawable;
             other.disabledByPolicy = disabledByPolicy;
             other.state = state;
+            other.dualTarget = dualTarget;
             if (enforcedAdmin == null) {
                 other.enforcedAdmin = null;
             } else if (other.enforcedAdmin == null) {
@@ -607,6 +611,7 @@ public abstract class QSTile<TState extends State> {
             sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",enforcedAdmin=").append(enforcedAdmin);
+            sb.append(",dualTarget=").append(dualTarget);
             sb.append(",state=").append(state);
             return sb.append(']');
         }

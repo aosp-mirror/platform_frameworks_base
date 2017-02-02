@@ -115,6 +115,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         final boolean enabled = mController.isBluetoothEnabled();
         final boolean connected = mController.isBluetoothConnected();
         final boolean connecting = mController.isBluetoothConnecting();
+        state.dualTarget = true;
         state.value = enabled;
         state.autoMirrorDrawable = false;
         state.minimalContentDescription =
