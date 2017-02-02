@@ -55,7 +55,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     public LoadedApk mLoadedApk;
 
     public interface ActivityLifecycleCallbacks {
-        default void onActivityPreCreated(Activity activity, Bundle savedInstanceState) {}
         void onActivityCreated(Activity activity, Bundle savedInstanceState);
         void onActivityStarted(Activity activity);
         void onActivityResumed(Activity activity);
@@ -189,16 +188,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /* package */ final void attach(Context context) {
         attachBaseContext(context);
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
-    }
-
-    /* package */ void dispatchActivityPreCreated(Activity activity, Bundle savedInstanceState) {
-        Object[] callbacks = collectActivityLifecycleCallbacks();
-        if (callbacks != null) {
-            for (int i = 0; i < callbacks.length; i++) {
-                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityPreCreated(activity,
-                        savedInstanceState);
-            }
-        }
     }
 
     /* package */ void dispatchActivityCreated(Activity activity, Bundle savedInstanceState) {
