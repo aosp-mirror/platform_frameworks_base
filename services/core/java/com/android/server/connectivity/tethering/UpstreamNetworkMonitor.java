@@ -66,9 +66,9 @@ public class UpstreamNetworkMonitor {
     public static final int EVENT_ON_LINKPROPERTIES = 3;
     public static final int EVENT_ON_LOST           = 4;
 
-    private static final int LISTEN_ALL = 1;
-    private static final int TRACK_DEFAULT = 2;
-    private static final int MOBILE_REQUEST = 3;
+    private static final int CALLBACK_LISTEN_ALL = 1;
+    private static final int CALLBACK_TRACK_DEFAULT = 2;
+    private static final int CALLBACK_MOBILE_REQUEST = 3;
 
     private final Context mContext;
     private final StateMachine mTarget;
@@ -98,10 +98,10 @@ public class UpstreamNetworkMonitor {
 
         final NetworkRequest listenAllRequest = new NetworkRequest.Builder()
                 .clearCapabilities().build();
-        mListenAllCallback = new UpstreamNetworkCallback(LISTEN_ALL);
+        mListenAllCallback = new UpstreamNetworkCallback(CALLBACK_LISTEN_ALL);
         cm().registerNetworkCallback(listenAllRequest, mListenAllCallback);
 
-        mDefaultNetworkCallback = new UpstreamNetworkCallback(TRACK_DEFAULT);
+        mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_TRACK_DEFAULT);
         cm().registerDefaultNetworkCallback(mDefaultNetworkCallback);
     }
 
@@ -136,30 +136,25 @@ public class UpstreamNetworkMonitor {
             return;
         }
 
-        final NetworkRequest.Builder builder = new NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        if (mDunRequired) {
-            builder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                   .addCapability(NetworkCapabilities.NET_CAPABILITY_DUN);
-        } else {
-            builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        }
-        final NetworkRequest mobileUpstreamRequest = builder.build();
+        // The following use of the legacy type system cannot be removed until
+        // after upstream selection no longer finds networks by legacy type.
+        // See also http://b/34364553 .
+        final int legacyType = mDunRequired ? TYPE_MOBILE_DUN : TYPE_MOBILE_HIPRI;
+
+        final NetworkRequest mobileUpstreamRequest = new NetworkRequest.Builder()
+                .setCapabilities(ConnectivityManager.networkCapabilitiesForType(legacyType))
+                .build();
 
         // The existing default network and DUN callbacks will be notified.
         // Therefore, to avoid duplicate notifications, we only register a no-op.
-        mMobileNetworkCallback = new UpstreamNetworkCallback(MOBILE_REQUEST);
+        mMobileNetworkCallback = new UpstreamNetworkCallback(CALLBACK_MOBILE_REQUEST);
 
         // TODO: Change the timeout from 0 (no onUnavailable callback) to some
         // moderate callback timeout. This might be useful for updating some UI.
         // Additionally, we log a message to aid in any subsequent debugging.
         Log.d(TAG, "requesting mobile upstream network: " + mobileUpstreamRequest);
 
-        // The following use of the legacy type system cannot be removed until
-        // after upstream selection no longer finds networks by legacy type.
-        // See also b/34364553.
-        final int apnType = mDunRequired ? TYPE_MOBILE_DUN : TYPE_MOBILE_HIPRI;
-        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, apnType);
+        cm().requestNetwork(mobileUpstreamRequest, mMobileNetworkCallback, 0, legacyType);
     }
 
     public void releaseMobileNetworkRequest() {
@@ -184,17 +179,18 @@ public class UpstreamNetworkMonitor {
         // Always request whatever extra information we can, in case this
         // was already up when start() was called, in which case we would
         // not have been notified of any information that had not changed.
-        final NetworkCallback cb =
-                (callbackType == TRACK_DEFAULT) ? mDefaultNetworkCallback :
-                (callbackType == MOBILE_REQUEST) ? mMobileNetworkCallback : null;
-        if (cb != null) {
-            final ConnectivityManager cm = cm();
-            cm.requestNetworkCapabilities(mDefaultNetworkCallback);
-            cm.requestLinkProperties(mDefaultNetworkCallback);
-        }
-
-        if (callbackType == TRACK_DEFAULT) {
-            mCurrentDefault = network;
+        switch (callbackType) {
+            case CALLBACK_LISTEN_ALL:
+                break;
+            case CALLBACK_TRACK_DEFAULT:
+                cm().requestNetworkCapabilities(mDefaultNetworkCallback);
+                cm().requestLinkProperties(mDefaultNetworkCallback);
+                mCurrentDefault = network;
+                break;
+            case CALLBACK_MOBILE_REQUEST:
+                cm().requestNetworkCapabilities(mMobileNetworkCallback);
+                cm().requestLinkProperties(mMobileNetworkCallback);
+                break;
         }
 
         // Requesting updates for mListenAllCallback is not currently possible
@@ -262,7 +258,7 @@ public class UpstreamNetworkMonitor {
     }
 
     private void handleLost(int callbackType, Network network) {
-        if (callbackType == TRACK_DEFAULT) {
+        if (callbackType == CALLBACK_TRACK_DEFAULT) {
             mCurrentDefault = null;
             // Receiving onLost() for a default network does not necessarily
             // mean the network is gone.  We wait for a separate notification
