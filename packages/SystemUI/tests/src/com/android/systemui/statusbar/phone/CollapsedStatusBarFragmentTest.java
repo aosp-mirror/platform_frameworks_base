@@ -25,16 +25,21 @@ import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.FragmentTestCase;
 import com.android.systemui.R;
+import com.android.systemui.SysUIRunner;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.utils.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+@RunWith(SysUIRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
 
     private NotificationIconAreaController mMockNotificiationAreaController;
@@ -59,7 +64,8 @@ public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
 
     @Test
     public void testDisableNone() throws Exception {
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
 
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
         fragment.initNotificationIconArea(mMockNotificiationAreaController);
@@ -71,7 +77,8 @@ public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
 
     @Test
     public void testDisableSystemInfo() throws Exception {
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
 
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
         fragment.initNotificationIconArea(mMockNotificiationAreaController);
@@ -88,7 +95,8 @@ public class CollapsedStatusBarFragmentTest extends FragmentTestCase {
 
     @Test
     public void testDisableNotifications() throws Exception {
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
 
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
         fragment.initNotificationIconArea(mMockNotificiationAreaController);

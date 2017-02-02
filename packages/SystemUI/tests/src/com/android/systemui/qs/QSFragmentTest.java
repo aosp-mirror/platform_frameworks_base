@@ -14,17 +14,23 @@
 
 package com.android.systemui.qs;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+
+import android.os.Looper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.FragmentTestCase;
 import com.android.systemui.R;
+import com.android.systemui.SysUIRunner;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.QuickStatusBarHeader;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.LayoutInflaterBuilder;
+import com.android.systemui.utils.TestableLooper;
+import com.android.systemui.utils.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +43,8 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.widget.FrameLayout;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(SysUIRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class QSFragmentTest extends FragmentTestCase {
 
     public QSFragmentTest() {
@@ -53,32 +60,31 @@ public class QSFragmentTest extends FragmentTestCase {
                         .replace("TextClock", View.class)
                         .build());
 
-        injectTestDependency(Dependency.BG_LOOPER, Looper.getMainLooper());
+        injectTestDependency(Dependency.BG_LOOPER, TestableLooper.get(this).getLooper());
         injectMockDependency(UserSwitcherController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test
     public void testListening() {
+        assertEquals(Looper.myLooper(), Looper.getMainLooper());
         QSFragment qs = (QSFragment) mFragment;
-        postAndWait(() -> mFragments.dispatchResume());
-        QSTileHost host = new QSTileHost(mContext, null,
-                mock(StatusBarIconController.class));
+        mFragments.dispatchResume();
+        processAllMessages();
+        QSTileHost host = new QSTileHost(mContext, null, mock(StatusBarIconController.class));
         qs.setHost(host);
-        Handler h = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
 
         qs.setListening(true);
-        waitForIdleSync(h);
+        processAllMessages();
 
         qs.setListening(false);
-        waitForIdleSync(h);
+        processAllMessages();
 
         // Manually push header through detach so it can handle standard cleanup it does on
         // removed from window.
         ((QuickStatusBarHeader) qs.getView().findViewById(R.id.header)).onDetachedFromWindow();
 
         host.destroy();
-        // Ensure the tuner cleans up its persistent listeners.
-        Dependency.get(TunerService.class).destroy();
+        processAllMessages();
     }
 }

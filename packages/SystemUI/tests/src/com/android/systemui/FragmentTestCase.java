@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import com.android.systemui.utils.TestableLooper;
 import com.android.systemui.utils.ViewUtils;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -59,12 +60,14 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
     }
 
     @Before
-    public void setupFragment() throws IllegalAccessException, InstantiationException {
+    public void setupFragment() throws Exception {
         mView = new FrameLayout(mContext);
         mView.setId(VIEW_ID);
-        mHandler = new Handler(Looper.getMainLooper());
-        mFragment = mCls.newInstance();
-        postAndWait(() -> {
+
+        TestableLooper.get(this).runWithLooper(() -> {
+            mHandler = new Handler();
+
+            mFragment = mCls.newInstance();
             mFragments = FragmentController.createController(new HostCallbacks());
             mFragments.attachHost(null);
             mFragments.getFragmentManager().beginTransaction()
@@ -73,30 +76,39 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
         });
     }
 
+    private String hex(Looper looper) {
+        return Integer.toHexString(System.identityHashCode(looper));
+    }
+
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (mFragments != null) {
             // Set mFragments to null to let it know not to destroy.
-            postAndWait(() -> mFragments.dispatchDestroy());
+            TestableLooper.get(this).runWithLooper(() -> mFragments.dispatchDestroy());
         }
     }
 
     @Test
     public void testCreateDestroy() {
-        postAndWait(() -> mFragments.dispatchCreate());
+        mFragments.dispatchCreate();
+        processAllMessages();
         destroyFragments();
     }
 
     @Test
     public void testStartStop() {
-        postAndWait(() -> mFragments.dispatchStart());
-        postAndWait(() -> mFragments.dispatchStop());
+        mFragments.dispatchStart();
+        processAllMessages();
+        mFragments.dispatchStop();
+        processAllMessages();
     }
 
     @Test
     public void testResumePause() {
-        postAndWait(() -> mFragments.dispatchResume());
-        postAndWait(() -> mFragments.dispatchPause());
+        mFragments.dispatchResume();
+        processAllMessages();
+        mFragments.dispatchPause();
+        processAllMessages();
     }
 
     @Test
@@ -105,54 +117,57 @@ public abstract class FragmentTestCase extends LeakCheckedTest {
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 LayoutParams.TYPE_SYSTEM_ALERT,
                 0, PixelFormat.TRANSLUCENT);
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
         attachFragmentToWindow();
         detachFragmentToWindow();
-        postAndWait(() -> mFragments.dispatchPause());
-    }
-
-    protected void attachFragmentToWindow() {
-        ViewUtils.attachView(mView);
-    }
-
-    protected void detachFragmentToWindow() {
-        ViewUtils.detachView(mView);
+        mFragments.dispatchPause();
+        processAllMessages();
     }
 
     @Test
     public void testRecreate() {
-        postAndWait(() -> mFragments.dispatchResume());
-        postAndWait(() -> {
-            mFragments.dispatchPause();
-            Parcelable p = mFragments.saveAllState();
-            mFragments.dispatchDestroy();
+        mFragments.dispatchResume();
+        processAllMessages();
+        mFragments.dispatchPause();
+        Parcelable p = mFragments.saveAllState();
+        mFragments.dispatchDestroy();
 
-            mFragments = FragmentController.createController(new HostCallbacks());
-            mFragments.attachHost(null);
-            mFragments.restoreAllState(p, (FragmentManagerNonConfig) null);
-            mFragments.dispatchResume();
-        });
+        mFragments = FragmentController.createController(new HostCallbacks());
+        mFragments.attachHost(null);
+        mFragments.restoreAllState(p, (FragmentManagerNonConfig) null);
+        mFragments.dispatchResume();
+        processAllMessages();
     }
 
     @Test
     public void testMultipleResumes() {
-        postAndWait(() -> mFragments.dispatchResume());
-        postAndWait(() -> mFragments.dispatchStop());
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
+        mFragments.dispatchStop();
+        processAllMessages();
+        mFragments.dispatchResume();
+        processAllMessages();
+    }
+
+    protected void attachFragmentToWindow() {
+        ViewUtils.attachView(mView);
+        TestableLooper.get(this).processMessages(1);
+    }
+
+    protected void detachFragmentToWindow() {
+        ViewUtils.detachView(mView);
+        TestableLooper.get(this).processMessages(1);
     }
 
     protected void destroyFragments() {
-        postAndWait(() -> mFragments.dispatchDestroy());
+        mFragments.dispatchDestroy();
+        processAllMessages();
         mFragments = null;
     }
 
-    protected void postAndWait(Runnable r) {
-        mHandler.post(r);
-        waitForFragments();
-    }
-
-    protected void waitForFragments() {
-        waitForIdleSync(mHandler);
+    protected void processAllMessages() {
+        TestableLooper.get(this).processAllMessages();
     }
 
     private View findViewById(int id) {
