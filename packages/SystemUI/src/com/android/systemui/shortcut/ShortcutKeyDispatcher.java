@@ -107,7 +107,7 @@ public class ShortcutKeyDispatcher extends SystemUI
                 List<ActivityManager.RecentTaskInfo> taskList =
                         SystemServicesProxy.getInstance(mContext).getRecentTasks(1,
                                 UserHandle.USER_CURRENT, false, new ArraySet<>());
-                recents.showRecents(
+                recents.showRecentApps(
                         false /* triggeredFromAltTab */,
                         false /* fromHome */);
                 if (!taskList.isEmpty()) {
