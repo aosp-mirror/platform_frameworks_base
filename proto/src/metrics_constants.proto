@@ -2252,30 +2252,6 @@ message MetricsEvent {
     // CATEGORY: QUICK_SETTINGS
     QS_NFC = 800;
 
-    // ---- End N-MR2 Constants, all N-MR1 constants go above this line ----
-
-    // ACTION: A captive portal was detected during network validation
-    // CATEGORY: NOTIFICATION
-    // OS: N-MR2
-    NOTIFICATION_NETWORK_SIGN_IN = 740;
-
-    // ACTION: An unvalidated network without Internet was selected by the user
-    // CATEGORY: NOTIFICATION
-    // OS: N-MR2
-    NOTIFICATION_NETWORK_NO_INTERNET = 741;
-
-    // ACTION: A validated network failed revalidation and lost Internet access
-    // CATEGORY: NOTIFICATION
-    // OS: N-MR2
-    NOTIFICATION_NETWORK_LOST_INTERNET = 742;
-
-    // ACTION: The system default network switched to a different network
-    // CATEGORY: NOTIFICATION
-    // OS: N-MR2
-    NOTIFICATION_NETWORK_SWITCH = 743;
-
-    // ---- End O Constants, all O constants go above this line ----
-
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
