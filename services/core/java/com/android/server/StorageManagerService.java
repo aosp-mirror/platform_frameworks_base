@@ -97,6 +97,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.AppFuseMount;
+import com.android.internal.os.FuseAppLoop;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
@@ -350,7 +351,7 @@ class StorageManagerService extends IStorageManager.Stub
     private int mNextAppFuseName = 0;
 
     @GuardedBy("mAppFuseLock")
-    private final SparseArray<Integer> mAppFusePids = new SparseArray<>();
+    private AppFuseBridge mAppFuseBridge = null;
 
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
@@ -2991,124 +2992,79 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    class CloseableHolder<T extends AutoCloseable> implements AutoCloseable {
-        @Nullable T mCloseable;
-
-        CloseableHolder(T closeable) {
-            mCloseable = closeable;
+    private ParcelFileDescriptor mountAppFuse(int uid, int mountId)
+            throws NativeDaemonConnectorException {
+        final NativeDaemonEvent event = StorageManagerService.this.mConnector.execute(
+                "appfuse", "mount", uid, Process.myPid(), mountId);
+        if (event.getFileDescriptors() == null ||
+            event.getFileDescriptors().length == 0) {
+            throw new NativeDaemonConnectorException("Cannot obtain device FD");
         }
-
-        @Nullable T get() {
-            return mCloseable;
-        }
-
-        @Nullable T release() {
-            final T result = mCloseable;
-            mCloseable = null;
-            return result;
-        }
-
-        @Override
-        public void close() {
-            if (mCloseable != null) {
-                IoUtils.closeQuietly(mCloseable);
-            }
-        }
+        return new ParcelFileDescriptor(event.getFileDescriptors()[0]);
     }
 
-    class AppFuseMountScope implements AppFuseBridge.IMountScope {
-        final int mUid;
-        final int mName;
-        final ParcelFileDescriptor mDeviceFd;
-
-        AppFuseMountScope(int uid, int pid, int name) throws NativeDaemonConnectorException {
-            final NativeDaemonEvent event = mConnector.execute(
-                    "appfuse", "mount", uid, Process.myPid(), name);
-            mUid = uid;
-            mName = name;
-            synchronized (mLock) {
-                mAppFusePids.put(name, pid);
-            }
-            if (event.getFileDescriptors() != null &&
-                    event.getFileDescriptors().length > 0) {
-                mDeviceFd = new ParcelFileDescriptor(event.getFileDescriptors()[0]);
-            } else {
-                mDeviceFd = null;
-            }
+    class AppFuseMountScope extends AppFuseBridge.MountScope {
+        public AppFuseMountScope(int uid, int pid, int mountId)
+                throws NativeDaemonConnectorException {
+            super(uid, pid, mountId, mountAppFuse(uid, mountId));
         }
 
         @Override
-        public void close() throws NativeDaemonConnectorException {
-            try {
-                IoUtils.closeQuietly(mDeviceFd);
-                mConnector.execute(
-                        "appfuse", "unmount", mUid, Process.myPid(), mName);
-            } finally {
-                synchronized (mLock) {
-                    mAppFusePids.delete(mName);
-                }
-            }
-        }
-
-        @Override
-        public ParcelFileDescriptor getDeviceFileDescriptor() {
-            return mDeviceFd;
+        public void close() throws Exception {
+            super.close();
+            mConnector.execute("appfuse", "unmount", uid, Process.myPid(), mountId);
         }
     }
 
     @Override
     public AppFuseMount mountProxyFileDescriptorBridge() throws RemoteException {
+        Slog.v(TAG, "mountProxyFileDescriptorBridge");
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        final int name;
-        synchronized (mAppFuseLock) {
-            name = mNextAppFuseName++;
-        }
-        try (CloseableHolder<AppFuseMountScope> mountScope =
-                new CloseableHolder<>(new AppFuseMountScope(uid, pid, name))) {
-            if (mountScope.get().getDeviceFileDescriptor() == null) {
-                throw new RemoteException("Failed to obtain device FD");
-            }
 
-            // Create communication channel.
-            final ArrayBlockingQueue<Boolean> channel = new ArrayBlockingQueue<>(1);
-            final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createSocketPair();
-            try (CloseableHolder<ParcelFileDescriptor> remote = new CloseableHolder<>(fds[0])) {
-                new Thread(
-                        new AppFuseBridge(mountScope.release(), fds[1], channel),
-                        AppFuseBridge.TAG).start();
-                if (!channel.take()) {
-                    throw new RemoteException("Failed to init AppFuse mount point");
+        while (true) {
+            synchronized (mAppFuseLock) {
+                boolean newlyCreated = false;
+                if (mAppFuseBridge == null) {
+                    mAppFuseBridge = new AppFuseBridge();
+                    new Thread(mAppFuseBridge, AppFuseBridge.TAG).start();
+                    newlyCreated = true;
                 }
-
-                return new AppFuseMount(name, remote.release());
+                try {
+                    final int name = mNextAppFuseName++;
+                    try {
+                        return new AppFuseMount(
+                            name,
+                            mAppFuseBridge.addBridge(new AppFuseMountScope(uid, pid, name)));
+                    } catch (AppFuseBridge.BridgeException e) {
+                        if (newlyCreated) {
+                            // If newly created bridge fails, it's a real error.
+                            throw new RemoteException(e.getMessage());
+                        }
+                        // It seems the thread of mAppFuseBridge has already been terminated.
+                        mAppFuseBridge = null;
+                    }
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
             }
-        } catch (NativeDaemonConnectorException e){
-            throw e.rethrowAsParcelableException();
-        } catch (IOException | InterruptedException error) {
-            throw new RemoteException(error.getMessage());
         }
     }
 
     @Override
-    public ParcelFileDescriptor openProxyFileDescriptor(int mountId, int fileId, int mode) {
-        final int uid = Binder.getCallingUid();
+    public ParcelFileDescriptor openProxyFileDescriptor(int mountId, int fileId, int mode)
+            throws RemoteException {
+        Slog.v(TAG, "mountProxyFileDescriptorBridge");
         final int pid = Binder.getCallingPid();
         try {
             synchronized (mAppFuseLock) {
-                final int expectedPid = mAppFusePids.get(mountId, -1);
-                if (expectedPid == -1) {
-                    Slog.i(TAG, "The mount point has already been unmounted");
-                    return null;
+                if (mAppFuseBridge == null) {
+                    throw new RemoteException("Cannot find mount point");
                 }
-                if (expectedPid != pid) {
-                    throw new SecurityException("Mount point was not created by this process.");
-                }
+                return mAppFuseBridge.openFile(pid, mountId, fileId, mode);
             }
-            return AppFuseBridge.openFile(uid, mountId, fileId, mode);
-        } catch (FileNotFoundException error) {
-            Slog.e(TAG, "Failed to openProxyFileDescriptor", error);
-            return null;
+        } catch (FileNotFoundException | SecurityException | InterruptedException error) {
+            throw new RemoteException(error.getMessage());
         }
     }
 
