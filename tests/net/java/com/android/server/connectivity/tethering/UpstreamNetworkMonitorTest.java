@@ -23,7 +23,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -40,6 +46,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
@@ -64,7 +71,7 @@ public class UpstreamNetworkMonitorTest {
         reset(mContext);
         reset(mCS);
 
-        mCM = new TestConnectivityManager(mContext, mCS);
+        mCM = spy(new TestConnectivityManager(mContext, mCS));
         mUNM = new UpstreamNetworkMonitor(null, EVENT_UNM_UPDATE, (ConnectivityManager) mCM);
     }
 
@@ -126,6 +133,42 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
+    public void testDuplicateMobileRequestsIgnored() throws Exception {
+        assertFalse(mUNM.mobileNetworkRequested());
+        assertEquals(0, mCM.requested.size());
+
+        mUNM.start();
+        verify(mCM, Mockito.times(1)).registerNetworkCallback(
+                any(NetworkRequest.class), any(NetworkCallback.class));
+        verify(mCM, Mockito.times(1)).registerDefaultNetworkCallback(any(NetworkCallback.class));
+        assertFalse(mUNM.mobileNetworkRequested());
+        assertEquals(0, mCM.requested.size());
+
+        mUNM.updateMobileRequiresDun(true);
+        mUNM.registerMobileNetworkRequest();
+        verify(mCM, Mockito.times(1)).requestNetwork(
+                any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt());
+
+        assertTrue(mUNM.mobileNetworkRequested());
+        assertUpstreamTypeRequested(TYPE_MOBILE_DUN);
+        assertTrue(mCM.isDunRequested());
+
+        // Try a few things that must not result in any state change.
+        mUNM.registerMobileNetworkRequest();
+        mUNM.updateMobileRequiresDun(true);
+        mUNM.registerMobileNetworkRequest();
+
+        assertTrue(mUNM.mobileNetworkRequested());
+        assertUpstreamTypeRequested(TYPE_MOBILE_DUN);
+        assertTrue(mCM.isDunRequested());
+
+        mUNM.stop();
+        verify(mCM, times(3)).unregisterNetworkCallback(any(NetworkCallback.class));
+
+        verifyNoMoreInteractions(mCM);
+    }
+
+    @Test
     public void testRequestsDunNetwork() throws Exception {
         assertFalse(mUNM.mobileNetworkRequested());
         assertEquals(0, mCM.requested.size());
@@ -149,7 +192,7 @@ public class UpstreamNetworkMonitorTest {
     }
 
     @Test
-    public void testUpdateMobileRequiredDun() throws Exception {
+    public void testUpdateMobileRequiresDun() throws Exception {
         mUNM.start();
 
         // Test going from no-DUN to DUN correctly re-registers callbacks.
@@ -180,7 +223,7 @@ public class UpstreamNetworkMonitorTest {
                 mCM.legacyTypeMap.values().iterator().next());
     }
 
-    private static class TestConnectivityManager extends ConnectivityManager {
+    public static class TestConnectivityManager extends ConnectivityManager {
         public Set<NetworkCallback> trackingDefault = new HashSet<>();
         public Map<NetworkCallback, NetworkRequest> listening = new HashMap<>();
         public Map<NetworkCallback, NetworkRequest> requested = new HashMap<>();
