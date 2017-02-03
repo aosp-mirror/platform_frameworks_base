@@ -63,8 +63,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"সিম কার্ড অবরোধ মুক্ত করতে PUK2 লিখুন৷"</string>
     <string name="enablePin" msgid="209412020907207950">"অসফল, সিম/RUIM লক সক্ষম করুন৷"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM লক হয়ে যাবে৷</item>
-      <item quantity="other">আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM লক হয়ে যাবে৷</item>
+      <item quantity="one">আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম লক হয়ে যাবে৷</item>
+      <item quantity="other">আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম লক হয়ে যাবে৷</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -255,7 +255,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ক্যালেন্ডার"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS বার্তাগুলি পাঠাতে এবং দেখতে"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"সঞ্চয়স্থান"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"আপনার ডিভাইসে ফটো, মিডিয়া এবং ফাইলগুলিতে অ্যাক্সেস"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"মাইক্রোফোন"</string>
@@ -291,7 +291,7 @@
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"আউটগোয়িং কলগুলি পুনঃচালিত করুন"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"অ্যাপ্লিকেশানকে কল চলাকালীন অন্য একটি নম্বরে কল পুনঃনির্দেশ বা কলটি একসথে বন্ধ করার সাথে ডায়াল করা নম্বরটি দেখতে দেয়৷"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"পাঠ্য বার্তা পান (SMS)"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে SMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে এসএমএস প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"পাঠ্য বার্তা পান (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"অ্যাপ্লিকেশানটিকে MMS বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"সেল সম্প্রচার বার্তা পড়ুন"</string>
@@ -299,11 +299,11 @@
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার অনুমতি দেবেন?"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে এসএমএসগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"অ্যাপ্লিকেশানটিকে আপনার টিভি বা SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তা নির্বিশেষে সমস্ত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত এসএমএসগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত এসএমএস নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
+    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"অ্যাপ্লিকেশানটিকে আপনার টিভি বা সিম কার্ডে সংরক্ষিত এসএমএসগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তা নির্বিশেষে সমস্ত এসএমএসগুলি পড়ার অনুমতি দেয়৷"</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার সিম কার্ডে সংরক্ষিত এসএমএসগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত এসএমএস নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"পাঠ্য বার্তা পান (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
@@ -370,7 +370,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট সামগ্রী হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"অ্যাপ্লিকেশানটিকে মাইক্রোফোনের দ্বারা অডিও রেকর্ড করার অনুমতি দেয়৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার অনুমোদন ছাড়া যেকোনো সময় অডিও রেকর্ড করার অনুমতি দেয়৷"</string>
-    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM এ আদেশগুলি পাঠান"</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"সিম এ আদেশগুলি পাঠান"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে সিম কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ক্যামেরার সাহায্যে ছবি তুলতে ও ভিডিও তৈরি করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার নিশ্চয়তা ছাড়াই যেকোনো সময় ক্যামেরা ব্যবহার করতে মঞ্জুর করে৷"</string>
@@ -475,8 +475,8 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"অ্যাপ্লিকেশানকে SD কার্ডে লেখার অনুমতি দেয়৷"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP কল করুন/গ্রহণ করুন"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"অ্যাপ্লিকেশানকে SIP কল করতে ও গ্রহণ করতে অনুমতি দেয়।"</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"নতুন টেলিকম SIM সংযোগগুলির নিবন্ধন"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"অ্যাপ্লিকেশানটিকে নতুন টেলিকম SIM সংযোগগুলি নিবন্ধিত করতে অনুমোদিত করে৷"</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"নতুন টেলিকম সিম সংযোগগুলির নিবন্ধন"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"অ্যাপ্লিকেশানটিকে নতুন টেলিকম সিম সংযোগগুলি নিবন্ধিত করতে অনুমোদিত করে৷"</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"নতুন টেলিকম সংযোগগুলির নিবন্ধন"</string>
     <string name="permdesc_register_call_provider" msgid="7034310263521081388">"নতুন টেলিকম সংযোগ নিবন্ধিত করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"টেলিকম সংযোগগুলি পরিচালনা করুন"</string>
@@ -688,7 +688,7 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"মুখের সাহায্যে আনলক করার প্রচেষ্টা যতবার করা যায় তার সীমা পেরিয়ে গেছে"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"কোনো সিম কার্ড নেই"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ট্যাবলেটের মধ্যে কোনো সিম কার্ড নেই৷"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"টিভির মধ্যে কোনো SIM কার্ড নেই৷"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"টিভির মধ্যে কোনো সিম কার্ড নেই৷"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ফোনের মধ্যে কোনো সিম কার্ড নেই৷"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"একটি সিম কার্ড ঢোকান৷"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"সিম কার্ডটি অনুপস্থিত বা পাঠযোগ্য নয়৷ একটি সিম কার্ড ঢোকান৷"</string>
@@ -1115,8 +1115,8 @@
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"আপনার টিভি <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এ সংযুক্ত থাকার সময় ওয়াই-ফাই থেকে সাময়িকভাবে সংযোগ বিচ্ছিন্ন হবে৷"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ফোনটি যখন <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এ সংযুক্ত হবে তখন এটি ওয়াই-ফাই থেকে সাময়িকভাবে সংযোগ বিচ্ছিন্ন হবে"</string>
     <string name="select_character" msgid="3365550120617701745">"অক্ষর ঢোকান"</string>
-    <string name="sms_control_title" msgid="7296612781128917719">"SMS বার্তা পাঠানো হচ্ছে"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অনেকগুলি SMS বার্তা পাঠাচ্ছে৷ আপনি কি এই অ্যাপ্লিকেশানটিকে বার্তা পাঠানো চালিয়ে যাওয়ার অনুমতি দিতে চান?"</string>
+    <string name="sms_control_title" msgid="7296612781128917719">"এসএমএস পাঠানো হচ্ছে"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অনেকগুলি এসএমএস পাঠাচ্ছে৷ আপনি কি এই অ্যাপ্লিকেশানটিকে বার্তা পাঠানো চালিয়ে যাওয়ার অনুমতি দিতে চান?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"অনুমতি দিন"</string>
     <string name="sms_control_no" msgid="625438561395534982">"আস্বীকার করুন"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; এ একটি বার্তা পাঠাতে চায়৷"</string>
@@ -1134,10 +1134,10 @@
     <string name="sim_added_title" msgid="3719670512889674693">"সিম কার্ড যোগ করা হয়েছে"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"সেলুলার নেটওয়ার্ক অ্যাক্সেস করতে আপনার ডিভাইস পুনর্সূচনা করুন"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"পুনর্সূচনা"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"যাতে আপনার নতুন SIM সঠিকভাবে কাজ করে, তার জন্য আপনাকে আপনার পরিষেবা প্রদানকারীর থেকে একটি অ্যাপ্লিকেশান ইনস্টল করতে এবং খুলতে হবে৷"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"যাতে আপনার নতুন সিম সঠিকভাবে কাজ করে, তার জন্য আপনাকে আপনার পরিষেবা প্রদানকারীর থেকে একটি অ্যাপ্লিকেশান ইনস্টল করতে এবং খুলতে হবে৷"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"অ্যাপ্লিকেশানটি পান"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"এখনই নয়"</string>
-    <string name="carrier_app_notification_title" msgid="8921767385872554621">"নতুন SIM ঢোকানো হয়েছে"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"নতুন সিম ঢোকানো হয়েছে"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"এটিকে সেট আপ করতে আলতো চাপুন"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"সময় সেট করুন"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"তারিখ সেট করুন"</string>
