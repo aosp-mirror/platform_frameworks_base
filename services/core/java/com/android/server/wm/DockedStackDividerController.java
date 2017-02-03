@@ -621,11 +621,7 @@ public class DockedStackDividerController implements DimLayerUser {
         final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
         final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisible())
                 || (homeStack.hasMultipleTaskWithHomeTaskNotTop());
-        // If the home task is an on-top launcher, we don't want to minimize the docked stack.
-        // Instead we want everything underneath that was visible to remain visible.
-        // See android.R.attr#onTopLauncher.
-        final boolean isOnTopLauncher = homeStack.topTaskIsOnTopLauncher();
-        setMinimizedDockedStack(homeVisible && !homeBehind && !isOnTopLauncher, animate);
+        setMinimizedDockedStack(homeVisible && !homeBehind, animate);
     }
 
     private boolean isWithinDisplay(Task task) {

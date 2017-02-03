@@ -17,7 +17,6 @@
 package android.content.pm;
 
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
@@ -4103,10 +4102,6 @@ public class PackageParser {
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
                 a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
-            }
-
-            if (sa.getBoolean(R.styleable.AndroidManifestActivity_onTopLauncher, false)) {
-                a.info.flags |= FLAG_ON_TOP_LAUNCHER;
             }
 
             a.info.lockTaskLaunchMode =

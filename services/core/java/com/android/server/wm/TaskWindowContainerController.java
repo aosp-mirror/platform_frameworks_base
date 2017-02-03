@@ -51,17 +51,17 @@ public class TaskWindowContainerController
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
             StackWindowController stackController, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers,
+            boolean homeTask, boolean toTop, boolean showForAllUsers,
             TaskDescription taskDescription) {
         this(taskId, listener, stackController, userId, bounds, overrideConfig, resizeMode,
-                supportsPictureInPicture, homeTask, isOnTopLauncher, toTop, showForAllUsers,
-                taskDescription, WindowManagerService.getInstance());
+                supportsPictureInPicture, homeTask, toTop, showForAllUsers, taskDescription,
+                WindowManagerService.getInstance());
     }
 
     public TaskWindowContainerController(int taskId, TaskWindowContainerListener listener,
             StackWindowController stackController, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean isOnTopLauncher, boolean toTop, boolean showForAllUsers,
+            boolean homeTask, boolean toTop, boolean showForAllUsers,
             TaskDescription taskDescription, WindowManagerService service) {
         super(listener, service);
         mTaskId = taskId;
@@ -78,7 +78,7 @@ public class TaskWindowContainerController
             }
             EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
             final Task task = createTask(taskId, stack, userId, bounds, overrideConfig, resizeMode,
-                    supportsPictureInPicture, homeTask, isOnTopLauncher, taskDescription);
+                    supportsPictureInPicture, homeTask, taskDescription);
             final int position = toTop ? POSITION_TOP : POSITION_BOTTOM;
             stack.addTask(task, position, showForAllUsers, true /* moveParents */);
         }
@@ -87,9 +87,9 @@ public class TaskWindowContainerController
     @VisibleForTesting
     Task createTask(int taskId, TaskStack stack, int userId, Rect bounds,
             Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-            boolean homeTask, boolean isOnTopLauncher, TaskDescription taskDescription) {
-        return new Task(taskId, stack, userId, mService, bounds, overrideConfig, isOnTopLauncher,
-                resizeMode, supportsPictureInPicture, homeTask, taskDescription, this);
+            boolean homeTask, TaskDescription taskDescription) {
+        return new Task(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
+                supportsPictureInPicture, homeTask, taskDescription, this);
     }
 
     @Override

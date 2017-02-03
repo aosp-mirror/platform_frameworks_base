@@ -75,7 +75,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
-import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
@@ -191,17 +190,15 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
 
     int mResizeMode;        // The resize mode of this task and its activities.
                             // Based on the {@link ActivityInfo#resizeMode} of the root activity.
-    boolean mSupportsPictureInPicture;  // Whether or not this task and its activities support PiP.
-            // Based on the {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root
-            // activity.
+    private boolean mSupportsPictureInPicture;  // Whether or not this task and its activities
+            // support PiP. Based on the {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag
+            // of the root activity.
     boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
                                      // changes on a temporary basis.
     private int mLockTaskMode;  // Which tasklock mode to launch this task in. One of
                                 // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
                                     // privileged permissions.
-    private boolean mIsOnTopLauncher; // Whether this task is an on-top launcher. See
-                                      // android.R.attr#onTopLauncher.
 
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
@@ -424,8 +421,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final Configuration overrideConfig = getOverrideConfiguration();
         mWindowContainerController = new TaskWindowContainerController(taskId, this,
                 getStack().getWindowContainerController(), userId, bounds, overrideConfig,
-                mResizeMode, mSupportsPictureInPicture, isHomeTask(), isOnTopLauncher(),
-                onTop, showForAllUsers, lastTaskDescription);
+                mResizeMode, mSupportsPictureInPicture, isHomeTask(), onTop, showForAllUsers,
+                lastTaskDescription);
     }
 
     void removeWindowContainer() {
@@ -688,7 +685,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         }
         mResizeMode = info.resizeMode;
         mSupportsPictureInPicture = info.supportsPictureInPicture();
-        mIsOnTopLauncher = (info.flags & FLAG_ON_TOP_LAUNCHER) != 0;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
@@ -1335,7 +1331,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      * @param bounds The bounds to be tested.
      * @return True if the requested bounds are okay for a resizing request.
      */
-    boolean canResizeToBounds(Rect bounds) {
+    private boolean canResizeToBounds(Rect bounds) {
         if (bounds == null || getStackId() != FREEFORM_WORKSPACE_STACK_ID) {
             // Note: If not on the freeform workspace, we ignore the bounds.
             return true;
@@ -1346,10 +1342,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         }
         return (mResizeMode != RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY || !landscape)
                 && (mResizeMode != RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY || landscape);
-    }
-
-    boolean isOnTopLauncher() {
-        return isHomeTask() && mIsOnTopLauncher;
     }
 
     /**

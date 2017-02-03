@@ -59,7 +59,6 @@ class WindowLayersController {
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mInputMethodWindows = new ArrayDeque<>();
-    private ArrayDeque<WindowState> mOnTopLauncherWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
     private int mCurBaseLayer;
@@ -138,7 +137,6 @@ class WindowLayersController {
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
         mDockedWindows.clear();
-        mOnTopLauncherWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
 
@@ -182,9 +180,6 @@ class WindowLayersController {
         if (task == null) {
             return;
         }
-        if (task.isOnTopLauncher()) {
-            mOnTopLauncherWindows.add(w);
-        }
         final TaskStack stack = task.mStack;
         if (stack == null) {
             return;
@@ -205,10 +200,6 @@ class WindowLayersController {
         }
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
-
-        while (!mOnTopLauncherWindows.isEmpty()) {
-            layer = assignAndIncreaseLayerIfNeeded(mOnTopLauncherWindows.remove(), layer);
-        }
 
         // We know that we will be animating a relaunching window in the near future, which will
         // receive a z-order increase. We want the replaced window to immediately receive the same

@@ -1554,38 +1554,6 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
-        final TaskRecord topFocusedTask = focusedStack.topTask();
-        final boolean isOnTopLauncherFocused = topFocusedTask != null &&
-                topFocusedTask.isOnTopLauncher();
-        if (isOnTopLauncherFocused) {
-            // When an on-top launcher is focused, we should find out whether the freeform stack or
-            // the fullscreen stack appears first underneath and has activities to show, and then
-            // make it visible.
-            boolean behindFullscreenOrFreeForm = false;
-            for (int stackBehindFocusedIndex = mStacks.indexOf(focusedStack) - 1;
-                 stackBehindFocusedIndex >= 0; stackBehindFocusedIndex--) {
-                ActivityStack stack = mStacks.get(stackBehindFocusedIndex);
-                if ((stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
-                        || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID)
-                        && stack.topRunningActivityLocked() != null) {
-                    if (stackIndex == stackBehindFocusedIndex) {
-                        return !behindFullscreenOrFreeForm ? STACK_VISIBLE : STACK_INVISIBLE;
-                    }
-                    behindFullscreenOrFreeForm = true;
-                }
-            }
-        }
-        // If an on-top launcher is on the top of the home stack but the home stack is not focused,
-        // then the whole stack should be invisible.
-        TaskRecord topTask = topTask();
-        if (mStackId != focusedStackId && topTask != null && topTask.isOnTopLauncher()) {
-            // We're here mostly because the on-top launcher didn't have a chance to move itself to
-            // back. We should move it to back as soon as possible to avoid other activities
-            // returning to it or other visibility issues.
-            moveTaskToBackLocked(topTask.taskId);
-            return STACK_INVISIBLE;
-        }
-
         if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 && hasVisibleBehindActivity() && StackId.isHomeOrRecentsStack(focusedStackId)
                 && !focusedStack.topActivity().fullscreen) {
@@ -1790,28 +1758,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                     // status of an activity in a previous task affects other.
                     behindFullscreenActivity = stackVisibility == STACK_INVISIBLE;
                 } else if (mStackId == HOME_STACK_ID) {
-                    if (task.isOnTopLauncher()) {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "On-top launcher: at " + task
-                                + " stackInvisible=" + stackInvisible
-                                + " behindFullscreenActivity=" + behindFullscreenActivity);
-                        // When an on-top launcher is visible, (e.g. it's on the top of the home stack),
-                        // other tasks in the home stack could be visible if and only if:
-                        // - some app is running in the docked stack;
-                        // - no app is running in either the fullscreen stack or the freefrom stack.
-                        final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
-                        final ActivityStack fullscreenStack = mStackSupervisor.getStack(
-                                FULLSCREEN_WORKSPACE_STACK_ID);
-                        final ActivityStack freeformStack = mStackSupervisor.getStack(
-                                FREEFORM_WORKSPACE_STACK_ID);
-                        final boolean dockedStackEmpty = dockedStack == null ||
-                                dockedStack.topRunningActivityLocked() == null;
-                        final boolean fullscreenStackEmpty = fullscreenStack == null ||
-                                fullscreenStack.topRunningActivityLocked() == null;
-                        final boolean freeformStackEmpty = freeformStack == null ||
-                                freeformStack.topRunningActivityLocked() == null;
-                        behindFullscreenActivity = dockedStackEmpty || !fullscreenStackEmpty ||
-                                !freeformStackEmpty;
-                    } else if (task.isHomeTask()) {
+                    if (task.isHomeTask()) {
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + task
                                 + " stackInvisible=" + stackInvisible
                                 + " behindFullscreenActivity=" + behindFullscreenActivity);
@@ -2699,14 +2646,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHomeOrRecents = lastStack.isHomeOrRecentsStack();
             final TaskRecord topTask = lastStack.topTask();
-            final boolean fromOnTopLauncher = topTask != null && topTask.isOnTopLauncher();
-            if (fromOnTopLauncher) {
-                // Since an on-top launcher will is moved to back when tasks are launched from it,
-                // those tasks should first try to return to a non-home activity.
-                // This also makes sure that non-home activities are visible under a transparent
-                // non-home activity.
-                task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
-            } else if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask() != task)) {
+            if (!isHomeOrRecentsStack() && (fromHomeOrRecents || topTask() != task)) {
                 // If it's a last task over home - we default to keep its return to type not to
                 // make underlying task focused when this one will be finished.
                 int returnToType = isLastTaskOverHome
@@ -4404,23 +4344,6 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
 
         if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
-            if (topTask().isOnTopLauncher()) {
-                // An on-top launcher doesn't affect the visibility of activities on other stacks
-                // behind it. So if we're moving an on-top launcher to the back, we want to move the
-                // focus to the next focusable stack and resume an activity there.
-                // Besides, when the docked stack is visible, we should also move the home stack to
-                // the back to avoid the recents pops up on top of a fullscreen or freeform
-                // activity.
-
-                // Move the home stack to back.
-                moveToBack(topTask());
-
-                // Resume an activity in the next focusable stack.
-                adjustFocusToNextFocusableStackLocked("moveTaskToBack");
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                return true;
-            }
-
             // For the case where we are moving the home task back and there is an activity visible
             // behind it on the fullscreen stack, we want to move the focus to the visible behind
             // activity to maintain order with what the user is seeing.

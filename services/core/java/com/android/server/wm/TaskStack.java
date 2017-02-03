@@ -160,10 +160,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return mChildren.size() > 1 && !mChildren.get(mChildren.size() - 1).isHomeTask();
     }
 
-    boolean topTaskIsOnTopLauncher() {
-        return mChildren.get(mChildren.size() - 1).isOnTopLauncher();
-    }
-
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.
