@@ -308,6 +308,11 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_DATA_DISABLED = 1406;
 
     /**
+     * Indicates a call was disconnected due to loss of wifi signal.
+     */
+    public static final int CODE_WIFI_LOST = 1407;
+
+    /**
      * Network string error messages.
      * mExtraMessage may have these values.
      */
