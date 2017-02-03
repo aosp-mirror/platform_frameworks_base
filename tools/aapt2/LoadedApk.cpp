@@ -86,8 +86,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
     if (path.find("res/") == 0 && referenced_resources.find(path) == referenced_resources.end()) {
       if (context->IsVerbose()) {
         context->GetDiagnostics()->Note(DiagMessage()
-                                        << "Resource '" << path << "' not referenced in "
-                                        << "resource table; removing from APK.");
+                                        << "Removing resource '" << path << "' from APK.");
       }
       continue;
     }
@@ -110,8 +109,8 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
     }
 
     std::unique_ptr<io::IData> data = file->OpenAsData();
-    // TODO(lecesne): Only compress the files that were compressed in the original APK.
-    if (!writer->StartEntry(path, ArchiveEntry::kCompress) ||
+    uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
+    if (!writer->StartEntry(path, compression_flags) ||
         !writer->WriteEntry(data->data(), data->size()) || !writer->FinishEntry()) {
       context->GetDiagnostics()->Error(DiagMessage()
                                        << "Error when writing file '" << path << "' in APK.");
