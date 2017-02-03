@@ -238,4 +238,6 @@
 
     <!-- Default for Settings.Secure.AWARE_LOCK_ENABLED -->
     <bool name="def_aware_lock_enabled">false</bool>
+
+    <bool name="def_text_show_password">false</bool>
 </resources>
