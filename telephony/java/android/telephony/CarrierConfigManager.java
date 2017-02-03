@@ -1074,6 +1074,9 @@ public class CarrierConfigManager {
      * and {@code NEW_CODE} is the new {@code ImsReasonInfo#CODE_*} which this combination of
      * original code and message shall be remapped to.
      *
+     * Note: If {@code *} is specified for the original code, any ImsReasonInfo with the matching
+     * {@code MESSAGE} will be remapped to {@code NEW_CODE}.
+     *
      * Example: "501|call completion elsewhere|1014"
      * When the {@link ImsReasonInfo#getCode()} is {@link ImsReasonInfo#CODE_USER_TERMINATED} and
      * the {@link ImsReasonInfo#getExtraMessage()} is {@code "call completion elsewhere"},
