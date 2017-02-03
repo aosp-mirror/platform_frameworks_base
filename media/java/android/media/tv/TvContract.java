@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -29,6 +30,8 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -372,6 +375,37 @@ public final class TvContract {
         /** The MIME type of a single TV channel. */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
 
+        /** @hide */
+        @StringDef({
+                TYPE_OTHER,
+                TYPE_NTSC,
+                TYPE_PAL,
+                TYPE_SECAM,
+                TYPE_DVB_T,
+                TYPE_DVB_T2,
+                TYPE_DVB_S,
+                TYPE_DVB_S2,
+                TYPE_DVB_C,
+                TYPE_DVB_C2,
+                TYPE_DVB_H,
+                TYPE_DVB_SH,
+                TYPE_ATSC_T,
+                TYPE_ATSC_C,
+                TYPE_ATSC_M_H,
+                TYPE_ISDB_T,
+                TYPE_ISDB_TB,
+                TYPE_ISDB_S,
+                TYPE_ISDB_C,
+                TYPE_1SEG,
+                TYPE_DTMB,
+                TYPE_CMMB,
+                TYPE_T_DMB,
+                TYPE_S_DMB,
+                TYPE_PREVIEW,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Type {}
+
         /**
          * A generic channel type.
          *
@@ -554,6 +588,15 @@ public final class TvContract {
          */
         public static final String TYPE_PREVIEW = "TYPE_PREVIEW";
 
+        /** @hide */
+        @StringDef({
+                SERVICE_TYPE_OTHER,
+                SERVICE_TYPE_AUDIO_VIDEO,
+                SERVICE_TYPE_AUDIO,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ServiceType {}
+
         /** A generic service type. */
         public static final String SERVICE_TYPE_OTHER = "SERVICE_TYPE_OTHER";
 
@@ -562,6 +605,22 @@ public final class TvContract {
 
         /** The service type for radio channels that have audio only. */
         public static final String SERVICE_TYPE_AUDIO = "SERVICE_TYPE_AUDIO";
+
+        /** @hide */
+        @StringDef({
+                VIDEO_FORMAT_240P,
+                VIDEO_FORMAT_360P,
+                VIDEO_FORMAT_480I,
+                VIDEO_FORMAT_576I,
+                VIDEO_FORMAT_576P,
+                VIDEO_FORMAT_720P,
+                VIDEO_FORMAT_1080I,
+                VIDEO_FORMAT_1080P,
+                VIDEO_FORMAT_2160P,
+                VIDEO_FORMAT_4320P,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface VideoFormat {}
 
         /** The video format for 240p. */
         public static final String VIDEO_FORMAT_240P = "VIDEO_FORMAT_240P";
@@ -595,6 +654,17 @@ public final class TvContract {
 
         /** The video format for 4320p. */
         public static final String VIDEO_FORMAT_4320P = "VIDEO_FORMAT_4320P";
+
+        /** @hide */
+        @StringDef({
+                VIDEO_RESOLUTION_SD,
+                VIDEO_RESOLUTION_ED,
+                VIDEO_RESOLUTION_HD,
+                VIDEO_RESOLUTION_FHD,
+                VIDEO_RESOLUTION_UHD,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface VideoResolution {}
 
         /** The video resolution for standard-definition. */
         public static final String VIDEO_RESOLUTION_SD = "VIDEO_RESOLUTION_SD";
@@ -634,7 +704,7 @@ public final class TvContract {
          * @see #COLUMN_VIDEO_FORMAT
          */
         @Nullable
-        public static final String getVideoResolution(String videoFormat) {
+        public static final String getVideoResolution(@VideoFormat String videoFormat) {
             return VIDEO_FORMAT_TO_RESOLUTION_MAP.get(videoFormat);
         }
 
@@ -1100,6 +1170,24 @@ public final class TvContract {
         /** The MIME type of a single TV program. */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
 
+        /** @hide */
+        @StringDef({
+                TYPE_MOVIE,
+                TYPE_TV_SERIES,
+                TYPE_TV_SEASON,
+                TYPE_TV_EPISODE,
+                TYPE_CLIP,
+                TYPE_EVENT,
+                TYPE_CHANNEL,
+                TYPE_TRACK,
+                TYPE_ALBUM,
+                TYPE_ARTIST,
+                TYPE_PLAYLIST,
+                TYPE_STATION,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Type {}
+
         /**
          * The program type for movie.
          *
@@ -1184,6 +1272,15 @@ public final class TvContract {
          */
         public static final String TYPE_STATION = "TYPE_STATION";
 
+        /** @hide */
+        @StringDef({
+                WATCH_NEXT_TYPE_CONTINUE,
+                WATCH_NEXT_TYPE_NEXT,
+                WATCH_NEXT_TYPE_NEW,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface WatchNextType {}
+
         /**
          * The watch next type for CONTINUE.
          *
@@ -1204,6 +1301,16 @@ public final class TvContract {
          * @see #COLUMN_WATCH_NEXT_TYPE
          */
         public static final String WATCH_NEXT_TYPE_NEW = "WATCH_NEXT_TYPE_NEW";
+
+        /** @hide */
+        @StringDef({
+                ASPECT_RATIO_16_9,
+                ASPECT_RATIO_3_2,
+                ASPECT_RATIO_1_1,
+                ASPECT_RATIO_2_3,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface AspectRatio {}
 
         /**
          * The aspect ratio for 16:9.
@@ -1237,6 +1344,15 @@ public final class TvContract {
          */
         public static final String ASPECT_RATIO_2_3 = "ASPECT_RATIO_2_3";
 
+        /** @hide */
+        @StringDef({
+                AVAILABILITY_AVAILABLE,
+                AVAILABILITY_FREE_WITH_SUBSCRIPTION,
+                AVAILABILITY_PAID_CONTENT,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Availability {}
+
         /**
          * The availability for "available to this user".
          *
@@ -1259,6 +1375,19 @@ public final class TvContract {
          * @see #COLUMN_AVAILABILITY
          */
         public static final String AVAILABILITY_PAID_CONTENT = "AVAILABILITY_PAID_CONTENT";
+
+        /** @hide */
+        @StringDef({
+                INTERACTION_TYPE_LISTENS,
+                INTERACTION_TYPE_FOLLOWERS,
+                INTERACTION_TYPE_FANS,
+                INTERACTION_TYPE_LIKES,
+                INTERACTION_TYPE_THUMBS,
+                INTERACTION_TYPE_VIEWS,
+                INTERACTION_TYPE_VIEWERS,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface InteractionType {}
 
         /**
          * The interaction type for "listens".
@@ -1308,6 +1437,15 @@ public final class TvContract {
          * @see #COLUMN_INTERACTION_TYPE
          */
         public static final String INTERACTION_TYPE_VIEWERS = "INTERACTION_TYPE_VIEWERS";
+
+        /** @hide */
+        @StringDef({
+                REVIEW_RATING_STYLE_STARS,
+                REVIEW_RATING_STYLE_THUMBS_UP_DOWN,
+                REVIEW_RATING_STYLE_PERCENTAGE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ReviewRatingStyle {}
 
         /**
          * The review rating style for five star rating.
@@ -1994,6 +2132,29 @@ public final class TvContract {
 
         /** Canonical genres for TV programs. */
         public static final class Genres {
+            /** @hide */
+            @StringDef({
+                    FAMILY_KIDS,
+                    SPORTS,
+                    SHOPPING,
+                    MOVIES,
+                    COMEDY,
+                    TRAVEL,
+                    DRAMA,
+                    EDUCATION,
+                    ANIMAL_WILDLIFE,
+                    NEWS,
+                    GAMING,
+                    ARTS,
+                    ENTERTAINMENT,
+                    LIFE_STYLE,
+                    MUSIC,
+                    PREMIER,
+                    TECH_SCIENCE,
+            })
+            @Retention(RetentionPolicy.SOURCE)
+            public @interface Genre {}
+
             /** The genre for Family/Kids. */
             public static final String FAMILY_KIDS = "FAMILY_KIDS";
 
@@ -2081,7 +2242,7 @@ public final class TvContract {
              * @return an encoded genre string that can be inserted into the
              *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              */
-            public static String encode(@NonNull String... genres) {
+            public static String encode(@NonNull @Genre String... genres) {
                 if (genres == null) {
                     // MNC and before will throw a NPE.
                     return null;
@@ -2120,7 +2281,7 @@ public final class TvContract {
              *            {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              * @return genre strings.
              */
-            public static String[] decode(@NonNull String genres) {
+            public static @Genre String[] decode(@NonNull String genres) {
                 if (TextUtils.isEmpty(genres)) {
                     // MNC and before will throw a NPE for {@code null} genres.
                     return EMPTY_STRING_ARRAY;
