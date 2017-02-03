@@ -156,7 +156,7 @@
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"সেলুলার ডেটা বন্ধ আছে"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ব্লুটুথ টিথারিং৷"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"বিমান মোড৷"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"কোনো SIM কার্ড নেই।"</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"কোনো সিম কার্ড নেই।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"পরিষেবা প্রদানকারীর নেটওয়ার্ক পরিবর্তিত হচ্ছে।"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ব্যাটারির বিশদ বিবরণ খুলুন"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
