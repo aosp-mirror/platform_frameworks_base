@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -42,7 +43,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class is used to specify meta information of an input method.
@@ -110,6 +110,19 @@ public final class InputMethodInfo implements Parcelable {
     private final boolean mSupportsDismissingWindow;
 
     /**
+     * @param service the {@link ResolveInfo} corresponds in which the IME is implemented.
+     * @return a unique ID to be returned by {@link #getId()}. We have used
+     *         {@link ComponentName#flattenToShortString()} for this purpose (and it is already
+     *         unrealistic to switch to a different scheme as it is already implicitly assumed in
+     *         many places).
+     * @hide
+     */
+    public static String computeId(@NonNull ResolveInfo service) {
+        final ServiceInfo si = service.serviceInfo;
+        return new ComponentName(si.packageName, si.name).flattenToShortString();
+    }
+
+    /**
      * Constructor.
      *
      * @param context The Context in which we are parsing the input method.
@@ -127,15 +140,15 @@ public final class InputMethodInfo implements Parcelable {
      * @param context The Context in which we are parsing the input method.
      * @param service The ResolveInfo returned from the package manager about
      * this input method's component.
-     * @param additionalSubtypesMap additional subtypes being added to this InputMethodInfo
+     * @param additionalSubtypes additional subtypes being added to this InputMethodInfo
      * @hide
      */
     public InputMethodInfo(Context context, ResolveInfo service,
-            Map<String, List<InputMethodSubtype>> additionalSubtypesMap)
+            List<InputMethodSubtype> additionalSubtypes)
             throws XmlPullParserException, IOException {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        mId = new ComponentName(si.packageName, si.name).flattenToShortString();
+        mId = computeId(service);
         boolean isAuxIme = true;
         boolean supportsSwitchingToNextInputMethod = false; // false as default
         boolean supportsDismissingWindow = false; // false as default
@@ -233,8 +246,7 @@ public final class InputMethodInfo implements Parcelable {
             isAuxIme = false;
         }
 
-        if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
-            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypesMap.get(mId);
+        if (additionalSubtypes != null) {
             final int N = additionalSubtypes.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodSubtype subtype = additionalSubtypes.get(i);
