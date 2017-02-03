@@ -32,7 +32,7 @@ import java.util.Collection;
  */
 public class LeakDetector implements Dumpable {
 
-    private static final boolean ENABLED = Build.IS_DEBUGGABLE;
+    public static final boolean ENABLED = Build.IS_DEBUGGABLE;
 
     private final TrackedCollections mTrackedCollections;
     private final TrackedGarbage mTrackedGarbage;
