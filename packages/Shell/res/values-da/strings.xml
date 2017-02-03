@@ -23,8 +23,8 @@
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent et øjeblik…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Fejlrapporten vises på telefonen om et øjeblik"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tryk for at dele din fejlrapport"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et skærmbillede, eller vent på, at skærmbilledet fuldføres"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et skærmbillede, eller vent på, at skærmbilledet fuldføres"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et screenshot, eller vent på, at screenshott fuldføres"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Fejlrapporter indeholder data fra systemets forskellige logfiler, som kan være data, du mener er følsomme, f.eks. appforbrug og placeringsdata. Del kun fejlrapporter med personer og apps, du har tillid til."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Vis ikke igen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Fejlrapporter"</string>
@@ -32,9 +32,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Oplysningerne i fejlrapporten kunne ikke føjes til zip-filen"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ikke navngivet"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Oplysninger"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skærmbillede"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Der blev taget et skærmbillede."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Der kunne ikke tages et skærmbillede."</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Screenshot"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Der blev taget et screenshot."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Der kunne ikke tages et screenshot."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Oplysninger om fejlrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnavn"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Fejlrapportens titel"</string>
