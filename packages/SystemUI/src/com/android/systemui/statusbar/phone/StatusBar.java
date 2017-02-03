@@ -279,6 +279,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
+    // Must match constant in Settings. Used to highlight preferences when linking to Settings.
+    private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
+
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     // Should match the values in PhoneWindowManager
@@ -5789,10 +5792,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     // The (i) button in the guts that links to the system notification settings for that app
-    private void startAppNotificationSettingsActivity(String packageName, final int appUid) {
+    private void startAppNotificationSettingsActivity(String packageName, final int appUid,
+            final String channelId) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
+        intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channelId);
         startNotificationGutsIntent(intent, appUid);
     }
 
@@ -5857,7 +5862,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     int appUid) -> {
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
                 guts.resetFalsingCheck();
-                startAppNotificationSettingsActivity(pkg, appUid);
+                startAppNotificationSettingsActivity(pkg, appUid, channel.getId());
             };
             final View.OnClickListener onDoneClick = (View v) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
