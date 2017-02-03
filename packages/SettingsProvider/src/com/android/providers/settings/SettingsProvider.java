@@ -2735,7 +2735,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 137;
+            private static final int SETTINGS_VERSION = 138;
 
             private final int mUserId;
 
@@ -3186,6 +3186,18 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 137;
+                }
+                if (currentVersion == 137) {
+                    // Version 138: Settings.Secure#INSTALL_NON_MARKET_APPS is deprecated and its
+                    // default value set to 1. The user can no longer change the value of this
+                    // setting through the UI.
+                    final SettingsState secureSetting = getSecureSettingsLocked(userId);
+                    if (!mUserManager.hasUserRestriction(
+                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, UserHandle.of(userId))) {
+                        secureSetting.insertSettingLocked(Settings.Secure.INSTALL_NON_MARKET_APPS,
+                                "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 138;
                 }
 
                 if (currentVersion != newVersion) {

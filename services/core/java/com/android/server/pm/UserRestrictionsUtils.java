@@ -474,11 +474,12 @@ public class UserRestrictionsUtils {
                     }
                     break;
                 case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
-                    if (newValue) {
-                        android.provider.Settings.Secure.putIntForUser(cr,
-                                android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
-                                userId);
-                    }
+                    // Since Android O, the secure setting is not available to be changed by the
+                    // user. Hence, when the restriction is cleared, we need to reset the state of
+                    // the setting to its default value which is now 1.
+                    android.provider.Settings.Secure.putIntForUser(cr,
+                            android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
+                            newValue ? 0 : 1, userId);
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
