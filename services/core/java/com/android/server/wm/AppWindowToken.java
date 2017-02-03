@@ -42,7 +42,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
@@ -666,6 +665,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     Task getTask() {
         return (Task) getParent();
+    }
+
+    TaskStack getStack() {
+        final Task task = getTask();
+        if (task != null) {
+            return task.mStack;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -1329,7 +1337,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     }
                 }
             } else if (w.isDrawnLw()) {
-                mService.mH.sendEmptyMessage(NOTIFY_STARTING_WINDOW_DRAWN);
+                if (getController() != null) {
+                    getController().reportStartingWindowDrawn();
+                }
                 startingDisplayed = true;
             }
         }

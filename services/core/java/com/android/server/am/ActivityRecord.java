@@ -23,6 +23,7 @@ import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE;
@@ -890,6 +891,10 @@ final class ActivityRecord implements AppWindowContainerListener {
         return task != null ? (T) task.getStack() : null;
     }
 
+    private int getStackId() {
+        return getStack() != null ? getStack().mStackId : INVALID_STACK_ID;
+    }
+
     boolean changeWindowTranslucency(boolean toOpaque) {
         if (fullscreen == toOpaque) {
             return false;
@@ -1706,9 +1711,16 @@ final class ActivityRecord implements AppWindowContainerListener {
     }
 
     @Override
+    public void onStartingWindowDrawn() {
+        synchronized (service) {
+            mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn(getStackId());
+        }
+    }
+
+    @Override
     public void onWindowsDrawn() {
         synchronized (service) {
-            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn();
+            mStackSupervisor.mActivityMetricsLogger.notifyWindowsDrawn(getStackId());
             if (displayStartTime != 0) {
                 reportLaunchTimeLocked(SystemClock.uptimeMillis());
             }

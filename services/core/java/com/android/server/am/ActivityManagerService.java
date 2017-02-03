@@ -22957,16 +22957,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void notifyStartingWindowDrawn() {
+        public void notifyAppTransitionStarting(SparseIntArray reasons) {
             synchronized (ActivityManagerService.this) {
-                mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn();
-            }
-        }
-
-        @Override
-        public void notifyAppTransitionStarting(int reason) {
-            synchronized (ActivityManagerService.this) {
-                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reason);
+                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reasons);
             }
         }
 

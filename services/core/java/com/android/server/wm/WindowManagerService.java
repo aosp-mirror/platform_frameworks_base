@@ -5253,7 +5253,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_APP_TRANSITION_STARTING = 47;
         public static final int NOTIFY_APP_TRANSITION_CANCELLED = 48;
         public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
-        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
         public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
@@ -5682,7 +5681,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 case NOTIFY_APP_TRANSITION_STARTING: {
-                    mAmInternal.notifyAppTransitionStarting(msg.arg1);
+                    mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj);
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_CANCELLED: {
@@ -5691,10 +5690,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case NOTIFY_APP_TRANSITION_FINISHED: {
                     mAmInternal.notifyAppTransitionFinished();
-                }
-                break;
-                case NOTIFY_STARTING_WINDOW_DRAWN: {
-                    mAmInternal.notifyStartingWindowDrawn();
                 }
                 break;
                 case WINDOW_HIDE_TIMEOUT: {
