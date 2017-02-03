@@ -49,8 +49,10 @@ import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.battery.BatteryServiceDumpProto;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -801,6 +803,35 @@ public final class BatteryService extends SystemService {
         }
     }
 
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        synchronized (mLock) {
+            proto.write(BatteryServiceDumpProto.ARE_UPDATES_STOPPED, mUpdatesStopped);
+            int batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_NONE;
+            if (mBatteryProps.chargerAcOnline) {
+                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_AC;
+            } else if (mBatteryProps.chargerUsbOnline) {
+                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_USB;
+            } else if (mBatteryProps.chargerWirelessOnline) {
+                batteryPluggedValue = BatteryServiceDumpProto.BATTERY_PLUGGED_WIRELESS;
+            }
+            proto.write(BatteryServiceDumpProto.PLUGGED, batteryPluggedValue);
+            proto.write(BatteryServiceDumpProto.MAX_CHARGING_CURRENT, mBatteryProps.maxChargingCurrent);
+            proto.write(BatteryServiceDumpProto.MAX_CHARGING_VOLTAGE, mBatteryProps.maxChargingVoltage);
+            proto.write(BatteryServiceDumpProto.CHARGE_COUNTER, mBatteryProps.batteryChargeCounter);
+            proto.write(BatteryServiceDumpProto.STATUS, mBatteryProps.batteryStatus);
+            proto.write(BatteryServiceDumpProto.HEALTH, mBatteryProps.batteryHealth);
+            proto.write(BatteryServiceDumpProto.IS_PRESENT, mBatteryProps.batteryPresent);
+            proto.write(BatteryServiceDumpProto.LEVEL, mBatteryProps.batteryLevel);
+            proto.write(BatteryServiceDumpProto.SCALE, BATTERY_SCALE);
+            proto.write(BatteryServiceDumpProto.VOLTAGE, mBatteryProps.batteryVoltage);
+            proto.write(BatteryServiceDumpProto.TEMPERATURE, mBatteryProps.batteryTemperature);
+            proto.write(BatteryServiceDumpProto.TECHNOLOGY, mBatteryProps.batteryTechnology);
+        }
+        proto.flush();
+    }
+
     private final class Led {
         private final Light mBatteryLight;
 
@@ -878,7 +909,11 @@ public final class BatteryService extends SystemService {
                 return;
             }
 
-            dumpInternal(fd, pw, args);
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                dumpProto(fd);
+            } else {
+                dumpInternal(fd, pw, args);
+            }
         }
 
         @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
