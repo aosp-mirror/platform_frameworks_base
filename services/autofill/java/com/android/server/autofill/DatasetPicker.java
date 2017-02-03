@@ -38,8 +38,6 @@ import java.util.List;
  * 3) the View is detached.
  */
 final class DatasetPicker extends ListView implements OnItemClickListener {
-    private static final String TAG = "DatasetPicker";
-
     interface Listener {
         void onDatasetPicked(Dataset dataset);
     }
@@ -80,7 +78,7 @@ final class DatasetPicker extends ListView implements OnItemClickListener {
         adapter.getFilter().filter(prefix, new FilterListener() {
             @Override
             public void onFilterComplete(int count) {
-                DatasetPicker.this.requestLayout();
+                setVisibility(count > 0 ? View.VISIBLE : View.GONE);
             }
         });
     }
