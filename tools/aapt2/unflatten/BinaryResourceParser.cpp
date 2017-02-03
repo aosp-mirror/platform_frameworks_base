@@ -370,8 +370,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       return false;
     }
 
-    if (!table_->AddResourceAllowMangled(name, config, {},
-                                         std::move(resource_value),
+    if (!table_->AddResourceAllowMangled(name, res_id, config, {}, std::move(resource_value),
                                          context_->GetDiagnostics())) {
       return false;
     }

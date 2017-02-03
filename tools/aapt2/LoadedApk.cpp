@@ -16,10 +16,15 @@
 
 #include "LoadedApk.h"
 
+#include "ResourceValues.h"
+#include "ValueVisitor.h"
+#include "flatten/Archive.h"
+#include "flatten/TableFlattener.h"
+
 namespace aapt {
 
-std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(
-    IAaptContext* context, const StringPiece& path) {
+std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
+                                                      const android::StringPiece& path) {
   Source source(path);
   std::string error;
   std::unique_ptr<io::ZipFileCollection> apk =
@@ -51,6 +56,70 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(
   }
 
   return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
+}
+
+bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
+  std::set<std::string> referenced_resources;
+  // List the files being referenced in the resource table.
+  for (auto& pkg : table_->packages) {
+    for (auto& type : pkg->types) {
+      for (auto& entry : type->entries) {
+        for (auto& config_value : entry->values) {
+          FileReference* file_ref = ValueCast<FileReference>(config_value->value.get());
+          if (file_ref) {
+            referenced_resources.insert(*file_ref->path);
+          }
+        }
+      }
+    }
+  }
+
+  std::unique_ptr<io::IFileCollectionIterator> iterator = apk_->Iterator();
+  while (iterator->HasNext()) {
+    io::IFile* file = iterator->Next();
+
+    std::string path = file->GetSource().path;
+    // The name of the path has the format "<zip-file-name>@<path-to-file>".
+    path = path.substr(path.find("@") + 1);
+
+    // Skip resources that are not referenced if requested.
+    if (path.find("res/") == 0 && referenced_resources.find(path) == referenced_resources.end()) {
+      if (context->IsVerbose()) {
+        context->GetDiagnostics()->Note(DiagMessage()
+                                        << "Resource '" << path << "' not referenced in "
+                                        << "resource table; removing from APK.");
+      }
+      continue;
+    }
+
+    // The resource table needs to be reserialized since it might have changed.
+    if (path == "resources.arsc") {
+      BigBuffer buffer = BigBuffer(1024);
+      TableFlattener flattener(&buffer);
+      if (!flattener.Consume(context, table_.get())) {
+        return false;
+      }
+
+      if (!writer->StartEntry(path, ArchiveEntry::kAlign) || !writer->WriteEntry(buffer) ||
+          !writer->FinishEntry()) {
+        context->GetDiagnostics()->Error(DiagMessage()
+                                         << "Error when writing file '" << path << "' in APK.");
+        return false;
+      }
+      continue;
+    }
+
+    std::unique_ptr<io::IData> data = file->OpenAsData();
+    // TODO(lecesne): Only compress the files that were compressed in the original APK.
+    if (!writer->StartEntry(path, ArchiveEntry::kCompress) ||
+        !writer->WriteEntry(data->data(), data->size()) || !writer->FinishEntry()) {
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << "Error when writing file '" << path << "' in APK.");
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace aapt

@@ -80,6 +80,12 @@ class StripCommand {
 
     // TODO(lecesne): Implement stripping here.
 
+    std::unique_ptr<IArchiveWriter> writer =
+        CreateZipFileArchiveWriter(context_->GetDiagnostics(), options_.output_path);
+    if (!apk->WriteToArchive(context_, writer.get())) {
+      return 1;
+    }
+
     return 0;
   }
 
