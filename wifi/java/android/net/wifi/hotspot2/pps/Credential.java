@@ -42,8 +42,6 @@ import java.util.Set;
  *
  * In addition to the fields in the Credential subtree, this will also maintain necessary
  * information for the private key and certificates associated with this credential.
- *
- * @hide
  */
 public final class Credential implements Parcelable {
     private static final String TAG = "Credential";
@@ -98,12 +96,12 @@ public final class Credential implements Parcelable {
      * and Accounting) server's certificate during EAP (Extensible Authentication
      * Protocol) authentication.
      */
-    private boolean mCheckAAAServerCertStatus = false;
-    public void setCheckAAAServerCertStatus(boolean checkAAAServerCertStatus) {
-        mCheckAAAServerCertStatus = checkAAAServerCertStatus;
+    private boolean mCheckAaaServerCertStatus = false;
+    public void setCheckAaaServerCertStatus(boolean checkAaaServerCertStatus) {
+        mCheckAaaServerCertStatus = checkAaaServerCertStatus;
     }
-    public boolean getCheckAAAServerStatus() {
-        return mCheckAAAServerCertStatus;
+    public boolean getCheckAaaServerStatus() {
+        return mCheckAaaServerCertStatus;
     }
 
     /**
@@ -685,7 +683,7 @@ public final class Credential implements Parcelable {
             mCreationTimeInMs = source.mCreationTimeInMs;
             mExpirationTimeInMs = source.mExpirationTimeInMs;
             mRealm = source.mRealm;
-            mCheckAAAServerCertStatus = source.mCheckAAAServerCertStatus;
+            mCheckAaaServerCertStatus = source.mCheckAaaServerCertStatus;
             if (source.mUserCredential != null) {
                 mUserCredential = new UserCredential(source.mUserCredential);
             }
@@ -714,7 +712,7 @@ public final class Credential implements Parcelable {
         dest.writeLong(mCreationTimeInMs);
         dest.writeLong(mExpirationTimeInMs);
         dest.writeString(mRealm);
-        dest.writeInt(mCheckAAAServerCertStatus ? 1 : 0);
+        dest.writeInt(mCheckAaaServerCertStatus ? 1 : 0);
         dest.writeParcelable(mUserCredential, flags);
         dest.writeParcelable(mCertCredential, flags);
         dest.writeParcelable(mSimCredential, flags);
@@ -736,7 +734,7 @@ public final class Credential implements Parcelable {
         return TextUtils.equals(mRealm, that.mRealm)
                 && mCreationTimeInMs == that.mCreationTimeInMs
                 && mExpirationTimeInMs == that.mExpirationTimeInMs
-                && mCheckAAAServerCertStatus == that.mCheckAAAServerCertStatus
+                && mCheckAaaServerCertStatus == that.mCheckAaaServerCertStatus
                 && (mUserCredential == null ? that.mUserCredential == null
                     : mUserCredential.equals(that.mUserCredential))
                 && (mCertCredential == null ? that.mCertCredential == null
@@ -751,7 +749,7 @@ public final class Credential implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mRealm, mCreationTimeInMs, mExpirationTimeInMs,
-                mCheckAAAServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
+                mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
                 mCaCertificate, mClientCertificateChain, mClientPrivateKey);
     }
 
@@ -800,7 +798,7 @@ public final class Credential implements Parcelable {
                 credential.setCreationTimeInMs(in.readLong());
                 credential.setExpirationTimeInMs(in.readLong());
                 credential.setRealm(in.readString());
-                credential.setCheckAAAServerCertStatus(in.readInt() != 0);
+                credential.setCheckAaaServerCertStatus(in.readInt() != 0);
                 credential.setUserCredential(in.readParcelable(null));
                 credential.setCertCredential(in.readParcelable(null));
                 credential.setSimCredential(in.readParcelable(null));

@@ -30,10 +30,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Unit tests for {@link android.net.wifi.hotspot2.pps.HomeSP}.
+ * Unit tests for {@link android.net.wifi.hotspot2.pps.HomeSp}.
  */
 @SmallTest
-public class HomeSPTest {
+public class HomeSpTest {
 
     /**
      * Helper function for creating a map of home network IDs for testing.
@@ -48,68 +48,68 @@ public class HomeSPTest {
     }
 
     /**
-     * Helper function for creating a HomeSP for testing.
+     * Helper function for creating a HomeSp for testing.
      *
-     * @param homeNetworkIds The map of home network IDs associated with HomeSP
-     * @return {@link HomeSP}
+     * @param homeNetworkIds The map of home network IDs associated with HomeSp
+     * @return {@link HomeSp}
      */
-    private static HomeSP createHomeSp(Map<String, Long> homeNetworkIds) {
-        HomeSP homeSp = new HomeSP();
+    private static HomeSp createHomeSp(Map<String, Long> homeNetworkIds) {
+        HomeSp homeSp = new HomeSp();
         homeSp.setFqdn("fqdn");
         homeSp.setFriendlyName("friendly name");
         homeSp.setIconUrl("icon.url");
         homeSp.setHomeNetworkIds(homeNetworkIds);
-        homeSp.setMatchAllOIs(new long[] {0x11L, 0x22L});
-        homeSp.setMatchAnyOIs(new long[] {0x33L, 0x44L});
+        homeSp.setMatchAllOis(new long[] {0x11L, 0x22L});
+        homeSp.setMatchAnyOis(new long[] {0x33L, 0x44L});
         homeSp.setOtherHomePartners(new String[] {"partner1", "partner2"});
-        homeSp.setRoamingConsortiumOIs(new long[] {0x55, 0x66});
+        homeSp.setRoamingConsortiumOis(new long[] {0x55, 0x66});
         return homeSp;
     }
 
     /**
-     * Helper function for creating a HomeSP with home network IDs for testing.
+     * Helper function for creating a HomeSp with home network IDs for testing.
      *
-     * @return {@link HomeSP}
+     * @return {@link HomeSp}
      */
-    private static HomeSP createHomeSpWithHomeNetworkIds() {
+    private static HomeSp createHomeSpWithHomeNetworkIds() {
         return createHomeSp(createHomeNetworkIds());
     }
 
     /**
-     * Helper function for creating a HomeSP without home network IDs for testing.
+     * Helper function for creating a HomeSp without home network IDs for testing.
      *
-     * @return {@link HomeSP}
+     * @return {@link HomeSp}
      */
-    private static HomeSP createHomeSpWithoutHomeNetworkIds() {
+    private static HomeSp createHomeSpWithoutHomeNetworkIds() {
         return createHomeSp(null);
     }
 
     /**
-     * Helper function for verifying HomeSP after parcel write then read.
+     * Helper function for verifying HomeSp after parcel write then read.
      * @param writeHomeSp
      * @throws Exception
      */
-    private static void verifyParcel(HomeSP writeHomeSp) throws Exception {
+    private static void verifyParcel(HomeSp writeHomeSp) throws Exception {
         Parcel parcel = Parcel.obtain();
         writeHomeSp.writeToParcel(parcel, 0);
 
         parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
-        HomeSP readHomeSp = HomeSP.CREATOR.createFromParcel(parcel);
+        HomeSp readHomeSp = HomeSp.CREATOR.createFromParcel(parcel);
         assertTrue(readHomeSp.equals(writeHomeSp));
     }
 
     /**
-     * Verify parcel read/write for an empty HomeSP.
+     * Verify parcel read/write for an empty HomeSp.
      *
      * @throws Exception
      */
     @Test
-    public void verifyParcelWithEmptyHomeSP() throws Exception {
-        verifyParcel(new HomeSP());
+    public void verifyParcelWithEmptyHomeSp() throws Exception {
+        verifyParcel(new HomeSp());
     }
 
     /**
-     * Verify parcel read/write for a HomeSP containing Home Network IDs.
+     * Verify parcel read/write for a HomeSp containing Home Network IDs.
      *
      * @throws Exception
      */
@@ -119,7 +119,7 @@ public class HomeSPTest {
     }
 
     /**
-     * Verify parcel read/write for a HomeSP without Home Network IDs.
+     * Verify parcel read/write for a HomeSp without Home Network IDs.
      *
      * @throws Exception
      */
@@ -129,62 +129,62 @@ public class HomeSPTest {
     }
 
     /**
-     * Verify that a HomeSP is valid when both FQDN and Friendly Name
+     * Verify that a HomeSp is valid when both FQDN and Friendly Name
      * are provided.
      *
      * @throws Exception
      */
     @Test
-    public void validateValidHomeSP() throws Exception {
-        HomeSP homeSp = createHomeSpWithHomeNetworkIds();
+    public void validateValidHomeSp() throws Exception {
+        HomeSp homeSp = createHomeSpWithHomeNetworkIds();
         assertTrue(homeSp.validate());
     }
 
     /**
-     * Verify that a HomeSP is not valid when FQDN is not provided
+     * Verify that a HomeSp is not valid when FQDN is not provided
      *
      * @throws Exception
      */
     @Test
     public void validateHomeSpWithoutFqdn() throws Exception {
-        HomeSP homeSp = createHomeSpWithHomeNetworkIds();
+        HomeSp homeSp = createHomeSpWithHomeNetworkIds();
         homeSp.setFqdn(null);
         assertFalse(homeSp.validate());
     }
 
     /**
-     * Verify that a HomeSP is not valid when Friendly Name is not provided
+     * Verify that a HomeSp is not valid when Friendly Name is not provided
      *
      * @throws Exception
      */
     @Test
     public void validateHomeSpWithoutFriendlyName() throws Exception {
-        HomeSP homeSp = createHomeSpWithHomeNetworkIds();
+        HomeSp homeSp = createHomeSpWithHomeNetworkIds();
         homeSp.setFriendlyName(null);
         assertFalse(homeSp.validate());
     }
 
     /**
-     * Verify that a HomeSP is valid when the optional Home Network IDs are
+     * Verify that a HomeSp is valid when the optional Home Network IDs are
      * not provided.
      *
      * @throws Exception
      */
     @Test
     public void validateHomeSpWithoutHomeNetworkIds() throws Exception {
-        HomeSP homeSp = createHomeSpWithoutHomeNetworkIds();
+        HomeSp homeSp = createHomeSpWithoutHomeNetworkIds();
         assertTrue(homeSp.validate());
     }
 
     /**
-     * Verify that a HomeSP is invalid when the optional Home Network IDs
+     * Verify that a HomeSp is invalid when the optional Home Network IDs
      * contained an invalid SSID (exceeding maximum number of bytes).
      *
      * @throws Exception
      */
     @Test
     public void validateHomeSpWithInvalidHomeNetworkIds() throws Exception {
-        HomeSP homeSp = createHomeSpWithoutHomeNetworkIds();
+        HomeSp homeSp = createHomeSpWithoutHomeNetworkIds();
         // HomeNetworkID with SSID exceeding the maximum length.
         Map<String, Long> homeNetworkIds = new HashMap<>();
         byte[] rawSsidBytes = new byte[33];
@@ -202,8 +202,8 @@ public class HomeSPTest {
      */
     @Test
     public void validateCopyConstructorFromNullSource() throws Exception {
-        HomeSP copySp = new HomeSP(null);
-        HomeSP defaultSp = new HomeSP();
+        HomeSp copySp = new HomeSp(null);
+        HomeSp defaultSp = new HomeSp();
         assertTrue(copySp.equals(defaultSp));
     }
 
@@ -214,8 +214,8 @@ public class HomeSPTest {
      */
     @Test
     public void validateCopyConstructorFromValidSource() throws Exception {
-        HomeSP sourceSp = createHomeSpWithHomeNetworkIds();
-        HomeSP copySp = new HomeSP(sourceSp);
+        HomeSp sourceSp = createHomeSpWithHomeNetworkIds();
+        HomeSp copySp = new HomeSp(sourceSp);
         assertTrue(copySp.equals(sourceSp));
     }
 }

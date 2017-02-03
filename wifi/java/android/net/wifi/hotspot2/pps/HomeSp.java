@@ -34,11 +34,9 @@ import java.util.Objects;
  *
  * For more info, refer to Hotspot 2.0 PPS MO defined in section 9.1 of the Hotspot 2.0
  * Release 2 Technical Specification.
- *
- * @hide
  */
-public final class HomeSP implements Parcelable {
-    private static final String TAG = "HomeSP";
+public final class HomeSp implements Parcelable {
+    private static final String TAG = "HomeSp";
 
     /**
      * Maximum number of bytes allowed for a SSID.
@@ -108,12 +106,12 @@ public final class HomeSP implements Parcelable {
      * Refer to HomeSP/HomeOIList subtree in PerProviderSubscription (PPS) Management Object
      * (MO) tree for more detail.
      */
-    private long[] mMatchAllOIs = null;
-    public void setMatchAllOIs(long[] matchAllOIs) {
-        mMatchAllOIs = matchAllOIs;
+    private long[] mMatchAllOis = null;
+    public void setMatchAllOis(long[] matchAllOis) {
+        mMatchAllOis = matchAllOis;
     }
-    public long[] getMatchAllOIs() {
-        return mMatchAllOIs;
+    public long[] getMatchAllOis() {
+        return mMatchAllOis;
     }
 
     /**
@@ -129,12 +127,12 @@ public final class HomeSP implements Parcelable {
      * Refer to HomeSP/HomeOIList subtree in PerProviderSubscription (PPS) Management Object
      * (MO) tree for more detail.
      */
-    private long[] mMatchAnyOIs = null;
-    public void setMatchAnyOIs(long[] matchAnyOIs) {
-        mMatchAnyOIs = matchAnyOIs;
+    private long[] mMatchAnyOis = null;
+    public void setMatchAnyOis(long[] matchAnyOis) {
+        mMatchAnyOis = matchAnyOis;
     }
-    public long[] getMatchAnysOIs() {
-        return mMatchAnyOIs;
+    public long[] getMatchAnysOis() {
+        return mMatchAnyOis;
     }
 
     /**
@@ -155,25 +153,25 @@ public final class HomeSP implements Parcelable {
      * List of Organization Identifiers (OIs) identifying a roaming consortium of
      * which this provider is a member.
      */
-    private long[] mRoamingConsortiumOIs = null;
-    public void setRoamingConsortiumOIs(long[] roamingConsortiumOIs) {
-        mRoamingConsortiumOIs = roamingConsortiumOIs;
+    private long[] mRoamingConsortiumOis = null;
+    public void setRoamingConsortiumOis(long[] roamingConsortiumOis) {
+        mRoamingConsortiumOis = roamingConsortiumOis;
     }
-    public long[] getRoamingConsortiumOIs() {
-        return mRoamingConsortiumOIs;
+    public long[] getRoamingConsortiumOis() {
+        return mRoamingConsortiumOis;
     }
 
     /**
-     * Constructor for creating HomeSP with default values.
+     * Constructor for creating HomeSp with default values.
      */
-    public HomeSP() {}
+    public HomeSp() {}
 
     /**
      * Copy constructor.
      *
      * @param source The source to copy from
      */
-    public HomeSP(HomeSP source) {
+    public HomeSp(HomeSp source) {
         if (source == null) {
             return;
         }
@@ -183,19 +181,19 @@ public final class HomeSP implements Parcelable {
         if (source.mHomeNetworkIds != null) {
             mHomeNetworkIds = Collections.unmodifiableMap(source.mHomeNetworkIds);
         }
-        if (source.mMatchAllOIs != null) {
-            mMatchAllOIs = Arrays.copyOf(source.mMatchAllOIs, source.mMatchAllOIs.length);
+        if (source.mMatchAllOis != null) {
+            mMatchAllOis = Arrays.copyOf(source.mMatchAllOis, source.mMatchAllOis.length);
         }
-        if (source.mMatchAnyOIs != null) {
-            mMatchAnyOIs = Arrays.copyOf(source.mMatchAnyOIs, source.mMatchAnyOIs.length);
+        if (source.mMatchAnyOis != null) {
+            mMatchAnyOis = Arrays.copyOf(source.mMatchAnyOis, source.mMatchAnyOis.length);
         }
         if (source.mOtherHomePartners != null) {
             mOtherHomePartners = Arrays.copyOf(source.mOtherHomePartners,
                     source.mOtherHomePartners.length);
         }
-        if (source.mRoamingConsortiumOIs != null) {
-            mRoamingConsortiumOIs = Arrays.copyOf(source.mRoamingConsortiumOIs,
-                    source.mRoamingConsortiumOIs.length);
+        if (source.mRoamingConsortiumOis != null) {
+            mRoamingConsortiumOis = Arrays.copyOf(source.mRoamingConsortiumOis,
+                    source.mRoamingConsortiumOis.length);
         }
     }
 
@@ -210,10 +208,10 @@ public final class HomeSP implements Parcelable {
         dest.writeString(mFriendlyName);
         dest.writeString(mIconUrl);
         writeHomeNetworkIds(dest, mHomeNetworkIds);
-        dest.writeLongArray(mMatchAllOIs);
-        dest.writeLongArray(mMatchAnyOIs);
+        dest.writeLongArray(mMatchAllOis);
+        dest.writeLongArray(mMatchAnyOis);
         dest.writeStringArray(mOtherHomePartners);
-        dest.writeLongArray(mRoamingConsortiumOIs);
+        dest.writeLongArray(mRoamingConsortiumOis);
     }
 
     @Override
@@ -221,30 +219,30 @@ public final class HomeSP implements Parcelable {
         if (this == thatObject) {
             return true;
         }
-        if (!(thatObject instanceof HomeSP)) {
+        if (!(thatObject instanceof HomeSp)) {
             return false;
         }
-        HomeSP that = (HomeSP) thatObject;
+        HomeSp that = (HomeSp) thatObject;
 
         return TextUtils.equals(mFqdn, that.mFqdn)
                 && TextUtils.equals(mFriendlyName, that.mFriendlyName)
                 && TextUtils.equals(mIconUrl, that.mIconUrl)
                 && (mHomeNetworkIds == null ? that.mHomeNetworkIds == null
                         : mHomeNetworkIds.equals(that.mHomeNetworkIds))
-                && Arrays.equals(mMatchAllOIs, that.mMatchAllOIs)
-                && Arrays.equals(mMatchAnyOIs, that.mMatchAnyOIs)
+                && Arrays.equals(mMatchAllOis, that.mMatchAllOis)
+                && Arrays.equals(mMatchAnyOis, that.mMatchAnyOis)
                 && Arrays.equals(mOtherHomePartners, that.mOtherHomePartners)
-                && Arrays.equals(mRoamingConsortiumOIs, that.mRoamingConsortiumOIs);
+                && Arrays.equals(mRoamingConsortiumOis, that.mRoamingConsortiumOis);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFqdn, mFriendlyName, mIconUrl, mHomeNetworkIds, mMatchAllOIs,
-                mMatchAnyOIs, mOtherHomePartners, mRoamingConsortiumOIs);
+        return Objects.hash(mFqdn, mFriendlyName, mIconUrl, mHomeNetworkIds, mMatchAllOis,
+                mMatchAnyOis, mOtherHomePartners, mRoamingConsortiumOis);
     }
 
     /**
-     * Validate HomeSP data.
+     * Validate HomeSp data.
      *
      * @return true on success or false on failure
      */
@@ -270,25 +268,25 @@ public final class HomeSP implements Parcelable {
         return true;
     }
 
-    public static final Creator<HomeSP> CREATOR =
-        new Creator<HomeSP>() {
+    public static final Creator<HomeSp> CREATOR =
+        new Creator<HomeSp>() {
             @Override
-            public HomeSP createFromParcel(Parcel in) {
-                HomeSP homeSp = new HomeSP();
+            public HomeSp createFromParcel(Parcel in) {
+                HomeSp homeSp = new HomeSp();
                 homeSp.setFqdn(in.readString());
                 homeSp.setFriendlyName(in.readString());
                 homeSp.setIconUrl(in.readString());
                 homeSp.setHomeNetworkIds(readHomeNetworkIds(in));
-                homeSp.setMatchAllOIs(in.createLongArray());
-                homeSp.setMatchAnyOIs(in.createLongArray());
+                homeSp.setMatchAllOis(in.createLongArray());
+                homeSp.setMatchAnyOis(in.createLongArray());
                 homeSp.setOtherHomePartners(in.createStringArray());
-                homeSp.setRoamingConsortiumOIs(in.createLongArray());
+                homeSp.setRoamingConsortiumOis(in.createLongArray());
                 return homeSp;
             }
 
             @Override
-            public HomeSP[] newArray(int size) {
-                return new HomeSP[size];
+            public HomeSp[] newArray(int size) {
+                return new HomeSp[size];
             }
 
             /**
