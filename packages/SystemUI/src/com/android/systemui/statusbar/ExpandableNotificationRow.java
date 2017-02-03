@@ -1796,9 +1796,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mShowingPublic ? mPublicLayout : mPrivateLayout;
     }
 
-    @Override
     public void setShowingLegacyBackground(boolean showing) {
-        super.setShowingLegacyBackground(showing);
         for (NotificationContentView l : mLayouts) {
             l.setShowingLegacyBackground(showing);
         }

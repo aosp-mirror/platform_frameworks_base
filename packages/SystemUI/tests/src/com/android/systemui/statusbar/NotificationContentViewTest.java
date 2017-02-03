@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
@@ -31,6 +28,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationContentViewTest {
@@ -39,13 +41,16 @@ public class NotificationContentViewTest {
     Context mContext;
 
     @Before
+    @UiThreadTest
     public void setup() {
-        ExpandableNotificationRow rowMock = mock(ExpandableNotificationRow.class);
-        when(rowMock.getIntrinsicHeight()).thenReturn(10);
-
         mContext = InstrumentationRegistry.getTargetContext();
         mView = new NotificationContentView(mContext, null);
-        mView.setContainingNotification(rowMock);
+        ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
+        ExpandableNotificationRow mockRow = spy(row);
+        doNothing().when(mockRow).updateBackgroundAlpha(anyFloat());
+        doReturn(10).when(mockRow).getIntrinsicHeight();
+
+        mView.setContainingNotification(mockRow);
         mView.setHeights(10, 20, 30, 40);
 
         mView.setContractedChild(createViewWithHeight(10));
