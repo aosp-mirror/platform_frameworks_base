@@ -193,6 +193,8 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
 
+
+import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -6748,6 +6750,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return null;
         }
         updateNotifications();
+        Dependency.get(LeakDetector.class).trackGarbage(entry);
         return entry.notification;
     }
 
@@ -6756,6 +6759,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Log.d(TAG, "createNotificationViews(notification=" + sbn);
         }
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        Dependency.get(LeakDetector.class).trackInstance(entry);
         try {
             entry.createIcons(mContext, sbn);
         } catch (NotificationData.IconException exception) {
