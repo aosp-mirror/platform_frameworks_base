@@ -51,7 +51,7 @@
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"ಎಂದಿಗೂ ಪರಿಶೀಲಿಸದಿರು"</item>
     <item msgid="6042769699089883931">"DRM ವಿಷಯಗಳಿಗಾಗಿ ಮಾತ್ರ ಪರಿಶೀಲಿಸಿ"</item>
-    <item msgid="9174900380056846820">"ಯಾವಾಗಲೂ ಪರಿಶೀಲಿಸು"</item>
+    <item msgid="9174900380056846820">"ಯಾವಾಗಲೂ ಪರಿಶೀಲಿಸಿ"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"HDCP ಪರಿಶೀಲನೆಯನ್ನು ಎಂದಿಗೂ ಬಳಸದಿರು"</item>
