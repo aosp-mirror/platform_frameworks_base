@@ -36,21 +36,36 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.when;
 
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.os.Build.VERSION_CODES;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.runner.RunWith;
+import org.junit.Before;
 import org.junit.Test;
-
-
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ConnectivityManagerTest {
+
+    @Mock Context mCtx;
+    @Mock IConnectivityManager mService;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     static NetworkCapabilities verifyNetworkCapabilities(
             int legacyType, int transportType, int... capabilities) {
         final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
@@ -172,5 +187,35 @@ public class ConnectivityManagerTest {
     public void testNetworkCapabilitiesForTypeEthernet() {
         verifyUnrestrictedNetworkCapabilities(
                 ConnectivityManager.TYPE_ETHERNET, TRANSPORT_ETHERNET);
+    }
+
+    @Test
+    public void testNoDoubleCallbackRegistration() throws Exception {
+        ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+        NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
+        NetworkCallback callback = new ConnectivityManager.NetworkCallback();
+        ApplicationInfo info = new ApplicationInfo();
+        info.targetSdkVersion = VERSION_CODES.N_MR1 + 1;
+
+        when(mCtx.getApplicationInfo()).thenReturn(info);
+        when(mService.requestNetwork(any(), any(), anyInt(), any(), anyInt())).thenReturn(request);
+
+        manager.requestNetwork(request, callback);
+
+        // Callback is already registered, reregistration should fail.
+        Class<IllegalArgumentException> wantException = IllegalArgumentException.class;
+        expectThrowable(() -> manager.requestNetwork(request, callback), wantException);
+    }
+
+    static void expectThrowable(Runnable block, Class<? extends Throwable> throwableType) {
+        try {
+            block.run();
+        } catch (Throwable t) {
+            if (t.getClass().equals(throwableType)) {
+                return;
+            }
+            fail("expected exception of type " + throwableType + ", but was " + t.getClass());
+        }
+        fail("expected exception of type " + throwableType);
     }
 }
