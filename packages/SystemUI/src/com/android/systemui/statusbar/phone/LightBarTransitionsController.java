@@ -20,13 +20,18 @@ import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.TimeUtils;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Class to control all aspects about light bar changes.
  */
-public class LightBarTransitionsController {
+public class LightBarTransitionsController implements Dumpable {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
     private static final String EXTRA_DARK_INTENSITY = "dark_intensity";
@@ -145,6 +150,26 @@ public class LightBarTransitionsController {
     private void setIconTintInternal(float darkIntensity) {
         mDarkIntensity = darkIntensity;
         mApplier.applyDarkIntensity(darkIntensity);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("  mTransitionDeferring="); pw.print(mTransitionDeferring);
+        if (mTransitionDeferring) {
+            pw.println();
+            pw.print("   mTransitionDeferringStartTime=");
+            pw.println(TimeUtils.formatUptime(mTransitionDeferringStartTime));
+
+            pw.print("   mTransitionDeferringDuration=");
+            TimeUtils.formatDuration(mTransitionDeferringDuration, pw);
+            pw.println();
+        }
+        pw.print("  mTransitionPending="); pw.print(mTransitionPending);
+        pw.print(" mTintChangePending="); pw.println(mTintChangePending);
+
+        pw.print("  mPendingDarkIntensity="); pw.print(mPendingDarkIntensity);
+        pw.print(" mDarkIntensity="); pw.print(mDarkIntensity);
+        pw.print(" mNextDarkIntensity="); pw.println(mNextDarkIntensity);
     }
 
     /**
