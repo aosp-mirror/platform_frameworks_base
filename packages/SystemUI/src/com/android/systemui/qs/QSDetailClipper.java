@@ -40,8 +40,8 @@ public class QSDetailClipper {
         if (mAnimator != null) {
             mAnimator.cancel();
         }
-        final int w = mDetail.getWidth() - x;
-        final int h = mDetail.getHeight() - y;
+        final int w = mDetail.getMeasuredWidth() - x;
+        final int h = mDetail.getMeasuredHeight() - y;
         int innerR = 0;
         if (x < 0 || w < 0 || y < 0 || h < 0) {
             innerR = Math.abs(x);
