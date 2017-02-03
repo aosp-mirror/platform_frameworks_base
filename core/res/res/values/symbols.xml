@@ -2860,4 +2860,7 @@
   <java-symbol type="drawable" name="btn_event_material"/>
   <java-symbol type="string" name="time_picker_text_input_mode_description"/>
   <java-symbol type="string" name="time_picker_radial_mode_description"/>
+
+  <!-- resolver activity -->
+  <java-symbol type="drawable" name="resolver_icon_placeholder" />
 </resources>

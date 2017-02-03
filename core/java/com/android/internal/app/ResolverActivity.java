@@ -36,7 +36,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 
 import android.app.ActivityManager;
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -115,6 +114,7 @@ public class ResolverActivity extends Activity {
 
     private static final String TAG = "ResolverActivity";
     private static final boolean DEBUG = false;
+    private Runnable mPostListBuildRunnable;
 
     private boolean mRegistered;
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -419,7 +419,9 @@ public class ResolverActivity extends Activity {
 
     protected CharSequence getTitleForAction(String action, int defaultTitleRes) {
         final ActionTitle title = mResolvingHome ? ActionTitle.HOME : ActionTitle.forAction(action);
-        final boolean named = mAdapter.hasFilteredItem();
+        // While there may already be a filtered item, we can only use it in the title if the list
+        // is already sorted and all information relevant to it is already in the list.
+        final boolean named = mAdapter.getFilteredPosition() > 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
         } else {
@@ -510,6 +512,9 @@ public class ResolverActivity extends Activity {
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
+        if (mPostListBuildRunnable != null) {
+            getMainThreadHandler().removeCallbacks(mPostListBuildRunnable);
+        }
     }
 
     @Override
@@ -590,6 +595,9 @@ public class ResolverActivity extends Activity {
         }
 
         TargetInfo target = mAdapter.targetInfoForPosition(which, filtered);
+        if (target == null) {
+            return;
+        }
         if (onTargetSelected(target, always)) {
             if (always && filtered) {
                 MetricsLogger.action(
@@ -880,15 +888,15 @@ public class ResolverActivity extends Activity {
         }
 
         setContentView(mLayoutId);
-        if (count > 0 || !rebuildCompleted) {
-            mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
-            onPrepareAdapterView(mAdapterView, mAdapter, mAlwaysUseOption);
-        } else {
+        mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
+
+        if (count == 0 && mAdapter.mPlaceholderCount == 0) {
             final TextView empty = (TextView) findViewById(R.id.empty);
             empty.setVisibility(View.VISIBLE);
-
-            mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
             mAdapterView.setVisibility(View.GONE);
+        } else {
+            mAdapterView.setVisibility(View.VISIBLE);
+            onPrepareAdapterView(mAdapterView, mAdapter, mAlwaysUseOption);
         }
         return false;
     }
@@ -917,16 +925,23 @@ public class ResolverActivity extends Activity {
     }
 
     public void setTitleAndIcon() {
-        if (mTitle == null) {
-            mTitle = getTitleForAction(getTargetIntent().getAction(), mDefaultTitleResId);
-        }
-
-        if (!TextUtils.isEmpty(mTitle)) {
+        if (mAdapter.getCount() == 0 && mAdapter.mPlaceholderCount == 0) {
             final TextView titleView = (TextView) findViewById(R.id.title);
             if (titleView != null) {
-                titleView.setText(mTitle);
+                titleView.setVisibility(View.GONE);
             }
-            setTitle(mTitle);
+        }
+
+        CharSequence title = mTitle != null
+                ? mTitle
+                : getTitleForAction(getTargetIntent().getAction(), mDefaultTitleResId);
+
+        if (!TextUtils.isEmpty(title)) {
+            final TextView titleView = (TextView) findViewById(R.id.title);
+            if (titleView != null) {
+                titleView.setText(title);
+            }
+            setTitle(title);
 
             // Try to initialize the title icon if we have a view for it and a title to match
             final ImageView titleIcon = (ImageView) findViewById(R.id.title_icon);
@@ -963,8 +978,16 @@ public class ResolverActivity extends Activity {
             }
         }
 
-        if (mAdapter.hasFilteredItem()) {
+        if (mAdapter.getFilteredPosition() >= 0) {
             setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
+            mOnceButton.setEnabled(true);
+            return;
+        }
+
+        // When the items load in, if an item was already selected, enable the buttons
+        if (mAdapterView != null
+                && mAdapterView.getCheckedItemPosition() != ListView.INVALID_POSITION) {
+            setAlwaysButtonEnabled(true, mAdapterView.getCheckedItemPosition(), true);
             mOnceButton.setEnabled(true);
         }
     }
@@ -1234,6 +1257,7 @@ public class ResolverActivity extends Activity {
         private DisplayResolveInfo mOtherProfile;
         private boolean mHasExtendedInfo;
         private ResolverListController mResolverListController;
+        private int mPlaceholderCount;
 
         protected final LayoutInflater mInflater;
 
@@ -1263,6 +1287,10 @@ public class ResolverActivity extends Activity {
                 // We no longer have any items...  just finish the activity.
                 finish();
             }
+        }
+
+        public void setPlaceholderCount(int count) {
+            mPlaceholderCount = count;
         }
 
         public DisplayResolveInfo getFilteredItem() {
@@ -1350,6 +1378,7 @@ public class ResolverActivity extends Activity {
                 }
 
                 if (N > 1) {
+                    setPlaceholderCount(currentResolveList.size());
                     AsyncTask<List<ResolvedComponentInfo>,
                             Void,
                             List<ResolvedComponentInfo>> sortingTask =
@@ -1366,13 +1395,26 @@ public class ResolverActivity extends Activity {
                         @Override
                         protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
                             processSortedList(sortedComponents);
-                            onPrepareAdapterView(mAdapterView, mAdapter, mAlwaysUseOption);
                             if (mProfileView != null) {
                                 bindProfileView();
                             }
+                            notifyDataSetChanged();
                         }
                     };
                     sortingTask.execute(currentResolveList);
+                    if (mPostListBuildRunnable == null) {
+                        mPostListBuildRunnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                setTitleAndIcon();
+                                resetAlwaysOrOnceButtonBar();
+                                onListRebuilt();
+                                disableLastChosenIfNeeded();
+                                mPostListBuildRunnable = null;
+                            }
+                        };
+                        getMainThreadHandler().post(mPostListBuildRunnable);
+                    }
                     return false;
                 } else {
                     processSortedList(currentResolveList);
@@ -1563,21 +1605,33 @@ public class ResolverActivity extends Activity {
             }
         }
 
+        @Nullable
         public ResolveInfo resolveInfoForPosition(int position, boolean filtered) {
-            return (filtered ? getItem(position) : mDisplayList.get(position))
-                    .getResolveInfo();
+            TargetInfo target = targetInfoForPosition(position, filtered);
+            if (target != null) {
+                return target.getResolveInfo();
+             }
+             return null;
         }
 
+        @Nullable
         public TargetInfo targetInfoForPosition(int position, boolean filtered) {
-            return filtered ? getItem(position) : mDisplayList.get(position);
+            if (filtered) {
+                return getItem(position);
+            }
+            if (mDisplayList.size() > position) {
+                return mDisplayList.get(position);
+            }
+            return null;
         }
 
         public int getCount() {
-            int result = mDisplayList.size();
+            int totalSize = mDisplayList == null || mDisplayList.isEmpty() ? mPlaceholderCount :
+                    mDisplayList.size();
             if (mFilterLastUsed && mLastChosenPosition >= 0) {
-                result--;
+                totalSize--;
             }
-            return result;
+            return totalSize;
         }
 
         public int getUnfilteredCount() {
@@ -1592,11 +1646,16 @@ public class ResolverActivity extends Activity {
             return mDisplayList.get(index);
         }
 
+        @Nullable
         public TargetInfo getItem(int position) {
             if (mFilterLastUsed && mLastChosenPosition >= 0 && position >= mLastChosenPosition) {
                 position++;
             }
-            return mDisplayList.get(position);
+            if (mDisplayList.size() > position) {
+                return mDisplayList.get(position);
+            } else {
+                return null;
+            }
         }
 
         public long getItemId(int position) {
@@ -1660,6 +1719,11 @@ public class ResolverActivity extends Activity {
 
         private void onBindView(View view, TargetInfo info) {
             final ViewHolder holder = (ViewHolder) view.getTag();
+            if (info == null) {
+                holder.icon.setImageDrawable(
+                        getDrawable(R.drawable.resolver_icon_placeholder));
+                return;
+            }
             final CharSequence label = info.getDisplayLabel();
             if (!TextUtils.equals(holder.text.getText(), label)) {
                 holder.text.setText(info.getDisplayLabel());
@@ -1770,6 +1834,11 @@ public class ResolverActivity extends Activity {
                 // Header views don't count.
                 return;
             }
+            // If we're still loading, we can't yet enable the buttons.
+            if (mAdapter.resolveInfoForPosition(position, true) == null) {
+                return;
+            }
+
             final int checkedPos = mAdapterView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
