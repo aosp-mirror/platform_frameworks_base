@@ -164,6 +164,8 @@ public class Emoji {
 
     public static int VARIATION_SELECTOR_16 = 0xFE0F;
 
+    public static int CANCEL_TAG = 0xE007F;
+
     // Returns true if the given code point is regional indicator symbol.
     public static boolean isRegionalIndicatorSymbol(int codepoint) {
         return 0x1F1E6 <= codepoint && codepoint <= 0x1F1FF;
@@ -187,5 +189,14 @@ public class Emoji {
     // Returns true if the character can be a base character of COMBINING ENCLOSING KEYCAP.
     public static boolean isKeycapBase(int codePoint) {
         return ('0' <= codePoint && codePoint <= '9') || codePoint == '#' || codePoint == '*';
+    }
+
+    /**
+     * Returns true if the character can be a part of tag_spec in emoji tag sequence.
+     *
+     * Note that 0xE007F (CANCEL TAG) is not included.
+     */
+    public static boolean isTagSpecChar(int codePoint) {
+        return 0xE0020 <= codePoint && codePoint <= 0xE007E;
     }
 }
