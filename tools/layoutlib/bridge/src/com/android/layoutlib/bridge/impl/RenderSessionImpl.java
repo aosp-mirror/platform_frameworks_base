@@ -144,7 +144,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
 
-        public PostInflateException(String message) {
+        private PostInflateException(String message) {
             super(message);
         }
     }
@@ -242,11 +242,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // Then measure only the content with UNSPECIFIED to see the size difference
             // and apply this to the screen size.
 
+            View measuredView = mContentRoot.getChildAt(0);
+
             // first measure the full layout, with EXACTLY to get the size of the
             // content as it is inside the decor/dialog
             @SuppressWarnings("deprecation")
             Pair<Integer, Integer> exactMeasure = measureView(
-                    mViewRoot, mContentRoot.getChildAt(0),
+                    mViewRoot, measuredView,
                     mMeasuredScreenWidth, MeasureSpec.EXACTLY,
                     mMeasuredScreenHeight, MeasureSpec.EXACTLY);
 
@@ -257,6 +259,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     mContentRoot, mContentRoot.getChildAt(0),
                     mMeasuredScreenWidth, widthMeasureSpecMode,
                     mMeasuredScreenHeight, heightMeasureSpecMode);
+
+            // If measuredView is not null, exactMeasure nor result will be null.
+            assert exactMeasure != null;
+            assert result != null;
 
             // now look at the difference and add what is needed.
             if (renderingMode.isHorizExpand()) {
@@ -406,8 +412,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @param canvas an optional canvas to render the views to. If null, only the measure and
      * layout steps will be executed.
      */
-    private static Result renderAndBuildResult(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
-            @Nullable Canvas canvas, int width, int height) {
+    private static Result renderAndBuildResult(@NonNull ViewGroup viewRoot, @Nullable Canvas canvas) {
         if (canvas == null) {
             return SUCCESS.createResult();
         }
@@ -551,7 +556,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     long initialTime = System_Delegate.nanoTime();
                     if (!mFirstFrameExecuted) {
                         // We need to run an initial draw call to initialize the animations
-                        renderAndBuildResult(getContext(), mViewRoot, NOP_CANVAS, mMeasuredScreenWidth, mMeasuredScreenHeight);
+                        renderAndBuildResult(mViewRoot, NOP_CANVAS);
 
                         // The first frame will initialize the animations
                         Choreographer_Delegate.doFrame(initialTime);
@@ -560,8 +565,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // Second frame will move the animations
                     Choreographer_Delegate.doFrame(initialTime + mElapsedFrameTimeNanos);
                 }
-                renderResult = renderAndBuildResult(getContext(), mViewRoot, mCanvas, mMeasuredScreenWidth,
-                        mMeasuredScreenHeight);
+                renderResult = renderAndBuildResult(mViewRoot, mCanvas);
             }
 
             mSystemViewInfoList =
@@ -1206,7 +1210,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * Sets up a {@link TabHost} object.
      * @param tabHost the TabHost to setup.
      * @param layoutlibCallback The project callback object to access the project R class.
-     * @throws PostInflateException
+     * @throws PostInflateException if TabHost is missing the required ids for TabHost
      */
     private void setupTabHost(TabHost tabHost, LayoutlibCallback layoutlibCallback)
             throws PostInflateException {
@@ -1254,12 +1258,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             TabSpec spec = tabHost.newTabSpec("tag")
                     .setIndicator("Tab Label", tabHost.getResources()
                             .getDrawable(android.R.drawable.ic_menu_info_details, null))
-                    .setContent(new TabHost.TabContentFactory() {
-                        @Override
-                        public View createTabContent(String tag) {
-                            return new LinearLayout(getContext());
-                        }
-                    });
+                    .setContent(tag -> new LinearLayout(getContext()));
             tabHost.addTab(spec);
         } else {
             // for each child of the frameLayout, add a new TabSpec
@@ -1333,8 +1332,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         int childCount = viewGroup.getChildCount();
         if (viewGroup == mContentRoot) {
-            List<ViewInfo> childrenWithoutOffset = new ArrayList<ViewInfo>(childCount);
-            List<ViewInfo> childrenWithOffset = new ArrayList<ViewInfo>(childCount);
+            List<ViewInfo> childrenWithoutOffset = new ArrayList<>(childCount);
+            List<ViewInfo> childrenWithOffset = new ArrayList<>(childCount);
             for (int i = 0; i < childCount; i++) {
                 ViewInfo[] childViewInfo =
                         visitContentRoot(viewGroup.getChildAt(i), hOffset, vOffset,
@@ -1345,7 +1344,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mViewInfoList = childrenWithOffset;
             return childrenWithoutOffset;
         } else {
-            List<ViewInfo> children = new ArrayList<ViewInfo>(childCount);
+            List<ViewInfo> children = new ArrayList<>(childCount);
             for (int i = 0; i < childCount; i++) {
                 children.add(visit(viewGroup.getChildAt(i), hOffset, vOffset, setExtendedInfo,
                         isContentFrame));

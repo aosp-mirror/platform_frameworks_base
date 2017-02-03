@@ -132,7 +132,7 @@ public class BridgeRenderSession extends RenderSession {
     @Override
     public Result insertChild(Object parentView, ILayoutPullParser childXml, int index,
             IAnimationListener listener) {
-        if (parentView instanceof ViewGroup == false) {
+        if (!(parentView instanceof ViewGroup)) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
         }
 
@@ -155,10 +155,10 @@ public class BridgeRenderSession extends RenderSession {
     @Override
     public Result moveChild(Object parentView, Object childView, int index,
             Map<String, String> layoutParams, IAnimationListener listener) {
-        if (parentView instanceof ViewGroup == false) {
+        if (!(parentView instanceof ViewGroup)) {
             throw new IllegalArgumentException("parentView is not a ViewGroup");
         }
-        if (childView instanceof View == false) {
+        if (!(childView instanceof View)) {
             throw new IllegalArgumentException("childView is not a View");
         }
 
@@ -179,7 +179,7 @@ public class BridgeRenderSession extends RenderSession {
 
     @Override
     public Result removeChild(Object childView, IAnimationListener listener) {
-        if (childView instanceof View == false) {
+        if (!(childView instanceof View)) {
             throw new IllegalArgumentException("childView is not a View");
         }
 
