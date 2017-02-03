@@ -169,13 +169,15 @@ void DeferredLayerUpdater::updateLayer(bool forceFilter, GLenum renderTarget,
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
-        if (mLayer->getApi() == Layer::Api::OpenGL) {
+        if (mLayerApi == Layer::Api::OpenGL) {
             status_t err = mSurfaceTexture->detachFromContext();
             if (err != 0) {
                 // TODO: Elevate to fatal exception
                 ALOGE("Failed to detach SurfaceTexture from context %d", err);
             }
-            static_cast<GlLayer*>(mLayer)->clearTexture();
+            if (mLayer) {
+                static_cast<GlLayer*>(mLayer)->clearTexture();
+            }
         }
         mSurfaceTexture = nullptr;
     }
