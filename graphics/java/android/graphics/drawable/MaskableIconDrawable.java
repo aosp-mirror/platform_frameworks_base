@@ -20,6 +20,7 @@ import static android.graphics.drawable.Drawable.obtainAttributes;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -62,17 +63,22 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
 
     /**
      * Mask path is defined inside device configuration in following dimension: [100 x 100]
+     * @hide
      */
     public static final float MASK_SIZE = 100f;
+    private static final float SAFEZONE_SCALE = .9f;
 
     /**
-     * The view port of the layers is smaller than their intrinsic width and height by this factor.
-     *
-     * It is part of the API contract that all four sides of the layers are padded so as to provide
+     * All four sides of the layers are padded with extra inset so as to provide
      * extra content to reveal within the clip path when performing affine transformations on the
      * layers.
+     *
+     * Each layers will reserve 25% of it's width and height.
+     *
+     * As a result, the view port of the layers is smaller than their intrinsic width and height.
      */
-    public static final float DEFAULT_VIEW_PORT_SCALE = 2f / 3f;
+    private static final float EXTRA_INSET_PERCENTAGE = 1 / 4f;
+    private static final float DEFAULT_VIEW_PORT_SCALE = 1f / (1 + 2 * EXTRA_INSET_PERCENTAGE);
 
     /**
      * Clip path defined in {@link com.android.internal.R.string.config_icon_mask}.
@@ -155,12 +161,17 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
      *
      * @param backgroundDrawable drawable that should be rendered in the background
      * @param foregroundDrawable drawable that should be rendered in the foreground
+     * @hide
      */
     public MaskableIconDrawable(Drawable backgroundDrawable,
             Drawable foregroundDrawable) {
         this((LayerState)null, null);
-        addLayer(BACKGROUND_ID, createChildDrawable(backgroundDrawable));
-        addLayer(FOREGROUND_ID, createChildDrawable(foregroundDrawable));
+        if (backgroundDrawable != null) {
+            addLayer(BACKGROUND_ID, createChildDrawable(backgroundDrawable));
+        }
+        if (foregroundDrawable != null) {
+            addLayer(FOREGROUND_ID, createChildDrawable(foregroundDrawable));
+        }
     }
 
     /**
@@ -196,6 +207,15 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
             layer.setDensity(density);
         }
         inflateLayers(r, parser, attrs, theme);
+    }
+
+    /**
+     * All four sides of the layers are padded with extra inset so as to provide
+     * extra content to reveal within the clip path when performing affine transformations on the
+     * layers.
+     */
+    public static float getExtraInsetPercentage() {
+        return EXTRA_INSET_PERCENTAGE;
     }
 
     /**
@@ -242,13 +262,20 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         int cY = bounds.centerY();
 
         for (int i = 0, count = mLayerState.N_CHILDREN; i < count; i++) {
+            final ChildDrawable r = mLayerState.mChildren[i];
+            if (r == null) {
+                continue;
+            }
+            final Drawable d = r.mDrawable;
+            if (d == null) {
+                continue;
+            }
+
             int insetWidth = (int) (bounds.width() / (DEFAULT_VIEW_PORT_SCALE * 2));
             int insetHeight = (int) (bounds.height() / (DEFAULT_VIEW_PORT_SCALE * 2));
             final Rect outRect = mTmpOutRect;
             outRect.set(cX - insetWidth, cY - insetHeight, cX + insetWidth, cY + insetHeight);
 
-            final ChildDrawable r = mLayerState.mChildren[i];
-            final Drawable d = r.mDrawable;
             d.setBounds(outRect);
         }
     }
@@ -273,6 +300,9 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         if (mLayersShader == null) {
             mCanvas.setBitmap(mLayersBitmap);
             for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
+                if (mLayerState.mChildren[i] == null) {
+                    continue;
+                }
                 final Drawable dr = mLayerState.mChildren[i].mDrawable;
                 if (dr != null) {
                     dr.draw(mCanvas);
@@ -293,6 +323,18 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
     @Override
     public void getOutline(@NonNull Outline outline) {
         outline.setConvexPath(mMask);
+    }
+
+    /** @hide */
+    @TestApi
+    public Region getSafeZone() {
+        mMaskMatrix.reset();
+        mMaskMatrix.setScale(SAFEZONE_SCALE, SAFEZONE_SCALE, getBounds().centerX(), getBounds().centerY());
+        Path p = new Path();
+        mMask.transform(mMaskMatrix, p);
+        Region safezoneRegion = new Region(getBounds());
+        safezoneRegion.setPath(p, safezoneRegion);
+        return safezoneRegion;
     }
 
     @Override

@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Parcel;
@@ -104,6 +105,40 @@ public class IconTest extends AndroidTestCase {
         if (!equalBitmaps(bm3, test3)) {
             findBitmapDifferences(bm3, test3);
             fail("bitmap3 differs, check " + dir);
+        }
+    }
+
+    @SmallTest
+    public void testWithMaskableBitmap() throws Exception {
+        final Bitmap bm1 = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_8888);
+
+        final Canvas can1 = new Canvas(bm1);
+        can1.drawColor(0xFFFF0000);
+
+        final Icon im1 = Icon.createWithMaskableBitmap(bm1);
+
+        final MaskableIconDrawable draw1 = (MaskableIconDrawable) im1.loadDrawable(mContext);
+
+        final Bitmap test1 = Bitmap.createBitmap(
+            (int)(draw1.getIntrinsicWidth() * (1 + 2 * MaskableIconDrawable.getExtraInsetPercentage())),
+            (int)(draw1.getIntrinsicHeight() * (1 + 2 * MaskableIconDrawable.getExtraInsetPercentage())),
+            Bitmap.Config.ARGB_8888);
+
+        draw1.setBounds(0, 0,
+            (int) (draw1.getIntrinsicWidth() * (1 + 2 * MaskableIconDrawable.getExtraInsetPercentage())),
+            (int) (draw1.getIntrinsicHeight() * (1 + 2 * MaskableIconDrawable.getExtraInsetPercentage())));
+        draw1.draw(new Canvas(test1));
+
+        final File dir = getContext().getExternalFilesDir(null);
+        L("writing temp bitmaps to %s...", dir);
+
+        bm1.compress(Bitmap.CompressFormat.PNG, 100,
+            new FileOutputStream(new File(dir, "maskable-bitmap1-original.png")));
+        test1.compress(Bitmap.CompressFormat.PNG, 100,
+            new FileOutputStream(new File(dir, "maskable-bitmap1-test.png")));
+        if (!equalBitmaps(bm1, test1, draw1.getSafeZone())) {
+            findBitmapDifferences(bm1, test1);
+            fail("maskable bitmap1 differs, check " + dir);
         }
     }
 
@@ -294,17 +329,31 @@ public class IconTest extends AndroidTestCase {
         printBits(aPix, w, h);
     }
     boolean equalBitmaps(Bitmap a, Bitmap b) {
+        return equalBitmaps(a, b, null);
+    }
+
+    boolean equalBitmaps(Bitmap a, Bitmap b, Region region) {
         if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) return false;
-        
+
         final int w = a.getWidth();
         final int h = a.getHeight();
         int[] aPix = new int[w * h];
         int[] bPix = new int[w * h];
 
-        a.getPixels(aPix, 0, w, 0, 0, w, h);
-        b.getPixels(bPix, 0, w, 0, 0, w, h);
-
-        return Arrays.equals(aPix, bPix);
+        if (region != null) {
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    if (region.contains(i, j) && a.getPixel(i, j) != b.getPixel(i, j)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            a.getPixels(aPix, 0, w, 0, 0, w, h);
+            b.getPixels(bPix, 0, w, 0, 0, w, h);
+            return Arrays.equals(aPix, bPix);
+        }
     }
 
     void findBitmapDifferences(Bitmap a, Bitmap b) {

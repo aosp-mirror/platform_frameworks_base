@@ -67,6 +67,8 @@ public final class Icon implements Parcelable {
     public static final int TYPE_DATA     = 3;
     /** @hide */
     public static final int TYPE_URI      = 4;
+    /** @hide */
+    public static final int TYPE_BITMAP_MASKABLE      = 5;
 
     private static final int VERSION_STREAM_SERIALIZER = 1;
 
@@ -101,6 +103,7 @@ public final class Icon implements Parcelable {
      * {@link #TYPE_RESOURCE},
      * {@link #TYPE_DATA}, or
      * {@link #TYPE_URI}.
+     * {@link #TYPE_BITMAP_MASKABLE}
      * @hide
      */
     public int getType() {
@@ -112,7 +115,7 @@ public final class Icon implements Parcelable {
      * @hide
      */
     public Bitmap getBitmap() {
-        if (mType != TYPE_BITMAP) {
+        if (mType != TYPE_BITMAP && mType != TYPE_BITMAP_MASKABLE) {
             throw new IllegalStateException("called getBitmap() on " + this);
         }
         return (Bitmap) mObj1;
@@ -218,6 +221,7 @@ public final class Icon implements Parcelable {
     private static final String typeToString(int x) {
         switch (x) {
             case TYPE_BITMAP: return "BITMAP";
+            case TYPE_BITMAP_MASKABLE: return "BITMAP_MASKABLE";
             case TYPE_DATA: return "DATA";
             case TYPE_RESOURCE: return "RESOURCE";
             case TYPE_URI: return "URI";
@@ -285,6 +289,9 @@ public final class Icon implements Parcelable {
         switch (mType) {
             case TYPE_BITMAP:
                 return new BitmapDrawable(context.getResources(), getBitmap());
+            case TYPE_BITMAP_MASKABLE:
+                return new MaskableIconDrawable(null,
+                    new BitmapDrawable(context.getResources(), getBitmap()));
             case TYPE_RESOURCE:
                 if (getResources() == null) {
                     // figure out where to load resources from
@@ -388,7 +395,7 @@ public final class Icon implements Parcelable {
      * @hide
      */
     public void convertToAshmem() {
-        if (mType == TYPE_BITMAP &&
+        if ((mType == TYPE_BITMAP || mType == TYPE_BITMAP_MASKABLE) &&
             getBitmap().isMutable() &&
             getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
             setBitmap(getBitmap().createAshmemBitmap());
@@ -409,6 +416,7 @@ public final class Icon implements Parcelable {
 
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_BITMAP_MASKABLE:
                 getBitmap().compress(Bitmap.CompressFormat.PNG, 100, dataStream);
                 break;
             case TYPE_DATA:
@@ -444,6 +452,8 @@ public final class Icon implements Parcelable {
             switch (type) {
                 case TYPE_BITMAP:
                     return createWithBitmap(BitmapFactory.decodeStream(inputStream));
+                case TYPE_BITMAP_MASKABLE:
+                    return createWithMaskableBitmap(BitmapFactory.decodeStream(inputStream));
                 case TYPE_DATA:
                     final int length = inputStream.readInt();
                     final byte[] data = new byte[length];
@@ -478,6 +488,7 @@ public final class Icon implements Parcelable {
         }
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_BITMAP_MASKABLE:
                 return getBitmap() == otherIcon.getBitmap();
             case TYPE_DATA:
                 return getDataLength() == otherIcon.getDataLength()
@@ -546,6 +557,20 @@ public final class Icon implements Parcelable {
             throw new IllegalArgumentException("Bitmap must not be null.");
         }
         final Icon rep = new Icon(TYPE_BITMAP);
+        rep.setBitmap(bits);
+        return rep;
+    }
+
+    /**
+     * Create an Icon pointing to a bitmap in memory that follows the icon design guideline defined
+     * by {@link MaskableIconDrawable}.
+     * @param bits A valid {@link android.graphics.Bitmap} object
+     */
+    public static Icon createWithMaskableBitmap(Bitmap bits) {
+        if (bits == null) {
+            throw new IllegalArgumentException("Bitmap must not be null.");
+        }
+        final Icon rep = new Icon(TYPE_BITMAP_MASKABLE);
         rep.setBitmap(bits);
         return rep;
     }
@@ -654,6 +679,7 @@ public final class Icon implements Parcelable {
         final StringBuilder sb = new StringBuilder("Icon(typ=").append(typeToString(mType));
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_BITMAP_MASKABLE:
                 sb.append(" size=")
                         .append(getBitmap().getWidth())
                         .append("x")
@@ -692,7 +718,7 @@ public final class Icon implements Parcelable {
      * Parcelable interface
      */
     public int describeContents() {
-        return (mType == TYPE_BITMAP || mType == TYPE_DATA)
+        return (mType == TYPE_BITMAP || mType == TYPE_BITMAP_MASKABLE || mType == TYPE_DATA)
                 ? Parcelable.CONTENTS_FILE_DESCRIPTOR : 0;
     }
 
@@ -702,6 +728,7 @@ public final class Icon implements Parcelable {
         this(in.readInt());
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_BITMAP_MASKABLE:
                 final Bitmap bits = Bitmap.CREATOR.createFromParcel(in);
                 mObj1 = bits;
                 break;
@@ -740,6 +767,7 @@ public final class Icon implements Parcelable {
         dest.writeInt(mType);
         switch (mType) {
             case TYPE_BITMAP:
+            case TYPE_BITMAP_MASKABLE:
                 final Bitmap bits = getBitmap();
                 getBitmap().writeToParcel(dest, flags);
                 break;
