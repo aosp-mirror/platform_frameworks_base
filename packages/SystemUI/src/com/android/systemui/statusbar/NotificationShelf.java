@@ -68,6 +68,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private float mMaxShelfEnd;
     private int mRelativeOffset;
     private boolean mInteractive;
+    private boolean mAnimationsEnabled = true;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -574,6 +575,15 @@ public class NotificationShelf extends ActivatableNotificationView {
         mMaxShelfEnd = maxShelfEnd;
     }
 
+    public void setAnimationsEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
+        mCollapsedIcons.setAnimationsEnabled(enabled);
+        if (!enabled) {
+            // we need to wait with enabling the animations until the first frame has passed
+            mShelfIcons.setAnimationsEnabled(false);
+        }
+    }
+
     private class ShelfState extends ExpandableViewState {
         private float openedAmount;
         private boolean hasItemsInStableShelf;
@@ -586,6 +596,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             setOpenedAmount(openedAmount);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
+            mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);
         }
 
         @Override
@@ -595,6 +606,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             setOpenedAmount(openedAmount);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
+            mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);
         }
     }
 }
