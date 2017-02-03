@@ -16,12 +16,6 @@
 
 package android.view;
 
-import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.os.Build.VERSION_CODES.KITKAT;
-import static android.os.Build.VERSION_CODES.M;
-import static android.os.Build.VERSION_CODES.N;
-
 import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
@@ -67,7 +61,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Build.VERSION_CODES;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -856,6 +850,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * sCascadedDragDrop is true for pre-N apps for backwards compatibility implementation.
      */
     static boolean sCascadedDragDrop;
+
+    /**
+     * Prior to O, auto-focusable didn't exist and widgets such as ListView use hasFocusable
+     * to determine things like whether or not to permit item click events. We can't break
+     * apps that do this just because more things (clickable things) are now auto-focusable
+     * and they would get different results, so give old behavior to old apps.
+     */
+    static boolean sHasFocusableExcludeAutoFocusable;
 
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
@@ -4143,40 +4145,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
             // Older apps may need this compatibility hack for measurement.
-            sUseBrokenMakeMeasureSpec = targetSdkVersion <= JELLY_BEAN_MR1;
+            sUseBrokenMakeMeasureSpec = targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR1;
 
             // Older apps expect onMeasure() to always be called on a layout pass, regardless
             // of whether a layout was requested on that View.
-            sIgnoreMeasureCache = targetSdkVersion < KITKAT;
+            sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
 
-            Canvas.sCompatibilityRestore = targetSdkVersion < M;
+            Canvas.sCompatibilityRestore = targetSdkVersion < Build.VERSION_CODES.M;
 
             // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
             // know what the expected parent size is going to be, so e.g. list items can size
             // themselves at 1/3 the size of their container. It breaks older apps though,
             // specifically apps that use some popular open source libraries.
-            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < M;
+            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < Build.VERSION_CODES.M;
 
             // Old versions of the platform would give different results from
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
             // modes, so we always need to run an additional EXACTLY pass.
-            sAlwaysRemeasureExactly = targetSdkVersion <= M;
+            sAlwaysRemeasureExactly = targetSdkVersion <= Build.VERSION_CODES.M;
 
             // Prior to N, layout params could change without requiring a
             // subsequent call to setLayoutParams() and they would usually
             // work. Partial layout breaks this assumption.
-            sLayoutParamsAlwaysChanged = targetSdkVersion <= M;
+            sLayoutParamsAlwaysChanged = targetSdkVersion <= Build.VERSION_CODES.M;
 
             // Prior to N, TextureView would silently ignore calls to setBackground/setForeground.
             // On N+, we throw, but that breaks compatibility with apps that use these methods.
-            sTextureViewIgnoresDrawableSetters = targetSdkVersion <= M;
+            sTextureViewIgnoresDrawableSetters = targetSdkVersion <= Build.VERSION_CODES.M;
 
             // Prior to N, we would drop margins in LayoutParam conversions. The fix triggers bugs
             // in apps so we target check it to avoid breaking existing apps.
-            sPreserveMarginParamsInLayoutParamConversion = targetSdkVersion >= N;
+            sPreserveMarginParamsInLayoutParamConversion =
+                    targetSdkVersion >= Build.VERSION_CODES.N;
 
-            sCascadedDragDrop = targetSdkVersion < N;
+            sCascadedDragDrop = targetSdkVersion < Build.VERSION_CODES.N;
+
+            sHasFocusableExcludeAutoFocusable = targetSdkVersion < Build.VERSION_CODES.O;
 
             sCompatibilityDone = true;
         }
@@ -4525,7 +4530,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 //noinspection deprecation
                 case R.styleable.View_fadingEdge:
-                    if (targetSdkVersion >= ICE_CREAM_SANDWICH) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                         // Ignore the attribute starting with ICS
                         break;
                     }
@@ -4663,27 +4668,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
                         setForeground(a.getDrawable(attr));
                     }
                     break;
                 case R.styleable.View_foregroundGravity:
-                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
                     }
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
                     }
                     break;
                 case R.styleable.View_foregroundTint:
-                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
                         setForegroundTintList(a.getColorStateList(attr));
                     }
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (targetSdkVersion >= VERSION_CODES.M || this instanceof FrameLayout) {
+                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
                         if (mForegroundInfo == null) {
                             mForegroundInfo = new ForegroundInfo();
                         }
@@ -6344,26 +6349,51 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Returns true if this view is focusable or if it contains a reachable View
-     * for which {@link #hasFocusable()} returns true. A "reachable hasFocusable()"
-     * is a View whose parents do not block descendants focus.
-     *
+     * for which {@link #hasFocusable()} returns {@code true}. A "reachable hasFocusable()"
+     * is a view whose parents do not block descendants focus.
      * Only {@link #VISIBLE} views are considered focusable.
      *
-     * @return True if the view is focusable or if the view contains a focusable
-     *         View, false otherwise.
+     * <p>As of {@link Build.VERSION_CODES#O} views that are determined to be focusable
+     * through {@link #FOCUSABLE_AUTO} will also cause this method to return {@code true}.
+     * Apps that declare a {@link android.content.pm.ApplicationInfo#targetSdkVersion} of
+     * earlier than {@link Build.VERSION_CODES#O} will continue to see this method return
+     * {@code false} for views not explicitly marked as focusable.
+     * Use {@link #hasExplicitFocusable()} if you require the pre-{@link Build.VERSION_CODES#O}
+     * behavior.</p>
+     *
+     * @return {@code true} if the view is focusable or if the view contains a focusable
+     *         view, {@code false} otherwise
      *
      * @see ViewGroup#FOCUS_BLOCK_DESCENDANTS
      * @see ViewGroup#getTouchscreenBlocksFocus()
+     * @see #hasExplicitFocusable()
      */
     public boolean hasFocusable() {
-        return hasFocusable(true);
+        return hasFocusable(!sHasFocusableExcludeAutoFocusable, false);
     }
 
     /**
-     * @hide pending determination of whether this should be public or not.
-     * Currently used for compatibility with old focusability expectations in ListView.
+     * Returns true if this view is focusable or if it contains a reachable View
+     * for which {@link #hasExplicitFocusable()} returns {@code true}.
+     * A "reachable hasExplicitFocusable()" is a view whose parents do not block descendants focus.
+     * Only {@link #VISIBLE} views for which {@link #getFocusable()} would return
+     * {@link #FOCUSABLE} are considered focusable.
+     *
+     * <p>This method preserves the pre-{@link Build.VERSION_CODES#O} behavior of
+     * {@link #hasFocusable()} in that only views explicitly set focusable will cause
+     * this method to return true. A view set to {@link #FOCUSABLE_AUTO} that resolves
+     * to focusable will not.</p>
+     *
+     * @return {@code true} if the view is focusable or if the view contains a focusable
+     *         view, {@code false} otherwise
+     *
+     * @see #hasFocusable()
      */
-    public boolean hasFocusable(boolean allowAutoFocus) {
+    public boolean hasExplicitFocusable() {
+        return hasFocusable(false, true);
+    }
+
+    boolean hasFocusable(boolean allowAutoFocus, boolean dispatchExplicit) {
         if (!isFocusableInTouchMode()) {
             for (ViewParent p = mParent; p instanceof ViewGroup; p = p.getParent()) {
                 final ViewGroup g = (ViewGroup) p;
@@ -8645,7 +8675,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ResolvedLayoutDir
     public int getLayoutDirection() {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < JELLY_BEAN_MR1) {
+        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
             return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
         }
@@ -15696,7 +15726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private boolean isRtlCompatibilityMode() {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport();
+        return targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1 || !hasRtlSupport();
     }
 
     /**
