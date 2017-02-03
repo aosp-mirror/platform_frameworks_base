@@ -712,6 +712,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // System configuration read by SystemConfig.
     final int[] mGlobalGids;
     final SparseArray<ArraySet<String>> mSystemPermissions;
+    @GuardedBy("mAvailableFeatures")
     final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
     // If mac_permissions.xml was found for seinfo labeling.
@@ -4215,21 +4216,22 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public @NonNull ParceledListSlice<FeatureInfo> getSystemAvailableFeatures() {
-        synchronized (mPackages) {
-            final ArrayList<FeatureInfo> res = new ArrayList<>(mAvailableFeatures.values());
-
-            final FeatureInfo fi = new FeatureInfo();
-            fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
-                    FeatureInfo.GL_ES_VERSION_UNDEFINED);
-            res.add(fi);
-
-            return new ParceledListSlice<>(res);
+        ArrayList<FeatureInfo> res;
+        synchronized (mAvailableFeatures) {
+            res = new ArrayList<>(mAvailableFeatures.size() + 1);
+            res.addAll(mAvailableFeatures.values());
         }
+        final FeatureInfo fi = new FeatureInfo();
+        fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
+                FeatureInfo.GL_ES_VERSION_UNDEFINED);
+        res.add(fi);
+
+        return new ParceledListSlice<>(res);
     }
 
     @Override
     public boolean hasSystemFeature(String name, int version) {
-        synchronized (mPackages) {
+        synchronized (mAvailableFeatures) {
             final FeatureInfo feat = mAvailableFeatures.get(name);
             if (feat == null) {
                 return false;
@@ -20379,20 +20381,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     pw.println("Features:");
                 }
 
-                for (FeatureInfo feat : mAvailableFeatures.values()) {
-                    if (checkin) {
-                        pw.print("feat,");
-                        pw.print(feat.name);
-                        pw.print(",");
-                        pw.println(feat.version);
-                    } else {
-                        pw.print("  ");
-                        pw.print(feat.name);
-                        if (feat.version > 0) {
-                            pw.print(" version=");
-                            pw.print(feat.version);
+                synchronized (mAvailableFeatures) {
+                    for (FeatureInfo feat : mAvailableFeatures.values()) {
+                        if (checkin) {
+                            pw.print("feat,");
+                            pw.print(feat.name);
+                            pw.print(",");
+                            pw.println(feat.version);
+                        } else {
+                            pw.print("  ");
+                            pw.print(feat.name);
+                            if (feat.version > 0) {
+                                pw.print(" version=");
+                                pw.print(feat.version);
+                            }
+                            pw.println();
                         }
-                        pw.println();
                     }
                 }
             }
