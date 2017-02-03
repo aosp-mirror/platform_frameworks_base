@@ -2545,9 +2545,17 @@
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
 
-    <!-- Max default size [WIDTHxHEIGHT] on screen for picture-in-picture windows to fit inside.
-         These values are in DPs and will be converted to pixel sizes internally. -->
-    <string translatable="false" name="config_defaultPictureInPictureSize">192x120</string>
+    <!-- The percentage of the screen width to use for the default width or height of
+         picture-in-picture windows. Regardless of the percent set here, calculated size will never
+         be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
+    <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.23</item>
+
+    <!-- The default aspect ratio for picture-in-picture windows. -->
+    <item name="config_pictureInPictureDefaultAspectRatio" format="float" type="dimen">1.777778</item>
+
+    <!-- This is the limit for the max and min aspect ratio (1 / this value) at which the min size
+         will be used instead of an adaptive size based loosely on area. -->
+    <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">1.777778</item>
 
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->

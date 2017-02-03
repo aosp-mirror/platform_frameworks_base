@@ -486,6 +486,9 @@
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
 
+    <!-- The default minimal size of a PiP task, in both dimensions. -->
+    <dimen name="default_minimal_size_pip_resizable_task">108dp</dimen>
+
     <!-- Height of a task when in minimized mode from the top when launcher is resizable. -->
     <dimen name="task_height_of_minimized_mode">80dp</dimen>
 

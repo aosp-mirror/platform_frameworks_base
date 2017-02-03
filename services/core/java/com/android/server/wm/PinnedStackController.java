@@ -94,12 +94,15 @@ class PinnedStackController {
 
     // The size and position information that describes where the pinned stack will go by default.
     private int mDefaultStackGravity;
-    private Size mDefaultStackSize;
+    private float mDefaultAspectRatio;
     private Point mScreenEdgeInsets;
 
     // The aspect ratio bounds of the PIP.
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
+
+    // The minimum edge size of the normal PiP bounds.
+    private int mMinSize;
 
     // Temp vars for calculation
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
@@ -151,15 +154,15 @@ class PinnedStackController {
      */
     void reloadResources() {
         final Resources res = mService.mContext.getResources();
-        final Size defaultSizeDp = Size.parseSize(res.getString(
-                com.android.internal.R.string.config_defaultPictureInPictureSize));
+        mMinSize = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
+        mDefaultAspectRatio = res.getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
         final Size screenEdgeInsetsDp = Size.parseSize(res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets));
         mDefaultStackGravity = res.getInteger(
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity);
         mDisplayContent.getDisplay().getRealMetrics(mTmpMetrics);
-        mDefaultStackSize = new Size(dpToPx(defaultSizeDp.getWidth(), mTmpMetrics),
-                dpToPx(defaultSizeDp.getHeight(), mTmpMetrics));
         mScreenEdgeInsets = new Point(dpToPx(screenEdgeInsetsDp.getWidth(), mTmpMetrics),
                 dpToPx(screenEdgeInsetsDp.getHeight(), mTmpMetrics));
         mMinAspectRatio = res.getFloat(
@@ -199,21 +202,26 @@ class PinnedStackController {
      * specified aspect ratio.
      */
     Rect transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio) {
-        // Save the snap fraction, calculate the aspect ratio based on the current bounds
+        // Save the snap fraction, calculate the aspect ratio based on screen size
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds));
-        final float radius = PointF.length(stackBounds.width(), stackBounds.height());
-        final int height = (int) Math.round(Math.sqrt((radius * radius) /
-                (aspectRatio * aspectRatio + 1)));
-        final int width = Math.round(height * aspectRatio);
-        final int left = (int) (stackBounds.centerX() - width / 2f);
-        final int top = (int) (stackBounds.centerY() - height / 2f);
-        stackBounds.set(left, top, left + width, top + height);
+        final Size size = getSize(aspectRatio);
+        final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
+        final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
+        stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
         if (mIsMinimized) {
             applyMinimizedOffset(stackBounds, getMovementBounds(stackBounds));
         }
         return stackBounds;
+    }
+
+    /**
+     * @return the size of the PIP based on the given {@param aspectRatio}.
+     */
+    Size getSize(float aspectRatio) {
+        return mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mMinSize,
+                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
     }
 
     /**
@@ -224,8 +232,9 @@ class PinnedStackController {
         getInsetBounds(insetBounds);
 
         final Rect defaultBounds = new Rect();
-        Gravity.apply(mDefaultStackGravity, mDefaultStackSize.getWidth(),
-                mDefaultStackSize.getHeight(), insetBounds, 0, 0, defaultBounds);
+        final Size size = getSize(mDefaultAspectRatio);
+        Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds, 0, 0,
+                defaultBounds);
         return defaultBounds;
     }
 

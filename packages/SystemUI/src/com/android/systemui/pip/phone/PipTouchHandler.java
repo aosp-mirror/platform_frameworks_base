@@ -18,11 +18,13 @@ package com.android.systemui.pip.phone;
 
 import android.app.IActivityManager;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Size;
 import android.view.IPinnedStackController;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
@@ -31,6 +33,7 @@ import android.view.ViewConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.io.PrintWriter;
@@ -69,6 +72,7 @@ public class PipTouchHandler {
     private Rect mNormalMovementBounds = new Rect();
     private Rect mExpandedBounds = new Rect();
     private Rect mExpandedMovementBounds = new Rect();
+    private int mExpandedShortestEdgeSize;
 
     private Handler mHandler = new Handler();
     private Runnable mShowDismissAffordance = new Runnable() {
@@ -145,6 +149,8 @@ public class PipTouchHandler {
         };
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mSnapAlgorithm,
                 mFlingAnimationUtils);
+        mExpandedShortestEdgeSize = context.getResources().getDimensionPixelSize(
+                R.dimen.pip_expanded_shortest_edge_size);
 
         // Register the listener for input consumer touch events
         inputConsumerController.setTouchListener(this::handleTouchEvent);
@@ -181,8 +187,14 @@ public class PipTouchHandler {
         Rect normalMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalMovementBounds,
                 mIsImeShowing ? mImeHeight : 0);
-        // TODO: Figure out the expanded size policy
-        mExpandedBounds = new Rect(normalBounds);
+
+        // Calculate the expanded size
+        float aspectRatio = (float) normalBounds.width() / normalBounds.height();
+        Point displaySize = new Point();
+        mContext.getDisplay().getRealSize(displaySize);
+        Size expandedSize = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio,
+                mExpandedShortestEdgeSize, displaySize.x, displaySize.y);
+        mExpandedBounds.set(0, 0, expandedSize.getWidth(), expandedSize.getHeight());
         Rect expandedMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
                 mIsImeShowing ? mImeHeight : 0);
@@ -358,6 +370,12 @@ public class PipTouchHandler {
         public void onDown(PipTouchState touchState) {
             if (!touchState.isUserInteracting()) {
                 return;
+            }
+
+            // If the menu is still visible, and we aren't minimized, then just poke the menu
+            // so that it will timeout after the user stops touching it
+            if (mMenuController.isMenuVisible() && !mIsMinimized) {
+                mMenuController.pokeMenu();
             }
 
             if (ENABLE_DRAG_TO_DISMISS) {
