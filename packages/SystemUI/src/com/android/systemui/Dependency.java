@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.leak.LeakDetector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -179,6 +180,8 @@ public class Dependency extends SystemUI {
 
         mProviders.put(SecurityController.class.getName(), () ->
                 new SecurityControllerImpl(mContext));
+
+        mProviders.put(LeakDetector.class.getName(), LeakDetector::create);
 
         mProviders.put(TunerService.class.getName(), () ->
                 new TunerService(mContext));
