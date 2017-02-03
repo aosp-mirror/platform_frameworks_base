@@ -64,6 +64,7 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchMostRecentTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
@@ -1733,6 +1734,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
     }
 
+    public final void onBusEvent(LaunchMostRecentTaskRequestEvent event) {
+        if (mStack.getTaskCount() > 0) {
+            Task mostRecentTask = mStack.getStackFrontMostTask(true /* includeFreefromTasks */);
+            launchTask(mostRecentTask);
+        }
+    }
+
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
         if (mAwaitingFirstLayout) {
             mLaunchNextAfterFirstMeasure = true;
@@ -1741,29 +1749,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         final Task launchTask = mStack.getNextLaunchTarget();
         if (launchTask != null) {
-            // Stop all animations
-            cancelAllTaskViewAnimations();
-
-            float curScroll = mStackScroller.getStackScroll();
-            float targetScroll = mLayoutAlgorithm.getStackScrollForTaskAtInitialOffset(launchTask);
-            float absScrollDiff = Math.abs(targetScroll - curScroll);
-            if (getChildViewForTask(launchTask) == null || absScrollDiff > 0.35f) {
-                int duration = (int) (LAUNCH_NEXT_SCROLL_BASE_DURATION +
-                        absScrollDiff * LAUNCH_NEXT_SCROLL_INCR_DURATION);
-                mStackScroller.animateScroll(targetScroll,
-                        duration, new Runnable() {
-                            @Override
-                            public void run() {
-                                EventBus.getDefault().send(new LaunchTaskEvent(
-                                        getChildViewForTask(launchTask), launchTask, null,
-                                        INVALID_STACK_ID, false /* screenPinningRequested */));
-                            }
-                        });
-            } else {
-                EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(launchTask),
-                        launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
-            }
-
+            launchTask(launchTask);
             MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
                     launchTask.key.getComponent().toString());
         } else if (mStack.getTaskCount() == 0) {
@@ -2213,6 +2199,31 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         }
         return -1;
+    }
+
+    private void launchTask(Task task) {
+        // Stop all animations
+        cancelAllTaskViewAnimations();
+
+        float curScroll = mStackScroller.getStackScroll();
+        float targetScroll = mLayoutAlgorithm.getStackScrollForTaskAtInitialOffset(task);
+        float absScrollDiff = Math.abs(targetScroll - curScroll);
+        if (getChildViewForTask(task) == null || absScrollDiff > 0.35f) {
+            int duration = (int) (LAUNCH_NEXT_SCROLL_BASE_DURATION +
+                    absScrollDiff * LAUNCH_NEXT_SCROLL_INCR_DURATION);
+            mStackScroller.animateScroll(targetScroll,
+                    duration, new Runnable() {
+                        @Override
+                        public void run() {
+                            EventBus.getDefault().send(new LaunchTaskEvent(
+                                    getChildViewForTask(task), task, null,
+                                    INVALID_STACK_ID, false /* screenPinningRequested */));
+                        }
+                    });
+        } else {
+            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(task),
+                    task, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+        }
     }
 
     /**

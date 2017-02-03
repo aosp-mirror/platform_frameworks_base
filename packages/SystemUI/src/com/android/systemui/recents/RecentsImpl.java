@@ -53,6 +53,7 @@ import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchMostRecentTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
@@ -311,15 +312,23 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
-                    // If the user taps quickly
-                    if (!debugFlags.isPagingEnabled() ||
-                            (ViewConfiguration.getDoubleTapMinTime() < elapsedTime &&
-                                    elapsedTime < ViewConfiguration.getDoubleTapTimeout())) {
-                        // Launch the next focused task
-                        EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
+                    // Has the user tapped quickly?
+                    boolean isQuickTap = ViewConfiguration.getDoubleTapMinTime() < elapsedTime &&
+                            elapsedTime < ViewConfiguration.getDoubleTapTimeout();
+                    if (Recents.getConfiguration().isGridEnabled) {
+                        if (isQuickTap) {
+                            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
+                        } else {
+                            EventBus.getDefault().post(new LaunchMostRecentTaskRequestEvent());
+                        }
                     } else {
-                        // Notify recents to move onto the next task
-                        EventBus.getDefault().post(new IterateRecentsEvent());
+                        if (!debugFlags.isPagingEnabled() || isQuickTap) {
+                            // Launch the next focused task
+                            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
+                        } else {
+                            // Notify recents to move onto the next task
+                            EventBus.getDefault().post(new IterateRecentsEvent());
+                        }
                     }
                 } else {
                     // If the user has toggled it too quickly, then just eat up the event here (it's
