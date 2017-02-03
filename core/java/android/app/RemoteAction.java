@@ -35,55 +35,30 @@ import java.io.PrintWriter;
  */
 public final class RemoteAction implements Parcelable {
 
-    /**
-     * Interface definition for a callback to be invoked when an action is invoked.
-     */
-    public interface OnActionListener {
-        /**
-         * Called when the associated action is invoked.
-         *
-         * @param action The action that was invoked.
-         */
-        void onAction(RemoteAction action);
-    }
-
     private static final String TAG = "RemoteAction";
-
-    private static final int MESSAGE_ACTION_INVOKED = 1;
 
     private final Icon mIcon;
     private final CharSequence mTitle;
     private final CharSequence mContentDescription;
-    private OnActionListener mActionCallback;
-    private final Messenger mMessenger;
+    private final PendingIntent mActionIntent;
 
     RemoteAction(Parcel in) {
         mIcon = Icon.CREATOR.createFromParcel(in);
         mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mMessenger = in.readParcelable(Messenger.class.getClassLoader());
+        mActionIntent = PendingIntent.CREATOR.createFromParcel(in);
     }
 
     public RemoteAction(@NonNull Icon icon, @NonNull CharSequence title,
-            @NonNull CharSequence contentDescription, @NonNull OnActionListener callback) {
-        if (icon == null || title == null || contentDescription == null || callback == null) {
+            @NonNull CharSequence contentDescription, @NonNull PendingIntent intent) {
+        if (icon == null || title == null || contentDescription == null || intent == null) {
             throw new IllegalArgumentException("Expected icon, title, content description and " +
                     "action callback");
         }
         mIcon = icon;
         mTitle = title;
         mContentDescription = contentDescription;
-        mActionCallback = callback;
-        mMessenger = new Messenger(new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MESSAGE_ACTION_INVOKED:
-                        mActionCallback.onAction(RemoteAction.this);
-                        break;
-                }
-            }
-        });
+        mActionIntent = intent;
     }
 
     /**
@@ -108,22 +83,15 @@ public final class RemoteAction implements Parcelable {
     }
 
     /**
-     * Sends a message that the action was invoked.
-     * @hide
+     * Return the action intent.
      */
-    public void sendActionInvoked() {
-        Message m = Message.obtain();
-        m.what = MESSAGE_ACTION_INVOKED;
-        try {
-            mMessenger.send(m);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not send action-invoked", e);
-        }
+    public @NonNull PendingIntent getActionIntent() {
+        return mActionIntent;
     }
 
     @Override
     public RemoteAction clone() {
-        return new RemoteAction(mIcon, mTitle, mContentDescription, mActionCallback);
+        return new RemoteAction(mIcon, mTitle, mContentDescription, mActionIntent);
     }
 
     @Override
@@ -136,7 +104,7 @@ public final class RemoteAction implements Parcelable {
         mIcon.writeToParcel(out, 0);
         TextUtils.writeToParcel(mTitle, out, flags);
         TextUtils.writeToParcel(mContentDescription, out, flags);
-        out.writeParcelable(mMessenger, flags);
+        mActionIntent.writeToParcel(out, flags);
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -144,6 +112,7 @@ public final class RemoteAction implements Parcelable {
         pw.print("title=" + mTitle);
         pw.print(" contentDescription=" + mContentDescription);
         pw.print(" icon=" + mIcon);
+        pw.print(" action=" + mActionIntent.getIntent());
         pw.println();
     }
 

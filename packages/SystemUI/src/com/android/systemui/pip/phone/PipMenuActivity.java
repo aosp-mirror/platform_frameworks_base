@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -258,7 +259,11 @@ public class PipMenuActivity extends Activity {
                     }, mHandler);
                     actionView.setContentDescription(action.getContentDescription());
                     actionView.setOnClickListener(v -> {
-                        action.sendActionInvoked();
+                        try {
+                            action.getActionIntent().send();
+                        } catch (CanceledException e) {
+                            Log.w(TAG, "Failed to send action", e);
+                        }
                     });
                     actionsGroup.addView(actionView);
                 }
