@@ -92,14 +92,13 @@ public class WatchHeaderListView extends ListView {
     }
 
     @Override
-    protected <T extends View> T findViewByPredicateTraversal(
-            Predicate<View> predicate, View childToSkip) {
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         View v = super.findViewByPredicateTraversal(predicate, childToSkip);
         if (v == null && mTopPanel != null && mTopPanel != childToSkip
                 && !mTopPanel.isRootNamespace()) {
-            return (T) mTopPanel.findViewByPredicate(predicate);
+            return mTopPanel.findViewByPredicate(predicate);
         }
-        return (T) v;
+        return v;
     }
 
     @Override

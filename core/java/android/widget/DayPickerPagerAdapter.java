@@ -225,7 +225,7 @@ class DayPickerPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         final View itemView = mInflater.inflate(mLayoutResId, container, false);
 
-        final SimpleMonthView v = itemView.findViewById(mCalendarViewId);
+        final SimpleMonthView v = (SimpleMonthView) itemView.findViewById(mCalendarViewId);
         v.setOnDayClickListener(mOnDayClickListener);
         v.setMonthTextAppearance(mMonthTextAppearance);
         v.setDayOfWeekTextAppearance(mDayOfWeekTextAppearance);

@@ -264,7 +264,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(com.android.internal.R.layout.zoom_container, container);
 
-        mControls = container.findViewById(com.android.internal.R.id.zoomControls);
+        mControls = (ZoomControls) container.findViewById(com.android.internal.R.id.zoomControls);
         mControls.setOnZoomInClickListener(new OnClickListener() {
             public void onClick(View v) {
                 dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
