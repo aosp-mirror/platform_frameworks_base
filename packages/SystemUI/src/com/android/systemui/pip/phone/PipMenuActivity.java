@@ -26,6 +26,7 @@ import android.app.PendingIntent.CanceledException;
 import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -273,6 +274,7 @@ public class PipMenuActivity extends Activity {
                     final ImageView actionView = (ImageView) inflater.inflate(
                             R.layout.pip_menu_action, actionsGroup, false);
                     action.getIcon().loadDrawableAsync(this, d -> {
+                        d.setTint(Color.WHITE);
                         actionView.setImageDrawable(d);
                     }, mHandler);
                     actionView.setContentDescription(action.getContentDescription());
