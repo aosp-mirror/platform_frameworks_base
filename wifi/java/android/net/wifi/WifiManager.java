@@ -838,7 +838,8 @@ public class WifiManager {
     }
 
     /**
-     * Return a list of all the networks configured in the supplicant.
+     * Return a list of all the networks configured for the current foreground
+     * user.
      * Not all fields of WifiConfiguration are returned. Only the following
      * fields are filled in:
      * <ul>
@@ -1057,8 +1058,12 @@ public class WifiManager {
      * Remove the specified network from the list of configured networks.
      * This may result in the asynchronous delivery of state change
      * events.
-     * @param netId the integer that identifies the network configuration
-     * to the supplicant
+     *
+     * Applications are not allowed to remove networks created by other
+     * applications.
+     *
+     * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
+     *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
      */
     public boolean removeNetwork(int netId) {
@@ -1071,8 +1076,7 @@ public class WifiManager {
 
     /**
      * Allow a previously configured network to be associated with. If
-     * <code>disableOthers</code> is true, then all other configured
-     * networks are disabled, and an attempt to connect to the selected
+     * <code>attemptConnect</code> is true, an attempt to connect to the selected
      * network is initiated. This may result in the asynchronous delivery
      * of state change events.
      * <p>
@@ -1089,14 +1093,17 @@ public class WifiManager {
      * {@link Network#openConnection(java.net.URL)}, or
      * {@link ConnectivityManager#bindProcessToNetwork} to do so.
      *
-     * @param netId the ID of the network in the list of configured networks
-     * @param disableOthers if true, disable all other networks. The way to
-     * select a particular network to connect to is specify {@code true}
-     * for this parameter.
+     * Applications are not allowed to enable networks created by other
+     * applications.
+     *
+     * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
+     *        #getConfiguredNetworks}.
+     * @param attemptConnect The way to select a particular network to connect to is specify
+     *        {@code true} for this parameter.
      * @return {@code true} if the operation succeeded
      */
-    public boolean enableNetwork(int netId, boolean disableOthers) {
-        final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
+    public boolean enableNetwork(int netId, boolean attemptConnect) {
+        final boolean pin = attemptConnect && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
         if (pin) {
             NetworkRequest request = new NetworkRequest.Builder()
                     .clearCapabilities()
@@ -1107,7 +1114,7 @@ public class WifiManager {
 
         boolean success;
         try {
-            success = mService.enableNetwork(netId, disableOthers);
+            success = mService.enableNetwork(netId, attemptConnect);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1123,7 +1130,12 @@ public class WifiManager {
      * Disable a configured network. The specified network will not be
      * a candidate for associating. This may result in the asynchronous
      * delivery of state change events.
-     * @param netId the ID of the network as returned by {@link #addNetwork}.
+     *
+     * Applications are not allowed to disable networks created by other
+     * applications.
+     *
+     * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
+     *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
      */
     public boolean disableNetwork(int netId) {
@@ -1182,15 +1194,11 @@ public class WifiManager {
      * Check that the supplicant daemon is responding to requests.
      * @return {@code true} if we were able to communicate with the supplicant and
      * it returned the expected response to the PING message.
+     * @deprecated Will return the output of {@link #isWifiEnabled()} instead.
      */
+    @Deprecated
     public boolean pingSupplicant() {
-        if (mService == null)
-            return false;
-        try {
-            return mService.pingSupplicant();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return isWifiEnabled();
     }
 
     /** @hide */
@@ -1509,14 +1517,18 @@ public class WifiManager {
     }
 
     /**
-     * Tell the supplicant to persist the current list of configured networks.
+     * Tell the device to persist the current list of configured networks.
      * <p>
      * Note: It is possible for this method to change the network IDs of
      * existing networks. You should assume the network IDs can be different
      * after calling this method.
      *
      * @return {@code true} if the operation succeeded
+     * @deprecated There is no need to call this method -
+     * {@link #addNetwork(WifiConfiguration)}, {@link #updateNetwork(WifiConfiguration)}
+     * and {@link #removeNetwork(int)} already persist the configurations automatically.
      */
+    @Deprecated
     public boolean saveConfiguration() {
         try {
             return mService.saveConfiguration();
@@ -2095,7 +2107,7 @@ public class WifiManager {
 
     /**
      * Connect to a network with the given configuration. The network also
-     * gets added to the supplicant configuration.
+     * gets added to the list of configured networks for the foreground user.
      *
      * For a new network, this function is used instead of a
      * sequence of addNetwork(), enableNetwork(), saveConfiguration() and
@@ -2124,8 +2136,8 @@ public class WifiManager {
      * This function is used instead of a enableNetwork(), saveConfiguration() and
      * reconnect()
      *
-     * @param networkId the network id identifiying the network in the
-     *                supplicant configuration list
+     * @param networkId the ID of the network as returned by {@link #addNetwork} or {@link
+     *        getConfiguredNetworks}.
      * @param listener for callbacks on success or failure. Can be null.
      * @throws IllegalStateException if the WifiManager instance needs to be
      * initialized again
@@ -2137,9 +2149,9 @@ public class WifiManager {
     }
 
     /**
-     * Save the given network in the supplicant config. If the network already
-     * exists, the configuration is updated. A new network is enabled
-     * by default.
+     * Save the given network to the list of configured networks for the
+     * foreground user. If the network already exists, the configuration
+     * is updated. Any new network is enabled by default.
      *
      * For a new network, this function is used instead of a
      * sequence of addNetwork(), enableNetwork() and saveConfiguration().
@@ -2160,7 +2172,8 @@ public class WifiManager {
     }
 
     /**
-     * Delete the network in the supplicant config.
+     * Delete the network from the list of configured networks for the
+     * foreground user.
      *
      * This function is used instead of a sequence of removeNetwork()
      * and saveConfiguration().
@@ -2851,7 +2864,8 @@ public class WifiManager {
 
     /**
      * Restore state from the older version of back up data.
-     * The old backup data was essentially a backup of wpa_supplicant.conf & ipconfig.txt file.
+     * The old backup data was essentially a backup of wpa_supplicant.conf
+     * and ipconfig.txt file.
      * @hide
      */
     public void restoreSupplicantBackupData(byte[] supplicantData, byte[] ipConfigData) {
