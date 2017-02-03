@@ -34,7 +34,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -43,7 +42,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.autofill.IAutoFillManagerService;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
@@ -72,66 +70,47 @@ import java.util.List;
 public final class AutoFillManagerService extends SystemService {
 
     private static final String TAG = "AutoFillManagerService";
-    static final boolean DEBUG = true; // TODO(b/33197203): change to false once stable
+    static final boolean DEBUG = false;
 
-    private static final long SERVICE_BINDING_LIFETIME_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
-
-    private static final int MSG_UNBIND = 1;
-    private static final int MSG_REQUEST_AUTO_FILL_FOR_USER = 2;
-    private static final int MSG_REQUEST_AUTO_FILL = 3;
+    protected static final int MSG_REQUEST_AUTO_FILL_FOR_USER = 1;
+    protected static final int MSG_REQUEST_AUTO_FILL = 2;
+    private static final int MSG_REQUEST_SAVE_FOR_USER = 3;
     private static final int MSG_ON_VALUE_CHANGED = 4;
-    private static final int MSG_REQUEST_SAVE_FOR_USER = 5;
 
-    private final AutoFillManagerServiceStub mServiceStub;
     private final Context mContext;
-    private final ContentResolver mResolver;
+    private final AutoFillUI mUi;
 
     private final Object mLock = new Object();
 
-    private final HandlerCaller.Callback mHandlerCallback = new HandlerCaller.Callback() {
-
-        @Override
-        public void executeMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UNBIND: {
-                    synchronized (mLock) {
-                        removeCachedServiceLocked(msg.arg1);
-                    }
-                    return;
-                } case MSG_REQUEST_AUTO_FILL_FOR_USER: {
-                    handleAutoFillForUser(msg.arg1);
-                    return;
-                } case MSG_REQUEST_SAVE_FOR_USER: {
-                    handleSaveForUser(msg.arg1);
-                    return;
-                } case MSG_REQUEST_AUTO_FILL: {
-                    final SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        final int userId = msg.arg1;
-                        final int flags = msg.arg2;
-                        final IBinder activityToken = (IBinder) args.arg1;
-                        final AutoFillId autoFillId = (AutoFillId) args.arg2;
-                        final Rect bounds = (Rect) args.arg3;
-                        handleAutoFill(activityToken, userId, autoFillId, bounds, flags);
-                    } finally {
-                        args.recycle();
-                    }
-                    return;
-                } case MSG_ON_VALUE_CHANGED: {
-                    final SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        final int userId = msg.arg1;
-                        final IBinder activityToken = (IBinder) args.arg1;
-                        final AutoFillId autoFillId = (AutoFillId) args.arg2;
-                        final AutoFillValue newValue = (AutoFillValue) args.arg3;
-                        handleValueChanged(activityToken, userId, autoFillId, newValue);
-                    } finally {
-                        args.recycle();
-                    }
-                    return;
-                } default: {
-                    Slog.w(TAG, "Invalid message: " + msg);
-                }
+    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
+        switch (msg.what) {
+            case MSG_REQUEST_AUTO_FILL_FOR_USER: {
+                handleAutoFillForUser(msg.arg1);
+                return;
+            } case MSG_REQUEST_SAVE_FOR_USER: {
+                handleSaveForUser(msg.arg1);
+                return;
+            } case MSG_REQUEST_AUTO_FILL: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final int userId = msg.arg1;
+                final int flags = msg.arg2;
+                final IBinder activityToken = (IBinder) args.arg1;
+                final AutoFillId autoFillId = (AutoFillId) args.arg2;
+                final Rect bounds = (Rect) args.arg3;
+                args.recycle();
+                handleAutoFill(activityToken, userId, autoFillId, bounds, flags);
+                return;
+            } case MSG_ON_VALUE_CHANGED: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final int userId = msg.arg1;
+                final IBinder activityToken = (IBinder) args.arg1;
+                final AutoFillId autoFillId = (AutoFillId) args.arg2;
+                final AutoFillValue newValue = (AutoFillValue) args.arg3;
+                args.recycle();
+                handleValueChanged(activityToken, userId, autoFillId, newValue);
+                return;
+            } default: {
+                Slog.w(TAG, "Invalid message: " + msg);
             }
         }
     };
@@ -148,10 +127,10 @@ public final class AutoFillManagerService extends SystemService {
      * Entries on this cache are added on demand and removed when:
      * <ol>
      *   <li>An auto-fill service app is removed.
-     *   <li>The {@link android.provider.Settings.Secure#AUTO_FILL_SERVICE} for an user change.
-     *   <li>It has not been interacted with for {@link #SERVICE_BINDING_LIFETIME_MS} ms.
+     *   <li>The {@link android.provider.Settings.Secure#AUTO_FILL_SERVICE} for an user change.\
      * </ol>
      */
+    // TODO(b/33197203): Update the above comment
     @GuardedBy("mLock")
     private SparseArray<AutoFillManagerServiceImpl> mServicesCache = new SparseArray<>();
 
@@ -160,19 +139,14 @@ public final class AutoFillManagerService extends SystemService {
 
     public AutoFillManagerService(Context context) {
         super(context);
-
         mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(), mHandlerCallback, true);
-
         mContext = context;
-
-        mResolver = context.getContentResolver();
-        mServiceStub = new AutoFillManagerServiceStub();
+        mUi = new AutoFillUI(mContext);
     }
 
     @Override
     public void onStart() {
-        if (DEBUG) Slog.d(TAG, "onStart(): binding as " + AUTO_FILL_MANAGER_SERVICE);
-        publishBinderService(AUTO_FILL_MANAGER_SERVICE, mServiceStub);
+        publishBinderService(AUTO_FILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
     }
 
     @Override
@@ -186,61 +160,41 @@ public final class AutoFillManagerService extends SystemService {
         ComponentName serviceComponent = null;
         ServiceInfo serviceInfo = null;
         final String componentName = Settings.Secure.getStringForUser(
-                mResolver, Settings.Secure.AUTO_FILL_SERVICE, userId);
+                mContext.getContentResolver(), Settings.Secure.AUTO_FILL_SERVICE, userId);
         if (!TextUtils.isEmpty(componentName)) {
             try {
                 serviceComponent = ComponentName.unflattenFromString(componentName);
                 serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent, 0,
                         userId);
             } catch (RuntimeException | RemoteException e) {
-                Slog.wtf(TAG, "Bad auto-fill service name " + componentName, e);
+                Slog.e(TAG, "Bad auto-fill service name " + componentName, e);
                 return null;
             }
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "getServiceComponentForUser(" + userId + "): component="
-                    + serviceComponent + ", info: " + serviceInfo);
-        }
         if (serviceInfo == null) {
-            if (DEBUG) Slog.d(TAG, "no service info for " + serviceComponent);
             return null;
         }
-        return new AutoFillManagerServiceImpl(this, mContext, mLock, mRequestsHistory,
-                userId, serviceInfo.applicationInfo.uid, serviceComponent,
-                SERVICE_BINDING_LIFETIME_MS);
+
+        try {
+            return new AutoFillManagerServiceImpl(mContext, mLock, mRequestsHistory,
+                    userId, serviceComponent, mUi);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Auto-fill service not found: " + serviceComponent, e);
+        }
+
+        return null;
     }
 
     /**
      * Gets the service instance for an user.
-     * <p>
-     * First it tries to return the existing instance from the cache; if it's not cached, it creates
-     * a new instance and caches it.
      */
-    // TODO(b/33197203): make private once AutoFillUi does not uses notifications
-    AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
+    AutoFillManagerServiceImpl getOrCreateServiceForUserLocked(int userId) {
         AutoFillManagerServiceImpl service = mServicesCache.get(userId);
-        if (service != null) {
-            if (DEBUG)
-                Log.d(TAG, "reusing cached service for userId " + userId);
-            service.setLifeExpectancy(SERVICE_BINDING_LIFETIME_MS);
-        } else {
+        if (service == null) {
             service = newServiceForUser(userId);
-            if (service == null) {
-                // Already logged
-                return null;
-            }
-            if (DEBUG) Log.d(TAG, "creating new cached service for userId " + userId);
-            service.startLocked();
             mServicesCache.put(userId, service);
         }
-        // Keep service connection alive for a while, in case user needs to interact with it
-        // (for example, to save the data that was inputted in)
-        if (mHandlerCaller.hasMessages(MSG_UNBIND)) {
-            mHandlerCaller.removeMessages(MSG_UNBIND);
-        }
-        mHandlerCaller.sendMessageDelayed(mHandlerCaller.obtainMessageI(MSG_UNBIND, userId),
-                SERVICE_BINDING_LIFETIME_MS);
         return service;
     }
 
@@ -248,22 +202,17 @@ public final class AutoFillManagerService extends SystemService {
      * Removes a cached service for a given user.
      */
     void removeCachedServiceLocked(int userId) {
-        if (DEBUG) Log.d(TAG, "removing cached service for userId " + userId);
         final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
-        if (service == null) {
-            if (DEBUG) {
-                Log.d(TAG, "removeCachedServiceForUser(): no cached service for userId " + userId);
-            }
-            return;
+        if (service != null) {
+            mServicesCache.delete(userId);
+            service.destroyLocked();
         }
-        mServicesCache.delete(userId);
-        service.stopLocked();
     }
 
     private void handleAutoFill(IBinder activityToken, int userId, AutoFillId autoFillId,
             Rect bounds, int flags) {
         synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+            final AutoFillManagerServiceImpl service = getOrCreateServiceForUserLocked(userId);
             if (service != null) {
                 service.requestAutoFillLocked(activityToken, autoFillId, bounds, flags);
             }
@@ -273,7 +222,7 @@ public final class AutoFillManagerService extends SystemService {
     private void handleValueChanged(IBinder activityToken, int userId, AutoFillId autoFillId,
             AutoFillValue newValue) {
         synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+            final AutoFillManagerServiceImpl service = getOrCreateServiceForUserLocked(userId);
             if (service != null) {
                 service.onValueChangeLocked(activityToken, autoFillId, newValue);
             }
@@ -283,45 +232,32 @@ public final class AutoFillManagerService extends SystemService {
     private IBinder getTopActivityForUser() {
         final List<IBinder> topActivities = LocalServices
                 .getService(ActivityManagerInternal.class).getTopVisibleActivities();
-        if (DEBUG) Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
         if (topActivities.isEmpty()) {
-            Slog.w(TAG, "Could not get top activity");
             return null;
         }
         return topActivities.get(0);
     }
 
     private void handleAutoFillForUser(int userId) {
-        if (DEBUG) Slog.d(TAG, "handler.requestAutoFillForUser(): id=" + userId);
         final IBinder activityToken = getTopActivityForUser();
-        if (activityToken == null) {
-            return;
+        if (activityToken != null) {
+            synchronized (mLock) {
+                final AutoFillManagerServiceImpl service =
+                        getOrCreateServiceForUserLocked(userId);
+                service.requestAutoFillLocked(activityToken, null, null, 0);
+            }
         }
 
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
-            if (service == null) {
-                Slog.w(TAG, "no service for user " + userId);
-                return;
-            }
-            service.requestAutoFillLocked(activityToken, null, null, 0);
-        }
     }
 
     private void handleSaveForUser(int userId) {
-        if (DEBUG) Slog.d(TAG, "handler.handleSaveForUser(): id=" + userId);
         final IBinder activityToken = getTopActivityForUser();
-        if (activityToken == null) {
-            return;
-        }
-
-        synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
-            if (service == null) {
-                Slog.w(TAG, "no service for user " + userId);
-                return;
+        if (activityToken != null) {
+            synchronized (mLock) {
+                final AutoFillManagerServiceImpl service =
+                        getOrCreateServiceForUserLocked(userId);
+                service.requestSaveForUserLocked(activityToken);
             }
-            service.requestSaveForUserLocked(activityToken);
         }
     }
 
@@ -347,9 +283,6 @@ public final class AutoFillManagerService extends SystemService {
 
         @Override
         public void requestAutoFill(AutoFillId id, Rect bounds, int flags) {
-            if (DEBUG) Slog.d(TAG, "requestAutoFill: flags=" + flags + ", autoFillId=" + id
-                    + ", bounds=" + bounds);
-
             final IBinder activityToken = getTopActivity();
             if (activityToken != null) {
                 mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIIOOO(MSG_REQUEST_AUTO_FILL,
@@ -360,25 +293,19 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void requestAutoFillForUser(int userId) {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-
-            mHandlerCaller.sendMessage(
-                    mHandlerCaller.obtainMessageI(MSG_REQUEST_AUTO_FILL_FOR_USER, userId));
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(
+                    MSG_REQUEST_AUTO_FILL_FOR_USER, userId));
         }
 
         @Override
         public void requestSaveForUser(int userId) {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-
-            mHandlerCaller.sendMessage(
-                    mHandlerCaller.obtainMessageI(MSG_REQUEST_SAVE_FOR_USER, userId));
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(MSG_REQUEST_SAVE_FOR_USER, userId));
         }
 
         @Override
         public void onValueChanged(AutoFillId id, AutoFillValue value) {
-            if (DEBUG) Slog.d(TAG, "onValueChanged(): id=" + id + ", value=" + value);
-
             final IBinder activityToken = getTopActivity();
-
             if (activityToken != null) {
                 mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOOO(MSG_ON_VALUE_CHANGED,
                         UserHandle.getCallingUserId(), activityToken, id, value));
@@ -407,6 +334,7 @@ public final class AutoFillManagerService extends SystemService {
                         impl.dumpLocked("  ", pw);
                     }
                 }
+                mUi.dump(pw);
             }
             pw.println("Requests history:");
             mRequestsHistory.reverseDump(fd, pw, args);
@@ -430,7 +358,6 @@ public final class AutoFillManagerService extends SystemService {
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (DEBUG) Slog.d(TAG, "settings (" + uri + " changed for " + userId);
             synchronized (mLock) {
                 removeCachedServiceLocked(userId);
             }

@@ -18,6 +18,8 @@ package android.service.autofill;
 
 import java.util.List;
 
+import android.content.Intent;
+import android.content.IntentSender;
 import android.view.autofill.Dataset;
 
 /**
@@ -31,4 +33,9 @@ oneway interface IAutoFillAppCallback {
       * Auto-fills the activity with the contents of a dataset.
       */
     void autoFill(in Dataset dataset);
+
+    /**
+      * Start an intent sender from the context of the filled app
+      */
+    void startIntentSender(in IntentSender intent, in Intent fillInIntent);
 }

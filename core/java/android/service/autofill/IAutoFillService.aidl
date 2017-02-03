@@ -18,19 +18,20 @@ package android.service.autofill;
 
 import android.app.assist.AssistStructure;
 import android.os.Bundle;
-import android.service.autofill.IAutoFillServerCallback;
+import android.service.autofill.IFillCallback;
+import android.service.autofill.ISaveCallback;
 import com.android.internal.os.IResultReceiver;
 
 /**
+ * Interface from the system to an auto fill service.
+ *
  * @hide
  */
-// TODO(b/33197203): document class and methods
 oneway interface IAutoFillService {
-    // TODO(b/33197203): rename method to make them more consistent
-    void autoFill(in AssistStructure structure, in IAutoFillServerCallback callback);
-    void save(in AssistStructure structure, in IAutoFillServerCallback callback, in Bundle extras);
-    void authenticateFillResponse(in Bundle extras, int flags);
-    void authenticateDataset(in Bundle extras, int flags);
+    void onFillRequest(in AssistStructure structure, in Bundle extras,
+            in IFillCallback callback);
+    void onSaveRequest(in AssistStructure structure, in Bundle extras,
+            in ISaveCallback callback);
     void onConnected();
     void onDisconnected();
 }

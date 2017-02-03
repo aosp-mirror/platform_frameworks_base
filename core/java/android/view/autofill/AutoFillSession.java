@@ -19,7 +19,8 @@ package android.view.autofill;
 import static android.view.autofill.Helper.DEBUG;
 
 import android.app.Activity;
-import android.os.RemoteException;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.service.autofill.IAutoFillAppCallback;
 import android.util.Log;
 import android.view.View;
@@ -39,7 +40,7 @@ public final class AutoFillSession {
 
     private final IAutoFillAppCallback mCallback = new IAutoFillAppCallback.Stub() {
         @Override
-        public void autoFill(Dataset dataset) throws RemoteException {
+        public void autoFill(Dataset dataset) {
             final Activity activity = mActivity.get();
             if (activity == null) {
                 if (DEBUG) Log.d(TAG, "autoFill(): activity already GCed");
@@ -49,12 +50,10 @@ public final class AutoFillSession {
             // dataset.extras to service
             activity.runOnUiThread(() -> {
                 final View root = activity.getWindow().getDecorView().getRootView();
-                for (DatasetField field : dataset.getFields()) {
-                    final AutoFillId id = field.getId();
-                    if (id == null) {
-                        Log.w(TAG, "autoFill(): null id on " + field);
-                        continue;
-                    }
+                final int itemCount = dataset.getFieldIds().size();
+                for (int i = 0; i < itemCount; i++) {
+                    final AutoFillId id = dataset.getFieldIds().get(i);
+                    final AutoFillValue value = dataset.getFieldValues().get(i);
                     final int viewId = id.getViewId();
                     final View view = root.findViewByAccessibilityIdTraversal(viewId);
                     if (view == null) {
@@ -79,13 +78,27 @@ public final class AutoFillSession {
                             Log.d(TAG, "autoFill(): delegating " + id
                                     + " to VirtualViewDelegate  " + delegate);
                         }
-                        delegate.autoFill(id.getVirtualChildId(), field.getValue());
+                        delegate.autoFill(id.getVirtualChildId(), value);
                     } else {
                         // Handle non-virtual fields itself.
-                        view.autoFill(field.getValue());
+                        view.autoFill(value);
                     }
                 }
             });
+        }
+
+        @Override
+        public void startIntentSender(IntentSender intent, Intent fillInIntent) {
+            final Activity activity = mActivity.get();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    try {
+                        activity.startIntentSender(intent, fillInIntent, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+                        Log.e(TAG, "startIntentSender() failed for intent:" + intent, e);
+                    }
+                });
+            }
         }
     };
 
@@ -114,5 +127,4 @@ public final class AutoFillSession {
             }
         }
     }
-
 }
