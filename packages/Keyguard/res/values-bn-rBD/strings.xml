@@ -47,8 +47,8 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"সিম কার্ডটি PUK কোড দিয়ে লক করা আছে৷"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"সিম কার্ড আনলক করা হচ্ছে…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"পিন অঞ্চল"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM পিন অঞ্চল"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK অঞ্চল"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"সিম পিন অঞ্চল"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"সিম PUK অঞ্চল"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> এ পরবর্তী অ্যালার্ম সেট করা হয়েছে"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"মুছুন"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
@@ -59,11 +59,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"আপনার প্যাটার্ন আঁকুন"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"সিম পিন লিখুন"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" এর জন্য SIM পিন লিখুন"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" এর জন্য সিম পিন লিখুন"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"পিন লিখুন"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"পাসওয়ার্ড লিখুন"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"সিম এখন অক্ষম করা হয়েছে৷ অবিরত থাকতে PUK কোডটি লিখুন৷ বিশদ বিবরণের জন্য ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" এখন অক্ষম করা হয়েছে৷ চালিয়ে যেতে PUK কোড লিখুন৷ বিস্তারিত জানার জন্য ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"সিম \"<xliff:g id="CARRIER">%1$s</xliff:g>\" এখন অক্ষম করা হয়েছে৷ চালিয়ে যেতে PUK কোড লিখুন৷ বিস্তারিত জানার জন্য ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"কাঙ্ক্ষিত পিন কোড লিখুন"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"কাঙ্ক্ষিত পিন কোড নিশ্চিত করুন"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"সিম কার্ড আনলক করা হচ্ছে…"</string>
@@ -91,13 +91,13 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%2$d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ফোন আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ভুল সিম পিন কোড, আপনার ডিভাইসটি আনলক করতে এখন আপনাকে অবশ্যই আপনার ক্যারিয়ারের সাথে যোগাযোগ করতে হবে৷"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">ভুল SIM পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
-      <item quantity="other">ভুল SIM পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
+      <item quantity="one">ভুল সিম পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
+      <item quantity="other">ভুল সিম পিন কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে৷</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIMটি ব্যবহারের অযোগ্য৷ আপনার ক্যারিয়ারের সাথে যোগাযোগ করুন৷"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
-      <item quantity="one">ভুল SIM PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
-      <item quantity="other">ভুল SIM PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার SIM স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
+      <item quantity="one">ভুল সিম PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
+      <item quantity="other">ভুল সিম PUK কোড, আপনার কাছে আর <xliff:g id="NUMBER_1">%d</xliff:g>টি প্রচেষ্টা বাকি রয়েছে এটির পরেই আপনার সিম স্থায়ীভাবে অব্যবহারযোগ্য হবে৷</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"সিম পিন ক্রিয়াকলাপটি ব্যর্থ হয়েছে!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"সিম PUK ক্রিয়াকলাপটি ব্যর্থ হয়েছে!"</string>
