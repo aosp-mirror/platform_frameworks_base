@@ -38,5 +38,5 @@
 -keep class ** extends android.support.v14.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 -keep class com.android.systemui.plugins.** {
-    public protected **;
+    public protected *;
 }
