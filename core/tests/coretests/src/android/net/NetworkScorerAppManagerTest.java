@@ -19,6 +19,7 @@ package android.net;
 import static org.mockito.Mockito.when;
 
 import android.Manifest.permission;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,12 +31,15 @@ import android.content.res.Resources;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.provider.Settings;
 import android.test.InstrumentationTestCase;
+
 import com.android.internal.R;
-import java.util.List;
+
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     @Mock private Context mMockContext;
@@ -114,39 +118,40 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
 
     public void testGetNetworkRecommendationProviderData_scoreNetworksNotGranted()
             throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksDenied("package1");
-        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksDenied(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
 
         assertNull(mNetworkScorerAppManager.getNetworkRecommendationProviderData());
     }
 
     public void testGetNetworkRecommendationProviderData_available() throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
 
         NetworkScorerAppData appData =
                 mNetworkScorerAppManager.getNetworkRecommendationProviderData();
         assertNotNull(appData);
-        assertEquals("package1", appData.packageName);
+        assertEquals(recoComponent, appData.getRecommendationServiceComponent());
         assertEquals(924, appData.packageUid);
-        assertEquals(".RecommendationService", appData.recommendationServiceClassName);
     }
 
     public void testGetActiveScorer_providerAvailable() throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
 
         ContentResolver cr = mTargetContext.getContentResolver();
         Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 1);
 
         final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
         assertNotNull(activeScorer);
-        assertEquals("package1", activeScorer.packageName);
+        assertEquals(recoComponent, activeScorer.getRecommendationServiceComponent());
         assertEquals(924, activeScorer.packageUid);
-        assertEquals(".RecommendationService", activeScorer.recommendationServiceClassName);
     }
 
     public void testGetActiveScorer_providerNotAvailable()
@@ -159,9 +164,10 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
     }
 
     public void testGetActiveScorer_recommendationsDisabled() throws Exception {
-        setNetworkRecommendationPackageNames("package1");
-        mockScoreNetworksGranted("package1");
-        mockRecommendationServiceAvailable("package1", 924 /* packageUid */);
+        final ComponentName recoComponent = new ComponentName("package1", "class1");
+        setNetworkRecommendationPackageNames(recoComponent.getPackageName());
+        mockScoreNetworksGranted(recoComponent.getPackageName());
+        mockRecommendationServiceAvailable(recoComponent, 924 /* packageUid */);
         ContentResolver cr = mTargetContext.getContentResolver();
         Settings.Global.putInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0);
 
@@ -187,11 +193,11 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                 .thenReturn(PackageManager.PERMISSION_DENIED);
     }
 
-    private void mockRecommendationServiceAvailable(final String packageName, int packageUid) {
+    private void mockRecommendationServiceAvailable(final ComponentName compName, int packageUid) {
         final ResolveInfo serviceInfo = new ResolveInfo();
         serviceInfo.serviceInfo = new ServiceInfo();
-        serviceInfo.serviceInfo.name = ".RecommendationService";
-        serviceInfo.serviceInfo.packageName = packageName;
+        serviceInfo.serviceInfo.name = compName.getClassName();
+        serviceInfo.serviceInfo.packageName = compName.getPackageName();
         serviceInfo.serviceInfo.applicationInfo = new ApplicationInfo();
         serviceInfo.serviceInfo.applicationInfo.uid = packageUid;
 
@@ -203,7 +209,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
                         Intent intent = (Intent) object;
                         return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
                                 .equals(intent.getAction())
-                                && packageName.equals(intent.getPackage());
+                                && compName.getPackageName().equals(intent.getPackage());
                     }
                 }), Mockito.eq(flags))).thenReturn(serviceInfo);
     }
