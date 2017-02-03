@@ -362,17 +362,12 @@
 
     <style name="TextAppearance.NotificationGuts.Secondary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:alpha">.38</item>
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="TextAppearance.NotificationGuts.Primary">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="TextAppearance.NotificationGuts.Radio">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    <style name="TextAppearance.NotificationGuts.SecondaryWarning">
+        <item name="android:textColor">@color/system_warning_color</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="TextAppearance.NotificationGuts.Button">

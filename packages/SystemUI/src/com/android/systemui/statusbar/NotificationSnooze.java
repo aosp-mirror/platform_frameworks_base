@@ -195,7 +195,7 @@ public class NotificationSnooze extends LinearLayout
     }
 
     @Override
-    public boolean handleCloseControls() {
+    public boolean handleCloseControls(boolean save) {
         // When snooze is closed (i.e. there was interaction outside of the notification)
         // then we commit the snooze action.
         if (mSnoozeListener != null && mSelectedOption != null) {

@@ -1678,8 +1678,16 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsForPackage(String pkg,
                 int uid, boolean includeDeleted) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("getNotificationChannelsForPackage");
             return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted);
+        }
+
+        @Override
+        public int getNumNotificationChannelsForPackage(String pkg, int uid,
+                boolean includeDeleted) {
+            enforceSystemOrSystemUI("getNumNotificationChannelsForPackage");
+            return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted)
+                    .getList().size();
         }
 
         @Override
@@ -1690,12 +1698,18 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public NotificationChannelGroup getNotificationChannelGroupForPackage(
+                String groupId, String pkg, int uid) {
+            enforceSystemOrSystemUI("getNotificationChannelGroupForPackage");
+            return mRankingHelper.getNotificationChannelGroup(groupId, pkg, uid);
+        }
+
+        @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
             return mRankingHelper.getNotificationChannels(
                     pkg, Binder.getCallingUid(), false /* includeDeleted */);
         }
-
 
         @Override
         public void clearData(String packageName, int uid, boolean fromApp) throws RemoteException {

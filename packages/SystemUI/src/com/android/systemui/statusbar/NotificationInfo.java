@@ -1,5 +1,3 @@
-package com.android.systemui.statusbar;
-
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
@@ -16,15 +14,19 @@ package com.android.systemui.statusbar;
  * limitations under the License
  */
 
+package com.android.systemui.statusbar;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -43,8 +45,6 @@ import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -77,13 +77,9 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     private TextView mImportanceTitle;
     private boolean mAuto;
 
-    private View mImportanceGroup;
-    private View mChannelDisabled;
+    private TextView mNumChannelsView;
+    private View mChannelDisabledView;
     private Switch mChannelEnabledSwitch;
-    private RadioButton mMinImportanceButton;
-    private RadioButton mLowImportanceButton;
-    private RadioButton mDefaultImportanceButton;
-    private RadioButton mHighImportanceButton;
 
     private GutsInteractionListener mGutsInteractionListener;
 
@@ -124,6 +120,19 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
             // app is gone, just show package name and generic icon
             pkgicon = pm.getDefaultActivityIcon();
         }
+        ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
+
+        int numChannels = 1;
+        try {
+            numChannels = iNotificationManager.getNumNotificationChannelsForPackage(
+                    pkg, appUid, false /* includeDeleted */);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.toString());
+        }
+
+        mNumChannelsView = (TextView) (findViewById(R.id.num_channels_desc));
+        mNumChannelsView.setText(String.format(mContext.getResources().getQuantityString(
+                R.plurals.notification_num_channels_desc, numChannels), numChannels));
 
         // If this is the placeholder channel, don't use our channel-specific text.
         String appNameText;
@@ -138,23 +147,30 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
         ((TextView) findViewById(R.id.pkgname)).setText(appNameText);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
 
-        // Settings button.
-        final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
-        if (appUid >= 0 && onSettingsClick != null) {
-            final int appUidF = appUid;
-            settingsButton.setOnClickListener(
-                    (View view) -> {
-                        onSettingsClick.onClick(view, appUidF);
-                    });
-            settingsButton.setText(R.string.notification_more_settings);
-        } else {
-            settingsButton.setVisibility(View.GONE);
+        // Set group information if this channel has an associated group.
+        CharSequence groupName = null;
+        if (channel.getGroup() != null) {
+            try {
+                final NotificationChannelGroup notificationChannelGroup =
+                        iNotificationManager.getNotificationChannelGroupForPackage(
+                                channel.getGroup(), pkg, appUid);
+                if (notificationChannelGroup != null) {
+                    groupName = notificationChannelGroup.getName();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         }
-
-        // Done button.
-        final TextView doneButton = (TextView) findViewById(R.id.done);
-        doneButton.setText(R.string.notification_done);
-        doneButton.setOnClickListener(onDoneClick);
+        TextView groupNameView = ((TextView) findViewById(R.id.group_name));
+        TextView groupDividerView = ((TextView) findViewById(R.id.pkg_group_divider));
+        if (groupName != null) {
+            groupNameView.setText(groupName);
+            groupNameView.setVisibility(View.VISIBLE);
+            groupDividerView.setVisibility(View.VISIBLE);
+        } else {
+            groupNameView.setVisibility(View.GONE);
+            groupDividerView.setVisibility(View.GONE);
+        }
 
         boolean nonBlockable = false;
         try {
@@ -167,53 +183,41 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
             nonBlockable |= nonBlockablePkgs.contains(pkg);
         }
 
-        final View importanceButtons = findViewById(R.id.importance_buttons);
-        bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
-
-        // Importance Text (hardcoded to 4 importance levels)
-        final ViewGroup importanceTextGroup = (ViewGroup) findViewById(
-                R.id.importance_buttons_text);
-        final int size = importanceTextGroup.getChildCount();
-        for (int i = 0; i < size; i++) {
-            int importanceNameResId = 0;
-            int importanceDescResId = 0;
-            switch (i) {
-                case 0:
-                    importanceNameResId = R.string.high_importance;
-                    importanceDescResId = R.string.notification_importance_high;
-                    break;
-                case 1:
-                    importanceNameResId = R.string.default_importance;
-                    importanceDescResId = R.string.notification_importance_default;
-                    break;
-                case 2:
-                    importanceNameResId = R.string.low_importance;
-                    importanceDescResId = R.string.notification_importance_low;
-                    break;
-                case 3:
-                    importanceNameResId = R.string.min_importance;
-                    importanceDescResId = R.string.notification_importance_min;
-                    break;
-                default:
-                    Log.e(TAG, "Too many importance groups in this layout.");
-                    break;
-            }
-            final ViewGroup importanceChildGroup = (ViewGroup) importanceTextGroup.getChildAt(i);
-            ((TextView) importanceChildGroup.getChildAt(0)).setText(importanceNameResId);
-            ((TextView) importanceChildGroup.getChildAt(1)).setText(importanceDescResId);
-        }
+        bindButtons(nonBlockable);
 
         // Top-level importance group
-        mImportanceGroup = findViewById(R.id.importance);
-        mChannelDisabled = findViewById(R.id.channel_disabled);
-        updateImportanceGroup();
+        mChannelDisabledView = findViewById(R.id.channel_disabled);
+        updateImportanceDisplay();
+
+        // Settings button.
+        final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
+        if (appUid >= 0 && onSettingsClick != null) {
+            final int appUidF = appUid;
+            settingsButton.setOnClickListener(
+                    (View view) -> {
+                        onSettingsClick.onClick(view, appUidF);
+                    });
+            if (numChannels > 1) {
+                settingsButton.setText(R.string.notification_all_categories);
+            } else {
+                settingsButton.setText(R.string.notification_more_settings);
+            }
+
+        } else {
+            settingsButton.setVisibility(View.GONE);
+        }
+
+        // Done button.
+        final TextView doneButton = (TextView) findViewById(R.id.done);
+        doneButton.setText(R.string.notification_done);
+        doneButton.setOnClickListener(onDoneClick);
     }
 
     public boolean hasImportanceChanged() {
         return mStartingUserImportance != getSelectedImportance();
     }
 
-    public void saveImportance() {
+    private void saveImportance() {
         int selectedImportance = getSelectedImportance();
         if (selectedImportance == mStartingUserImportance) {
             return;
@@ -233,73 +237,37 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     private int getSelectedImportance() {
         if (!mChannelEnabledSwitch.isChecked()) {
             return NotificationManager.IMPORTANCE_NONE;
-        } else if (mMinImportanceButton.isChecked()) {
-            return NotificationManager.IMPORTANCE_MIN;
-        } else if (mLowImportanceButton.isChecked()) {
-            return NotificationManager.IMPORTANCE_LOW;
-        } else if (mDefaultImportanceButton.isChecked()) {
-            return NotificationManager.IMPORTANCE_DEFAULT;
-        } else if (mHighImportanceButton.isChecked()) {
-            return NotificationManager.IMPORTANCE_HIGH;
         } else {
-            return NotificationManager.IMPORTANCE_UNSPECIFIED;
+            return mStartingUserImportance;
         }
     }
 
-    private void bindToggles(final View importanceButtons, final int importance,
-            final boolean nonBlockable) {
+    private void bindButtons(final boolean nonBlockable) {
         // Enabled Switch
         mChannelEnabledSwitch = (Switch) findViewById(R.id.channel_enabled_switch);
-        mChannelEnabledSwitch.setChecked(importance != NotificationManager.IMPORTANCE_NONE);
+        mChannelEnabledSwitch.setChecked(
+                mStartingUserImportance != NotificationManager.IMPORTANCE_NONE);
         mChannelEnabledSwitch.setVisibility(nonBlockable ? View.INVISIBLE : View.VISIBLE);
-
-        // Importance Buttons
-        mMinImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.min_importance);
-        mLowImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.low_importance);
-        mDefaultImportanceButton = (RadioButton) importanceButtons
-                .findViewById(R.id.default_importance);
-        mHighImportanceButton = (RadioButton) importanceButtons.findViewById(R.id.high_importance);
-
-        // Set to current importance setting
-        switch (importance) {
-            case NotificationManager.IMPORTANCE_UNSPECIFIED:
-            case NotificationManager.IMPORTANCE_NONE:
-                break;
-            case NotificationManager.IMPORTANCE_MIN:
-                mMinImportanceButton.setChecked(true);
-                break;
-            case NotificationManager.IMPORTANCE_LOW:
-                mLowImportanceButton.setChecked(true);
-                break;
-            case NotificationManager.IMPORTANCE_DEFAULT:
-                mDefaultImportanceButton.setChecked(true);
-                break;
-            case NotificationManager.IMPORTANCE_HIGH:
-            case NotificationManager.IMPORTANCE_MAX:
-                mHighImportanceButton.setChecked(true);
-                break;
-        }
 
         // Callback when checked.
         mChannelEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            mGutsInteractionListener.onInteraction(NotificationInfo.this);
-            updateImportanceGroup();
+            if (mGutsInteractionListener != null) {
+                mGutsInteractionListener.onInteraction(NotificationInfo.this);
+            }
+            updateImportanceDisplay();
         });
-        ((RadioGroup) importanceButtons).setOnCheckedChangeListener(
-                (buttonView, isChecked) -> {
-                    mGutsInteractionListener.onInteraction(NotificationInfo.this);
-                });
     }
 
-    private void updateImportanceGroup() {
+    private void updateImportanceDisplay() {
         final boolean disabled = getSelectedImportance() == NotificationManager.IMPORTANCE_NONE;
-        mImportanceGroup.setVisibility(disabled ? View.GONE : View.VISIBLE);
-        mChannelDisabled.setVisibility(disabled ? View.VISIBLE : View.GONE);
-    }
-
-    public void closeControls() {
-        if (mGutsInteractionListener != null) {
-            mGutsInteractionListener.closeGuts(this);
+        mChannelDisabledView.setVisibility(disabled ? View.VISIBLE : View.GONE);
+        if (disabled) {
+            // To be replaced by disabled text.
+            mNumChannelsView.setVisibility(View.GONE);
+        } else if (mNotificationChannel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+            mNumChannelsView.setVisibility(View.INVISIBLE);
+        } else {
+            mNumChannelsView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -314,7 +282,10 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     @Override
-    public boolean handleCloseControls() {
+    public boolean handleCloseControls(boolean save) {
+        if (save) {
+            saveImportance();
+        }
         return false;
     }
 }

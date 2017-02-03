@@ -39,12 +39,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -170,14 +167,14 @@ public class NotificationGuts extends FrameLayout
         void onClick(View v, int appUid);
     }
 
-    public void closeControls(int x, int y, boolean saveImportance) {
+    public void closeControls(int x, int y, boolean save) {
         if (getWindowToken() == null) {
             if (mListener != null) {
                 mListener.onGutsClosed(this);
             }
             return;
         }
-        if (mGutsContent == null || !mGutsContent.handleCloseControls()) {
+        if (mGutsContent == null || !mGutsContent.handleCloseControls(save)) {
             animateClose(x, y);
         }
         setExposed(false, mNeedsFalsingProtection);
