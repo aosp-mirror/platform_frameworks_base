@@ -255,7 +255,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             iconState.visibleState = StatusBarIconView.STATE_ICON;
             if (firstOverflowIndex == -1 && (isAmbient
                     || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
-                firstOverflowIndex = noOverflowAfter ? i - 1 : i;
+                firstOverflowIndex = noOverflowAfter && !isAmbient ? i - 1 : i;
                 int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
                 visualOverflowStart = overflowStart + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT)
                         - totalDotLength / 2
