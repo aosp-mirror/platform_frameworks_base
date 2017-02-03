@@ -70,6 +70,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
     /** Amount of time a job is allowed to execute for before being considered timed-out. */
     private static final long EXECUTING_TIMESLICE_MILLIS = 10 * 60 * 1000;  // 10mins.
+    /** Amount of time the JobScheduler waits for the initial service launch+bind. */
+    private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000;
 
@@ -645,8 +647,20 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private void scheduleOpTimeOut() {
         removeOpTimeOut();
 
-        final long timeoutMillis = (mVerb == VERB_EXECUTING) ?
-                EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
+        final long timeoutMillis;
+        switch (mVerb) {
+            case VERB_EXECUTING:
+                timeoutMillis = EXECUTING_TIMESLICE_MILLIS;
+                break;
+
+            case VERB_BINDING:
+                timeoutMillis = OP_BIND_TIMEOUT_MILLIS;
+                break;
+
+            default:
+                timeoutMillis = OP_TIMEOUT_MILLIS;
+                break;
+        }
         if (DEBUG) {
             Slog.d(TAG, "Scheduling time out for '" +
                     mRunningJob.getServiceComponent().getShortClassName() + "' jId: " +
