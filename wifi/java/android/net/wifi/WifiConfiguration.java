@@ -845,6 +845,7 @@ public class WifiConfiguration implements Parcelable {
          * This network is disabled because EAP-TLS failure
          */
         public static final int DISABLED_TLS_VERSION_MISMATCH = 7;
+        // Values above are for temporary disablement; values below are for permanent disablement.
         /**
          * This network is disabled due to absence of user credentials
          */
@@ -967,6 +968,28 @@ public class WifiConfiguration implements Parcelable {
          * the credentials are updated (ex. a password change).
          */
         private boolean mHasEverConnected;
+
+        /**
+         * Boolean indicating whether {@link com.android.server.wifi.RecommendedNetworkEvaluator}
+         * chose not to connect to this network in the last qualified network selection process.
+         */
+        private boolean mNotRecommended;
+
+        /**
+         * Set whether {@link com.android.server.wifi.RecommendedNetworkEvaluator} does not
+         * recommend connecting to this network.
+         */
+        public void setNotRecommended(boolean notRecommended) {
+            mNotRecommended = notRecommended;
+        }
+
+        /**
+         * Returns whether {@link com.android.server.wifi.RecommendedNetworkEvaluator} does not
+         * recommend connecting to this network.
+         */
+        public boolean isNotRecommended() {
+            return mNotRecommended;
+        }
 
         /**
          * set whether this network is visible in latest Qualified Network Selection
@@ -1291,6 +1314,7 @@ public class WifiConfiguration implements Parcelable {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
             dest.writeInt(getHasEverConnected() ? 1 : 0);
+            dest.writeInt(isNotRecommended() ? 1 : 0);
         }
 
         public void readFromParcel(Parcel in) {
@@ -1310,6 +1334,7 @@ public class WifiConfiguration implements Parcelable {
                 setConnectChoiceTimestamp(INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP);
             }
             setHasEverConnected(in.readInt() != 0);
+            setNotRecommended(in.readInt() != 0);
         }
     }
 
