@@ -60,6 +60,8 @@ protected:
     virtual void onDrawRect(const SkRect&, const SkPaint&) override;
     virtual void onDrawRRect(const SkRRect&, const SkPaint&) override;
     virtual void onDrawPath(const SkPath& path, const SkPaint&) override;
+    virtual void onDrawArc(const SkRect&, SkScalar startAngle, SkScalar sweepAngle, bool useCenter,
+                           const SkPaint&) override;
     virtual void onDrawBitmap(const SkBitmap&, SkScalar left, SkScalar top,
                               const SkPaint*) override;
     virtual void onDrawBitmapRect(const SkBitmap&, const SkRect* src, const SkRect& dst,
