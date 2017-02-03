@@ -63,6 +63,11 @@ class IFile {
 
   IFile* CreateFileSegment(size_t offset, size_t len);
 
+  /** Returns whether the file was compressed before it was stored in memory. */
+  virtual bool WasCompressed() {
+    return false;
+  }
+
  private:
   // Any segments created from this IFile need to be owned by this IFile, so
   // keep them

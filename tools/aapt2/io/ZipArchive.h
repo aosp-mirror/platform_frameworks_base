@@ -40,6 +40,7 @@ class ZipFile : public IFile {
 
   std::unique_ptr<IData> OpenAsData() override;
   const Source& GetSource() const override;
+  bool WasCompressed() override;
 
  private:
   ZipArchiveHandle zip_handle_;

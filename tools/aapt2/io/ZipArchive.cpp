@@ -59,6 +59,10 @@ std::unique_ptr<IData> ZipFile::OpenAsData() {
 
 const Source& ZipFile::GetSource() const { return source_; }
 
+bool ZipFile::WasCompressed() {
+  return zip_entry_.method != kCompressStored;
+}
+
 ZipFileCollectionIterator::ZipFileCollectionIterator(
     ZipFileCollection* collection)
     : current_(collection->files_.begin()), end_(collection->files_.end()) {}
