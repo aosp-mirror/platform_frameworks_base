@@ -29,7 +29,7 @@ public class ViewUtils {
     public static void attachView(View view) {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_SYSTEM_ALERT,
+                LayoutParams.TYPE_APPLICATION_OVERLAY,
                 0, PixelFormat.TRANSLUCENT);
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> InstrumentationRegistry.getContext()
