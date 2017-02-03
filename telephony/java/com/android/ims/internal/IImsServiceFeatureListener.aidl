@@ -17,7 +17,8 @@
 package com.android.ims.internal;
 
 /**
-*  Interface from ImsResolver to ImsServiceProxy in ImsManager.
+ *  Interface from ImsResolver to ImsServiceProxy in ImsManager.
+ * Callback to ImsManager when a feature changes in the ImsServiceController.
  * {@hide}
  */
 oneway interface IImsServiceFeatureListener {
