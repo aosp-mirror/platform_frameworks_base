@@ -440,10 +440,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 AnimationProperties animationProperties = null;
                 if (justAdded) {
                     super.applyToView(icon);
-                    icon.setAlpha(0.0f);
-                    icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, false /* animate */);
-                    animationProperties = ADD_ICON_PROPERTIES;
-                    animate = true;
+                    if (iconAppearAmount != 0.0f) {
+                        icon.setAlpha(0.0f);
+                        icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, false /* animate */);
+                        animationProperties = ADD_ICON_PROPERTIES;
+                        animate = true;
+                    }
                 } else if (visibleState != icon.getVisibleState()) {
                     animationProperties = DOT_ANIMATION_PROPERTIES;
                     animate = true;
