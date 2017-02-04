@@ -72,25 +72,25 @@ public class PackageDexUsageTests {
         String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
 
         mFooBaseUser0 = new TestData(fooPackageName,
-                fooCodeDir + "base.apk", 0, isa, false, true);
+                fooCodeDir + "base.apk", 0, isa, false, true, fooPackageName);
 
         mFooSplit1User0 = new TestData(fooPackageName,
-                fooCodeDir + "split-1.apk", 0, isa, false, true);
+                fooCodeDir + "split-1.apk", 0, isa, false, true, fooPackageName);
 
         mFooSplit2UsedByOtherApps0 = new TestData(fooPackageName,
-                fooCodeDir + "split-2.apk", 0, isa, true, true);
+                fooCodeDir + "split-2.apk", 0, isa, true, true, "used.by.other.com");
 
         mFooSecondary1User0 = new TestData(fooPackageName,
-                fooDataDir + "sec-1.dex", 0, isa, false, false);
+                fooDataDir + "sec-1.dex", 0, isa, false, false, fooPackageName);
 
         mFooSecondary1User1 = new TestData(fooPackageName,
-                fooDataDir + "sec-1.dex", 1, isa, false, false);
+                fooDataDir + "sec-1.dex", 1, isa, false, false, fooPackageName);
 
         mFooSecondary2UsedByOtherApps0 = new TestData(fooPackageName,
-                fooDataDir + "sec-2.dex", 0, isa, true, false);
+                fooDataDir + "sec-2.dex", 0, isa, true, false, "used.by.other.com");
 
         mInvalidIsa = new TestData(fooPackageName,
-                fooCodeDir + "base.apk", 0, "INVALID_ISA", false, true);
+                fooCodeDir + "base.apk", 0, "INVALID_ISA", false, true, "INALID_USER");
 
         String barPackageName = "com.google.bar";
         String barCodeDir = "/data/app/com.google.bar/";
@@ -98,11 +98,11 @@ public class PackageDexUsageTests {
         String barDataDir1 = "/data/user/1/com.google.bar/";
 
         mBarBaseUser0 = new TestData(barPackageName,
-                barCodeDir + "base.apk", 0, isa, false, true);
+                barCodeDir + "base.apk", 0, isa, false, true, barPackageName);
         mBarSecondary1User0 = new TestData(barPackageName,
-                barDataDir + "sec-1.dex", 0, isa, false, false);
+                barDataDir + "sec-1.dex", 0, isa, false, false, barPackageName);
         mBarSecondary2User1 = new TestData(barPackageName,
-                barDataDir1 + "sec-2.dex", 1, isa, false, false);
+                barDataDir1 + "sec-2.dex", 1, isa, false, false, barPackageName);
     }
 
     @Test
@@ -319,7 +319,8 @@ public class PackageDexUsageTests {
             mFooSplit2UsedByOtherApps0.mOwnerUserId,
             mFooSplit2UsedByOtherApps0.mLoaderIsa,
             /*mIsUsedByOtherApps*/false,
-            mFooSplit2UsedByOtherApps0.mPrimaryOrSplit);
+            mFooSplit2UsedByOtherApps0.mPrimaryOrSplit,
+            mFooSplit2UsedByOtherApps0.mUsedBy);
         assertPackageDexUsage(noLongerUsedByOtherApps);
     }
 
@@ -332,14 +333,65 @@ public class PackageDexUsageTests {
         assertFalse(mPackageDexUsage.clearUsedByOtherApps(mFooSplit2UsedByOtherApps0.mPackageName));
     }
 
+    @Test
+    public void testRecordDexFileUsers() {
+        PackageDexUsage packageDexUsageRecordUsers = new PackageDexUsage();
+        Set<String> users = new HashSet<>(Arrays.asList(
+                new String[] {"another.package.1"}));
+        Set<String> usersExtra = new HashSet<>(Arrays.asList(
+                new String[] {"another.package.2", "another.package.3"}));
+
+        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, usersExtra));
+
+        assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, usersExtra));
+
+        packageDexUsageRecordUsers = writeAndReadBack(packageDexUsageRecordUsers);
+        // Verify that the users were recorded.
+        Set<String> userAll = new HashSet<>(users);
+        userAll.addAll(usersExtra);
+        assertPackageDexUsage(packageDexUsageRecordUsers, userAll, mFooBaseUser0,
+                mFooSecondary1User0);
+    }
+
+    @Test
+    public void testRecordDexFileUsersNotTheOwningPackage() {
+        PackageDexUsage packageDexUsageRecordUsers = new PackageDexUsage();
+        Set<String> users = new HashSet<>(Arrays.asList(
+                new String[] {mFooBaseUser0.mPackageName,}));
+        Set<String> usersExtra = new HashSet<>(Arrays.asList(
+                new String[] {"another.package.2", "another.package.3"}));
+
+        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooBaseUser0, usersExtra));
+
+        assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, users));
+        assertTrue(record(packageDexUsageRecordUsers, mFooSecondary1User0, usersExtra));
+
+        packageDexUsageRecordUsers = writeAndReadBack(packageDexUsageRecordUsers);
+        // Verify that only the non owning packages were recorded.
+        assertPackageDexUsage(packageDexUsageRecordUsers, usersExtra, mFooBaseUser0,
+                mFooSecondary1User0);
+    }
+
     private void assertPackageDexUsage(TestData primary, TestData... secondaries) {
+        assertPackageDexUsage(mPackageDexUsage, null, primary, secondaries);
+    }
+
+    private void assertPackageDexUsage(PackageDexUsage packageDexUsage, Set<String> users,
+            TestData primary, TestData... secondaries) {
         String packageName = primary == null ? secondaries[0].mPackageName : primary.mPackageName;
         boolean primaryUsedByOtherApps = primary == null ? false : primary.mUsedByOtherApps;
-        PackageUseInfo pInfo = mPackageDexUsage.getPackageUseInfo(packageName);
+        PackageUseInfo pInfo = packageDexUsage.getPackageUseInfo(packageName);
 
         // Check package use info
         assertNotNull(pInfo);
         assertEquals(primaryUsedByOtherApps, pInfo.isUsedByOtherApps());
+        if (users != null) {
+            assertEquals(pInfo.getLoadingPackages(), users);
+        }
+
         Map<String, DexUseInfo> dexUseInfoMap = pInfo.getDexUseInfoMap();
         assertEquals(secondaries.length, dexUseInfoMap.size());
 
@@ -351,24 +403,43 @@ public class PackageDexUsageTests {
             assertEquals(testData.mOwnerUserId, dInfo.getOwnerUserId());
             assertEquals(1, dInfo.getLoaderIsas().size());
             assertTrue(dInfo.getLoaderIsas().contains(testData.mLoaderIsa));
+            if (users != null) {
+                 assertEquals(dInfo.getLoadingPackages(), users);
+            }
         }
     }
 
     private boolean record(TestData testData) {
         return mPackageDexUsage.record(testData.mPackageName, testData.mDexFile,
-                testData.mOwnerUserId, testData.mLoaderIsa, testData.mUsedByOtherApps,
-                testData.mPrimaryOrSplit);
+               testData.mOwnerUserId, testData.mLoaderIsa, testData.mUsedByOtherApps,
+               testData.mPrimaryOrSplit, testData.mUsedBy);
+    }
+
+    private boolean record(PackageDexUsage packageDexUsage, TestData testData, Set<String> users) {
+        boolean result = true;
+        for (String user : users) {
+            result = result && packageDexUsage.record(testData.mPackageName, testData.mDexFile,
+                    testData.mOwnerUserId, testData.mLoaderIsa, testData.mUsedByOtherApps,
+                    testData.mPrimaryOrSplit, user);
+        }
+        return result;
     }
 
     private void writeAndReadBack() {
+        mPackageDexUsage = writeAndReadBack(mPackageDexUsage);
+    }
+
+    private PackageDexUsage writeAndReadBack(PackageDexUsage packageDexUsage) {
         try {
             StringWriter writer = new StringWriter();
-            mPackageDexUsage.write(writer);
+            packageDexUsage.write(writer);
 
-            mPackageDexUsage = new PackageDexUsage();
-            mPackageDexUsage.read(new StringReader(writer.toString()));
+            PackageDexUsage newPackageDexUsage = new PackageDexUsage();
+            newPackageDexUsage.read(new StringReader(writer.toString()));
+            return newPackageDexUsage;
         } catch (IOException e) {
             fail("Unexpected IOException: " + e.getMessage());
+            return null;
         }
     }
 
@@ -379,15 +450,17 @@ public class PackageDexUsageTests {
         private final String mLoaderIsa;
         private final boolean mUsedByOtherApps;
         private final boolean mPrimaryOrSplit;
+        private final String mUsedBy;
 
         private TestData(String packageName, String dexFile, int ownerUserId,
-                 String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit) {
+                 String loaderIsa, boolean isUsedByOtherApps, boolean primaryOrSplit, String usedBy) {
             mPackageName = packageName;
             mDexFile = dexFile;
             mOwnerUserId = ownerUserId;
             mLoaderIsa = loaderIsa;
             mUsedByOtherApps = isUsedByOtherApps;
             mPrimaryOrSplit = primaryOrSplit;
+            mUsedBy = usedBy;
         }
 
     }
