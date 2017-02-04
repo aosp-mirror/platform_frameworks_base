@@ -46,7 +46,7 @@ public final class PlaybackActivityMonitor
         implements AudioPlaybackConfiguration.PlayerDeathMonitor, PlayerFocusEnforcer {
 
     public final static String TAG = "AudioService.PlaybackActivityMonitor";
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
 
     private ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
     // a public client is one that needs an anonymized version of the playback configurations, we
