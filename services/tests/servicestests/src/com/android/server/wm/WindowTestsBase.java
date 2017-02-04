@@ -201,8 +201,8 @@ class WindowTestsBase {
 
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     static Task createTaskInStack(TaskStack stack, int userId) {
-        final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, false, 0,
-                false, false, new TaskDescription(), null);
+        final Task newTask = new Task(sNextTaskId++, stack, userId, sWm, null, EMPTY, 0, false,
+                false, new TaskDescription(), null);
         stack.addTask(newTask, POSITION_TOP);
         return newTask;
     }
@@ -283,12 +283,10 @@ class WindowTestsBase {
         private boolean mIsAnimating = false;
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-                Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
-                boolean supportsPictureInPicture, boolean homeTask,
-                TaskWindowContainerController controller) {
-            super(taskId, stack, userId, service, bounds, overrideConfig, isOnTopLauncher,
-                    resizeMode, supportsPictureInPicture, homeTask, new TaskDescription(),
-                            controller);
+                Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
+                boolean homeTask, TaskWindowContainerController controller) {
+            super(taskId, stack, userId, service, bounds, overrideConfig, resizeMode,
+                    supportsPictureInPicture, homeTask, new TaskDescription(), controller);
         }
 
         boolean shouldDeferRemoval() {
@@ -339,17 +337,16 @@ class WindowTestsBase {
                         }
                     }, stackController, 0 /* userId */, null /* bounds */,
                     EMPTY /* overrideConfig*/, RESIZE_MODE_UNRESIZEABLE,
-                    false /* supportsPictureInPicture */, false /* homeTask*/,
-                    false /* isOnTopLauncher */, true /* toTop*/, true /* showForAllUsers */,
-                    new TaskDescription(), sWm);
+                    false /* supportsPictureInPicture */, false /* homeTask*/, true /* toTop*/,
+                    true /* showForAllUsers */, new TaskDescription(), sWm);
         }
 
         @Override
         TestTask createTask(int taskId, TaskStack stack, int userId, Rect bounds,
                 Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
-                boolean homeTask, boolean isOnTopLauncher, TaskDescription taskDescription) {
-            return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig,
-                    isOnTopLauncher, resizeMode, supportsPictureInPicture, homeTask, this);
+                boolean homeTask, TaskDescription taskDescription) {
+            return new TestTask(taskId, stack, userId, mService, bounds, overrideConfig, resizeMode,
+                    supportsPictureInPicture, homeTask, this);
         }
     }
 

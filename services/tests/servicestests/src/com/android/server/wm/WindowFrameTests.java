@@ -78,8 +78,7 @@ public class WindowFrameTests {
         final Rect mInsetBounds = new Rect();
         boolean mFullscreenForTest = true;
         TaskWithBounds(Rect bounds) {
-            super(0, mStubStack, 0, sWm, null, null, false, 0, false, false, new TaskDescription(),
-                    null);
+            super(0, mStubStack, 0, sWm, null, null, 0, false, false, new TaskDescription(), null);
             mBounds = bounds;
         }
         @Override

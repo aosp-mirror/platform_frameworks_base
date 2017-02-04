@@ -1498,15 +1498,7 @@ class ActivityStarter {
 
     private void updateTaskReturnToType(
             TaskRecord task, int launchFlags, ActivityStack focusedStack) {
-        if (focusedStack != null && focusedStack.isHomeOrRecentsStack()
-                && focusedStack.topTask() != null && focusedStack.topTask().isOnTopLauncher()) {
-            // Since an on-top launcher will is moved to back when tasks are launched from it,
-            // those tasks should first try to return to a non-home activity.
-            // This also makes sure that non-home activities are visible under a transparent
-            // non-home activity.
-            task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
-            return;
-        } else if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+        if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                 == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
             // Caller wants to appear on home activity.
             task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);

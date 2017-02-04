@@ -91,20 +91,16 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     private boolean mHomeTask;
 
-    // Whether this task is an on-top launcher task, which is determined by the root activity.
-    private boolean mIsOnTopLauncher;
-
     private TaskDescription mTaskDescription;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration overrideConfig, boolean isOnTopLauncher, int resizeMode,
-            boolean supportsPictureInPicture, boolean homeTask, TaskDescription taskDescription,
+            Configuration overrideConfig, int resizeMode, boolean supportsPictureInPicture,
+            boolean homeTask, TaskDescription taskDescription,
             TaskWindowContainerController controller) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
-        mIsOnTopLauncher = isOnTopLauncher;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         mHomeTask = homeTask;
@@ -117,7 +113,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mStack != null ? mStack.getDisplayContent() : null;
     }
 
-    int getAdjustedAddPosition(int suggestedPosition) {
+    private int getAdjustedAddPosition(int suggestedPosition) {
         final int size = mChildren.size();
         if (suggestedPosition >= size) {
             return Math.min(size, suggestedPosition);
@@ -345,10 +341,6 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mResizeMode == RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY
                 || mResizeMode == RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY
                 || mResizeMode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
-    }
-
-    boolean isOnTopLauncher() {
-        return mIsOnTopLauncher;
     }
 
     boolean cropWindowsToStackBounds() {
