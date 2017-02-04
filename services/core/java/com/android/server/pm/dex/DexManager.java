@@ -148,7 +148,8 @@ public class DexManager {
                 // or UsedBytOtherApps), record will return true and we trigger an async write
                 // to disk to make sure we don't loose the data in case of a reboot.
                 if (mPackageDexUsage.record(searchResult.mOwningPackageName,
-                        dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit)) {
+                        dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
+                        loadingAppInfo.packageName)) {
                     mPackageDexUsage.maybeWriteAsync();
                 }
             } else {
@@ -465,7 +466,8 @@ public class DexManager {
         for (String isa : getAppDexInstructionSets(info)) {
             isas.add(isa);
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
-                dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false);
+                    dexPath, userId, isa, isUsedByOtherApps, /*primaryOrSplit*/ false,
+                    searchResult.mOwningPackageName);
             update |= newUpdate;
         }
         if (update) {
