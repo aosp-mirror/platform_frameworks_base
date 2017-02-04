@@ -637,13 +637,16 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     public void setCurrentFraction(float fraction) {
         initAnimation();
         fraction = clampFraction(fraction);
-        long seekTime = (long) (getScaledDuration() * fraction);
-        long currentTime = AnimationUtils.currentAnimationTimeMillis();
-        mStartTime = currentTime - seekTime;
         mStartTimeCommitted = true; // do not allow start time to be compensated for jank
-        if (!isPulsingInternal()) {
-            // If the animation loop hasn't started, the startTime will be adjusted in the first
-            // frame based on seek fraction.
+        if (isPulsingInternal()) {
+            long seekTime = (long) (getScaledDuration() * fraction);
+            long currentTime = AnimationUtils.currentAnimationTimeMillis();
+            // Only modify the start time when the animation is running. Seek fraction will ensure
+            // non-running animations skip to the correct start time.
+            mStartTime = currentTime - seekTime;
+        } else {
+            // If the animation loop hasn't started, or during start delay, the startTime will be
+            // adjusted once the delay has passed based on seek fraction.
             mSeekFraction = fraction;
         }
         mOverallFraction = fraction;
@@ -1028,7 +1031,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         // started-but-not-yet-reached-the-first-frame phase.
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
-        addAnimationCallback((long) (mStartDelay * sDurationScale));
+        addAnimationCallback(0);
 
         if (mStartDelay == 0 || mSeekFraction >= 0 || mReversing) {
             // If there's no start delay, init the animation and notify start listeners right away
