@@ -437,7 +437,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         }
         if (oldVisibility != null
                 && oldVisibility == AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE) {
-            AccountManager.get(this).setAccountVisibility(account, mCallingUid,
+            AccountManager.get(this).setAccountVisibility(account, mCallingPackage,
                     AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
         }
         Bundle bundle = new Bundle();

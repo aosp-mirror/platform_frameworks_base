@@ -54,7 +54,7 @@ class AccountsDb implements AutoCloseable {
     private static final String DATABASE_NAME = "accounts.db";
     private static final int PRE_N_DATABASE_VERSION = 9;
     private static final int CE_DATABASE_VERSION = 10;
-    private static final int DE_DATABASE_VERSION = 2; // Added visibility support in O.
+    private static final int DE_DATABASE_VERSION = 3; // Added visibility support in O
 
 
     static final String TABLE_ACCOUNTS = "accounts";
@@ -75,7 +75,7 @@ class AccountsDb implements AutoCloseable {
 
     private static final String TABLE_VISIBILITY = "visibility";
     private static final String VISIBILITY_ACCOUNTS_ID = "accounts_id";
-    private static final String VISIBILITY_UID = "_uid";
+    private static final String VISIBILITY_PACKAGE = "_package";
     private static final String VISIBILITY_VALUE = "value";
 
     private static final String TABLE_GRANTS = "grants";
@@ -252,7 +252,7 @@ class AccountsDb implements AutoCloseable {
                 createAccountsDeletionTrigger(db);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_GRANTS);
                 db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEBUG);
-                oldVersion ++;
+                oldVersion++;
             }
 
             if (oldVersion != newVersion) {
@@ -559,9 +559,9 @@ class AccountsDb implements AutoCloseable {
         private void createAccountsVisibilityTable(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + TABLE_VISIBILITY + " ( "
                   + VISIBILITY_ACCOUNTS_ID + " INTEGER NOT NULL, "
-                  + VISIBILITY_UID + " TEXT NOT NULL, "
+                  + VISIBILITY_PACKAGE + " TEXT NOT NULL, "
                   + VISIBILITY_VALUE + " INTEGER, "
-                  + "PRIMARY KEY(" + VISIBILITY_ACCOUNTS_ID + "," + VISIBILITY_UID + "))");
+                  + "PRIMARY KEY(" + VISIBILITY_ACCOUNTS_ID + "," + VISIBILITY_PACKAGE + "))");
         }
 
         static void createDebugTable(SQLiteDatabase db) {
@@ -591,9 +591,18 @@ class AccountsDb implements AutoCloseable {
             Log.i(TAG, "upgrade from version " + oldVersion + " to version " + newVersion);
 
             if (oldVersion == 1) {
-              createAccountsVisibilityTable(db);
-              createAccountsDeletionVisibilityCleanupTrigger(db);
-              ++oldVersion;
+                createAccountsVisibilityTable(db);
+                createAccountsDeletionVisibilityCleanupTrigger(db);
+                oldVersion = 3; // skip version 2 which had uid based table
+            }
+
+            if (oldVersion == 2) {
+                // Remove uid based table and replace it with packageName based
+                db.execSQL("DROP TRIGGER IF EXISTS " + TABLE_ACCOUNTS + "DeleteVisibility");
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCOUNTS);
+                createAccountsVisibilityTable(db);
+                createAccountsDeletionVisibilityCleanupTrigger(db);
+                oldVersion++;
             }
 
             if (oldVersion != newVersion) {
@@ -890,20 +899,20 @@ class AccountsDb implements AutoCloseable {
                 new String[] {Integer.toString(uid)}) > 0;
     }
 
-    boolean setAccountVisibility(long accountId, int uid, int visibility) {
+    boolean setAccountVisibility(long accountId, String packageName, int visibility) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(VISIBILITY_ACCOUNTS_ID, String.valueOf(accountId));
-        values.put(VISIBILITY_UID, String.valueOf(uid));
+        values.put(VISIBILITY_PACKAGE, packageName);
         values.put(VISIBILITY_VALUE, String.valueOf(visibility));
         return (db.replace(TABLE_VISIBILITY, VISIBILITY_VALUE, values) != -1);
     }
 
-    Integer findAccountVisibility(Account account, int uid) {
+    Integer findAccountVisibility(Account account, String packageName) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabase();
         final Cursor cursor = db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_VALUE},
-                SELECTION_ACCOUNTS_ID_BY_ACCOUNT + " AND " + VISIBILITY_UID + "=? ",
-                new String[] {account.name, account.type, String.valueOf(uid)}, null, null, null);
+                SELECTION_ACCOUNTS_ID_BY_ACCOUNT + " AND " + VISIBILITY_PACKAGE + "=? ",
+                new String[] {account.name, account.type, packageName}, null, null, null);
         try {
             while (cursor.moveToNext()) {
                 return cursor.getInt(0);
@@ -914,11 +923,11 @@ class AccountsDb implements AutoCloseable {
         return null;
     }
 
-    Integer findAccountVisibility(long accountId, int uid) {
+    Integer findAccountVisibility(long accountId, String packageName) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabase();
         final Cursor cursor = db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_VALUE},
-                VISIBILITY_ACCOUNTS_ID + "=? AND " + VISIBILITY_UID + "=? ",
-                new String[] {String.valueOf(accountId), String.valueOf(uid)}, null, null, null);
+                VISIBILITY_ACCOUNTS_ID + "=? AND " + VISIBILITY_PACKAGE + "=? ",
+                new String[] {String.valueOf(accountId), packageName}, null, null, null);
         try {
             while (cursor.moveToNext()) {
                 return cursor.getInt(0);
@@ -944,18 +953,18 @@ class AccountsDb implements AutoCloseable {
     }
 
     /**
-     * Returns a map from uid to visibility value.
+     * Returns a map from packageNames to visibility.
      */
-    Map<Integer, Integer> findAllVisibilityValuesForAccount(Account account) {
+    Map<String, Integer> findAllVisibilityValuesForAccount(Account account) {
         SQLiteDatabase db = mDeDatabase.getReadableDatabase();
-        Map<Integer, Integer> result = new HashMap<>();
+        Map<String, Integer> result = new HashMap<>();
         final Cursor cursor =
-                db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_UID, VISIBILITY_VALUE},
-                        SELECTION_ACCOUNTS_ID_BY_ACCOUNT,
-                        new String[] {account.name, account.type}, null, null, null);
+                db.query(TABLE_VISIBILITY, new String[] {VISIBILITY_PACKAGE, VISIBILITY_VALUE},
+                        SELECTION_ACCOUNTS_ID_BY_ACCOUNT, new String[] {account.name, account.type},
+                        null, null, null);
         try {
             while (cursor.moveToNext()) {
-                result.put(cursor.getInt(0), cursor.getInt(1));
+                result.put(cursor.getString(0), cursor.getInt(1));
             }
         } finally {
             cursor.close();
@@ -963,10 +972,10 @@ class AccountsDb implements AutoCloseable {
         return result;
     }
 
-    boolean deleteAccountVisibilityForUid(int uid) {
+    boolean deleteAccountVisibilityForPackage(String packageName) {
         SQLiteDatabase db = mDeDatabase.getWritableDatabase();
-        return db.delete(TABLE_VISIBILITY, VISIBILITY_UID + "=? ",
-                new String[] {Integer.toString(uid)}) > 0;
+        return db.delete(TABLE_VISIBILITY, VISIBILITY_PACKAGE + "=? ",
+                new String[] {packageName}) > 0;
     }
 
     long insertOrReplaceMetaAuthTypeAndUid(String authenticatorType, int uid) {

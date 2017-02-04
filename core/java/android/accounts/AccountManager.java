@@ -338,21 +338,24 @@ public class AccountManager {
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 
     /**
-     * Uid key to set default visibility for applications targeting API level
+     * Key to set default visibility for applications targeting API level
      * {@link android.os.Build.VERSION_CODES#O} or above and don't have the same signature as
      * authenticator See {@link #getAccountVisibility}. If the value was not set by authenticator
-     * USER_MANAGED_NOT_VISIBLE is used.
+     * {@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE} is used.
      */
-    public static final int UID_KEY_DEFAULT_VISIBILITY = -2;
+    public static final String PACKAGE_NAME_KEY_LEGACY_VISIBLE =
+            "android.accounts.key_legacy_visible";
 
     /**
-     * Uid key to set visibility for applications targeting API level below
-     * {@link android.os.Build.VERSION_CODES#O} with GET_ACCOUNS permission, or applications with
-     * any targeting API level with the same signature as authenticator. See
-     * {@link #getAccountVisibility}. If the value was not set by authenticator USER_MANAGED_VISIBLE
-     * is used.
+     * Key to set visibility for applications targeting API level below
+     * {@link android.os.Build.VERSION_CODES#O} with
+     * {@link android.Manifest.permission#GET_ACCOUNTS} permission, or applications with any
+     * targeting API level with the same signature as authenticator. See
+     * {@link #getAccountVisibility}. If the value was not set by authenticator
+     * {@link #VISIBILITY_USER_MANAGED_VISIBLE} is used.
      */
-    public static final int UID_KEY_DEFAULT_LEGACY_VISIBILITY = -3;
+    public static final String PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE =
+            "android.accounts.key_legacy_not_visible";
 
     /**
      * @hide
@@ -565,12 +568,14 @@ public class AccountManager {
     }
 
     /**
-     * Returns the accounts visible to the specified package, in an environment where some apps
-     * are not authorized to view all accounts. This method can only be called by system apps.
+     * Returns the accounts visible to the specified package, in an environment where some apps are
+     * not authorized to view all accounts. This method can only be called by system apps and
+     * authenticators managing the type
+     *
      * @param type The type of accounts to return, null to retrieve all accounts
      * @param packageName The package name of the app for which the accounts are to be returned
-     * @return An array of {@link Account}, one per matching account.  Empty
-     *     (never null) if no accounts of the specified type have been added.
+     * @return An array of {@link Account}, one per matching account. Empty (never null) if no
+     *         accounts of the specified type have been added.
      */
     @NonNull
     public Account[] getAccountsByTypeForPackage(String type, String packageName) {
@@ -609,7 +614,8 @@ public class AccountManager {
      *
      * <p>
      * <b>NOTE:</b> If targeting your app to work on API level
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and before, GET_ACCOUNTS permission is
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and before,
+     * {@link android.Manifest.permission#GET_ACCOUNTS} permission is
      * needed for those platforms, irrespective of uid or signature match. See docs for this
      * function in API level {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
      *
@@ -750,7 +756,8 @@ public class AccountManager {
      * accounts managed by AbstractAccountAuthenticators whose signature matches the client.
      * <p>
      * <b>NOTE:</b> If targeting your app to work on API level
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and before, GET_ACCOUNTS permission is
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and before,
+     * {@link android.Manifest.permission#GET_ACCOUNTS} permission is
      * needed for those platforms, irrespective of uid or signature match. See docs for this
      * function in API level {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
      *
@@ -822,9 +829,8 @@ public class AccountManager {
     }
 
     /**
-     * Adds an account directly to the AccountManager. Additionally this makes the Account visible
-     * to desired UIDs of applications on the device, and sends directed broadcasts to these
-     * individual applications.
+     * Adds an account directly to the AccountManager. Additionally it specifies Account visiblity
+     * for given list of packages.
      * <p>
      * Normally used by sign-up wizards associated with authenticators, not directly by
      * applications.
@@ -841,14 +847,14 @@ public class AccountManager {
      * @param account The {@link Account} to add
      * @param password The password to associate with the account, null for none
      * @param extras String values to use for the account's userdata, null for none
-     * @param visibility Map from uid to visibility values which will be set before account is
-     *        added. See getAccountVisibility for possilbe values.
+     * @param visibility Map from packageName to visibility values which will be set before account
+     *        is added. See {@link #getAccountVisibility} for possible values.
      *
      * @return True if the account was successfully added, false if the account already exists, the
      *         account is null, or another error occurs.
      */
     public boolean addAccountExplicitly(Account account, String password, Bundle extras,
-            Map<Integer, Integer> visibility) {
+            Map<String, Integer> visibility) {
         if (account == null)
             throw new IllegalArgumentException("account is null");
         try {
@@ -860,20 +866,22 @@ public class AccountManager {
     }
 
     /**
-     * Returns UIDs of applications for which visibility of given account was explicitly set.
+     * Returns package names and visibility which were explicitly set for given account.
      * <p>
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
      *
      * @param account The account for which visibility data should be returned.
      *
-     * @return Map from uid to visibility for given account.
+     * @return Map from package names to visibility for given account.
      */
-    public Map<Integer, Integer> getUidsAndVisibilityForAccount(Account account) {
+    public Map<String, Integer> getPackagesAndVisibilityForAccount(Account account) {
         try {
+            if (account == null)
+                throw new IllegalArgumentException("account is null");
             @SuppressWarnings("unchecked")
-            Map<Integer, Integer> result = (Map<Integer, Integer>) mService
-                    .getUidsAndVisibilityForAccount(account);
+            Map<String, Integer> result = (Map<String, Integer>) mService
+                    .getPackagesAndVisibilityForAccount(account);
             return result;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -907,30 +915,34 @@ public class AccountManager {
     }
 
     /**
-     * Set visibility value of given account to certain UID.
+     * Set visibility value of given account to certain packageName.
+     * Package name must match installed application, or be equal to
+     * {@link #PACKAGE_NAME_KEY_LEGACY_VISIBLE} or {@link #PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE}.
      * <p>
      * See {@link #getAccountVisibility} for possible values.
      * <p>
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
      *
-     * @param account Account to make visible.
-     * @param uid The UID of the application to modify account visibility.
+     * @param account Account to update visibility
+     * @param packageName Package name of the application to modify account visibility.
      * @param visibility - new visibility value.
      *
      * @return True if visibility value was succesfully updated.
      */
-    public boolean setAccountVisibility(Account account, int uid,
+    public boolean setAccountVisibility(Account account, String packageName,
             @AccountVisibility int visibility) {
+        if (account == null)
+            throw new IllegalArgumentException("account is null");
         try {
-            return mService.setAccountVisibility(account, uid, visibility);
+            return mService.setAccountVisibility(account, packageName, visibility);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Gets visibility of certain account for given UID. Possible returned values are:
+     * Get visibility of certain account for given application. Possible returned values are:
      * <ul>
      * <li>{@link #VISIBILITY_UNDEFINED}</li>
      * <li>{@link #VISIBILITY_VISIBLE}</li>
@@ -944,13 +956,15 @@ public class AccountManager {
      * the specified account.
      *
      * @param account Account to get visibility.
-     * @param uid The UID of the application to get account visibility.
+     * @param packageName Package name of the application to get account visibility
      *
-     * @return int Visibility for given account and uid.
+     * @return int Visibility for given account and package.
      */
-    public @AccountVisibility int getAccountVisibility(Account account, int uid) {
+    public @AccountVisibility int getAccountVisibility(Account account, String packageName) {
+        if (account == null)
+            throw new IllegalArgumentException("account is null");
         try {
-            return mService.getAccountVisibility(account, uid);
+            return mService.getAccountVisibility(account, packageName);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

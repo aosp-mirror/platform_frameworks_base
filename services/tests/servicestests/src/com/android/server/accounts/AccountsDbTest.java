@@ -355,49 +355,49 @@ public class AccountsDbTest {
     @Test
     public void testVisibilityFindSetDelete() {
         long accId = 10;
-        int uid1 = 100500;
-        int uid2 = 100501;
+        String packageName1 = "com.example.one";
+        String packageName2 = "com.example.two";
         Account account = new Account("name", "example.com");
-        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
 
         mAccountsDb.insertDeAccount(account, accId);
-        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
-        assertNull(mAccountsDb.findAccountVisibility(accId, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
+        assertNull(mAccountsDb.findAccountVisibility(accId, packageName1));
 
-        mAccountsDb.setAccountVisibility(accId, uid1, 1);
-        assertEquals(mAccountsDb.findAccountVisibility(account, uid1), Integer.valueOf(1));
-        assertEquals(mAccountsDb.findAccountVisibility(accId, uid1), Integer.valueOf(1));
+        mAccountsDb.setAccountVisibility(accId, packageName1, 1);
+        assertEquals(mAccountsDb.findAccountVisibility(account, packageName1), Integer.valueOf(1));
+        assertEquals(mAccountsDb.findAccountVisibility(accId, packageName1), Integer.valueOf(1));
 
-        mAccountsDb.setAccountVisibility(accId, uid2, 2);
-        assertEquals(mAccountsDb.findAccountVisibility(accId, uid2), Integer.valueOf(2));
+        mAccountsDb.setAccountVisibility(accId, packageName2, 2);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, packageName2), Integer.valueOf(2));
 
-        mAccountsDb.setAccountVisibility(accId, uid2, 3);
-        assertEquals(mAccountsDb.findAccountVisibility(accId, uid2), Integer.valueOf(3));
+        mAccountsDb.setAccountVisibility(accId, packageName2, 3);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, packageName2), Integer.valueOf(3));
 
-        Map<Integer, Integer> vis = mAccountsDb.findAllVisibilityValuesForAccount(account);
+        Map<String, Integer> vis = mAccountsDb.findAllVisibilityValuesForAccount(account);
         assertEquals(vis.size(), 2);
-        assertEquals(vis.get(uid1), Integer.valueOf(1));
-        assertEquals(vis.get(uid2), Integer.valueOf(3));
+        assertEquals(vis.get(packageName1), Integer.valueOf(1));
+        assertEquals(vis.get(packageName2), Integer.valueOf(3));
 
-        assertTrue(mAccountsDb.deleteAccountVisibilityForUid(uid1));
-        assertNull(mAccountsDb.findAccountVisibility(accId, uid1));
-        assertFalse(mAccountsDb.deleteAccountVisibilityForUid(uid1)); // Already deleted.
+        assertTrue(mAccountsDb.deleteAccountVisibilityForPackage(packageName1));
+        assertNull(mAccountsDb.findAccountVisibility(accId, packageName1));
+        assertFalse(mAccountsDb.deleteAccountVisibilityForPackage(packageName1)); // 2nd attempt.
     }
 
     @Test
     public void testVisibilityCleanupTrigger() {
         long accId = 10;
-        int uid1 = 100500;
+        String packageName1 = "com.example.one";
         Account account = new Account("name", "example.com");
 
-        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
         mAccountsDb.insertDeAccount(account, accId);
-        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
 
-        mAccountsDb.setAccountVisibility(accId, uid1, 1);
-        assertEquals(mAccountsDb.findAccountVisibility(accId, uid1), Integer.valueOf(1));
+        mAccountsDb.setAccountVisibility(accId, packageName1, 1);
+        assertEquals(mAccountsDb.findAccountVisibility(accId, packageName1), Integer.valueOf(1));
 
         assertTrue(mAccountsDb.deleteDeAccount(accId)); // Trigger should remove visibility.
-        assertNull(mAccountsDb.findAccountVisibility(account, uid1));
+        assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
     }
 }
