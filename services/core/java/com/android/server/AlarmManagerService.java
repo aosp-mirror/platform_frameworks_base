@@ -1123,9 +1123,6 @@ class AlarmManagerService extends SystemService {
                         + " interval=" + interval + " flags=0x" + Integer.toHexString(flags));
             }
 
-            if(blockAlarm){
-                Slog.e(TAG, "RTC alarm blocked: " + type + " " + listenerTag + " " + callingPackage + " " + operation.getTag(""));
-            }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
                 interval, operation, directReceiver, listenerTag, flags, true, workSource,
                 alarmClock, callingUid, callingPackage);
