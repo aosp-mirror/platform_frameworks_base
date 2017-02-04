@@ -20,7 +20,11 @@ import android.graphics.Rect;
 import android.view.View;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BatteryController;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
@@ -28,7 +32,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 /**
  * Controls how light status bar flag applies to the icons.
  */
-public class LightBarController implements BatteryController.BatteryStateChangeCallback {
+public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
@@ -202,5 +206,38 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         reevaluate();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("LightBarController: ");
+        pw.print(" mSystemUiVisibility=0x"); pw.print(
+                Integer.toHexString(mSystemUiVisibility));
+        pw.print(" mFullscreenStackVisibility=0x"); pw.print(
+                Integer.toHexString(mFullscreenStackVisibility));
+        pw.print(" mDockedStackVisibility=0x"); pw.println(
+                Integer.toHexString(mDockedStackVisibility));
+
+        pw.print(" mFullscreenLight="); pw.print(mFullscreenLight);
+        pw.print(" mDockedLight="); pw.println(mDockedLight);
+
+        pw.print(" mLastFullscreenBounds="); pw.print(mLastFullscreenBounds);
+        pw.print(" mLastDockedBounds="); pw.println(mLastDockedBounds);
+
+        pw.print(" mNavigationLight="); pw.print(mNavigationLight);
+        pw.print(" mHasLightNavigationBar="); pw.println(mHasLightNavigationBar);
+
+        pw.print(" mLastStatusBarMode="); pw.print(mLastStatusBarMode);
+        pw.print(" mLastNavigationBarMode="); pw.println(mLastNavigationBarMode);
+
+        pw.print(" mScrimAlpha="); pw.print(mScrimAlpha);
+        pw.print(" mScrimAlphaBelowThreshold="); pw.println(mScrimAlphaBelowThreshold);
+        pw.println();
+        pw.println(" StatusBarTransitionsController:");
+        mStatusBarIconController.getTransitionsController().dump(fd, pw, args);
+        pw.println();
+        pw.println(" NavigationBarTransitionsController:");
+        mNavigationBarController.dump(fd, pw, args);
+        pw.println();
     }
 }

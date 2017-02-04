@@ -3416,6 +3416,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             pw.println("  mGroupManager: null");
         }
+
+        mLightBarController.dump(fd, pw, args);
+
         if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }
