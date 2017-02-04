@@ -624,7 +624,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
-    private boolean isCallerSystemUid() {
+    private boolean callerCanRequestScores() {
         // REQUEST_NETWORK_SCORES is a signature only permission.
         return mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES) ==
                  PackageManager.PERMISSION_GRANTED;
@@ -633,7 +633,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean clearScores() {
         // Only the active scorer or the system should be allowed to flush all scores.
-        if (isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
+        if (isCallerActiveScorer(getCallingUid()) || callerCanRequestScores()) {
             final long token = Binder.clearCallingIdentity();
             try {
                 clearInternal();
@@ -695,7 +695,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
-        if (isCallerActiveScorer(getCallingUid()) || isCallerSystemUid()) {
+        if (isCallerActiveScorer(getCallingUid()) || callerCanRequestScores()) {
             // no-op for now but we could write to the setting if needed.
         } else {
             throw new SecurityException(
