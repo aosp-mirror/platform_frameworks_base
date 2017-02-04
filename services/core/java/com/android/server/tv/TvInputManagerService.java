@@ -23,15 +23,12 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -84,12 +81,9 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.SystemService;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -240,44 +234,6 @@ public final class TvInputManagerService extends SystemService {
                 // it happened to the whole package or a specific component. Returning true so that
                 // the update can be handled in {@link #onSomePackagesChanged}.
                 return true;
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                synchronized (mLock) {
-                    UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-                    if (!userState.packageSet.contains(packageName)) {
-                        // Not a TV input package.
-                        return;
-                    }
-                }
-
-                ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-
-                String selection = TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME + "=?";
-                String[] selectionArgs = { packageName };
-
-                operations.add(ContentProviderOperation.newDelete(TvContract.Channels.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-                operations.add(ContentProviderOperation.newDelete(TvContract.Programs.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-                operations.add(ContentProviderOperation
-                        .newDelete(TvContract.WatchedPrograms.CONTENT_URI)
-                        .withSelection(selection, selectionArgs).build());
-
-                ContentProviderResult[] results = null;
-                try {
-                    ContentResolver cr = getContentResolverForUser(getChangingUserId());
-                    results = cr.applyBatch(TvContract.AUTHORITY, operations);
-                } catch (RemoteException | OperationApplicationException e) {
-                    Slog.e(TAG, "error in applyBatch", e);
-                }
-
-                if (DEBUG) {
-                    Slog.d(TAG, "onPackageRemoved(packageName=" + packageName + ", uid=" + uid
-                            + ")");
-                    Slog.d(TAG, "results=" + results);
-                }
             }
         };
         monitor.register(mContext, null, UserHandle.ALL, true);
