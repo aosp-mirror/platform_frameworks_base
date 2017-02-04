@@ -28,4 +28,8 @@ public interface PlayerFocusEnforcer {
     public boolean duckPlayers(FocusRequester winner, FocusRequester loser);
 
     public void unduckPlayers(FocusRequester winner);
+
+    public void mutePlayersForCall(int[] usagesToMute);
+
+    public void unmutePlayersForCall();
 }

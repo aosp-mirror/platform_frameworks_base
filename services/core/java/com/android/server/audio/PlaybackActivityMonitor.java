@@ -147,6 +147,11 @@ public final class PlaybackActivityMonitor
             for (int piid : mDuckedPlayers) {
                 pw.println(" " + piid);
             }
+            // players muted due to the device ringing or being in a call
+            pw.println("\n  muted player piids:");
+            for (int piid : mMutedPlayers) {
+                pw.println(" " + piid);
+            }
         }
     }
 
@@ -231,6 +236,7 @@ public final class PlaybackActivityMonitor
     //=================================================================
     // PlayerFocusEnforcer implementation
     private final ArrayList<Integer> mDuckedPlayers = new ArrayList<Integer>();
+    private final ArrayList<Integer> mMutedPlayers = new ArrayList<Integer>();
 
     @Override
     public boolean duckPlayers(FocusRequester winner, FocusRequester loser) {
@@ -290,14 +296,73 @@ public final class PlaybackActivityMonitor
                         && winner.hasSameUid(apc.getClientUid())) {
                     try {
                         if (DEBUG) { Log.v(TAG, "unducking player" + piid); }
+                        mDuckedPlayers.remove(new Integer(piid));
                         //FIXME just a test before we have VolumeShape
                         apc.getPlayerProxy().setPan(0.0f);
-                        mDuckedPlayers.remove(new Integer(piid));
                     } catch (Exception e) {
                         Log.e(TAG, "Error unducking player " + piid, e);
                     }
                 } else {
                     Log.e(TAG, "Error unducking player " + piid + ", player not found");
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mutePlayersForCall(int[] usagesToMute) {
+        if (DEBUG) {
+            String log = new String("mutePlayersForCall: usages=");
+            for (int usage : usagesToMute) { log += " " + usage; }
+            Log.v(TAG, log);
+        }
+        synchronized (mPlayerLock) {
+            final Set<Integer> piidSet = mPlayers.keySet();
+            final Iterator<Integer> piidIterator = piidSet.iterator();
+            // find which players to mute
+            while (piidIterator.hasNext()) {
+                final Integer piid = piidIterator.next();
+                final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                final int playerUsage = apc.getAudioAttributes().getUsage();
+                boolean mute = false;
+                for (int usageToMute : usagesToMute) {
+                    if (playerUsage == usageToMute) {
+                        mute = true;
+                        break;
+                    }
+                }
+                if (mute) {
+                    try {
+                        if (DEBUG) { Log.v(TAG, "muting player" + piid); }
+                        apc.getPlayerProxy().setVolume(0.0f);
+                        mMutedPlayers.add(piid);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error muting player " + piid, e);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void unmutePlayersForCall() {
+        if (DEBUG) {
+            Log.v(TAG, "unmutePlayersForCall()");
+        }
+        synchronized (mPlayerLock) {
+            if (mMutedPlayers.isEmpty()) {
+                return;
+            }
+            for (int piid : mMutedPlayers) {
+                final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                if (apc != null) {
+                    try {
+                        if (DEBUG) { Log.v(TAG, "unmuting player" + piid); }
+                        apc.getPlayerProxy().setVolume(1.0f);
+                        mMutedPlayers.remove(new Integer(piid));
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error unmuting player " + piid, e);
+                    }
                 }
             }
         }
