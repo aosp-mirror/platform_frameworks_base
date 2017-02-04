@@ -39,6 +39,8 @@ StringPiece ToString(ResourceType type) {
       return "bool";
     case ResourceType::kColor:
       return "color";
+    case ResourceType::kConfigVarying:
+      return "configVarying";
     case ResourceType::kDimen:
       return "dimen";
     case ResourceType::kDrawable:
@@ -85,6 +87,7 @@ static const std::map<StringPiece, ResourceType> sResourceTypeMap{
     {"^attr-private", ResourceType::kAttrPrivate},
     {"bool", ResourceType::kBool},
     {"color", ResourceType::kColor},
+    {"configVarying", ResourceType::kConfigVarying},
     {"dimen", ResourceType::kDimen},
     {"drawable", ResourceType::kDrawable},
     {"font", ResourceType::kFont},

@@ -719,4 +719,23 @@ TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
   EXPECT_EQ(uint32_t(android::Res_value::TYPE_FLOAT), val->value.dataType);
 }
 
+TEST_F(ResourceParserTest, ParseConfigVaryingItem) {
+  std::string input = R"EOF(<item name="foo" type="configVarying">Hey</item>)EOF";
+  ASSERT_TRUE(TestParse(input));
+  ASSERT_NE(nullptr, test::GetValue<String>(&table_, "configVarying/foo"));
+}
+
+TEST_F(ResourceParserTest, ParseBagElement) {
+  std::string input =
+      R"EOF(<bag name="bag" type="configVarying"><item name="test">Hello!</item></bag>)EOF";
+  ASSERT_TRUE(TestParse(input));
+
+  Style* val = test::GetValue<Style>(&table_, "configVarying/bag");
+  ASSERT_NE(nullptr, val);
+
+  ASSERT_EQ(1u, val->entries.size());
+  EXPECT_EQ(Reference(test::ParseNameOrDie("attr/test")), val->entries[0].key);
+  EXPECT_NE(nullptr, ValueCast<RawString>(val->entries[0].value.get()));
+}
+
 }  // namespace aapt
