@@ -38,4 +38,10 @@ oneway interface IAutoFillAppCallback {
       * Start an intent sender from the context of the filled app
       */
     void startIntentSender(in IntentSender intent, in Intent fillInIntent);
+
+    /**
+      * Called by system_service to enable auto-fill in a session, after it was asynchronously
+      * started by the manager.
+      */
+    void enableSession();
 }

@@ -2931,7 +2931,7 @@ public final class ActivityThread {
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutoFill) {
                 structure = new AssistStructure(r.activity, forAutoFill);
                 Intent activityIntent = r.activity.getIntent();
-                boolean addAutoFillCallback = false;
+                boolean attachToSession = false;
                 // TODO(b/33197203): re-evaluate conditions below for auto-fill. In particular,
                 // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
                 boolean notSecure = r.window == null ||
@@ -2939,7 +2939,7 @@ public final class ActivityThread {
                                 & WindowManager.LayoutParams.FLAG_SECURE) == 0;
                 if (activityIntent != null && notSecure) {
                     if (forAutoFill) {
-                        addAutoFillCallback = true;
+                        attachToSession = true;
                     } else {
                         Intent intent = new Intent(activityIntent);
                         intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -2953,18 +2953,13 @@ public final class ActivityThread {
                     } else {
                         // activityIntent is unlikely to be null, but if it is, we should still
                         // set the auto-fill callback.
-                        addAutoFillCallback = notSecure;
+                        attachToSession = notSecure;
                     }
                 }
                 if (!forAutoFill) {
                     r.activity.onProvideAssistContent(content);
-                } else if (addAutoFillCallback) {
-                    IAutoFillAppCallback cb = r.activity.getAutoFillCallback();
-                    if (cb != null) {
-                        data.putBinder(AutoFillService.KEY_CALLBACK, cb.asBinder());
-                    } else {
-                        Slog.w(TAG, "handleRequestAssistContextExtras(): callback was GCed");
-                    }
+                } else if (attachToSession) {
+                    r.activity.attachToAutoFillSession();
                 }
             }
         }

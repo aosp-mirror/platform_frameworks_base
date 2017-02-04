@@ -18,8 +18,11 @@ package com.android.server.autofill;
 
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTO_FILL_MANAGER_SERVICE;
+import static com.android.server.autofill.Helper.DEBUG;
+import static com.android.server.autofill.Helper.VERBOSE;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -34,7 +37,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -70,12 +72,11 @@ import java.util.List;
 public final class AutoFillManagerService extends SystemService {
 
     private static final String TAG = "AutoFillManagerService";
-    static final boolean DEBUG = false;
 
-    protected static final int MSG_REQUEST_AUTO_FILL_FOR_USER = 1;
-    protected static final int MSG_REQUEST_AUTO_FILL = 2;
-    private static final int MSG_REQUEST_SAVE_FOR_USER = 3;
-    private static final int MSG_ON_VALUE_CHANGED = 4;
+    private static final int MSG_START_SESSION = 1;
+    private static final int MSG_UPDATE_SESSION = 2;
+    private static final int MSG_FINISH_SESSION = 3;
+    private static final int MSG_REQUEST_SAVE_FOR_USER = 4;
 
     private final Context mContext;
     private final AutoFillUI mUi;
@@ -84,30 +85,31 @@ public final class AutoFillManagerService extends SystemService {
 
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
-            case MSG_REQUEST_AUTO_FILL_FOR_USER: {
-                handleAutoFillForUser(msg.arg1);
+            case MSG_START_SESSION: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final int userId = msg.arg1;
+                final IBinder activityToken = (IBinder) args.arg1;
+                final IBinder appCallback = (IBinder) args.arg2;
+                final AutoFillId autoFillId = (AutoFillId) args.arg3;
+                final Rect bounds = (Rect) args.arg4;
+                final AutoFillValue value = (AutoFillValue) args.arg5;
+                handleStartSession(userId, activityToken, appCallback, autoFillId, bounds, value);
+                return;
+            } case MSG_FINISH_SESSION: {
+                handleFinishSession(msg.arg1, (IBinder) msg.obj);
                 return;
             } case MSG_REQUEST_SAVE_FOR_USER: {
                 handleSaveForUser(msg.arg1);
                 return;
-            } case MSG_REQUEST_AUTO_FILL: {
+            } case MSG_UPDATE_SESSION: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final int userId = msg.arg1;
-                final int flags = msg.arg2;
                 final IBinder activityToken = (IBinder) args.arg1;
                 final AutoFillId autoFillId = (AutoFillId) args.arg2;
                 final Rect bounds = (Rect) args.arg3;
-                args.recycle();
-                handleAutoFill(activityToken, userId, autoFillId, bounds, flags);
-                return;
-            } case MSG_ON_VALUE_CHANGED: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final int userId = msg.arg1;
-                final IBinder activityToken = (IBinder) args.arg1;
-                final AutoFillId autoFillId = (AutoFillId) args.arg2;
-                final AutoFillValue newValue = (AutoFillValue) args.arg3;
-                args.recycle();
-                handleValueChanged(activityToken, userId, autoFillId, newValue);
+                final AutoFillValue value = (AutoFillValue) args.arg4;
+                final int userId = args.argi5;
+                final int flags = args.argi6;
+                handleUpdateSession(userId, activityToken, autoFillId, bounds, value, flags);
                 return;
             } default: {
                 Slog.w(TAG, "Invalid message: " + msg);
@@ -188,8 +190,11 @@ public final class AutoFillManagerService extends SystemService {
 
     /**
      * Gets the service instance for an user.
+     *
+     * @return service instance or {@code null} if user does not have a service set.
      */
-    AutoFillManagerServiceImpl getOrCreateServiceForUserLocked(int userId) {
+    @Nullable
+    AutoFillManagerServiceImpl getServiceForUserLocked(int userId) {
         AutoFillManagerServiceImpl service = mServicesCache.get(userId);
         if (service == null) {
             service = newServiceForUser(userId);
@@ -209,107 +214,114 @@ public final class AutoFillManagerService extends SystemService {
         }
     }
 
-    private void handleAutoFill(IBinder activityToken, int userId, AutoFillId autoFillId,
-            Rect bounds, int flags) {
+    private void handleStartSession(int userId, IBinder activityToken, IBinder appCallback,
+            AutoFillId autoFillId, Rect bounds, AutoFillValue value) {
         synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getOrCreateServiceForUserLocked(userId);
-            if (service != null) {
-                service.requestAutoFillLocked(activityToken, autoFillId, bounds, flags);
+            final AutoFillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service == null) {
+                return;
             }
+           service.startSessionLocked(activityToken, appCallback, autoFillId, bounds, value);
         }
     }
 
-    private void handleValueChanged(IBinder activityToken, int userId, AutoFillId autoFillId,
-            AutoFillValue newValue) {
+    private void handleFinishSession(int userId, IBinder activityToken) {
         synchronized (mLock) {
-            final AutoFillManagerServiceImpl service = getOrCreateServiceForUserLocked(userId);
-            if (service != null) {
-                service.onValueChangeLocked(activityToken, autoFillId, newValue);
+            final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+            if (service == null) {
+                return;
             }
+            service.finishSessionLocked(activityToken);
+        }
+    }
+
+    private void handleUpdateSession(int userId, IBinder activityToken, AutoFillId autoFillId,
+            Rect bounds, AutoFillValue value, int flags) {
+        synchronized (mLock) {
+            final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+            if (service == null) {
+                return;
+            }
+
+            service.updateSessionLocked(activityToken, autoFillId, bounds, value, flags);
         }
     }
 
     private IBinder getTopActivityForUser() {
         final List<IBinder> topActivities = LocalServices
                 .getService(ActivityManagerInternal.class).getTopVisibleActivities();
+        if (DEBUG) Slog.d(TAG, "Top activities (" + topActivities.size() + "): " + topActivities);
         if (topActivities.isEmpty()) {
+            Slog.w(TAG, "Could not get top activity");
             return null;
         }
         return topActivities.get(0);
-    }
-
-    private void handleAutoFillForUser(int userId) {
-        final IBinder activityToken = getTopActivityForUser();
-        if (activityToken != null) {
-            synchronized (mLock) {
-                final AutoFillManagerServiceImpl service =
-                        getOrCreateServiceForUserLocked(userId);
-                service.requestAutoFillLocked(activityToken, null, null, 0);
-            }
-        }
-
     }
 
     private void handleSaveForUser(int userId) {
         final IBinder activityToken = getTopActivityForUser();
         if (activityToken != null) {
             synchronized (mLock) {
-                final AutoFillManagerServiceImpl service =
-                        getOrCreateServiceForUserLocked(userId);
+                final AutoFillManagerServiceImpl service = mServicesCache.get(userId);
+                if (service == null) {
+                    Log.w(TAG, "handleSaveForUser(): no cached service for userId " + userId);
+                    return;
+                }
+
                 service.requestSaveForUserLocked(activityToken);
             }
         }
     }
 
-    private IBinder getTopActivity() {
-        final int uid = Binder.getCallingUid();
-        final IBinder activityToken = LocalServices.getService(ActivityManagerInternal.class)
-                .getTopVisibleActivity(uid);
-        if (activityToken == null) {
-            // Make sure its called by the top activity.
-            if (uid == Process.SYSTEM_UID) {
-                // TODO(b/33197203, b/34819567, b/34171325): figure out proper way to handle it
-                if (DEBUG) Log.w(TAG, "requestAutoFill(): ignoring call from system");
-
-                return null;
-            }
-            throw new SecurityException("uid " + uid + " does not own the top activity");
-        }
-
-        return activityToken;
-    }
-
     final class AutoFillManagerServiceStub extends IAutoFillManagerService.Stub {
 
         @Override
-        public void requestAutoFill(AutoFillId id, Rect bounds, int flags) {
-            final IBinder activityToken = getTopActivity();
-            if (activityToken != null) {
-                mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIIOOO(MSG_REQUEST_AUTO_FILL,
-                        UserHandle.getCallingUserId(), flags, activityToken, id, bounds));
+        public void startSession(IBinder activityToken, IBinder appCallback, AutoFillId autoFillId,
+                Rect bounds, AutoFillValue value) throws RemoteException {
+            // TODO(b/33197203): make sure it's called by resumed / focused activity
+
+            final int userId = UserHandle.getCallingUserId();
+            if (VERBOSE) {
+                Slog.v(TAG, "startSession: autoFillId=" + autoFillId + ", bounds=" + bounds
+                        + ", value=" + value);
             }
+
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = activityToken;
+            args.arg2 = appCallback;
+            args.arg3 = autoFillId;
+            args.arg4 = bounds;
+            args.arg5 = value;
+
+            mHandlerCaller.sendMessage(mHandlerCaller.getHandler().obtainMessage(MSG_START_SESSION,
+                    userId, 0, args));
         }
 
         @Override
-        public void requestAutoFillForUser(int userId) {
-            mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(
-                    MSG_REQUEST_AUTO_FILL_FOR_USER, userId));
+        public void updateSession(IBinder activityToken, AutoFillId id, Rect bounds,
+                AutoFillValue value, int flags) throws RemoteException {
+            if (DEBUG) {
+                Slog.d(TAG, "updateSession: flags=" + flags + ", autoFillId=" + id
+                        + ", bounds=" + bounds + ", value=" + value);
+            }
+
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOOII(MSG_UPDATE_SESSION,
+                    activityToken, id, bounds, value, UserHandle.getCallingUserId(), flags));
+        }
+
+        @Override
+        public void finishSession(IBinder activityToken) throws RemoteException {
+            if (VERBOSE) Slog.v(TAG, "finishSession(): " + activityToken);
+
+            mHandlerCaller.sendMessage(mHandlerCaller.getHandler().obtainMessage(MSG_FINISH_SESSION,
+                    UserHandle.getCallingUserId(), 0, activityToken));
         }
 
         @Override
         public void requestSaveForUser(int userId) {
             mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(MSG_REQUEST_SAVE_FOR_USER, userId));
-        }
-
-        @Override
-        public void onValueChanged(AutoFillId id, AutoFillValue value) {
-            final IBinder activityToken = getTopActivity();
-            if (activityToken != null) {
-                mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOOO(MSG_ON_VALUE_CHANGED,
-                        UserHandle.getCallingUserId(), activityToken, id, value));
-            }
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(MSG_REQUEST_SAVE_FOR_USER,
+                    userId));
         }
 
         @Override

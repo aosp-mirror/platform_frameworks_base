@@ -154,12 +154,6 @@ public abstract class ActivityManagerInternal {
     public abstract List<IBinder> getTopVisibleActivities();
 
     /**
-     * Returns the top, focused activity of the currently visible stack, but only if it belongs to
-     * the given UID.
-     */
-    public abstract IBinder getTopVisibleActivity(int uid);
-
-    /**
      * Callback for window manager to let activity manager know that docked stack changes its
      * minimized state.
      */

@@ -15,7 +15,6 @@
  */
 package com.android.server.autofill;
 
-
 import static com.android.server.autofill.Helper.DEBUG;
 
 import android.app.Notification;
@@ -29,7 +28,10 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder;
 import android.util.ArraySet;
+import android.os.Looper;
+import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
@@ -40,6 +42,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
+import com.android.internal.os.HandlerCaller;
 import com.android.server.UiThread;
 import com.android.server.autofill.AutoFillManagerServiceImpl.ViewState;
 
@@ -51,6 +54,8 @@ import java.io.PrintWriter;
 // TODO(b/33197203): document exactly what once the auto-fill bar is implemented
 final class AutoFillUI {
     private static final String TAG = "AutoFillUI";
+    private static final long SNACK_BAR_LIFETIME_MS = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final int MSG_HIDE_SNACK_BAR = 1;
 
     private static final String EXTRA_AUTH_INTENT_SENDER =
             "com.android.server.autofill.extra.AUTH_INTENT_SENDER";
@@ -70,13 +75,21 @@ final class AutoFillUI {
     private String mFilterText;
 
     private AutoFillUiCallback mCallback;
-    private int mClientId;
+    private IBinder mActivityToken;
 
-    public interface AutoFillUiCallback {
-        void authenticate(IntentSender intent, Intent fillInIntent);
-        void fill(Dataset dataset);
-        void save();
-    }
+    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
+        switch (msg.what) {
+            case MSG_HIDE_SNACK_BAR: {
+                hideSnackbarUiThread();
+                return;
+            }
+            default: {
+                Slog.w(TAG, "Invalid message: " + msg);
+            }
+        }
+    };
+    private final HandlerCaller mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(),
+            mHandlerCallback, true);
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
@@ -88,10 +101,10 @@ final class AutoFillUI {
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
-    void setCallback(AutoFillUiCallback callback, int clientId) {
+    void setCallback(AutoFillUiCallback callback, IBinder activityToken) {
         hideAll();
         mCallback = callback;
-        mClientId = clientId;
+        mActivityToken = activityToken;
     }
 
     /**
@@ -144,9 +157,21 @@ final class AutoFillUI {
         if (!hasCallback()) {
             return;
         }
+
+        if (datasets == null) {
+            // TODO(b/33197203): shouldn't be called, but keeping the WTF for a while just to be
+            // safe, otherwise it would crash system server...
+            Slog.wtf(TAG, "showFillUI(): no dataset");
+            return;
+        }
+
+        // TODO(b/33197203): call to hideAll() was making it janky because then mViewState is set
+        // to null and hence the first check inside the lambada fails, causing it to be displayed
+        // twice in some cases.
         hideAll();
+
         UiThread.getHandler().runWithScissors(() -> {
-            if (mViewState != viewState) {
+            if (mViewState == null || !mViewState.mId.equals(viewState.mId)) {
                 mViewState = viewState;
 
                 mFillView = new DatasetPicker(mContext, datasets,
@@ -158,12 +183,14 @@ final class AutoFillUI {
                             callback.fill(dataset);
                             hideFillUi();
                         });
-                // TODO: No magical numbers
+                // TODO(b/33197203): No magical numbers
                 mFillWindow = new AnchoredWindow(
                         mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-                if (DEBUG) Slog.d(TAG, "show FillUi");
+                if (DEBUG) Slog.d(TAG, "show FillUi: " + viewState.mId);
             }
+
+            // TODO(b/33197203): If bounds are the same we would not show, fix this
             if (!bounds.equals(mBounds)) {
                 if (DEBUG) Slog.d(TAG, "update FillUi bounds: " + mBounds);
                 mBounds = bounds;
@@ -216,6 +243,7 @@ final class AutoFillUI {
 
                 @Override
                 public void onCancelClick() {
+                    // TODO(b/33197203): add MetricsLogger call
                     hideSnackbarUiThread();
                 }
             }));
@@ -237,7 +265,7 @@ final class AutoFillUI {
         pw.println("AufoFill UI");
         final String prefix = "  ";
         pw.print(prefix); pw.print("sResultCode: "); pw.println(sResultCode);
-        pw.print(prefix); pw.print("mClientId: "); pw.println(mClientId);
+        pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
         pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
         pw.print(prefix); pw.print("mBounds: "); pw.println(mBounds);
@@ -264,9 +292,16 @@ final class AutoFillUI {
             mSnackbar = snackBar;
             mWm.addView(mSnackbar, params);
         }, 0);
+
+        if (DEBUG) {
+            Slog.d(TAG, "showSnackbar(): auto dismissing it in " + SNACK_BAR_LIFETIME_MS + " ms");
+        }
+        mHandlerCaller.sendMessageDelayed(mHandlerCaller.obtainMessage(MSG_HIDE_SNACK_BAR),
+                SNACK_BAR_LIFETIME_MS);
     }
 
     private void hideSnackbarUiThread() {
+        mHandlerCaller.getHandler().removeMessages(MSG_HIDE_SNACK_BAR);
         if (mSnackbar != null) {
             mWm.removeView(mSnackbar);
             mSnackbar = null;
@@ -277,6 +312,12 @@ final class AutoFillUI {
         synchronized (mLock) {
             return mCallback != null;
         }
+    }
+
+    interface AutoFillUiCallback {
+        void authenticate(IntentSender intent, Intent fillInIntent);
+        void fill(Dataset dataset);
+        void save();
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -345,7 +386,7 @@ final class AutoFillUI {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            NotificationManager.from(mContext).notify(mClientId, notification.build());
+            NotificationManager.from(mContext).notify(0, notification.build());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -355,7 +396,7 @@ final class AutoFillUI {
     private void hideFillResponseAuthUiUiThread() {
         final long identity = Binder.clearCallingIdentity();
         try {
-            NotificationManager.from(mContext).cancel(mClientId);
+            NotificationManager.from(mContext).cancel(0);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

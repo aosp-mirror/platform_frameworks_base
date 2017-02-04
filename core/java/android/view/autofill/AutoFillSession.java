@@ -21,11 +21,10 @@ import static android.view.autofill.Helper.DEBUG;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.IBinder;
 import android.service.autofill.IAutoFillAppCallback;
 import android.util.Log;
 import android.view.View;
-
-import com.android.internal.annotations.GuardedBy;
 
 import java.lang.ref.WeakReference;
 
@@ -39,6 +38,14 @@ public final class AutoFillSession {
     private static final String TAG = "AutoFillSession";
 
     private final IAutoFillAppCallback mCallback = new IAutoFillAppCallback.Stub() {
+
+        @Override
+        public void enableSession() {
+            if (DEBUG) Log.d(TAG, "enableSession()");
+
+            mEnabled = true;
+        }
+
         @Override
         public void autoFill(Dataset dataset) {
             final Activity activity = mActivity.get();
@@ -64,10 +71,8 @@ public final class AutoFillSession {
                     // TODO(b/33197203): handle protected value (like credit card)
                     if (id.isVirtual()) {
                         // Delegate virtual fields.
-                        setAutoFillDelegateCallback();
                         final VirtualViewDelegate delegate = view
-                                .getAutoFillVirtualViewDelegate(
-                                        mAutoFillDelegateCallback);
+                                .getAutoFillVirtualViewDelegate();
                         if (delegate == null) {
                             Log.w(TAG, "autoFill(): cannot fill virtual " + id
                                     + "; no VirtualViewDelegate for view "
@@ -102,29 +107,60 @@ public final class AutoFillSession {
         }
     };
 
-    private final WeakReference<Activity> mActivity;
+    private final AutoFillManager mAfm;
+    private WeakReference<Activity> mActivity;
 
-    @GuardedBy("this")
-    private VirtualViewDelegate.Callback mAutoFillDelegateCallback;
+    // Reference to the token, which is used by the server.
+    final WeakReference<IBinder> mToken;
 
-    public AutoFillSession(Activity activity) {
+    private boolean mEnabled;
+
+    public AutoFillSession(AutoFillManager afm, IBinder token) {
+        mToken = new WeakReference<>(token);
+        mAfm = afm;
+    }
+
+    /**
+     * Called by the {@link Activity} when it was asked to provider auto-fill data.
+     */
+    public void attachActivity(Activity activity) {
+        if (mActivity != null) {
+            Log.w(TAG, "attachActivity(): already attached");
+            return;
+        }
         mActivity = new WeakReference<>(activity);
+    }
+
+    /**
+     * Checks whether auto-fill is enabled for this session, as decided by the
+     * {@code AutoFillManagerService}.
+     */
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    /**
+     * Notifies the manager that a session finished.
+     */
+    // TODO(b/33197203): hook it to other lifecycle events like fragments transition
+    public void finishSession() {
+        if (mAfm != null) {
+            try {
+                mAfm.reset();
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Failed to finish session for " + mToken.get() + ": " + e);
+            }
+        }
     }
 
     public IAutoFillAppCallback getCallback() {
         return mCallback;
     }
 
-    /**
-     * Lazily sets the {@link #mAutoFillDelegateCallback}.
-     */
-    private void setAutoFillDelegateCallback() {
-        synchronized (this) {
-            if (mAutoFillDelegateCallback == null) {
-                mAutoFillDelegateCallback = new VirtualViewDelegate.Callback() {
-                    // TODO(b/33197203): implement
-                };
-            }
-        }
+    @Override
+    public String toString() {
+        if (!DEBUG) return super.toString();
+
+        return "AutoFillSession[activityoken=" + mToken.get() + "]";
     }
 }
