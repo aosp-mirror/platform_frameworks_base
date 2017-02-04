@@ -34,6 +34,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public String targetPackage;
 
     /**
+     * Names of the process(es) this instrumentation will run in.  If not specified, only
+     * runs in the main process of the targetPackage.  Can either be a comma-separated list
+     * of process names or '*' for any process that launches to run targetPackage code.
+     */
+    public String targetProcess;
+
+    /**
      * Full path to the base APK for this application.
      */
     public String sourceDir;
@@ -113,6 +120,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public InstrumentationInfo(InstrumentationInfo orig) {
         super(orig);
         targetPackage = orig.targetPackage;
+        targetProcess = orig.targetProcess;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
         splitNames = orig.splitNames;
@@ -141,6 +149,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(targetPackage);
+        dest.writeString(targetProcess);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
         dest.writeStringArray(splitNames);
@@ -170,6 +179,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     private InstrumentationInfo(Parcel source) {
         super(source);
         targetPackage = source.readString();
+        targetProcess = source.readString();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
         splitNames = source.readStringArray();

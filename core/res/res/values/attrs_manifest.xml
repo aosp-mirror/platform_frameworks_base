@@ -885,6 +885,12 @@
          will run against. -->
     <attr name="targetPackage" format="string" />
 
+    <!-- The name of an application's processes that an Instrumentation object
+         will run against.  If not specified, only runs in the main process of the targetPackage.
+         Can either be a comma-separated list of process names or '*' for any process that
+         launches to run targetPackage code. -->
+    <attr name="targetProcess" format="string" />
+
     <!-- Flag indicating that an Instrumentation class wants to take care
          of starting/stopping profiling itself, rather than relying on
          the default behavior of profiling the complete time it is running.
@@ -2297,6 +2303,7 @@
             is a period then it is appended to your package name. -->
         <attr name="name" />
         <attr name="targetPackage" />
+        <attr name="targetProcess" />
         <attr name="label" />
         <attr name="icon" />
         <attr name="roundIcon" />

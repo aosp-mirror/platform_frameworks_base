@@ -573,7 +573,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
-    public IntentFirewall mIntentFirewall;
+    final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
+
+    public final IntentFirewall mIntentFirewall;
 
     // Whether we should show our dialogs (ANR, crash, etc) or just perform their
     // default action automatically.  Important for devices without direct input
@@ -3926,7 +3928,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
             ProcessRecord app = getProcessRecordLocked(aInfo.processName,
                     aInfo.applicationInfo.uid, true);
-            if (app == null || app.instrumentationClass == null) {
+            if (app == null || app.instr == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startHomeActivityLocked(intent, aInfo, reason);
             }
@@ -5092,9 +5094,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         app.activities.clear();
 
-        if (app.instrumentationClass != null) {
+        if (app.instr != null) {
             Slog.w(TAG, "Crash of app " + app.processName
-                  + " running instrumentation " + app.instrumentationClass);
+                  + " running instrumentation " + app.instr.mClass);
             Bundle info = new Bundle();
             info.putString("shortMsg", "Process crashed.");
             finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
@@ -5227,7 +5229,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
                 app.thread.asBinder() == thread.asBinder()) {
-            boolean doLowMem = app.instrumentationClass == null;
+            boolean doLowMem = app.instr == null;
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
                 Slog.i(TAG, "Process " + app.processName + " (pid " + pid
@@ -6383,7 +6385,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
-                addAppLocked(app.info, false, null /* ABI override */);
+                addAppLocked(app.info, null, false, null /* ABI override */);
             }
         } else {
             mRemovedProcesses.add(app);
@@ -6559,7 +6561,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
-            String profileFile = app.instrumentationProfileFile;
+            String profileFile = app.instr != null ? app.instr.mProfileFile : null;
             ParcelFileDescriptor profileFd = null;
             int samplingInterval = 0;
             boolean profileAutoStop = false;
@@ -6587,14 +6589,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
-            if (app.instrumentationClass != null) {
-                notifyPackageUse(app.instrumentationClass.getPackageName(),
+            if (app.instr != null) {
+                notifyPackageUse(app.instr.mClass.getPackageName(),
                                  PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
                     + processName + " with config " + getGlobalConfiguration());
-            ApplicationInfo appInfo = app.instrumentationInfo != null
-                    ? app.instrumentationInfo : app.info;
+            ApplicationInfo appInfo = app.instr != null ? app.instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
             if (profileFd != null) {
                 profileFd = profileFd.dup();
@@ -6614,16 +6615,57 @@ public class ActivityManagerService extends IActivityManager.Stub
                         .getSerial();
 //            }
 
+            // Check if this is a secondary process that should be incorporated into some
+            // currently active instrumentation.  (Note we do this AFTER all of the profiling
+            // stuff above because profiling can currently happen only in the primary
+            // instrumentation process.)
+            if (mActiveInstrumentation.size() > 0 && app.instr == null) {
+                for (int i = mActiveInstrumentation.size() - 1; i >= 0 && app.instr == null; i--) {
+                    ActiveInstrumentation aInstr = mActiveInstrumentation.get(i);
+                    if (!aInstr.mFinished && aInstr.mTargetInfo.uid == app.uid) {
+                        if (aInstr.mTargetProcesses.length == 0) {
+                            // This is the wildcard mode, where every process brought up for
+                            // the target instrumentation should be included.
+                            if (aInstr.mTargetInfo.packageName.equals(app.info.packageName)) {
+                                app.instr = aInstr;
+                                aInstr.mRunningProcesses.add(app);
+                            }
+                        } else {
+                            for (String proc : aInstr.mTargetProcesses) {
+                                if (proc.equals(app.processName)) {
+                                    app.instr = aInstr;
+                                    aInstr.mRunningProcesses.add(app);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
-                    profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
-                    app.instrumentationUiAutomationConnection, testMode,
-                    mBinderTransactionTrackingEnabled, enableTrackAllocation,
-                    isRestrictedBackupMode || !normalMode, app.persistent,
-                    new Configuration(getGlobalConfiguration()), app.compat,
-                    getCommonServicesLocked(app.isolated),
-                    mCoreSettingsObserver.getCoreSettingsLocked(),
-                    buildSerial);
+            if (app.instr != null) {
+                thread.bindApplication(processName, appInfo, providers,
+                        app.instr.mClass,
+                        profilerInfo, app.instr.mArguments,
+                        app.instr.mWatcher,
+                        app.instr.mUiAutomationConnection, testMode,
+                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
+                        isRestrictedBackupMode || !normalMode, app.persistent,
+                        new Configuration(getGlobalConfiguration()), app.compat,
+                        getCommonServicesLocked(app.isolated),
+                        mCoreSettingsObserver.getCoreSettingsLocked(),
+                        buildSerial);
+            } else {
+                thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
+                        null, null, null, testMode,
+                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
+                        isRestrictedBackupMode || !normalMode, app.persistent,
+                        new Configuration(getGlobalConfiguration()), app.compat,
+                        getCommonServicesLocked(app.isolated),
+                        mCoreSettingsObserver.getCoreSettingsLocked(),
+                        buildSerial);
+            }
 
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             updateLruProcessLocked(app, false, null);
@@ -11595,7 +11637,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         .getPersistentApplications(STOCK_PM_FLAGS | matchFlags).getList();
                 for (ApplicationInfo app : apps) {
                     if (!"android".equals(app.packageName)) {
-                        addAppLocked(app, false, null /* ABI override */);
+                        addAppLocked(app, null, false, null /* ABI override */);
                     }
                 }
             } catch (RemoteException ex) {
@@ -11783,17 +11825,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
-    final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated,
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
-            app = getProcessRecordLocked(info.processName, info.uid, true);
+            app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
+                    info.uid, true);
         } else {
             app = null;
         }
 
         if (app == null) {
-            app = newProcessRecordLocked(info, null, isolated, 0);
+            app = newProcessRecordLocked(info, customProcess, isolated, 0);
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked();
         }
@@ -11814,7 +11857,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app.thread == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
-            startProcessLocked(app, "added application", app.processName, abiOverride,
+            startProcessLocked(app, "added application",
+                    customProcess != null ? customProcess : app.processName, abiOverride,
                     null /* entryPoint */, null /* entryPointArgs */);
         }
 
@@ -12269,11 +12313,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             synchronized (mPidsSelfLocked) {
                 final int callingPid = Binder.getCallingPid();
-                ProcessRecord precessRecord = mPidsSelfLocked.get(callingPid);
-                if (precessRecord == null) {
+                ProcessRecord proc = mPidsSelfLocked.get(callingPid);
+                if (proc == null) {
                     throw new SecurityException("Unknown process: " + callingPid);
                 }
-                if (precessRecord.instrumentationUiAutomationConnection  == null) {
+                if (proc.instr == null || proc.instr.mUiAutomationConnection == null) {
                     throw new SecurityException("Only an instrumentation process "
                             + "with a UiAutomation can call setUserIsMonkey");
                 }
@@ -12330,7 +12374,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public static long getInputDispatchingTimeoutLocked(ProcessRecord r) {
-        if (r != null && (r.instrumentationClass != null || r.usingWrapper)) {
+        if (r != null && (r.instr != null || r.usingWrapper)) {
             return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
         }
         return KEY_DISPATCHING_TIMEOUT;
@@ -12391,7 +12435,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return false;
                 }
 
-                if (proc.instrumentationClass != null) {
+                if (proc.instr != null) {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");
                     info.putString("longMsg", annotation);
@@ -14901,8 +14945,31 @@ public class ActivityManagerService extends IActivityManager.Stub
                     printed = true;
                     needSep = true;
                 }
-                pw.println(String.format("%sIsolated #%2d: %s",
-                        "    ", i, r.toString()));
+                pw.print("    Isolated #"); pw.print(i); pw.print(": ");
+                pw.println(r);
+            }
+        }
+
+        if (mActiveInstrumentation.size() > 0) {
+            boolean printed = false;
+            for (int i=0; i<mActiveInstrumentation.size(); i++) {
+                ActiveInstrumentation ai = mActiveInstrumentation.get(i);
+                if (dumpPackage != null && !ai.mClass.getPackageName().equals(dumpPackage)
+                        && !ai.mTargetInfo.packageName.equals(dumpPackage)) {
+                    continue;
+                }
+                if (!printed) {
+                    if (needSep) {
+                        pw.println();
+                    }
+                    pw.println("  Active instrumentation:");
+                    printedAnything = true;
+                    printed = true;
+                    needSep = true;
+                }
+                pw.print("    Instrumentation #"); pw.print(i); pw.print(": ");
+                pw.println(ai);
+                ai.dump(pw, "      ");
             }
         }
 
@@ -19046,18 +19113,35 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(msg);
             }
 
+            ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
+            activeInstr.mClass = className;
+            String defProcess = ai.processName;;
+            if (ii.targetProcess == null) {
+                activeInstr.mTargetProcesses = new String[]{ai.processName};
+            } else if (ii.targetProcess.equals("*")) {
+                activeInstr.mTargetProcesses = new String[0];
+            } else {
+                activeInstr.mTargetProcesses = ii.targetProcess.split(",");
+                defProcess = activeInstr.mTargetProcesses[0];
+            }
+            activeInstr.mTargetInfo = ai;
+            activeInstr.mProfileFile = profileFile;
+            activeInstr.mArguments = arguments;
+            activeInstr.mWatcher = watcher;
+            activeInstr.mUiAutomationConnection = uiAutomationConnection;
+            activeInstr.mResultClass = className;
+
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
-            ProcessRecord app = addAppLocked(ai, false, abiOverride);
-            app.instrumentationClass = className;
-            app.instrumentationInfo = ai;
-            app.instrumentationProfileFile = profileFile;
-            app.instrumentationArguments = arguments;
-            app.instrumentationWatcher = watcher;
-            app.instrumentationUiAutomationConnection = uiAutomationConnection;
-            app.instrumentationResultClass = className;
+            ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
+            app.instr = activeInstr;
+            activeInstr.mFinished = false;
+            activeInstr.mRunningProcesses.add(app);
+            if (!mActiveInstrumentation.contains(activeInstr)) {
+                mActiveInstrumentation.add(activeInstr);
+            }
             Binder.restoreCallingIdentity(origId);
         }
 
@@ -19084,24 +19168,70 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    void addInstrumentationResultsLocked(ProcessRecord app, Bundle results) {
+        if (app.instr == null) {
+            Slog.w(TAG, "finishInstrumentation called on non-instrumented: " + app);
+            return;
+        }
+
+        if (!app.instr.mFinished && results != null) {
+            if (app.instr.mCurResults == null) {
+                app.instr.mCurResults = new Bundle(results);
+            } else {
+                app.instr.mCurResults.putAll(results);
+            }
+        }
+    }
+
+    public void addInstrumentationResults(IApplicationThread target, Bundle results) {
+        int userId = UserHandle.getCallingUserId();
+        // Refuse possible leaked file descriptors
+        if (results != null && results.hasFileDescriptors()) {
+            throw new IllegalArgumentException("File descriptors passed in Intent");
+        }
+
+        synchronized(this) {
+            ProcessRecord app = getRecordForAppLocked(target);
+            if (app == null) {
+                Slog.w(TAG, "addInstrumentationResults: no app for " + target);
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            addInstrumentationResultsLocked(app, results);
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     void finishInstrumentationLocked(ProcessRecord app, int resultCode, Bundle results) {
-        if (app.instrumentationWatcher != null) {
-            mInstrumentationReporter.reportFinished(app.instrumentationWatcher,
-                    app.instrumentationClass, resultCode, results);
+        if (app.instr == null) {
+            Slog.w(TAG, "finishInstrumentation called on non-instrumented: " + app);
+            return;
         }
 
-        // Can't call out of the system process with a lock held, so post a message.
-        if (app.instrumentationUiAutomationConnection != null) {
-            mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
-                    app.instrumentationUiAutomationConnection).sendToTarget();
+        if (!app.instr.mFinished) {
+            if (app.instr.mWatcher != null) {
+                Bundle finalResults = app.instr.mCurResults;
+                if (finalResults != null) {
+                    if (app.instr.mCurResults != null && results != null) {
+                        finalResults.putAll(results);
+                    }
+                } else {
+                    finalResults = results;
+                }
+                mInstrumentationReporter.reportFinished(app.instr.mWatcher,
+                        app.instr.mClass, resultCode, finalResults);
+            }
+
+            // Can't call out of the system process with a lock held, so post a message.
+            if (app.instr.mUiAutomationConnection != null) {
+                mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
+                        app.instr.mUiAutomationConnection).sendToTarget();
+            }
+            app.instr.mFinished = true;
         }
 
-        app.instrumentationWatcher = null;
-        app.instrumentationUiAutomationConnection = null;
-        app.instrumentationClass = null;
-        app.instrumentationInfo = null;
-        app.instrumentationProfileFile = null;
-        app.instrumentationArguments = null;
+        app.instr.removeProcess(app);
+        app.instr = null;
 
         forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false, app.userId,
                 "finished inst");
@@ -19884,7 +20014,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.adjType = "top-activity";
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
-        } else if (app.instrumentationClass != null) {
+        } else if (app.instr != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -21973,7 +22103,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mRemovedProcesses.remove(i);
 
                     if (app.persistent) {
-                        addAppLocked(app.info, false, null /* ABI override */);
+                        addAppLocked(app.info, null, false, null /* ABI override */);
                     }
                 }
             }
