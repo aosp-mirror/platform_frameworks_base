@@ -267,6 +267,42 @@ public final class AudioFormat implements Parcelable {
      **/
     public static final int ENCODING_DOLBY_TRUEHD = 14;
 
+    /** @hide */
+    public static String toLogFriendlyEncoding(int enc) {
+        switch(enc) {
+            case ENCODING_INVALID:
+                return "ENCODING_INVALID";
+            case ENCODING_PCM_16BIT:
+                return "ENCODING_PCM_16BIT";
+            case ENCODING_PCM_8BIT:
+                return "ENCODING_PCM_8BIT";
+            case ENCODING_PCM_FLOAT:
+                return "ENCODING_PCM_FLOAT";
+            case ENCODING_AC3:
+                return "ENCODING_AC3";
+            case ENCODING_E_AC3:
+                return "ENCODING_E_AC3";
+            case ENCODING_DTS:
+                return "ENCODING_DTS";
+            case ENCODING_DTS_HD:
+                return "ENCODING_DTS_HD";
+            case ENCODING_MP3:
+                return "ENCODING_MP3";
+            case ENCODING_AAC_LC:
+                return "ENCODING_AAC_LC";
+            case ENCODING_AAC_HE_V1:
+                return "ENCODING_AAC_HE_V1";
+            case ENCODING_AAC_HE_V2:
+                return "ENCODING_AAC_HE_V2";
+            case ENCODING_IEC61937:
+                return "ENCODING_IEC61937";
+            case ENCODING_DOLBY_TRUEHD:
+                return "ENCODING_DOLBY_TRUEHD";
+            default :
+                return "invalid encoding " + enc;
+        }
+    }
+
     /** Invalid audio channel configuration */
     /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */
     @Deprecated    public static final int CHANNEL_CONFIGURATION_INVALID   = 0;
@@ -691,6 +727,12 @@ public final class AudioFormat implements Parcelable {
     /** @hide */
     public int getPropertySetMask() {
         return mPropertySetMask;
+    }
+
+    /** @hide */
+    public String toLogFriendlyString() {
+        return String.format("%dch %dHz %s",
+                getChannelCount(), mSampleRate, toLogFriendlyEncoding(mEncoding));
     }
 
     /**
