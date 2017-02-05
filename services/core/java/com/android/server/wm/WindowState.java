@@ -665,7 +665,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void attach() {
         if (localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
-        mSession.windowAddedLocked();
+        mSession.windowAddedLocked(mAttrs.type);
     }
 
     @Override
@@ -1738,7 +1738,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWinAnimator.destroyDeferredSurfaceLocked();
         mWinAnimator.destroySurfaceLocked();
-        mSession.windowRemovedLocked();
+        mSession.windowRemovedLocked(mAttrs.type);
         try {
             mClient.asBinder().unlinkToDeath(mDeathRecipient, 0);
         } catch (RuntimeException e) {

@@ -20141,6 +20141,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.adjType = "force-fg";
                 app.adjSource = app.forcingToForeground;
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            } else if (app.hasOverlayUi) {
+                // The process is display an overlay UI.
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                app.cached = false;
+                app.adjType = "has-overlay-ui";
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             }
         }
 
@@ -22858,6 +22865,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (mKeyguardController.isKeyguardShowing()) {
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
+            }
+        }
+
+        /**
+         * Sets if the given pid has an overlay UI or not.
+         *
+         * @param pid The pid we are setting overlay UI for.
+         * @param hasOverlayUi True if the process has overlay UI.
+         * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
+         */
+        @Override
+        public void setHasOverlayUi(int pid, boolean hasOverlayUi) {
+            synchronized (ActivityManagerService.this) {
+                final ProcessRecord pr;
+                synchronized (mPidsSelfLocked) {
+                    pr = mPidsSelfLocked.get(pid);
+                    if (pr == null) {
+                        Slog.w(TAG, "setHasOverlayUi called on unknown pid: " + pid);
+                        return;
+                    }
+                }
+                if (pr.hasOverlayUi == hasOverlayUi) {
+                    return;
+                }
+                pr.hasOverlayUi = hasOverlayUi;
+                //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
+                updateOomAdjLocked(pr);
             }
         }
     }

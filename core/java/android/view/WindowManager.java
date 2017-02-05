@@ -726,7 +726,10 @@ public interface WindowManager extends ViewManager {
          * <p>
          * Requires {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission.
          * <p>
-         * In mult-iuser systems shows only on the owning user's screen.
+         * The system will adjust the importance of processes with this window type to reduce the
+         * chance of the low-memory-killer killing them.
+         * <p>
+         * In multi-user systems shows only on the owning user's screen.
          */
         public static final int TYPE_APPLICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 38;
 

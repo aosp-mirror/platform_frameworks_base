@@ -5268,6 +5268,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESTORE_POINTER_ICON = 55;
         public static final int NOTIFY_KEYGUARD_FLAGS_CHANGED = 56;
         public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
+        public static final int SET_HAS_OVERLAY_UI = 58;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5749,6 +5750,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case NOTIFY_KEYGUARD_TRUSTED_CHANGED: {
                     mAmInternal.notifyKeyguardTrustedChanged();
+                }
+                break;
+                case SET_HAS_OVERLAY_UI: {
+                    mAmInternal.setHasOverlayUi(msg.arg1, msg.arg2 == 1);
                 }
                 break;
             }
