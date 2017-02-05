@@ -913,13 +913,13 @@ public final class AudioAttributes implements Parcelable {
         }
     }
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC (or at least SYSTEM) API
      * Returns the stream type matching the given attributes for volume control.
      * Use this method to derive the stream type needed to configure the volume
-     * control slider in an {@link Activity} with {@link Activity#setVolumeControlStream(int)}.
+     * control slider in an {@link android.app.Activity} with
+     * {@link android.app.Activity#setVolumeControlStream(int)}.
      * <BR>Do not use this method to set the stream type on an audio player object
-     * (e.g. {@link AudioTrack}, {@link MediaPlayer}), use <code>AudioAttributes</code> instead.
+     * (e.g. {@link AudioTrack}, {@link MediaPlayer}) as this is deprecated,
+     * use <code>AudioAttributes</code> instead.
      * @param aa non-null AudioAttributes.
      * @return a valid stream type for <code>Activity</code> or stream volume control that matches
      *     the attributes, or {@link AudioManager#USE_DEFAULT_STREAM_TYPE} if there isn't a direct
