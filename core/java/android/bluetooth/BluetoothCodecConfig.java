@@ -37,9 +37,11 @@ public final class BluetoothCodecConfig implements Parcelable {
     public static final int SOURCE_CODEC_TYPE_APTX    = 2;
     public static final int SOURCE_CODEC_TYPE_APTX_HD = 3;
     public static final int SOURCE_CODEC_TYPE_LDAC    = 4;
+    public static final int SOURCE_CODEC_TYPE_MAX     = 5;
 
     public static final int SOURCE_CODEC_TYPE_INVALID = 1000 * 1000;
 
+    public static final int CODEC_PRIORITY_DISABLED = -1;
     public static final int CODEC_PRIORITY_DEFAULT = 0;
     public static final int CODEC_PRIORITY_HIGHEST = 1000 * 1000;
 
@@ -72,7 +74,7 @@ public final class BluetoothCodecConfig implements Parcelable {
 
     public BluetoothCodecConfig(int codecType, int codecPriority,
                                 int sampleRate, int bitsPerSample,
-                                int channelMode,long codecSpecific1,
+                                int channelMode, long codecSpecific1,
                                 long codecSpecific2, long codecSpecific3,
                                 long codecSpecific4) {
         mCodecType = codecType;
