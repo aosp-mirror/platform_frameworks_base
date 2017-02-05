@@ -19,7 +19,6 @@ package com.android.systemui;
 import android.animation.ArgbEvaluator;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
@@ -28,11 +27,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -40,7 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StopMotionVectorDrawable;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
@@ -348,8 +344,7 @@ public class BatteryMeterDrawable extends Drawable implements
 
     private void updateChargeColor() {
         mChargeColor = Settings.Secure.getInt(mContext.getContentResolver(),
-                STATUS_BAR_CHARGE_COLOR,
-                        mContext.getResources().getColor(R.color.batterymeter_charge_color));
+                STATUS_BAR_CHARGE_COLOR, mContext.getResources().getColor(R.color.batterymeter_charge_color));
     }
 
     private int updateDarkDensityChargeColor() {
@@ -359,7 +354,7 @@ public class BatteryMeterDrawable extends Drawable implements
 
     private void updateForceChargeBatteryText() {
         mForceChargeBatteryText = Settings.Secure.getInt(mContext.getContentResolver(),
-                FORCE_CHARGE_BATTERY_TEXT, 1) == 1 ? true : false;
+                FORCE_CHARGE_BATTERY_TEXT, 1) == 1;
     }
 
     private void updateShowPercentLowOnly() {
@@ -428,10 +423,14 @@ public class BatteryMeterDrawable extends Drawable implements
         mIconTint = mCurrentFillColor;
         if (darkIntensity == 0f) {
             updateChargeColor();
-            mBoltDrawable.setTint(0xff000000 | mChargeColor);
+            if (mBoltDrawable != null) {
+                mBoltDrawable.setTint(0xff000000 | mChargeColor);
+            }
         } else {
             mChargeColor = mCurrentFillColor;
-            mBoltDrawable.setTint(0xff000000 | mCurrentFillColor);
+            if (mBoltDrawable != null) {
+                mBoltDrawable.setTint(0xff000000 | mCurrentFillColor);
+            }
         }
         mFrameDrawable.setTint(mCurrentBackgroundColor);
         updateBoltDrawableLayer(mBatteryDrawable, mBoltDrawable);
