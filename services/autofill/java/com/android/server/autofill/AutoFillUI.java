@@ -33,6 +33,7 @@ import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Slog;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.Dataset;
@@ -63,23 +64,23 @@ final class AutoFillUI {
 
     private final Context mContext;
     private final Session mSession;
+    private final IBinder mAppToken;
     private final WindowManager mWm;
 
     // Fill UI variables
     private AnchoredWindow mFillWindow;
     private DatasetPicker mFillView;
     private ViewState mViewState;
-    private Rect mBounds;
-    private String mFilterText;
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
      */
     private View mSnackbar;
 
-    AutoFillUI(Context context, Session session) {
+    AutoFillUI(Context context, Session session, IBinder appToken) {
         mContext = context;
         mSession = session;
+        mAppToken = appToken;
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
@@ -114,8 +115,6 @@ final class AutoFillUI {
         }
 
         mViewState = null;
-        mBounds = null;
-        mFilterText = null;
         mFillView = null;
         mFillWindow = null;
     }
@@ -143,23 +142,14 @@ final class AutoFillUI {
                             mSession.autoFillApp(dataset);
                             hideFillUi();
                         });
-                mFillWindow = new AnchoredWindow(
-                        mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
+                mFillWindow = new AnchoredWindow(mWm, mAppToken, mFillView);
 
-                if (DEBUG) Slog.d(TAG, "show FillUi");
+                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed");
             }
 
-            if (!bounds.equals(mBounds)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi bounds: " + mBounds);
-                mBounds = bounds;
-                mFillWindow.show(mBounds);
-            }
-
-            if (!filterText.equals(mFilterText)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi filter text: " + mFilterText);
-                mFilterText = filterText;
-                mFillView.update(mFilterText);
-            }
+            if (DEBUG) Slog.d(TAG, "showFillUi(): bounds=" + bounds + ", filterText=" + filterText);
+            mFillView.update(filterText);
+            mFillWindow.show(bounds);
         }, 0);
     }
 
@@ -248,8 +238,6 @@ final class AutoFillUI {
         pw.print(prefix); pw.print("mSessionId: "); pw.println(mSession.mId);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
         pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
-        pw.print(prefix); pw.print("mBounds: "); pw.println(mBounds);
-        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
     }
 
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
