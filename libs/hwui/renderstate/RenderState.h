@@ -99,8 +99,6 @@ public:
         mActiveLayerUpdaters.erase(layerUpdater);
     }
 
-    void destroyLayersInUpdater();
-
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
@@ -121,6 +119,7 @@ public:
 private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
+    void destroyLayersInUpdater();
 
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
