@@ -247,11 +247,6 @@ static void EnableKeepCapabilities(JNIEnv* env) {
 
 static void DropCapabilitiesBoundingSet(JNIEnv* env) {
   for (int i = 0; prctl(PR_CAPBSET_READ, i, 0, 0, 0) >= 0; i++) {
-    // Keep CAP_SYS_PTRACE in our bounding set so crash_dump can gain it.
-    if (i == CAP_SYS_PTRACE) {
-      continue;
-    }
-
     int rc = prctl(PR_CAPBSET_DROP, i, 0, 0, 0);
     if (rc == -1) {
       if (errno == EINVAL) {
