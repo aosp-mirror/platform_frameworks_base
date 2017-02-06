@@ -130,6 +130,11 @@ public class TileService extends Service {
      */
     public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
+    /**
+     * @hide
+     */
+    public static final String EXTRA_STATE = "state";
+
     private final H mHandler = new H(Looper.getMainLooper());
 
     private boolean mListening = false;
