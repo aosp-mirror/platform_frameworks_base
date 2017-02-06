@@ -70,7 +70,7 @@ float finalizeTemperature(float temperature) {
 static void nativeInit(JNIEnv* env, jobject obj) {
     // TODO(b/31632518)
     if (gThermalModule == nullptr) {
-        gThermalModule = IThermal::getService("thermal");
+        gThermalModule = IThermal::getService();
     }
 
     if (gThermalModule == nullptr) {
