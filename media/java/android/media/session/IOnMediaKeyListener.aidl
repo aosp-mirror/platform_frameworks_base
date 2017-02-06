@@ -22,7 +22,7 @@ import android.view.KeyEvent;
  * Listener to handle media key.
  * @hide
  */
-interface IOnMediaKeyListener {
+oneway interface IOnMediaKeyListener {
     void onMediaKey(in KeyEvent event, in ResultReceiver result);
 }
 
