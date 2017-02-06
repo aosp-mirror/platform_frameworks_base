@@ -155,10 +155,10 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     /**
-     * Tells the system UI that volume has changed on a remote session.
+     * Tells the system UI that volume has changed on an active remote session.
      */
     public void notifyRemoteVolumeChanged(int flags, MediaSessionRecord session) {
-        if (mRvc == null) {
+        if (mRvc == null || !session.isActive()) {
             return;
         }
         try {
