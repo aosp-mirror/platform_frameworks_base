@@ -51,6 +51,7 @@ public class LockSettingsStrongAuth {
     private static final int MSG_REGISTER_TRACKER = 2;
     private static final int MSG_UNREGISTER_TRACKER = 3;
     private static final int MSG_REMOVE_USER = 4;
+    private static final int MSG_SCHEDULE_STRONG_AUTH_TIMEOUT = 5;
 
     private static final String STRONG_AUTH_TIMEOUT_ALARM_TAG =
             "LockSettingsStrongAuth.timeoutForUser";
@@ -128,6 +129,23 @@ public class LockSettingsStrongAuth {
         }
     }
 
+    private void handleScheduleStrongAuthTimeout(int userId) {
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        long when = SystemClock.elapsedRealtime() + dpm.getRequiredStrongAuthTimeout(null, userId);
+        // cancel current alarm listener for the user (if there was one)
+        StrongAuthTimeoutAlarmListener alarm = mStrongAuthTimeoutAlarmListenerForUser.get(userId);
+        if (alarm != null) {
+            mAlarmManager.cancel(alarm);
+        } else {
+            alarm = new StrongAuthTimeoutAlarmListener(userId);
+            mStrongAuthTimeoutAlarmListenerForUser.put(userId, alarm);
+        }
+        // schedule a new alarm listener for the user
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, STRONG_AUTH_TIMEOUT_ALARM_TAG,
+                alarm, mHandler);
+    }
+
     private void notifyStrongAuthTrackers(int strongAuthReason, int userId) {
         for (int i = 0; i < mStrongAuthTrackers.size(); i++) {
             try {
@@ -151,7 +169,8 @@ public class LockSettingsStrongAuth {
     }
 
     public void removeUser(int userId) {
-        mHandler.obtainMessage(MSG_REMOVE_USER, userId, 0).sendToTarget();
+        final int argNotUsed = 0;
+        mHandler.obtainMessage(MSG_REMOVE_USER, userId, argNotUsed).sendToTarget();
     }
 
     public void requireStrongAuth(int strongAuthReason, int userId) {
@@ -169,29 +188,8 @@ public class LockSettingsStrongAuth {
     }
 
     public void reportSuccessfulStrongAuthUnlock(int userId) {
-        scheduleStrongAuthTimeout(userId);
-    }
-
-    private void scheduleStrongAuthTimeout(int userId) {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        long when = SystemClock.elapsedRealtime() + dpm.getRequiredStrongAuthTimeout(null, userId);
-        // cancel current alarm listener for the user (if there was one)
-        StrongAuthTimeoutAlarmListener alarm = mStrongAuthTimeoutAlarmListenerForUser.get(userId);
-        if (alarm != null) {
-            mAlarmManager.cancel(alarm);
-        } else {
-            alarm = new StrongAuthTimeoutAlarmListener(userId);
-            mStrongAuthTimeoutAlarmListenerForUser.put(userId, alarm);
-        }
-        // schedule a new alarm listener for the user
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, when, STRONG_AUTH_TIMEOUT_ALARM_TAG,
-                    alarm, mHandler);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
+        final int argNotUsed = 0;
+        mHandler.obtainMessage(MSG_SCHEDULE_STRONG_AUTH_TIMEOUT, userId, argNotUsed).sendToTarget();
     }
 
     private class StrongAuthTimeoutAlarmListener implements OnAlarmListener {
@@ -223,6 +221,9 @@ public class LockSettingsStrongAuth {
                     break;
                 case MSG_REMOVE_USER:
                     handleRemoveUser(msg.arg1);
+                    break;
+                case MSG_SCHEDULE_STRONG_AUTH_TIMEOUT:
+                    handleScheduleStrongAuthTimeout(msg.arg1);
                     break;
             }
         }
