@@ -3600,6 +3600,14 @@ public abstract class Context {
     public static final String PRINT_SERVICE = "print";
 
     /**
+     * {@link android.companion.CompanionDeviceManager} for managing companion devices
+     *
+     * @see #getSystemService
+     * @see android.companion.CompanionDeviceManager
+     */
+    public static final String COMPANION_DEVICE_SERVICE = "companion_device";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.hardware.ConsumerIrManager} for transmitting infrared
      * signals from the device.

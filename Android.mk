@@ -295,6 +295,10 @@ LOCAL_SRC_FILES += \
 	core/java/android/print/IWriteResultCallback.aidl \
 	core/java/android/printservice/IPrintService.aidl \
 	core/java/android/printservice/IPrintServiceClient.aidl \
+	core/java/android/companion/ICompanionDeviceManager.aidl \
+	core/java/android/companion/ICompanionDeviceManagerService.aidl \
+	core/java/android/companion/ICompanionDeviceManagerServiceCallback.aidl \
+	core/java/android/companion/IOnAssociateCallback.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
 	core/java/android/service/persistentdata/IPersistentDataBlockService.aidl \

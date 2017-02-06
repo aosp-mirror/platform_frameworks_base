@@ -435,10 +435,6 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(@Nullable ArraySet<T> cur, T val) {
-        return (cur != null) ? cur.contains(val) : false;
-    }
-
     public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             cur = new ArrayList<>();
@@ -457,6 +453,16 @@ public class ArrayUtils {
         } else {
             return cur;
         }
+    }
+
+    /**
+     * Returns the given list, or an immutable empty list if the provided list is null
+     *
+     * @see Collections#emptyList
+     */
+
+    public static @NonNull <T> List<T> emptyIfNull(@Nullable List<T> cur) {
+        return cur == null ? Collections.emptyList() : cur;
     }
 
     public static <T> boolean contains(@Nullable Collection<T> cur, T val) {
