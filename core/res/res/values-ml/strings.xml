@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ഡിസ്പ്ലേയുടെ സൂം നിലയും പൊസിഷനിംഗും നിയന്ത്രിക്കുക."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ജെസ്‌റ്ററുകൾ നിർവഹിക്കുക"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ടാപ്പുചെയ്യാനോ സ്വൈപ്പുചെയ്യാനോ പിഞ്ചുചെയ്യാനോ മറ്റ് ജെസ്‌റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ഫിംഗർപ്രിന്റ് ജെസ്‌റ്ററുകൾ"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ ടാപ്പുചെയ്യുക."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നു…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ബഗ് റിപ്പോർട്ട് പങ്കിടണോ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ബഗ് റിപ്പോർട്ട് പങ്കിടുന്നു…"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"വാർത്തകളും മാസികകളും"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"മാപ്സും നാവിഗേഷനും"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ഉല്‍‌പ്പാദനക്ഷമത"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ഉപകരണ സ്റ്റോറേജ്"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

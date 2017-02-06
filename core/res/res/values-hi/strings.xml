@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शन का ज़ूम स्‍तर और स्‍थिति निर्धारण नियंत्रित करें."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"हावभाव निष्पादित करें"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"इस सेवा के द्वारा टैप किया जा सकता है, स्वाइप किया जा सकता है, पिंच किया जा सकता है और अन्य हावभाव निष्पादित किए जा सकते हैं."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"फ़िंगरप्रिंट हावभाव"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"डिवाइस फ़िंगरप्रिंट सेंसर पर किए गए हावभाव कैप्चर किए जा सकते हैं."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्‍थिति बार अक्षम या बदलें"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ऐप्स  को स्थिति बार अक्षम करने या सिस्‍टम आइकन को जोड़ने या निकालने देता है."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्‍थिति बार होने दें"</string>
@@ -951,7 +953,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"लेख क्रियाएं"</string>
     <string name="email" msgid="4560673117055050403">"ईमेल करें"</string>
     <string name="dial" msgid="2275093056198652749">"डायल करें"</string>
-    <string name="map" msgid="5441053548030107189">"नक्शा"</string>
+    <string name="map" msgid="5441053548030107189">"मानचित्र"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"मेमोरी स्‍थान समाप्‍त हो रहा है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए पर्याप्त मेमोरी नहीं है. सुनिश्चित करें कि आपके पास 250MB का खाली स्थान है और फिर से प्रारंभ करें."</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"अधिक विकल्पों के लिए टैप करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करना अक्षम करने के लिए टैप करें."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डीबग करना अक्षम करने के लिए चुनें."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रिपोर्ट प्राप्त की जा रही है…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा करें?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझा की जा रही है…"</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"समाचार और पत्रिकाएं"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"मानचित्र और मार्गदर्शक"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादकता"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"डिवाइस में जगह"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

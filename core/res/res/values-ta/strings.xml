@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"திரையின் ஜூம் அளவையும் நிலையையும் கட்டுப்படுத்தலாம்."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"சைகைகளைச் செயல்படுத்துதல்"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"தட்டலாம், ஸ்வைப் செய்யலாம், பின்ச் செய்யலாம் மற்றும் பிற சைகைகளைச் செயல்படுத்தலாம்."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"கைரேகை சைகைகள்"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"சாதனத்தின் கைரேகை உணர்வி மேல் செய்யப்படும் சைகைகளைப் படமெடுக்க முடியும்."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"நிலைப் பட்டியில் இருக்கும்"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"மேலும் விருப்பங்களுக்கு, தட்டவும்."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB பிழை திருத்தத்தை முடக்க, தட்டவும்."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"பிழை அறிக்கையை எடுக்கிறது…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"பிழை அறிக்கையைப் பகிரவா?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"பிழை அறிக்கையைப் பகிர்கிறது…"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"செய்திகளும் பத்திரிகைகளும்"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"வரைபடங்களும் வழிசெலுத்தலும்"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"உற்பத்தித்திறன்"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"சாதனச் சேமிப்பகம்"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ekranni kattalashtirish darajasi va joylashuvini boshqaradi."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Imo-ishoralar bilan boshqarish"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Bosish, surish; jipslashtirish va boshqa imo-ishoralarni amalga oshirish mumkin."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Barmoq izi ishoralari"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Barmoq izi skanerlarida kiritilgan ishoralarni taniy oladi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"holat qatorida ko‘rinishi"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"O‘chirib qo‘yish uchun bu yerga bosing."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Xatoliklar hisoboti olinmoqda…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Xatoliklar hisoboti yuborilmoqda…"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Yangiliklar va jurnallar"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Xaritalar va navigatsiya"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Ish va unumdorlik"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Qurilma xotirasi"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

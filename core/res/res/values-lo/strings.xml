@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ຄວບຄຸມລະດັບການຊູມ ແລະການວາງຕຳແໜ່ງຂອງຈໍສະແດງຜົນ."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ດຳເນີນທ່າທາງຕ່າງໆ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ສາມາດແຕະ, ປັດນີ້ວມື, ຢິບນິ້ວມື ແລະ ດຳເນີນທ່າທາງອື່ນ."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ທ່າທາງລາຍນິ້ວມື"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ສາມາດບັນທຶກທ່າທາງທີ່ເກີດຂຶ້ນໃນອຸປະກອນເຊັນເຊີລາຍນິ້ວມືໄດ້."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັ໊ກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"ແຕະເພື່ອປິດການດີບັກຜ່ານ USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"ເລືອກເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ກຳລັງຂໍລາຍງານຂໍ້ຜິດພາດ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ແບ່ງປັນລາຍງານບັນຫາບໍ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ກຳລັງແບ່ງປັນລາຍງານບັນຫາ…"</string>
@@ -1202,8 +1205,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້. ນີ້​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ມັນ​ເບິ່ງ​ເຫັນ​ລາຍ​ລະ​ອຽດ​ກ່ຽວ​ກັບ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ​ທີ່​ເຮັດ​​ວຽກ​ຢູ່​ໄດ້."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ຂໍ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຂອງ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ."</string>
-    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"request delete packages"</string>
-    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ຂອງ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ."</string>
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"ຮ້ອງຂໍການລຶບແພັກເກດ"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຮ້ອງຂໍການລຶບແພັກເກດ."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"ຖາມເພື່ອໃຫ້ເພີກເສີຍການປັບແຕ່ງແບັດເຕີຣີ"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"ອະນຸຍາດໃຫ້ແອັບຖາມສິດອະນຸຍາດເພື່ອເພີກເສີຍຕໍ່ການປັບແຕ່ງແບັດເຕີຣີສຳລັບແອັບນັ້ນ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ແຕະສອງເທື່ອເພື່ອຄວບຄຸມການຊູມ"</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"News &amp; Magazines"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Maps &amp; Navigation"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ຜະລິດຕະພາບ"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ບ່ອນຈັດເກັບຂໍ້ມູນອຸປະກອນ"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

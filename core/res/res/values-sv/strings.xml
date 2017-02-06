@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Styr skärmens zoomnivå och positionering."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Göra rörelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trycka, svepa, nypa och göra andra rörelser."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeravtrycksrörelser"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"visas i statusfältet"</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Tryck för fler alternativ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryck om du vill inaktivera USB-felsökning."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Välj att inaktivera USB-felsökning."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Felrapporten delas …"</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Nyheter och tidskrifter"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Kartor och navigation"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktivitet"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Enhetens lagringsutrymme"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

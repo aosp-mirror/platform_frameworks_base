@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ڈسپلے کے زوم کی سطح اور پوزیشن کو کنٹرول کریں۔"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"اشارے انجام دیں"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"تھپتھپانا، سوائپ کرنا، چٹکی بھرنا اور دیگر اشارے انجام دے سکتی ہے"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگرپرنٹ کے اشارے"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"آلات کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"بطور اسٹیٹس بار کام لیں"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"مزید اختیارات کیلئے تھپتھپائیں۔"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے تھپتھپائیں۔"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"بگ رپورٹ لی جا رہی ہے…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"بگ رپورٹ کا اشتراک کریں؟"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"بگ رپورٹ کا اشتراک ہو رہا ہے…"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"خبریں اور میگزین"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"نقشے اور نیویگیشن"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"پروڈکٹیوٹی"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"آلہ کی اسٹوریج"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

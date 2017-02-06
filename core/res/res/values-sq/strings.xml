@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrollo nivelin dhe pozicionimin e zmadhimit të ekranit."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Kryen gjeste"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mund të trokasë, rrëshqasë, bashkojë gishtat dhe kryejë gjeste të tjera."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gjestet e gjurmës së gishtit"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Mund të kapë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjeve."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"të bëhet shiriti i statusit"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Trokit për më shumë opsione."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Trokit për të çaktivizuar korrigjimin e gabimeve të USB-së."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Po ndan raportin e defekteve në kod..."</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Lajme dhe revista"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Harta dhe navigim"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktivitet"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Hapësira ruajtëse e pajisjes"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

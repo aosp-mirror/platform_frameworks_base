@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrollér skærmens zoomniveau og position."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Udfør bevægelser"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan trykke, stryge, knibe sammen og udføre andre bevægelser."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Fingeraftryksbevægelser"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan registrere bevægelser, der foretages på enhedernes fingeraftrykslæser."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vær statusbjælken"</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Tryk for at se flere muligheder."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryk for at deaktivere fejlretning via USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Vælg for at deaktivere USB-fejlretning."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Opretter fejlrapport…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vil du dele fejlrapporten?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Deler fejlrapport…"</string>
@@ -1395,7 +1398,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Forkert pinkode"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%1$d</xliff:g> sekunder."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM-kort"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobiloperatøren for at få flere oplysninger."</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Aviser og blade"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Kort og navigation"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktivitet"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Lagerplads på enheden"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

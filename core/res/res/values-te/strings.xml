@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"డిస్‌ప్లే జూమ్ స్థాయి మరియు స్థానాన్ని నియంత్రిస్తుంది."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"సంజ్ఞలను చేయడం"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"వేలిముద్ర సంజ్ఞలు"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"పరికరాల వేలిముద్ర సెన్సార్‌లో నిర్వహించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"స్థితి పట్టీగా ఉండటం"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి నొక్కండి."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"బగ్ నివేదికను భాగస్వామ్యం చేస్తోంది..."</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"వార్తలు &amp; వార్తాపత్రికలు"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"మ్యాప్స్ &amp; నావిగేషన్"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ఉత్పాదకత"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"పరికర నిల్వ"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

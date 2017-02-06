@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Realizar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Puedes tocar y pellizcar la pantalla, deslizar el dedo y hacer otros gestos."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestos de huellas digitales"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Puede capturar los gestos realizados en el sensor de huellas digitales del dispositivo."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite que la aplicación inhabilite la barra de estado o añada y elimine iconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"aparecer en la barra de estado"</string>
@@ -949,12 +951,9 @@
     <string name="deleteText" msgid="6979668428458199034">"Eliminar"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Método de introducción de texto"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
-    <!-- no translation found for email (4560673117055050403) -->
-    <skip />
-    <!-- no translation found for dial (2275093056198652749) -->
-    <skip />
-    <!-- no translation found for map (5441053548030107189) -->
-    <skip />
+    <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
+    <string name="dial" msgid="2275093056198652749">"Marcar"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>
@@ -1149,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Toca para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Toca para inhabilitar la depuración USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleccionar para inhabilitar la depuración USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
@@ -1205,10 +1205,8 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación consulte sesiones de instalación para ver detalles sobre instalaciones de paquetes activos."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"solicitar instalación de paquetes"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Permite a una aplicación solicitar la instalación de paquetes."</string>
-    <!-- no translation found for permlab_requestDeletePackages (1703686454657781242) -->
-    <skip />
-    <!-- no translation found for permdesc_requestDeletePackages (3406172963097595270) -->
-    <skip />
+    <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"solicitar eliminación de paquetes"</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Permite a una aplicación solicitar la eliminación de paquetes."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"solicitar permiso para ignorar las optimizaciones de la batería"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Permite que una aplicación solicite permiso para ignorar las optimizaciones de la batería."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Da dos toques para acceder al control de zoom."</string>
@@ -1694,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Noticias y revistas"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Mapas y navegación"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Productividad"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Almacenamiento del dispositivo"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

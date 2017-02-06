@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"画面のズームレベルと位置を制御します。"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"操作の実行"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"タップ、スワイプ、ピンチ、その他の操作を行えます。"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"指紋認証センサーでの操作"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"端末の指紋認証センサーで行われた操作をキャプチャできます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ステータスバーへの表示"</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"タップしてその他のオプションを表示します。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"タップして USB デバッグを無効にします。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"バグレポートを取得しています…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"バグレポートを共有しますか？"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"バグレポートの共有中…"</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"ニュース＆雑誌"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"地図＆ナビ"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"仕事効率化"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"端末のストレージ"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>
