@@ -528,24 +528,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"Emitir sonido y mostrar en pantalla"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más ajustes"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
-    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
-    <skip />
-    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
-    <skip />
-    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
-    <skip />
-    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
-    <skip />
-    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
-    <skip />
-    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
-    <skip />
-    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
-    <skip />
-    <!-- no translation found for snooze_undo (6074877317002985129) -->
-    <skip />
-    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
-    <skip />
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"Controles de las notificaciones"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Opciones para posponer las notificaciones"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 minutos"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 minutos"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 hora"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"No posponer"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"DESHACER"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Volverá a mostrarse en <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de la batería"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ahorro de batería"</string>
@@ -607,24 +598,23 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Sí"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
-    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
-    <skip />
-    <!-- no translation found for nav_bar_left (731491280511316123) -->
-    <skip />
-    <!-- no translation found for nav_bar_right (2523774879720231974) -->
-    <skip />
-    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
-    <skip />
-    <!-- no translation found for nav_bar_default (8587114043070993007) -->
-    <skip />
-    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
-    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
-    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
-    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
-    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
-    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
-    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
-    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Diseño"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"Izquierda"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"Derecha"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tipo de botón"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(predeterminada)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"Portapapeles"</item>
+    <item msgid="5742013440802239414">"Código de teclado"</item>
+    <item msgid="8748101184830239843">"Menú/Cambio de teclado"</item>
+    <item msgid="8175437057325747277">"Ninguno"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"Dividida (predeterminada)"</item>
+    <item msgid="6210279084134579668">"Centrada"</item>
+    <item msgid="89143234390889289">"Alineada a la izquierda"</item>
+    <item msgid="7715533883382410603">"Alineada a la derecha"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"Menú/Cambio de teclado"</string>
     <string name="save" msgid="2311877285724540644">"Guardar"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
@@ -632,8 +622,7 @@
     <string name="clipboard" msgid="1313879395099896312">"Portapapeles"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Botón de navegación personalizada"</string>
     <string name="keycode" msgid="7335281375728356499">"Código de teclado"</string>
-    <!-- no translation found for icon (8732339849035837289) -->
-    <skip />
+    <string name="icon" msgid="8732339849035837289">"Icono"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastra para añadir funciones"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar una función"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
@@ -684,28 +673,18 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Mostrar"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Rechazar"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"El teléfono se está calentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
-    <!-- no translation found for lockscreen_left (6806490081187499505) -->
-    <skip />
-    <!-- no translation found for lockscreen_right (6093496261656102989) -->
-    <skip />
-    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
-    <skip />
-    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
-    <skip />
-    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
-    <skip />
-    <!-- no translation found for notification_channel_security (7345516133431326347) -->
-    <skip />
-    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
-    <skip />
-    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
-    <skip />
+    <string name="lockscreen_left" msgid="6806490081187499505">"Izquierda"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"Derecha"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Personalizar el acceso directo"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Acceso directo"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Solicitar contraseña"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de pantalla"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Mensajes generales"</string>
+    <string name="notification_channel_storage" msgid="3077205683020695313">"Almacenamiento"</string>
 </resources>

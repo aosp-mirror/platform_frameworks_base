@@ -534,7 +534,7 @@
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ժամ"</string>
     <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Չհետաձգել"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ՀԵՏԱՐԿԵԼ"</string>
-    <string name="snoozed_for_time" msgid="2390718332980204462">"Հետաձգվել է հետևյալ ժամանակով՝ <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"Հետաձգվել է <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ով"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Մարտկոցի օգտագործում"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Մարտկոցի տնտեսումը լիցքավորման ժամանակ հասանելի չէ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Մարտկոցի տնտեսում"</string>
@@ -608,7 +608,7 @@
     <item msgid="8175437057325747277">"Չկան"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Բաժանվածծ (կանխադրված)"</item>
+    <item msgid="4967898371682516967">"Բաժանված (կանխադրված)"</item>
     <item msgid="6210279084134579668">"Կենտրոնում"</item>
     <item msgid="89143234390889289">"Հավասարեցված ձախ"</item>
     <item msgid="7715533883382410603">"Հավասարեցված աջ"</item>
@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Ընդարձակել"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Ծալել"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Փակել"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Հեռախոսը տաքանում է"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Պահանջել գաղտնաբառ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Էկրանի պատկերներ"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Անվտանգություն"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Օգտվողի կարգավիճակը"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Ընդհանուր հաղորդագրություններ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Հիշողություն"</string>
 </resources>

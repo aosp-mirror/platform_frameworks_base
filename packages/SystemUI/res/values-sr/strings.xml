@@ -673,7 +673,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. страна од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Прошири"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Умањи"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Одбаци"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон се загрејао"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Неке функције су ограничене док се телефон не охлади"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
@@ -684,7 +685,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Упит за лозинку"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Снимци екрана"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Безбедност"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Статус корисника"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Опште поруке"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Меморијски простор"</string>
 </resources>

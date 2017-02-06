@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"விரி"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"சிறிதாக்கு"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"நிராகரி"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"கடவுச்சொல்லைக் கேள்"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ஸ்கிரீன் ஷாட்டுகள்"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"பாதுகாப்பு"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"பயனர் நிலை"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"பொதுச் செய்திகள்"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"சேமிப்பிடம்"</string>
 </resources>

@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Faqja <xliff:g id="ID_1">%1$d</xliff:g> nga <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Zgjero"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizo"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Hiqe"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Telefoni po bëhet i ngrohtë"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Disa funksione janë të kufizuara kur telefoni është duke u ftohur"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefoni yt do të përpiqet automatikisht që të ftohet. Mund ta përdorësh përsëri telefonin, por ai mund të punojë më ngadalë.\n\nPasi telefoni të jetë ftohur, ai do të punojë si normalisht."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Kërko fjalëkalimin"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Sinjalizimet"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pamjet e ekranit"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Siguria"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Statusi i përdoruesit"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Mesazhe të përgjithshme"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Hapësira ruajtëse"</string>
 </resources>

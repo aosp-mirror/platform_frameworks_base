@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"展開"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"關閉"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"提示輸入密碼"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕擷取畫面"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"安全性"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"使用者狀態"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
 </resources>

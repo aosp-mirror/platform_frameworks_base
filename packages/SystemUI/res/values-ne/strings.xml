@@ -526,24 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"आवाज निकाल्ने र स्क्रिनमा पपअप देखाउने"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"थप सेटिङहरू"</string>
     <string name="notification_done" msgid="5279426047273930175">"सम्पन्‍न भयो"</string>
-    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
-    <skip />
-    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
-    <skip />
-    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
-    <skip />
-    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
-    <skip />
-    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
-    <skip />
-    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
-    <skip />
-    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
-    <skip />
-    <!-- no translation found for snooze_undo (6074877317002985129) -->
-    <skip />
-    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
-    <skip />
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना सम्बन्धी नियन्त्रणहरू"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना स्नुज गर्ने विकल्पहरू"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"१५ मिनेट"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"३० मिनेट"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"१ घण्टा"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"स्नुज नगर्नुहोस्"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"अनडू गर्नुहोस्"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> का लागि स्नुज गरियो"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ब्याट्री उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज गर्ने समयमा ब्याट्री सेभर उपलब्ध छैन"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ब्याट्री सेभर"</string>
@@ -605,24 +596,23 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"सक्रिय गर्नुहोस्"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"निष्क्रिय"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नेभिगेशन पट्टी"</string>
-    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
-    <skip />
-    <!-- no translation found for nav_bar_left (731491280511316123) -->
-    <skip />
-    <!-- no translation found for nav_bar_right (2523774879720231974) -->
-    <skip />
-    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
-    <skip />
-    <!-- no translation found for nav_bar_default (8587114043070993007) -->
-    <skip />
-    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
-    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
-    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
-    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
-    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
-    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
-    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
-    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
+    <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"बायाँ"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"दायाँ"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"बटनको प्रकार"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(पूर्वनिर्धारित)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
+    <item msgid="5742013440802239414">"किकोड"</item>
+    <item msgid="8748101184830239843">"मेनु / किबोर्ड परिवर्तक"</item>
+    <item msgid="8175437057325747277">"कुनै पनि होइन"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"विभाजित (पूर्वनिर्धारित)"</item>
+    <item msgid="6210279084134579668">"मध्य भागमा"</item>
+    <item msgid="89143234390889289">"बायाँतिर पङ्क्तिबद्ध"</item>
+    <item msgid="7715533883382410603">"दायाँतिर पङ्क्तिबद्ध"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"मेनु / किबोर्ड स्विचर"</string>
     <string name="save" msgid="2311877285724540644">"सुरक्षित गर्नुहोस्"</string>
     <string name="reset" msgid="2448168080964209908">"पुनःसेट गर्नु"</string>
@@ -630,8 +620,7 @@
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलनको नेभिगेशन बटन"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <!-- no translation found for icon (8732339849035837289) -->
-    <skip />
+    <string name="icon" msgid="8732339849035837289">"आइकन"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइलहरू थप्न तान्नुहोस्"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाउनका लागि यहाँ तान्नुहोस्"</string>
     <string name="qs_edit" msgid="2232596095725105230">"सम्पादन गर्नुहोस्"</string>
@@ -682,28 +671,19 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत गर्नुहोस्"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"सानो बनाउनुहोस्"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"खारेज गर्नुहोस्"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"फोन तातो भइरहेको छ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्नेछ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
-    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <string name="lockscreen_left" msgid="6806490081187499505">"बायाँ"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"दायाँ"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"सर्टकट आफू अनुकूल पार्नुहोस्"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"सर्टकट"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"पासवर्ड माग्ने"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"अलर्टहरू"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रिनशटहरू"</string>
+    <!-- no translation found for notification_channel_general (4525309436693914482) -->
     <skip />
-    <!-- no translation found for lockscreen_right (6093496261656102989) -->
-    <skip />
-    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
-    <skip />
-    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
-    <skip />
-    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
-    <skip />
-    <!-- no translation found for notification_channel_security (7345516133431326347) -->
-    <skip />
-    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
-    <skip />
-    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
-    <skip />
+    <string name="notification_channel_storage" msgid="3077205683020695313">"भण्डारण"</string>
 </resources>

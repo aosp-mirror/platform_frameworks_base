@@ -602,16 +602,16 @@
     <string name="nav_bar_button_type" msgid="6947806619897153791">"ប្រភេទ​ប៊ូតុង"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(លំនាំដើម)"</string>
   <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"ក្ដារ​តម្បៀត​ខ្ទាស់"</item>
+    <item msgid="1545641631806817203">"អង្គចងចាំ"</item>
     <item msgid="5742013440802239414">"លេខកូដ​គ្រាប់ចុច"</item>
-    <item msgid="8748101184830239843">"កម្មវិធី​ប្តូរក្តារ​ចុច / ម៉ឺនុយ"</item>
+    <item msgid="8748101184830239843">"ម៉ឺនុយ / កម្មវិធី​ប្តូរក្តារ​ចុច"</item>
     <item msgid="8175437057325747277">"គ្មាន"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="4967898371682516967">"បំបែក (លំនាំដើម)"</item>
     <item msgid="6210279084134579668">"ដាក់​នៅ​កណ្តាល"</item>
-    <item msgid="89143234390889289">"តម្រឹម​ខាងឆ្វេង"</item>
-    <item msgid="7715533883382410603">"តម្រឹម​ខាងស្ដាំ"</item>
+    <item msgid="89143234390889289">"តម្រឹម​ឆ្វេង"</item>
+    <item msgid="7715533883382410603">"តម្រឹមស្ដាំ"</item>
   </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"កម្មវិធីប្តូរក្តារចុច / ម៉ឺនុយ"</string>
     <string name="save" msgid="2311877285724540644">"រក្សាទុក"</string>
@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ពង្រីក"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"បង្រួម"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"បដិសេធ"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"ទូរសព្ទ​នេះ​កំពុង​កើន​កម្តៅ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"មុខងារ​មួយ​ចំនួន​នឹង​មិន​អាច​ប្រើ​បាន​ពេញលេញ​នោះ​ទេ ខណៈពេល​ដែល​ទូរសព្ទ​កំពុង​បញ្ចុះ​កម្តៅ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ទូរសព្ទ​របស់អ្នក​នឹង​ព្យាយាម​បញ្ចុះ​កម្តៅ​ដោយ​ស្វ័យប្រវត្តិ។ អ្នក​នៅតែ​អាច​ប្រើ​ទូរសព្ទ​របស់អ្នក​បាន​ដដែល​ ប៉ុន្តែ​វា​នឹង​ដំណើរ​ការ​យឺត​ជាង​មុន។\n\nបន្ទាប់​ពី​ទូរសព្ទ​របស់អ្នក​ត្រជាក់​ជាង​មុន​ហើយ វា​នឹង​ដំណើរការ​ដូច​ធម្មតា។"</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"ជំរុញ​ឲ្យ​បញ្ចូល​ពាក្យ​សម្ងាត់"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ការ​ជូនដំណឹង"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"រូបថត​អេក្រង់"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"សុវត្ថិភាព"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"ស្ថានភាព​អ្នកប្រើ"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"សារ​ទូទៅ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ទំហំផ្ទុក"</string>
 </resources>

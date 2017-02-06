@@ -533,7 +533,7 @@
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 ਮਿੰਟ"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 ਘੰਟਾ"</string>
     <string name="snooze_option_dont_snooze" msgid="655446566007801922">"ਸਨੂਜ਼ ਨਾ ਕਰੋ"</string>
-    <string name="snooze_undo" msgid="6074877317002985129">"ਪਹਿਲਾਂ ਵਰਗਾ ਕਰੋ"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ਲਈ ਸਨੂਜ਼ ਕੀਤਾ ਗਿਆ"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -603,7 +603,7 @@
     <string name="nav_bar_default" msgid="8587114043070993007">"(ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ਕਲਿੱਪਬੋਰਡ"</item>
-    <item msgid="5742013440802239414">"ਕੀਕੋਡ"</item>
+    <item msgid="5742013440802239414">"ਕੀ-ਕੋਡ"</item>
     <item msgid="8748101184830239843">"ਮੀਨੂ/ਕੀ-ਬੋਰਡ ਸਵਿੱਚਰ"</item>
     <item msgid="8175437057325747277">"ਕੋਈ ਨਹੀਂ"</item>
   </string-array>
@@ -620,7 +620,7 @@
     <string name="clipboard" msgid="1313879395099896312">"ਕਲਿੱਪਬੋਰਡ"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਆਵਾਗੌਣ ਬਟਨ"</string>
     <string name="keycode" msgid="7335281375728356499">"ਕੀਕੋਡ"</string>
-    <string name="icon" msgid="8732339849035837289">"ਚਿੰਨ੍ਹ"</string>
+    <string name="icon" msgid="8732339849035837289">"ਪ੍ਰਤੀਕ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ਟਾਇਲਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਘਸੀਟੋ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ਹਟਾਉਣ ਲਈ ਇੱਥੇ ਘਸੀਟੋ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ਸੰਪਾਦਨ ਕਰੋ"</string>
@@ -671,18 +671,18 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ਛੋਟਾ ਕਰੋ"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"ਖਾਰਜ ਕਰੋ"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"ਫ਼ੋਨ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ਫ਼ੋਨ ਦੇ ਠੰਡਾ ਹੋਣ ਦੇ ਦੌਰਾਨ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸੀਮਿਤ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਵੈਚਲਿਤ ਰੂਪ ਵਿੱਚ ਠੰਡਾ ਹੋਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੇਗਾ। ਤੁਸੀਂ ਹਾਲੇ ਵੀ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਵਰਤ ਸਕਦੇ ਹੋ, ਪਰੰਤੂ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਇਹ ਵਧੇਰੇ ਹੌਲੀ ਚੱਲੇ।\n\nਇੱਕ ਵਾਰ ਠੰਡਾ ਹੋਣ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡਾ ਫ਼ੋਨ ਸਧਾਰਨ ਤੌਰ \'ਤੇ ਚੱਲੇਗਾ।"</string>
     <string name="lockscreen_left" msgid="6806490081187499505">"ਖੱਬੇ"</string>
     <string name="lockscreen_right" msgid="6093496261656102989">"ਸੱਜੇ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਸ਼ਾਰਟਕੱਟ"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="lockscreen_shortcut" msgid="3734369277470360642">"ਸ਼ਾਰਟਕੱਟ"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"ਪਾਸਵਰਡ ਲਈ ਉਤਪ੍ਰੇਰਕ"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"ਪਾਸਵਰਡ ਲਈ ਪੁੱਛੋ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"ਸੁਰੱਖਿਆ"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"ਵਰਤੋਂਕਾਰ ਸਥਿਤੀ"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"ਆਮ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ਸਟੋਰੇਜ"</string>
 </resources>

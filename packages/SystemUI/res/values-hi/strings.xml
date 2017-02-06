@@ -532,7 +532,7 @@
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 मिनट"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 मिनट"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 घंटा"</string>
-    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"यद नहीं दिलाएं"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"याद नहीं दिलाएं"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"बैटरी उपयोग"</string>
@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत करें"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"छोटा करें"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"खारिज करें"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"फ़ोन गर्म हो रहा है"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फ़ोन के ठंडा होने के दौरान कुछ सुविधाएं सीमित होती हैं"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अभी भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"पासवर्ड के लिए संकेत दें"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचनाएं"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्‍क्रीनशॉट"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"सुरक्षा"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"उपयोगकर्ता स्थिति"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"जगह"</string>
 </resources>
