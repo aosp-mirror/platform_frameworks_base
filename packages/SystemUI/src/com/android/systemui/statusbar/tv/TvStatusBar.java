@@ -42,101 +42,8 @@ public class TvStatusBar extends SystemUI implements Callbacks {
     private IStatusBarService mBarService;
 
     @Override
-    public void setIcon(String slot, StatusBarIcon icon) {
-    }
-
-    @Override
-    public void removeIcon(String slot) {
-    }
-
-    public void removeNotification(String key, RankingMap ranking) {
-    }
-
-    @Override
-    public void disable(int state1, int state2, boolean animate) {
-    }
-
-    @Override
-    public void animateExpandNotificationsPanel() {
-    }
-
-    @Override
-    public void animateCollapsePanels(int flags) {
-    }
-
-    @Override
-    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
-    }
-
-    @Override
-    public void topAppWindowChanged(boolean visible) {
-    }
-
-    @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher) {
-    }
-
-    @Override // CommandQueue
-    public void setWindowState(int window, int state) {
-    }
-
-    @Override // CommandQueue
-    public void buzzBeepBlinked() {
-    }
-
-    @Override // CommandQueue
-    public void notificationLightOff() {
-    }
-
-    @Override // CommandQueue
-    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
-    }
-
-    @Override
-    public void animateExpandSettingsPanel(String subPanel) {
-    }
-
-    @Override
-    public void showScreenPinningRequest(int taskId) {
-    }
-
-    @Override
-    public void appTransitionPending() {
-    }
-
-    @Override
-    public void appTransitionCancelled() {
-    }
-
-    @Override
-    public void appTransitionStarting(long startTime, long duration) {
-    }
-
-    @Override
-    public void appTransitionFinished() {
-    }
-
-    @Override
-    public void onCameraLaunchGestureDetected(int source) {
-    }
-
-    @Override
     public void showTvPictureInPictureMenu() {
         PipManager.getInstance().showTvPictureInPictureMenu();
-    }
-
-    @Override
-    public void addQsTile(ComponentName tile) {
-    }
-
-    @Override
-    public void remQsTile(ComponentName tile) {
-    }
-
-    @Override
-    public void clickTile(ComponentName tile) {
     }
 
     @Override
@@ -160,8 +67,4 @@ public class TvStatusBar extends SystemUI implements Callbacks {
         }
     }
 
-    @Override
-    public void handleSystemNavigationKey(int arg1) {
-        // Not implemented
-    }
 }

@@ -63,9 +63,6 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_WINDOW_STATE              = 12 << MSG_SHIFT;
     private static final int MSG_SHOW_RECENT_APPS              = 13 << MSG_SHIFT;
     private static final int MSG_HIDE_RECENT_APPS              = 14 << MSG_SHIFT;
-    private static final int MSG_BUZZ_BEEP_BLINKED             = 15 << MSG_SHIFT;
-    private static final int MSG_NOTIFICATION_LIGHT_OFF        = 16 << MSG_SHIFT;
-    private static final int MSG_NOTIFICATION_LIGHT_PULSE      = 17 << MSG_SHIFT;
     private static final int MSG_SHOW_SCREEN_PIN_REQUEST       = 18 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_PENDING        = 19 << MSG_SHIFT;
     private static final int MSG_APP_TRANSITION_CANCELLED      = 20 << MSG_SHIFT;
@@ -121,9 +118,6 @@ public class CommandQueue extends IStatusBar.Stub {
         default void toggleKeyboardShortcutsMenu(int deviceId) { }
         default void cancelPreloadRecentApps() { }
         default void setWindowState(int window, int state) { }
-        default void buzzBeepBlinked() { }
-        default void notificationLightOff() { }
-        default void notificationLightPulse(int argb, int onMillis, int offMillis) { }
         default void showScreenPinningRequest(int taskId) { }
         default void appTransitionPending() { }
         default void appTransitionCancelled() { }
@@ -310,26 +304,6 @@ public class CommandQueue extends IStatusBar.Stub {
         synchronized (mLock) {
             // don't coalesce these
             mHandler.obtainMessage(MSG_SET_WINDOW_STATE, window, state, null).sendToTarget();
-        }
-    }
-
-    public void buzzBeepBlinked() {
-        synchronized (mLock) {
-            mHandler.removeMessages(MSG_BUZZ_BEEP_BLINKED);
-            mHandler.sendEmptyMessage(MSG_BUZZ_BEEP_BLINKED);
-        }
-    }
-
-    public void notificationLightOff() {
-        synchronized (mLock) {
-            mHandler.sendEmptyMessage(MSG_NOTIFICATION_LIGHT_OFF);
-        }
-    }
-
-    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
-        synchronized (mLock) {
-            mHandler.obtainMessage(MSG_NOTIFICATION_LIGHT_PULSE, onMillis, offMillis, argb)
-                    .sendToTarget();
         }
     }
 
@@ -522,21 +496,6 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SET_WINDOW_STATE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).setWindowState(msg.arg1, msg.arg2);
-                    }
-                    break;
-                case MSG_BUZZ_BEEP_BLINKED:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).buzzBeepBlinked();
-                    }
-                    break;
-                case MSG_NOTIFICATION_LIGHT_OFF:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).notificationLightOff();
-                    }
-                    break;
-                case MSG_NOTIFICATION_LIGHT_PULSE:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).notificationLightPulse((Integer) msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:

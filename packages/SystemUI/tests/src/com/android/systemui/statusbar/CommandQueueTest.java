@@ -171,27 +171,6 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBuzzBeepBlink() {
-        mCommandQueue.buzzBeepBlinked();
-        waitForIdleSync();
-        verify(mCallbacks).buzzBeepBlinked();
-    }
-
-    @Test
-    public void testNotificationLightOff() {
-        mCommandQueue.notificationLightOff();
-        waitForIdleSync();
-        verify(mCallbacks).notificationLightOff();
-    }
-
-    @Test
-    public void testNotificationLightPulse() {
-        mCommandQueue.notificationLightPulse(1, 2, 3);
-        waitForIdleSync();
-        verify(mCallbacks).notificationLightPulse(eq(1), eq(2), eq(3));
-    }
-
-    @Test
     public void testScreenPinRequest() {
         mCommandQueue.showScreenPinningRequest(1);
         waitForIdleSync();
