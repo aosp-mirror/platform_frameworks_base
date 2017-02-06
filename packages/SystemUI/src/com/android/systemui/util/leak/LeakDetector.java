@@ -96,6 +96,10 @@ public class LeakDetector implements Dumpable {
         }
     }
 
+    TrackedGarbage getTrackedGarbage() {
+        return mTrackedGarbage;
+    }
+
     @Override
     public void dump(FileDescriptor df, PrintWriter w, String[] args) {
         IndentingPrintWriter pw = new IndentingPrintWriter(w, "  ");

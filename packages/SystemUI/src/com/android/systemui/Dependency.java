@@ -67,7 +67,9 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
+import com.android.systemui.util.leak.LeakReporter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -103,6 +105,12 @@ public class Dependency extends SystemUI {
      * Generic handler on the main thread.
      */
     public static final DependencyKey<Handler> MAIN_HANDLER = new DependencyKey<>("main_handler");
+
+    /**
+     * An email address to send memory leak reports to by default.
+     */
+    public static final DependencyKey<String> LEAK_REPORT_EMAIL
+            = new DependencyKey<>("leak_report_email");
 
     private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
     private final ArrayMap<Object, DependencyProvider> mProviders = new ArrayMap<>();
@@ -191,6 +199,18 @@ public class Dependency extends SystemUI {
                 new SecurityControllerImpl(mContext));
 
         mProviders.put(LeakDetector.class, LeakDetector::create);
+
+        mProviders.put(LEAK_REPORT_EMAIL, () -> null);
+
+        mProviders.put(LeakReporter.class, () -> new LeakReporter(
+                mContext,
+                getDependency(LeakDetector.class),
+                getDependency(LEAK_REPORT_EMAIL)));
+
+        mProviders.put(GarbageMonitor.class, () -> new GarbageMonitor(
+                getDependency(BG_LOOPER),
+                getDependency(LeakDetector.class),
+                getDependency(LeakReporter.class)));
 
         mProviders.put(TunerService.class, () ->
                 new TunerService(mContext));
