@@ -2342,34 +2342,6 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * Utility adapter class to avoid having to override all three methods
-     * whenever someone just wants to listen for a single event.
-     *
-     * @hide
-     * */
-    public static class TransitionListenerAdapter implements TransitionListener {
-        @Override
-        public void onTransitionStart(Transition transition) {
-        }
-
-        @Override
-        public void onTransitionEnd(Transition transition) {
-        }
-
-        @Override
-        public void onTransitionCancel(Transition transition) {
-        }
-
-        @Override
-        public void onTransitionPause(Transition transition) {
-        }
-
-        @Override
-        public void onTransitionResume(Transition transition) {
-        }
-    }
-
-    /**
      * Holds information about each animator used when a new transition starts
      * while other transitions are still running to determine whether a running
      * animation should be canceled or a new animation noop'd. The structure holds

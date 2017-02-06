@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.view.View;
@@ -491,7 +492,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 sharedElementTransitionStarted();
                 sharedElementTransitionComplete();
             } else {
-                sharedElementTransition.addListener(new Transition.TransitionListenerAdapter() {
+                sharedElementTransition.addListener(new TransitionListenerAdapter() {
                     @Override
                     public void onTransitionStart(Transition transition) {
                         sharedElementTransitionStarted();
@@ -592,7 +593,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
                 mBackgroundAnimator.start();
             } else if (transition != null) {
-                transition.addListener(new Transition.TransitionListenerAdapter() {
+                transition.addListener(new TransitionListenerAdapter() {
                     @Override
                     public void onTransitionEnd(Transition transition) {
                         transition.removeListener(this);

@@ -298,7 +298,7 @@ public class TransitionManager {
                 previousRunningTransitions = new ArrayList<Transition>(currentTransitions);
             }
             currentTransitions.add(mTransition);
-            mTransition.addListener(new Transition.TransitionListenerAdapter() {
+            mTransition.addListener(new TransitionListenerAdapter() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     ArrayList<Transition> currentTransitions =

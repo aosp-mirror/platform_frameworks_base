@@ -21,7 +21,7 @@ import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.transition.Transition.TransitionListener;
-import android.transition.Transition.TransitionListenerAdapter;
+import android.transition.TransitionListenerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 

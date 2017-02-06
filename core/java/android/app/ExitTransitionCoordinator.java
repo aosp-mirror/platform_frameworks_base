@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -161,7 +162,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void startSharedElementExit(final ViewGroup decorView) {
         Transition transition = getSharedElementExitTransition();
-        transition.addListener(new Transition.TransitionListenerAdapter() {
+        transition.addListener(new TransitionListenerAdapter() {
             @Override
             public void onTransitionEnd(Transition transition) {
                 transition.removeListener(this);

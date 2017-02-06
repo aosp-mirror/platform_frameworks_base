@@ -18,6 +18,7 @@ package android.app;
 import android.graphics.Rect;
 import android.os.Build;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.ArrayMap;
@@ -332,7 +333,7 @@ class FragmentTransition {
             OneShotPreDrawListener.add(exitingFragment.mContainer, () -> {
                 setViewVisibility(exitingViews, View.INVISIBLE);
             });
-            exitTransition.addListener(new Transition.TransitionListenerAdapter() {
+            exitTransition.addListener(new TransitionListenerAdapter() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     transition.removeListener(this);
@@ -995,7 +996,7 @@ class FragmentTransition {
             final Transition enterTransition, final ArrayList<View> enteringViews,
             final Transition exitTransition, final ArrayList<View> exitingViews,
             final TransitionSet sharedElementTransition, final ArrayList<View> sharedElementsIn) {
-        overalTransition.addListener(new Transition.TransitionListenerAdapter() {
+        overalTransition.addListener(new TransitionListenerAdapter() {
             @Override
             public void onTransitionStart(Transition transition) {
                 if (enterTransition != null) {

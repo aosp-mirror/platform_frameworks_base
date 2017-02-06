@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionSet;
 import android.transition.Visibility;
 import android.util.ArrayMap;
@@ -916,7 +917,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected void onTransitionsComplete() {}
 
-    protected class ContinueTransitionListener extends Transition.TransitionListenerAdapter {
+    protected class ContinueTransitionListener extends TransitionListenerAdapter {
         @Override
         public void onTransitionStart(Transition transition) {
             mIsStartingTransition = false;
