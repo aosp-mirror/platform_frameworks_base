@@ -836,6 +836,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private File mCacheDir;
 
+    private ArraySet<String> mPrivappPermissionsViolations;
+
     private static class IFVerificationParams {
         PackageParser.Package pkg;
         boolean replacing;
@@ -11543,6 +11545,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!whitelisted) {
                 Slog.w(TAG, "Privileged permission " + perm + " for package "
                         + pkg.packageName + " - not in privapp-permissions whitelist");
+                if (!mSystemReady) {
+                    if (mPrivappPermissionsViolations == null) {
+                        mPrivappPermissionsViolations = new ArraySet<>();
+                    }
+                    mPrivappPermissionsViolations.add(pkg.packageName + ": " + perm);
+                }
                 if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
                     return false;
                 }
@@ -19972,6 +19980,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // Now that we're mostly running, clean up stale users and apps
         sUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
+
+        if (mPrivappPermissionsViolations != null) {
+            Slog.wtf(TAG,"Signature|privileged permissions not in "
+                    + "privapp-permissions whitelist: " + mPrivappPermissionsViolations);
+            mPrivappPermissionsViolations = null;
+        }
     }
 
     @Override
