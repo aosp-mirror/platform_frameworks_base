@@ -34,14 +34,14 @@ struct SplitConstraints {
 
 struct TableSplitterOptions {
   /**
-   * The preferred density to keep in the table, stripping out all others.
+   * The preferred densities to keep in the table, stripping out all others.
+   * If empty, no stripping is done.
    */
-  Maybe<uint16_t> preferred_density;
+  std::vector<uint16_t> preferred_densities;
 
   /**
    * Configuration filter that determines which resource configuration values
-   * end up in
-   * the final table.
+   * end up in the final table.
    */
   IConfigFilter* config_filter = nullptr;
 };
