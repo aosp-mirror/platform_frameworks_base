@@ -36,6 +36,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -200,6 +201,7 @@ public class RankingHelperTest {
         assertTrue(Arrays.equals(expected.getVibrationPattern(), actual.getVibrationPattern()));
         assertEquals(expected.getGroup(), actual.getGroup());
         assertEquals(expected.getAudioAttributes(), actual.getAudioAttributes());
+        assertEquals(expected.getLightColor(), actual.getLightColor());
     }
 
     @Test
@@ -260,12 +262,13 @@ public class RankingHelperTest {
         NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel2.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel2.setLights(true);
+        channel2.enableLights(true);
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel2.enableVibration(true);
         channel2.setGroup(ncg.getId());
         channel2.setVibrationPattern(new long[]{100, 67, 145, 156});
+        channel2.setLightColor(Color.BLUE);
 
         mHelper.createNotificationChannelGroup(pkg, uid, ncg, true);
         mHelper.createNotificationChannel(pkg, uid, channel1, true);
@@ -437,7 +440,7 @@ public class RankingHelperTest {
         // all fields locked by user
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setLights(false);
+        channel.enableLights(false);
         channel.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
 
         mHelper.createNotificationChannel(pkg, uid, channel, false);
@@ -459,7 +462,7 @@ public class RankingHelperTest {
         // all fields locked by user
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
-        channel.setLights(false);
+        channel.enableLights(false);
         channel.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
 
         mHelper.createNotificationChannel(pkg, uid, channel, false);
@@ -467,7 +470,7 @@ public class RankingHelperTest {
         // same id, try to update
         final NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
-        channel2.setLights(true);
+        channel2.enableLights(true);
 
         mHelper.updateNotificationChannelFromAssistant(pkg, uid, channel2);
 
@@ -542,7 +545,7 @@ public class RankingHelperTest {
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel.setLights(true);
+        channel.enableLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
 
@@ -552,7 +555,7 @@ public class RankingHelperTest {
         final NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_HIGH);
         channel2.setSound(new Uri.Builder().scheme("test2").build(), mAudioAttributes);
-        channel2.setLights(false);
+        channel2.enableLights(false);
         channel2.setBypassDnd(false);
         channel2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
@@ -574,7 +577,7 @@ public class RankingHelperTest {
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel.setLights(true);
+        channel.enableLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
@@ -601,7 +604,7 @@ public class RankingHelperTest {
         final NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel.setLights(true);
+        channel.enableLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
@@ -628,7 +631,7 @@ public class RankingHelperTest {
         NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel.setLights(true);
+        channel.enableLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.enableVibration(true);
@@ -654,7 +657,7 @@ public class RankingHelperTest {
         NotificationChannel channel =
                 new NotificationChannel("id2", "name2", NotificationManager.IMPORTANCE_LOW);
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
-        channel.setLights(true);
+        channel.enableLights(true);
         channel.setBypassDnd(true);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         channel.enableVibration(true);

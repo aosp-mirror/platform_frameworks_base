@@ -33,6 +33,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -137,10 +138,11 @@ public class NotificationRecordTest {
                 defaults |= Notification.DEFAULT_LIGHTS;
             } else {
                 builder.setLights(CUSTOM_LIGHT.color, CUSTOM_LIGHT.onMs, CUSTOM_LIGHT.offMs);
+                channel.setLightColor(Color.BLUE);
             }
-            channel.setLights(true);
+            channel.enableLights(true);
         } else {
-            channel.setLights(false);
+            channel.enableLights(false);
         }
 
         builder.setDefaults(defaults);
@@ -316,7 +318,7 @@ public class NotificationRecordTest {
 
     @Test
     public void testLights_locked_preUpgrade() throws Exception {
-        defaultChannel.setLights(true);
+        defaultChannel.enableLights(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
         StatusBarNotification sbn = getNotification(true /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
@@ -327,7 +329,7 @@ public class NotificationRecordTest {
     }
 
     @Test
-    public void testLights_upgrade() throws Exception {
+    public void testLights_upgrade_defaultLights() throws Exception {
         int defaultLightColor = mMockContext.getResources().getColor(
                 com.android.internal.R.color.config_defaultNotificationColor);
         int defaultLightOn = mMockContext.getResources().getInteger(
@@ -337,6 +339,22 @@ public class NotificationRecordTest {
 
         NotificationRecord.Light expected = new NotificationRecord.Light(
                 defaultLightColor, defaultLightOn, defaultLightOff);
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                true /* lights */, true /*defaultLights */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        assertEquals(expected, record.getLight());
+    }
+
+    @Test
+    public void testLights_upgrade() throws Exception {
+        int defaultLightOn = mMockContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOn);
+        int defaultLightOff = mMockContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultNotificationLedOff);
+
+        NotificationRecord.Light expected = new NotificationRecord.Light(
+                Color.BLUE, defaultLightOn, defaultLightOff);
         StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, false /*defaultLights */);

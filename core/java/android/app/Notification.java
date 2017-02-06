@@ -49,7 +49,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -3128,7 +3127,7 @@ public class Notification implements Parcelable
 
          * Not all devices will honor all (or even any) of these values.
          *
-         * @deprecated use {@link NotificationChannel#setLights(boolean)} instead.
+         * @deprecated use {@link NotificationChannel#enableLights(boolean)} instead.
          * @see Notification#ledARGB
          * @see Notification#ledOnMS
          * @see Notification#ledOffMS
@@ -3227,7 +3226,7 @@ public class Notification implements Parcelable
          * For all default values, use {@link #DEFAULT_ALL}.
          *
          * @deprecated use {@link NotificationChannel#enableVibration(boolean)} and
-         * {@link NotificationChannel#setLights(boolean)} and
+         * {@link NotificationChannel#enableLights(boolean)} and
          * {@link NotificationChannel#setSound(Uri, AudioAttributes)} instead.
          */
         @Deprecated

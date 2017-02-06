@@ -185,7 +185,9 @@ public final class NotificationRecord {
         int defaultLightOff = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultNotificationLedOff);
 
-        Light light = getChannel().shouldShowLights() ? new Light(defaultLightColor,
+        int channelLightColor = getChannel().getLightColor() != 0 ? getChannel().getLightColor()
+                : defaultLightColor;
+        Light light = getChannel().shouldShowLights() ? new Light(channelLightColor,
                 defaultLightOn, defaultLightOff) : null;
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
