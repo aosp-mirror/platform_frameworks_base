@@ -517,9 +517,6 @@ public final class PowerManagerService extends SystemService
     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
-    // True if brightness should be affected by twilight.
-    private boolean mBrightnessUseTwilight;
-
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
@@ -735,9 +732,6 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DOUBLE_TAP_TO_WAKE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Secure.BRIGHTNESS_USE_TWILIGHT),
-                    false, mSettingsObserver, UserHandle.USER_ALL);
             IVrManager vrManager =
                     (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
             if (vrManager != null) {
@@ -877,9 +871,6 @@ public final class PowerManagerService extends SystemService
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
-
-        mBrightnessUseTwilight = Settings.Secure.getIntForUser(resolver,
-                Secure.BRIGHTNESS_USE_TWILIGHT, 0, UserHandle.USER_CURRENT) != 0;
 
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
@@ -2254,7 +2245,6 @@ public final class PowerManagerService extends SystemService
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
             mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
             mDisplayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
-            mDisplayPowerRequest.useTwilight = mBrightnessUseTwilight;
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
