@@ -382,7 +382,7 @@ static void JHwBlob_native_putString(
     s = nullptr;
 
     hidl_string tmp;
-    tmp.setToExternal(static_cast<const char *>(subBlob->data()), size);
+    tmp.setToExternal(static_cast<const char *>(subBlob->data()), size - 1);
 
     sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, thiz);
     blob->write(offset, &tmp, sizeof(tmp));
