@@ -50,7 +50,7 @@ public final class RecommendationRequest implements Parcelable {
         private WifiConfiguration mDefaultConfig;
         private WifiConfiguration mConnectedConfig;
         private WifiConfiguration[] mConnectableConfigs;
-        private int mLastSelectedNetworkId;
+        private int mLastSelectedNetworkId = -1;
         private long mLastSelectedTimestamp;
 
         public Builder setScanResults(ScanResult[] scanResults) {
@@ -161,7 +161,7 @@ public final class RecommendationRequest implements Parcelable {
 
     /**
      * @return The {@link WifiConfiguration#networkId} of the last user selected network.
-     *         {@code 0} if not set.
+     *         {@code -1} if not set.
      */
     public int getLastSelectedNetworkId() {
         return mLastSelectedNetworkId;

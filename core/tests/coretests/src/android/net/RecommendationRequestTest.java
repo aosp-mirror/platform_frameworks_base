@@ -96,7 +96,7 @@ public class RecommendationRequestTest extends AndroidTestCase {
 
         RecommendationRequest parceled = passThroughParcel(request);
 
-        assertEquals(0, parceled.getLastSelectedNetworkId());
+        assertEquals(-1, parceled.getLastSelectedNetworkId());
         assertEquals(0, parceled.getLastSelectedNetworkTimestamp());
     }
 
