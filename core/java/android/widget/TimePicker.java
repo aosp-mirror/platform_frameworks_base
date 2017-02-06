@@ -278,6 +278,16 @@ public class TimePicker extends FrameLayout {
         return mDelegate.getBaseline();
     }
 
+    /**
+     * Validates whether current input by the user is a valid time based on the locale. TimePicker
+     * will show an error message to the user if the time is not valid.
+     *
+     * @return {@code true} if the input is valid, {@code false} otherwise
+     */
+    public boolean validateInput() {
+        return mDelegate.validateInput();
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
@@ -340,6 +350,8 @@ public class TimePicker extends FrameLayout {
 
         void setIs24Hour(boolean is24Hour);
         boolean is24Hour();
+
+        boolean validateInput();
 
         void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener);
 

@@ -4471,4 +4471,20 @@
     <string name="device_storage_monitor_notification_channel">Device storage</string>
     <!-- Channel name for UsbDeviceManager adb debugging notifications -->
     <string name="adb_debugging_notification_channel_tv">USB debugging</string>
+
+    <!-- Label for the time picker hour input field. [CHAR LIMIT=20] -->
+    <string name="time_picker_hour_label">hour</string>
+    <!-- Label for the time picker minute input field. [CHAR LIMIT=20] -->
+    <string name="time_picker_minute_label">minute</string>
+    <!-- The title for the time picker dialog. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_header_text">Set time</string>
+    <!-- Error shown to the user if they type in invalid hour or minute in the time picker. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_input_error">Enter a valid time</string>
+    <!-- Label shown to the user in time picker to let them know that should type in time. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_prompt_label">Type in time</string>
+    <!-- Accessibility string used for describing the button in time picker that changes the dialog to text input mode. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_text_input_mode_description">Switch to text input mode for the time input.</string>
+    <!-- Accessibility string used for describing the button in time picker that changes the dialog to circular clock mode. [CHAR LIMIT=NONE] -->
+    <string name="time_picker_radial_mode_description">Switch to clock mode for the time input.</string>
+
 </resources>

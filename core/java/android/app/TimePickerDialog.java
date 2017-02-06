@@ -145,14 +145,25 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
     }
 
     @Override
+    public void show() {
+        super.show();
+        getButton(BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mTimePicker.validateInput()) {
+                    if (mTimeSetListener != null) {
+                        mTimeSetListener.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
+                                mTimePicker.getCurrentMinute());
+                    }
+                    dismiss();
+                }
+            }
+        });
+    }
+
+    @Override
     public void onClick(DialogInterface dialog, int which) {
         switch (which) {
-            case BUTTON_POSITIVE:
-                if (mTimeSetListener != null) {
-                    mTimeSetListener.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
-                            mTimePicker.getCurrentMinute());
-                }
-                break;
             case BUTTON_NEGATIVE:
                 cancel();
                 break;

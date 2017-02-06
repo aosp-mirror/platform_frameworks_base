@@ -219,6 +219,11 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         }
     }
 
+    @Override
+    public boolean validateInput() {
+        return true;
+    }
+
     private void getHourFormatData() {
         final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
                 (mIs24HourView) ? "Hm" : "hm");
