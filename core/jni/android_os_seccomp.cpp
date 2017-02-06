@@ -147,6 +147,9 @@ bool set_seccomp_filter() {
     // Needed for kernel to restart syscalls
     AllowSyscall(f, 128); // __NR_restart_syscall
 
+    // b/35034743
+    AllowSyscall(f, 267); // __NR_fstatfs64
+
     Trap(f);
 
     if (SetValidateArchitectureJumpTarget(offset_to_32bit_filter, f) != 0)
