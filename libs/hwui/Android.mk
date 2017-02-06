@@ -167,7 +167,7 @@ hwui_c_includes += \
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
     hwui_cflags += -DANDROID_ENABLE_RENDERSCRIPT
     hwui_c_includes += \
-        $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,) \
+        $(call intermediates-dir-for,STATIC_LIBRARIES,TARGET,) \
         frameworks/rs/cpp \
         frameworks/rs
 endif
