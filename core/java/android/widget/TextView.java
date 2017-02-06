@@ -9639,7 +9639,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return new GestureDetector(mContext,
                 new GestureDetector.SimpleOnGestureListener() {
                     @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                    public boolean onSingleTapUp(MotionEvent e) {
                         if (shouldUseClickableSpanOnClickGestureDetector()) {
                             ClickableSpan[] links = ((Spannable) mText).getSpans(
                                     getSelectionStart(), getSelectionEnd(),
