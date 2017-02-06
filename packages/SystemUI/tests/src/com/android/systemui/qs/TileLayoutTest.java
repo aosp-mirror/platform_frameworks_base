@@ -161,4 +161,10 @@ public class TileLayoutTest extends SysuiTestCase {
         assertEquals(top1.getValue().intValue(), top2.getValue().intValue());
         assertEquals(bottom1.getValue().intValue(), bottom2.getValue().intValue());
     }
+
+    @Test
+    public void testEmptyHeight() {
+        mTileLayout.measure(mLayoutSizeForOneTile, mLayoutSizeForOneTile);
+        assertEquals(0, mTileLayout.getMeasuredHeight());
+    }
 }
