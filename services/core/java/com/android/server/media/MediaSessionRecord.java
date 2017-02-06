@@ -1123,6 +1123,38 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
+        public void addQueueItem(MediaDescription description) {
+            try {
+                mCb.onAddQueueItem(description);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in addQueueItem.", e);
+            }
+        }
+
+        public void addQueueItemAt(MediaDescription description, int index) {
+            try {
+                mCb.onAddQueueItemAt(description, index);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in addQueueItemAt.", e);
+            }
+        }
+
+        public void removeQueueItem(MediaDescription description) {
+            try {
+                mCb.onRemoveQueueItem(description);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in removeQueueItem.", e);
+            }
+        }
+
+        public void removeQueueItemAt(int index) {
+            try {
+                mCb.onRemoveQueueItemAt(index);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in removeQueueItem.", e);
+            }
+        }
+
         public void adjustVolume(int direction) {
             try {
                 mCb.onAdjustVolume(direction);
@@ -1394,6 +1426,30 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             synchronized (mLock) {
                 return mQueue;
             }
+        }
+
+        @Override
+        public void addQueueItem(MediaDescription description) {
+            updateCallingPackage();
+            mSessionCb.addQueueItem(description);
+        }
+
+        @Override
+        public void addQueueItemAt(MediaDescription description, int index) {
+            updateCallingPackage();
+            mSessionCb.addQueueItemAt(description, index);
+        }
+
+        @Override
+        public void removeQueueItem(MediaDescription description) {
+            updateCallingPackage();
+            mSessionCb.removeQueueItem(description);
+        }
+
+        @Override
+        public void removeQueueItemAt(int index) {
+            updateCallingPackage();
+            mSessionCb.removeQueueItemAt(index);
         }
 
         @Override
