@@ -60,6 +60,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -6151,8 +6152,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 intent.setComponent(mOwners.getDeviceOwnerComponent());
                 intent.setDataAndType(bugreportUri, RemoteBugreportUtils.BUGREPORT_MIMETYPE);
                 intent.putExtra(DeviceAdminReceiver.EXTRA_BUGREPORT_HASH, bugreportHash);
-                mContext.grantUriPermission(mOwners.getDeviceOwnerComponent().getPackageName(),
-                        bugreportUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                LocalServices.getService(ActivityManagerInternal.class)
+                        .grantUriPermissionFromIntent(Process.SHELL_UID,
+                                mOwners.getDeviceOwnerComponent().getPackageName(),
+                                intent, mOwners.getDeviceOwnerUserId());
                 mContext.sendBroadcastAsUser(intent, UserHandle.of(mOwners.getDeviceOwnerUserId()));
             }
         } catch (FileNotFoundException e) {
