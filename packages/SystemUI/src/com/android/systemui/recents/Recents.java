@@ -205,7 +205,6 @@ public class Recents extends SystemUI
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
         mHandler = new Handler();
-        getComponent(CommandQueue.class).addCallbacks(this);
         UiModeManager uiModeManager = (UiModeManager) mContext.
                 getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
@@ -234,6 +233,7 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(processUser)) {
             // For the system user, initialize an instance of the interface that we can pass to the
             // secondary user
+            getComponent(CommandQueue.class).addCallbacks(this);
             mSystemToUserCallbacks = new RecentsSystemUser(mContext, mImpl);
         } else {
             // For the secondary user, bind to the primary user's service to get a persistent
