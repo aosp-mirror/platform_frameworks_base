@@ -104,6 +104,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mOpenedAmount = 0.0f;
     private float mVisualOverflowAdaption;
     private boolean mDisallowNextAnimation;
+    private boolean mAnimationsEnabled = true;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -255,7 +256,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             iconState.visibleState = StatusBarIconView.STATE_ICON;
             if (firstOverflowIndex == -1 && (isAmbient
                     || (translationX >= (noOverflowAfter ? layoutEnd - mIconSize : overflowStart)))) {
-                firstOverflowIndex = noOverflowAfter ? i - 1 : i;
+                firstOverflowIndex = noOverflowAfter && !isAmbient ? i - 1 : i;
                 int totalDotLength = mStaticDotRadius * 6 + 2 * mDotPadding;
                 visualOverflowStart = overflowStart + mIconSize * (1 + OVERFLOW_EARLY_AMOUNT)
                         - totalDotLength / 2
@@ -422,6 +423,20 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return mIconSize;
     }
 
+    public void setAnimationsEnabled(boolean enabled) {
+        if (!enabled && mAnimationsEnabled) {
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                ViewState childState = mIconStates.get(child);
+                if (childState != null) {
+                    childState.cancelAnimations(child);
+                    childState.applyToView(child);
+                }
+            }
+        }
+        mAnimationsEnabled = enabled;
+    }
+
     public class IconState extends ViewState {
         public float iconAppearAmount = 1.0f;
         public float clampedAppearAmount = 1.0f;
@@ -438,52 +453,59 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 StatusBarIconView icon = (StatusBarIconView) view;
                 boolean animate = false;
                 AnimationProperties animationProperties = null;
-                if (justAdded) {
-                    super.applyToView(icon);
-                    icon.setAlpha(0.0f);
-                    icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, false /* animate */);
-                    animationProperties = ADD_ICON_PROPERTIES;
-                    animate = true;
-                } else if (visibleState != icon.getVisibleState()) {
-                    animationProperties = DOT_ANIMATION_PROPERTIES;
-                    animate = true;
-                }
-                if (!animate && mAddAnimationStartIndex >= 0
-                        && indexOfChild(view) >= mAddAnimationStartIndex
-                        && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
-                            || visibleState != StatusBarIconView.STATE_HIDDEN)) {
-                    animationProperties = DOT_ANIMATION_PROPERTIES;
-                    animate = true;
-                }
-                if (needsCannedAnimation) {
-                    AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
-                    animationFilter.reset();
-                    animationFilter.combineFilter(ICON_ANIMATION_PROPERTIES.getAnimationFilter());
-                    mTempProperties.resetCustomInterpolators();
-                    mTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
-                    if (animationProperties != null) {
-                        animationFilter.combineFilter(animationProperties.getAnimationFilter());
-                        mTempProperties.combineCustomInterpolators(animationProperties);
+                boolean animationsAllowed = mAnimationsEnabled && !mDisallowNextAnimation;
+                if (animationsAllowed) {
+                    if (justAdded) {
+                        super.applyToView(icon);
+                        if (iconAppearAmount != 0.0f) {
+                            icon.setAlpha(0.0f);
+                            icon.setVisibleState(StatusBarIconView.STATE_HIDDEN,
+                                    false /* animate */);
+                            animationProperties = ADD_ICON_PROPERTIES;
+                            animate = true;
+                        }
+                    } else if (visibleState != icon.getVisibleState()) {
+                        animationProperties = DOT_ANIMATION_PROPERTIES;
+                        animate = true;
                     }
-                    animationProperties = mTempProperties;
-                    animationProperties.setDuration(CANNED_ANIMATION_DURATION);
-                    animate = true;
-                    mCannedAnimationStartIndex = indexOfChild(view);
+                    if (!animate && mAddAnimationStartIndex >= 0
+                            && indexOfChild(view) >= mAddAnimationStartIndex
+                            && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+                            || visibleState != StatusBarIconView.STATE_HIDDEN)) {
+                        animationProperties = DOT_ANIMATION_PROPERTIES;
+                        animate = true;
+                    }
+                    if (needsCannedAnimation) {
+                        AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                        animationFilter.reset();
+                        animationFilter.combineFilter(
+                                ICON_ANIMATION_PROPERTIES.getAnimationFilter());
+                        mTempProperties.resetCustomInterpolators();
+                        mTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
+                        if (animationProperties != null) {
+                            animationFilter.combineFilter(animationProperties.getAnimationFilter());
+                            mTempProperties.combineCustomInterpolators(animationProperties);
+                        }
+                        animationProperties = mTempProperties;
+                        animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                        animate = true;
+                        mCannedAnimationStartIndex = indexOfChild(view);
+                    }
+                    if (!animate && mCannedAnimationStartIndex >= 0
+                            && indexOfChild(view) > mCannedAnimationStartIndex
+                            && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
+                            || visibleState != StatusBarIconView.STATE_HIDDEN)) {
+                        AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
+                        animationFilter.reset();
+                        animationFilter.animateX();
+                        mTempProperties.resetCustomInterpolators();
+                        animationProperties = mTempProperties;
+                        animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                        animate = true;
+                    }
                 }
-                if (!animate && mCannedAnimationStartIndex >= 0
-                        && indexOfChild(view) > mCannedAnimationStartIndex
-                        && (icon.getVisibleState() != StatusBarIconView.STATE_HIDDEN
-                        || visibleState != StatusBarIconView.STATE_HIDDEN)) {
-                    AnimationFilter animationFilter = mTempProperties.getAnimationFilter();
-                    animationFilter.reset();
-                    animationFilter.animateX();
-                    mTempProperties.resetCustomInterpolators();
-                    animationProperties = mTempProperties;
-                    animationProperties.setDuration(CANNED_ANIMATION_DURATION);
-                    animate = true;
-                }
-                icon.setVisibleState(visibleState);
-                if (animate && !mDisallowNextAnimation) {
+                icon.setVisibleState(visibleState, animationsAllowed);
+                if (animate) {
                     animateTo(icon, animationProperties);
                 } else {
                     super.applyToView(view);

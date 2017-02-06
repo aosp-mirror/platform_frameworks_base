@@ -68,6 +68,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private float mMaxShelfEnd;
     private int mRelativeOffset;
     private boolean mInteractive;
+    private boolean mAnimationsEnabled = true;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -388,12 +389,13 @@ public class NotificationShelf extends ActivatableNotificationView {
 
         View rowIcon = row.getNotificationIcon();
         float notificationIconPosition = row.getTranslationY() + row.getContentTranslation();
-        if (usingLinearInterpolation) {
+        boolean stayingInShelf = row.isInShelf() && !row.isTransformingIntoShelf();
+        if (usingLinearInterpolation && !stayingInShelf) {
             // If we interpolate from the notification position, this might lead to a slightly
             // odd interpolation, since the notification position changes as well. Let's interpolate
             // from a fixed distance. We can only do this if we don't animate and the icon is
             // always in the interpolated positon.
-            notificationIconPosition = mMaxShelfEnd - getIntrinsicHeight() - iconTransformDistance;
+            notificationIconPosition = getTranslationY() - iconTransformDistance;
         }
         float notificationIconSize = 0.0f;
         int iconTopPadding;
@@ -426,7 +428,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             iconState.hidden = transitionAmount == 0.0f;
             iconState.alpha = alpha;
             iconState.yTranslation = iconYTranslation;
-            if (row.isInShelf() && !row.isTransformingIntoShelf()) {
+            if (stayingInShelf) {
                 iconState.iconAppearAmount = 1.0f;
                 iconState.alpha = 1.0f;
                 iconState.scaleX = 1.0f;
@@ -573,6 +575,15 @@ public class NotificationShelf extends ActivatableNotificationView {
         mMaxShelfEnd = maxShelfEnd;
     }
 
+    public void setAnimationsEnabled(boolean enabled) {
+        mAnimationsEnabled = enabled;
+        mCollapsedIcons.setAnimationsEnabled(enabled);
+        if (!enabled) {
+            // we need to wait with enabling the animations until the first frame has passed
+            mShelfIcons.setAnimationsEnabled(false);
+        }
+    }
+
     private class ShelfState extends ExpandableViewState {
         private float openedAmount;
         private boolean hasItemsInStableShelf;
@@ -585,6 +596,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             setOpenedAmount(openedAmount);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
+            mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);
         }
 
         @Override
@@ -594,6 +606,7 @@ public class NotificationShelf extends ActivatableNotificationView {
             setOpenedAmount(openedAmount);
             updateAppearance();
             setHasItemsInStableShelf(hasItemsInStableShelf);
+            mShelfIcons.setAnimationsEnabled(mAnimationsEnabled);
         }
     }
 }

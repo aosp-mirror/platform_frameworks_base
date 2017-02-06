@@ -105,6 +105,11 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
+    protected boolean shouldClearBackgroundOnReapply() {
+        return false;
+    }
+
+    @Override
     public int getCustomBackgroundColor() {
         int customBackgroundColor = super.getCustomBackgroundColor();
         if (customBackgroundColor == 0 && mShowingLegacyBackground) {

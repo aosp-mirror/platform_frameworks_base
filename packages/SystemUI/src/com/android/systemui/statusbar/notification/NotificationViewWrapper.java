@@ -93,12 +93,18 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void notifyContentUpdated(StatusBarNotification notification, boolean isLowPriority) {
         mDarkInitialized = false;
         Drawable background = mView.getBackground();
-        mBackgroundColor = 0;
+        if (shouldClearBackgroundOnReapply()) {
+            mBackgroundColor = 0;
+        }
         if (background instanceof ColorDrawable) {
             mBackgroundColor = ((ColorDrawable) background).getColor();
             mView.setBackground(null);
         }
         mShouldInvertDark = mBackgroundColor == 0 || isColorLight(mBackgroundColor);
+    }
+
+    protected boolean shouldClearBackgroundOnReapply() {
+        return true;
     }
 
     private boolean isColorLight(int backgroundColor) {
