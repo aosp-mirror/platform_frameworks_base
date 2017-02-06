@@ -1880,14 +1880,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             } else if (isUserLocked()) {
                 return mChildrenContainer.getGroupExpandFraction();
             }
-        } else if (isColorized()) {
+        } else if (isColorized() && (!mIsLowPriority || isExpanded())) {
             return -1.0f;
         }
         return 0.0f;
     }
 
     private boolean isColorized() {
-        return mIsColorized;
+        return mIsColorized && mBgTint != NO_COLOR;
     }
 
     @Override

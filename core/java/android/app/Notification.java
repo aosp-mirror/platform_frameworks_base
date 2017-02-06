@@ -633,9 +633,10 @@ public class Notification implements Parcelable
 
     /**
      * Special value of {@link #color} used as a place holder for an invalid color.
+     * @hide
      */
     @ColorInt
-    private static final int COLOR_INVALID = 1;
+    public static final int COLOR_INVALID = 1;
 
     /**
      * Sphere of visibility of this notification, which affects how and when the SystemUI reveals
@@ -2534,7 +2535,6 @@ public class Notification implements Parcelable
         private NotificationColorUtil mColorUtil;
         private boolean mIsLegacy;
         private boolean mIsLegacyInitialized;
-        private boolean mColorUtilInited = false;
 
         /**
          * Caches a contrast-enhanced version of {@link #mCachedContrastColorIsFor}.
@@ -2652,11 +2652,8 @@ public class Notification implements Parcelable
         }
 
         private NotificationColorUtil getColorUtil() {
-            if (!mColorUtilInited) {
-                mColorUtilInited = true;
-                if (isLegacy() || isColorized()) {
-                    mColorUtil = NotificationColorUtil.getInstance(mContext);
-                }
+            if (mColorUtil == null) {
+                mColorUtil = NotificationColorUtil.getInstance(mContext);
             }
             return mColorUtil;
         }
@@ -3172,12 +3169,16 @@ public class Notification implements Parcelable
          * Set whether this notification should be colorized. When set, the color set with
          * {@link #setColor(int)} will be used as the background color of this notification.
          * <p>
-         * The coloring will only be applied if the notification is ongoing.
          * This should only be used for high priority ongoing tasks like navigation, an ongoing
          * call, or other similarly high-priority events for the user.
+         * <p>
+         * For most styles, the coloring will only be applied if the notification is ongoing.
+         * However, for {@link MediaStyle} and {@link DecoratedMediaCustomViewStyle} notifications
+         * that have a media session attached there is no requirement for it to be ongoing.
          *
          * @see Builder#setOngoing(boolean)
          * @see Builder#setColor(int)
+         * @see MediaStyle#setMediaSession(MediaSession.Token)
          */
         public Builder setColorized(boolean colorize) {
             mN.extras.putBoolean(EXTRA_COLORIZED, colorize);
@@ -3758,11 +3759,19 @@ public class Notification implements Parcelable
         }
 
         private void bindExpandButton(RemoteViews contentView) {
-            int color = isColorized() ? getPrimaryTextColor() : resolveContrastColor();
+            int color = getPrimaryHighlightColor();
             contentView.setDrawableParameters(R.id.expand_button, false, -1, color,
                     PorterDuff.Mode.SRC_ATOP, -1);
             contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
                     color);
+        }
+
+        /**
+         * @return the color that is used as the first primary highlight color. This is applied
+         * in several places like the action buttons or the app name in the header.
+         */
+        private int getPrimaryHighlightColor() {
+            return isColorized() ? getPrimaryTextColor() : resolveContrastColor();
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView) {
@@ -4341,7 +4350,7 @@ public class Notification implements Parcelable
         }
 
         private CharSequence processLegacyText(CharSequence charSequence) {
-            if (isLegacy() || isColorized()) {
+            if (isLegacy() || textColorsNeedInversion()) {
                 return getColorUtil().invertCharSequenceColors(charSequence);
             } else {
                 return charSequence;
@@ -4354,7 +4363,7 @@ public class Notification implements Parcelable
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
                 boolean ambient) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
-            int color = ambient ? resolveAmbientColor() : resolveContrastColor();
+            int color = ambient ? resolveAmbientColor() : getPrimaryHighlightColor();
             if (colorable) {
                 contentView.setDrawableParameters(R.id.icon, false, -1, color,
                         PorterDuff.Mode.SRC_ATOP, -1);
@@ -4615,6 +4624,15 @@ public class Notification implements Parcelable
         private boolean isColorized() {
             return mN.isColorized();
         }
+
+        private boolean textColorsNeedInversion() {
+            if (mStyle == null || !MediaStyle.class.equals(mStyle.getClass())) {
+                return false;
+            }
+            int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+            return targetSdkVersion > Build.VERSION_CODES.M
+                    && targetSdkVersion < Build.VERSION_CODES.O;
+        }
     }
 
     /**
@@ -4624,6 +4642,14 @@ public class Notification implements Parcelable
         final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE
                 | Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR;
         return (flags & ongoingFlags) != 0;
+    }
+
+    /**
+     * @return whether this notification has a media session attached
+     * @hide
+     */
+    public boolean hasMediaSession() {
+        return extras.getParcelable(Notification.EXTRA_MEDIA_SESSION) != null;
     }
 
     /**
@@ -4640,12 +4666,23 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if this notification is colorized. This also factors in wheather the
+     * @return true if this notification is colorized. This also factors in whether the
      * notification is ongoing.
      *
      * @hide
      */
     public boolean isColorized() {
+        Class<? extends Style> style = getNotificationStyle();
+        if (MediaStyle.class.equals(style)) {
+            Boolean colorized = (Boolean) extras.get(EXTRA_COLORIZED);
+            if ((colorized == null || colorized) && hasMediaSession()) {
+                return true;
+            }
+        } else if (DecoratedMediaCustomViewStyle.class.equals(style)) {
+            if (extras.getBoolean(EXTRA_COLORIZED) && hasMediaSession()) {
+                return true;
+            }
+        }
         return extras.getBoolean(EXTRA_COLORIZED) && isOngoing();
     }
 
@@ -5891,20 +5928,26 @@ public class Notification implements Parcelable
      * shown as icon-only pushbuttons, suitable for transport controls. The Bitmap given to
      * {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap) setLargeIcon()} will be
      * treated as album artwork.
-     *
+     * <p>
      * Unlike the other styles provided here, MediaStyle can also modify the standard-size
      * {@link Notification#contentView}; by providing action indices to
      * {@link #setShowActionsInCompactView(int...)} you can promote up to 3 actions to be displayed
      * in the standard view alongside the usual content.
-     *
+     * <p>
      * Notifications created with MediaStyle will have their category set to
      * {@link Notification#CATEGORY_TRANSPORT CATEGORY_TRANSPORT} unless you set a different
      * category using {@link Notification.Builder#setCategory(String) setCategory()}.
-     *
+     * <p>
      * Finally, if you attach a {@link android.media.session.MediaSession.Token} using
      * {@link android.app.Notification.MediaStyle#setMediaSession(MediaSession.Token)},
      * the System UI can identify this as a notification representing an active media session
      * and respond accordingly (by showing album artwork in the lockscreen, for example).
+     *
+     * <p>
+     * Starting at {@link android.os.Build.VERSION_CODES#O Android O} any notification that has a
+     * media session attached with {@link #setMediaSession(MediaSession.Token)} will be colorized.
+     * You can opt-out of this behavior by using {@link Notification.Builder#setColorized(boolean)}.
+     * <p>
      *
      * To use this style with your Notification, feed it to
      * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
@@ -5920,6 +5963,7 @@ public class Notification implements Parcelable
      * </pre>
      *
      * @see Notification#bigContentView
+     * @see Notification.Builder#setColorized(boolean)
      */
     public static class MediaStyle extends Style {
         static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 3;
@@ -6057,7 +6101,7 @@ public class Notification implements Parcelable
 
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
                     final RemoteViews button = generateMediaActionButton(action,
-                            mBuilder.resolveContrastColor());
+                            getPrimaryHighlightColor());
                     view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
@@ -6069,6 +6113,10 @@ public class Notification implements Parcelable
             }
             view.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             return view;
+        }
+
+        private int getPrimaryHighlightColor() {
+            return mBuilder.getPrimaryHighlightColor();
         }
 
         private RemoteViews makeMediaBigContentView() {
@@ -6088,7 +6136,7 @@ public class Notification implements Parcelable
                 big.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < actionCount; i++) {
                     final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i),
-                            mBuilder.resolveContrastColor());
+                            getPrimaryHighlightColor());
                     big.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
@@ -6233,7 +6281,10 @@ public class Notification implements Parcelable
      * {@link android.app.Notification.Builder#setCustomBigContentView(RemoteViews)} and
      * {@link android.app.Notification.Builder#setCustomHeadsUpContentView(RemoteViews)} to set the
      * corresponding custom views to display.
-     *
+     * <p>
+     * Contrary to {@link MediaStyle} a developer has to opt-in to the colorizing of the
+     * notification by using {@link Notification.Builder#setColorized(boolean)}.
+     * <p>
      * To use this style with your Notification, feed it to
      * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
      * <pre class="prettyprint">
