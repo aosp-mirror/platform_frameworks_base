@@ -148,7 +148,7 @@ public final class TextClassificationResult {
      * @hide
      */
     @NonNull
-    public static OnClickListener createStartActivityOnClick(
+    public static OnClickListener createStartActivityOnClickListener(
             @NonNull final Context context, @NonNull final Intent intent) {
         Preconditions.checkArgument(context != null);
         Preconditions.checkArgument(intent != null);

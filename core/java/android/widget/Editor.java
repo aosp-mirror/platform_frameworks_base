@@ -3902,7 +3902,7 @@ public class Editor {
                 } else {
                     final Intent intent = textClassificationResult.getIntent();
                     if (intent != null) {
-                        TextClassificationResult.createStartActivityOnClick(
+                        TextClassificationResult.createStartActivityOnClickListener(
                                 mTextView.getContext(), intent)
                                 .onClick(mTextView);
                     }
