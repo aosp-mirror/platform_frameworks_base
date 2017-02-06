@@ -26,18 +26,11 @@
 
 namespace android {
 
-static int start_sensor_service(void* /*unused*/) {
-    SensorService::instantiate();
-    return 0;
-}
-
 static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
     char propBuf[PROPERTY_VALUE_MAX];
     property_get("system_init.startsensorservice", propBuf, "1");
     if (strcmp(propBuf, "1") == 0) {
-        // Start the sensor service in a new thread
-        createThreadEtc(start_sensor_service, nullptr,
-                        "StartSensorThread", PRIORITY_FOREGROUND);
+        SensorService::instantiate();
     }
 }
 
