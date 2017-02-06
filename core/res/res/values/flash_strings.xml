@@ -25,9 +25,6 @@
     <string name="reboot_bootloader">Bootloader</string>
     <!-- Button to soft reboot the device in reboot menu -->
     <string name="reboot_soft">Soft reboot</string>
-    <!-- Reboot Confirmation Dialog. -->
-    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
-    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Rebooting\u2026</string>
 </resources>

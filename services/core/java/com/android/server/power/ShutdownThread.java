@@ -173,9 +173,6 @@ public final class ShutdownThread extends Thread {
                 : (longPressBehavior == 2
                         ? com.android.internal.R.string.shutdown_confirm_question
                         : com.android.internal.R.string.shutdown_confirm);
-        if (showRebootOption && !mRebootSafeMode) {
-            resourceId = com.android.internal.R.string.reboot_confirm;
-        }
 
         Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
@@ -190,7 +187,7 @@ public final class ShutdownThread extends Thread {
             AlertDialog.Builder confirmDialogBuilder = new AlertDialog.Builder(context)
                     .setTitle(mRebootSafeMode
                             ? com.android.internal.R.string.reboot_safemode_title
-                            : showRebootOption
+                            : mReboot
                                     ? com.android.internal.R.string.global_action_reboot
                                     : com.android.internal.R.string.power_off);
             if (!advancedReboot || !mReboot || mRebootSafeMode) {
