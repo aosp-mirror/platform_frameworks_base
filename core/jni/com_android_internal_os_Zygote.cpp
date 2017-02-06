@@ -247,24 +247,42 @@ static void EnableKeepCapabilities(JNIEnv* env) {
 
 static void DropCapabilitiesBoundingSet(JNIEnv* env) {
   for (int i = 0; prctl(PR_CAPBSET_READ, i, 0, 0, 0) >= 0; i++) {
-    // Keep CAP_SYS_PTRACE in our bounding set so crash_dump can gain it.
-    if (i == CAP_SYS_PTRACE) {
-      continue;
-    }
-
     int rc = prctl(PR_CAPBSET_DROP, i, 0, 0, 0);
     if (rc == -1) {
       if (errno == EINVAL) {
         ALOGE("prctl(PR_CAPBSET_DROP) failed with EINVAL. Please verify "
               "your kernel is compiled with file capabilities support");
       } else {
+        ALOGE("prctl(PR_CAPBSET_DROP, %d) failed: %s", i, strerror(errno));
         RuntimeAbort(env, __LINE__, "prctl(PR_CAPBSET_DROP) failed");
       }
     }
   }
 }
 
-static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
+static void SetInheritable(JNIEnv* env, uint64_t inheritable) {
+  __user_cap_header_struct capheader;
+  memset(&capheader, 0, sizeof(capheader));
+  capheader.version = _LINUX_CAPABILITY_VERSION_3;
+  capheader.pid = 0;
+
+  __user_cap_data_struct capdata[2];
+  if (capget(&capheader, &capdata[0]) == -1) {
+    ALOGE("capget failed: %s", strerror(errno));
+    RuntimeAbort(env, __LINE__, "capget failed");
+  }
+
+  capdata[0].inheritable = inheritable;
+  capdata[1].inheritable = inheritable >> 32;
+
+  if (capset(&capheader, &capdata[0]) == -1) {
+    ALOGE("capset(inh=%" PRIx64 ") failed: %s", inheritable, strerror(errno));
+    RuntimeAbort(env, __LINE__, "capset failed");
+  }
+}
+
+static void SetCapabilities(JNIEnv* env, uint64_t permitted, uint64_t effective,
+                            uint64_t inheritable) {
   __user_cap_header_struct capheader;
   memset(&capheader, 0, sizeof(capheader));
   capheader.version = _LINUX_CAPABILITY_VERSION_3;
@@ -276,9 +294,12 @@ static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
   capdata[1].effective = effective >> 32;
   capdata[0].permitted = permitted;
   capdata[1].permitted = permitted >> 32;
+  capdata[0].inheritable = inheritable;
+  capdata[1].inheritable = inheritable >> 32;
 
   if (capset(&capheader, &capdata[0]) == -1) {
-    ALOGE("capset(%" PRId64 ", %" PRId64 ") failed", permitted, effective);
+    ALOGE("capset(perm=%" PRIx64 ", eff=%" PRIx64 ", inh=%" PRIx64 ") failed: %s", permitted,
+          effective, inheritable, strerror(errno));
     RuntimeAbort(env, __LINE__, "capset failed");
   }
 }
@@ -513,6 +534,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       EnableKeepCapabilities(env);
     }
 
+    SetInheritable(env, permittedCapabilities);
     DropCapabilitiesBoundingSet(env);
 
     bool use_native_bridge = !is_system_server && (instructionSet != NULL)
@@ -585,7 +607,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         }
     }
 
-    SetCapabilities(env, permittedCapabilities, effectiveCapabilities);
+    SetCapabilities(env, permittedCapabilities, effectiveCapabilities, permittedCapabilities);
 
     SetSchedulerPolicy(env);
 
