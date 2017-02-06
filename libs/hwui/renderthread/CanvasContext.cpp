@@ -570,7 +570,6 @@ void CanvasContext::destroyHardwareResources() {
         }
         mRenderPipeline->onDestroyHardwareResources();
     }
-    mRenderThread.renderState().destroyLayersInUpdater();
 }
 
 void CanvasContext::trimMemory(RenderThread& thread, int level) {
