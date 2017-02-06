@@ -80,6 +80,7 @@ void RenderState::onGLContextDestroyed() {
     delete mStencil;
     mStencil = nullptr;
 
+    destroyLayersInUpdater();
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 
