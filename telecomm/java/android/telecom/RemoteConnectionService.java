@@ -405,6 +405,50 @@ final class RemoteConnectionService {
                         extras);
             }
         }
+
+        @Override
+        public void onRttInitiationSuccess(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttInitiationSuccess")
+                        .onRttInitiationSuccess();
+            } else {
+                Log.w(this, "onRttInitiationSuccess called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRttInitiationFailure(String callId, int reason, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttInitiationFailure")
+                        .onRttInitiationFailure(reason);
+            } else {
+                Log.w(this, "onRttInitiationFailure called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRttSessionRemotelyTerminated(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRttSessionRemotelyTerminated")
+                        .onRttSessionRemotelyTerminated();
+            } else {
+                Log.w(this, "onRttSessionRemotelyTerminated called on a remote conference");
+            }
+        }
+
+        @Override
+        public void onRemoteRttRequest(String callId, Session.Info sessionInfo)
+                throws RemoteException {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "onRemoteRttRequest")
+                        .onRemoteRttRequest();
+            } else {
+                Log.w(this, "onRemoteRttRequest called on a remote conference");
+            }
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =
