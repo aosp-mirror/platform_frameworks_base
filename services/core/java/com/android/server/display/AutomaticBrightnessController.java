@@ -18,9 +18,6 @@ package com.android.server.display;
 
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.twilight.TwilightListener;
-import com.android.server.twilight.TwilightManager;
-import com.android.server.twilight.TwilightState;
 
 import android.annotation.Nullable;
 import android.hardware.Sensor;
@@ -55,9 +52,6 @@ class AutomaticBrightnessController {
     // non-zero, which in turn ensures that the total weight is non-zero.
     private static final long AMBIENT_LIGHT_PREDICTION_TIME_MILLIS = 100;
 
-    // Specifies the maximum magnitude of the time of day adjustment.
-    private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1f;
-
     // Debounce for sampling user-initiated changes in display brightness to ensure
     // the user is satisfied with the result before storing the sample.
     private static final int BRIGHTNESS_ADJUSTMENT_SAMPLE_DEBOUNCE_MILLIS = 10000;
@@ -73,9 +67,6 @@ class AutomaticBrightnessController {
 
     // The light sensor, or null if not available or needed.
     private final Sensor mLightSensor;
-
-    // The twilight service.
-    private final TwilightManager mTwilight;
 
     // The auto-brightness spline adjustment.
     // The brightness values have been scaled to a range of 0..1.
@@ -194,8 +185,6 @@ class AutomaticBrightnessController {
     private int mBrightnessAdjustmentSampleOldBrightness;
     private float mBrightnessAdjustmentSampleOldGamma;
 
-    private boolean mUseTwilight;
-
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
@@ -205,7 +194,6 @@ class AutomaticBrightnessController {
             boolean activeDozeLightSensor, boolean useNewSensorSamplesForDoze,
             LuxLevels luxLevels) {
         mCallbacks = callbacks;
-        mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
         mScreenAutoBrightnessSpline = autoBrightnessSpline;
         mScreenBrightnessRangeMinimum = brightnessMin;
@@ -244,7 +232,7 @@ class AutomaticBrightnessController {
     }
 
     public void configure(boolean enable, float adjustment, boolean dozing,
-            boolean userInitiatedChange, boolean useTwilight) {
+            boolean userInitiatedChange) {
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -264,24 +252,12 @@ class AutomaticBrightnessController {
         mDozing = dozing;
         boolean changed = setLightSensorEnabled(enableSensor);
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
-        changed |= setUseTwilight(useTwilight);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
         if (enableSensor && userInitiatedChange) {
             prepareBrightnessAdjustmentSample();
         }
-    }
-
-    private boolean setUseTwilight(boolean useTwilight) {
-        if (mUseTwilight == useTwilight) return false;
-        if (useTwilight) {
-            mTwilight.registerListener(mTwilightListener, mHandler);
-        } else {
-            mTwilight.unregisterListener(mTwilightListener);
-        }
-        mUseTwilight = useTwilight;
-        return true;
     }
 
     public void dump(PrintWriter pw) {
@@ -298,7 +274,6 @@ class AutomaticBrightnessController {
         pw.println();
         pw.println("Automatic Brightness Controller State:");
         pw.println("  mLightSensor=" + mLightSensor);
-        pw.println("  mTwilight.getLastTwilightState()=" + mTwilight.getLastTwilightState());
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
         pw.println("  mAmbientLux=" + mAmbientLux);
@@ -558,19 +533,6 @@ class AutomaticBrightnessController {
             }
         }
 
-        if (mUseTwilight) {
-            TwilightState state = mTwilight.getLastTwilightState();
-            if (state != null && state.isNight()) {
-                final long duration = state.sunriseTimeMillis() - state.sunsetTimeMillis();
-                final long progress = System.currentTimeMillis() - state.sunsetTimeMillis();
-                final float amount = (float) Math.pow(2.0 * progress / duration - 1.0, 2.0);
-                gamma *= 1 + amount * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
-                if (DEBUG) {
-                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + amount);
-                }
-            }
-        }
-
         if (gamma != 1.0f) {
             final float in = value;
             value = MathUtils.pow(value, gamma);
@@ -688,13 +650,6 @@ class AutomaticBrightnessController {
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // Not used.
-        }
-    };
-
-    private final TwilightListener mTwilightListener = new TwilightListener() {
-        @Override
-        public void onTwilightStateChanged(@Nullable TwilightState state) {
-            updateAutoBrightness(true /*sendUpdate*/);
         }
     };
 
