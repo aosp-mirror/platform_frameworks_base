@@ -60,6 +60,8 @@ final class TextClassifierImpl implements TextClassifier {
 
     private static final String LOG_TAG = "TextClassifierImpl";
 
+    private final Object mSmartSelectionLock = new Object();
+
     private final Context mContext;
     private final ParcelFileDescriptor mFd;
     private SmartSelection mSmartSelection;
@@ -140,11 +142,13 @@ final class TextClassifierImpl implements TextClassifier {
         return TextClassifier.NO_OP.getLinks(text, linkMask);
     }
 
-    private synchronized SmartSelection getSmartSelection() throws FileNotFoundException {
-        if (mSmartSelection == null) {
-            mSmartSelection = new SmartSelection(mFd.getFd());
+    private SmartSelection getSmartSelection() throws FileNotFoundException {
+        synchronized (mSmartSelectionLock) {
+            if (mSmartSelection == null) {
+                mSmartSelection = new SmartSelection(mFd.getFd());
+            }
+            return mSmartSelection;
         }
-        return mSmartSelection;
     }
 
     private TextClassificationResult createClassificationResult(String type, CharSequence text) {
