@@ -17,6 +17,9 @@
 package com.android.server.autofill;
 
 import android.os.Bundle;
+import android.util.ArraySet;
+import android.view.autofill.Dataset;
+import android.view.autofill.FillResponse;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -54,5 +57,27 @@ final class Helper {
 
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
+    }
+
+    /**
+     * Finds a data set by id in a response.
+     *
+     * @param id The dataset id.
+     * @param response The response to search.
+     * @return The dataset if found or null.
+     */
+    static Dataset findDatasetById(String id, FillResponse response) {
+        ArraySet<Dataset> datasets = response.getDatasets();
+        if (datasets == null || datasets.isEmpty()) {
+            return null;
+        }
+        final int datasetCount = datasets.size();
+        for (int i = 0; i < datasetCount; i++) {
+            Dataset dataset = datasets.valueAt(i);
+            if (dataset.getId().equals(id)) {
+                return dataset;
+            }
+        }
+        return null;
     }
 }

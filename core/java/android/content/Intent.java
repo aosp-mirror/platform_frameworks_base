@@ -1806,6 +1806,41 @@ public class Intent implements Parcelable, Cloneable {
     @SystemApi
     public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
 
+    /**
+     * Intent extra: An id if an autofill item ({@link
+     * android.view.autofill.Dataset} or {@link android.view.autofill.FillResponse}).
+     * <p>
+     * Type: String
+     * </p>
+     */
+    public static final String EXTRA_AUTO_FILL_ITEM_ID = "android.intent.extra.AUTO_FILL_ITEM_ID";
+
+    /**
+     * Intent extra: The assist structure which captures the filled screen.
+     * <p>
+     * Type: {@link android.app.assist.AssistStructure}
+     * </p>
+     */
+    public static final String EXTRA_AUTO_FILL_ASSIST_STRUCTURE =
+            "android.intent.extra.AUTO_FILL_ASSIST_STRUCTURE";
+
+    /**
+     * Intent extra: The metadata associated with the authenticated entity ({@link
+     * android.view.autofill.Dataset} or {@link android.view.autofill.FillResponse}).
+     * <p>
+     * Type: {@link android.os.Bundle}
+     * </p>
+     */
+    public static final String EXTRA_AUTO_FILL_EXTRAS = "android.intent.extra.AUTO_FILL_EXTRAS";
+
+    /**
+     * Intent extra: A callback to report an authentication result.
+     * <p>
+     * Type: {@link android.view.autofill.FillResponse}
+     * </p>
+     */
+    public static final String EXTRA_AUTO_FILL_CALLBACK = "android.intent.extra.AUTO_FILL_CALLBACK";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).

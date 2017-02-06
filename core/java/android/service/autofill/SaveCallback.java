@@ -16,21 +16,9 @@
 
 package android.service.autofill;
 
-import static android.service.autofill.AutoFillService.DEBUG;
-
 import android.app.Activity;
-import android.app.assist.AssistStructure.ViewNode;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.service.autofill.CallbackHelper.Dumpable;
-import android.service.autofill.CallbackHelper.Finalizer;
-import android.util.Log;
-import android.view.autofill.AutoFillId;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
-
-import java.io.PrintWriter;
 
 /**
  * Handles save requests from the {@link AutoFillService} into the {@link Activity} being
@@ -38,20 +26,12 @@ import java.io.PrintWriter;
  *
  * <p>This class is thread safe.
  */
-public final class SaveCallback implements Dumpable {
-
-    private static final String TAG = "SaveCallback";
-
-    private final IAutoFillServerCallback mCallback;
-
-    @GuardedBy("mCallback")
-    private boolean mReplied = false;
-
-    @GuardedBy("mCallback")
-    private Finalizer mFinalizer;
+public final class SaveCallback {
+    private final ISaveCallback mCallback;
+    private boolean mCalled;
 
     /** @hide */
-    SaveCallback(IAutoFillServerCallback callback) {
+    SaveCallback(ISaveCallback callback) {
         mCallback = callback;
     }
 
@@ -63,17 +43,12 @@ public final class SaveCallback implements Dumpable {
      * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onSuccess() {
-        if (DEBUG) Log.d(TAG, "onSuccess()");
-
-        synchronized (mCallback) {
-            checkNotRepliedYetLocked();
-            try {
-                mCallback.onSaved();
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            } finally {
-                setRepliedLocked();
-            }
+        assertNotCalled();
+        mCalled = true;
+        try {
+            mCallback.onSuccess();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -87,54 +62,18 @@ public final class SaveCallback implements Dumpable {
      * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onFailure(CharSequence message) {
-        if (DEBUG) Log.d(TAG, "onFailure(): message=" + message);
-
-        synchronized (mCallback) {
-            checkNotRepliedYetLocked();
-
-            try {
-                mCallback.showError(message);
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            } finally {
-                setRepliedLocked();
-            }
+        assertNotCalled();
+        mCalled = true;
+        try {
+            mCallback.onFailure(message);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
-    /** @hide */
-    @Override
-    public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("SaveCallback: mReplied="); pw.println(mReplied);
-    }
-
-    /** @hide */
-    @Override
-    public void setFinalizer(Finalizer f) {
-        synchronized (mCallback) {
-            mFinalizer = f;
-        }
-    }
-
-    @Override
-    public String toString() {
-        if (!DEBUG) return super.toString();
-
-        return "SaveCallback: [mReplied= " + mReplied + "]";
-    }
-
-    // There can be only one!!
-    private void checkNotRepliedYetLocked() {
-        Preconditions.checkState(!mReplied, "already replied");
-    }
-
-    private void setRepliedLocked() {
-        if (DEBUG) Log.d(TAG, "setReplied()");
-
-        mReplied = true;
-
-        if (mFinalizer != null) {
-            mFinalizer.gone();
+    private void assertNotCalled() {
+        if (mCalled) {
+            throw new IllegalStateException("Already called");
         }
     }
 }

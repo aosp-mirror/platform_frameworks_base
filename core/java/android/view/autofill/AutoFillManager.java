@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import static android.view.autofill.Helper.DEBUG;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
@@ -31,7 +33,6 @@ import android.view.View;
 public final class AutoFillManager {
 
     private static final String TAG = "AutoFillManager";
-    private static final boolean DEBUG = true; // TODO(b/33197203): change to false once stable
 
     /**
      * Flag used to show the auto-fill UI affordance for a view.

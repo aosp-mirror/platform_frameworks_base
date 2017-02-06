@@ -17,6 +17,7 @@ package com.android.server.autofill;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.ArraySet;
 import android.view.autofill.Dataset;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,7 @@ final class DatasetPicker extends ListView implements OnItemClickListener {
 
     private final Listener mListener;
 
-    DatasetPicker(Context context, List<Dataset> datasets, Listener listener) {
+    DatasetPicker(Context context, ArraySet<Dataset> datasets, Listener listener) {
         super(context);
         mListener = listener;
 

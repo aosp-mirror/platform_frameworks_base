@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntegerRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1339,7 +1340,7 @@ public final class Parcel {
     }
 
     /**
-     * Flatten a heterogeneous array containing a particular object type into
+     * Flatten a homogeneous array containing a particular object type into
      * the parcel, at
      * the current dataPosition() and growing dataCapacity() if needed.  The
      * type of the objects in the array must be one that implements Parcelable.
@@ -1361,7 +1362,7 @@ public final class Parcel {
         if (val != null) {
             int N = val.length;
             writeInt(N);
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 T item = val[i];
                 if (item != null) {
                     writeInt(1);
@@ -1373,6 +1374,146 @@ public final class Parcel {
         } else {
             writeInt(-1);
         }
+    }
+
+    /**
+     * Write a uniform (all items are null or the same class) array list of
+     * parcelables.
+     *
+     * @param list The list to write.
+     *
+     * @hide
+     */
+    public final <T extends Parcelable> void writeTypedArrayList(@Nullable ArrayList<T> list,
+            int parcelableFlags) {
+        if (list != null) {
+            int N = list.size();
+            writeInt(N);
+            boolean wroteCreator = false;
+            for (int i = 0; i < N; i++) {
+                T item = list.get(i);
+                if (item != null) {
+                    writeInt(1);
+                    if (!wroteCreator) {
+                        writeParcelableCreator(item);
+                        wroteCreator = true;
+                    }
+                    item.writeToParcel(this, parcelableFlags);
+                } else {
+                    writeInt(0);
+                }
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
+     * Reads a uniform (all items are null or the same class) array list of
+     * parcelables.
+     *
+     * @return The list or null.
+     *
+     * @hide
+     */
+    public final @Nullable <T> ArrayList<T> readTypedArrayList(@Nullable ClassLoader loader) {
+        int N = readInt();
+        if (N <= 0) {
+            return null;
+        }
+        Parcelable.Creator<?> creator = null;
+        ArrayList<T> result = new ArrayList<T>(N);
+        for (int i = 0; i < N; i++) {
+            if (readInt() != 0) {
+                if (creator == null) {
+                    creator = readParcelableCreator(loader);
+                    if (creator == null) {
+                        return null;
+                    }
+                }
+                final T parcelable;
+                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+                            (Parcelable.ClassLoaderCreator<?>) creator;
+                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
+                } else {
+                    parcelable = (T) creator.createFromParcel(this);
+                }
+                result.add(parcelable);
+            } else {
+                result.add(null);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Write a uniform (all items are null or the same class) array set of
+     * parcelables.
+     *
+     * @param set The set to write.
+     *
+     * @hide
+     */
+    public final <T extends Parcelable> void writeTypedArraySet(@Nullable ArraySet<T> set,
+            int parcelableFlags) {
+        if (set != null) {
+            int N = set.size();
+            writeInt(N);
+            boolean wroteCreator = false;
+            for (int i = 0; i < N; i++) {
+                T item = set.valueAt(i);
+                if (item != null) {
+                    writeInt(1);
+                    if (!wroteCreator) {
+                        writeParcelableCreator(item);
+                        wroteCreator = true;
+                    }
+                    item.writeToParcel(this, parcelableFlags);
+                } else {
+                    writeInt(0);
+                }
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /**
+     * Reads a uniform (all items are null or the same class) array set of
+     * parcelables.
+     *
+     * @return The set or null.
+     *
+     * @hide
+     */
+    public final @Nullable <T> ArraySet<T> readTypedArraySet(@Nullable ClassLoader loader) {
+        int N = readInt();
+        if (N <= 0) {
+            return null;
+        }
+        Parcelable.Creator<?> creator = null;
+        ArraySet<T> result = new ArraySet<T>(N);
+        for (int i = 0; i < N; i++) {
+            T parcelable = null;
+            if (readInt() != 0) {
+                if (creator == null) {
+                    creator = readParcelableCreator(loader);
+                    if (creator == null) {
+                        return null;
+                    }
+                }
+                if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+                    Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+                            (Parcelable.ClassLoaderCreator<?>) creator;
+                    parcelable = (T) classLoaderCreator.createFromParcel(this, loader);
+                } else {
+                    parcelable = (T) creator.createFromParcel(this);
+                }
+            }
+            result.append(parcelable);
+        }
+        return result;
     }
 
     /**

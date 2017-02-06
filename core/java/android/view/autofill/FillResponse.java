@@ -16,36 +16,30 @@
 package android.view.autofill;
 
 import static android.view.autofill.Helper.DEBUG;
-import static android.view.autofill.Helper.append;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.hardware.fingerprint.FingerprintManager.CryptoObject;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.autofill.FillCallback;
+import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Response for a {@link
  * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
- * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)} request.
+ * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)} and
+ * authentication requests.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
- * fields that can be auto-filled together, and the Android System displays a dataset picker UI
+ * fields that can be auto-filled together, and the Android system displays a dataset picker UI
  * affordance that the user must use before the {@link Activity} is filled with the dataset.
  *
  * <p>For example, for a login page with username/password where the user only has one account in
- * the service, the response could be:
+ * the response could be:
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
@@ -102,12 +96,17 @@ import java.util.Set;
  * <p>Notice that the ids that are part of a dataset (ids 1 to 4, in this example) are automatically
  * added to the {@code savableIds} list.
  *
- * <p>If the service has multiple {@link Dataset}s with multiple options for some fields on each
- * dataset (for example, multiple accounts with both a home and work address), then it should
- * "partition" the {@link Activity} in sections and populate the response with just a subset of the
- * data that would fulfill the first section; then once the user fills the first section and taps a
- * field from the next section, the Android system would issue another request for that section, and
- * so on. For example, the first response could be:
+ * <p>If the service has multiple {@link Dataset}s for different sections of the activity,
+ * for example, a user section for which there are two datasets followed by an address
+ * section for which there are two datasets for each user user, then it should "partition"
+ * the activity in sections and populate the response with just a subset of the data that would
+ * fulfill the first section (the name in our example); then once the user fills the first
+ * section and taps a field from the next section (the address in our example), the Android
+ * system would issue another request for that section, and so on. Note that if the user
+ * chooses to populate the first section with a service provided dataset, the subsequent request
+ * would contain the populated values so you don't try to provide suggestions for the first
+ * section but ony for the second one based on the context of what was already filled. For
+ * example, the first response could be:
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
@@ -132,236 +131,182 @@ import java.util.Set;
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
  *      .add(new Dataset.Builder("Work")
- *          .setTextFieldValue(id3, "Springfield Nuclear Power Plant")
+ *          .setTextFieldValue(id3, "Springfield Power Plant")
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
  *      .build();
  * </pre>
  *
- * <p>The service could require user authentication, either at the {@link FillResponse} or {@link
- * Dataset} levels, prior to auto-filling the activity - see {@link
- * FillResponse.Builder#requiresFingerprintAuthentication(CryptoObject, Bundle, int)}, {@link
- * FillResponse.Builder#requiresCustomAuthentication(Bundle, int)}, {@link
- * Dataset.Builder#requiresFingerprintAuthentication(CryptoObject, Bundle, int)}, and {@link
- * Dataset.Builder#requiresCustomAuthentication(Bundle, int)} for details.
+ * <p>The service could require user authentication at the {@link FillResponse} or the
+ * {@link Dataset} level, prior to auto-filling an activity - see {@link FillResponse.Builder
+ * #setAuthentication(IntentSender)} and {@link Dataset.Builder#setAuthentication(IntentSender)}.
+ * It is recommended that you encrypt only the sensitive data but leave the labels unencrypted
+ * which would allow you to provide the dataset names to the user and if they choose one
+ * them challenge the user to authenticate. For example, if the user has a home and a work
+ * address the Home and Work labels could be stored unencrypted as they don't have any sensitive
+ * data while the address data is in an encrypted storage. If the user chooses Home, then the
+ * platform will start your authentication flow. If you encrypt all data and require auth
+ * at the response level the user will have to interact with the fill UI to trigger a request
+ * for the datasets as they don't see Home and Work options which will trigger your auth
+ * flow and after successfully authenticating the user will be presented with the Home and
+ * Work options where they can pick one. Hence, you have flexibility how to implement your
+ * auth while storing labels non-encrypted and data encrypted provides a better user
+ * experience.</p>
  *
- * <p>Finally, the service can use the {@link FillResponse.Builder#setExtras(Bundle)} and/or {@link
- * Dataset.Builder#setExtras(Bundle)} methods to pass {@link Bundle}s with service-specific data use
- * to identify this response on future calls (like {@link
- * android.service.autofill.AutoFillService#onSaveRequest(android.app.assist.AssistStructure,
- * Bundle, android.service.autofill.SaveCallback)}) - such bundles will be available as the
- * {@link android.service.autofill.AutoFillService#EXTRA_RESPONSE_EXTRAS} and
- * {@link android.service.autofill.AutoFillService#EXTRA_DATASET_EXTRAS} extras in that method's
- * {@code extras} argument.
+ * <p>Finally, the service can use {@link Dataset.Builder#setExtras(Bundle)} methods
+ * to pass {@link Bundle extras} provided to all future calls related to a dataset,
+ * for example during authentication and saving.</p>
  */
 public final class FillResponse implements Parcelable {
-
-    private final List<Dataset> mDatasets;
-    private final AutoFillId[] mSavableIds;
+    private final String mId;
+    private final ArraySet<Dataset> mDatasets;
+    private final ArraySet<AutoFillId> mSavableIds;
     private final Bundle mExtras;
-    private final int mFlags;
-    private final boolean mRequiresAuth;
-    private final boolean mHasCryptoObject;
-    private final long mCryptoOpId;
+    private final IntentSender mAuthentication;
 
-    private FillResponse(Builder builder) {
-        // TODO(b/33197203): make it immutable?
+    private FillResponse(@NonNull Builder builder) {
+        mId = builder.mId;
         mDatasets = builder.mDatasets;
-        final int size = builder.mSavableIds.size();
-        mSavableIds = new AutoFillId[size];
-        int i = 0;
-        for (AutoFillId id : builder.mSavableIds) {
-            mSavableIds[i++] = id;
-        }
+        mSavableIds = builder.mSavableIds;
         mExtras = builder.mExtras;
-        mFlags = builder.mFlags;
-        mRequiresAuth = builder.mRequiresAuth;
-        mHasCryptoObject = builder.mHasCryptoObject;
-        mCryptoOpId = builder.mCryptoOpId;
+        mAuthentication = builder.mAuthentication;
     }
 
     /** @hide */
-    public List<Dataset> getDatasets() {
-        return mDatasets;
+    public @NonNull String getId() {
+        return mId;
     }
 
     /** @hide */
-    public AutoFillId[] getSavableIds() {
-        return mSavableIds;
-    }
-
-    /** @hide */
-    public Bundle getExtras() {
+    public @Nullable Bundle getExtras() {
         return mExtras;
     }
 
     /** @hide */
-    public int getFlags() {
-        return mFlags;
+    public @Nullable ArraySet<Dataset> getDatasets() {
+        return mDatasets;
     }
 
     /** @hide */
-    public boolean isAuthRequired() {
-        return mRequiresAuth;
+    public @Nullable ArraySet<AutoFillId> getSavableIds() {
+        return mSavableIds;
     }
 
     /** @hide */
-    public boolean hasCryptoObject() {
-        return mHasCryptoObject;
-    }
-
-    /** @hide */
-    public long getCryptoObjectOpId() {
-        return mCryptoOpId;
+    public @Nullable IntentSender getAuthentication() {
+        return mAuthentication;
     }
 
     /**
-     * Builder for {@link FillResponse} objects.
+     * Builder for {@link FillResponse} objects. You must to provide at least
+     * one dataset or set an authentication intent.
      */
     public static final class Builder {
-        private final List<Dataset> mDatasets = new ArrayList<>();
-        private final Set<AutoFillId> mSavableIds = new HashSet<>();
+        private final String mId;
+        private ArraySet<Dataset> mDatasets;
+        private ArraySet<AutoFillId> mSavableIds;
         private Bundle mExtras;
-        private int mFlags;
-        private boolean mRequiresAuth;
-        private boolean mHasCryptoObject;
-        private long mCryptoOpId;
+        private IntentSender mAuthentication;
+        private boolean mDestroyed;
 
-        /**
-         * Requires user authentication through the {@link android.service.autofill.AutoFillService}
-         * before handling an auto-fill request.
-         *
-         * <p>This method is typically called when the device (or the service) does not support
-         * fingerprint authentication (and hence it cannot use {@link
-         * #requiresFingerprintAuthentication(CryptoObject, Bundle, int)}) or when the service needs
-         * to use a custom authentication UI and is used in 2 scenarios:
-         *
-         * <ol>
-         *   <li>When the user data is encrypted and the service must authenticate an object that
-         *       will be used to decrypt it.
-         *   <li>When the service already acquired the user data but wants to confirm the user's
-         *       identity before the activity is filled with it.
-         * </ol>
-         *
-         * <p>When this method is called, the Android System displays an UI affordance asking the
-         * user to tap it to auto-fill the activity; if the user taps it, the Android System calls
-         * {@link
-         * android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         * int)} passing {@link
-         * android.service.autofill.AutoFillService#FLAG_AUTHENTICATION_REQUESTED} in the flags and
-         * the same {@code extras} passed to this method. The service can then displays its custom
-         * authentication UI, and then call the proper method on {@link FillCallback} depending on
-         * the authentication result and whether this response already contains the {@link Dataset}s
-         * need to auto-fill the activity:
-         *
-         * <ul>
-         *   <li>If authentication failed, call {@link
-         *       FillCallback#onFillResponseAuthentication(int)} passing {@link
-         *       android.service.autofill.AutoFillService#FLAG_AUTHENTICATION_ERROR} in the flags.
-         *   <li>If authentication succeeded and this response is empty (no datasets), call {@link
-         *       FillCallback#onSuccess(FillResponse)} with a new dataset (that does not require
-         *       authentication).
-         *   <li>If authentication succeeded and this response is not empty, call {@link
-         *       FillCallback#onFillResponseAuthentication(int)} passing {@link
-         *       android.service.autofill.AutoFillService#FLAG_AUTHENTICATION_SUCCESS} in the flags.
-         * </ul>
-         *
-         * @param extras when set, will be passed back in the {@link
-         *     android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         *     int)} call so it could be used by the service to handle state.
-         * @param flags optional parameters, currently ignored.
-         */
-        public Builder requiresCustomAuthentication(@Nullable Bundle extras, int flags) {
-            return requiresAuthentication(null, extras, flags);
+        /** @hide */
+        // TODO(b/33197203): Remove once GCore migrates
+        public Builder() {
+            this(String.valueOf(System.currentTimeMillis()));
         }
 
         /**
-         * Requires user authentication through the Fingerprint sensor before handling an auto-fill
-         * request.
+         * Creates a new {@link FillResponse} builder.
          *
-         * <p>The {@link android.service.autofill.AutoFillService} typically uses this method in 2
-         * situations:
-         *
-         * <ol>
-         *   <li>When the user data is encrypted and the service must authenticate an object that
-         *       will be used to decrypt it.
-         *   <li>When the service already acquired the user data but wants to confirm the user's
-         *       identity before the activity is filled with it.
-         * </ol>
-         *
-         * <p>When this method is called, the Android System displays an UI affordance asking the
-         * user to use the fingerprint sensor to auto-fill the activity, and what happens after a
-         * successful fingerprint authentication depends on the number of {@link Dataset}s included
-         * in this response:
-         *
-         * <ul>
-         *   <li>If it's empty (scenario #1 above), the Android System will call {@link
-         *     android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         *       int)} passing {@link
-         *       android.service.autofill.AutoFillService#FLAG_AUTHENTICATION_SUCCESS}} in the
-         *       flags.
-         *   <li>If it contains one dataset, the activity will be auto-filled right away.
-         *   <li>If it contains many datasets, the Android System will show dataset picker UI, and
-         *       then auto-fill the activity once the user select the proper datased.
-         * </ul>
-         *
-         * <p>If the fingerprint authentication fails, the Android System will call {@link
-         * android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         * int)} passing {@link android.service.autofill.AutoFillService#FLAG_AUTHENTICATION_ERROR}
-         * in the flags.
-         *
-         * <p><strong>NOTE: </note> the {@link android.service.autofill.AutoFillService} should use
-         * the {@link android.hardware.fingerprint.FingerprintManager} to check if fingerpint
-         * authentication is available before using this method, and use other alternatives (such as
-         * {@link #requiresCustomAuthentication(Bundle, int)}) if it is not: if this method is
-         * called when fingerprint is not available, Android System will call {@link
-         * android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         * int)} passing {@link
-         * android.service.autofill.AutoFillService#FLAG_FINGERPRINT_AUTHENTICATION_NOT_AVAILABLE}
-         * in the flags, but it would be wasting system resources (and worsening the user
-         * experience) in the process.
-         *
-         * @param crypto object that will be authenticated.
-         * @param extras when set, will be passed back in the {@link
-         *     android.service.autofill.AutoFillService#onFillResponseAuthenticationRequest(Bundle,
-         *     int)} call so it could be used by the service to handle state.
-         * @param flags optional parameters, currently ignored.
+         * @param id A required id to identify this dataset for future interactions related to it.
          */
-        public Builder requiresFingerprintAuthentication(CryptoObject crypto,
-                @Nullable Bundle extras, int flags) {
-            // TODO(b/33197203): should we allow crypto to be null?
-            Preconditions.checkArgument(crypto != null, "must pass a CryptoObject");
-            return requiresAuthentication(crypto, extras, flags);
+        public Builder(@NonNull String id) {
+            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty or null");
         }
 
-        private Builder requiresAuthentication(CryptoObject cryptoObject, Bundle extras,
-                int flags) {
-            // There can be only one!
-            Preconditions.checkState(!mRequiresAuth,
-                    "requires-authentication methods already called");
-            // TODO(b/33197203): make sure that either this method or setExtras() is called, but
-            // not both
-            mExtras = extras;
-            mFlags = flags;
-            mRequiresAuth = true;
-            if (cryptoObject != null) {
-                mHasCryptoObject = true;
-                mCryptoOpId = cryptoObject.getOpId();
-            }
+        /**
+         * Requires a fill response authentication before auto-filling the activity with
+         * any dataset in this response. This is typically useful when a user interaction
+         * is required to unlock their data vault if you encrypt the dataset labels and
+         * dataset data. It is recommended to encrypt only the sensitive data and not the
+         * dataset labels which would allow auth on the dataset level leading to a better
+         * user experience. Note that if you use sensitive data as a label, for example an
+         * email address, then it should also be encrypted.
+         *
+         * <p>This method is called when you need to provide an authentication
+         * UI for the fill response. For example, when the user's data is stored
+         * encrypted and needs a user interaction to decrypt before offering fill
+         * suggestions.</p>
+         *
+         * <p>When a user initiates an auto fill, the system triggers the provided
+         * intent whose extras will have the {@link android.content.Intent
+         * #EXTRA_AUTO_FILL_ITEM_ID id} of the {@link android.view.autofill.FillResponse})
+         * to authenticate, the {@link android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras}
+         * associated with this response, and a {@link android.content.Intent
+         * #EXTRA_AUTO_FILL_CALLBACK callback} to dispatch the authentication result.</p>
+         *
+         * <p>Once you complete your authentication flow you should use the provided callback
+         * to notify for a failure or a success. In case of a success you need to provide
+         * the fully populated response that is being authenticated. For example, if you
+         * provided an empty {@link FillResponse} because the user's data was locked and
+         * marked that the response needs an authentication then in the response returned
+         * if authentication succeeds you need to provide all available datasets some of
+         * which may need to be further authenticated, for example a credit card whose
+         * CVV needs to be entered.</p>
+         *
+         * <p>The indent sender mechanism allows you to have your authentication UI
+         * implemented as an activity or a service or a receiver. However, the recommended
+         * way is to do this is with an activity which the system will start in the
+         * filled activity's task meaning it will properly work with back, recent apps, and
+         * free-form multi-window, while avoiding the need for the "draw on top of other"
+         * apps special permission. You can still theme your authentication activity's
+         * UI to look like a dialog if desired.</p>
+         *
+         * <p></><strong>Note:</strong> Do not make the provided intent sender
+         * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
+         * platform needs to fill in the authentication arguments.</p>
+         *
+         * @param authentication Intent to trigger your authentication flow.
+         *
+         * @see android.app.PendingIntent#getIntentSender()
+         */
+        public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
+            throwIfDestroyed();
+            mAuthentication = authentication;
             return this;
         }
 
         /**
-         * Adds a new {@link Dataset} to this response.
+         * Adds a new {@link Dataset} to this response. Adding a dataset with the
+         * same id updates the existing one.
          *
          * @throws IllegalArgumentException if a dataset with same {@code name} already exists.
          */
-        public Builder addDataset(Dataset dataset) {
-            Preconditions.checkNotNull(dataset, "dataset cannot be null");
-            // TODO(b/33197203): check if name already exists
-            mDatasets.add(dataset);
-            for (DatasetField field : dataset.getFields()) {
-                mSavableIds.add(field.getId());
+        public@NonNull Builder addDataset(@Nullable Dataset dataset) {
+            throwIfDestroyed();
+            if (dataset == null) {
+                return this;
+            }
+            if (mDatasets == null) {
+                mDatasets = new ArraySet<>();
+            }
+            final int datasetCount = mDatasets.size();
+            for (int i = 0; i < datasetCount; i++) {
+                if (mDatasets.valueAt(i).getName().equals(dataset.getName())) {
+                    throw new IllegalArgumentException("Duplicate dataset name: "
+                            + dataset.getName());
+                }
+            }
+            if (!mDatasets.add(dataset)) {
+                return this;
+            }
+            final int fieldCount = dataset.getFieldIds().size();
+            for (int i = 0; i < fieldCount; i++) {
+                final AutoFillId id = dataset.getFieldIds().get(i);
+                if (mSavableIds == null) {
+                    mSavableIds = new ArraySet<>();
+                }
+                mSavableIds.add(id);
             }
             return this;
         }
@@ -374,27 +319,35 @@ public final class FillResponse implements Parcelable {
          *
          * <p>See {@link FillResponse} for examples.
          */
-        public Builder addSavableFields(AutoFillId... ids) {
+        public @NonNull Builder addSavableFields(@Nullable AutoFillId... ids) {
+            throwIfDestroyed();
+            if (ids == null) {
+                return this;
+            }
             for (AutoFillId id : ids) {
+                if (mSavableIds == null) {
+                    mSavableIds = new ArraySet<>();
+                }
                 mSavableIds.add(id);
             }
             return this;
         }
 
         /**
-         * Sets a {@link Bundle} that will be passed to subsequent calls to {@link
-         * android.service.autofill.AutoFillService} methods such as {@link
+         * Sets a {@link Bundle} that will be passed to subsequent APIs that
+         * manipulate this response. For example, they are passed in as {@link
+         * android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras} to your
+         * authentication flow and to subsequent calls to {@link
+         * android.service.autofill.AutoFillService#onFillRequest(
+         * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
+         * android.service.autofill.FillCallback)} and {@link
          * android.service.autofill.AutoFillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, android.service.autofill.SaveCallback)},
-         * using {@link
-         * android.service.autofill.AutoFillService#EXTRA_RESPONSE_EXTRAS} as the key.
-         *
-         * <p>It can be used when to keep service state in between calls.
+         * android.app.assist.AssistStructure, Bundle,
+         * android.service.autofill.SaveCallback)}.
          */
         public Builder setExtras(Bundle extras) {
-            // TODO(b/33197203): make sure that either this method or the requires-Authentication
-            // ones are called, but not both
-            mExtras = Objects.requireNonNull(extras, "extras cannot be null");
+            throwIfDestroyed();
+            mExtras = extras;
             return this;
         }
 
@@ -402,7 +355,15 @@ public final class FillResponse implements Parcelable {
          * Builds a new {@link FillResponse} instance.
          */
         public FillResponse build() {
+            throwIfDestroyed();
+            mDestroyed = true;
             return new FillResponse(this);
+        }
+
+        private void throwIfDestroyed() {
+            if (mDestroyed) {
+                throw new IllegalStateException("Already called #build()");
+            }
         }
     }
 
@@ -412,14 +373,12 @@ public final class FillResponse implements Parcelable {
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();
-
-        final StringBuilder builder = new StringBuilder("FillResponse: [datasets=")
-                .append(mDatasets).append(", savableIds=").append(Arrays.toString(mSavableIds))
-                .append(", extras=");
-        append(builder, mExtras)
-            .append(", flags=").append(mFlags)
-            .append(", requiresAuth: ").append(mRequiresAuth)
-            .append(", hasCrypto: ").append(mHasCryptoObject);
+        final StringBuilder builder = new StringBuilder(
+                "FillResponse: [id=").append(mId)
+                .append(", datasets=").append(mDatasets)
+                .append(", savableIds=").append(mSavableIds)
+                .append(", hasExtras=").append(mExtras != null)
+                .append(", hasAuthentication=").append(mAuthentication != null);
         return builder.append(']').toString();
     }
 
@@ -434,33 +393,34 @@ public final class FillResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeList(mDatasets);
-        parcel.writeParcelableArray(mSavableIds, 0);
-        parcel.writeBundle(mExtras);
-        parcel.writeInt(mFlags);
-        parcel.writeInt(mRequiresAuth ? 1 : 0);
-        parcel.writeInt(mHasCryptoObject ? 1 : 0);
-        if (mHasCryptoObject) {
-            parcel.writeLong(mCryptoOpId);
-        }
-    }
-
-    private FillResponse(Parcel parcel) {
-        mDatasets = new ArrayList<>();
-        parcel.readList(mDatasets, null);
-        mSavableIds = parcel.readParcelableArray(null, AutoFillId.class);
-        mExtras = parcel.readBundle();
-        mFlags = parcel.readInt();
-        mRequiresAuth = parcel.readInt() == 1;
-        mHasCryptoObject = parcel.readInt() == 1;
-        mCryptoOpId = mHasCryptoObject ? parcel.readLong() : 0;
+        parcel.writeString(mId);
+        parcel.writeTypedArraySet(mDatasets, 0);
+        parcel.writeTypedArraySet(mSavableIds, 0);
+        parcel.writeParcelable(mExtras, 0);
+        parcel.writeParcelable(mAuthentication, 0);
     }
 
     public static final Parcelable.Creator<FillResponse> CREATOR =
             new Parcelable.Creator<FillResponse>() {
         @Override
-        public FillResponse createFromParcel(Parcel source) {
-            return new FillResponse(source);
+        public FillResponse createFromParcel(Parcel parcel) {
+            // Always go through the builder to ensure the data ingested by
+            // the system obeys the contract of the builder to avoid attacks
+            // using specially crafted parcels.
+            final Builder builder = new Builder(parcel.readString());
+            final ArraySet<Dataset> datasets = parcel.readTypedArraySet(null);
+            final int datasetCount = (datasets != null) ? datasets.size() : 0;
+            for (int i = 0; i < datasetCount; i++) {
+                builder.addDataset(datasets.valueAt(i));
+            }
+            final ArraySet<AutoFillId> fillIds = parcel.readTypedArraySet(null);
+            final int fillIdCount = (fillIds != null) ? fillIds.size() : 0;
+            for (int i = 0; i < fillIdCount; i++) {
+                builder.addSavableFields(fillIds.valueAt(i));
+            }
+            builder.setExtras(parcel.readParcelable(null));
+            builder.setAuthentication(parcel.readParcelable(null));
+            return builder.build();
         }
 
         @Override
