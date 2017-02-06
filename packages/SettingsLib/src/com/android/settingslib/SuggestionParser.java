@@ -94,16 +94,27 @@ public class SuggestionParser {
 
     private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
 
+    // Default dismiss control for smart suggestions.
+    private static final String DEFAULT_SMART_DISMISS_CONTROL = "0,10";
+
     private final Context mContext;
     private final List<SuggestionCategory> mSuggestionList;
     private final ArrayMap<Pair<String, String>, Tile> mAddCache = new ArrayMap<>();
     private final SharedPreferences mSharedPrefs;
+    private final String mSmartDismissControl;
 
-    public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
+
+    public SuggestionParser(
+        Context context, SharedPreferences sharedPrefs, int orderXml, String smartDismissControl) {
         mContext = context;
         mSuggestionList = (List<SuggestionCategory>) new SuggestionOrderInflater(mContext)
                 .parse(orderXml);
         mSharedPrefs = sharedPrefs;
+        mSmartDismissControl = smartDismissControl;
+    }
+
+    public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
+       this(context, sharedPrefs, orderXml, DEFAULT_SMART_DISMISS_CONTROL);
     }
 
     @VisibleForTesting
@@ -111,26 +122,35 @@ public class SuggestionParser {
         mContext = context;
         mSuggestionList = new ArrayList<SuggestionCategory>();
         mSharedPrefs = sharedPrefs;
+        mSmartDismissControl = DEFAULT_SMART_DISMISS_CONTROL;
         Log.wtf(TAG, "Only use this constructor for testing");
     }
 
     public List<Tile> getSuggestions() {
+        return getSuggestions(false);
+    }
+
+    public List<Tile> getSuggestions(boolean isSmartSuggestionEnabled) {
         List<Tile> suggestions = new ArrayList<>();
         final int N = mSuggestionList.size();
         for (int i = 0; i < N; i++) {
-            readSuggestions(mSuggestionList.get(i), suggestions);
+            readSuggestions(mSuggestionList.get(i), suggestions, isSmartSuggestionEnabled);
         }
         return suggestions;
+    }
+
+    public boolean dismissSuggestion(Tile suggestion) {
+        return dismissSuggestion(suggestion, false);
     }
 
     /**
      * Dismisses a suggestion, returns true if the suggestion has no more dismisses left and should
      * be disabled.
      */
-    public boolean dismissSuggestion(Tile suggestion) {
+    public boolean dismissSuggestion(Tile suggestion, boolean isSmartSuggestionEnabled) {
         String keyBase = suggestion.intent.getComponent().flattenToShortString();
         int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
-        String dismissControl = suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
+        String dismissControl = getDismissControl(suggestion, isSmartSuggestionEnabled);
         if (dismissControl == null || parseDismissString(dismissControl).length == index) {
             return true;
         }
@@ -141,20 +161,23 @@ public class SuggestionParser {
     }
 
     @VisibleForTesting
-    public void filterSuggestions(List<Tile> suggestions, int countBefore) {
+    public void filterSuggestions(
+        List<Tile> suggestions, int countBefore, boolean isSmartSuggestionEnabled) {
         for (int i = countBefore; i < suggestions.size(); i++) {
             if (!isAvailable(suggestions.get(i)) ||
                     !isSupported(suggestions.get(i)) ||
                     !satisifesRequiredUserType(suggestions.get(i)) ||
                     !satisfiesRequiredAccount(suggestions.get(i)) ||
                     !satisfiesConnectivity(suggestions.get(i)) ||
-                    isDismissed(suggestions.get(i))) {
+                    isDismissed(suggestions.get(i), isSmartSuggestionEnabled)) {
                 suggestions.remove(i--);
             }
         }
     }
 
-    private void readSuggestions(SuggestionCategory category, List<Tile> suggestions) {
+    @VisibleForTesting
+    void readSuggestions(
+        SuggestionCategory category, List<Tile> suggestions, boolean isSmartSuggestionEnabled) {
         int countBefore = suggestions.size();
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(category.category);
@@ -163,7 +186,7 @@ public class SuggestionParser {
         }
         TileUtils.getTilesForIntent(mContext, new UserHandle(UserHandle.myUserId()), intent,
                 mAddCache, null, suggestions, true, false);
-        filterSuggestions(suggestions, countBefore);
+        filterSuggestions(suggestions, countBefore, isSmartSuggestionEnabled);
         if (!category.multiple && suggestions.size() > (countBefore + 1)) {
             // If there are too many, remove them all and only re-add the one with the highest
             // priority.
@@ -288,12 +311,11 @@ public class SuggestionParser {
         Settings.Secure.putInt(mContext.getContentResolver(), name, 1);
     }
 
-    private boolean isDismissed(Tile suggestion) {
-        Object dismissObj = suggestion.metaData.get(META_DATA_DISMISS_CONTROL);
-        if (dismissObj == null) {
+    private boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {
+        String dismissControl = getDismissControl(suggestion, isSmartSuggestionEnabled);
+        if (dismissControl == null) {
             return false;
         }
-        String dismissControl = String.valueOf(dismissObj);
         String keyBase = suggestion.intent.getComponent().flattenToShortString();
         if (!mSharedPrefs.contains(keyBase + SETUP_TIME)) {
             mSharedPrefs.edit()
@@ -333,7 +355,16 @@ public class SuggestionParser {
         return dismisses;
     }
 
-    private static class SuggestionCategory {
+    private String getDismissControl(Tile suggestion, boolean isSmartSuggestionEnabled) {
+        if (isSmartSuggestionEnabled) {
+            return mSmartDismissControl;
+        } else {
+            return suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
+        }
+    }
+
+    @VisibleForTesting
+    static class SuggestionCategory {
         public String category;
         public String pkg;
         public boolean multiple;

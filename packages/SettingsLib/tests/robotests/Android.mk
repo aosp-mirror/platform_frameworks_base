@@ -43,6 +43,12 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay \
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src)
 
+LOCAL_JAR_EXCLUDE_FILES := none
+
+LOCAL_RESOURCE_DIR := \
+    $(LOCAL_PATH)/res
+
+
 include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
