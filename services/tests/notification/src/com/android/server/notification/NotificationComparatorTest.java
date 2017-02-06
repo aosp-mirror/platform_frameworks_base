@@ -112,6 +112,7 @@ public class NotificationComparatorTest {
         Notification n2 = new Notification.Builder(mContext)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setColorized(true /* colorized */)
                 .build();
         mRecordHighCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "highcall", callUid, callUid, n2,
@@ -186,10 +187,10 @@ public class NotificationComparatorTest {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordHighCall);
         expected.add(mRecordDefaultMedia);
-        expected.add(mRecordStarredContact);
-        expected.add(mRecordContact);
         expected.add(mRecordInlineReply);
         expected.add(mRecordSms);
+        expected.add(mRecordStarredContact);
+        expected.add(mRecordContact);
         expected.add(mRecordEmail);
         expected.add(mRecordUrgent);
         expected.add(mRecordCheater);
@@ -207,12 +208,17 @@ public class NotificationComparatorTest {
     @Test
     public void testMessaging() throws Exception {
         NotificationComparator comp = new NotificationComparator(mContext);
-        assertTrue(comp.isImportantMessaging(mRecordStarredContact));
-        assertTrue(comp.isImportantMessaging(mRecordContact));
         assertTrue(comp.isImportantMessaging(mRecordInlineReply));
         assertTrue(comp.isImportantMessaging(mRecordSms));
         assertFalse(comp.isImportantMessaging(mRecordEmail));
         assertFalse(comp.isImportantMessaging(mRecordCheater));
+    }
+
+    @Test
+    public void testPeople() throws Exception {
+        NotificationComparator comp = new NotificationComparator(mContext);
+        assertTrue(comp.isImportantPeople(mRecordStarredContact));
+        assertTrue(comp.isImportantPeople(mRecordContact));
     }
 
     private NotificationChannel getDefaultChannel() {
