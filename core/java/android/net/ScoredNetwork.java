@@ -106,7 +106,7 @@ public class ScoredNetwork implements Parcelable {
      * the Network Recommendation Provider.
      *
      * @see #ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL
-     * @see #ATTRIBUTES_KEY_RANKING_SCORE_OFFSET_KEY
+     * @see #ATTRIBUTES_KEY_RANKING_SCORE_OFFSET
      */
     @Nullable
     public final Bundle attributes;
