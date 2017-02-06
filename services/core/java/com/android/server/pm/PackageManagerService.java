@@ -833,7 +833,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
-    private final UserDataPreparer mUserDataPreparer;
 
     private File mCacheDir;
 
@@ -1937,7 +1936,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     // Clean up any users or apps that were removed or recreated
                     // while this volume was missing
-                    reconcileUsers(volumeUuid);
+                    sUserManager.reconcileUsers(volumeUuid);
                     reconcileApps(volumeUuid);
 
                     // Clean up any install sessions that expired or were
@@ -2270,8 +2269,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
-            mUserDataPreparer = new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore);
-            sUserManager = new UserManagerService(context, this, mUserDataPreparer, mPackages);
+            sUserManager = new UserManagerService(context, this,
+                    new UserDataPreparer(mInstaller, mInstallLock, mContext, mOnlyCore), mPackages);
 
             // Propagate permission configuration in to package manager.
             ArrayMap<String, SystemConfig.PermissionEntry> permConfig
@@ -19971,7 +19970,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         });
 
         // Now that we're mostly running, clean up stale users and apps
-        reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
+        sUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
     }
 
@@ -21306,60 +21305,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         for (int i = 0; i < 3; i++) {
             System.gc();
             System.runFinalization();
-        }
-    }
-
-    /**
-     * Examine all users present on given mounted volume, and destroy data
-     * belonging to users that are no longer valid, or whose user ID has been
-     * recycled.
-     */
-    private void reconcileUsers(String volumeUuid) {
-        final List<File> files = new ArrayList<>();
-        Collections.addAll(files, FileUtils
-                .listFilesOrEmpty(Environment.getDataUserDeDirectory(volumeUuid)));
-        Collections.addAll(files, FileUtils
-                .listFilesOrEmpty(Environment.getDataUserCeDirectory(volumeUuid)));
-        Collections.addAll(files, FileUtils
-                .listFilesOrEmpty(Environment.getDataSystemDeDirectory()));
-        Collections.addAll(files, FileUtils
-                .listFilesOrEmpty(Environment.getDataSystemCeDirectory()));
-        Collections.addAll(files, FileUtils
-                .listFilesOrEmpty(Environment.getDataMiscCeDirectory()));
-        for (File file : files) {
-            if (!file.isDirectory()) continue;
-
-            final int userId;
-            final UserInfo info;
-            try {
-                userId = Integer.parseInt(file.getName());
-                info = sUserManager.getUserInfo(userId);
-            } catch (NumberFormatException e) {
-                Slog.w(TAG, "Invalid user directory " + file);
-                continue;
-            }
-
-            boolean destroyUser = false;
-            if (info == null) {
-                logCriticalInfo(Log.WARN, "Destroying user directory " + file
-                        + " because no matching user was found");
-                destroyUser = true;
-            } else if (!mOnlyCore) {
-                try {
-                    UserManagerService.enforceSerialNumber(file, info.serialNumber);
-                } catch (IOException e) {
-                    logCriticalInfo(Log.WARN, "Destroying user directory " + file
-                            + " because we failed to enforce serial number: " + e);
-                    destroyUser = true;
-                }
-            }
-
-            if (destroyUser) {
-                synchronized (mInstallLock) {
-                    mUserDataPreparer.destroyUserDataLI(volumeUuid, userId,
-                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-                }
-            }
         }
     }
 
