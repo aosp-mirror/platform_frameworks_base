@@ -250,7 +250,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         mDefaultActivityButton = (FrameLayout) findViewById(R.id.default_activity_button);
         mDefaultActivityButton.setOnClickListener(mCallbacks);
         mDefaultActivityButton.setOnLongClickListener(mCallbacks);
-        mDefaultActivityButtonImage = mDefaultActivityButton.findViewById(R.id.image);
+        mDefaultActivityButtonImage = (ImageView) mDefaultActivityButton.findViewById(R.id.image);
 
         final FrameLayout expandButton = (FrameLayout) findViewById(R.id.expand_activities_button);
         expandButton.setOnClickListener(mCallbacks);
@@ -282,7 +282,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         mExpandActivityOverflowButton = expandButton;
 
         mExpandActivityOverflowButtonImage =
-            expandButton.findViewById(R.id.image);
+            (ImageView) expandButton.findViewById(R.id.image);
         mExpandActivityOverflowButtonImage.setImageDrawable(expandActivityOverflowButtonDrawable);
 
         mAdapter = new ActivityChooserViewAdapter();
@@ -760,7 +760,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                         convertView = LayoutInflater.from(getContext()).inflate(
                                 R.layout.activity_chooser_view_list_item, parent, false);
                         convertView.setId(ITEM_VIEW_TYPE_FOOTER);
-                        TextView titleView = convertView.findViewById(R.id.title);
+                        TextView titleView = (TextView) convertView.findViewById(R.id.title);
                         titleView.setText(mContext.getString(
                                 R.string.activity_chooser_view_see_all));
                     }
@@ -772,11 +772,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                     }
                     PackageManager packageManager = mContext.getPackageManager();
                     // Set the icon
-                    ImageView iconView = convertView.findViewById(R.id.icon);
+                    ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
                     ResolveInfo activity = (ResolveInfo) getItem(position);
                     iconView.setImageDrawable(activity.loadIcon(packageManager));
                     // Set the title.
-                    TextView titleView = convertView.findViewById(R.id.title);
+                    TextView titleView = (TextView) convertView.findViewById(R.id.title);
                     titleView.setText(activity.loadLabel(packageManager));
                     // Highlight the default.
                     if (mShowDefaultActivity && position == 0 && mHighlightDefaultActivity) {

@@ -619,7 +619,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
 
-            final TextView tv = tabIndicator.findViewById(R.id.title);
+            final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
             tv.setText(mLabel);
 
             if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
@@ -653,8 +653,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
 
-            final TextView tv = tabIndicator.findViewById(R.id.title);
-            final ImageView iconView = tabIndicator.findViewById(R.id.icon);
+            final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
+            final ImageView iconView = (ImageView) tabIndicator.findViewById(R.id.icon);
 
             // when icon is gone by default, we're in exclusive mode
             final boolean exclusive = iconView.getVisibility() == View.GONE;

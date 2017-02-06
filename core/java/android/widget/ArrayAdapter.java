@@ -388,7 +388,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
                 text = (TextView) view;
             } else {
                 //  Otherwise, find the TextView field within the layout
-                text = view.findViewById(mFieldId);
+                text = (TextView) view.findViewById(mFieldId);
 
                 if (text == null) {
                     throw new RuntimeException("Failed to find view with ID "

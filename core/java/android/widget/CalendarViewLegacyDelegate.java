@@ -316,9 +316,9 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
         View content = layoutInflater.inflate(R.layout.calendar_view, null, false);
         mDelegator.addView(content);
 
-        mListView = mDelegator.findViewById(R.id.list);
-        mDayNamesHeader = content.findViewById(R.id.day_names);
-        mMonthName = content.findViewById(R.id.month_name);
+        mListView = (ListView) mDelegator.findViewById(R.id.list);
+        mDayNamesHeader = (ViewGroup) content.findViewById(R.id.day_names);
+        mMonthName = (TextView) content.findViewById(R.id.month_name);
 
         setUpHeader();
         setUpListView();

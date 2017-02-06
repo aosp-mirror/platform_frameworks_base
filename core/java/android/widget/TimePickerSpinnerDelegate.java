@@ -86,7 +86,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         inflater.inflate(layoutResourceId, mDelegator, true);
 
         // hour
-        mHourSpinner = delegator.findViewById(R.id.hour);
+        mHourSpinner = (NumberPicker) delegator.findViewById(R.id.hour);
         mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 updateInputState();
@@ -100,17 +100,17 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
                 onTimeChanged();
             }
         });
-        mHourSpinnerInput = mHourSpinner.findViewById(R.id.numberpicker_input);
+        mHourSpinnerInput = (EditText) mHourSpinner.findViewById(R.id.numberpicker_input);
         mHourSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         // divider (only for the new widget style)
-        mDivider = mDelegator.findViewById(R.id.divider);
+        mDivider = (TextView) mDelegator.findViewById(R.id.divider);
         if (mDivider != null) {
             setDividerText();
         }
 
         // minute
-        mMinuteSpinner = mDelegator.findViewById(R.id.minute);
+        mMinuteSpinner = (NumberPicker) mDelegator.findViewById(R.id.minute);
         mMinuteSpinner.setMinValue(0);
         mMinuteSpinner.setMaxValue(59);
         mMinuteSpinner.setOnLongPressUpdateInterval(100);
@@ -138,7 +138,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
                 onTimeChanged();
             }
         });
-        mMinuteSpinnerInput = mMinuteSpinner.findViewById(R.id.numberpicker_input);
+        mMinuteSpinnerInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
         mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         // Get the localized am/pm strings and use them in the spinner.
@@ -173,13 +173,13 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
                     onTimeChanged();
                 }
             });
-            mAmPmSpinnerInput = mAmPmSpinner.findViewById(R.id.numberpicker_input);
+            mAmPmSpinnerInput = (EditText) mAmPmSpinner.findViewById(R.id.numberpicker_input);
             mAmPmSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
         }
 
         if (isAmPmAtStart()) {
             // Move the am/pm view to the beginning
-            ViewGroup amPmParent = delegator.findViewById(R.id.timePickerLayout);
+            ViewGroup amPmParent = (ViewGroup) delegator.findViewById(R.id.timePickerLayout);
             amPmParent.removeView(amPmView);
             amPmParent.addView(amPmView, 0);
             // Swap layout margins if needed. They may be not symmetrical (Old Standard Theme

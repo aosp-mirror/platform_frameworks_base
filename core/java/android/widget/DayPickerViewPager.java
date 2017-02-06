@@ -137,10 +137,9 @@ class DayPickerViewPager extends ViewPager {
     }
 
     @Override
-    protected <T extends View> T findViewByPredicateTraversal(Predicate<View> predicate,
-            View childToSkip) {
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         if (predicate.apply(this)) {
-            return (T) this;
+            return this;
         }
 
         // Always try the selected view first.
@@ -149,7 +148,7 @@ class DayPickerViewPager extends ViewPager {
         if (current != childToSkip && current != null) {
             final View v = current.findViewByPredicate(predicate);
             if (v != null) {
-                return (T) v;
+                return v;
             }
         }
 
@@ -161,7 +160,7 @@ class DayPickerViewPager extends ViewPager {
                 final View v = child.findViewByPredicate(predicate);
 
                 if (v != null) {
-                    return (T) v;
+                    return v;
                 }
             }
         }
