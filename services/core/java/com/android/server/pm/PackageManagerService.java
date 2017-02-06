@@ -2161,19 +2161,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (SystemProperties.getInt("ro.cp_system_other_odex", 0) == 1) {
             SystemProperties.set(CP_PREOPT_PROPERTY, "requested");
             // We will wait for up to 100 seconds.
-            final long timeEnd = SystemClock.uptimeMillis() + 100 * 1000;
+            final long timeStart = SystemClock.uptimeMillis();
+            final long timeEnd = timeStart + 100 * 1000;
+            long timeNow = timeStart;
             while (!SystemProperties.get(CP_PREOPT_PROPERTY).equals("finished")) {
                 try {
                     Thread.sleep(WAIT_TIME_MS);
                 } catch (InterruptedException e) {
                     // Do nothing
                 }
-                if (SystemClock.uptimeMillis() > timeEnd) {
+                timeNow = SystemClock.uptimeMillis();
+                if (timeNow > timeEnd) {
                     SystemProperties.set(CP_PREOPT_PROPERTY, "timed-out");
                     Slog.wtf(TAG, "cppreopt did not finish!");
                     break;
                 }
             }
+
+            Slog.i(TAG, "cppreopts took " + (timeNow - timeStart) + " ms");
         }
     }
 
