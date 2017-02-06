@@ -17467,7 +17467,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             int flags) {
         enforceNotIsolatedCaller("getServices");
         synchronized (this) {
-            return mServices.getRunningServiceInfoLocked(maxNum, flags);
+            final int callingUid = Binder.getCallingUid();
+            final boolean allowed = isGetTasksAllowed("getServices", Binder.getCallingPid(),
+                callingUid);
+
+            return mServices.getRunningServiceInfoLocked(maxNum, flags, callingUid, allowed);
         }
     }
 
