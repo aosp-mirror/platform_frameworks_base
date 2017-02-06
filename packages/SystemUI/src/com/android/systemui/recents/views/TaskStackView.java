@@ -96,6 +96,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import com.android.systemui.recents.views.grid.GridTaskView;
+import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -445,6 +446,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Returns the stack algorithm for this task stack. */
     public TaskStackLayoutAlgorithm getStackAlgorithm() {
         return mLayoutAlgorithm;
+    }
+
+    /** Returns the grid algorithm for this task stack. */
+    public TaskGridLayoutAlgorithm getGridAlgorithm() {
+        return mLayoutAlgorithm.mTaskGridLayoutAlgorithm;
     }
 
     /**
