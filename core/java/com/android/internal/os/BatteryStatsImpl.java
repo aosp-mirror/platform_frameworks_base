@@ -9612,7 +9612,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 doWrite = true;
                 resetAllStatsLocked();
-                if (chargeUAh > 0) {
+                if (chargeUAh > 0 && level > 0) {
                     // Only use the reported coulomb charge value if it is supported and reported.
                     mEstimatedBatteryCapacity = (int) ((chargeUAh / 1000) / (level / 100.0));
                 }
