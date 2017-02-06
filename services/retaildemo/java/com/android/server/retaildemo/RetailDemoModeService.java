@@ -541,6 +541,8 @@ public class RetailDemoModeService extends SystemService {
     }
 
     private void stopDemoMode() {
+        mDeviceInDemoMode = false;
+        mIsCarrierDemoMode = false;
         mPreloadAppsInstaller = null;
         mCameraIdsWithFlash = null;
         mInjector.destroyWakeLock();
