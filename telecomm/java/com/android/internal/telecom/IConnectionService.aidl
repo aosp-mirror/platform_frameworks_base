@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.telecom.CallAudioState;
 import android.telecom.ConnectionRequest;
 import android.telecom.Logging.Session;
@@ -89,4 +90,12 @@ oneway interface IConnectionService {
     void sendCallEvent(String callId, String event, in Bundle extras, in Session.Info sessionInfo);
 
     void onExtrasChanged(String callId, in Bundle extras, in Session.Info sessionInfo);
+
+    void startRtt(String callId, in ParcelFileDescriptor fromInCall,
+    in ParcelFileDescriptor toInCall, in Session.Info sessionInfo);
+
+    void stopRtt(String callId, in Session.Info sessionInfo);
+
+    void respondToRttUpgradeRequest(String callId, in ParcelFileDescriptor fromInCall,
+    in ParcelFileDescriptor toInCall, in Session.Info sessionInfo);
 }

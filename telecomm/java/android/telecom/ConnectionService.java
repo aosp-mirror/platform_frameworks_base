@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.telecom.Logging.Session;
 
 import com.android.internal.os.SomeArgs;
@@ -119,6 +121,9 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
     private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
+    private static final String SESSION_START_RTT = "CS.+RTT";
+    private static final String SESSION_STOP_RTT = "CS.-RTT";
+    private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -144,6 +149,9 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SEND_CALL_EVENT = 23;
     private static final int MSG_ON_EXTRAS_CHANGED = 24;
     private static final int MSG_CREATE_CONNECTION_FAILED = 25;
+    private static final int MSG_ON_START_RTT = 26;
+    private static final int MSG_ON_STOP_RTT = 27;
+    private static final int MSG_RTT_UPGRADE_RESPONSE = 28;
 
     private static Connection sNullConnection;
 
@@ -501,6 +509,53 @@ public abstract class ConnectionService extends Service {
                 Log.endSession();
             }
         }
+
+        @Override
+        public void startRtt(String callId, ParcelFileDescriptor fromInCall,
+                ParcelFileDescriptor toInCall, Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_START_RTT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = new Connection.RttTextStream(toInCall, fromInCall);
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_START_RTT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void stopRtt(String callId, Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_STOP_RTT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_STOP_RTT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void respondToRttUpgradeRequest(String callId, ParcelFileDescriptor fromInCall,
+                ParcelFileDescriptor toInCall, Session.Info sessionInfo) throws RemoteException {
+            Log.startSession(sessionInfo, SESSION_RTT_UPGRADE_RESPONSE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                if (toInCall == null || fromInCall == null) {
+                    args.arg2 = null;
+                } else {
+                    args.arg2 = new Connection.RttTextStream(toInCall, fromInCall);
+                }
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_RTT_UPGRADE_RESPONSE, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -848,6 +903,49 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_ON_START_RTT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_START_RTT);
+                        String callId = (String) args.arg1;
+                        Connection.RttTextStream rttTextStream =
+                                (Connection.RttTextStream) args.arg2;
+                        startRtt(callId, rttTextStream);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_STOP_RTT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_STOP_RTT);
+                        String callId = (String) args.arg1;
+                        stopRtt(callId);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_RTT_UPGRADE_RESPONSE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg3,
+                                SESSION_HANDLER + SESSION_RTT_UPGRADE_RESPONSE);
+                        String callId = (String) args.arg1;
+                        Connection.RttTextStream rttTextStream =
+                                (Connection.RttTextStream) args.arg2;
+                        handleRttUpgradeResponse(callId, rttTextStream);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -1134,6 +1232,38 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConnection.get(c);
             if (id != null) {
                 mAdapter.setAudioRoute(id, audioRoute);
+            }
+        }
+
+        @Override
+        public void onRttInitiationSuccess(Connection c) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.onRttInitiationSuccess(id);
+            }
+        }
+
+        @Override
+        public void onRttInitiationFailure(Connection c, int reason) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.onRttInitiationFailure(id, reason);
+            }
+        }
+
+        @Override
+        public void onRttSessionRemotelyTerminated(Connection c) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.onRttSessionRemotelyTerminated(id);
+            }
+        }
+
+        @Override
+        public void onRemoteRttRequest(Connection c) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.onRemoteRttRequest(id);
             }
         }
     };
@@ -1430,7 +1560,6 @@ public abstract class ConnectionService extends Service {
         if (connection != null) {
             connection.onCallEvent(event, extras);
         }
-
     }
 
     /**
@@ -1451,6 +1580,34 @@ public abstract class ConnectionService extends Service {
             findConnectionForAction(callId, "handleExtrasChanged").handleExtrasChanged(extras);
         } else if (mConferenceById.containsKey(callId)) {
             findConferenceForAction(callId, "handleExtrasChanged").handleExtrasChanged(extras);
+        }
+    }
+
+    private void startRtt(String callId, Connection.RttTextStream rttTextStream) {
+        Log.d(this, "startRtt(%s)", callId);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "startRtt").onStartRtt(rttTextStream);
+        } else if (mConferenceById.containsKey(callId)) {
+            Log.w(this, "startRtt called on a conference.");
+        }
+    }
+
+    private void stopRtt(String callId) {
+        Log.d(this, "stopRtt(%s)", callId);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "stopRtt").onStopRtt();
+        } else if (mConferenceById.containsKey(callId)) {
+            Log.w(this, "stopRtt called on a conference.");
+        }
+    }
+
+    private void handleRttUpgradeResponse(String callId, Connection.RttTextStream rttTextStream) {
+        Log.d(this, "handleRttUpgradeResponse(%s, %s)", callId, rttTextStream == null);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "handleRttUpgradeResponse")
+                    .handleRttUpgradeResponse(rttTextStream);
+        } else if (mConferenceById.containsKey(callId)) {
+            Log.w(this, "handleRttUpgradeResponse called on a conference.");
         }
     }
 
