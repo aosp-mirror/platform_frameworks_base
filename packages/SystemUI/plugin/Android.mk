@@ -27,3 +27,13 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 LOCAL_JAR_EXCLUDE_FILES := none
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
+
+include $(CLEAR_VARS)
+
+# Dummy to generate .toc files.
+LOCAL_PACKAGE_NAME := PluginDummyLib
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
+
+LOCAL_JAVA_LIBRARIES := SystemUIPluginLib
+
+include $(BUILD_PACKAGE)

@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.systemui.fragments.FragmentService;
@@ -43,6 +44,7 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.util.NotificationChannels;
@@ -149,7 +151,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      * Makes sure that all the SystemUI services are running. If they are already running, this is a
      * no-op. This is needed to conditinally start all the services, as we only need to have it in
      * the main process.
-     *
      * <p>This method must only be called from the main thread.</p>
      */
     public void startServicesIfNeeded() {
@@ -160,7 +161,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      * Ensures that all the Secondary user SystemUI services are running. If they are already
      * running, this is a no-op. This is needed to conditinally start all the services, as we only
      * need to have it in the main process.
-     *
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
@@ -184,7 +184,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
         final int N = services.length;
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
             try {
@@ -207,15 +207,34 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         }
         Dependency.get(PluginManager.class).addPluginListener(OverlayPlugin.ACTION,
                 new PluginListener<OverlayPlugin>() {
-            @Override
-            public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                StatusBar statusBar = getComponent(StatusBar.class);
-                if (statusBar != null) {
-                    plugin.setup(statusBar.getStatusBarWindow(),
-                            statusBar.getNavigationBarView());
-                }
-            }
-        }, OverlayPlugin.VERSION, true /* Allow multiple plugins */);
+                    private ArraySet<OverlayPlugin> mOverlays;
+
+                    @Override
+                    public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
+                        StatusBar statusBar = getComponent(StatusBar.class);
+                        if (statusBar != null) {
+                            plugin.setup(statusBar.getStatusBarWindow(),
+                                    statusBar.getNavigationBarView());
+                        }
+                        // Lazy init.
+                        if (mOverlays == null) mOverlays = new ArraySet<>();
+                        if (plugin.holdStatusBarOpen()) {
+                            mOverlays.add(plugin);
+                            Dependency.get(StatusBarWindowManager.class).setStateListener(b ->
+                                    mOverlays.forEach(o -> o.setCollapseDesired(b)));
+                            Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
+                                    mOverlays.size() != 0);
+
+                        }
+                    }
+
+                    @Override
+                    public void onPluginDisconnected(OverlayPlugin plugin) {
+                        mOverlays.remove(plugin);
+                        Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
+                                mOverlays.size() != 0);
+                    }
+                }, OverlayPlugin.VERSION, true /* Allow multiple plugins */);
 
         mServicesStarted = true;
     }

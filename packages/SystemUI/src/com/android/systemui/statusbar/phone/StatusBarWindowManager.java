@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.keyguard.R;
+import com.android.systemui.Dumpable;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -43,7 +44,7 @@ import java.lang.reflect.Field;
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-public class StatusBarWindowManager implements RemoteInputController.Callback {
+public class StatusBarWindowManager implements RemoteInputController.Callback, Dumpable {
 
     private static final String TAG = "StatusBarWindowManager";
 
@@ -59,6 +60,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
     private final boolean mKeyguardScreenRotation;
     private final float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
+    private OtherwisedCollapsedListener mListener;
 
     public StatusBarWindowManager(Context context) {
         mContext = context;
@@ -154,6 +156,10 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
 
     private void applyHeight(State state) {
         boolean expanded = isExpanded(state);
+        if (state.forcePluginOpen) {
+            mListener.setWouldOtherwiseCollapse(expanded);
+            expanded = true;
+        }
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
@@ -356,6 +362,15 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         apply(mCurrentState);
     }
 
+    public void setForcePluginOpen(boolean forcePluginOpen) {
+        mCurrentState.forcePluginOpen = forcePluginOpen;
+        apply(mCurrentState);
+    }
+
+    public void setStateListener(OtherwisedCollapsedListener listener) {
+        mListener = listener;
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("StatusBarWindowManager state:");
         pw.println(mCurrentState);
@@ -388,6 +403,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
         int statusBarState;
 
         boolean remoteInputActive;
+        boolean forcePluginOpen;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;
@@ -418,5 +434,14 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
 
             return result.toString();
         }
+    }
+
+    /**
+     * Custom listener to pipe data back to plugins about whether or not the status bar would be
+     * collapsed if not for the plugin.
+     * TODO: Find cleaner way to do this.
+     */
+    public interface OtherwisedCollapsedListener {
+        void setWouldOtherwiseCollapse(boolean otherwiseCollapse);
     }
 }
