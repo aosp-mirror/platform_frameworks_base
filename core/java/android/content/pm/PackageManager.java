@@ -1741,6 +1741,22 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan native API
+     * will enumerate at least one {@code VkPhysicalDevice}, and the feature version will indicate
+     * what level of optional compute features are supported beyond the Vulkan 1.0 requirements.
+     * <p>
+     * Compute level 0 indicates support for:
+     * <ul>
+     * <li>Ability to use pointers to buffer data from shaders</li>
+     * <li>Ability to load/store 16-bit values from buffers</li>
+     * <li>Ability to control shader floating point rounding mode</li>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VULKAN_HARDWARE_COMPUTE = "android.hardware.vulkan.compute";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: The version of this feature indicates the highest
      * {@code VkPhysicalDeviceProperties::apiVersion} supported by the physical devices that support
      * the hardware level indicated by {@link #FEATURE_VULKAN_HARDWARE_LEVEL}. The feature version
