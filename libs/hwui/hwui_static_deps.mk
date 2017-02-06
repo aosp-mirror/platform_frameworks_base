@@ -29,5 +29,5 @@ LOCAL_SHARED_LIBRARIES += \
     libandroidfw
 
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
-    LOCAL_SHARED_LIBRARIES += libRS libRScpp
+    LOCAL_SHARED_LIBRARIES += libRScpp
 endif
