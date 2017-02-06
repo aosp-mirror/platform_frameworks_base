@@ -57,6 +57,8 @@ public class BackupManagerMonitor {
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_TIMEOUT = 4;
   public static final int LOG_EVENT_ID_KEY_VALUE_BACKUP_TIMEOUT = 21;
+  public static final int LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT = 31;
+  public static final int LOG_EVENT_ID_FULL_RESTORE_TIMEOUT = 45;
   public static final int LOG_EVENT_ID_NO_PACKAGES = 49;
 
 

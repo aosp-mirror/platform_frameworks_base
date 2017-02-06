@@ -506,7 +506,8 @@ public final class Bmgr {
     private void doListRestoreSets() {
         try {
             RestoreObserver observer = new RestoreObserver();
-            int err = mRestore.getAvailableRestoreSets(observer);
+            // TODO implement monitor here
+            int err = mRestore.getAvailableRestoreSets(observer, null);
             if (err != 0) {
                 System.out.println("Unable to request restore sets");
             } else {
@@ -609,7 +610,8 @@ public final class Bmgr {
             }
 
             RestoreObserver observer = new RestoreObserver();
-            int err = mRestore.restorePackage(pkg, observer);
+            // TODO implement monitor here
+            int err = mRestore.restorePackage(pkg, observer, null );
             if (err == 0) {
                 // Off and running -- wait for the restore to complete
                 observer.waitForCompletion();
@@ -636,7 +638,8 @@ public final class Bmgr {
                 return;
             }
             RestoreSet[] sets = null;
-            int err = mRestore.getAvailableRestoreSets(observer);
+            // TODO implement monitor here
+            int err = mRestore.getAvailableRestoreSets(observer, null);
             if (err == 0) {
                 observer.waitForCompletion();
                 sets = observer.sets;
@@ -645,11 +648,12 @@ public final class Bmgr {
                         if (s.token == token) {
                             System.out.println("Scheduling restore: " + s.name);
                             if (filter == null) {
-                                didRestore = (mRestore.restoreAll(token, observer) == 0);
+                                didRestore = (mRestore.restoreAll(token, observer, null) == 0);
                             } else {
                                 String[] names = new String[filter.size()];
                                 filter.toArray(names);
-                                didRestore = (mRestore.restoreSome(token, observer, names) == 0);
+                                didRestore = (mRestore.restoreSome(token, observer,
+                                        null, names) == 0);
                             }
                             break;
                         }
