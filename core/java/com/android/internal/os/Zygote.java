@@ -173,6 +173,10 @@ public final class Zygote {
         VM_HOOKS.postForkChild(debugFlags, isSystemServer, instructionSet);
     }
 
+    /**
+     * Resets this process' priority to the default value (0).
+     */
+    native static void nativeResetNicePriority();
 
     /**
      * Executes "/system/bin/sh -c &lt;command&gt;" using the exec() system call.

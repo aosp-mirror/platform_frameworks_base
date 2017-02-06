@@ -712,6 +712,8 @@ public class ZygoteInit {
                 EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                     SystemClock.uptimeMillis());
                 bootTimingsTraceLog.traceEnd(); // ZygotePreload
+            } else {
+                Zygote.nativeResetNicePriority();
             }
 
             // Finish profiling the zygote initialization.
