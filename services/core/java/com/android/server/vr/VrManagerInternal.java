@@ -79,4 +79,13 @@ public abstract class VrManagerInternal {
      *       given in {@link android.service.vr.VrModeException} on failure.
      */
     public abstract int hasVrPackage(@NonNull ComponentName packageName, int userId);
+
+    /**
+     * Sets the persistent VR mode state of a device. When a device is in persistent VR mode it will
+     * remain in VR mode even if the foreground does not specify Vr mode being enabled. Mainly used
+     * by VR viewers to indicate that a device is placed in a VR viewer.
+     *
+     * @param enabled true if the device should be placed in persistent VR mode.
+     */
+    public abstract void setPersistentVrModeEnabled(boolean enabled);
 }
