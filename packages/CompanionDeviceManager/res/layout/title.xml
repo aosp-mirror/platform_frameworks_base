@@ -14,24 +14,12 @@
      limitations under the License.
 -->
 
-<RelativeLayout
+
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
-    android:layout_height="400dp"
-    style="@style/ContainerLayout"
-    >
-
-    <include layout="@layout/title" />
-
-    <ListView
-        android:id="@+id/device_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/title"
-        android:layout_above="@+id/buttons"
-        style="@android:style/Widget.Material.Light.ListView"
-    />
-
-    <include layout="@layout/buttons" />
-
-</RelativeLayout>
+    android:id="@+id/title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="@android:color/black"
+    style="@*android:style/TextAppearance.Widget.Toolbar.Title"
+/>

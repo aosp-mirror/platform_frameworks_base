@@ -22,4 +22,13 @@
     <!-- Title of the device selection dialog. -->
     <string name="chooser_title">Pair with &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; via Bluetooth?</string>
 
+    <!-- Title of the device pairing confirmation dialog. -->
+    <string name="confirmation_title">Pair &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; with &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt; via Bluetooth?</string>
+
+    <!-- Label on the pair button in a companion device chooser/confirmation dialog -->
+    <string name="pair">Pair</string>
+
+    <!-- Label on the cancel button in a companion device chooser/confirmation dialog -->
+    <string name="cancel">Cancel</string>
+
 </resources>

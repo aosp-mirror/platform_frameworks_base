@@ -66,6 +66,7 @@ public class DeviceDiscoveryService extends Service {
     private BluetoothLEDeviceFilter mFilter;
     private ScanFilter mScanFilter;
     private ScanSettings mDefaultScanSettings = new ScanSettings.Builder().build();
+    AssociationRequest<?> mRequest;
     List<BluetoothDevice> mDevicesFound;
     BluetoothDevice mSelectedDevice;
     DevicesAdapter mDevicesAdapter;
@@ -141,6 +142,7 @@ public class DeviceDiscoveryService extends Service {
 
     private void startDiscovery(AssociationRequest<?> request) {
         //TODO support other protocols as well
+        mRequest = request;
         mFilter = nullsafe((BluetoothLEDeviceFilter) request.getDeviceFilter());
         mScanFilter = mFilter.getScanFilter();
 

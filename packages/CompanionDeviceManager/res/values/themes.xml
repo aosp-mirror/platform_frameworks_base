@@ -16,10 +16,11 @@
 
 <resources>
 
-    <!--TODO-->
-    <!--<style name="Theme.ChooserActivity" parent="@*android:style/Theme.Dialog.NoFrame">-->
-        <!--&lt;!&ndash;<item name="android:windowBackground">@android:color/light_grey</item>&ndash;&gt;-->
-        <!--<item name="android:backgroundColor">@android:color/light_grey</item>-->
-    <!--</style>-->
+    <style name="ChooserActivity"
+           parent="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar">
+        <item name="*android:windowFixedHeightMajor">100%</item>
+        <item name="*android:windowFixedHeightMinor">100%</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 
 </resources>
