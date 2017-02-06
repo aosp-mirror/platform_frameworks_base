@@ -6706,6 +6706,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mDelegationMap.clear();
         policy.mStatusBarDisabled = false;
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
+        policy.mAffiliationIds.clear();
+        policy.mLockTaskPackages.clear();
         saveSettingsLocked(userId);
 
         try {
