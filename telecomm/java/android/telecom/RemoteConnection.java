@@ -651,6 +651,14 @@ public final class RemoteConnection {
         mCallerDisplayName = connection.getCallerDisplayName();
         mCallerDisplayNamePresentation = connection.getCallerDisplayNamePresentation();
         mConference = null;
+        putExtras(connection.getExtras());
+
+        // Stash the original connection ID as it exists in the source ConnectionService.
+        // Telecom will use this to avoid adding duplicates later.
+        // See comments on Connection.EXTRA_ORIGINAL_CONNECTION_ID for more information.
+        Bundle newExtras = new Bundle();
+        newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+        putExtras(newExtras);
     }
 
     /**
@@ -1350,6 +1358,9 @@ public final class RemoteConnection {
 
     /** @hide */
     void putExtras(final Bundle extras) {
+        if (extras == null) {
+            return;
+        }
         if (mExtras == null) {
             mExtras = new Bundle();
         }
