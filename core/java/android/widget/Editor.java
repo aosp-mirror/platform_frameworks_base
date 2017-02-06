@@ -149,10 +149,10 @@ public class Editor {
     private static final int MENU_ITEM_ORDER_ASSIST = 1;
     private static final int MENU_ITEM_ORDER_UNDO = 2;
     private static final int MENU_ITEM_ORDER_REDO = 3;
-    private static final int MENU_ITEM_ORDER_SHARE = 4;
-    private static final int MENU_ITEM_ORDER_CUT = 5;
-    private static final int MENU_ITEM_ORDER_COPY = 6;
-    private static final int MENU_ITEM_ORDER_PASTE = 7;
+    private static final int MENU_ITEM_ORDER_CUT = 4;
+    private static final int MENU_ITEM_ORDER_COPY = 5;
+    private static final int MENU_ITEM_ORDER_PASTE = 6;
+    private static final int MENU_ITEM_ORDER_SHARE = 7;
     private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 8;
     private static final int MENU_ITEM_ORDER_SELECT_ALL = 9;
     private static final int MENU_ITEM_ORDER_REPLACE = 10;
@@ -3876,7 +3876,7 @@ public class Editor {
                 final Intent intent = textClassificationResult.getIntent();
                 if ((icon != null || !TextUtils.isEmpty(label))
                         && (onClickListener != null || intent != null)) {
-                    menu.add(Menu.NONE, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
+                    menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST, label)
                             .setIcon(icon)
                             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
                 }

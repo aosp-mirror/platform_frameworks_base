@@ -32,6 +32,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Size;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -1113,6 +1114,7 @@ public final class FloatingToolbar {
             mMainPanel.removeAllViews();
             mMainPanel.setPaddingRelative(0, 0, 0, 0);
 
+            int lastGroupId = -1;
             boolean isFirstItem = true;
             while (!remainingMenuItems.isEmpty()) {
                 final MenuItem menuItem = remainingMenuItems.peek();
@@ -1125,11 +1127,11 @@ public final class FloatingToolbar {
                             menuItemButton.getPaddingTop(),
                             menuItemButton.getPaddingEnd(),
                             menuItemButton.getPaddingBottom());
-                    isFirstItem = false;
                 }
 
                 // Adding additional end padding for the last button to even out button spacing.
-                if (remainingMenuItems.size() == 1) {
+                boolean isLastItem = remainingMenuItems.size() == 1;
+                if (isLastItem) {
                     menuItemButton.setPaddingRelative(
                             menuItemButton.getPaddingStart(),
                             menuItemButton.getPaddingTop(),
@@ -1138,25 +1140,64 @@ public final class FloatingToolbar {
                 }
 
                 menuItemButton.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-                int menuItemButtonWidth = Math.min(menuItemButton.getMeasuredWidth(), toolbarWidth);
+                final int menuItemButtonWidth = Math.min(menuItemButton.getMeasuredWidth(), toolbarWidth);
+
+                final boolean isNewGroup = !isFirstItem && lastGroupId != menuItem.getGroupId();
+                final int extraPadding = isNewGroup ? menuItemButton.getPaddingEnd() * 2 : 0;
+
                 // Check if we can fit an item while reserving space for the overflowButton.
                 boolean canFitWithOverflow =
-                        menuItemButtonWidth <= availableWidth - mOverflowButtonSize.getWidth();
+                        menuItemButtonWidth <=
+                                availableWidth - mOverflowButtonSize.getWidth() - extraPadding;
                 boolean canFitNoOverflow =
-                        remainingMenuItems.size() == 1 && menuItemButtonWidth <= availableWidth;
+                        isLastItem && menuItemButtonWidth <= availableWidth - extraPadding;
                 if (canFitWithOverflow || canFitNoOverflow) {
+                    if (isNewGroup) {
+                        final View border = createBorder(mContext);
+                        final int borderWidth = border.getLayoutParams().width;
+
+                        // Add extra padding to the end of the previous button.
+                        // Half of the extra padding (less borderWidth) goes to the previous button.
+                        View previousButton = mMainPanel.getChildAt(mMainPanel.getChildCount() - 1);
+                        final int prevPaddingEnd = previousButton.getPaddingEnd()
+                                + extraPadding / 2 - borderWidth;
+                        previousButton.setPaddingRelative(
+                                previousButton.getPaddingStart(),
+                                previousButton.getPaddingTop(),
+                                prevPaddingEnd,
+                                previousButton.getPaddingBottom());
+                        final ViewGroup.LayoutParams prevParams = previousButton.getLayoutParams();
+                        prevParams.width += extraPadding / 2 - borderWidth;
+                        previousButton.setLayoutParams(prevParams);
+
+                        // Add extra padding to the start of this button.
+                        // Other half of the extra padding goes to this button.
+                        final int paddingStart = menuItemButton.getPaddingStart()
+                                + extraPadding / 2;
+                        menuItemButton.setPaddingRelative(
+                                paddingStart,
+                                menuItemButton.getPaddingTop(),
+                                menuItemButton.getPaddingEnd(),
+                                menuItemButton.getPaddingBottom());
+
+                        // Include a border.
+                        mMainPanel.addView(border);
+                    }
+
                     setButtonTagAndClickListener(menuItemButton, menuItem);
                     mMainPanel.addView(menuItemButton);
-                    ViewGroup.LayoutParams params = menuItemButton.getLayoutParams();
-                    params.width = menuItemButtonWidth;
+                    final ViewGroup.LayoutParams params = menuItemButton.getLayoutParams();
+                    params.width = menuItemButtonWidth + extraPadding / 2;
                     menuItemButton.setLayoutParams(params);
-                    availableWidth -= menuItemButtonWidth;
+                    availableWidth -= menuItemButtonWidth + extraPadding;
                     remainingMenuItems.pop();
                 } else {
                     // Reserve space for overflowButton.
                     mMainPanel.setPaddingRelative(0, 0, mOverflowButtonSize.getWidth(), 0);
                     break;
                 }
+                lastGroupId = menuItem.getGroupId();
+                isFirstItem = false;
             }
             mMainPanelSize = measure(mMainPanel);
             return remainingMenuItems;
@@ -1686,6 +1727,23 @@ public final class FloatingToolbar {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         popupContentHolder.addView(content);
         return popupWindow;
+    }
+
+    private static View createBorder(Context context) {
+        // TODO: Inflate this instead.
+        View border = new View(context);
+        int _1dp = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                _1dp, ViewGroup.LayoutParams.MATCH_PARENT);
+        params.setMarginsRelative(0, _1dp * 10, 0, _1dp * 10);
+        border.setLayoutParams(params);
+        border.setBackgroundColor(Color.parseColor("#9E9E9E"));
+        border.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        border.setEnabled(false);
+        border.setFocusable(false);
+        border.setContentDescription(null);
+        return border;
     }
 
     /**
