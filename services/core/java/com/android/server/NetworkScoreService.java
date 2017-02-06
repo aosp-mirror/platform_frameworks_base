@@ -927,7 +927,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 try {
                     for (int i = 0; i < count; i++) {
                         consumer.accept(callbackList.getBroadcastItem(i),
-                                callbackList.getRegisteredCallbackCookie(i));
+                                callbackList.getBroadcastCookie(i));
                     }
                 } finally {
                     callbackList.finishBroadcast();
