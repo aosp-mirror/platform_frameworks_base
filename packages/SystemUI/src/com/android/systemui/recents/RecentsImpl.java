@@ -72,6 +72,7 @@ import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
+import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.stackdivider.DividerView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
@@ -627,10 +628,21 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
             mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
+            // Get the width of a task view so that we know how wide to draw the header bar.
+            int taskViewWidth = 0;
+            if (mDummyStackView.useGridLayout()) {
+                TaskGridLayoutAlgorithm gridLayout = mDummyStackView.getGridAlgorithm();
+                gridLayout.initialize(windowRect);
+                taskViewWidth = (int) gridLayout.getTransform(0 /* taskIndex */,
+                        stack.getTaskCount(), new TaskViewTransform(), stackLayout).rect.width();
+            } else {
+                Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
+                if (!taskViewBounds.isEmpty()) {
+                    taskViewWidth = taskViewBounds.width();
+                }
+            }
 
-            Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
-            if (!taskViewBounds.isEmpty()) {
-                int taskViewWidth = taskViewBounds.width();
+            if (taskViewWidth > 0) {
                 synchronized (mHeaderBarLock) {
                     if (mHeaderBar.getMeasuredWidth() != taskViewWidth ||
                             mHeaderBar.getMeasuredHeight() != mTaskBarHeight) {
