@@ -603,6 +603,11 @@ static VkAccessFlags layoutToSrcAccessMask(const VkImageLayout layout) {
 }
 
 void VulkanManager::swapBuffers(VulkanSurface* surface) {
+    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
+        ATRACE_NAME("Finishing GPU work");
+        mDeviceWaitIdle(mBackendContext->fDevice);
+    }
+
     VulkanSurface::BackbufferInfo* backbuffer = surface->mBackbuffers +
             surface->mCurrentBackbufferIndex;
     GrVkImageInfo* imageInfo;
