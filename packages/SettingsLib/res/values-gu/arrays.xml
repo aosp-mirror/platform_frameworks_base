@@ -58,14 +58,22 @@
     <item msgid="3878793616631049349">"ફક્ત DRM સામગ્રી માટે HDCP તપાસનો ઉપયોગ કરો"</item>
     <item msgid="45075631231212732">"હંમેશા HDCP તપાસનો ઉપયોગ કરો"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_titles:2 (686685526567131661) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:3 (8910200421843557332) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:4 (8434403964359457768) -->
-    <!-- no translation found for bluetooth_a2dp_codec_titles:5 (6751080638867012696) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:2 (6839647709301342559) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:3 (2279916056363477395) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:4 (6641171061200063516) -->
-    <!-- no translation found for bluetooth_a2dp_codec_summaries:5 (7950781694447359344) -->
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="7065842274271279580">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
+    <item msgid="7539690996561263909">"SBC"</item>
+    <item msgid="686685526567131661">"AAC"</item>
+    <item msgid="8910200421843557332">"aptX"</item>
+    <item msgid="8434403964359457768">"aptX HD"</item>
+    <item msgid="6751080638867012696">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="5062108632402595000">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
+    <item msgid="6898329690939802290">"SBC"</item>
+    <item msgid="6839647709301342559">"AAC"</item>
+    <item msgid="2279916056363477395">"aptX"</item>
+    <item msgid="6641171061200063516">"aptX HD"</item>
+    <item msgid="7950781694447359344">"LDAC"</item>
+  </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="3093023430402746802">"સિસ્ટમ પસંદગીનો ઉપયોગ કરો (ડિફૉલ્ટ)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
@@ -102,10 +110,16 @@
     <item msgid="8900559293912978337">"મૉનો"</item>
     <item msgid="8883739882299884241">"સ્ટીરિઓ"</item>
   </string-array>
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:0 (7158319962230727476) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_titles:2 (8860982705384396512) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:0 (6398189564246596868) -->
-    <!-- no translation found for bluetooth_a2dp_codec_ldac_playback_quality_summaries:2 (4681409244565426925) -->
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="7158319962230727476">"ઑડિઓની ગુણવત્તા (990 kbps/909 kbps) માટે ઓપ્ટિમાઇઝ કર્યું"</item>
+    <item msgid="2921767058740704969">"સંતુલિત ઑડિઓ અને કનેક્શનની ગુણવત્તા (660kbps/606kbps)"</item>
+    <item msgid="8860982705384396512">"કનેક્શનની ગુણવત્તા (330 kbps/303 kbps) માટે ઓપ્ટિમાઇઝ કર્યું"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="6398189564246596868">"ઑડિઓની ગુણવત્તા માટે ઓપ્ટિમાઇઝ કર્યું"</item>
+    <item msgid="4327143584633311908">"સંતુલિત ઑડિઓ અને કનેક્શનની ગુણવત્તા"</item>
+    <item msgid="4681409244565426925">"કનેક્શનની ગુણવત્તા માટે ઓપ્ટિમાઇઝ કર્યું"</item>
+  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"બંધ"</item>
     <item msgid="1593289376502312923">"64K"</item>
