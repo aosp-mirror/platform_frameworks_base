@@ -217,9 +217,6 @@ public class WallpaperBackupAgent extends BackupAgent {
         final int sysWhich = FLAG_SYSTEM | (lockImageStage.exists() ? 0 : FLAG_LOCK);
 
         try {
-            // First off, revert to the factory state
-            mWm.clear(FLAG_SYSTEM | FLAG_LOCK);
-
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
