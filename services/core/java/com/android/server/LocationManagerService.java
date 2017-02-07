@@ -142,7 +142,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final long HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
 
     // default background throttling interval if not overriden in settings
-    private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 10 * 60 * 1000;
+    private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
 
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
