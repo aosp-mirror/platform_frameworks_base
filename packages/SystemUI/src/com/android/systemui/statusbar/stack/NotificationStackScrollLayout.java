@@ -362,6 +362,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mHeadsUpAnimatingAway;
     private int mStatusBarState;
     private int mCachedBackgroundColor;
+    private Runnable mAnimateScroll = this::animateScroll;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -1151,7 +1152,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
             mDontReportNextOverScroll = true;
-            postInvalidateOnAnimation();
+            animateScroll();
             return true;
         }
         return false;
@@ -1191,7 +1192,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, range - mOwnScrollY);
             mDontReportNextOverScroll = true;
             mDontClampNextScroll = true;
-            postInvalidateOnAnimation();
+            animateScroll();
         }
     };
 
@@ -1308,7 +1309,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                                 newScrollY = range;
                             }
                             if (newScrollY != oldScrollY) {
-                                customScrollTo(newScrollY);
+                                setOwnScrollY(newScrollY);
                                 return true;
                             }
                         }
@@ -1388,13 +1389,13 @@ public class NotificationStackScrollLayout extends ViewGroup
                         scrollAmount = overScrollUp(deltaY, range);
                     }
 
-                    // Calling overScrollBy will call onOverScrolled, which
-                    // calls onScrollChanged if applicable.
+                    // Calling customOverScrollBy will call onCustomOverScrolled, which
+                    // sets the scrolling if applicable.
                     if (scrollAmount != 0.0f) {
                         // The scrolling motion could not be compensated with the
                         // existing overScroll, we have to scroll the view
-                        overScrollBy(0, (int) scrollAmount, 0, mOwnScrollY,
-                                0, range, 0, getHeight() / 2, true);
+                        customOverScrollBy((int) scrollAmount, mOwnScrollY,
+                                range, getHeight() / 2);
                     }
                 }
                 break;
@@ -1418,7 +1419,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                             } else {
                                 if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
                                         getScrollRange())) {
-                                    postInvalidateOnAnimation();
+                                    animateScroll();
                                 }
                             }
                         }
@@ -1431,7 +1432,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
                     if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
-                        postInvalidateOnAnimation();
+                        animateScroll();
                     }
                     mActivePointerId = INVALID_POINTER;
                     endDrag();
@@ -1571,16 +1572,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         mFinishScrollingCallback = runnable;
     }
 
-    @Override
-    public void computeScroll() {
+    private void animateScroll() {
         if (mScroller.computeScrollOffset()) {
-            // This is called at drawing time by ViewGroup.
-            int oldX = mScrollX;
             int oldY = mOwnScrollY;
-            int x = mScroller.getCurrX();
             int y = mScroller.getCurrY();
 
-            if (oldX != x || oldY != y) {
+            if (oldY != y) {
                 int range = getScrollRange();
                 if (y < 0 && oldY >= 0 || y > range && oldY <= range) {
                     float currVelocity = mScroller.getCurrVelocity();
@@ -1592,13 +1589,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (mDontClampNextScroll) {
                     range = Math.max(range, oldY);
                 }
-                overScrollBy(x - oldX, y - oldY, oldX, oldY, 0, range,
-                        0, (int) (mMaxOverScroll), false);
-                onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
+                customOverScrollBy(y - oldY, oldY, range,
+                        (int) (mMaxOverScroll));
             }
 
-            // Keep on drawing until the animation has finished.
-            postInvalidateOnAnimation();
+            postOnAnimation(mAnimateScroll);
         } else {
             mDontClampNextScroll = false;
             if (mFinishScrollingCallback != null) {
@@ -1607,12 +1602,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    @Override
-    protected boolean overScrollBy(int deltaX, int deltaY,
-            int scrollX, int scrollY,
-            int scrollRangeX, int scrollRangeY,
-            int maxOverScrollX, int maxOverScrollY,
-            boolean isTouchEvent) {
+    private boolean customOverScrollBy(int deltaY, int scrollY, int scrollRangeY,
+            int maxOverScrollY) {
 
         int newScrollY = scrollY + deltaY;
         final int top = -maxOverScrollY;
@@ -1627,7 +1618,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             clampedY = true;
         }
 
-        onOverScrolled(0, newScrollY, false, clampedY);
+        onCustomOverScrolled(newScrollY, clampedY);
 
         return clampedY;
     }
@@ -1736,25 +1727,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private void customScrollTo(int y) {
-        setOwnScrollY(y);
-        updateChildren();
-    }
-
-    @Override
-    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+    private void onCustomOverScrolled(int scrollY, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
-            final int oldX = mScrollX;
-            final int oldY = mOwnScrollY;
-            mScrollX = scrollX;
             setOwnScrollY(scrollY);
             if (clampedY) {
                 springBack();
             } else {
-                onScrollChanged(mScrollX, mOwnScrollY, oldX, oldY);
-                invalidateParentIfNeeded();
-                updateChildren();
                 float overScrollTop = getCurrentOverScrollAmount(true);
                 if (mOwnScrollY < 0) {
                     notifyOverscrollTopListener(-mOwnScrollY, isRubberbanded(true));
@@ -1763,8 +1742,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
             }
         } else {
-            customScrollTo(scrollY);
-            scrollTo(scrollX, mScrollY);
+            setOwnScrollY(scrollY);
         }
     }
 
@@ -2265,10 +2243,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mExpandedInThisMotion) {
                 minScrollY = Math.min(minScrollY, mMaxScrollAfterExpand);
             }
-            mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0,
-                    minScrollY, 0, mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
+            mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0, minScrollY, 0,
+                    mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
 
-            postInvalidateOnAnimation();
+            animateScroll();
         }
     }
 
@@ -3123,7 +3101,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mActivePointerId = INVALID_POINTER;
                 recycleVelocityTracker();
                 if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
-                    postInvalidateOnAnimation();
+                    animateScroll();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -3888,7 +3866,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
                 if (targetScrollY != mOwnScrollY) {
                     mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScrollY - mOwnScrollY);
-                    postInvalidateOnAnimation();
+                    animateScroll();
                     return true;
                 }
                 break;
@@ -4038,8 +4016,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setOwnScrollY(int ownScrollY) {
         if (ownScrollY != mOwnScrollY) {
+            // We still want to call the normal scrolled changed for accessibility reasons
+            onScrollChanged(mScrollX, ownScrollY, mScrollX, mOwnScrollY);
             mOwnScrollY = ownScrollY;
             updateForwardAndBackwardScrollability();
+            requestChildrenUpdate();
         }
     }
 
