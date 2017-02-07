@@ -3392,6 +3392,8 @@
             <flag name="flagRetrieveInteractiveWindows" value="0x00000040" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_ENABLE_ACCESSIBILITY_VOLUME} -->
             <flag name="flagEnableAccessibilityVolume" value="0x00000080" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_ACCESSIBILITY_BUTTON} -->
+            <flag name="flagRequestAccessibilityButton" value="0x00000100" />
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_CAPTURE_FINGERPRINT_GESTURES} -->
             <flag name="flagCaptureFingerprintGestures" value="0x00000200" />
         </attr>
@@ -3429,18 +3431,9 @@
         <attr name="canRequestFilterKeyEvents" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to control
              display magnification.
-             <p>
-             Required to allow setting the {@link android.accessibilityservice
-             #AccessibilityServiceInfo#FLAG_CAN_CONTROL_MAGNIFICATION} flag.
-             </p>
          -->
         <attr name="canControlMagnification" format="boolean" />
-        <!-- Attribute whether the accessibility service wants to be able to perform gestures.
-             <p>
-             Required to allow setting the {@link android.accessibilityservice
-             #AccessibilityServiceInfo#FLAG_CAN_PERFORM_GESTURES} flag.
-             </p>
-         -->
+        <!-- Attribute whether the accessibility service wants to be able to perform gestures. -->
         <attr name="canPerformGestures" format="boolean" />
         <!-- Attribute whether the accessibility service wants to be able to capture gestures from
              the fingerprint sensor.

@@ -88,6 +88,8 @@ interface IAccessibilityServiceConnection {
 
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
+    boolean isAccessibilityButtonAvailable();
+
     void sendGesture(int sequence, in ParceledListSlice gestureSteps);
 
     boolean isFingerprintGestureDetectionAvailable();

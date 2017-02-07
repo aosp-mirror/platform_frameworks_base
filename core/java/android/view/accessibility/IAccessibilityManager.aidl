@@ -59,6 +59,10 @@ interface IAccessibilityManager {
 
     IBinder getWindowToken(int windowId, int userId);
 
+    void notifyAccessibilityButtonClicked();
+
+    void notifyAccessibilityButtonAvailabilityChanged(boolean available);
+
     // Requires WRITE_SECURE_SETTINGS
     void performAccessibilityShortcut();
 

@@ -779,6 +779,49 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Notifies that the accessibility button in the system's navigation area has been clicked
+     *
+     * @hide
+     */
+    public void notifyAccessibilityButtonClicked() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyAccessibilityButtonClicked();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
+        }
+    }
+
+    /**
+     * Notifies that the availability of the accessibility button in the system's navigation area
+     * has changed.
+     *
+     * @param available {@code true} if the accessibility button is available within the system
+     *                  navigation area, {@code false} otherwise
+     * @hide
+     */
+    public void notifyAccessibilityButtonAvailabilityChanged(boolean available) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyAccessibilityButtonAvailabilityChanged(available);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while dispatching accessibility button availability change", re);
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
