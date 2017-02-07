@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.wifi.EAPConstants;
 import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcel;
@@ -50,11 +50,11 @@ public class PasspointConfigurationTest {
      *
      * @return {@link android.net.wifi.hotspot2.pps.HomeSP}
      */
-    private static HomeSP createHomeSp() {
-        HomeSP homeSp = new HomeSP();
+    private static HomeSp createHomeSp() {
+        HomeSp homeSp = new HomeSp();
         homeSp.setFqdn("fqdn");
         homeSp.setFriendlyName("friendly name");
-        homeSp.setRoamingConsortiumOIs(new long[] {0x55, 0x66});
+        homeSp.setRoamingConsortiumOis(new long[] {0x55, 0x66});
         return homeSp;
     }
 
