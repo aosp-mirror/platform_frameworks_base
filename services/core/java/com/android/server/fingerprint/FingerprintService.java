@@ -83,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -113,6 +114,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             new ArrayList<>();
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
+    private final Map<Integer, Long> mAuthenticatorIds =
+            Collections.synchronizedMap(new HashMap<>());
     private final AppOpsManager mAppOps;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
     private static final int MAX_FAILED_ATTEMPTS = 5;
@@ -130,7 +133,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private final UserManager mUserManager;
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
-    private long mCurrentAuthenticatorId;
     private PerformanceStats mPerformanceStats;
 
     // Normal fingerprint authentications are tracked by mPerformanceMap.
@@ -239,6 +241,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
             if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
             if (mHalDeviceId != 0) {
+                loadAuthenticatorIds();
                 updateActiveGroup(ActivityManager.getCurrentUser(), null);
             } else {
                 Slog.w(TAG, "Failed to open Fingerprint HAL!");
@@ -247,6 +250,26 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             }
         }
         return mDaemon;
+    }
+
+    /** Populates existing authenticator ids. To be used only during the start of the service. */
+    private void loadAuthenticatorIds() {
+        // This operation can be expensive, so keep track of the elapsed time. Might need to move to
+        // background if it takes too long.
+        long t = System.currentTimeMillis();
+
+        mAuthenticatorIds.clear();
+        for (UserInfo user : UserManager.get(mContext).getUsers(true /* excludeDying */)) {
+            int userId = getUserOrWorkProfileId(null, user.id);
+            if (!mAuthenticatorIds.containsKey(userId)) {
+                updateActiveGroup(userId, null);
+            }
+        }
+
+        t = System.currentTimeMillis() - t;
+        if (t > 1000) {
+            Slog.w(TAG, "loadAuthenticatorIds() taking too long: " + t + "ms");
+        }
     }
 
     protected void handleEnumerate(long deviceId, int fingerId, int groupId, int remaining) {
@@ -499,14 +522,23 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     boolean isCurrentUserOrProfile(int userId) {
         UserManager um = UserManager.get(mContext);
-
-        // Allow current user or profiles of the current user...
-        for (int profileId : um.getEnabledProfileIds(mCurrentUserId)) {
-            if (profileId == userId) {
-                return true;
-            }
+        if (um == null) {
+            Slog.e(TAG, "Unable to acquire UserManager");
+            return false;
         }
-        return false;
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Allow current user or profiles of the current user...
+            for (int profileId : um.getEnabledProfileIds(mCurrentUserId)) {
+                if (profileId == userId) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private boolean isForegroundActivity(int uid, int pid) {
@@ -1195,7 +1227,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     daemon.setActiveGroup(userId, fpDir.getAbsolutePath());
                     mCurrentUserId = userId;
                 }
-                mCurrentAuthenticatorId = daemon.getAuthenticatorId();
+                mAuthenticatorIds.put(userId, daemon.getAuthenticatorId());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveGroup():", e);
             }
@@ -1218,8 +1250,14 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
      * @return true if this is a work profile
      */
     private boolean isWorkProfile(int userId) {
-        UserInfo info = mUserManager.getUserInfo(userId);
-        return info != null && info.isManagedProfile();
+        UserInfo userInfo = null;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            userInfo = mUserManager.getUserInfo(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return userInfo != null && userInfo.isManagedProfile();
     }
 
     private void listenForUserSwitches() {
@@ -1239,9 +1277,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     /***
      * @param opPackageName the name of the calling package
-     * @return authenticator id for the current user
+     * @return authenticator id for the calling user
      */
     public long getAuthenticatorId(String opPackageName) {
-        return mCurrentAuthenticatorId;
+        final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
+        Long authenticatorId = mAuthenticatorIds.get(userId);
+        return authenticatorId != null ? authenticatorId : 0;
     }
 }
