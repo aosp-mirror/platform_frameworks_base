@@ -109,8 +109,6 @@ import org.xml.sax.SAXException;
  *     </Node>
  *   </Node>
  * </MgmtTree>
- *
- * @hide
  */
 public final class PpsMoParser {
     private static final String TAG = "PpsMoParser";
@@ -324,6 +322,11 @@ public final class PpsMoParser {
             return false;
         }
     }
+
+    /**
+     * @hide
+     */
+    public PpsMoParser() {}
 
     /**
      * Convert a XML string representation of a PPS MO (PerProviderSubscription
