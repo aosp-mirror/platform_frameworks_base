@@ -3220,6 +3220,11 @@
     <permission android:name="android.permission.BIND_VR_LISTENER_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by system apps when accessing restricted VR APIs.
+         <p>Protection level: signature -->
+    <permission android:name="android.permission.RESTRICTED_VR_ACCESS"
+        android:protectionLevel="signature|preinstalled" />
+
     <!-- Required to make calls to {@link android.service.vr.IVrManager}.
          @hide -->
     <permission android:name="android.permission.ACCESS_VR_MANAGER"
