@@ -1258,7 +1258,13 @@ public class MediaPlayer extends PlayerBase
                         e.printStackTrace();
                     }
                     baseSetStartDelayMs(0);
-                    startImpl();
+                    try {
+                        startImpl();
+                    } catch (IllegalStateException e) {
+                        // fail silently for a state exception when it is happening after
+                        // a delayed start, as the player state could have changed between the
+                        // call to start() and the execution of startImpl()
+                    }
                 }
             }.start();
         }
