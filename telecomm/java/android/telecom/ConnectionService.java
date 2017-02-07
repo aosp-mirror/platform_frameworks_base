@@ -98,6 +98,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_ADD_CS_ADAPTER = "CS.aCSA";
     private static final String SESSION_REMOVE_CS_ADAPTER = "CS.rCSA";
     private static final String SESSION_CREATE_CONN = "CS.crCo";
+    private static final String SESSION_CREATE_CONN_FAILED = "CS.crCoF";
     private static final String SESSION_ABORT = "CS.ab";
     private static final String SESSION_ANSWER = "CS.an";
     private static final String SESSION_ANSWER_VIDEO = "CS.anV";
@@ -142,6 +143,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_PULL_EXTERNAL_CALL = 22;
     private static final int MSG_SEND_CALL_EVENT = 23;
     private static final int MSG_ON_EXTRAS_CHANGED = 24;
+    private static final int MSG_CREATE_CONNECTION_FAILED = 25;
 
     private static Connection sNullConnection;
 
@@ -205,6 +207,25 @@ public abstract class ConnectionService extends Service {
                 args.argi1 = isIncoming ? 1 : 0;
                 args.argi2 = isUnknown ? 1 : 0;
                 mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void createConnectionFailed(
+                String callId,
+                ConnectionRequest request,
+                boolean isIncoming,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CREATE_CONN_FAILED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = request;
+                args.arg3 = Log.createSubsession();
+                args.argi1 = isIncoming ? 1 : 0;
+                mHandler.obtainMessage(MSG_CREATE_CONNECTION_FAILED, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -545,6 +566,35 @@ public abstract class ConnectionService extends Service {
                                     request,
                                     isIncoming,
                                     isUnknown);
+                        }
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_CREATE_CONNECTION_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3, SESSION_HANDLER +
+                            SESSION_CREATE_CONN_FAILED);
+                    try {
+                        final String id = (String) args.arg1;
+                        final ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        final boolean isIncoming = args.argi1 == 1;
+                        if (!mAreAccountsInitialized) {
+                            Log.d(this, "Enqueueing pre-init request %s", id);
+                            mPreInitializationConnectionRequests.add(
+                                    new android.telecom.Logging.Runnable(
+                                            SESSION_HANDLER + SESSION_CREATE_CONN_FAILED + ".pICR",
+                                            null /*lock*/) {
+                                        @Override
+                                        public void loggedRun() {
+                                            createConnectionFailed(id, request, isIncoming);
+                                        }
+                                    }.prepare());
+                        } else {
+                            Log.i(this, "createConnectionFailed %s", id);
+                            createConnectionFailed(id, request, isIncoming);
                         }
                     } finally {
                         args.recycle();
@@ -1172,6 +1222,17 @@ public abstract class ConnectionService extends Service {
         }
         if (isUnknown) {
             triggerConferenceRecalculate();
+        }
+    }
+
+    private void createConnectionFailed(final String callId, final ConnectionRequest request,
+            boolean isIncoming) {
+
+        Log.i(this, "createConnectionFailed %s", callId);
+        if (isIncoming) {
+            onCreateIncomingConnectionFailed(request);
+        } else {
+            onCreateOutgoingConnectionFailed(request);
         }
     }
 

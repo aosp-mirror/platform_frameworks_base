@@ -46,6 +46,9 @@ oneway interface IConnectionService {
             boolean isUnknown,
             in Session.Info sessionInfo);
 
+    void createConnectionFailed(String callId, in ConnectionRequest request, boolean isIncoming,
+            in Session.Info sessionInfo);
+
     void abort(String callId, in Session.Info sessionInfo);
 
     void answerVideo(String callId, int videoState, in Session.Info sessionInfo);
