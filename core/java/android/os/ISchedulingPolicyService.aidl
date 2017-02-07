@@ -29,6 +29,6 @@ interface ISchedulingPolicyService {
      * The thread group leader of tid must be pid.
      * There may be restrictions on who can call this.
      */
-    int requestPriority(int pid, int tid, int prio);
+    int requestPriority(int pid, int tid, int prio, boolean isForApp);
 
 }
