@@ -190,10 +190,10 @@ public final class ParcelableCall implements Parcelable {
 
      * @return The video call.
      */
-    public VideoCallImpl getVideoCallImpl() {
+    public VideoCallImpl getVideoCallImpl(String callingPackageName) {
         if (mVideoCall == null && mVideoCallProvider != null) {
             try {
-                mVideoCall = new VideoCallImpl(mVideoCallProvider);
+                mVideoCall = new VideoCallImpl(mVideoCallProvider, callingPackageName);
             } catch (RemoteException ignored) {
                 // Ignore RemoteException.
             }
