@@ -91,6 +91,9 @@ public class TaskViewHeader extends FrameLayout
             if (mColor != color || Float.compare(mDimAlpha, dimAlpha) != 0) {
                 mColor = color;
                 mDimAlpha = dimAlpha;
+                if (mShouldDarkenBackgroundColor) {
+                    color = getSecondaryColor(color, false /* useLightOverlayColor */);
+                }
                 mBackgroundPaint.setColor(color);
 
                 ColorUtils.colorToHSL(color, mTmpHSL);
@@ -178,6 +181,10 @@ public class TaskViewHeader extends FrameLayout
 
     // Header dim, which is only used when task view hardware layers are not used
     private Paint mDimLayerPaint = new Paint();
+
+    // Whether the background color should be darkened to differentiate from the primary color.
+    // Used in grid layout.
+    private boolean mShouldDarkenBackgroundColor = false;
 
     private CountDownTimer mFocusTimerCountDown;
 
@@ -443,6 +450,13 @@ public class TaskViewHeader extends FrameLayout
     }
 
     /**
+     * Sets whether the background color should be darkened to differentiate from the primary color.
+     */
+    public void setShouldDarkenBackgroundColor(boolean flag) {
+        mShouldDarkenBackgroundColor = flag;
+    }
+
+    /**
      * Binds the bar view to the task.
      */
     public void bindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
@@ -557,7 +571,7 @@ public class TaskViewHeader extends FrameLayout
      * Mark this task view that the user does has not interacted with the stack after a certain
      * time.
      */
-    void setNoUserInteractionState() {
+    public void setNoUserInteractionState() {
         mDismissButton.setVisibility(View.VISIBLE);
         mDismissButton.animate().cancel();
         mDismissButton.setAlpha(1f);
