@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
@@ -517,6 +519,46 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int MOVEMENT_GRANULARITY_PAGE = 0x00000010;
 
+    /**
+     * Key used to request and locate extra data for text character location. This key requests that
+     * an array of {@link android.graphics.RectF}s be added to the extras. This request is made with
+     * {@link #refreshWithExtraData(String, Bundle)}. The arguments taken by this request are two
+     * integers: {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX} and
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}. The starting index must be valid
+     * inside the CharSequence returned by {@link #getText()}, and the length must be positive.
+     * <p>
+     * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
+     * string as a key for {@link Bundle#getParcelableArray(String)}. The
+     * {@link android.graphics.RectF} will be null for characters that either do not exist or are
+     * off the screen.
+     *
+     * {@see #refreshWithExtraData(String, Bundle)}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+
+    /**
+     * Integer argument specifying the start index of the requested text location data. Must be
+     * valid inside the CharSequence returned by {@link #getText()}.
+     *
+     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
+
+    /**
+     * Integer argument specifying the end index of the requested text location data. Must be
+     * positive.
+     *
+     * {@see EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY}
+     */
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
+
+    /** @hide */
+    public static final String EXTRA_DATA_REQUESTED_KEY =
+            "android.view.accessibility.AccessibilityNodeInfo.extra_data_requested";
+
     // Boolean attributes.
 
     private static final int BOOLEAN_PROPERTY_CHECKABLE = 0x00000001;
@@ -651,6 +693,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mError;
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
+    private ArrayList<String> mExtraDataKeys;
 
     private LongArray mChildNodeIds;
     private ArrayList<AccessibilityAction> mActions;
@@ -786,14 +829,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    public boolean refresh(boolean bypassCache) {
+    public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mSourceNodeId)) {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         AccessibilityNodeInfo refreshedInfo = client.findAccessibilityNodeInfoByAccessibilityId(
-                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0);
+                mConnectionId, mWindowId, mSourceNodeId, bypassCache, 0, arguments);
         if (refreshedInfo == null) {
             return false;
         }
@@ -804,15 +847,33 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Refreshes this info with the latest state of the view it represents.
-     * <p>
-     * <strong>Note:</strong> If this method returns false this info is obsolete
-     * since it represents a view that is no longer in the view tree and should
-     * be recycled.
-     * </p>
-     * @return Whether the refresh succeeded.
+     *
+     * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
+     * by this node is no longer in the view tree (and thus this node is obsolete and should be
+     * recycled).
      */
     public boolean refresh() {
-        return refresh(true);
+        return refresh(null, true);
+    }
+
+    /**
+     * Refreshes this info with the latest state of the view it represents, and request new
+     * data be added by the View.
+     *
+     * @param extraDataKey A bitmask of the extra data requested. Data that must be requested
+     *                     with this mechanism is generally expensive to retrieve, so should only be
+     *                     requested when needed. See
+     *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY} and
+     *                     {@link #getAvailableExtraData()}.
+     * @param args A bundle of arguments for the request. These depend on the particular request.
+     *
+     * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
+     * by this node is no longer in the view tree (and thus this node is obsolete and should be
+     * recycled).
+     */
+    public boolean refreshWithExtraData(String extraDataKey, Bundle args) {
+        args.putString(EXTRA_DATA_REQUESTED_KEY, extraDataKey);
+        return refresh(args, true);
     }
 
     /**
@@ -872,7 +933,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         final long childId = mChildNodeIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId,
-                childId, false, FLAG_PREFETCH_DESCENDANTS);
+                childId, false, FLAG_PREFETCH_DESCENDANTS, null);
     }
 
     /**
@@ -1260,6 +1321,45 @@ public class AccessibilityNodeInfo implements Parcelable {
         final int rootAccessibilityViewId = (root != null)
                 ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
         mTraversalAfter = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+    }
+
+    /**
+     * Get the extra data available for this node.
+     * <p>
+     * Some data that is useful for some accessibility services is expensive to compute, and would
+     * place undue overhead on apps to compute all the time. That data can be requested with
+     * {@link #refreshWithExtraData(String, Bundle)}.
+     *
+     * @return An unmodifiable list of keys corresponding to extra data that can be requested.
+     * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+     */
+    public List<String> getAvailableExtraData() {
+        if (mExtraDataKeys != null) {
+            return Collections.unmodifiableList(mExtraDataKeys);
+        } else {
+            return EMPTY_LIST;
+        }
+    }
+
+    /**
+     * Set the extra data available for this node.
+     * <p>
+     * <strong>Note:</strong> When a {@code View} passes in a non-empty list, it promises that
+     * it will populate the node's extras with corresponding pieces of information in
+     * {@link View#addExtraDataToAccessibilityNodeInfo(AccessibilityNodeInfo, String, Bundle)}.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     *
+     * @param extraDataKeys A list of types of extra data that are available.
+     * @see #getAvailableExtraData()
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setAvailableExtraData(List<String> extraDataKeys) {
+        enforceNotSealed();
+        mExtraDataKeys = new ArrayList<>(extraDataKeys);
     }
 
     /**
@@ -2658,6 +2758,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Check if a node has an extras bundle
+     * @hide
+     */
+    public boolean hasExtras() {
+        return mExtras != null;
+    }
+
+    /**
      * Gets the value of a boolean property.
      *
      * @param property The property.
@@ -2955,6 +3063,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mInputType);
         parcel.writeInt(mLiveRegion);
         parcel.writeInt(mDrawingOrderInParent);
+        if (mExtraDataKeys != null) {
+            parcel.writeInt(1);
+            parcel.writeStringList(mExtraDataKeys);
+        } else {
+            parcel.writeInt(0);
+        }
 
         if (mExtras != null) {
             parcel.writeInt(1);
@@ -3054,6 +3168,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = other.mInputType;
         mLiveRegion = other.mLiveRegion;
         mDrawingOrderInParent = other.mDrawingOrderInParent;
+        mExtraDataKeys = other.mExtraDataKeys;
+
         if (other.mExtras != null) {
             mExtras = new Bundle(other.mExtras);
         } else {
@@ -3135,6 +3251,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = parcel.readInt();
         mLiveRegion = parcel.readInt();
         mDrawingOrderInParent = parcel.readInt();
+
+        if (parcel.readInt() == 1) {
+            mExtraDataKeys = parcel.createStringArrayList();
+        } else {
+            mExtraDataKeys = null;
+        }
 
         if (parcel.readInt() == 1) {
             mExtras = parcel.readBundle();
@@ -3455,7 +3577,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
         return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
                 mWindowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
     }
 
     /**

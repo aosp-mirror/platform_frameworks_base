@@ -2932,7 +2932,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean findAccessibilityNodeInfoByAccessibilityId(
                 int accessibilityWindowId, long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                long interrogatingTid) throws RemoteException {
+                long interrogatingTid, Bundle arguments) throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
@@ -2964,7 +2964,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
                         partialInteractiveRegion, interactionId, callback, mFetchFlags | flags,
-                        interrogatingPid, interrogatingTid, spec);
+                        interrogatingPid, interrogatingTid, spec, arguments);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {

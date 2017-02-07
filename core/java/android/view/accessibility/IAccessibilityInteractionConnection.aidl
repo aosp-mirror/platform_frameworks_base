@@ -33,7 +33,8 @@ oneway interface IAccessibilityInteractionConnection {
 
     void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, in Region bounds,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-        int interrogatingPid, long interrogatingTid, in MagnificationSpec spec);
+        int interrogatingPid, long interrogatingTid, in MagnificationSpec spec,
+        in Bundle arguments);
 
     void findAccessibilityNodeInfosByViewId(long accessibilityNodeId, String viewId,
         in Region bounds, int interactionId, IAccessibilityInteractionConnectionCallback callback,
