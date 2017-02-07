@@ -161,9 +161,35 @@ const char* gFS_Uniforms_HasRoundRectClip =
         "uniform vec4 roundRectInnerRectLTRB;\n"
         "uniform float roundRectRadius;\n";
 
+const char* gFS_OETF[2] = {
+         "\nvec4 OETF(const vec4 linear) {\n"
+         "    return linear;\n"
+         "}\n",
+          // We expect linear data to be scRGB so we mirror the gamma function
+         "\nvec4 OETF(const vec4 linear) {"
+          "    return vec4(sign(linear.rgb) * OETF_sRGB(abs(linear.rgb)), linear.a);\n"
+          "}\n",
+};
+
+const char* gFS_Transfer_Functions = R"__SHADER__(
+        float OETF_sRGB(const float linear) {
+            // IEC 61966-2-1:1999
+            return linear <= 0.0031308 ? linear * 12.92 : (pow(linear, 1.0 / 2.4) * 1.055) - 0.055;
+        }
+
+        vec3 OETF_sRGB(const vec3 linear) {
+            return vec3(OETF_sRGB(linear.r), OETF_sRGB(linear.g), OETF_sRGB(linear.b));
+        }
+
+        float EOTF_sRGB(float srgb) {
+            // IEC 61966-2-1:1999
+            return srgb <= 0.04045 ? srgb / 12.92 : pow((srgb + 0.055) / 1.055, 2.4);
+        }
+)__SHADER__";
+
 // Dithering must be done in the quantization space
 // When we are writing to an sRGB framebuffer, we must do the following:
-//     EOCF(OECF(color) + dither)
+//     EOTF(OETF(color) + dither)
 // The dithering pattern is generated with a triangle noise generator in the range [-0.0,1.0]
 // TODO: Handle linear fp16 render targets
 const char* gFS_Gradient_Functions = R"__SHADER__(
@@ -173,20 +199,6 @@ const char* gFS_Gradient_Functions = R"__SHADER__(
             highp float xy = p.x * p.y;
             return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;
         }
-
-        float OECF_sRGB(const float linear) {
-            // IEC 61966-2-1:1999
-            return linear <= 0.0031308 ? linear * 12.92 : (pow(linear, 1.0 / 2.4) * 1.055) - 0.055;
-        }
-
-        vec3 OECF_sRGB(const vec3 linear) {
-            return vec3(OECF_sRGB(linear.r), OECF_sRGB(linear.g), OECF_sRGB(linear.b));
-        }
-
-        float EOCF_sRGB(float srgb) {
-            // IEC 61966-2-1:1999
-            return srgb <= 0.04045 ? srgb / 12.92 : pow((srgb + 0.055) / 1.055, 2.4);
-        }
 )__SHADER__";
 const char* gFS_Gradient_Preamble[2] = {
         // Linear framebuffer
@@ -195,8 +207,8 @@ const char* gFS_Gradient_Preamble[2] = {
         "}\n"
         "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
         "    vec4 c = mix(a, b, v);\n"
-        "    c.a = EOCF_sRGB(c.a);\n" // This is technically incorrect but preserves compatibility
-        "    return vec4(OECF_sRGB(c.rgb) * c.a, c.a);\n"
+        "    c.a = EOTF_sRGB(c.a);\n" // This is technically incorrect but preserves compatibility
+        "    return vec4(OETF_sRGB(c.rgb) * c.a, c.a);\n"
         "}\n",
         // sRGB framebuffer
         "\nvec4 dither(const vec4 color) {\n"
@@ -232,52 +244,6 @@ const char* gFS_Main =
 const char* gFS_Main_AddDither =
         "    fragColor = dither(fragColor);\n";
 
-// Fast cases
-const char* gFS_Fast_SingleColor =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = color;\n"
-        "}\n\n";
-const char* gFS_Fast_SingleTexture =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = texture2D(baseSampler, outTexCoords);\n"
-        "}\n\n";
-const char* gFS_Fast_SingleModulateTexture =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = color.a * texture2D(baseSampler, outTexCoords);\n"
-        "}\n\n";
-const char* gFS_Fast_SingleA8Texture =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = texture2D(baseSampler, outTexCoords);\n"
-        "}\n\n";
-const char* gFS_Fast_SingleA8Texture_ApplyGamma =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = vec4(0.0, 0.0, 0.0, pow(texture2D(baseSampler, outTexCoords).a, GAMMA));\n"
-        "}\n\n";
-const char* gFS_Fast_SingleModulateA8Texture =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = color * texture2D(baseSampler, outTexCoords).a;\n"
-        "}\n\n";
-const char* gFS_Fast_SingleModulateA8Texture_ApplyGamma =
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = color * gamma(texture2D(baseSampler, outTexCoords).a, color.rgb);\n"
-        "}\n\n";
-const char* gFS_Fast_SingleGradient[2] = {
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = dither(texture2D(gradientSampler, linear));\n"
-        "}\n\n",
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = dither(gammaMix(startColor, endColor, clamp(linear, 0.0, 1.0)));\n"
-        "}\n\n",
-};
-const char* gFS_Fast_SingleModulateGradient[2] = {
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = dither(color.a * texture2D(gradientSampler, linear));\n"
-        "}\n\n",
-        "\nvoid main(void) {\n"
-        "    gl_FragColor = dither(color.a * gammaMix(startColor, endColor, clamp(linear, 0.0, 1.0)));\n"
-        "}\n\n"
-};
-
 // General case
 const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
@@ -290,7 +256,7 @@ const char* gFS_Main_ApplyVertexAlphaShadowInterp =
         "    fragColor *= texture2D(baseSampler, vec2(alpha, 0.5)).a;\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
-        "    fragColor = texture2D(baseSampler, outTexCoords);\n",
+        "    fragColor = OETF(texture2D(baseSampler, outTexCoords));\n",
         // Modulate
         "    fragColor = color * texture2D(baseSampler, outTexCoords);\n"
 };
@@ -321,9 +287,9 @@ const char* gFS_Main_FetchGradient[6] = {
         "    vec4 gradientColor = gammaMix(startColor, endColor, clamp(index - floor(index), 0.0, 1.0));\n"
 };
 const char* gFS_Main_FetchBitmap =
-        "    vec4 bitmapColor = texture2D(bitmapSampler, outBitmapTexCoords);\n";
+        "    vec4 bitmapColor = OETF(texture2D(bitmapSampler, outBitmapTexCoords));\n";
 const char* gFS_Main_FetchBitmapNpot =
-        "    vec4 bitmapColor = texture2D(bitmapSampler, wrap(outBitmapTexCoords));\n";
+        "    vec4 bitmapColor = OETF(texture2D(bitmapSampler, wrap(outBitmapTexCoords)));\n";
 const char* gFS_Main_BlendShadersBG =
         "    fragColor = blendShaders(gradientColor, bitmapColor)";
 const char* gFS_Main_BlendShadersGB =
@@ -649,71 +615,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.appendFormat(gFS_Gamma_Preamble, Properties::textGamma, 1.0f / Properties::textGamma);
     }
 
-    // Optimization for common cases
-    if (!description.hasVertexAlpha
-            && !blendFramebuffer
-            && !description.hasColors
-            && description.colorOp == ProgramDescription::ColorFilterMode::None
-            && !description.hasDebugHighlight
-            && !description.hasRoundRectClip) {
-        bool fast = false;
-
-        const bool noShader = !description.hasGradient && !description.hasBitmap;
-        const bool singleTexture = (description.hasTexture || description.hasExternalTexture) &&
-                !description.hasAlpha8Texture && noShader;
-        const bool singleA8Texture = description.hasTexture &&
-                description.hasAlpha8Texture && noShader;
-        const bool singleGradient = !description.hasTexture && !description.hasExternalTexture &&
-                description.hasGradient && !description.hasBitmap &&
-                description.gradientType == ProgramDescription::kGradientLinear;
-
-        if (singleColor) {
-            shader.append(gFS_Fast_SingleColor);
-            fast = true;
-        } else if (singleTexture) {
-            if (!description.modulate) {
-                shader.append(gFS_Fast_SingleTexture);
-            } else {
-                shader.append(gFS_Fast_SingleModulateTexture);
-            }
-            fast = true;
-        } else if (singleA8Texture) {
-            if (!description.modulate) {
-                if (description.hasGammaCorrection) {
-                    shader.append(gFS_Fast_SingleA8Texture_ApplyGamma);
-                } else {
-                    shader.append(gFS_Fast_SingleA8Texture);
-                }
-            } else {
-                if (description.hasGammaCorrection) {
-                    shader.append(gFS_Fast_SingleModulateA8Texture_ApplyGamma);
-                } else {
-                    shader.append(gFS_Fast_SingleModulateA8Texture);
-                }
-            }
-            fast = true;
-        } else if (singleGradient) {
-            shader.append(gFS_Gradient_Functions);
-            shader.append(gFS_Gradient_Preamble[mHasSRGB]);
-            if (!description.modulate) {
-                shader.append(gFS_Fast_SingleGradient[description.isSimpleGradient]);
-            } else {
-                shader.append(gFS_Fast_SingleModulateGradient[description.isSimpleGradient]);
-            }
-            fast = true;
-        }
-
-        if (fast) {
-#if DEBUG_PROGRAMS
-                PROGRAM_LOGD("*** Fast case:\n");
-                PROGRAM_LOGD("*** Generated fragment shader:\n\n");
-                printLongString(shader);
-#endif
-
-            return shader;
-        }
-    }
-
     if (description.hasBitmap) {
         if (description.isShaderBitmapExternal) {
             shader.append(gFS_Uniforms_BitmapExternalSampler);
@@ -735,6 +636,13 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     if (description.useShaderBasedWrap) {
         generateTextureWrap(shader, description.bitmapWrapS, description.bitmapWrapT);
+    }
+    if (description.hasGradient || description.hasLinearTexture) {
+        shader.append(gFS_Transfer_Functions);
+    }
+    if (description.hasBitmap || ((description.hasTexture || description.hasExternalTexture) &&
+            !description.hasAlpha8Texture)) {
+        shader.append(gFS_OETF[description.hasLinearTexture && !mHasSRGB]);
     }
     if (description.hasGradient) {
         shader.append(gFS_Gradient_Functions);
@@ -827,10 +735,10 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     // End the shader
     shader.append(gFS_Footer);
 
-#if DEBUG_PROGRAMS
+//#if DEBUG_PROGRAMS
         PROGRAM_LOGD("*** Generated fragment shader:\n\n");
         printLongString(shader);
-#endif
+//#endif
 
     return shader;
 }

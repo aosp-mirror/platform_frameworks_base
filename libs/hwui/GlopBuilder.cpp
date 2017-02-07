@@ -605,6 +605,7 @@ void GlopBuilder::build() {
         } else {
             mDescription.hasExternalTexture = true;
         }
+        mDescription.hasLinearTexture = mOutGlop->fill.texture.texture->isLinear();
     }
 
     mDescription.hasColors = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::Color;

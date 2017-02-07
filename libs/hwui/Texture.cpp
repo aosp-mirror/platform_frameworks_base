@@ -48,6 +48,10 @@ static int bytesPerPixel(GLint glFormat) {
     }
 }
 
+bool Texture::isLinear() const {
+    return mInternalFormat == GL_RGBA16F;
+}
+
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force) {
 
     if (force || wrapS != mWrapS || wrapT != mWrapT) {
