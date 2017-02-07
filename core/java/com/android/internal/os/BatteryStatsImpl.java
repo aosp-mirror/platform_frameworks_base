@@ -9562,7 +9562,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 });
 
-        if (DEBUG_ENERGY_CPU) {
+        // TODO: STOPSHIP, remove the "true" below after b/34961340 is fixed
+        if (DEBUG_ENERGY_CPU || true) {
             Slog.d(TAG, "Reading cpu stats took " + (mClocks.elapsedRealtime() - startTimeMs) +
                     " ms");
         }
@@ -10390,10 +10391,9 @@ public class BatteryStatsImpl extends BatteryStats {
             if (next == null) {
                 return;
             }
-
-            mWriteLock.lock();
         }
 
+        mWriteLock.lock();
         try {
             FileOutputStream stream = new FileOutputStream(mFile.chooseForWrite());
             stream.write(next.marshall());
