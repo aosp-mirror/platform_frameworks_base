@@ -18,6 +18,7 @@ package android.service.autofill;
 
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
 
@@ -27,16 +28,13 @@ import android.view.autofill.AutoFillValue;
  * {@hide}
  */
 oneway interface IAutoFillManagerService {
+    // Methods called by AutoFillManager
+    void startSession(in IBinder activityToken, in IBinder appCallback, in AutoFillId autoFillId,
+                      in Rect bounds, in AutoFillValue value);
+    void updateSession(in IBinder activityToken, in AutoFillId id, in Rect bounds,
+                       in AutoFillValue value, int flags);
+    void finishSession(in IBinder activityToken);
 
-    // Called by AutoFillManager (app).
-    void requestAutoFill(in AutoFillId id, in Rect bounds, int flags);
-
-    // Called by AutoFillManager (app).
-    void onValueChanged(in AutoFillId id, in AutoFillValue value);
-
-    // Called by ShellCommand only.
-    void requestAutoFillForUser(int userId);
-
-    // Called by ShellCommand only.
+    // Methods called by ShellCommand
     void requestSaveForUser(int userId);
 }

@@ -16,11 +16,15 @@
 
 package com.android.server.autofill;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.util.ArraySet;
+import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 import android.view.autofill.Dataset;
 import android.view.autofill.FillResponse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -55,8 +59,22 @@ final class Helper {
         return builder.toString();
     }
 
-    private Helper() {
-        throw new UnsupportedOperationException("contains static members only");
+    /**
+     * Gets the value of a {@link Dataset} field by its id, or {@code null} if not found.
+     */
+    @Nullable
+    static AutoFillValue findValue(Dataset dataset, AutoFillId id) {
+        if (dataset != null) {
+            final ArrayList<AutoFillId> ids = dataset.getFieldIds();
+            final int size = ids.size();
+            for (int i = 0; i < size; i++) {
+                if (id.equals(ids.get(i))) {
+                    return dataset.getFieldValues().get(i);
+                }
+
+            }
+        }
+        return null;
     }
 
     /**
@@ -79,5 +97,9 @@ final class Helper {
             }
         }
         return null;
+    }
+
+    private Helper() {
+        throw new UnsupportedOperationException("contains static members only");
     }
 }

@@ -49,7 +49,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -74,8 +73,6 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.service.autofill.AutoFillService;
-import android.service.autofill.IAutoFillAppCallback;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -116,7 +113,6 @@ import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillSession;
 import android.widget.AdapterView;
@@ -127,7 +123,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1700,16 +1695,21 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Lazily gets the {@link IAutoFillAppCallback} for this activitity.
-     *
-     * <p>This callback is used by the {@link AutoFillService} app to auto-fill the activity fields.
+     * Lazily attachs the activity to the current {@link AutoFillSession} (if any).
      */
-    IAutoFillAppCallback getAutoFillCallback() {
+    void attachToAutoFillSession() {
         synchronized (this) {
             if (mAutoFillSession == null) {
-                mAutoFillSession = new AutoFillSession(this);
+                final AutoFillManager afm = getSystemService(AutoFillManager.class);
+                if (afm != null) {
+                    mAutoFillSession = afm.getSession();
+                    if (mAutoFillSession != null) {
+                        mAutoFillSession.attachActivity(this);
+                    } else {
+                        Log.w(TAG, "attachToAutoFillSession(): not in a session");
+                    }
+                }
             }
-            return mAutoFillSession.getCallback();
         }
     }
 
@@ -1798,6 +1798,10 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
+        if (mAutoFillSession != null && isFinishing()) {
+            mAutoFillSession.finishSession();
+            mAutoFillSession = null;
+        }
     }
 
     /**

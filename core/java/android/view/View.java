@@ -6424,9 +6424,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (isAutoFillable()) {
             AutoFillManager afm = getAutoFillManager();
             if (afm != null) {
-                afm.updateAutoFillInput(this, gainFocus
-                        ? AutoFillManager.FLAG_UPDATE_UI_SHOW
-                        : AutoFillManager.FLAG_UPDATE_UI_HIDE);
+                afm.focusChanged(this, gainFocus);
             }
         }
 
@@ -6916,10 +6914,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (forAutoFill) {
-            // The auto-fill id needs to be unique, but its value doesn't matter, so it's better to
-            // reuse the accessibility id to save space.
-            structure.setAutoFillId(getAccessibilityViewId());
-            structure.setAutoFillType(getAutoFillType());
+            final AutoFillType autoFillType = getAutoFillType();
+            // Don't need to fill auto-fill info if view does not support it.
+            // For example, only TextViews that are editable support auto-fill
+            if (autoFillType != null) {
+                // The auto-fill id needs to be unique, but its value doesn't matter, so it's better
+                // to reuse the accessibility id to save space.
+                structure.setAutoFillId(getAccessibilityViewId());
+                structure.setAutoFillType(autoFillType);
+                structure.setAutoFillValue(getAutoFillValue());
+            }
         }
 
         structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
@@ -7015,16 +7019,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * hierachy on {@link #onProvideAutoFillVirtualStructure(ViewStructure, int)}.
      */
     @Nullable
-    public VirtualViewDelegate getAutoFillVirtualViewDelegate(
-            @SuppressWarnings("unused") VirtualViewDelegate.Callback callback) {
+    public VirtualViewDelegate getAutoFillVirtualViewDelegate() {
         return null;
     }
 
     /**
      * Automatically fills the content of this view with the {@code value}.
      *
-     * <p>By default does nothing, but views should override it (and {@link #getAutoFillType()} to
-     * support the AutoFill Framework.
+     * <p>By default does nothing, but views should override it (and {@link #getAutoFillType()
+     * and #getAutoFillValue()} to support the AutoFill Framework.
      *
      * <p>Typically, it is implemented by:
      *
@@ -7055,6 +7058,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @Nullable
     public AutoFillType getAutoFillType() {
+        return null;
+    }
+
+    /**
+     * Gets the {@link View}'s current auto-fill value.
+     *
+     * <p>By default returns {@code null}, but views should override it,
+     * {@link #autoFill(AutoFillValue)}, and {@link #getAutoFillType()} to support the AutoFill
+     * Framework.
+     */
+    @Nullable
+    public AutoFillValue getAutoFillValue() {
         return null;
     }
 

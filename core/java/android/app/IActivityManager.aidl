@@ -585,7 +585,7 @@ interface IActivityManager {
     void unregisterTaskStackListener(ITaskStackListener listener);
     void moveStackToDisplay(int stackId, int displayId);
     boolean requestAutoFillData(in IResultReceiver receiver, in Bundle receiverExtras,
-            int resultCode, in IBinder activityToken);
+                                in IBinder activityToken);
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
     int restartUserInBackground(int userId);
 

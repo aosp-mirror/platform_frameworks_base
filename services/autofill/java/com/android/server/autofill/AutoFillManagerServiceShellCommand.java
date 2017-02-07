@@ -40,8 +40,6 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
-                case "fill":
-                    return requestAutoFill();
                 case "save":
                     return requestSave();
                 default:
@@ -60,18 +58,10 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("    Prints this help text.");
             pw.println("");
-            pw.println("  fill [--user USER_ID]");
-            pw.println("    Request provider to auto-fill the top activity. ");
             pw.println("  save [--user USER_ID]");
             pw.println("    Request provider to save contents of the top activity. ");
             pw.println("");
         }
-    }
-
-    private int requestAutoFill() throws RemoteException {
-        final int userId = getUserIdFromArgs();
-        mService.requestAutoFillForUser(userId);
-        return 0;
     }
 
     private int requestSave() throws RemoteException {

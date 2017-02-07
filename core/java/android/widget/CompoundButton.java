@@ -32,7 +32,6 @@ import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
-import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutoFillType;
@@ -562,22 +561,24 @@ public abstract class CompoundButton extends Button implements Checkable {
         stream.addProperty("checked", isChecked());
     }
 
-    // TODO(b/33197203): add unit/CTS tests for auto-fill methods
+    // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
 
-    @Override
-    public void onProvideAutoFillStructure(ViewStructure structure, int flags) {
-        super.onProvideAutoFillStructure(structure, flags);
-        structure.setAutoFillValue(AutoFillValue.forToggle(isChecked()));
-        // TODO(b/33197203): add unit/CTS tests for auto-fill methods
-    }
+    // TODO(b/33197203): override onProvideAutoFillStructure and add a change listener
 
     @Override
     public void autoFill(AutoFillValue value) {
+        if (!isEnabled()) return;
+
         setChecked(value.getToggleValue());
     }
 
     @Override
     public AutoFillType getAutoFillType() {
         return AutoFillType.forToggle();
+    }
+
+    @Override
+    public AutoFillValue getAutoFillValue() {
+        return isEnabled() ? null : AutoFillValue.forToggle(isChecked());
     }
 }

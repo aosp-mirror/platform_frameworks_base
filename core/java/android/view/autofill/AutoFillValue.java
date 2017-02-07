@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import static android.view.autofill.Helper.DEBUG;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -32,12 +33,12 @@ import android.view.View;
  */
 public final class AutoFillValue implements Parcelable {
 
-    private final CharSequence mText;
+    private final String mText;
     private final int mListIndex;
     private final boolean mToggle;
 
     private AutoFillValue(CharSequence text, int listIndex, boolean toggle) {
-        mText = text;
+        mText = (text == null) ? null : text.toString();
         mListIndex = listIndex;
         mToggle = toggle;
     }
@@ -74,6 +75,32 @@ public final class AutoFillValue implements Parcelable {
     /////////////////////////////////////
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + mListIndex;
+        result = prime * result + ((mText == null) ? 0 : mText.hashCode());
+        result = prime * result + (mToggle ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final AutoFillValue other = (AutoFillValue) obj;
+        if (mListIndex != other.mListIndex) return false;
+        if (mText == null) {
+            if (other.mText != null) return false;
+        } else {
+            if (!mText.equals(other.mText)) return false;
+        }
+        if (mToggle != other.mToggle) return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         if (!DEBUG) return super.toString();
 
@@ -92,13 +119,13 @@ public final class AutoFillValue implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeCharSequence(mText);
+        parcel.writeString(mText);
         parcel.writeInt(mListIndex);
         parcel.writeInt(mToggle ? 1 : 0);
     }
 
     private AutoFillValue(Parcel parcel) {
-        mText = parcel.readCharSequence();
+        mText = parcel.readString();
         mListIndex = parcel.readInt();
         mToggle = parcel.readInt() == 1;
     }
@@ -127,8 +154,9 @@ public final class AutoFillValue implements Parcelable {
      * <p>See {@link AutoFillType#isText()} for more info.
      */
     // TODO(b/33197203): use cache
-    public static AutoFillValue forText(CharSequence value) {
-        return new AutoFillValue(value, 0, false);
+    @Nullable
+    public static AutoFillValue forText(@Nullable CharSequence value) {
+        return value == null ? null : new AutoFillValue(value, 0, false);
     }
 
     /**

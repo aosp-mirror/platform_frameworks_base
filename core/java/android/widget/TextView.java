@@ -9736,9 +9736,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Simple case: this is a single line.
                 final CharSequence text = getText();
                 structure.setText(text, getSelectionStart(), getSelectionEnd());
-                if (forAutoFill && isTextEditable()) {
-                    structure.setAutoFillValue(AutoFillValue.forText(text));
-                }
             } else {
                 // Complex case: multi-line, could be scrolled or within a scroll container
                 // so some lines are not visible.
@@ -9795,9 +9792,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     text = text.subSequence(expandedTopChar, expandedBottomChar);
                 }
                 structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
-                if (forAutoFill && isTextEditable()) {
-                    structure.setAutoFillValue(AutoFillValue.forText(text));
-                }
                 final int[] lineOffsets = new int[bottomLine - topLine + 1];
                 final int[] lineBaselines = new int[bottomLine - topLine + 1];
                 final int baselineOffset = getBaselineOffset();
@@ -9845,17 +9839,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final CharSequence text = value.getTextValue();
 
         if (text != null && isTextEditable()) {
-            if (mAutoFillChangeWatcher == null || mAutoFillChangeWatcher.mOnAutoFill) {
-                setText(text, mBufferType, true, 0);
-            } else {
-                // Must disable listener first so it's not triggered.
-                mAutoFillChangeWatcher.mOnAutoFill = true;
-                try {
-                    setText(text, mBufferType, true, 0);
-                } finally {
-                    mAutoFillChangeWatcher.mOnAutoFill = false;
-                }
-            }
+            setText(text, mBufferType, true, 0);
         }
     }
 
@@ -9863,6 +9847,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Nullable
     public AutoFillType getAutoFillType() {
         return isTextEditable() ? AutoFillType.forText(getInputType()) : null;
+    }
+
+    @Override
+    @Nullable
+    public AutoFillValue getAutoFillValue() {
+        return isTextEditable() ? AutoFillValue.forText(getText()) : null;
     }
 
     /** @hide */
@@ -10724,14 +10714,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     protected void viewClicked(InputMethodManager imm) {
-        final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
-        if (afm != null) {
-            if (DEBUG_AUTOFILL) Log.v(LOG_TAG, "viewClicked(): id=" + getAccessibilityViewId());
-
-            // TODO(b/33197203): integrate with onFocus and/or move to view?
-            afm.updateAutoFillInput(this, AutoFillManager.FLAG_UPDATE_UI_SHOW);
-        }
-
         if (imm != null) {
             imm.viewClicked(this);
         }
@@ -11213,7 +11195,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // TODO(b/33197203): implements SpanWatcher too?
     private final class AutoFillChangeWatcher implements TextWatcher {
 
-        private boolean mOnAutoFill;
         private final AutoFillManager mAfm = mContext.getSystemService(AutoFillManager.class);
 
         @Override
@@ -11226,18 +11207,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (mOnAutoFill) {
-                if (DEBUG_AUTOFILL) {
-                    Log.v(LOG_TAG, "AutoFillChangeWatcher.afterTextChanged() skipped during "
-                            + "autoFill(): s=" + s);
-                }
-                return;
-            }
             if (mAfm != null) {
                 if (DEBUG_AUTOFILL) {
                     Log.v(LOG_TAG, "AutoFillChangeWatcher.afterTextChanged(): s=" + s);
                 }
-                mAfm.onValueChanged(TextView.this, AutoFillValue.forText(s));
+                mAfm.valueChanged(TextView.this);
             }
         }
     }

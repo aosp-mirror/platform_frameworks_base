@@ -701,18 +701,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         public AssistStructure structure = null;
         public AssistContent content = null;
         public Bundle receiverExtras;
-        public int resultCode;
 
         public PendingAssistExtras(ActivityRecord _activity, Bundle _extras, Intent _intent,
-                String _hint, IResultReceiver _receiver, Bundle _receiverExtras, int _resultCode,
-                int _userHandle) {
+                String _hint, IResultReceiver _receiver, Bundle _receiverExtras, int _userHandle) {
             activity = _activity;
             extras = _extras;
             intent = _intent;
             hint = _hint;
             receiver = _receiver;
             receiverExtras = _receiverExtras;
-            resultCode = _resultCode;
             userHandle = _userHandle;
         }
         @Override
@@ -12457,7 +12454,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                null, 0, null, true /* focused */, true /* newSessionId */,
+                null, null, true /* focused */, true /* newSessionId */,
                 UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
         if (pae == null) {
             return null;
@@ -12524,29 +12521,29 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
             Bundle receiverExtras, IBinder activityToken, boolean focused, boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
-                0, activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
+                activityToken, focused, newSessionId, UserHandle.getCallingUserId(), null,
                 PENDING_ASSIST_EXTRAS_LONG_TIMEOUT) != null;
     }
 
     @Override
     public boolean requestAutoFillData(IResultReceiver receiver, Bundle receiverExtras,
-            int resultCode, IBinder activityToken) {
+            IBinder activityToken) {
         // NOTE: we could always use ActivityManager.ASSIST_CONTEXT_FULL and let ActivityThread
         // rely on the flags to decide whether the handleRequestAssistContextExtras() is for
         // auto-fill, but it's safer to explicitly use new AutoFill types, in case the Assist
         // requests use flags in the future as well (since their flags value might collide with the
         // auto-fill flag values).
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTO_FILL, null, null,
-                receiver, receiverExtras, resultCode, activityToken, true, true,
-                UserHandle.getCallingUserId(), null,
-                PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT) != null;
+                receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
+                null, PENDING_AUTO_FILL_ASSIST_STRUCTURE_TIMEOUT) != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, Bundle receiverExtras, int resultCode, IBinder activityToken,
+            IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
             boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
+
         synchronized (this) {
             ActivityRecord activity = getFocusedStack().topActivity();
             if (activity == null) {
@@ -12582,8 +12579,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
             extras.putInt(Intent.EXTRA_ASSIST_UID, activity.app.uid);
+
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
-                    resultCode, userHandle);
+                    userHandle);
+
             // Increment the sessionId if necessary
             if (newSessionId) {
                 mViSessionId++;
@@ -12666,15 +12665,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sendBundle.putParcelable(VoiceInteractionSession.KEY_CONTENT, pae.content);
                 sendBundle.putBundle(VoiceInteractionSession.KEY_RECEIVER_EXTRAS,
                         pae.receiverExtras);
-                IBinder cb = extras.getBinder(AutoFillService.KEY_CALLBACK);
-                if (cb != null) {
-                    sendBundle.putBinder(AutoFillService.KEY_CALLBACK, cb);
-                }
             }
         }
         if (sendReceiver != null) {
             try {
-                sendReceiver.send(pae.resultCode, sendBundle);
+                sendReceiver.send(0, sendBundle);
             } catch (RemoteException e) {
             }
             return;
@@ -12699,7 +12694,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, null, 0, null,
+        return enqueueAssistContext(requestType, intent, hint, null, null, null,
                 true /* focused */, true /* newSessionId */, userHandle, args,
                 PENDING_ASSIST_EXTRAS_TIMEOUT) != null;
     }
@@ -22735,13 +22730,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         public List<IBinder> getTopVisibleActivities() {
             synchronized (ActivityManagerService.this) {
                 return mStackSupervisor.getTopVisibleActivities();
-            }
-        }
-
-        @Override
-        public IBinder getTopVisibleActivity(int uid) {
-            synchronized (ActivityManagerService.this) {
-                return mStackSupervisor.getTopVisibleActivity(uid);
             }
         }
 

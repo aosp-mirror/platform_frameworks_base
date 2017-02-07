@@ -67,8 +67,10 @@ public abstract class AutoFillService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.autofill";
 
-    // Internal bundle keys.
-    /** @hide */ public static final String KEY_CALLBACK = "callback";
+    // Internal extras
+    /** @hide */
+    public static final String EXTRA_ACTIVITY_TOKEN =
+            "android.service.autofill.EXTRA_ACTIVITY_TOKEN";
 
     // Handler messages.
     private static final int MSG_CONNECT = 1;

@@ -16,11 +16,12 @@
 
 package android.view.autofill;
 
-import static android.view.autofill.Helper.DEBUG;
+import static android.view.autofill.Helper.VERBOSE;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.IAutoFillManagerService;
 import android.util.Log;
@@ -30,94 +31,184 @@ import android.view.View;
  * App entry point to the AutoFill Framework.
  */
 // TODO(b/33197203): improve this javadoc
+//TODO(b/33197203): restrict manager calls to activity
 public final class AutoFillManager {
 
     private static final String TAG = "AutoFillManager";
 
-    /**
-     * Flag used to show the auto-fill UI affordance for a view.
-     */
-    public static final int FLAG_UPDATE_UI_SHOW = 0x1;
-
-    /**
-     * Flag used to hide the auto-fill UI affordance for a view.
-     */
-    public static final int FLAG_UPDATE_UI_HIDE = 0x2;
+    /** @hide */ public static final int FLAG_START_SESSION = 0x1;
+    /** @hide */ public static final int FLAG_FOCUS_GAINED = 0x2;
+    /** @hide */ public static final int FLAG_FOCUS_LOST = 0x4;
+    /** @hide */ public static final int FLAG_VALUE_CHANGED = 0x8;
 
     private final IAutoFillManagerService mService;
+    private final Context mContext;
+
+    private AutoFillSession mSession;
 
     /**
      * @hide
      */
-    public AutoFillManager(@SuppressWarnings("unused") Context context,
-            IAutoFillManagerService service) {
+    public AutoFillManager(Context context, IAutoFillManagerService service) {
+        mContext = context;
         mService = service;
     }
 
     /**
-     * Updates the auto-fill bar for a given {@link View}.
+     * Called to indicate the focus on an auto-fillable {@link View} changed.
      *
-     * <b>Typically called twice, with different flags ({@link #FLAG_UPDATE_UI_SHOW} and
-     * {@link #FLAG_UPDATE_UI_HIDE} respectively), as the user "entered" and "exited" a view.
-     *
-     * @param view view to be updated.
-     * @param flags either {@link #FLAG_UPDATE_UI_SHOW} or
-     * {@link #FLAG_UPDATE_UI_HIDE}.
+     * @param view view whose focus changed.
+     * @param gainFocus whether focus was gained or lost.
      */
-    public void updateAutoFillInput(View view, int flags) {
+    public void focusChanged(View view, boolean gainFocus) {
+        if (mSession == null) {
+            // Starts new session.
+            final Rect bounds = new Rect();
+            view.getBoundsOnScreen(bounds);
+            final AutoFillId id = getAutoFillId(view);
+            final AutoFillValue value = view.getAutoFillValue();
+            startSession(id, bounds, value);
+            return;
+        }
+
+        if (!mSession.isEnabled()) {
+            // Auto-fill is disabled for this session.
+            return;
+        }
+
+        // Update focus on existing session.
         final Rect bounds = new Rect();
         view.getBoundsOnScreen(bounds);
-
-        requestAutoFill(getAutoFillId(view), bounds, flags);
-    }
-
-    /**
-     * Updates the auto-fill bar for a virtual child of a given {@link View}.
-     *
-     * <b>Typically called twice, with different flags ({@link #FLAG_UPDATE_UI_SHOW} and
-     * {@link #FLAG_UPDATE_UI_HIDE} respectively), as the user "entered" and "exited" a view.
-     *
-     * @param parent parent view.
-     * @param childId id identifying the virtual child inside the parent view.
-     * @param bounds absolute boundaries of the child in the window (could be {@code null} when
-     * flag is {@link #FLAG_UPDATE_UI_HIDE}.
-     * @param flags either {@link #FLAG_UPDATE_UI_SHOW} or
-     * {@link #FLAG_UPDATE_UI_HIDE}.
-     */
-    public void updateAutoFillInput(View parent, int childId, @Nullable Rect bounds,
-            int flags) {
-        requestAutoFill(new AutoFillId(parent.getAccessibilityViewId(), childId), bounds, flags);
-    }
-
-    /**
-     * Notifies the framework that the value of a view changed.
-     * @param view view whose value was updated
-     * @param value new value.
-     */
-    public void onValueChanged(View view, AutoFillValue value) {
-        // TODO(b/33197203): optimize it by not calling service when the view does not belong to
-        // the session.
         final AutoFillId id = getAutoFillId(view);
-        if (DEBUG) Log.v(TAG, "onValueChanged(): id=" + id + ", value=" + value);
+        final AutoFillValue value = view.getAutoFillValue();
+        updateSession(id, bounds, value, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
+    }
+
+    /**
+     * Called to indicate the focus on an auto-fillable virtual {@link View} changed.
+     *
+     * @param parent parent view whose focus changed.
+     * @param childId id identifying the virtual child inside the parent view.
+     * @param bounds child boundaries, relative to the top window.
+     * @param value current value of the child; can be {@code null} when focus is lost, but must be
+     *            set when focus is gained.
+     * @param gainFocus whether focus was gained or lost.
+     */
+    public void virtualFocusChanged(View parent, int childId, Rect bounds,
+            @Nullable AutoFillValue value, boolean gainFocus) {
+        if (mSession == null) {
+            // Starts new session.
+            final AutoFillId id = getAutoFillId(parent, childId);
+            startSession(id, bounds, value);
+            return;
+        }
+
+        if (!mSession.isEnabled()) {
+            // Auto-fill is disabled for this session.
+            return;
+        }
+
+        // Update focus on existing session.
+        final AutoFillId id = getAutoFillId(parent, childId);
+        updateSession(id, bounds, value, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
+    }
+
+    /**
+     * Called to indicate the value of an auto-fillable {@link View} changed.
+     *
+     * @param view view whose focus changed.
+     */
+    public void valueChanged(View view) {
+        if (mSession == null) return;
+
+        final AutoFillId id = getAutoFillId(view);
+        final AutoFillValue value = view.getAutoFillValue();
+        updateSession(id, null, value, FLAG_VALUE_CHANGED);
+    }
+
+
+    /**
+     * Called to indicate the value of an auto-fillable virtual {@link View} changed.
+     *
+     * @param parent parent view whose value changed.
+     * @param childId id identifying the virtual child inside the parent view.
+     * @param value new value of the child.
+     */
+    public void virtualValueChanged(View parent, int childId, AutoFillValue value) {
+        if (mSession == null) return;
+
+        final AutoFillId id = getAutoFillId(parent, childId);
+        updateSession(id, null, value, FLAG_VALUE_CHANGED);
+    }
+
+    /**
+     * Called to indicate the current auto-fill context should be reset.
+     *
+     * <p>For example, when a virtual view is rendering an {@code HTML} page with a form, it should
+     * call this method after the form is submitted and another page is rendered.
+     */
+    public void reset() {
+        if (mSession == null) return;
+
+        final IBinder activityToken = mSession.mToken.get();
+        if (activityToken == null) {
+            Log.wtf(TAG, "finishSession(): token already GC'ed");
+            return;
+        }
         try {
-            mService.onValueChanged(id, value);
+            mService.finishSession(activityToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            mSession = null;
         }
+    }
+
+    /**
+     * Gets the current session, if any.
+     *
+     * @hide
+     */
+    @Nullable
+    public AutoFillSession getSession() {
+        return mSession;
     }
 
     private AutoFillId getAutoFillId(View view) {
         return new AutoFillId(view.getAccessibilityViewId());
     }
 
-    private void requestAutoFill(AutoFillId id, Rect bounds, int flags) {
-        // TODO(b/33197203): optimize it by not calling service when the view does not belong to
-        // the session.
-        if (DEBUG) {
-            Log.v(TAG, "requestAutoFill(): id=" + id + ", bounds=" + bounds + ", flags=" + flags);
+    private AutoFillId getAutoFillId(View parent, int childId) {
+        return new AutoFillId(parent.getAccessibilityViewId(), childId);
+    }
+
+    private void startSession(AutoFillId id, Rect bounds, AutoFillValue value) {
+        if (VERBOSE) {
+            Log.v(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
+        }
+
+        final IBinder activityToken = mContext.getActivityToken();
+        mSession = new AutoFillSession(this, activityToken);
+        final IBinder appCallback = mSession.getCallback().asBinder();
+        try {
+            mService.startSession(activityToken, appCallback, id, bounds, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void updateSession(AutoFillId id, Rect bounds, AutoFillValue value, int flags) {
+        if (VERBOSE) {
+            Log.v(TAG, "updateSession(): id=" + id + ", bounds=" + bounds + ", value=" + value
+                    + ", flags=" + flags);
+        }
+
+        final IBinder activityToken = mSession.mToken.get();
+        if (activityToken == null) {
+            return;
         }
         try {
-            mService.requestAutoFill(id, bounds, flags);
+            mService.updateSession(activityToken, id, bounds, value, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
