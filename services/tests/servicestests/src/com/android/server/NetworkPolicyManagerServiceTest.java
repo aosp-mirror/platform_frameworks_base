@@ -76,6 +76,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
@@ -975,7 +976,8 @@ public class NetworkPolicyManagerServiceTest {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, null, null, TEST_SSID);
+        final NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        return new NetworkState(info, prop, networkCapabilities, null, null, TEST_SSID);
     }
 
     private void expectCurrentTime() throws Exception {
