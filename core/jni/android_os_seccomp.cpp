@@ -212,6 +212,10 @@ bool set_seccomp_filter() {
     // b/34908783
     AllowSyscall(f, 250); // __NR_epoll_create
 
+    // b/34979910
+    AllowSyscall(f, 8);   // __NR_creat
+    AllowSyscall(f, 10);  // __NR_unlink
+
     Trap(f);
 
     return install_filter(f);
