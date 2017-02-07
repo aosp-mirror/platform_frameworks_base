@@ -38,8 +38,6 @@ import java.util.Objects;
  *
  * For more info, refer to Hotspot 2.0 PPS MO defined in section 9.1 of the Hotspot 2.0
  * Release 2 Technical Specification.
- *
- * @hide
  */
 public final class PasspointConfiguration implements Parcelable {
     private static final String TAG = "PasspointConfiguration";
