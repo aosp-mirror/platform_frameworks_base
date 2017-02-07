@@ -467,7 +467,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gonga ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Inaonyesha %s ya vidhibiti vya sauti. Telezesha kidole juu ili uondoe."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Imeficha vidhibiti vya sauti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Kipokea Ishara cha SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Kirekebishi cha kiolesura cha mfumo"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Onyesha asilimia ya betri iliyopachikwa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Onyesha asilimia ya kiwango cha betri ndani ya aikoni ya sehemu ya arifa inapokuwa haichaji"</string>
     <string name="quick_settings" msgid="10042998191725428">"Mipangilio ya Haraka"</string>
@@ -490,12 +490,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Mtandao-hewa"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Wasifu wa kazini"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kinafurahisha kwa baadhi ya watu lakini si wote"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Kipokea Ishara cha System UI kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Kirekebishi cha kiolesura cha mfumo kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="got_it" msgid="2239653834387972602">"Nimeelewa"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kipokea Ishara cha System UI kimeongezwa kwenye Mipangilio"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kirekebishi cha kiolesura cha mfumo kimeongezwa kwenye mipangilio"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ondoa kwenye Mipangilio"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kipokea ishara cha SystemUI kwenye Mipangilio na uache kutumia vipengele vyake vyote?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kirekebishi cha kiolesura cha mfumo kwenye mipangilio na uache kutumia vipengele vyake vyote?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Programu haijasakinishwa kwenye kifaa chako"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Onyesha sekunde za saa"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Onyesha sekunde za saa katika sehemu ya arifa. Inaweza kuathiri muda wa matumizi ya betri."</string>
