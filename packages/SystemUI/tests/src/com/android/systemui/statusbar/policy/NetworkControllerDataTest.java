@@ -110,6 +110,21 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyDataIndicators(0, 0);
     }
 
+    public void testAlwaysShowDataRatIcon() {
+        setupDefaultSignal();
+        Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED,
+                TelephonyManager.NETWORK_TYPE_GSM);
+
+        // Switch to showing data RAT icon when data is diconnected
+        // and re-initialize the NetworkController.
+        mConfig.alwaysShowDataRatIcon = true;
+        mNetworkController.handleConfigurationChanged();
+
+        verifyDataIndicators(TelephonyIcons.DATA_G[1][0 /* No direction */],
+                TelephonyIcons.QS_DATA_G);
+    }
+
     public void test4gDataIconConfigChange() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
