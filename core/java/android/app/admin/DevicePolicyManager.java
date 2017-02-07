@@ -6108,8 +6108,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
      * an affiliated user or profile.
      * @see #setLockTaskPackages
-     *
-     * @hide
      */
     public @NonNull String[] getLockTaskPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getLockTaskPackages");
