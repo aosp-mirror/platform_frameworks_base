@@ -165,6 +165,17 @@ final class AutoFillManagerServiceImpl {
                 session.mStructure = structure;
             }
 
+
+            // TODO(b/33197203, b/33269702): Must fetch the data so it's available later on
+            // handleSave(), even if if the activity is gone by then, but structure.ensureData()
+            // gives a ONE_WAY warning because system_service could block on app calls.
+            // We need to change AssistStructure so it provides a "one-way" writeToParcel()
+            // method that sends all the data
+            structure.ensureData();
+
+            // Sanitize structure before it's sent to service.
+            structure.sanitizeForParceling(true);
+
             // TODO(b/33197203): Need to pipe the bundle
             session.mRemoteFillService.onFillRequest(structure, null);
         }
