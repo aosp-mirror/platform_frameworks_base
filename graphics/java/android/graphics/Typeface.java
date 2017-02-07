@@ -198,9 +198,10 @@ public class Typeface {
     }
 
     /**
+     * Used by resources for cached loading if the font is available.
      * @hide
      */
-    public static Typeface createFromCache(AssetManager mgr, String path) {
+    public static Typeface findFromCache(AssetManager mgr, String path) {
         synchronized (sDynamicTypefaceCache) {
             final String key = createAssetUid(mgr, path);
             Typeface typeface = sDynamicTypefaceCache.get(key);
@@ -221,6 +222,15 @@ public class Typeface {
      * @param callback A callback that will be triggered when results are obtained. May not be null.
      */
     public static void create(@NonNull FontRequest request, @NonNull FontRequestCallback callback) {
+        // Check the cache first
+        // TODO: would the developer want to avoid a cache hit and always ask for the freshest
+        // result?
+        Typeface cachedTypeface = findFromCache(
+                request.getProviderAuthority(), request.getQuery());
+        if (cachedTypeface != null) {
+            mHandler.post(() -> callback.onTypefaceRetrieved(cachedTypeface));
+            return;
+        }
         synchronized (sLock) {
             if (sFontsContract == null) {
                 sFontsContract = new FontsContract();
@@ -229,20 +239,34 @@ public class Typeface {
             final ResultReceiver receiver = new ResultReceiver(null) {
                 @Override
                 public void onReceiveResult(int resultCode, Bundle resultData) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            receiveResult(request, callback, resultCode, resultData);
-                        }
-                    });
+                    mHandler.post(() -> receiveResult(request, callback, resultCode, resultData));
                 }
             };
             sFontsContract.getFont(request, receiver);
         }
     }
 
+    private static Typeface findFromCache(String providerAuthority, String query) {
+        synchronized (sDynamicTypefaceCache) {
+            final String key = createProviderUid(providerAuthority, query);
+            Typeface typeface = sDynamicTypefaceCache.get(key);
+            if (typeface != null) {
+                return typeface;
+            }
+        }
+        return null;
+    }
+
     private static void receiveResult(FontRequest request, FontRequestCallback callback,
             int resultCode, Bundle resultData) {
+        Typeface cachedTypeface = findFromCache(
+                request.getProviderAuthority(), request.getQuery());
+        if (cachedTypeface != null) {
+            // We already know the result.
+            // Probably the requester requests the same font again in a short interval.
+            callback.onTypefaceRetrieved(cachedTypeface);
+            return;
+        }
         if (resultCode == FontsContract.RESULT_CODE_PROVIDER_NOT_FOUND) {
             callback.onTypefaceRequestFailed(
                     FontRequestCallback.FAIL_REASON_PROVIDER_NOT_FOUND);
@@ -296,8 +320,12 @@ public class Typeface {
             }
         }
         fontFamily.freeze();
-        callback.onTypefaceRetrieved(Typeface.createFromFamiliesWithDefault(
-                new FontFamily[] {fontFamily}));
+        Typeface typeface = Typeface.createFromFamiliesWithDefault(new FontFamily[] { fontFamily });
+        synchronized (sDynamicTypefaceCache) {
+            String key = createProviderUid(request.getProviderAuthority(), request.getQuery());
+            sDynamicTypefaceCache.put(key, typeface);
+        }
+        callback.onTypefaceRetrieved(typeface);
     }
 
     /**
@@ -464,12 +492,25 @@ public class Typeface {
     private static String createAssetUid(final AssetManager mgr, String path) {
         final SparseArray<String> pkgs = mgr.getAssignedPackageIdentifiers();
         final StringBuilder builder = new StringBuilder();
+        builder.append("asset:");
         final int size = pkgs.size();
         for (int i = 0; i < size; i++) {
             builder.append(pkgs.valueAt(i));
             builder.append("-");
         }
         builder.append(path);
+        return builder.toString();
+    }
+
+    /**
+     * Creates a unique id for a given font provider and query.
+     */
+    private static String createProviderUid(String authority, String query) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("provider:");
+        builder.append(authority);
+        builder.append("-");
+        builder.append(query);
         return builder.toString();
     }
 

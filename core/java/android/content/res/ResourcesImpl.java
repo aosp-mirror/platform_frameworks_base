@@ -753,7 +753,7 @@ public class ResourcesImpl {
         }
 
         final String file = value.string.toString();
-        Typeface cached = Typeface.createFromCache(mAssets, file);
+        Typeface cached = Typeface.findFromCache(mAssets, file);
         if (cached != null) {
             return cached;
         }
