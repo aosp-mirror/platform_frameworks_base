@@ -52,7 +52,9 @@ public class FocusFinder {
     final Rect mFocusedRect = new Rect();
     final Rect mOtherRect = new Rect();
     final Rect mBestCandidateRect = new Rect();
-    final SequentialFocusComparator mSequentialFocusComparator = new SequentialFocusComparator();
+    private final UserSpecifiedFocusComparator mUserSpecifiedFocusComparator =
+            new UserSpecifiedFocusComparator();
+    private final FocusComparator mFocusComparator = new FocusComparator();
 
     private final ArrayList<View> mTempList = new ArrayList<View>();
 
@@ -225,12 +227,10 @@ public class FocusFinder {
             View focused, Rect focusedRect, int direction) {
         try {
             // Note: This sort is stable.
-            mSequentialFocusComparator.setRoot(root);
-            mSequentialFocusComparator.setIsLayoutRtl(root.isLayoutRtl());
-            mSequentialFocusComparator.setFocusables(focusables);
-            Collections.sort(focusables, mSequentialFocusComparator);
+            mUserSpecifiedFocusComparator.setFocusables(focusables);
+            Collections.sort(focusables, mUserSpecifiedFocusComparator);
         } finally {
-            mSequentialFocusComparator.recycle();
+            mUserSpecifiedFocusComparator.recycle();
         }
 
         final int count = focusables.size();
@@ -703,36 +703,80 @@ public class FocusFinder {
         return id != 0 && id != View.NO_ID;
     }
 
-    /**
-     * Sorts views according to their visual layout and geometry for default tab order.
-     * If views are part of a focus chain (nextFocusForwardId), then they are all grouped
-     * together. The head of the chain is used to determine the order of the chain and is
-     * first in the order and the tail of the chain is the last in the order. The views
-     * in the middle of the chain can be arbitrary order.
-     * This is used for sequential focus traversal.
-     */
-    private static final class SequentialFocusComparator implements Comparator<View> {
+    static FocusComparator getFocusComparator(ViewGroup root, boolean isRtl) {
+        FocusComparator comparator = getInstance().mFocusComparator;
+        comparator.setRoot(root);
+        comparator.setIsLayoutRtl(isRtl);
+        return comparator;
+    }
+
+    static final class FocusComparator implements Comparator<View> {
         private final Rect mFirstRect = new Rect();
         private final Rect mSecondRect = new Rect();
-        private ViewGroup mRoot;
+        private ViewGroup mRoot = null;
         private boolean mIsLayoutRtl;
-        private final SparseArray<View> mFocusables = new SparseArray<View>();
-        private final SparseBooleanArray mIsConnectedTo = new SparseBooleanArray();
-        private final ArrayMap<View, View> mHeadsOfChains = new ArrayMap<View, View>();
 
-        public void recycle() {
-            mRoot = null;
-            mFocusables.clear();
-            mHeadsOfChains.clear();
-            mIsConnectedTo.clear();
+        public void setIsLayoutRtl(boolean b) {
+            mIsLayoutRtl = b;
         }
 
         public void setRoot(ViewGroup root) {
             mRoot = root;
         }
 
-        public void setIsLayoutRtl(boolean b) {
-            mIsLayoutRtl = b;
+        public int compare(View first, View second) {
+            if (first == second) {
+                return 0;
+            }
+
+            getRect(first, mFirstRect);
+            getRect(second, mSecondRect);
+
+            if (mFirstRect.top < mSecondRect.top) {
+                return -1;
+            } else if (mFirstRect.top > mSecondRect.top) {
+                return 1;
+            } else if (mFirstRect.left < mSecondRect.left) {
+                return mIsLayoutRtl ? 1 : -1;
+            } else if (mFirstRect.left > mSecondRect.left) {
+                return mIsLayoutRtl ? -1 : 1;
+            } else if (mFirstRect.bottom < mSecondRect.bottom) {
+                return -1;
+            } else if (mFirstRect.bottom > mSecondRect.bottom) {
+                return 1;
+            } else if (mFirstRect.right < mSecondRect.right) {
+                return mIsLayoutRtl ? 1 : -1;
+            } else if (mFirstRect.right > mSecondRect.right) {
+                return mIsLayoutRtl ? -1 : 1;
+            } else {
+                // The view are distinct but completely coincident so we consider
+                // them equal for our purposes.  Since the sort is stable, this
+                // means that the views will retain their layout order relative to one another.
+                return 0;
+            }
+        }
+
+        private void getRect(View view, Rect rect) {
+            view.getDrawingRect(rect);
+            mRoot.offsetDescendantRectToMyCoords(view, rect);
+        }
+    }
+
+    /**
+     * Sorts views according to any explicitly-specified focus-chains. If there are no explicitly
+     * specified focus chains (eg. no nextFocusForward attributes defined), this should be a no-op.
+     */
+    private static final class UserSpecifiedFocusComparator implements Comparator<View> {
+        private final SparseArray<View> mFocusables = new SparseArray<View>();
+        private final SparseBooleanArray mIsConnectedTo = new SparseBooleanArray();
+        private final ArrayMap<View, View> mHeadsOfChains = new ArrayMap<View, View>();
+        private final ArrayMap<View, Integer> mOriginalOrdinal = new ArrayMap<>();
+
+        public void recycle() {
+            mFocusables.clear();
+            mHeadsOfChains.clear();
+            mIsConnectedTo.clear();
+            mOriginalOrdinal.clear();
         }
 
         public void setFocusables(ArrayList<View> focusables) {
@@ -754,6 +798,10 @@ public class FocusFinder {
                 if (isValidId(nextId) && !mIsConnectedTo.get(view.getId())) {
                     setHeadOfChain(view);
                 }
+            }
+
+            for (int i = 0; i < focusables.size(); ++i) {
+                mOriginalOrdinal.put(focusables.get(i), i);
             }
         }
 
@@ -793,44 +841,22 @@ public class FocusFinder {
                     return 1; // first is end of chain
                 }
             }
+            boolean involvesChain = false;
             if (firstHead != null) {
                 first = firstHead;
+                involvesChain = true;
             }
             if (secondHead != null) {
                 second = secondHead;
+                involvesChain = true;
             }
 
-            // First see if they belong to the same focus chain.
-            getRect(first, mFirstRect);
-            getRect(second, mSecondRect);
-
-            if (mFirstRect.top < mSecondRect.top) {
-                return -1;
-            } else if (mFirstRect.top > mSecondRect.top) {
-                return 1;
-            } else if (mFirstRect.left < mSecondRect.left) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.left > mSecondRect.left) {
-                return mIsLayoutRtl ? -1 : 1;
-            } else if (mFirstRect.bottom < mSecondRect.bottom) {
-                return -1;
-            } else if (mFirstRect.bottom > mSecondRect.bottom) {
-                return 1;
-            } else if (mFirstRect.right < mSecondRect.right) {
-                return mIsLayoutRtl ? 1 : -1;
-            } else if (mFirstRect.right > mSecondRect.right) {
-                return mIsLayoutRtl ? -1 : 1;
+            if (involvesChain) {
+                // keep original order between chains
+                return mOriginalOrdinal.get(first) < mOriginalOrdinal.get(second) ? -1 : 1;
             } else {
-                // The view are distinct but completely coincident so we consider
-                // them equal for our purposes.  Since the sort is stable, this
-                // means that the views will retain their layout order relative to one another.
                 return 0;
             }
-        }
-
-        private void getRect(View view, Rect rect) {
-            view.getDrawingRect(rect);
-            mRoot.offsetDescendantRectToMyCoords(view, rect);
         }
     }
 }

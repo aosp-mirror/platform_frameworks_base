@@ -60,6 +60,7 @@ import com.android.internal.R;
 import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -1140,31 +1141,42 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int focusableCount = views.size();
 
         final int descendantFocusability = getDescendantFocusability();
+        final boolean focusSelf = (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen());
 
-        if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
-            if (shouldBlockFocusForTouchscreen()) {
-                focusableMode |= FOCUSABLES_TOUCH_MODE;
+        if (descendantFocusability == FOCUS_BLOCK_DESCENDANTS) {
+            if (focusSelf) {
+                super.addFocusables(views, direction, focusableMode);
             }
-
-            final int count = mChildrenCount;
-            final View[] children = mChildren;
-
-            for (int i = 0; i < count; i++) {
-                final View child = children[i];
-                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                    child.addFocusables(views, direction, focusableMode);
-                }
-            }
+            return;
         }
 
-        // we add ourselves (if focusable) in all cases except for when we are
-        // FOCUS_AFTER_DESCENDANTS and there are some descendants focusable.  this is
+        if (shouldBlockFocusForTouchscreen()) {
+            focusableMode |= FOCUSABLES_TOUCH_MODE;
+        }
+
+        if ((descendantFocusability == FOCUS_BEFORE_DESCENDANTS) && focusSelf) {
+            super.addFocusables(views, direction, focusableMode);
+        }
+
+        int count = 0;
+        final View[] children = new View[mChildrenCount];
+        for (int i = 0; i < mChildrenCount; ++i) {
+            View child = mChildren[i];
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                children[count++] = child;
+            }
+        }
+        Arrays.sort(children, 0, count, FocusFinder.getFocusComparator(this, false));
+        for (int i = 0; i < count; ++i) {
+            children[i].addFocusables(views, direction, focusableMode);
+        }
+
+        // When set to FOCUS_AFTER_DESCENDANTS, we only add ourselves if
+        // there aren't any focusable descendants.  this is
         // to avoid the focus search finding layouts when a more precise search
         // among the focusable children would be more interesting.
-        if ((descendantFocusability != FOCUS_AFTER_DESCENDANTS
-                // No focusable descendants
-                || (focusableCount == views.size())) &&
-                (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen())) {
+        if ((descendantFocusability == FOCUS_AFTER_DESCENDANTS) && focusSelf
+                && focusableCount == views.size()) {
             super.addFocusables(views, direction, focusableMode);
         }
     }
