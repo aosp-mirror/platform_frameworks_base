@@ -149,6 +149,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
+import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
 import android.media.AudioAttributes;
@@ -203,6 +204,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -4236,6 +4238,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
                         INPUT_CONSUMER_NAVIGATION,
                         (channel, looper) -> new HideNavInputEventReceiver(channel, looper));
+                // As long as mInputConsumer is active, hover events are not dispatched to the app
+                // and the pointer icon is likely to become stale. Hide it to avoid confusion.
+                InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);
             }
 
             // For purposes of positioning and showing the nav bar, if we have
