@@ -7171,6 +7171,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
         if (!blocked) {
             if (forAutoFill) {
+                // The auto-fill id needs to be unique, but its value doesn't matter,
+                // so it's better to reuse the accessibility id to save space.
+                structure.setAutoFillId(getAccessibilityViewId());
                 // NOTE: flags are not currently supported, hence 0
                 onProvideAutoFillStructure(structure, 0);
                 onProvideAutoFillVirtualStructure(structure, 0);
