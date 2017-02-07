@@ -36,7 +36,6 @@ public final class CategoryKey {
     public static final String CATEGORY_SECURITY = "com.android.settings.category.ia.security";
     public static final String CATEGORY_ACCOUNT = "com.android.settings.category.ia.accounts";
     public static final String CATEGORY_SYSTEM = "com.android.settings.category.ia.system";
-    public static final String CATEGORY_SYSTEM_INPUT = "com.android.settings.category.ia.input";
     public static final String CATEGORY_SYSTEM_LANGUAGE =
             "com.android.settings.category.ia.language";
     public static final String CATEGORY_SYSTEM_DEVELOPMENT =
