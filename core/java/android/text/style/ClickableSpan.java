@@ -22,7 +22,7 @@ import android.view.View;
 /**
  * If an object of this type is attached to the text of a TextView
  * with a movement method of LinkMovementMethod, the affected spans of
- * text can be selected.  If clicked, the {@link #onClick} method will
+ * text can be selected. If selected and clicked, the {@link #onClick} method will
  * be called.
  */
 public abstract class ClickableSpan extends CharacterStyle implements UpdateAppearance {
