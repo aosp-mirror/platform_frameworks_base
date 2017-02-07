@@ -252,7 +252,7 @@ public class BackgroundDexOptService extends JobService {
             return result;
         }
 
-        if (SystemProperties.getBoolean("dalvik.vm.deopt.secondary", false)) {
+        if (SystemProperties.getBoolean("dalvik.vm.dexopt.secondary", false)) {
             result = reconcileSecondaryDexFiles(pm.getDexManager());
             if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                 return result;
