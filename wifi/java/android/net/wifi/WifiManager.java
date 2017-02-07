@@ -973,7 +973,6 @@ public class WifiManager {
      *
      * @param config The Passpoint configuration to be added
      * @return true on success
-     * @hide
      */
     public boolean addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
@@ -988,7 +987,6 @@ public class WifiManager {
      *
      * @param fqdn The FQDN of the passpoint configuration to be removed
      * @return true on success
-     * @hide
      */
     public boolean removePasspointConfiguration(String fqdn) {
         try {
@@ -1004,7 +1002,6 @@ public class WifiManager {
      * An empty list will be returned when no configurations are installed.
      *
      * @return A list of {@link PasspointConfiguration}
-     * @hide
      */
     public List<PasspointConfiguration> getPasspointConfigurations() {
         try {

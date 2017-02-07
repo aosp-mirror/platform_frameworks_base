@@ -16,4 +16,4 @@
 
 package android.net.wifi.hotspot2.pps;
 
-parcelable HomeSP;
+parcelable HomeSp;

@@ -17,7 +17,7 @@
 package android.net.wifi.hotspot2;
 
 import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcelable;
@@ -38,8 +38,6 @@ import java.util.Objects;
  *
  * For more info, refer to Hotspot 2.0 PPS MO defined in section 9.1 of the Hotspot 2.0
  * Release 2 Technical Specification.
- *
- * @hide
  */
 public final class PasspointConfiguration implements Parcelable {
     private static final String TAG = "PasspointConfiguration";
@@ -60,11 +58,11 @@ public final class PasspointConfiguration implements Parcelable {
     private static final int NULL_VALUE = -1;
 
     /**
-     * Configurations under HomeSP subtree.
+     * Configurations under HomeSp subtree.
      */
-    private HomeSP mHomeSp = null;
-    public void setHomeSp(HomeSP homeSp) { mHomeSp = homeSp; }
-    public HomeSP getHomeSp() { return mHomeSp; }
+    private HomeSp mHomeSp = null;
+    public void setHomeSp(HomeSp homeSp) { mHomeSp = homeSp; }
+    public HomeSp getHomeSp() { return mHomeSp; }
 
     /**
      * Configurations under Credential subtree.
@@ -248,7 +246,7 @@ public final class PasspointConfiguration implements Parcelable {
         }
 
         if (source.mHomeSp != null) {
-            mHomeSp = new HomeSP(source.mHomeSp);
+            mHomeSp = new HomeSp(source.mHomeSp);
         }
         if (source.mCredential != null) {
             mCredential = new Credential(source.mCredential);

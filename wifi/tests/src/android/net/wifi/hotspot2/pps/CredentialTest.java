@@ -59,7 +59,7 @@ public class CredentialTest {
         cred.setCreationTimeInMs(123455L);
         cred.setExpirationTimeInMs(2310093L);
         cred.setRealm("realm");
-        cred.setCheckAAAServerCertStatus(true);
+        cred.setCheckAaaServerCertStatus(true);
         cred.setUserCredential(userCred);
         cred.setCertCredential(certCred);
         cred.setSimCredential(simCred);

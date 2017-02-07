@@ -40,16 +40,9 @@ import java.util.Objects;
  *
  * For more info, refer to Hotspot 2.0 PPS MO defined in section 9.1 of the Hotspot 2.0
  * Release 2 Technical Specification.
- *
- * @hide
  */
 public final class Policy implements Parcelable {
     private static final String TAG = "Policy";
-
-    /**
-     * Default priority for preferred roaming partner.
-     */
-    public static final int PREFERRED_ROAMING_PARTNER_DEFAULT_PRIORITY = 128;
 
     /**
      * Maximum number of SSIDs in the exclusion list.
@@ -189,8 +182,9 @@ public final class Policy implements Parcelable {
 
         /**
          * Priority associated with this roaming partner policy.
+         * Using Integer.MIN_VALUE to indicate unset value.
          */
-        private int mPriority = PREFERRED_ROAMING_PARTNER_DEFAULT_PRIORITY;
+        private int mPriority = Integer.MIN_VALUE;
         public void setPriority(int priority) {
             mPriority = priority;
         }

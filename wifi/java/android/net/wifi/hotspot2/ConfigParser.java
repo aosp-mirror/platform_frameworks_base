@@ -16,7 +16,7 @@
 
 package android.net.wifi.hotspot2;
 
-import android.net.wifi.hotspot2.omadm.PPSMOParser;
+import android.net.wifi.hotspot2.omadm.PpsMoParser;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -41,11 +41,9 @@ import java.util.Map;
 
 /**
  * Utility class for building PasspointConfiguration from an installation file.
- *
- * @hide
  */
-public final class ConfigBuilder {
-    private static final String TAG = "ConfigBuilder";
+public final class ConfigParser {
+    private static final String TAG = "ConfigParser";
 
     // Header names.
     private static final String CONTENT_TYPE = "Content-Type";
@@ -101,6 +99,10 @@ public final class ConfigBuilder {
         public String encodingType = null;
     }
 
+    /**
+     * @hide
+     */
+    public ConfigParser() {}
 
     /**
      * Parse the Hotspot 2.0 Release 1 configuration data into a {@link PasspointConfiguration}
@@ -133,7 +135,7 @@ public final class ConfigBuilder {
      *             certificate chain (optional).
      * @return {@link PasspointConfiguration}
      */
-    public static PasspointConfiguration buildPasspointConfig(String mimeType, byte[] data) {
+    public static PasspointConfiguration parsePasspointConfig(String mimeType, byte[] data) {
         // Verify MIME type.
         if (!TextUtils.equals(mimeType, TYPE_WIFI_CONFIG)) {
             Log.e(TAG, "Unexpected MIME type: " + mimeType);
@@ -169,7 +171,7 @@ public final class ConfigBuilder {
             throw new IOException("Missing Passpoint Profile");
         }
 
-        PasspointConfiguration config = PPSMOParser.parseMOText(new String(profileData));
+        PasspointConfiguration config = PpsMoParser.parseMoText(new String(profileData));
         if (config == null) {
             throw new IOException("Failed to parse Passpoint profile");
         }
