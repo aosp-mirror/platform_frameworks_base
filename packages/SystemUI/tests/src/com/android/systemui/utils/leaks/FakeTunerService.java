@@ -25,6 +25,7 @@ public class FakeTunerService extends TunerService {
     public FakeTunerService(Context context, LeakCheckedTest test) {
         super(context);
         mBaseLeakChecker = new BaseLeakChecker<>(test, "tunable");
+        destroy();
     }
 
     @Override
