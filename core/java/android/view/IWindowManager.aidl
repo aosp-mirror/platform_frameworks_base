@@ -337,16 +337,6 @@ interface IWindowManager
     void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
 
     /**
-     * Returns the initial bounds that PIP will be shown when it is first started.
-     */
-    Rect getPictureInPictureDefaultBounds(int displayId);
-
-    /**
-     * Returns the bounds that the PIP can move on the screen in the current PIP state.
-     */
-    Rect getPictureInPictureMovementBounds(int displayId);
-
-    /**
      * Updates the dim layer used while resizing.
      *
      * @param visible Whether the dim layer should be visible.

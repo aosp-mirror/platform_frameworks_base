@@ -84,13 +84,6 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * Enables snapping to the closest edge.
-     */
-    public void setSnapToEdge(boolean snapToEdge) {
-        mSnapMode = snapToEdge ? SNAP_MODE_EDGE : mDefaultSnapMode;
-    }
-
-    /**
      * @return the closest absolute snap stack bounds for the given {@param stackBounds} moving at
      * the given {@param velocityX} and {@param velocityY}.  The {@param movementBounds} should be
      * those for the given {@param stackBounds}.
@@ -230,6 +223,21 @@ public class PipSnapAlgorithm {
             int offset = movementBounds.top + (int) ((1f - snapFraction) * movementBounds.height());
             stackBounds.offsetTo(movementBounds.left, offset);
         }
+    }
+
+    /**
+     * Adjusts {@param movementBoundsOut} so that it is the movement bounds for the given
+     * {@param stackBounds}.
+     */
+    public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
+            int imeHeight) {
+        // Adjust the right/bottom to ensure the stack bounds never goes offscreen
+        movementBoundsOut.set(insetBounds);
+        movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right -
+                stackBounds.width());
+        movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom -
+                stackBounds.height());
+        movementBoundsOut.bottom -= imeHeight;
     }
 
     /**

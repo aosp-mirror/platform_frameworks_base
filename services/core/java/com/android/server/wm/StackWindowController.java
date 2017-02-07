@@ -216,7 +216,28 @@ public class StackWindowController
 
             final int displayId = mContainer.getDisplayContent().getDisplayId();
             final Rect toBounds = mService.getPictureInPictureBounds(displayId, aspectRatio);
-            animateResizePinnedStack(toBounds, -1 /* duration */);
+            final Rect targetBounds = new Rect();
+            mContainer.getAnimatingBounds(targetBounds);
+            if (!toBounds.equals(targetBounds)) {
+                animateResizePinnedStack(toBounds, -1 /* duration */);
+            }
+
+            final PinnedStackController pinnedStackController =
+                    mContainer.getDisplayContent().getPinnedStackController();
+            pinnedStackController.setAspectRatio(
+                    pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)
+                            ? aspectRatio : -1f);
+        }
+    }
+
+    /** Sets the current picture-in-picture actions. */
+    public void setPictureInPictureActions(List<RemoteAction> actions) {
+        synchronized (mWindowMap) {
+            if (!mService.mSupportsPictureInPicture || mContainer == null) {
+                return;
+            }
+
+            mContainer.getDisplayContent().getPinnedStackController().setActions(actions);
         }
     }
 
@@ -241,17 +262,6 @@ public class StackWindowController
                         + " not found.");
             }
             mContainer.prepareFreezingTaskBounds();
-        }
-    }
-
-    /** Sets the current picture-in-picture actions. */
-    public void setPictureInPictureActions(List<RemoteAction> actions) {
-        synchronized (mWindowMap) {
-            if (!mService.mSupportsPictureInPicture || mContainer == null) {
-                return;
-            }
-
-            mContainer.getDisplayContent().getPinnedStackController().setActions(actions);
         }
     }
 

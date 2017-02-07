@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.view.IPinnedStackController;
 
 /**
@@ -33,24 +34,28 @@ oneway interface IPinnedStackListener {
     void onListenerRegistered(IPinnedStackController controller);
 
     /**
-     * Called when window manager decides to adjust the pinned stack bounds, or when the listener
-     * is first registered to allow the listener to synchronized its state with the controller.
+     * Called when the window manager has detected a change that would cause the movement bounds
+     * to be changed (ie. after configuration change, aspect ratio change, etc). It then provides
+     * the components that allow the listener to calculate the movement bounds itself. The
+     * {@param normalBounds} are also the default bounds that the PiP would be entered in its
+     * current state with the aspect ratio applied.
      */
-    void onBoundsChanged(boolean adjustedForIme);
+    void onMovementBoundsChanged(in Rect insetBounds, in Rect normalBounds,
+            boolean fromImeAdjustement);
+
+    /**
+     * Called when window manager decides to adjust the pinned stack bounds because of the IME, or
+     * when the listener is first registered to allow the listener to synchronized its state with
+     * the controller.  This call will always be followed by a onMovementBoundsChanged() call
+     * with fromImeAdjustement set to true.
+     */
+    void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
 
     /**
      * Called when window manager decides to adjust the minimized state, or when the listener
      * is first registered to allow the listener to synchronized its state with the controller.
      */
     void onMinimizedStateChanged(boolean isMinimized);
-
-    /**
-     * Called when window manager decides to adjust the snap-to-edge state, which determines whether
-     * to snap only to the corners of the screen or to the closest edge.  It is called when the
-     * listener is first registered to allow the listener to synchronized its state with the
-     * controller.
-     */
-    void onSnapToEdgeStateChanged(boolean isSnapToEdge);
 
     /**
      * Called when the set of actions for the current PiP activity changes, or when the listener

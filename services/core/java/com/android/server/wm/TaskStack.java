@@ -393,8 +393,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         switch (mStackId) {
             case PINNED_STACK_ID:
+                Rect targetBounds = new Rect();
+                getAnimatingBounds(targetBounds);
                 mTmpRect2 = mDisplayContent.getPinnedStackController().onDisplayChanged(mBounds,
-                        mDisplayContent);
+                        targetBounds, mDisplayContent);
                 break;
             case DOCKED_STACK_ID:
                 repositionDockedStackAfterRotation(mTmpRect2);
@@ -670,7 +672,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         // Update the pinned stack controller after the display info is updated
         if (mStackId == PINNED_STACK_ID) {
-            mDisplayContent.getPinnedStackController().onDisplayChanged(oldBounds,
+            Rect targetBounds = new Rect();
+            getAnimatingBounds(targetBounds);
+            mDisplayContent.getPinnedStackController().onDisplayChanged(oldBounds, targetBounds,
                     mDisplayContent);
         }
 

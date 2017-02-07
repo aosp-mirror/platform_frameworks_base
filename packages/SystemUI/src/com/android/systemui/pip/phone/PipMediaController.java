@@ -16,16 +16,22 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+
 import android.app.IActivityManager;
+import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
-import android.media.session.MediaController.TransportControls;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.UserHandle;
 
 import com.android.systemui.R;
 
@@ -39,6 +45,9 @@ import java.util.List;
  * when there is a media session from the top PiP activity.
  */
 public class PipMediaController {
+
+    private static final String ACTION_PLAY = "com.android.systemui.pip.phone.PLAY";
+    private static final String ACTION_PAUSE = "com.android.systemui.pip.phone.PAUSE";
 
     /**
      * A listener interface to receive notification on changes to the media actions.
@@ -59,6 +68,18 @@ public class PipMediaController {
     private RemoteAction mPauseAction;
     private RemoteAction mPlayAction;
 
+    private BroadcastReceiver mPlayPauseActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(ACTION_PLAY)) {
+                mMediaController.getTransportControls().play();
+            } else if (action.equals(ACTION_PAUSE)) {
+                mMediaController.getTransportControls().pause();
+            }
+        }
+    };
+
     private MediaController.Callback mPlaybackChangedListener = new MediaController.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
@@ -73,6 +94,10 @@ public class PipMediaController {
     public PipMediaController(Context context, IActivityManager activityManager) {
         mContext = context;
         mActivityManager = activityManager;
+        IntentFilter mediaControlFilter = new IntentFilter();
+        mediaControlFilter.addAction(ACTION_PLAY);
+        mediaControlFilter.addAction(ACTION_PAUSE);
+        mContext.registerReceiver(mPlayPauseActionReceiver, mediaControlFilter);
 
         createMediaActions();
         mMediaSessionManager =
@@ -135,12 +160,14 @@ public class PipMediaController {
         String pauseDescription = mContext.getString(R.string.pip_pause);
         mPauseAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.ic_pause_white_24dp), pauseDescription, pauseDescription,
-                action -> mMediaController.getTransportControls().pause());
+                        PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PAUSE),
+                                FLAG_UPDATE_CURRENT));
 
         String playDescription = mContext.getString(R.string.pip_play);
         mPlayAction = new RemoteAction(Icon.createWithResource(mContext,
                 R.drawable.ic_play_arrow_white_24dp), playDescription, playDescription,
-                action -> mMediaController.getTransportControls().play());
+                        PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_PLAY),
+                                FLAG_UPDATE_CURRENT));
     }
 
     /**
