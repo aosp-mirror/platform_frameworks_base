@@ -40,6 +40,7 @@ import android.util.Pair;
 
 import com.android.settingslib.SuggestionParser;
 import com.android.settingslib.TestConfig;
+import com.android.settingslib.drawer.TileUtilsTest;
 import static org.mockito.Mockito.atLeastOnce;
 
 import org.junit.Before;
@@ -179,7 +180,7 @@ public class TileUtilsTest {
 
         assertThat(outTiles.size()).isEqualTo(1);
         SuggestionParser parser = new SuggestionParser(mContext, null);
-        parser.filterSuggestions(outTiles, 0);
+        parser.filterSuggestions(outTiles, 0, false);
         assertThat(outTiles.size()).isEqualTo(0);
     }
 
@@ -303,16 +304,16 @@ public class TileUtilsTest {
         assertThat(outTiles.get(0).summary).isEqualTo("dynamic-summary");
     }
 
-    private ResolveInfo newInfo(boolean systemApp, String category) {
+    public static ResolveInfo newInfo(boolean systemApp, String category) {
         return newInfo(systemApp, category, null);
     }
 
-    private ResolveInfo newInfo(boolean systemApp, String category, String keyHint) {
+    private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint) {
         return newInfo(systemApp, category, keyHint, null, null);
     }
 
-    private ResolveInfo newInfo(boolean systemApp, String category, String keyHint, String iconUri,
-            String summaryUri) {
+    private static ResolveInfo newInfo(boolean systemApp, String category, String keyHint,
+        String iconUri, String summaryUri) {
         ResolveInfo info = new ResolveInfo();
         info.system = systemApp;
         info.activityInfo = new ActivityInfo();
