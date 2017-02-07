@@ -18,8 +18,10 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.LooperProto;
 import android.util.Log;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
 
 /**
   * Class used to run a message loop for a thread.  Threads by default do
@@ -287,6 +289,16 @@ public final class Looper {
     public void dump(@NonNull Printer pw, @NonNull String prefix) {
         pw.println(prefix + toString());
         mQueue.dump(pw, prefix + "  ");
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long looperToken = proto.start(fieldId);
+        proto.write(LooperProto.THREAD_NAME, mThread.getName());
+        proto.write(LooperProto.THREAD_ID, mThread.getId());
+        proto.write(LooperProto.IDENTITY_HASH_CODE, System.identityHashCode(this));
+        mQueue.writeToProto(proto, LooperProto.QUEUE);
+        proto.end(looperToken);
     }
 
     @Override

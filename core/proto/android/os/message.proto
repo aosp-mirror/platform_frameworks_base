@@ -1,0 +1,37 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package android.os;
+
+option java_multiple_files = true;
+
+message MessageProto {
+    int64 when = 1;
+    // Name of callback class.
+    string callback = 2;
+    // User-defined message code so that the recipient can identify what this
+    // message is about.
+    int32 what = 3;
+    int32 arg1 = 4;
+    int32 arg2 = 5;
+    // String representation of an arbitrary object to send to the recipient.
+    string obj = 6;
+    // Name of target class.
+    string target = 7;
+    int32 barrier = 8;
+}
