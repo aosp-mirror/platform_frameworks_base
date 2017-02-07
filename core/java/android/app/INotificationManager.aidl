@@ -40,7 +40,7 @@ interface INotificationManager
 {
     void cancelAllNotifications(String pkg, int userId);
 
-    void clearData(String pkg, int uid);
+    void clearData(String pkg, int uid, boolean fromApp);
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,

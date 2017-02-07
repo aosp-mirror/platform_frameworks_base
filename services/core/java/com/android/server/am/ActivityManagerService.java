@@ -5570,7 +5570,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Reset notification settings.
                 INotificationManager inm = NotificationManager.getService();
-                inm.clearData(packageName, pkgUidF);
+                inm.clearData(packageName, pkgUidF, uid == pkgUidF);
             } catch (RemoteException e) {
             }
         } finally {
