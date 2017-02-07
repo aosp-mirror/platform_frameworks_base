@@ -1297,7 +1297,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return flags;
     }
 
-    InputBindResult attachNewInputLocked(boolean initial) {
+    InputBindResult attachNewInputLocked(
+            /* @InputMethodClient.StartInputReason */ final int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                     MSG_BIND_INPUT, mCurMethod, mCurClient.binding));
@@ -1361,12 +1362,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         return startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                controlFlags);
+                controlFlags, startInputReason);
     }
 
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            @NonNull EditorInfo attribute, int controlFlags) {
+            @NonNull EditorInfo attribute, int controlFlags,
+            /* @InputMethodClient.StartInputReason */ final int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
@@ -1408,7 +1410,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
-                return attachNewInputLocked(
+                return attachNewInputLocked(startInputReason,
                         (controlFlags&InputMethodManager.CONTROL_START_INITIAL) != 0);
             }
             if (mHaveConnection) {
@@ -1549,7 +1551,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     clearClientSessionLocked(mCurClient);
                     mCurClient.curSession = new SessionState(mCurClient,
                             method, session, channel);
-                    InputBindResult res = attachNewInputLocked(true);
+                    InputBindResult res = attachNewInputLocked(
+                            InputMethodClient.START_INPUT_REASON_SESSION_CREATED_BY_IME, true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                 MSG_BIND_CLIENT, mCurClient.client, res));
@@ -2289,7 +2292,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     if (attribute != null) {
                         return startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                attribute, controlFlags);
+                                attribute, controlFlags, startInputReason);
                     }
                     return null;
                 }
@@ -2339,7 +2342,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                             if (attribute != null) {
                                 res = startInputUncheckedLocked(cs, inputContext,
-                                        missingMethods, attribute, controlFlags);
+                                        missingMethods, attribute, controlFlags, startInputReason);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2365,7 +2368,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
                             if (attribute != null) {
                                 res = startInputUncheckedLocked(cs, inputContext,
-                                        missingMethods, attribute, controlFlags);
+                                        missingMethods, attribute, controlFlags, startInputReason);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2375,7 +2378,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                         if (attribute != null) {
                             res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                    attribute, controlFlags);
+                                    attribute, controlFlags, startInputReason);
                             didStart = true;
                         }
                         showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2384,7 +2387,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 if (!didStart && attribute != null) {
                     res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                            controlFlags);
+                            controlFlags, startInputReason);
                 }
             }
         } finally {
