@@ -3388,6 +3388,9 @@ message MetricsEvent {
     // OS: O
     FIELD_GESTURE_VELOCITY = 827;
 
+    // OPEN: Carrier demo mode password dialog
+    CARRIER_DEMO_MODE_PASSWORD = 828;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
