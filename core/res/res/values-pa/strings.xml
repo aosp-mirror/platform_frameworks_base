@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ਡਿਸਪਲੇ ਦੇ ਜ਼ੂਮ ਪੱਧਰ ਅਤੇ ਸਥਿਤੀ ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਰੋ।"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ਸੰਕੇਤ ਕਰਦੀ ਹੈ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ਟੈਪ ਕਰ ਸਕਦੀ ਹੈ, ਸਵਾਈਪ ਕਰ ਸਕਦੀ ਹੈ, ਪਿੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਹੋਰ ਸੰਕੇਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਕੇਤ"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ਡੀਵਾਈਸਾਂ ਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ \'ਤੇ ਕੀਤੇ ਗਏ ਸੰਕੇਤਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ਸਥਿਤੀ ਬਾਰ ਅਸਮਰੱਥ ਬਣਾਓ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਜਾਂ ਸਿਸਟਮ ਆਈਕਨਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ਡੀਬੱਗਿੰਗ ਨੂੰ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"ਖਬਰਾਂ ਅਤੇ ਰਸਾਲੇ"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"ਨਕਸ਼ੇ ਅਤੇ ਆਵਾਗੌਣ"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ਉਤਪਾਦਕਤਾ"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ਡੀਵਾਈਸ ਸਟੋਰੇਜ"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

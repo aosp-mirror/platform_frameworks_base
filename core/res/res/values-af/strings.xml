@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Beheer die vertoonskerm se zoemvlak en posisionering."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Voer gebare uit"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Vingerafdrukgebare"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Kan gebare wat op die toestel se vingerafdruksensor uitgevoer word, vasvang"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"wees die statusbalk"</string>
@@ -1146,6 +1148,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Tik vir meer opsies."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Tik om USB-ontfouting te deaktiveer."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Kies om USB-ontfouting te deaktiveer."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Neem tans foutverslag …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Deel foutverslag?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Deel tans foutverslag …"</string>
@@ -1689,4 +1692,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Nuus en tydskrifte"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Kaarte en navigasie"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktiwiteit"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Toestelberging"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

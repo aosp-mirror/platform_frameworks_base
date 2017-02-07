@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शनाचा झूम स्तर आणि स्थिती निर्धारण नियंत्रित करा."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेश्चर करा"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"टॅप, स्वाइप, पिंच आणि इतर जेश्चर करू शकते."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"फिंगरप्रिंट जेश्चर"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"डिव्‍हाइसच्‍या फिंगरप्रिंट सेंसरवर केलेले जेश्चर कॅप्‍चर करू शकते."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टीम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"अधिक पर्यायांसाठी टॅप करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करणे अक्षम करण्यासाठी टॅप करा."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"दोष अहवाल घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल सामायिक करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"दोष अहवाल सामायिक करीत आहे..."</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"बातम्‍या आणि मासिके"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"नकाशे आणि नेव्हिगेशन"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादनक्षमता"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"डिव्‍हाइस संचय"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

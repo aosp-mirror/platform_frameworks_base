@@ -276,6 +276,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Dhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Ishara za alama ya kidole"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>
@@ -1144,6 +1146,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Gonga ili upate chaguo zaidi."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Utatuaji wa USB umeunganishwa"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Gonga ili uzime utatuaji wa USB."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Chagua ili kulemaza utatuaji USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Inatayarisha ripoti ya hitilafu…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Ungependa kushiriki ripoti ya hitilafu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Inashiriki ripoti ya hitilafu…"</string>
@@ -1687,4 +1690,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Habari na Magazeti"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Ramani na Maelekezo"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Uzalishaji"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Hifadhi ya kifaa"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

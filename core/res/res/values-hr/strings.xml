@@ -281,6 +281,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolira razinu zumiranja i položaj zaslona."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvođenje pokreta"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirnuti, prijeći prstom, spojiti prste i izvoditi druge pokrete."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Pokreti za otisak prsta"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Može snimati pokrete izvršene na senzoru otiska prsta na uređaju."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikaciji omogućuje onemogućavanje trake statusa ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"biti traka statusa"</string>
@@ -1166,6 +1168,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje pogrešaka putem USB-a."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Odaberite da biste onemogućili rješavanje programske pogreške na USB-u."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izrada izvješća o programskoj pogrešci…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li podijeliti izvješće o programskoj pogrešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvješća o programskoj pogrešci…"</string>
@@ -1720,4 +1723,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Vijesti i časopisi"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Karte i navigacija"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktivnost"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Pohrana na uređaju"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>

@@ -278,6 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolatu pantailaren zoom-maila eta kokapena."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Keinuak egin"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Sakatu, lerratu, atximurkatu eta beste hainbat keinu egin ditzake."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Hatz-marken keinuak"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Gailuaren hatz-marken sentsorean egindako keinuak antzeman ditzake."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"Bihurtu egoera-barra"</string>
@@ -1146,6 +1148,8 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Sakatu aukera gehiago ikusteko."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB arazketa konektatuta"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Sakatu USB arazketa desgaitzeko."</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Akatsen txostena sortzen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Akatsen txostena partekatzen…"</string>
@@ -1232,7 +1236,7 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Aldatu horma-papera"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Jakinarazpenak hautemateko zerbitzua"</string>
-    <string name="vr_listener_binding_label" msgid="4316591939343607306">"Errealitate birtualeko hautemailea"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"EB hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Jakinarazpenen sailkapen-zerbitzua"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN eginbidea aktibatuta"</string>
@@ -1689,4 +1693,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"Albisteak eta aldizkariak"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Mapak eta nabigazioa"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Produktibitatea"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Gailuaren memoria"</string>
+    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <skip />
 </resources>
