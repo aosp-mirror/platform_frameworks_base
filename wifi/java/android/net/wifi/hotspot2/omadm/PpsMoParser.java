@@ -18,7 +18,7 @@ package android.net.wifi.hotspot2.omadm;
 
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.text.TextUtils;
@@ -112,8 +112,8 @@ import org.xml.sax.SAXException;
  *
  * @hide
  */
-public final class PPSMOParser {
-    private static final String TAG = "PPSMOParser";
+public final class PpsMoParser {
+    private static final String TAG = "PpsMoParser";
 
     /**
      * XML tags expected in the PPS MO (PerProviderSubscription Management Object) XML tree.
@@ -332,7 +332,7 @@ public final class PPSMOParser {
      * @param xmlString XML string representation of a PPS MO tree
      * @return {@link PasspointConfiguration} or null
      */
-    public static PasspointConfiguration parseMOText(String xmlString) {
+    public static PasspointConfiguration parseMoText(String xmlString) {
         // Convert the XML string to a XML tree.
         XMLParser xmlParser = new XMLParser();
         XMLNode root = null;
@@ -640,12 +640,12 @@ public final class PPSMOParser {
      * @return HomeSP
      * @throws ParsingException
      */
-    private static HomeSP parseHomeSP(PPSNode node) throws ParsingException {
+    private static HomeSp parseHomeSP(PPSNode node) throws ParsingException {
         if (node.isLeaf()) {
             throw new ParsingException("Leaf node not expected for HomeSP");
         }
 
-        HomeSP homeSp = new HomeSP();
+        HomeSp homeSp = new HomeSp();
         for (PPSNode child : node.getChildren()) {
             switch (child.getName()) {
                 case NODE_FQDN:
@@ -655,7 +655,7 @@ public final class PPSMOParser {
                     homeSp.setFriendlyName(getPpsNodeValue(child));
                     break;
                 case NODE_ROAMING_CONSORTIUM_OI:
-                    homeSp.setRoamingConsortiumOIs(
+                    homeSp.setRoamingConsortiumOis(
                             parseRoamingConsortiumOI(getPpsNodeValue(child)));
                     break;
                 case NODE_ICON_URL:
@@ -666,8 +666,8 @@ public final class PPSMOParser {
                     break;
                 case NODE_HOME_OI_LIST:
                     Pair<List<Long>, List<Long>> homeOIs = parseHomeOIList(child);
-                    homeSp.setMatchAllOIs(convertFromLongList(homeOIs.first));
-                    homeSp.setMatchAnyOIs(convertFromLongList(homeOIs.second));
+                    homeSp.setMatchAllOis(convertFromLongList(homeOIs.first));
+                    homeSp.setMatchAnyOis(convertFromLongList(homeOIs.second));
                     break;
                 case NODE_OTHER_HOME_PARTNERS:
                     homeSp.setOtherHomePartners(parseOtherHomePartners(child));
@@ -909,7 +909,7 @@ public final class PPSMOParser {
                     credential.setRealm(getPpsNodeValue(child));
                     break;
                 case NODE_CHECK_AAA_SERVER_CERT_STATUS:
-                    credential.setCheckAAAServerCertStatus(
+                    credential.setCheckAaaServerCertStatus(
                             Boolean.parseBoolean(getPpsNodeValue(child)));
                     break;
                 case NODE_SIM:
