@@ -222,20 +222,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (isActive() && !other.isActive()) return -1;
         if (!isActive() && other.isActive()) return 1;
 
-        // Higher scores go before lower scores
-        if (mRankingScore != other.mRankingScore) {
-            return (mRankingScore > other.mRankingScore) ? -1 : 1;
-        }
-
         // Reachable one goes before unreachable one.
         if (mRssi != Integer.MAX_VALUE && other.mRssi == Integer.MAX_VALUE) return -1;
         if (mRssi == Integer.MAX_VALUE && other.mRssi != Integer.MAX_VALUE) return 1;
 
-        // Configured one goes before unconfigured one.
+        // Configured (saved) one goes before unconfigured one.
         if (networkId != WifiConfiguration.INVALID_NETWORK_ID
                 && other.networkId == WifiConfiguration.INVALID_NETWORK_ID) return -1;
         if (networkId == WifiConfiguration.INVALID_NETWORK_ID
                 && other.networkId != WifiConfiguration.INVALID_NETWORK_ID) return 1;
+
+        // Higher scores go before lower scores
+        if (mRankingScore != other.mRankingScore) {
+            return (mRankingScore > other.mRankingScore) ? -1 : 1;
+        }
 
         // Sort by signal strength, bucketed by level
         int difference = WifiManager.calculateSignalLevel(other.mRssi, SIGNAL_LEVELS)
