@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.wifi.FakeKeys;
 import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.io.BufferedReader;
@@ -33,10 +33,10 @@ import java.util.Arrays;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link android.net.wifi.hotspot2.ConfigBuilder}.
+ * Unit tests for {@link android.net.wifi.hotspot2.ConfigParser}.
  */
 @SmallTest
-public class ConfigBuilderTest {
+public class ConfigParserTest {
     /**
      * Hotspot 2.0 Release 1 installation file that contains a Passpoint profile and a
      * CA (Certificate Authority) X.509 certificate {@link FakeKeys#CA_CERT0}.
@@ -83,10 +83,10 @@ public class ConfigBuilderTest {
         PasspointConfiguration config = new PasspointConfiguration();
 
         // HomeSP configuration.
-        HomeSP homeSp = new HomeSP();
+        HomeSp homeSp = new HomeSp();
         homeSp.setFriendlyName("Century House");
         homeSp.setFqdn("mi6.co.uk");
-        homeSp.setRoamingConsortiumOIs(new long[] {0x112233L, 0x445566L});
+        homeSp.setRoamingConsortiumOis(new long[] {0x112233L, 0x445566L});
         config.setHomeSp(homeSp);
 
         // Credential configuration.
@@ -123,7 +123,7 @@ public class ConfigBuilderTest {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_CA_CERT);
         PasspointConfiguration expectedConfig = generateConfigurationFromProfile();
         PasspointConfiguration actualConfig =
-                ConfigBuilder.buildPasspointConfig(
+                ConfigParser.parsePasspointConfig(
                         "application/x-wifi-config", configStr.getBytes());
         assertTrue(actualConfig.equals(expectedConfig));
     }
@@ -136,7 +136,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithInvalidMimeType() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_CA_CERT);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/wifi-config", configStr.getBytes()));
     }
 
@@ -148,7 +148,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithUnencodedData() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_UNENCODED_DATA);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
 
@@ -160,7 +160,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithInvalidPart() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_INVALID_PART);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
 
@@ -172,7 +172,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithMissingBoundary() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_MISSING_BOUNDARY);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
 
@@ -185,7 +185,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithInvalidContentType() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_INVALID_CONTENT_TYPE);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
 
@@ -197,7 +197,7 @@ public class ConfigBuilderTest {
     @Test
     public void parseConfigFileWithoutPasspointProfile() throws Exception {
         String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITHOUT_PROFILE);
-        assertNull(ConfigBuilder.buildPasspointConfig(
+        assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
 }

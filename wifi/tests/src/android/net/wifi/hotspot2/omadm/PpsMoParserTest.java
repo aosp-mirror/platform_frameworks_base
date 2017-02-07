@@ -19,10 +19,10 @@ package android.net.wifi.hotspot2.omadm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.net.wifi.hotspot2.omadm.PPSMOParser;
+import android.net.wifi.hotspot2.omadm.PpsMoParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSP;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -43,10 +43,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Unit tests for {@link android.net.wifi.hotspot2.omadm.PPSMOParser}.
+ * Unit tests for {@link android.net.wifi.hotspot2.omadm.PpsMoParser}.
  */
 @SmallTest
-public class PPSMOParserTest {
+public class PpsMoParserTest {
     private static final String VALID_PPS_MO_XML_FILE = "assets/pps/PerProviderSubscription.xml";
     private static final String PPS_MO_XML_FILE_DUPLICATE_HOMESP =
             "assets/pps/PerProviderSubscription_DuplicateHomeSP.xml";
@@ -122,17 +122,17 @@ public class PPSMOParserTest {
         config.setUsageLimitUsageTimePeriodInMinutes(99910);
 
         // HomeSP configuration.
-        HomeSP homeSp = new HomeSP();
+        HomeSp homeSp = new HomeSp();
         homeSp.setFriendlyName("Century House");
         homeSp.setFqdn("mi6.co.uk");
-        homeSp.setRoamingConsortiumOIs(new long[] {0x112233L, 0x445566L});
+        homeSp.setRoamingConsortiumOis(new long[] {0x112233L, 0x445566L});
         homeSp.setIconUrl("icon.test.com");
         Map<String, Long> homeNetworkIds = new HashMap<>();
         homeNetworkIds.put("TestSSID", 0x12345678L);
         homeNetworkIds.put("NullHESSID", null);
         homeSp.setHomeNetworkIds(homeNetworkIds);
-        homeSp.setMatchAllOIs(new long[] {0x11223344});
-        homeSp.setMatchAnyOIs(new long[] {0x55667788});
+        homeSp.setMatchAllOis(new long[] {0x11223344});
+        homeSp.setMatchAnyOis(new long[] {0x55667788});
         homeSp.setOtherHomePartners(new String[] {"other.fqdn.com"});
         config.setHomeSp(homeSp);
 
@@ -141,7 +141,7 @@ public class PPSMOParserTest {
         credential.setCreationTimeInMs(format.parse("2016-01-01T10:00:00Z").getTime());
         credential.setExpirationTimeInMs(format.parse("2016-02-01T10:00:00Z").getTime());
         credential.setRealm("shaken.stirred.com");
-        credential.setCheckAAAServerCertStatus(true);
+        credential.setCheckAaaServerCertStatus(true);
         Credential.UserCredential userCredential = new Credential.UserCredential();
         userCredential.setUsername("james");
         userCredential.setPassword("Ym9uZDAwNw==");
@@ -209,53 +209,53 @@ public class PPSMOParserTest {
     public void parseValidPPSMOTree() throws Exception {
         String ppsMoTree = loadResourceFile(VALID_PPS_MO_XML_FILE);
         PasspointConfiguration expectedConfig = generateConfigurationFromPPSMOTree();
-        PasspointConfiguration actualConfig = PPSMOParser.parseMOText(ppsMoTree);
+        PasspointConfiguration actualConfig = PpsMoParser.parseMoText(ppsMoTree);
         assertTrue(actualConfig.equals(expectedConfig));
     }
 
     @Test
     public void parseNullPPSMOTree() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(null));
+        assertEquals(null, PpsMoParser.parseMoText(null));
     }
 
     @Test
     public void parseEmptyPPSMOTree() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(new String()));
+        assertEquals(null, PpsMoParser.parseMoText(new String()));
     }
 
     @Test
     public void parsePPSMOTreeWithDuplicateHomeSP() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_DUPLICATE_HOMESP)));
     }
 
     @Test
     public void parsePPSMOTreeWithDuplicateValue() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_DUPLICATE_VALUE)));
     }
 
     @Test
     public void parsePPSMOTreeWithMissingValue() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_MISSING_VALUE)));
     }
 
     @Test
     public void parsePPSMOTreeWithMissingName() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_MISSING_NAME)));
     }
 
     @Test
     public void parsePPSMOTreeWithInvalidNode() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_INVALID_NODE)));
     }
 
     @Test
     public void parsePPSMOTreeWithInvalidName() throws Exception {
-        assertEquals(null, PPSMOParser.parseMOText(
+        assertEquals(null, PpsMoParser.parseMoText(
                 loadResourceFile(PPS_MO_XML_FILE_INVALID_NAME)));
     }
 }
