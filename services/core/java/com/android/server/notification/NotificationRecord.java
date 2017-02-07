@@ -37,12 +37,14 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationRecordProto;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -336,6 +338,24 @@ public final class NotificationRecord {
     public String getKey() { return sbn.getKey(); }
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
+
+    void dump(ProtoOutputStream proto, boolean redact) {
+        proto.write(NotificationRecordProto.KEY, sbn.getKey());
+        if (getChannel() != null) {
+            proto.write(NotificationRecordProto.CHANNEL_ID, getChannel().getId());
+        }
+        proto.write(NotificationRecordProto.CAN_SHOW_LIGHT, getLight() != null);
+        proto.write(NotificationRecordProto.CAN_VIBRATE, getVibration() != null);
+        proto.write(NotificationRecordProto.FLAGS, sbn.getNotification().flags);
+        proto.write(NotificationRecordProto.GROUP_KEY, getGroupKey());
+        proto.write(NotificationRecordProto.IMPORTANCE, getImportance());
+        if (getSound() != null) {
+            proto.write(NotificationRecordProto.SOUND, getSound().toString());
+        }
+        if (getAudioAttributes() != null) {
+            proto.write(NotificationRecordProto.SOUND_USAGE, getAudioAttributes().getUsage());
+        }
+    }
 
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
         final Notification notification = sbn.getNotification();
