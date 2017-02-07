@@ -164,24 +164,39 @@ const char* gFS_Uniforms_HasRoundRectClip =
 // Dithering must be done in the quantization space
 // When we are writing to an sRGB framebuffer, we must do the following:
 //     EOCF(OECF(color) + dither)
-// We approximate the transfer functions with gamma 2.0 to avoid branches and pow()
 // The dithering pattern is generated with a triangle noise generator in the range [-0.0,1.0]
 // TODO: Handle linear fp16 render targets
-const char* gFS_Gradient_Functions =
-        "\nfloat triangleNoise(const highp vec2 n) {\n"
-        "    highp vec2 p = fract(n * vec2(5.3987, 5.4421));\n"
-        "    p += dot(p.yx, p.xy + vec2(21.5351, 14.3137));\n"
-        "    highp float xy = p.x * p.y;\n"
-        "    return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;\n"
-        "}\n";
+const char* gFS_Gradient_Functions = R"__SHADER__(
+        float triangleNoise(const highp vec2 n) {
+            highp vec2 p = fract(n * vec2(5.3987, 5.4421));
+            p += dot(p.yx, p.xy + vec2(21.5351, 14.3137));
+            highp float xy = p.x * p.y;
+            return fract(xy * 95.4307) + fract(xy * 75.04961) - 1.0;
+        }
+
+        float OECF_sRGB(const float linear) {
+            // IEC 61966-2-1:1999
+            return linear <= 0.0031308 ? linear * 12.92 : (pow(linear, 1.0 / 2.4) * 1.055) - 0.055;
+        }
+
+        vec3 OECF_sRGB(const vec3 linear) {
+            return vec3(OECF_sRGB(linear.r), OECF_sRGB(linear.g), OECF_sRGB(linear.b));
+        }
+
+        float EOCF_sRGB(float srgb) {
+            // IEC 61966-2-1:1999
+            return srgb <= 0.04045 ? srgb / 12.92 : pow((srgb + 0.055) / 1.055, 2.4);
+        }
+)__SHADER__";
 const char* gFS_Gradient_Preamble[2] = {
         // Linear framebuffer
         "\nvec4 dither(const vec4 color) {\n"
         "    return vec4(color.rgb + (triangleNoise(gl_FragCoord.xy * screenSize.xy) / 255.0), color.a);\n"
         "}\n"
         "\nvec4 gammaMix(const vec4 a, const vec4 b, float v) {\n"
-        "    vec4 c = pow(mix(a, b, v), vec4(vec3(1.0 / 2.2), 1.0));\n"
-        "    return vec4(c.rgb * c.a, c.a);\n"
+        "    vec4 c = mix(a, b, v);\n"
+        "    c.a = EOCF_sRGB(c.a);\n" // This is technically incorrect but preserves compatibility
+        "    return vec4(OECF_sRGB(c.rgb) * c.a, c.a);\n"
         "}\n",
         // sRGB framebuffer
         "\nvec4 dither(const vec4 color) {\n"
@@ -200,13 +215,15 @@ const char* gFS_Gradient_Preamble[2] = {
 // The gamma coefficient is chosen to thicken or thin the text accordingly
 // The dot product used to compute the luminance could be approximated with
 // a simple max(color.r, color.g, color.b)
-const char* gFS_Gamma_Preamble =
-        "\n#define GAMMA (%.2f)\n"
-        "#define GAMMA_INV (%.2f)\n"
-        "\nfloat gamma(float a, const vec3 color) {\n"
-        "    float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));\n"
-        "    return pow(a, luminance < 0.5 ? GAMMA_INV : GAMMA);\n"
-        "}\n";
+const char* gFS_Gamma_Preamble = R"__SHADER__(
+        #define GAMMA (%.2f)
+        #define GAMMA_INV (%.2f)
+
+        float gamma(float a, const vec3 color) {
+            float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+            return pow(a, luminance < 0.5 ? GAMMA_INV : GAMMA);
+        }
+)__SHADER__";
 
 const char* gFS_Main =
         "\nvoid main(void) {\n"

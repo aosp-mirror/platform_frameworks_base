@@ -205,6 +205,10 @@ void GradientCache::mixFloats(const FloatColor& start, const FloatColor& end,
     *d++ = a * (start.g * oppAmount + end.g * amount);
     *d++ = a * (start.b * oppAmount + end.b * amount);
 #else
+    // What we're doing to the alpha channel here is technically incorrect
+    // but reproduces Android's old behavior when the alpha was pre-multiplied
+    // with gamma-encoded colors
+    a = EOCF_sRGB(a);
     *d++ = a * OECF_sRGB(start.r * oppAmount + end.r * amount);
     *d++ = a * OECF_sRGB(start.g * oppAmount + end.g * amount);
     *d++ = a * OECF_sRGB(start.b * oppAmount + end.b * amount);

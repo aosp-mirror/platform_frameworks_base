@@ -44,7 +44,7 @@ static int bytesPerPixel(GLint glFormat) {
     case GL_RGBA16F:
         return 8;
     default:
-        LOG_ALWAYS_FATAL("UNKNOWN FORMAT %d", glFormat);
+        LOG_ALWAYS_FATAL("UNKNOWN FORMAT 0x%x", glFormat);
     }
 }
 
