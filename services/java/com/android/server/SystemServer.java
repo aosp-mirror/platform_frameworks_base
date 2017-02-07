@@ -376,6 +376,7 @@ public final class SystemServer {
             startBootstrapServices();
             startCoreServices();
             startOtherServices();
+            SystemServerInitThreadPool.shutdown();
         } catch (Throwable ex) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting system services", ex);
@@ -383,7 +384,6 @@ public final class SystemServer {
         } finally {
             traceEnd();
         }
-        SystemServerInitThreadPool.shutdown();
 
         // For debug builds, log event loop stalls to dropbox for analysis.
         if (StrictMode.conditionallyEnableDebugLogging()) {
@@ -1693,6 +1693,9 @@ public final class SystemServer {
             traceBeginAndSlog("StartWatchdog");
             Watchdog.getInstance().start();
             traceEnd();
+
+            // Wait for all packages to be prepared
+            mPackageManagerService.waitForAppDataPrepared();
 
             // It is now okay to let the various system services start their
             // third party code...

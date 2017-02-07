@@ -251,6 +251,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -265,6 +266,7 @@ import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
@@ -322,6 +324,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -856,6 +859,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private File mCacheDir;
 
     private ArraySet<String> mPrivappPermissionsViolations;
+
+    private Future<?> mPrepareAppDataFuture;
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -2757,8 +2762,32 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             }
-            reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
-                    storageFlags, true /* migrateAppData */);
+            List<String> deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
+                    UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
+                    true /* onlyCoreApps */);
+            mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
+                if (deferPackages == null || deferPackages.isEmpty()) {
+                    return;
+                }
+                int count = 0;
+                for (String pkgName : deferPackages) {
+                    PackageParser.Package pkg = null;
+                    synchronized (mPackages) {
+                        PackageSetting ps = mSettings.getPackageLPr(pkgName);
+                        if (ps != null && ps.getInstalled(UserHandle.USER_SYSTEM)) {
+                            pkg = ps.pkg;
+                        }
+                    }
+                    if (pkg != null) {
+                        synchronized (mInstallLock) {
+                            prepareAppDataAndMigrateLIF(pkg, UserHandle.USER_SYSTEM, storageFlags,
+                                    true /* maybeMigrateAppData */);
+                        }
+                        count++;
+                    }
+                }
+                Slog.i(TAG, "Deferred reconcileAppsData finished " + count + " packages");
+            }, "prepareAppData");
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
@@ -20140,6 +20169,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    public void waitForAppDataPrepared() {
+        if (mPrepareAppDataFuture == null) {
+            return;
+        }
+        ConcurrentUtils.waitForFutureNoInterrupt(mPrepareAppDataFuture, "wait for prepareAppData");
+        mPrepareAppDataFuture = null;
+    }
+
     @Override
     public boolean isSafeMode() {
         return mSafeMode;
@@ -21590,6 +21627,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
+            boolean migrateAppData) {
+        reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
+    }
+
     /**
      * Reconcile all app data on given mounted volume.
      * <p>
@@ -21598,11 +21640,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * <p>
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps.
+     * @returns list of skipped non-core packages (if {@code onlyCoreApps} is true)
      */
-    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
-            boolean migrateAppData) {
+    private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
+            boolean migrateAppData, boolean onlyCoreApps) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
+        List<String> result = onlyCoreApps ? new ArrayList<>() : null;
 
         final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
         final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
@@ -21666,21 +21710,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 // and reconcile again once they're scanned
                 continue;
             }
+            // Skip non-core apps if requested
+            if (onlyCoreApps && !ps.pkg.coreApp) {
+                result.add(packageName);
+                continue;
+            }
 
             if (ps.getInstalled(userId)) {
-                prepareAppDataLIF(ps.pkg, userId, flags);
-
-                if (migrateAppData && maybeMigrateAppDataLIF(ps.pkg, userId)) {
-                    // We may have just shuffled around app data directories, so
-                    // prepare them one more time
-                    prepareAppDataLIF(ps.pkg, userId, flags);
-                }
-
+                prepareAppDataAndMigrateLIF(ps.pkg, userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
 
         Slog.v(TAG, "reconcileAppsData finished " + preparedCount + " packages");
+        return result;
     }
 
     /**
@@ -21738,6 +21781,17 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             prepareAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
+        }
+    }
+
+    private void prepareAppDataAndMigrateLIF(PackageParser.Package pkg, int userId, int flags,
+            boolean maybeMigrateAppData) {
+        prepareAppDataLIF(pkg, userId, flags);
+
+        if (maybeMigrateAppData && maybeMigrateAppDataLIF(pkg, userId)) {
+            // We may have just shuffled around app data directories, so
+            // prepare them one more time
+            prepareAppDataLIF(pkg, userId, flags);
         }
     }
 
