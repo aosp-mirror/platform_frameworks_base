@@ -26,6 +26,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaHTTPService;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import com.android.internal.util.Preconditions;
@@ -597,6 +598,16 @@ final public class MediaExtractor {
      * indicates the presence of a cache, i.e. does NOT return -1.
      */
     public native boolean hasCacheReachedEndOfStream();
+
+    /**
+     *  Returns Analytics/Metrics data about the current media container.
+     *
+     * @return the set of keys and values available for the media being
+     * handled by this instance of MediaExtractor
+     *
+     */
+    public native Bundle getMetrics();
+
 
     private static native final void native_init();
     private native final void native_setup();

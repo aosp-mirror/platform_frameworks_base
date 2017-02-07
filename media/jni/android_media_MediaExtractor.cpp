@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "android_media_MediaExtractor.h"
+#include "android_media_MediaMetricsJNI.h"
 
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -239,6 +240,13 @@ status_t JMediaExtractor::getSampleFlags(uint32_t *sampleFlags) {
 
     return OK;
 }
+
+status_t JMediaExtractor::getMetrics(Parcel *reply) const {
+
+    status_t status = mImpl->getMetrics(reply);
+    return status;
+}
+
 
 status_t JMediaExtractor::getSampleMeta(sp<MetaData> *sampleMeta) {
     return mImpl->getSampleMeta(sampleMeta);
@@ -767,6 +775,38 @@ static void android_media_MediaExtractor_native_finalize(
     android_media_MediaExtractor_release(env, thiz);
 }
 
+static jobject
+android_media_MediaExtractor_getMetrics(JNIEnv * env, jobject thiz)
+{
+    ALOGV("android_media_MediaExtractor_getMetrics");
+
+    sp<JMediaExtractor> extractor = getMediaExtractor(env, thiz);
+    if (extractor == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    // get what we have for the metrics from the codec
+    Parcel reply;
+    status_t err = extractor->getMetrics(&reply);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        return (jobject) NULL;
+    }
+
+    // build and return the Bundle
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(reply);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
+
 static const JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaExtractor_release },
 
@@ -826,6 +866,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "hasCacheReachedEndOfStream", "()Z",
       (void *)android_media_MediaExtractor_hasCacheReachedEOS },
+
+    {"getMetrics",          "()Landroid/os/Bundle;",
+      (void *)android_media_MediaExtractor_getMetrics},
 };
 
 int register_android_media_MediaExtractor(JNIEnv *env) {
