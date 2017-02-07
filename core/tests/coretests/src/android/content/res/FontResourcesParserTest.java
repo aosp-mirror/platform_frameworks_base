@@ -91,7 +91,8 @@ public class FontResourcesParserTest {
         List<FontConfig.Family> families = result.getFamilies();
         assertEquals(1, families.size());
         FontConfig.Family family = families.get(0);
-        assertEquals("com.example.test.fontprovider", family.getProviderAuthority());
+        assertEquals("com.example.test.fontprovider.authority", family.getProviderAuthority());
+        assertEquals("com.example.test.fontprovider.package", family.getProviderPackage());
         assertEquals("MyRequestedFont", family.getQuery());
         assertNull(family.getFonts());
     }

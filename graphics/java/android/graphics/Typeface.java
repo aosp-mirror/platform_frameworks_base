@@ -186,8 +186,8 @@ public class Typeface {
                 }
                 // Downloaded font and it wasn't cached, request it again and return a
                 // default font instead (nothing we can do now).
-                create(new FontRequest(family.getProviderAuthority(), family.getQuery()),
-                        NO_OP_REQUEST_CALLBACK);
+                create(new FontRequest(family.getProviderAuthority(), family.getProviderPackage(),
+                        family.getQuery()), NO_OP_REQUEST_CALLBACK);
                 return DEFAULT;
             }
 

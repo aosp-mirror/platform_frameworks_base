@@ -403,6 +403,7 @@ public final class FontConfig implements Parcelable {
         private final String mLanguage;
         private final String mVariant;
         private final String mProviderAuthority;
+        private final String mProviderPackage;
         private final String mQuery;
 
         public Family(String name, List<Font> fonts, String language, String variant) {
@@ -411,18 +412,20 @@ public final class FontConfig implements Parcelable {
             mLanguage = language;
             mVariant = variant;
             mProviderAuthority = null;
+            mProviderPackage = null;
             mQuery = null;
         }
 
         /**
          * @hide
          */
-        public Family(String providerAuthority, String query) {
+        public Family(String providerAuthority, String providerPackage, String query) {
             mName = null;
             mFonts = null;
             mLanguage = null;
             mVariant = null;
             mProviderAuthority = providerAuthority;
+            mProviderPackage = providerPackage;
             mQuery = query;
         }
 
@@ -435,6 +438,7 @@ public final class FontConfig implements Parcelable {
                 mFonts.add(new Font(origin.mFonts.get(i)));
             }
             mProviderAuthority = origin.mProviderAuthority;
+            mProviderPackage = origin.mProviderPackage;
             mQuery = origin.mQuery;
         }
 
@@ -476,6 +480,13 @@ public final class FontConfig implements Parcelable {
         /**
          * @hide
          */
+        public String getProviderPackage() {
+            return mProviderPackage;
+        }
+
+        /**
+         * @hide
+         */
         public String getQuery() {
             return mQuery;
         }
@@ -498,6 +509,11 @@ public final class FontConfig implements Parcelable {
                 mProviderAuthority = null;
             }
             if (in.readInt() == 1) {
+                mProviderPackage = in.readString();
+            } else {
+                mProviderPackage = null;
+            }
+            if (in.readInt() == 1) {
                 mQuery = in.readString();
             } else {
                 mQuery = null;
@@ -516,6 +532,10 @@ public final class FontConfig implements Parcelable {
             out.writeInt(mProviderAuthority == null ? 0 : 1);
             if (mProviderAuthority != null) {
                 out.writeString(mProviderAuthority);
+            }
+            out.writeInt(mProviderPackage == null ? 0 : 1);
+            if (mProviderPackage != null) {
+                out.writeString(mProviderPackage);
             }
             out.writeInt(mQuery == null ? 0 : 1);
             if (mQuery != null) {

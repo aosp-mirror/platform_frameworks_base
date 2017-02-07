@@ -8567,6 +8567,7 @@
     <!-- Attributes that are read when parsing a <fontfamily> tag. -->
     <declare-styleable name="FontFamily">
         <attr name="fontProviderAuthority" format="string" />
+        <attr name="fontProviderPackage" format="string" />
         <attr name="fontProviderQuery" format="string" />
     </declare-styleable>
 
