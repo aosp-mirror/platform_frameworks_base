@@ -710,7 +710,7 @@ public class FingerprintManager {
 
     /**
      * Retrieves the authenticator token for binding keys to the lifecycle
-     * of the current set of fingerprints. Used only by internal clients.
+     * of the calling user's fingerprints. Used only by internal clients.
      *
      * @hide
      */
