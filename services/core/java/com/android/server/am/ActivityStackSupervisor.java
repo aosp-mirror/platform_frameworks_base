@@ -2301,7 +2301,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             } else {
                 for (int i = 0; i < size; i++) {
                     final TaskRecord task = tasks.get(i);
-                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, MAX_VALUE,
+                    final int position = fullscreenStack != null ?
+                            Math.max(fullscreenStack.getAllTasks().size() - 1, 0) : 0;
+                    task.reparent(FULLSCREEN_WORKSPACE_STACK_ID, position,
                             "moveTasksToFullscreenStack - NOT_onTop");
                 }
             }
