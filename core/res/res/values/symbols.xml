@@ -120,6 +120,7 @@
   <java-symbol type="id" name="permission_list" />
   <java-symbol type="id" name="pickers" />
   <java-symbol type="id" name="prefs" />
+  <java-symbol type="id" name="prefs_container" />
   <java-symbol type="id" name="prefs_frame" />
   <java-symbol type="id" name="prev" />
   <java-symbol type="id" name="progress" />
