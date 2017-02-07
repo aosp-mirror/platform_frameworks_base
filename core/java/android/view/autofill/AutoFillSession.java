@@ -68,24 +68,9 @@ public final class AutoFillSession {
                         continue;
                     }
 
-                    // TODO(b/33197203): handle protected value (like credit card)
                     if (id.isVirtual()) {
-                        // Delegate virtual fields.
-                        final VirtualViewDelegate delegate = view
-                                .getAutoFillVirtualViewDelegate();
-                        if (delegate == null) {
-                            Log.w(TAG, "autoFill(): cannot fill virtual " + id
-                                    + "; no VirtualViewDelegate for view "
-                                    + view.getClass());
-                            continue;
-                        }
-                        if (DEBUG) {
-                            Log.d(TAG, "autoFill(): delegating " + id
-                                    + " to VirtualViewDelegate  " + delegate);
-                        }
-                        delegate.autoFill(id.getVirtualChildId(), value);
+                        view.autoFillVirtual(id.getVirtualChildId(), value);
                     } else {
-                        // Handle non-virtual fields itself.
                         view.autoFill(value);
                     }
                 }
