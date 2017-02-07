@@ -311,7 +311,7 @@ public final class LoadedApk {
                 }
 
                 mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                        splitPaths, mOverlayDirs, mSharedLibraries,
+                        splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
                         Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
                         getClassLoader());
             }
@@ -923,10 +923,6 @@ public final class LoadedApk {
         return mOverlayDirs;
     }
 
-    public String[] getSharedLibraries() {
-        return mSharedLibraries;
-    }
-
     public String getDataDir() {
         return mDataDir;
     }
@@ -958,7 +954,7 @@ public final class LoadedApk {
             }
 
             mResources = ResourcesManager.getInstance().getResources(null, mResDir,
-                    splitPaths, mOverlayDirs, mSharedLibraries,
+                    splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
                     Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
                     getClassLoader());
         }
