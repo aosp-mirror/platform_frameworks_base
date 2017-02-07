@@ -43,6 +43,7 @@ public class VideoCallImpl extends VideoCall {
     private VideoCall.Callback mCallback;
     private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
     private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
+    private final String mCallingPackageName;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -197,12 +198,13 @@ public class VideoCallImpl extends VideoCall {
 
     private Handler mHandler;
 
-    VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
+    VideoCallImpl(IVideoProvider videoProvider, String callingPackageName) throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
+        mCallingPackageName = callingPackageName;
     }
 
     public void destroy() {
@@ -240,7 +242,8 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setCamera(String cameraId) {
         try {
-            mVideoProvider.setCamera(cameraId);
+            Log.w(this, "setCamera: cameraId=%s, calling=%s", cameraId, mCallingPackageName);
+            mVideoProvider.setCamera(cameraId, mCallingPackageName);
         } catch (RemoteException e) {
         }
     }

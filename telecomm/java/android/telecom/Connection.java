@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -799,7 +800,7 @@ public abstract class Connection extends Conferenceable {
         public static final int SESSION_EVENT_TX_STOP = 4;
 
         /**
-         * A camera failure has occurred for the selected camera.  The {@link InCallService} can use
+         * A camera failure has occurred for the selected camera.  The {@link VideoProvider} can use
          * this as a cue to inform the user the camera is not available.
          * @see #handleCallSessionEvent(int)
          */
@@ -807,11 +808,19 @@ public abstract class Connection extends Conferenceable {
 
         /**
          * Issued after {@link #SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready
-         * for operation.  The {@link InCallService} can use this as a cue to inform the user that
+         * for operation.  The {@link VideoProvider} can use this as a cue to inform the user that
          * the camera has become available again.
          * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_CAMERA_READY = 6;
+
+        /**
+         * Session event raised by Telecom when
+         * {@link android.telecom.InCallService.VideoCall#setCamera(String)} is called and the
+         * caller does not have the necessary {@link android.Manifest.permission#CAMERA} permission.
+         * @see #handleCallSessionEvent(int)
+         */
+        public static final int SESSION_EVENT_CAMERA_PERMISSION_ERROR = 7;
 
         /**
          * Session modify request was successful.
@@ -862,6 +871,8 @@ public abstract class Connection extends Conferenceable {
         private static final String SESSION_EVENT_TX_STOP_STR = "TX_STOP";
         private static final String SESSION_EVENT_CAMERA_FAILURE_STR = "CAMERA_FAIL";
         private static final String SESSION_EVENT_CAMERA_READY_STR = "CAMERA_READY";
+        private static final String SESSION_EVENT_CAMERA_PERMISSION_ERROR_STR =
+                "CAMERA_PERMISSION_ERROR";
         private static final String SESSION_EVENT_UNKNOWN_STR = "UNKNOWN";
 
         private VideoProvider.VideoProviderHandler mMessageHandler;
@@ -920,8 +931,17 @@ public abstract class Connection extends Conferenceable {
                         break;
                     }
                     case MSG_SET_CAMERA:
-                        onSetCamera((String) msg.obj);
-                        break;
+                    {
+                        SomeArgs args = (SomeArgs) msg.obj;
+                        try {
+                            onSetCamera((String) args.arg1);
+                            onSetCamera((String) args.arg1, (String) args.arg2, args.argi1,
+                                    args.argi2);
+                        } finally {
+                            args.recycle();
+                        }
+                    }
+                    break;
                     case MSG_SET_PREVIEW_SURFACE:
                         onSetPreviewSurface((Surface) msg.obj);
                         break;
@@ -976,8 +996,19 @@ public abstract class Connection extends Conferenceable {
                         MSG_REMOVE_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
             }
 
-            public void setCamera(String cameraId) {
-                mMessageHandler.obtainMessage(MSG_SET_CAMERA, cameraId).sendToTarget();
+            public void setCamera(String cameraId, String callingPackageName) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = cameraId;
+                // Propagate the calling package; originally determined in
+                // android.telecom.InCallService.VideoCall#setCamera(String) from the calling
+                // process.
+                args.arg2 = callingPackageName;
+                // Pass along the uid and pid of the calling app; this gets lost when we put the
+                // message onto the handler.  These are required for Telecom to perform a permission
+                // check to see if the calling app is able to use the camera.
+                args.argi1 = Binder.getCallingUid();
+                args.argi2 = Binder.getCallingPid();
+                mMessageHandler.obtainMessage(MSG_SET_CAMERA, args).sendToTarget();
             }
 
             public void setPreviewSurface(Surface surface) {
@@ -1060,6 +1091,29 @@ public abstract class Connection extends Conferenceable {
          * {@link CameraManager#getCameraIdList()}).
          */
         public abstract void onSetCamera(String cameraId);
+
+        /**
+         * Sets the camera to be used for the outgoing video.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating the capabilities of the chosen
+         * camera via
+         * {@link VideoProvider#changeCameraCapabilities(VideoProfile.CameraCapabilities)}.
+         * <p>
+         * This prototype is used internally to ensure that the calling package name, UID and PID
+         * are sent to Telecom so that can perform a camera permission check on the caller.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setCamera(String)}.
+         *
+         * @param cameraId The id of the camera (use ids as reported by
+         * {@link CameraManager#getCameraIdList()}).
+         * @param callingPackageName The AppOpps package name of the caller.
+         * @param callingUid The UID of the caller.
+         * @param callingPid The PID of the caller.
+         * @hide
+         */
+        public void onSetCamera(String cameraId, String callingPackageName, int callingUid,
+                int callingPid) {}
 
         /**
          * Sets the surface to be used for displaying a preview of what the user's camera is
@@ -1247,7 +1301,8 @@ public abstract class Connection extends Conferenceable {
          *      {@link VideoProvider#SESSION_EVENT_TX_START},
          *      {@link VideoProvider#SESSION_EVENT_TX_STOP},
          *      {@link VideoProvider#SESSION_EVENT_CAMERA_FAILURE},
-         *      {@link VideoProvider#SESSION_EVENT_CAMERA_READY}.
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_READY},
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_FAILURE}.
          */
         public void handleCallSessionEvent(int event) {
             if (mVideoCallbacks != null) {
@@ -1396,6 +1451,8 @@ public abstract class Connection extends Conferenceable {
                     return SESSION_EVENT_TX_START_STR;
                 case SESSION_EVENT_TX_STOP:
                     return SESSION_EVENT_TX_STOP_STR;
+                case SESSION_EVENT_CAMERA_PERMISSION_ERROR:
+                    return SESSION_EVENT_CAMERA_PERMISSION_ERROR_STR;
                 default:
                     return SESSION_EVENT_UNKNOWN_STR + " " + event;
             }
