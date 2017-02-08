@@ -813,8 +813,11 @@ final class BackStackRecord extends FragmentTransaction implements
     /**
      * Reverses the execution of the operations within this transaction. The Fragment states will
      * only be modified if optimizations are not allowed.
+     *
+     * @param moveToState {@code true} if added fragments should be moved to their final state
+     *                    in unoptimized transactions
      */
-    void executePopOps() {
+    void executePopOps(boolean moveToState) {
         for (int opNum = mOps.size() - 1; opNum >= 0; opNum--) {
             final Op op = mOps.get(opNum);
             Fragment f = op.fragment;
@@ -860,7 +863,7 @@ final class BackStackRecord extends FragmentTransaction implements
                 mManager.moveFragmentToExpectedState(f);
             }
         }
-        if (!mAllowOptimization) {
+        if (!mAllowOptimization && moveToState) {
             mManager.moveToState(mManager.mCurState, true);
         }
     }
