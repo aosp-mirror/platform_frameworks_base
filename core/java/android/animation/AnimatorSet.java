@@ -934,6 +934,31 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         }
     }
 
+    /**
+     * Gets the current position of the animation in time, which is equal to the current
+     * time minus the time that the animation started. An animation that is not yet started will
+     * return a value of zero, unless the animation has has its play time set via
+     * {@link #setCurrentPlayTime(long)}, in which case it will return the time that was set.
+     *
+     * @return The current position in time of the animation.
+     */
+    public long getCurrentPlayTime() {
+        if (mSeekState.isActive()) {
+            return mSeekState.getPlayTime();
+        }
+        if (mLastFrameTime == -1) {
+            // Not yet started or during start delay
+            return 0;
+        }
+        float durationScale = ValueAnimator.getDurationScale();
+        durationScale = durationScale == 0 ? 1 : durationScale;
+        if (mReversing) {
+            return (long) ((mLastFrameTime - mFirstFrame) / durationScale);
+        } else {
+            return (long) ((mLastFrameTime - mFirstFrame - mStartDelay) / durationScale);
+        }
+    }
+
     private void initChildren() {
         if (!isInitialized()) {
             mChildrenInitialized = true;
