@@ -128,6 +128,11 @@ public:
     }
 
     /**
+     * Returns true if this texture uses a linear encoding format.
+     */
+    bool isLinear() const;
+
+    /**
      * Generation of the backing bitmap,
      */
     uint32_t generation = 0;

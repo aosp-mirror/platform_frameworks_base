@@ -87,6 +87,7 @@ namespace uirenderer {
 #define PROGRAM_HAS_ROUND_RECT_CLIP 43
 
 #define PROGRAM_HAS_GAMMA_CORRECTION 44
+#define PROGRAM_HAS_LINEAR_TEXTURE 45
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -162,7 +163,10 @@ struct ProgramDescription {
     bool hasDebugHighlight;
     bool hasRoundRectClip;
 
+    // Extra gamma correction used for text
     bool hasGammaCorrection;
+    // Set when sampling an image in linear space
+    bool hasLinearTexture;
 
     /**
      * Resets this description. All fields are reset back to the default
@@ -205,6 +209,7 @@ struct ProgramDescription {
         hasRoundRectClip = false;
 
         hasGammaCorrection = false;
+        hasLinearTexture = false;
     }
 
     /**
@@ -275,6 +280,7 @@ struct ProgramDescription {
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
         if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
         if (hasGammaCorrection) key |= programid(0x1) << PROGRAM_HAS_GAMMA_CORRECTION;
+        if (hasLinearTexture) key |= programid(0x1) << PROGRAM_HAS_LINEAR_TEXTURE;
         return key;
     }
 
