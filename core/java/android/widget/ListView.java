@@ -19,7 +19,6 @@ package android.widget;
 import com.google.android.collect.Lists;
 
 import com.android.internal.R;
-import com.android.internal.util.Predicate;
 
 import android.annotation.IdRes;
 import android.annotation.NonNull;
@@ -55,6 +54,7 @@ import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /*
  * Implementation Notes:
