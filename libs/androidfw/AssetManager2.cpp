@@ -31,6 +31,8 @@
 #endif
 #endif
 
+#include "androidfw/ResourceUtils.h"
+
 namespace android {
 
 AssetManager2::AssetManager2() { memset(&configuration_, 0, sizeof(configuration_)); }
@@ -235,9 +237,9 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
     desired_config = &density_override_config;
   }
 
-  const uint32_t package_id = util::get_package_id(resid);
-  const uint8_t type_id = util::get_type_id(resid);
-  const uint16_t entry_id = util::get_entry_id(resid);
+  const uint32_t package_id = get_package_id(resid);
+  const uint8_t type_id = get_type_id(resid);
+  const uint16_t entry_id = get_entry_id(resid);
 
   if (type_id == 0) {
     LOG(ERROR) << base::StringPrintf("Invalid ID 0x%08x.", resid);
@@ -452,7 +454,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
     ResolvedBag::Entry* new_entry = new_bag->entries;
     for (; map_entry != map_entry_end; ++map_entry) {
       uint32_t new_key = dtohl(map_entry->name.ident);
-      if (!util::is_internal_resid(new_key)) {
+      if (!is_internal_resid(new_key)) {
         // Attributes, arrays, etc don't have a resource id as the name. They specify
         // other data, which would be wrong to change via a lookup.
         if (entry.dynamic_ref_table->lookupResourceId(&new_key) != NO_ERROR) {
@@ -501,7 +503,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   // The keys are expected to be in sorted order. Merge the two bags.
   while (map_entry != map_entry_end && parent_entry != parent_entry_end) {
     uint32_t child_key = dtohl(map_entry->name.ident);
-    if (!util::is_internal_resid(child_key)) {
+    if (!is_internal_resid(child_key)) {
       if (entry.dynamic_ref_table->lookupResourceId(&child_key) != NO_ERROR) {
         LOG(ERROR) << base::StringPrintf("Failed to resolve key 0x%08x in bag 0x%08x.", child_key, resid);
         return nullptr;
@@ -533,7 +535,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   // Finish the child entries if they exist.
   while (map_entry != map_entry_end) {
     uint32_t new_key = dtohl(map_entry->name.ident);
-    if (!util::is_internal_resid(new_key)) {
+    if (!is_internal_resid(new_key)) {
       if (entry.dynamic_ref_table->lookupResourceId(&new_key) != NO_ERROR) {
         LOG(ERROR) << base::StringPrintf("Failed to resolve key 0x%08x in bag 0x%08x.", new_key, resid);
         return nullptr;
@@ -571,12 +573,71 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   return result;
 }
 
+static bool Utf8ToUtf16(const StringPiece& str, std::u16string* out) {
+  ssize_t len =
+      utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(str.data()), str.size(), false);
+  if (len < 0) {
+    return false;
+  }
+  out->resize(static_cast<size_t>(len));
+  utf8_to_utf16(reinterpret_cast<const uint8_t*>(str.data()), str.size(), &*out->begin(),
+                static_cast<size_t>(len + 1));
+  return true;
+}
+
 uint32_t AssetManager2::GetResourceId(const std::string& resource_name,
                                       const std::string& fallback_type,
                                       const std::string& fallback_package) {
-  (void)resource_name;
-  (void)fallback_type;
-  (void)fallback_package;
+  StringPiece package_name, type, entry;
+  if (!ExtractResourceName(resource_name, &package_name, &type, &entry)) {
+    return 0u;
+  }
+
+  if (entry.empty()) {
+    return 0u;
+  }
+
+  if (package_name.empty()) {
+    package_name = fallback_package;
+  }
+
+  if (type.empty()) {
+    type = fallback_type;
+  }
+
+  std::u16string type16;
+  if (!Utf8ToUtf16(type, &type16)) {
+    return 0u;
+  }
+
+  std::u16string entry16;
+  if (!Utf8ToUtf16(entry, &entry16)) {
+    return 0u;
+  }
+
+  const StringPiece16 kAttr16 = u"attr";
+  const static std::u16string kAttrPrivate16 = u"^attr-private";
+
+  for (const PackageGroup& package_group : package_groups_) {
+    for (const LoadedPackage* package : package_group.packages_) {
+      if (package_name != package->GetPackageName()) {
+        // All packages in the same group are expected to have the same package name.
+        break;
+      }
+
+      uint32_t resid = package->FindEntryByName(type16, entry16);
+      if (resid == 0u && kAttr16 == type16) {
+        // Private attributes in libraries (such as the framework) are sometimes encoded
+        // under the type '^attr-private' in order to leave the ID space of public 'attr'
+        // free for future additions. Check '^attr-private' for the same name.
+        resid = package->FindEntryByName(kAttrPrivate16, entry16);
+      }
+
+      if (resid != 0u) {
+        return fix_package_id(resid, package_group.dynamic_ref_table.mAssignedPackageId);
+      }
+    }
+  }
   return 0u;
 }
 
@@ -619,15 +680,15 @@ bool Theme::ApplyStyle(uint32_t resid, bool force) {
 
     // If the resource ID passed in is not a style, the key can be
     // some other identifier that is not a resource ID.
-    if (!util::is_valid_resid(attr_resid)) {
+    if (!is_valid_resid(attr_resid)) {
       return false;
     }
 
-    const uint32_t package_idx = util::get_package_id(attr_resid);
+    const uint32_t package_idx = get_package_id(attr_resid);
 
     // The type ID is 1-based, so subtract 1 to get an index.
-    const uint32_t type_idx = util::get_type_id(attr_resid) - 1;
-    const uint32_t entry_idx = util::get_entry_id(attr_resid);
+    const uint32_t type_idx = get_type_id(attr_resid) - 1;
+    const uint32_t entry_idx = get_entry_id(attr_resid);
 
     std::unique_ptr<Package>& package = packages_[package_idx];
     if (package == nullptr) {
@@ -656,9 +717,9 @@ bool Theme::ApplyStyle(uint32_t resid, bool force) {
   // and populate the structures.
   for (auto bag_iter = begin(bag); bag_iter != bag_iter_end; ++bag_iter) {
     const uint32_t attr_resid = bag_iter->key;
-    const uint32_t package_idx = util::get_package_id(attr_resid);
-    const uint32_t type_idx = util::get_type_id(attr_resid) - 1;
-    const uint32_t entry_idx = util::get_entry_id(attr_resid);
+    const uint32_t package_idx = get_package_id(attr_resid);
+    const uint32_t type_idx = get_type_id(attr_resid) - 1;
+    const uint32_t entry_idx = get_entry_id(attr_resid);
     Package* package = packages_[package_idx].get();
     util::unique_cptr<Type>& type = package->types[type_idx];
     if (type->entry_count != type->entry_capacity) {
@@ -691,15 +752,15 @@ ApkAssetsCookie Theme::GetAttribute(uint32_t resid, Res_value* out_value,
   uint32_t type_spec_flags = 0u;
 
   for (int iterations_left = kMaxIterations; iterations_left > 0; iterations_left--) {
-    if (!util::is_valid_resid(resid)) {
+    if (!is_valid_resid(resid)) {
       return kInvalidCookie;
     }
 
-    const uint32_t package_idx = util::get_package_id(resid);
+    const uint32_t package_idx = get_package_id(resid);
 
     // Type ID is 1-based, subtract 1 to get the index.
-    const uint32_t type_idx = util::get_type_id(resid) - 1;
-    const uint32_t entry_idx = util::get_entry_id(resid);
+    const uint32_t type_idx = get_type_id(resid) - 1;
+    const uint32_t entry_idx = get_entry_id(resid);
 
     const Package* package = packages_[package_idx].get();
     if (package == nullptr) {

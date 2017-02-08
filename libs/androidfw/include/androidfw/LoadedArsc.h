@@ -101,6 +101,13 @@ class LoadedPackage {
   // before being inserted into the set. This may cause some equivalent locales to de-dupe.
   void CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const;
 
+  // Finds the entry with the specified type name and entry name. The names are in UTF-16 because
+  // the underlying ResStringPool API expects this. For now this is acceptable, but since
+  // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
+  // Returns a partial resource ID, with the package ID left as 0x00. The caller is responsible
+  // for patching the correct package ID to the resource ID.
+  uint32_t FindEntryByName(const std::u16string& type_name, const std::u16string& entry_name) const;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 

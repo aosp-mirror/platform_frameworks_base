@@ -32,6 +32,7 @@ testFiles := \
     ConfigLocale_test.cpp \
     Idmap_test.cpp \
     LoadedArsc_test.cpp \
+    ResourceUtils_test.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
     StringPiece_test.cpp \

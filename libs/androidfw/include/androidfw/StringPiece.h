@@ -257,6 +257,16 @@ inline typename BasicStringPiece<TChar>::const_iterator BasicStringPiece<TChar>:
   return data_ + length_;
 }
 
+template <typename TChar>
+inline bool operator==(const TChar* lhs, const BasicStringPiece<TChar>& rhs) {
+  return BasicStringPiece<TChar>(lhs) == rhs;
+}
+
+template <typename TChar>
+inline bool operator!=(const TChar* lhs, const BasicStringPiece<TChar>& rhs) {
+  return BasicStringPiece<TChar>(lhs) != rhs;
+}
+
 inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<char>& str) {
   return out.write(str.data(), str.size());
 }
