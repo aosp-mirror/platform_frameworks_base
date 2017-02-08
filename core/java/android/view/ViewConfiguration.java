@@ -156,6 +156,11 @@ public class ViewConfiguration {
     private static final int TOUCH_SLOP = 8;
 
     /**
+     * Defines the minimum size of the touch target for a scrollbar in dips
+     */
+    private static final int MIN_SCROLLBAR_TOUCH_TARGET = 48;
+
+    /**
      * Distance the first touch can wander before we stop considering this event a double tap
      * (in dips)
      */
@@ -274,6 +279,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mMinScrollbarTouchTarget;
     private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
@@ -302,6 +308,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mMinScrollbarTouchTarget = MIN_SCROLLBAR_TOUCH_TARGET;
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
@@ -386,6 +393,8 @@ public class ViewConfiguration {
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
         mTouchSlop = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewConfigurationTouchSlop);
+        mMinScrollbarTouchTarget = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_minScrollbarTouchTarget);
         mPagingTouchSlop = mTouchSlop * 2;
 
         mDoubleTapTouchSlop = mTouchSlop;
@@ -437,6 +446,14 @@ public class ViewConfiguration {
      */
     public int getScaledScrollBarSize() {
         return mScrollbarSize;
+    }
+
+    /**
+     * @return the minimum size of the scrollbar thumb's touch target in pixels
+     * @hide
+     */
+    public int getScaledMinScrollbarTouchTarget() {
+        return mMinScrollbarTouchTarget;
     }
 
     /**

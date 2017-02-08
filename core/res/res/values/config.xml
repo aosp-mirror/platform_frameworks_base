@@ -1847,6 +1847,9 @@
     -->
     <fraction name="config_maximumScreenDimRatio">20%</fraction>
 
+    <!-- Minimum size of the scrollbar thumb's touch target. -->
+    <dimen name="config_minScrollbarTouchTarget">48dp</dimen>
+
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->
     <dimen name="config_viewConfigurationTouchSlop">8dp</dimen>

@@ -5373,16 +5373,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         x += getScrollX();
         y += getScrollY();
         if (isVerticalScrollBarEnabled() && !isVerticalScrollBarHidden()) {
-            final Rect bounds = mScrollCache.mScrollBarBounds;
-            getVerticalScrollBarBounds(bounds);
-            if (bounds.contains((int)x, (int)y)) {
+            final Rect touchBounds = mScrollCache.mScrollBarTouchBounds;
+            getVerticalScrollBarBounds(null, touchBounds);
+            if (touchBounds.contains((int) x, (int) y)) {
                 return true;
             }
         }
         if (isHorizontalScrollBarEnabled()) {
-            final Rect bounds = mScrollCache.mScrollBarBounds;
-            getHorizontalScrollBarBounds(bounds);
-            if (bounds.contains((int)x, (int)y)) {
+            final Rect touchBounds = mScrollCache.mScrollBarTouchBounds;
+            getHorizontalScrollBarBounds(null, touchBounds);
+            if (touchBounds.contains((int) x, (int) y)) {
                 return true;
             }
         }
@@ -5401,7 +5401,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             x += getScrollX();
             y += getScrollY();
             final Rect bounds = mScrollCache.mScrollBarBounds;
-            getVerticalScrollBarBounds(bounds);
+            final Rect touchBounds = mScrollCache.mScrollBarTouchBounds;
+            getVerticalScrollBarBounds(bounds, touchBounds);
             final int range = computeVerticalScrollRange();
             final int offset = computeVerticalScrollOffset();
             final int extent = computeVerticalScrollExtent();
@@ -5410,8 +5411,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final int thumbOffset = ScrollBarUtils.getThumbOffset(bounds.height(), thumbLength,
                     extent, range, offset);
             final int thumbTop = bounds.top + thumbOffset;
-            if (x >= bounds.left && x <= bounds.right && y >= thumbTop
-                    && y <= thumbTop + thumbLength) {
+            final int adjust = Math.max(mScrollCache.scrollBarMinTouchTarget - thumbLength, 0) / 2;
+            if (x >= touchBounds.left && x <= touchBounds.right
+                    && y >= thumbTop - adjust && y <= thumbTop + thumbLength + adjust) {
                 return true;
             }
         }
@@ -5426,7 +5428,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             x += getScrollX();
             y += getScrollY();
             final Rect bounds = mScrollCache.mScrollBarBounds;
-            getHorizontalScrollBarBounds(bounds);
+            final Rect touchBounds = mScrollCache.mScrollBarTouchBounds;
+            getHorizontalScrollBarBounds(bounds, touchBounds);
             final int range = computeHorizontalScrollRange();
             final int offset = computeHorizontalScrollOffset();
             final int extent = computeHorizontalScrollExtent();
@@ -5435,8 +5438,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final int thumbOffset = ScrollBarUtils.getThumbOffset(bounds.width(), thumbLength,
                     extent, range, offset);
             final int thumbLeft = bounds.left + thumbOffset;
-            if (x >= thumbLeft && x <= thumbLeft + thumbLength && y >= bounds.top
-                    && y <= bounds.bottom) {
+            final int adjust = Math.max(mScrollCache.scrollBarMinTouchTarget - thumbLength, 0) / 2;
+            if (x >= thumbLeft - adjust && x <= thumbLeft + thumbLength + adjust
+                    && y >= touchBounds.top && y <= touchBounds.bottom) {
                 return true;
             }
         }
@@ -11739,7 +11743,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (mScrollCache.mScrollBarDraggingState
                         == ScrollabilityCache.DRAGGING_VERTICAL_SCROLL_BAR) {
                     final Rect bounds = mScrollCache.mScrollBarBounds;
-                    getVerticalScrollBarBounds(bounds);
+                    getVerticalScrollBarBounds(bounds, null);
                     final int range = computeVerticalScrollRange();
                     final int offset = computeVerticalScrollOffset();
                     final int extent = computeVerticalScrollExtent();
@@ -11768,7 +11772,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (mScrollCache.mScrollBarDraggingState
                         == ScrollabilityCache.DRAGGING_HORIZONTAL_SCROLL_BAR) {
                     final Rect bounds = mScrollCache.mScrollBarBounds;
-                    getHorizontalScrollBarBounds(bounds);
+                    getHorizontalScrollBarBounds(bounds, null);
                     final int range = computeHorizontalScrollRange();
                     final int offset = computeHorizontalScrollOffset();
                     final int extent = computeHorizontalScrollExtent();
@@ -15466,7 +15470,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void getHorizontalScrollBarBounds(Rect bounds) {
+    private void getHorizontalScrollBarBounds(@Nullable Rect drawBounds,
+            @Nullable Rect touchBounds) {
+        final Rect bounds = drawBounds != null ? drawBounds : touchBounds;
+        if (bounds == null) {
+            return;
+        }
         final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
         final boolean drawVerticalScrollBar = isVerticalScrollBarEnabled()
                 && !isVerticalScrollBarHidden();
@@ -15479,13 +15488,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         bounds.left = mScrollX + (mPaddingLeft & inside);
         bounds.right = mScrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap;
         bounds.bottom = bounds.top + size;
+
+        if (touchBounds == null) {
+            return;
+        }
+        if (touchBounds != bounds) {
+            touchBounds.set(bounds);
+        }
+        final int minTouchTarget = mScrollCache.scrollBarMinTouchTarget;
+        if (touchBounds.height() < minTouchTarget) {
+            final int adjust = (minTouchTarget - touchBounds.height()) / 2;
+            touchBounds.bottom = Math.min(touchBounds.bottom + adjust, mScrollY + height);
+            touchBounds.top = touchBounds.bottom - minTouchTarget;
+        }
+        if (touchBounds.width() < minTouchTarget) {
+            final int adjust = (minTouchTarget - touchBounds.width()) / 2;
+            touchBounds.left -= adjust;
+            touchBounds.right = touchBounds.left + minTouchTarget;
+        }
     }
 
-    private void getVerticalScrollBarBounds(Rect bounds) {
+    private void getVerticalScrollBarBounds(@Nullable Rect bounds, @Nullable Rect touchBounds) {
         if (mRoundScrollbarRenderer == null) {
-            getStraightVerticalScrollBarBounds(bounds);
+            getStraightVerticalScrollBarBounds(bounds, touchBounds);
         } else {
-            getRoundVerticalScrollBarBounds(bounds);
+            getRoundVerticalScrollBarBounds(bounds != null ? bounds : touchBounds);
         }
     }
 
@@ -15500,7 +15527,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         bounds.bottom = mScrollY + height;
     }
 
-    private void getStraightVerticalScrollBarBounds(Rect bounds) {
+    private void getStraightVerticalScrollBarBounds(@Nullable Rect drawBounds,
+            @Nullable Rect touchBounds) {
+        final Rect bounds = drawBounds != null ? drawBounds : touchBounds;
+        if (bounds == null) {
+            return;
+        }
         final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
         final int size = getVerticalScrollbarWidth();
         int verticalScrollbarPosition = mVerticalScrollbarPosition;
@@ -15522,6 +15554,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         bounds.top = mScrollY + (mPaddingTop & inside);
         bounds.right = bounds.left + size;
         bounds.bottom = mScrollY + height - (mUserPaddingBottom & inside);
+
+        if (touchBounds == null) {
+            return;
+        }
+        if (touchBounds != bounds) {
+            touchBounds.set(bounds);
+        }
+        final int minTouchTarget = mScrollCache.scrollBarMinTouchTarget;
+        if (touchBounds.width() < minTouchTarget) {
+            final int adjust = (minTouchTarget - touchBounds.width()) / 2;
+            if (verticalScrollbarPosition == SCROLLBAR_POSITION_RIGHT) {
+                touchBounds.right = Math.min(touchBounds.right + adjust, mScrollX + width);
+                touchBounds.left = touchBounds.right - minTouchTarget;
+            } else {
+                touchBounds.left = Math.max(touchBounds.left + adjust, mScrollX);
+                touchBounds.right = touchBounds.left + minTouchTarget;
+            }
+        }
+        if (touchBounds.height() < minTouchTarget) {
+            final int adjust = (minTouchTarget - touchBounds.height()) / 2;
+            touchBounds.top -= adjust;
+            touchBounds.bottom = touchBounds.top + minTouchTarget;
+        }
     }
 
     /**
@@ -15580,7 +15635,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mRoundScrollbarRenderer != null) {
                 if (drawVerticalScrollBar) {
                     final Rect bounds = cache.mScrollBarBounds;
-                    getVerticalScrollBarBounds(bounds);
+                    getVerticalScrollBarBounds(bounds, null);
                     mRoundScrollbarRenderer.drawRoundScrollbars(
                             canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds);
                     if (invalidate) {
@@ -15596,7 +15651,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             computeHorizontalScrollOffset(),
                             computeHorizontalScrollExtent(), false);
                     final Rect bounds = cache.mScrollBarBounds;
-                    getHorizontalScrollBarBounds(bounds);
+                    getHorizontalScrollBarBounds(bounds, null);
                     onDrawHorizontalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
                             bounds.right, bounds.bottom);
                     if (invalidate) {
@@ -15609,7 +15664,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             computeVerticalScrollOffset(),
                             computeVerticalScrollExtent(), true);
                     final Rect bounds = cache.mScrollBarBounds;
-                    getVerticalScrollBarBounds(bounds);
+                    getVerticalScrollBarBounds(bounds, null);
                     onDrawVerticalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
                             bounds.right, bounds.bottom);
                     if (invalidate) {
@@ -24101,6 +24156,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public int scrollBarFadeDuration;
 
         public int scrollBarSize;
+        public int scrollBarMinTouchTarget;
         public ScrollBarDrawable scrollBar;
         public float[] interpolatorValues;
         public View host;
@@ -24129,6 +24185,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private int mLastColor;
 
         public final Rect mScrollBarBounds = new Rect();
+        public final Rect mScrollBarTouchBounds = new Rect();
 
         public static final int NOT_DRAGGING = 0;
         public static final int DRAGGING_VERTICAL_SCROLL_BAR = 1;
@@ -24140,6 +24197,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public ScrollabilityCache(ViewConfiguration configuration, View host) {
             fadingEdgeLength = configuration.getScaledFadingEdgeLength();
             scrollBarSize = configuration.getScaledScrollBarSize();
+            scrollBarMinTouchTarget = configuration.getScaledMinScrollbarTouchTarget();
             scrollBarDefaultDelayBeforeFade = ViewConfiguration.getScrollDefaultDelay();
             scrollBarFadeDuration = ViewConfiguration.getScrollBarFadeDuration();
 
