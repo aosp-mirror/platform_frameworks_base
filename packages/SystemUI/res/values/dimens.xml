@@ -520,14 +520,6 @@
     <!-- How much two taps can be apart to still be recognized as a double tap on the lockscreen -->
     <dimen name="double_tap_slop">32dp</dimen>
 
-    <!-- Margin on the right side of the system icon group on Keyguard. -->
-    <fraction name="battery_button_height_fraction">10.5%</fraction>
-
-    <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
-         fraction of a pixel.-->
-    <fraction name="battery_subpixel_smoothing_left">0%</fraction>
-    <fraction name="battery_subpixel_smoothing_right">0%</fraction>
-
     <dimen name="battery_margin_bottom">0dp</dimen>
 
     <!-- Padding at the end of the view that displays the mobile signal icons. If the view is
@@ -641,9 +633,6 @@
 
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
-
-    <dimen name="battery_height">14.5dp</dimen>
-    <dimen name="battery_width">9.5dp</dimen>
 
     <dimen name="battery_detail_graph_space_top">27dp</dimen>
     <dimen name="battery_detail_graph_space_bottom">27dp</dimen>

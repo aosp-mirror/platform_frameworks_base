@@ -819,9 +819,6 @@
     <!-- Expanded Status Bar Header: Not charging [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_not_charging">Not charging</string>
 
-    <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
-    <string name="battery_meter_very_low_overlay_symbol">!</string>
-
     <!-- Shows up when there is a user SSL CA Cert installed on the
          device.  Indicates to the user that SSL traffic can be intercepted.
          If the text fits on one line (~14 chars), it should start with a

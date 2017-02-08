@@ -57,4 +57,15 @@
     <dimen name="drawer_width">300dp</dimen>
     <dimen name="drawer_item_top_bottom_margin">4dp</dimen>
     <dimen name="drawer_spacer_height">32dp</dimen>
+
+    <dimen name="battery_height">48dp</dimen>
+    <dimen name="battery_width">38dp</dimen>
+
+    <!-- Margin on the right side of the system icon group on Keyguard. -->
+    <fraction name="battery_button_height_fraction">10.5%</fraction>
+
+    <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
+         fraction of a pixel.-->
+    <fraction name="battery_subpixel_smoothing_left">0%</fraction>
+    <fraction name="battery_subpixel_smoothing_right">0%</fraction>
 </resources>
