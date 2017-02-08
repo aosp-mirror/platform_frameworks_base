@@ -100,7 +100,6 @@ import android.view.animation.Transformation;
 import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
-import android.view.autofill.VirtualViewDelegate;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -6914,10 +6913,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Called when assist structure is being retrieved from a view as part of an auto-fill request.
      *
-     * <p>The structure must be filled according to the request type, which is set in the
-     * {@code flags} parameter - see the documentation on each flag for more details.
+     * <p>When implementing this method, subclasses must also:
      *
-     * @param structure Fill in with structured view data.  The default implementation
+     * <ol>
+     * <li>Implement {@link #autoFill(AutoFillValue)}, {@link #getAutoFillType()}
+     * and {@link #getAutoFillValue()}.
+     * <li>Call {@link android.view.autofill.AutoFillManager#virtualValueChanged(View, int,
+     * AutoFillValue)} when its value changed.
+     * </ol>
+     *
+     * @param structure Fill in with structured view data. The default implementation
      * fills in all data that can be inferred from the view itself.
      * @param flags optional flags (currently {@code 0}).
      */
@@ -7013,12 +7018,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Called when assist structure is being retrieved from a view as part of an auto-fill request
      * to generate additional virtual structure under this view.
      *
-     * <p>The defaullt implementation uses {@link #getAccessibilityNodeProvider()} to try to
+     * <p>The default implementation uses {@link #getAccessibilityNodeProvider()} to try to
      * generate this from the view's virtual accessibility nodes, if any. You can override this
      * for a more optimal implementation providing this data.
      *
-     * <p>The structure must be filled according to the request type, which is set in the
-     * {@code flags} parameter - see the documentation on each flag for more details.
+     * <p>When implementing this method, subclasses must follow the rules below:
+     *
+     * <ol>
+     * <li>Also implement {@link #autoFillVirtual(int, AutoFillValue)} to auto-fill the virtual
+     * children.
+     * <li>Call {@link android.view.autofill.AutoFillManager#virtualFocusChanged(View, int, Rect,
+     * boolean)} when the focus inside the view changed.
+     * <li>Call {@link android.view.autofill.AutoFillManager#virtualValueChanged(View, int,
+     * AutoFillValue)} when the value of a child changed.
+     * <li>Call {@link android.view.autofill.AutoFillManager#reset()} when the auto-fill context
+     * of the view structure changed.
+     * </ol>
      *
      * @param structure Fill in with structured view data.
      * @param flags optional flags (currently {@code 0}).
@@ -7042,28 +7057,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the {@link VirtualViewDelegate} responsible for auto-filling the virtual children of
-     * this view.
-     *
-     * <p>By default returns {@code null} but should be overridden when view provides a virtual
-     * hierachy on {@link #onProvideAutoFillVirtualStructure(ViewStructure, int)}.
-     */
-    @Nullable
-    public VirtualViewDelegate getAutoFillVirtualViewDelegate() {
-        return null;
-    }
-
-    /**
      * Automatically fills the content of this view with the {@code value}.
      *
-     * <p>By default does nothing, but views should override it (and {@link #getAutoFillType()
-     * and #getAutoFillValue()} to support the AutoFill Framework.
+     * <p>By default does nothing, but views should override it (and {@link #getAutoFillType()},
+     * {@link #getAutoFillValue()}, and {@link #onProvideAutoFillStructure(ViewStructure, int)}
+     * to support the AutoFill Framework.
      *
      * <p>Typically, it is implemented by:
      *
      * <ol>
-     * <li>Call the proper getter method on {@link AutoFillValue} to fetch the actual value.
-     * <li>Pass the actual value to the equivalent setter in the view.
+     * <li>Calling the proper getter method on {@link AutoFillValue} to fetch the actual value.
+     * <li>Passing the actual value to the equivalent setter in the view.
      * <ol>
      *
      * <p>For example, a text-field view would call:
@@ -7074,15 +7078,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     setText(text);
      * }
      * </pre>
+     *
+     * @param value value to be auto-filled.
      */
     public void autoFill(@SuppressWarnings("unused") AutoFillValue value) {
     }
 
     /**
-     * Describes the auto-fill type that should be used on calls to
-     * {@link #autoFill(AutoFillValue)} and
-     * {@link VirtualViewDelegate#autoFill(int, AutoFillValue)}.
+     * Automatically fills the content of a virtual view with the {@code value}
      *
+     * <p>See {@link #autoFill(AutoFillValue)} and
+     * {@link #onProvideAutoFillVirtualStructure(ViewStructure, int)} for more info.
+     *
+     * @param value value to be auto-filled.
+     * @param virtualId id identifying the virtual child inside the custom view.
+     */
+    public void autoFillVirtual(@SuppressWarnings("unused") int virtualId,
+            @SuppressWarnings("unused") AutoFillValue value) {
+    }
+
+    /**
+     * Describes the auto-fill type that should be used on calls to
+     * {@link #autoFill(AutoFillValue)} and {@link #autoFillVirtual(int, AutoFillValue)}.
+
      * <p>By default returns {@code null}, but views should override it (and
      * {@link #autoFill(AutoFillValue)} to support the AutoFill Framework.
      */
@@ -7201,6 +7219,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean blocked = forAutoFill ? isAutoFillBlocked() : isAssistBlocked();
         if (!blocked) {
             if (forAutoFill) {
+                // The auto-fill id needs to be unique, but its value doesn't matter,
+                // so it's better to reuse the accessibility id to save space.
+                structure.setAutoFillId(getAccessibilityViewId());
                 // NOTE: flags are not currently supported, hence 0
                 onProvideAutoFillStructure(structure, 0);
                 onProvideAutoFillVirtualStructure(structure, 0);
