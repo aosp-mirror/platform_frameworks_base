@@ -100,7 +100,7 @@ public final class Credential implements Parcelable {
     public void setCheckAaaServerCertStatus(boolean checkAaaServerCertStatus) {
         mCheckAaaServerCertStatus = checkAaaServerCertStatus;
     }
-    public boolean getCheckAaaServerStatus() {
+    public boolean getCheckAaaServerCertStatus() {
         return mCheckAaaServerCertStatus;
     }
 
