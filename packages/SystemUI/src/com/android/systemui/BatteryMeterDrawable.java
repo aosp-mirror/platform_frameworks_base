@@ -27,6 +27,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 public class BatteryMeterDrawable extends BatteryMeterDrawableBase implements
         BatteryController.BatteryStateChangeCallback {
 
+    public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
+
     private BatteryController mBatteryController;
     private SettingObserver mSettingObserver;
 
@@ -38,16 +40,13 @@ public class BatteryMeterDrawable extends BatteryMeterDrawableBase implements
 
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        mLevel = level;
-        mPluggedIn = pluggedIn;
-
-        postInvalidate();
+        setBatteryLevel(level);
+        setPluggedIn(pluggedIn);
     }
 
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
-        mPowerSaveEnabled = isPowerSave;
-        invalidateSelf();
+        setPowerSave(isPowerSave);
     }
 
     public void startListening() {
@@ -62,15 +61,14 @@ public class BatteryMeterDrawable extends BatteryMeterDrawableBase implements
         mBatteryController.removeCallback(this);
     }
 
-    @Override
     protected void updateShowPercent() {
-        mShowPercent = 0 != Settings.System.getInt(mContext.getContentResolver(),
-                SHOW_PERCENT_SETTING, 0);
+        setShowPercent(0 != Settings.System.getInt(mContext.getContentResolver(),
+                SHOW_PERCENT_SETTING, 0));
     }
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        setPowerSave(mBatteryController.isPowerSave());
     }
 
     private final class SettingObserver extends ContentObserver {
