@@ -829,6 +829,50 @@ public class NetworkScoreServiceTest {
         assertEquals(expectedList, actualList);
     }
 
+    @Test
+    public void testGetActiveScorer_notConnected_canRequestScores() throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        assertNull(mNetworkScoreService.getActiveScorer());
+    }
+
+    @Test
+    public void testGetActiveScorer_notConnected_canNotRequestScores() throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        try {
+            mNetworkScoreService.getActiveScorer();
+            fail("SecurityException expected.");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void testGetActiveScorer_connected_canRequestScores()
+            throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        NetworkScorerAppData expectedAppData =
+                new NetworkScorerAppData(Binder.getCallingUid(), RECOMMENDATION_SERVICE_COMP);
+        bindToScorer(expectedAppData);
+        assertEquals(expectedAppData, mNetworkScoreService.getActiveScorer());
+    }
+
+    @Test
+    public void testGetActiveScorer_connected_canNotRequestScores()
+            throws Exception {
+        when(mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        bindToScorer(false);
+        try {
+            mNetworkScoreService.getActiveScorer();
+            fail("SecurityException expected.");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
     // "injects" the mock INetworkRecommendationProvider into the NetworkScoreService.
     private void injectProvider() {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(NEW_SCORER);
@@ -849,9 +893,13 @@ public class NetworkScoreServiceTest {
     }
 
     private void bindToScorer(boolean callerIsScorer) {
-        final int callingUid = callerIsScorer ? Binder.getCallingUid() : 0;
+        final int callingUid = callerIsScorer ? Binder.getCallingUid() : Binder.getCallingUid() + 1;
         NetworkScorerAppData appData =
                 new NetworkScorerAppData(callingUid, RECOMMENDATION_SERVICE_COMP);
+        bindToScorer(appData);
+    }
+
+    private void bindToScorer(NetworkScorerAppData appData) {
         when(mNetworkScorerAppManager.getActiveScorer()).thenReturn(appData);
         when(mContext.bindServiceAsUser(isA(Intent.class), isA(ServiceConnection.class), anyInt(),
                 isA(UserHandle.class))).thenReturn(true);

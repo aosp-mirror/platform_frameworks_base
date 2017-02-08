@@ -186,6 +186,20 @@ public class NetworkScoreManager {
     }
 
     /**
+     * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
+     *
+     * @hide
+     */
+    @Nullable
+    public NetworkScorerAppData getActiveScorer() {
+        try {
+            return mService.getActiveScorer();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Update network scores.
      *
      * <p>This may be called at any time to re-score active networks. Scores will generally be

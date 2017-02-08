@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -54,7 +56,7 @@ public class NetworkScorerAppManager {
     /**
      * Holds metadata about a discovered network scorer/recommendation application.
      */
-    public static class NetworkScorerAppData {
+    public static final class NetworkScorerAppData implements Parcelable {
         /** UID of the scorer app. */
         public final int packageUid;
         private final ComponentName mRecommendationService;
@@ -63,6 +65,35 @@ public class NetworkScorerAppManager {
             this.packageUid = packageUid;
             this.mRecommendationService = recommendationServiceComp;
         }
+
+        protected NetworkScorerAppData(Parcel in) {
+            packageUid = in.readInt();
+            mRecommendationService = ComponentName.readFromParcel(in);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(packageUid);
+            ComponentName.writeToParcel(mRecommendationService, dest);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<NetworkScorerAppData> CREATOR =
+                new Creator<NetworkScorerAppData>() {
+                    @Override
+                    public NetworkScorerAppData createFromParcel(Parcel in) {
+                        return new NetworkScorerAppData(in);
+                    }
+
+                    @Override
+                    public NetworkScorerAppData[] newArray(int size) {
+                        return new NetworkScorerAppData[size];
+                    }
+                };
 
         public String getRecommendationServicePackageName() {
             return mRecommendationService.getPackageName();

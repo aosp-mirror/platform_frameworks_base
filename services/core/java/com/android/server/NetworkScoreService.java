@@ -53,6 +53,7 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -676,6 +677,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
+    private boolean isCallerSystemProcess(int callingUid) {
+        return callingUid == Process.SYSTEM_UID;
+    }
+
     /**
      * Obtain the package name of the current active network scorer.
      *
@@ -689,6 +694,27 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return mServiceConnection.getPackageName();
             }
         }
+        return null;
+    }
+
+
+    /**
+     * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
+     */
+    @Override
+    public NetworkScorerAppData getActiveScorer() {
+        // Only the system can access this data.
+        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
+            synchronized (mServiceConnectionLock) {
+                if (mServiceConnection != null) {
+                    return mServiceConnection.mAppData;
+                }
+            }
+        } else {
+            throw new SecurityException(
+                    "Caller is neither the system process nor a score requester.");
+        }
+
         return null;
     }
 
