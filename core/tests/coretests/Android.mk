@@ -34,7 +34,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     espresso-core \
     ub-uiautomator \
     platform-test-annotations \
-    compatibility-device-util
+    compatibility-device-util \
+    truth-prebuilt
 
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
