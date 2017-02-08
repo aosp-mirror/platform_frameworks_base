@@ -107,7 +107,9 @@ public class PipMotionHelper {
         cancelAnimations();
         try {
             StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            mBounds.set(stackInfo.bounds);
+            if (stackInfo != null) {
+                mBounds.set(stackInfo.bounds);
+            }
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get pinned stack bounds");
         }
