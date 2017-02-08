@@ -2219,11 +2219,13 @@ public final class Debug
     }
 
     /**
-     * Have the stack traces of the given native process dumped to the
-     * specified file.  Will be appended to the file.
+     * Append the stack traces of a given native process to a specified file.
+     * @param pid pid to dump.
+     * @param file path of file to append dump to.
+     * @param timeoutSecs time to wait in seconds, or 0 to wait forever.
      * @hide
      */
-    public static native void dumpNativeBacktraceToFile(int pid, String file);
+    public static native void dumpNativeBacktraceToFileTimeout(int pid, String file, int timeoutSecs);
 
     /**
      * Get description of unreachable native memory.
