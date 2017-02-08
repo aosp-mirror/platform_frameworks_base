@@ -125,7 +125,7 @@ public class ImmersiveModeConfirmation {
 
     void systemReady() {
         IVrManager vrManager = IVrManager.Stub.asInterface(
-                ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
+                ServiceManager.getService(Context.VR_SERVICE));
         if (vrManager != null) {
             try {
                 vrManager.registerListener(mVrStateCallbacks);

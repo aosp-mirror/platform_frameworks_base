@@ -732,8 +732,7 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DOUBLE_TAP_TO_WAKE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
-            IVrManager vrManager =
-                    (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
+            IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
             if (vrManager != null) {
                 try {
                     vrManager.registerListener(mVrStateCallbacks);

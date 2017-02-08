@@ -141,8 +141,7 @@ public final class NightDisplayService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            IVrManager vrManager =
-                    (IVrManager) getBinderService(VrManagerService.VR_MANAGER_BINDER_SERVICE);
+            IVrManager vrManager = (IVrManager) getBinderService(Context.VR_SERVICE);
             if (vrManager != null) {
                 try {
                     vrManager.registerListener(mVrStateCallbacks);

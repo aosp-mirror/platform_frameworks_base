@@ -295,8 +295,10 @@ public class BrightnessController implements ToggleSlider.Listener {
 
         mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
-        mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
-        mVrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+        mPower = IPowerManager.Stub.asInterface(ServiceManager.getService(
+                Context.POWER_SERVICE));
+        mVrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
+                Context.VR_SERVICE));
     }
 
     public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
