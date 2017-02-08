@@ -858,6 +858,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static boolean sHasFocusableExcludeAutoFocusable;
 
+    /**
+     * Prior to O, auto-focusable didn't exist and views marked as clickable weren't implicitly
+     * made focusable by default. As a result, apps could (incorrectly) change the clickable
+     * setting of views off the UI thread. Now that clickable can effect the focusable state,
+     * changing the clickable attribute off the UI thread will cause an exception (since changing
+     * the focusable state checks). In order to prevent apps from crashing, we will handle this
+     * specific case and just not notify parents on new focusables resulting from marking views
+     * clickable from outside the UI thread.
+     */
+    private static boolean sAutoFocusableOffUIThreadWontNotifyParents;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -4181,6 +4192,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sCascadedDragDrop = targetSdkVersion < Build.VERSION_CODES.N;
 
             sHasFocusableExcludeAutoFocusable = targetSdkVersion < Build.VERSION_CODES.O;
+
+            sAutoFocusableOffUIThreadWontNotifyParents = targetSdkVersion < Build.VERSION_CODES.O;
 
             sCompatibilityDone = true;
         }
@@ -12112,6 +12125,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int privateFlags = mPrivateFlags;
 
         // If focusable is auto, update the FOCUSABLE bit.
+        int focusableChangedByAuto = 0;
         if (((mViewFlags & FOCUSABLE_AUTO) != 0)
                 && (changed & (FOCUSABLE_MASK | CLICKABLE | FOCUSABLE_IN_TOUCH_MODE)) != 0) {
             int newFocus = NOT_FOCUSABLE;
@@ -12121,8 +12135,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mViewFlags = (mViewFlags & ~FOCUSABLE_IN_TOUCH_MODE);
             }
             mViewFlags = (mViewFlags & ~FOCUSABLE) | newFocus;
-            int focusChanged = (old & FOCUSABLE) ^ (newFocus & FOCUSABLE);
-            changed = (changed & ~FOCUSABLE) | focusChanged;
+            focusableChangedByAuto = (old & FOCUSABLE) ^ (newFocus & FOCUSABLE);
+            changed = (changed & ~FOCUSABLE) | focusableChangedByAuto;
         }
 
         /* Check if the FOCUSABLE bit has changed */
@@ -12137,7 +12151,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                  * Tell the view system that we are now available to take focus
                  * if no one else already has it.
                  */
-                if (mParent != null) mParent.focusableViewAvailable(this);
+                if (mParent != null) {
+                    ViewRootImpl viewRootImpl = getViewRootImpl();
+                    if (!sAutoFocusableOffUIThreadWontNotifyParents
+                            || focusableChangedByAuto == 0
+                            || viewRootImpl == null
+                            || viewRootImpl.mThread == Thread.currentThread()) {
+                        mParent.focusableViewAvailable(this);
+                    }
+                }
             }
         }
 
