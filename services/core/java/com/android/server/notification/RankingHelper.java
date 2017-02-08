@@ -674,7 +674,7 @@ public class RankingHelper implements RankingConfig {
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted) {
         Preconditions.checkNotNull(pkg);
-        List<NotificationChannelGroup> groups = new ArrayList<>();
+        Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         Record r = getRecord(pkg, uid);
         if (r == null) {
             return ParceledListSlice.emptyList();
@@ -685,23 +685,21 @@ public class RankingHelper implements RankingConfig {
             final NotificationChannel nc = r.channels.valueAt(i);
             if (includeDeleted || !nc.isDeleted()) {
                 if (nc.getGroup() != null) {
-                    // lazily populate channel list
-                    NotificationChannelGroup ncg = r.groups.get(nc.getGroup());
+                    NotificationChannelGroup ncg = groups.get(nc.getGroup());
+                    if (ncg == null ) {
+                        ncg = r.groups.get(nc.getGroup()).clone();
+                        groups.put(nc.getGroup(), ncg);
+                    }
                     ncg.addChannel(nc);
                 } else {
                     nonGrouped.addChannel(nc);
                 }
             }
         }
-        for (NotificationChannelGroup group : r.groups.values()) {
-            if (group.getChannels().size() > 0) {
-                groups.add(group);
-            }
-        }
         if (nonGrouped.getChannels().size() > 0) {
-            groups.add(nonGrouped);
+            groups.put(null, nonGrouped);
         }
-        return new ParceledListSlice<>(groups);
+        return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
 
     @Override
