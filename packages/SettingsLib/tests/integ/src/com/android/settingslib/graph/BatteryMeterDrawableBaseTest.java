@@ -48,4 +48,24 @@ public class BatteryMeterDrawableBaseTest {
         verify(canvas, never()).drawPath(any(), any());
         verify(canvas, never()).drawText(anyString(), anyFloat(), anyFloat(), any());
     }
+
+    @Test
+    public void testDrawingForTypicalValues() {
+        final Canvas canvas = mock(Canvas.class);
+        final int levels[] = { 0, 1, 5, 10, 25, 50, 75, 90, 95, 99, 100 };
+        final boolean bools[] = { false, true };
+        for (int l : levels) {
+            for (boolean plugged : bools) {
+                for (boolean saver : bools) {
+                    for (boolean percent : bools) {
+                        mBatteryDrawable.setBatteryLevel(l);
+                        mBatteryDrawable.setPowerSave(saver);
+                        mBatteryDrawable.setPluggedIn(plugged);
+                        mBatteryDrawable.setShowPercent(percent);
+                        mBatteryDrawable.draw(canvas);
+                    }
+                }
+            }
+        }
+    }
 }

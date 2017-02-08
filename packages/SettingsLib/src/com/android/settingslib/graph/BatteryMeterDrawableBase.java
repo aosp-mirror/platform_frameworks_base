@@ -37,14 +37,13 @@ public class BatteryMeterDrawableBase extends Drawable {
 
     private static final float ASPECT_RATIO = 9.5f / 14.5f;
     public static final String TAG = BatteryMeterDrawableBase.class.getSimpleName();
-    public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
 
     protected final Context mContext;
 
-    protected int mLevel = -1;
-    protected boolean mPluggedIn;
-    protected boolean mPowerSaveEnabled;
-    protected boolean mShowPercent;
+    private int mLevel = -1;
+    private boolean mPluggedIn;
+    private boolean mPowerSaveEnabled;
+    private boolean mShowPercent;
 
     private static final boolean SINGLE_DIGIT_PERCENT = false;
 
@@ -104,7 +103,7 @@ public class BatteryMeterDrawableBase extends Drawable {
         }
         levels.recycle();
         colors.recycle();
-        updateShowPercent();
+
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -143,10 +142,10 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBoltPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_bolt_color));
-        mBoltPoints = loadBoltPoints(res);
+        mBoltPoints = loadPoints(res, R.array.batterymeter_bolt_points);
 
         mPlusPaint = new Paint(mBoltPaint);
-        mPlusPoints = loadPlusPoints(res);
+        mPlusPoints = loadPoints(res, R.array.batterymeter_plus_points);
 
         mDarkModeBackgroundColor =
                 Utils.getDefaultColor(mContext, R.color.dark_mode_icon_color_dual_tone_background);
@@ -171,32 +170,34 @@ public class BatteryMeterDrawableBase extends Drawable {
         return mIntrinsicWidth;
     }
 
-    public void disableShowPercent() {
-        mShowPercent = false;
+    public void setShowPercent(boolean show) {
+        mShowPercent = show;
         postInvalidate();
     }
 
+    public void setPluggedIn(boolean val) {
+        mPluggedIn = val;
+        postInvalidate();
+    }
+
+    public void setBatteryLevel(int val) {
+        mLevel = val;
+        postInvalidate();
+    }
+
+    public void setPowerSave(boolean val) {
+        mPowerSaveEnabled = val;
+        postInvalidate();
+    }
+
+    // an approximation of View.postInvalidate()
     protected void postInvalidate() {
+        unscheduleSelf(this::invalidateSelf);
         scheduleSelf(this::invalidateSelf, 0);
     }
 
-    private static float[] loadBoltPoints(Resources res) {
-        final int[] pts = res.getIntArray(R.array.batterymeter_bolt_points);
-        int maxX = 0, maxY = 0;
-        for (int i = 0; i < pts.length; i += 2) {
-            maxX = Math.max(maxX, pts[i]);
-            maxY = Math.max(maxY, pts[i + 1]);
-        }
-        final float[] ptsF = new float[pts.length];
-        for (int i = 0; i < pts.length; i += 2) {
-            ptsF[i] = (float) pts[i] / maxX;
-            ptsF[i + 1] = (float) pts[i + 1] / maxY;
-        }
-        return ptsF;
-    }
-
-    private static float[] loadPlusPoints(Resources res) {
-        final int[] pts = res.getIntArray(R.array.batterymeter_plus_points);
+    private static float[] loadPoints(Resources res, int pointArrayRes) {
+        final int[] pts = res.getIntArray(pointArrayRes);
         int maxX = 0, maxY = 0;
         for (int i = 0; i < pts.length; i += 2) {
             maxX = Math.max(maxX, pts[i]);
@@ -217,10 +218,6 @@ public class BatteryMeterDrawableBase extends Drawable {
         mWidth = right - left;
         mWarningTextPaint.setTextSize(mHeight * 0.75f);
         mWarningTextHeight = -mWarningTextPaint.getFontMetrics().ascent;
-    }
-
-    protected void updateShowPercent() {
-        mShowPercent = true;
     }
 
     private int getColorForLevel(int percent) {
