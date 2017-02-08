@@ -461,12 +461,12 @@
     <dimen name="floating_toolbar_height">48dp</dimen>
     <dimen name="floating_toolbar_menu_image_button_width">56dp</dimen>
     <dimen name="floating_toolbar_menu_image_button_vertical_padding">12dp</dimen>
-    <dimen name="floating_toolbar_menu_button_side_padding">16dp</dimen>
+    <dimen name="floating_toolbar_menu_button_side_padding">11dp</dimen>
     <dimen name="floating_toolbar_overflow_image_button_width">60dp</dimen>
     <dimen name="floating_toolbar_overflow_side_padding">18dp</dimen>
     <dimen name="floating_toolbar_text_size">14sp</dimen>
     <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
-    <dimen name="floating_toolbar_preferred_width">328dp</dimen>
+    <dimen name="floating_toolbar_preferred_width">400dp</dimen>
     <dimen name="floating_toolbar_minimum_overflow_height">96dp</dimen>
     <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
     <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
