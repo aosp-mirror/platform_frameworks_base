@@ -15,5 +15,5 @@
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
   <solid android:color="#61FFFFFF" />
-  <corners android:radius="@dimen/recents_grid_task_view_rounded_corners_radius"/>
+  <corners android:radius="@dimen/recents_grid_task_view_focused_frame_rounded_corners_radius"/>
 </shape>
