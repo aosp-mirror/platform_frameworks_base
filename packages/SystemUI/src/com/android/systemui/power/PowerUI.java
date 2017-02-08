@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -45,6 +46,8 @@ public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
+    private static final long TEMPERATURE_LOGGING_INTERVAL = DateUtils.HOUR_IN_MILLIS;
+    private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
 
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
@@ -62,7 +65,10 @@ public class PowerUI extends SystemUI {
 
     private long mScreenOffTime = -1;
 
-    private float mThrottlingTemp;
+    private float mThresholdTemp;
+    private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
+    private int mNumTemps;
+    private long mNextLogTime;
 
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -229,10 +235,10 @@ public class PowerUI extends SystemUI {
             return;
         }
 
-        mThrottlingTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
+        mThresholdTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
                 resources.getInteger(R.integer.config_warningTemperature));
 
-        if (mThrottlingTemp < 0f) {
+        if (mThresholdTemp < 0f) {
             // Get the throttling temperature. No need to check if we're not throttling.
             float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
                     HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
@@ -242,39 +248,84 @@ public class PowerUI extends SystemUI {
                     || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
                 return;
             }
-            mThrottlingTemp = throttlingTemps[0];
+            mThresholdTemp = throttlingTemps[0];
         }
+        setNextLogTime();
 
         // We have passed all of the checks, start checking the temp
         updateTemperatureWarning();
     }
 
     private void updateTemperatureWarning() {
-        StatusBar statusBar = getComponent(StatusBar.class);
-        if (statusBar != null && statusBar.isDeviceInVrMode()) {
-            // ensure the warning isn't showing, since VR shows its own warning
-            mWarnings.dismissTemperatureWarning();
-        } else {
-            float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
-                    HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                    HardwarePropertiesManager.TEMPERATURE_CURRENT);
-            boolean shouldShowTempWarning = false;
-            for (float temp : temps) {
-                if (temp >= mThrottlingTemp) {
-                    Slog.i(TAG, "currentTemp=" + temp + ", throttlingTemp=" + mThrottlingTemp);
-                    shouldShowTempWarning = true;
-                    break;
-                }
-            }
-            if (shouldShowTempWarning) {
+        float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
+                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                HardwarePropertiesManager.TEMPERATURE_CURRENT);
+        if (temps.length != 0) {
+            float temp = temps[0];
+            mRecentTemps[mNumTemps++] = temp;
+
+            StatusBar statusBar = getComponent(StatusBar.class);
+            if (statusBar != null && !statusBar.isDeviceInVrMode()
+                    && temp >= mThresholdTemp) {
+                logAtTemperatureThreshold(temp);
                 mWarnings.showTemperatureWarning();
             } else {
                 mWarnings.dismissTemperatureWarning();
             }
         }
 
-        // TODO: skip this when in VR mode since we already get a callback
+        logTemperatureStats();
+
         mHandler.postDelayed(this::updateTemperatureWarning, TEMPERATURE_INTERVAL);
+    }
+
+    private void logAtTemperatureThreshold(float temp) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("currentTemp=").append(temp)
+                .append(",thresholdTemp=").append(mThresholdTemp)
+                .append(",batteryStatus=").append(mBatteryStatus)
+                .append(",recentTemps=");
+        for (int i = 0; i < mNumTemps; i++) {
+            sb.append(mRecentTemps[i]).append(',');
+        }
+        Slog.i(TAG, sb.toString());
+    }
+
+    /**
+     * Calculates and logs min, max, and average
+     * {@link HardwarePropertiesManager#DEVICE_TEMPERATURE_SKIN} over the past
+     * {@link #TEMPERATURE_LOGGING_INTERVAL}.
+     */
+    private void logTemperatureStats() {
+        if (mNextLogTime > System.currentTimeMillis() && mNumTemps != MAX_RECENT_TEMPS) {
+            return;
+        }
+
+        if (mNumTemps > 0) {
+            float sum = mRecentTemps[0], min = mRecentTemps[0], max = mRecentTemps[0];
+            for (int i = 1; i < mNumTemps; i++) {
+                float temp = mRecentTemps[i];
+                sum += temp;
+                if (temp > max) {
+                    max = temp;
+                }
+                if (temp < min) {
+                    min = temp;
+                }
+            }
+
+            float avg = sum / mNumTemps;
+            Slog.i(TAG, "avg=" + avg + ",min=" + min + ",max=" + max);
+            MetricsLogger.histogram(mContext, "device_skin_temp_avg", (int) avg);
+            MetricsLogger.histogram(mContext, "device_skin_temp_min", (int) min);
+            MetricsLogger.histogram(mContext, "device_skin_temp_max", (int) max);
+        }
+        setNextLogTime();
+        mNumTemps = 0;
+    }
+
+    private void setNextLogTime() {
+        mNextLogTime = System.currentTimeMillis() + TEMPERATURE_LOGGING_INTERVAL;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -303,8 +354,10 @@ public class PowerUI extends SystemUI {
                 Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
-        pw.print("mThrottlingTemp=");
-        pw.println(Float.toString(mThrottlingTemp));
+        pw.print("mThresholdTemp=");
+        pw.println(Float.toString(mThresholdTemp));
+        pw.print("mNextLogTime=");
+        pw.println(Long.toString(mNextLogTime));
         mWarnings.dump(pw);
     }
 
