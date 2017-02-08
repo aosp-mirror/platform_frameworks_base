@@ -7538,7 +7538,34 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner to control the network logging feature.
      *
-     * <p> Network logs contain DNS lookup and connect() library call events.
+     * <p> Network logs contain DNS lookup and connect() library call events. The following library
+     *     functions are recorded while network logging is active:
+     *     <ul>
+     *       <li>{@code getaddrinfo()}</li>
+     *       <li>{@code gethostbyname()}</li>
+     *       <li>{@code connect()}</li>
+     *     </ul>
+     *
+     * <p> Network logging is a low-overhead tool for forensics but it is not guaranteed to use
+     *     full system call logging; event reporting is enabled by default for all processes but not
+     *     strongly enforced.
+     *     Events from applications using alternative implementations of libc, making direct kernel
+     *     calls, or deliberately obfuscating traffic may not be recorded.
+     *
+     * <p> Some common network events may not be reported. For example:
+     *     <ul>
+     *       <li>Applications may hardcode IP addresses to reduce the number of DNS lookups, or use
+     *           an alternative system for name resolution, and so avoid calling
+     *           {@code getaddrinfo()} or {@code gethostbyname}.</li>
+     *       <li>Applications may use datagram sockets for performance reasons, for example
+     *           for a game client. Calling {@code connect()} is unnecessary for this kind of
+     *           socket, so it will not trigger a network event.</li>
+     *     </ul>
+     *
+     * <p> It is possible to directly intercept layer 3 traffic leaving the device using an
+     *     always-on VPN service.
+     *     See {@link #setAlwaysOnVpnPackage(ComponentName, String, boolean)}
+     *     and {@link android.net.VpnService} for details.
      *
      * <p><strong>Note:</strong> The device owner won't be able to retrieve network logs if there
      * are unaffiliated secondary users or profiles on the device, regardless of whether the
