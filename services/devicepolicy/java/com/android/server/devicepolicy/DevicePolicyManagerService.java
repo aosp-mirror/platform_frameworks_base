@@ -1887,7 +1887,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void setDeviceOwnerSystemPropertyLocked() {
         // Device owner may still be provisioned, do not set the read-only system property yet.
-        if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
+        // Wear devices don't set device_provisioned until the device is paired, so allow
+        // device_owner property to be set without that.
+        if (!mIsWatch
+                && mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
             return;
         }
         // Still at the first stage of CryptKeeper double bounce, mOwners.hasDeviceOwner is
