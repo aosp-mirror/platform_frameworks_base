@@ -869,8 +869,10 @@ final class AutoFillManagerServiceImpl {
         }
 
         private AutoFillUI getUiForShowing() {
-            mUi.setCallback(this, mActivityToken);
-            return mUi;
+            synchronized (mLock) {
+                mUi.setCallbackLocked(this, mActivityToken);
+                return mUi;
+            }
         }
 
         private ViewNode findViewNodeByIdLocked(AutoFillId id) {
@@ -909,7 +911,7 @@ final class AutoFillManagerServiceImpl {
         private void destroyLocked() {
             mRemoteFillService.destroy();
             mUi.hideAll();
-            mUi.setCallback(null, null);
+            mUi.setCallbackLocked(null, null);
         }
 
         private void removeSelf() {
