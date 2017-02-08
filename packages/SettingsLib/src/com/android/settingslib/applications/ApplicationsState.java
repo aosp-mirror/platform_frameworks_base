@@ -1504,4 +1504,20 @@ public class ApplicationsState {
             return isMusicApp;
         }
     };
+
+    public static final AppFilter FILTER_OTHER_APPS = new AppFilter() {
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            boolean isCategorized;
+            synchronized(entry) {
+                isCategorized = entry.info.category == ApplicationInfo.CATEGORY_AUDIO ||
+                    entry.info.category == ApplicationInfo.CATEGORY_GAME;
+            }
+            return !isCategorized;
+        }
+    };
 }

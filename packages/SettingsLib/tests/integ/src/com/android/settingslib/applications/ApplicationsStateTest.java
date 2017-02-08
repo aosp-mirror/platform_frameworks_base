@@ -86,4 +86,25 @@ public class ApplicationsStateTest {
 
         assertThat(ApplicationsState.FILTER_AUDIO.filterApp(mEntry)).isFalse();
     }
+
+    @Test
+    public void testOtherAppsRejectsAudio() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_AUDIO;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testOtherAppsRejectsGame() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_GAME;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testOtherAppsAcceptsDefaultCategory() {
+        mEntry.info.category = ApplicationInfo.CATEGORY_UNDEFINED;
+
+        assertThat(ApplicationsState.FILTER_OTHER_APPS.filterApp(mEntry)).isTrue();
+    }
 }
