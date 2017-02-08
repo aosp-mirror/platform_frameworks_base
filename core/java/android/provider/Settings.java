@@ -6825,39 +6825,6 @@ public final class Settings {
                 "system_navigation_keys_enabled";
 
         /**
-         * Whether Downloads folder backup is enabled and should run on the device.
-         *
-         * @hide
-         */
-        public static final String DOWNLOADS_BACKUP_ENABLED = "downloads_backup_enabled";
-
-        /**
-         * Whether Downloads folder backup should only occur if the device is using a metered
-         * network.
-         *
-         * @hide
-         */
-        public static final String DOWNLOADS_BACKUP_ALLOW_METERED =
-                "downloads_backup_allow_metered";
-
-        /**
-         * Whether Downloads folder backup should only occur if the device is charging.
-         *
-         * @hide
-         */
-        public static final String DOWNLOADS_BACKUP_CHARGING_ONLY =
-                "downloads_backup_charging_only";
-
-        /**
-         * How many days of information for the automatic storage manager to retain on the device
-         * for downloads.
-         *
-         * @hide
-         */
-        public static final String AUTOMATIC_STORAGE_MANAGER_DOWNLOADS_DAYS_TO_RETAIN =
-                "automatic_storage_manager_downloads_days_to_retain";
-
-        /**
          * Holds comma separated list of ordering of QS tiles.
          * @hide
          */
