@@ -151,7 +151,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
     protected TaskViewThumbnail mThumbnailView;
     @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
-    TaskViewHeader mHeaderView;
+    protected TaskViewHeader mHeaderView;
     private View mActionButtonView;
     private View mIncompatibleAppToastView;
     private TaskViewCallbacks mCb;

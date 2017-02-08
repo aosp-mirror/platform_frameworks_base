@@ -53,6 +53,7 @@ public class GridTaskView extends TaskView {
         mThumbnailView.setOverlayHeaderOnThumbnailActionBar(false);
         mThumbnailView.updateThumbnailMatrix();
         mThumbnailView.setTranslationY(mHeaderHeight);
+        mHeaderView.setShouldDarkenBackgroundColor(true);
     }
 
     @Override

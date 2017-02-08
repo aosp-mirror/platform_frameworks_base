@@ -656,6 +656,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 synchronized (mHeaderBarLock) {
                     if (mHeaderBar.getMeasuredWidth() != taskViewWidth ||
                             mHeaderBar.getMeasuredHeight() != mTaskBarHeight) {
+                        if (mDummyStackView.useGridLayout()) {
+                            mHeaderBar.setShouldDarkenBackgroundColor(true);
+                            mHeaderBar.setNoUserInteractionState();
+                        }
                         mHeaderBar.forceLayout();
                         mHeaderBar.measure(
                                 MeasureSpec.makeMeasureSpec(taskViewWidth, MeasureSpec.EXACTLY),
