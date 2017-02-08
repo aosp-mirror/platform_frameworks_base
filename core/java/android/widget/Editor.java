@@ -106,7 +106,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationResult;
-import android.view.textclassifier.TextSelection;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
@@ -169,7 +168,7 @@ public class Editor {
     private InsertionPointCursorController mInsertionPointCursorController;
     SelectionModifierCursorController mSelectionModifierCursorController;
     // Action mode used when text is selected or when actions on an insertion cursor are triggered.
-    ActionMode mTextActionMode;
+    private ActionMode mTextActionMode;
     private boolean mInsertionControllerEnabled;
     private boolean mSelectionControllerEnabled;
 
@@ -236,7 +235,7 @@ public class Editor {
     private boolean mPreserveSelection;
     private boolean mRestartActionModeOnNextRefresh;
 
-    private TextClassificationResult mTextClassificationResult;
+    private SelectionActionModeHelper mSelectionActionModeHelper;
 
     boolean mIsBeingLongClicked;
 
@@ -292,7 +291,7 @@ public class Editor {
 
     private Rect mTempRect;
 
-    private TextView mTextView;
+    private final TextView mTextView;
 
     final ProcessTextIntentActionsHandler mProcessTextIntentActionsHandler;
 
@@ -1850,7 +1849,7 @@ public class Editor {
             mInsertionPointCursorController.invalidateHandle();
         }
         if (mTextActionMode != null) {
-            invalidateActionMode(getTextClassifierInfo(false));
+            invalidateActionModeAsync();
         }
     }
 
@@ -1943,12 +1942,12 @@ public class Editor {
                 if (mRestartActionModeOnNextRefresh) {
                     // To avoid distraction, newly start action mode only when selection action
                     // mode is being restarted.
-                    startSelectionActionMode(null);
+                    startSelectionActionMode();
                 }
             } else if (selectionController == null || !selectionController.isActive()) {
                 // Insertion action mode is active. Avoid dismissing the selection.
                 stopTextActionModeWithPreservingSelection();
-                startSelectionActionMode(null);
+                startSelectionActionMode();
             } else {
                 mTextActionMode.invalidateContentRect();
             }
@@ -1985,55 +1984,46 @@ public class Editor {
         }
     }
 
+    @NonNull
+    TextView getTextView() {
+        return mTextView;
+    }
+
+    @Nullable
+    ActionMode getTextActionMode() {
+        return mTextActionMode;
+    }
+
+    void setRestartActionModeOnNextRefresh(boolean value) {
+        mRestartActionModeOnNextRefresh = value;
+    }
+
     /**
-     * Starts a Selection Action Mode with the current selection and ensures the selection handles
-     * are shown if there is a selection. This should be used when the mode is started from a
-     * non-touch event.
-     *
-     * @return true if the selection mode was actually started.
+     * Asynchronously starts a selection action mode using the TextClassifier.
      */
-    boolean startSelectionActionMode(@Nullable TextClassificationResult textClassificationResult) {
-        mTextClassificationResult = textClassificationResult;
-        boolean selectionStarted = startSelectionActionModeInternal();
-        if (selectionStarted) {
-            getSelectionController().show();
+    void startSelectionActionModeAsync() {
+        getSelectionActionModeHelper().startActionModeAsync();
+    }
+
+    /**
+     * Synchronously starts a selection action mode without the TextClassifier.
+     */
+    void startSelectionActionMode() {
+        getSelectionActionModeHelper().startActionMode();
+    }
+
+    /**
+     * Asynchronously invalidates an action mode using the TextClassifier.
+     */
+    private void invalidateActionModeAsync() {
+        getSelectionActionModeHelper().invalidateActionModeAsync();
+    }
+
+    private SelectionActionModeHelper getSelectionActionModeHelper() {
+        if (mSelectionActionModeHelper == null) {
+            mSelectionActionModeHelper = new SelectionActionModeHelper(this);
         }
-        mRestartActionModeOnNextRefresh = false;
-        return selectionStarted;
-    }
-
-    private boolean startSelectionActionModeWithTextAssistant() {
-        return startSelectionActionMode(getTextClassifierInfo(true));
-    }
-
-    private void invalidateActionMode(TextClassificationResult textClassificationResult) {
-        mTextClassificationResult = textClassificationResult;
-        mTextActionMode.invalidate();
-    }
-
-    // TODO: Make this a non-blocking call.
-    private TextClassificationResult getTextClassifierInfo(boolean updateSelection) {
-        // TODO: Trim the text so that only text necessary to provide context of the selected
-        // text is sent to the assistant.
-        final int trimStartIndex = 0;
-        final int trimEndIndex = mTextView.getText().length();
-        CharSequence trimmedText =
-                mTextView.getText().subSequence(trimStartIndex, trimEndIndex);
-        int startIndex = mTextView.getSelectionStart() - trimStartIndex;
-        int endIndex = mTextView.getSelectionEnd() - trimStartIndex;
-
-        if (updateSelection) {
-            TextSelection textSelection = mTextView.getTextClassifier()
-                    .suggestSelection(trimmedText, startIndex, endIndex);
-            startIndex = Math.max(0, textSelection.getSelectionStartIndex() + trimStartIndex);
-            endIndex = Math.min(mTextView.getText().length(),
-                    textSelection.getSelectionEndIndex() + trimStartIndex);
-            Selection.setSelection((Spannable) mTextView.getText(), startIndex, endIndex);
-            return getTextClassifierInfo(false);
-        }
-
-        return mTextView.getTextClassifier()
-                .getTextClassificationResult(trimmedText, startIndex, endIndex);
+        return mSelectionActionModeHelper;
     }
 
     /**
@@ -2076,13 +2066,13 @@ public class Editor {
         return true;
     }
 
-    private boolean startSelectionActionModeInternal() {
+    boolean startSelectionActionModeInternal() {
         if (extractedTextModeWillBeStarted()) {
             return false;
         }
         if (mTextActionMode != null) {
             // Text action mode is already started
-            invalidateActionMode(getTextClassifierInfo(false));
+            invalidateActionModeAsync();
             return false;
         }
 
@@ -2273,7 +2263,8 @@ public class Editor {
         return mInsertionPointCursorController;
     }
 
-    private SelectionModifierCursorController getSelectionController() {
+    @Nullable
+    SelectionModifierCursorController getSelectionController() {
         if (!mSelectionControllerEnabled) {
             return null;
         }
@@ -3772,7 +3763,7 @@ public class Editor {
             mode.setSubtitle(null);
             mode.setTitleOptionalHint(true);
             populateMenuWithItems(menu);
-            updateAssistMenuItem(menu, mTextClassificationResult);
+            updateAssistMenuItem(menu);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3840,7 +3831,7 @@ public class Editor {
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
-            updateAssistMenuItem(menu, mTextClassificationResult);
+            updateAssistMenuItem(menu);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -3873,9 +3864,10 @@ public class Editor {
             }
         }
 
-        private void updateAssistMenuItem(
-                Menu menu, TextClassificationResult textClassificationResult) {
+        private void updateAssistMenuItem(Menu menu) {
             menu.removeItem(TextView.ID_ASSIST);
+            final TextClassificationResult textClassificationResult =
+                    getSelectionActionModeHelper().getTextClassificationResult();
             if (textClassificationResult != null) {
                 final Drawable icon = textClassificationResult.getIcon();
                 final CharSequence label = textClassificationResult.getLabel();
@@ -3900,7 +3892,8 @@ public class Editor {
             if (customCallback != null && customCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-            final TextClassificationResult textClassificationResult = mTextClassificationResult;
+            final TextClassificationResult textClassificationResult =
+                    getSelectionActionModeHelper().getTextClassificationResult();
             if (TextView.ID_ASSIST == item.getItemId() && textClassificationResult != null) {
                 final OnClickListener onClickListener =
                         textClassificationResult.getOnClickListener();
@@ -3923,8 +3916,8 @@ public class Editor {
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             // Clear mTextActionMode not to recursively destroy action mode by clearing selection.
+            getSelectionActionModeHelper().cancelAsyncTask();
             mTextActionMode = null;
-            mTextClassificationResult = null;
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
                 customCallback.onDestroyActionMode(mode);
@@ -4683,7 +4676,7 @@ public class Editor {
             }
             positionAtCursorOffset(offset, false);
             if (mTextActionMode != null) {
-                invalidateActionMode(getTextClassifierInfo(false));
+                invalidateActionModeAsync();
             }
         }
 
@@ -4767,7 +4760,7 @@ public class Editor {
             }
             updateDrawable();
             if (mTextActionMode != null) {
-                invalidateActionMode(getTextClassifierInfo(false));
+                invalidateActionModeAsync();
             }
         }
 
@@ -5416,8 +5409,12 @@ public class Editor {
 
                     if (mTextView.hasSelection()) {
                         // Do not invoke the text assistant if this was a drag selection.
-                        startSelectionActionMode(
-                                mHaventMovedEnoughToStartDrag ? getTextClassifierInfo(true) : null);
+                        if (mHaventMovedEnoughToStartDrag) {
+                            startSelectionActionModeAsync();
+                        } else {
+                            startSelectionActionMode();
+                        }
+
                     }
                     break;
             }
