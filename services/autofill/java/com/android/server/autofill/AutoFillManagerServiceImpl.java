@@ -541,6 +541,11 @@ final class AutoFillManagerServiceImpl {
                 Slog.wtf(TAG, "showSaveLocked(): no mStructure");
                 return;
             }
+            if (mCurrentResponse == null) {
+                // Happens when the activity / session was finished before the service replied.
+                Slog.d(TAG, "showSaveLocked(): no mCurrentResponse yet");
+                return;
+            }
             final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
             if (VERBOSE) Slog.v(TAG, "showSaveLocked(): savableIds=" + savableIds);
 
@@ -562,7 +567,6 @@ final class AutoFillManagerServiceImpl {
                         Slog.d(TAG, "finishSessionLocked(): found a change on " + id + ": "
                                 + state.mAutoFillValue);
                     }
-
                     mUi.showSaveUi();
                     return;
                 }
