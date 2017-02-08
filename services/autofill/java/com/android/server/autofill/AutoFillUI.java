@@ -17,6 +17,7 @@ package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.DEBUG;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -71,8 +72,6 @@ final class AutoFillUI {
     private AnchoredWindow mFillWindow;
     private DatasetPicker mFillView;
     private ViewState mViewState;
-    private Rect mBounds;
-    private String mFilterText;
 
     private AutoFillUiCallback mCallback;
     private IBinder mActivityToken;
@@ -138,8 +137,6 @@ final class AutoFillUI {
         }
 
         mViewState = null;
-        mBounds = null;
-        mFilterText = null;
         mFillView = null;
         mFillWindow = null;
     }
@@ -147,16 +144,22 @@ final class AutoFillUI {
     /**
      * Shows the fill UI, removing the previous fill UI if the has changed.
      *
+     * @param appToken the token of the app to be autofilled
      * @param viewState the view state, compared by reference to know if new UI should be shown
      * @param datasets the datasets to show, not used if viewState is the same
      * @param bounds bounds of the view to be filled, used if changed
      * @param filterText text of the view to be filled, used if changed
      */
-    void showFillUi(ViewState viewState, ArraySet<Dataset> datasets, Rect bounds,
-            String filterText) {
+    void showFillUi(IBinder appToken, ViewState viewState, @Nullable ArraySet<Dataset> datasets,
+            Rect bounds, String filterText) {
         if (!hasCallback()) {
             return;
         }
+
+        UiThread.getHandler().runWithScissors(() -> {
+            hideSnackbarUiThread();
+            hideFillResponseAuthUiUiThread();
+        }, 0);
 
         if (datasets == null) {
             // TODO(b/33197203): shouldn't be called, but keeping the WTF for a while just to be
@@ -165,13 +168,10 @@ final class AutoFillUI {
             return;
         }
 
-        // TODO(b/33197203): call to hideAll() was making it janky because then mViewState is set
-        // to null and hence the first check inside the lambada fails, causing it to be displayed
-        // twice in some cases.
-        hideAll();
-
         UiThread.getHandler().runWithScissors(() -> {
             if (mViewState == null || !mViewState.mId.equals(viewState.mId)) {
+                hideFillUiUiThread();
+
                 mViewState = viewState;
 
                 mFillView = new DatasetPicker(mContext, datasets,
@@ -183,25 +183,15 @@ final class AutoFillUI {
                             callback.fill(dataset);
                             hideFillUi();
                         });
-                // TODO(b/33197203): No magical numbers
-                mFillWindow = new AnchoredWindow(
-                        mWm, mFillView, 800, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-                if (DEBUG) Slog.d(TAG, "show FillUi: " + viewState.mId);
+                mFillWindow = new AnchoredWindow(mWm, appToken, mFillView);
+
+                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed");
             }
 
-            // TODO(b/33197203): If bounds are the same we would not show, fix this
-            if (!bounds.equals(mBounds)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi bounds: " + mBounds);
-                mBounds = bounds;
-                mFillWindow.show(mBounds);
-            }
-
-            if (!filterText.equals(mFilterText)) {
-                if (DEBUG) Slog.d(TAG, "update FillUi filter text: " + mFilterText);
-                mFilterText = filterText;
-                mFillView.update(mFilterText);
-            }
+            if (DEBUG) Slog.d(TAG, "showFillUi(): bounds=" + bounds + ", filterText=" + filterText);
+            mFillView.update(filterText);
+            mFillWindow.show(bounds);
         }, 0);
     }
 
@@ -268,8 +258,6 @@ final class AutoFillUI {
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
         pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
-        pw.print(prefix); pw.print("mBounds: "); pw.println(mBounds);
-        pw.print(prefix); pw.print("mFilterText: "); pw.println(mFilterText);
     }
 
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
