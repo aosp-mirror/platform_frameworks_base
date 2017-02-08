@@ -86,5 +86,7 @@ interface IInputMethodManager {
     IInputContentUriToken createInputContentUriToken(in IBinder token, in Uri contentUri,
             in String packageName);
 
+    void reportFullscreenMode(in IBinder token, boolean fullscreen);
+
     oneway void notifyUserAction(int sequenceNumber);
 }

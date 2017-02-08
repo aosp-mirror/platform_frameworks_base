@@ -387,8 +387,9 @@ public class InputMethodService extends AbstractInputMethodService {
             mInputConnection = binding.getConnection();
             if (DEBUG) Log.v(TAG, "bindInput(): binding=" + binding
                     + " ic=" + mInputConnection);
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) ic.reportFullscreenMode(mIsFullscreen);
+            if (mImm != null && mToken != null) {
+                mImm.reportFullscreenMode(mToken, mIsFullscreen);
+            }
             initialize();
             onBindInput();
         }
@@ -1027,8 +1028,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
             mIsFullscreen = isFullscreen;
-            InputConnection ic = getCurrentInputConnection();
-            if (ic != null) ic.reportFullscreenMode(isFullscreen);
+            if (mImm != null && mToken != null) {
+                mImm.reportFullscreenMode(mToken, mIsFullscreen);
+            }
             mFullscreenApplied = true;
             initialize();
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
