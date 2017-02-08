@@ -259,4 +259,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isOutgoingCallPermitted
      */
     boolean isOutgoingCallPermitted(in PhoneAccountHandle phoneAccountHandle);
+
+    /**
+     * @see TelecomServiceImpl#waitOnHandler
+     */
+    void waitOnHandlers();
 }
