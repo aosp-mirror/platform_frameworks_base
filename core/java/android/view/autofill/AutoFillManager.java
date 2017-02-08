@@ -90,16 +90,13 @@ public final class AutoFillManager {
      * @param parent parent view whose focus changed.
      * @param childId id identifying the virtual child inside the parent view.
      * @param bounds child boundaries, relative to the top window.
-     * @param value current value of the child; can be {@code null} when focus is lost, but must be
-     *            set when focus is gained.
      * @param gainFocus whether focus was gained or lost.
      */
-    public void virtualFocusChanged(View parent, int childId, Rect bounds,
-            @Nullable AutoFillValue value, boolean gainFocus) {
+    public void virtualFocusChanged(View parent, int childId, Rect bounds, boolean gainFocus) {
         if (mSession == null) {
             // Starts new session.
             final AutoFillId id = getAutoFillId(parent, childId);
-            startSession(id, bounds, value);
+            startSession(id, bounds, null);
             return;
         }
 
@@ -110,7 +107,7 @@ public final class AutoFillManager {
 
         // Update focus on existing session.
         final AutoFillId id = getAutoFillId(parent, childId);
-        updateSession(id, bounds, value, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
+        updateSession(id, bounds, null, gainFocus ? FLAG_FOCUS_GAINED : FLAG_FOCUS_LOST);
     }
 
     /**
