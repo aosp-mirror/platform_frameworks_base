@@ -636,11 +636,10 @@ public class AccountManagerService
             return visibility;
         }
 
-        if (isPermittedForPackage(packageName, accounts.userId,
-                Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
-            return AccountManager.VISIBILITY_VISIBLE;
-        }
-        // Profile owner gets visibility by default.
+        boolean isPrivileged = isPermittedForPackage(packageName, accounts.userId,
+                Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
+
+        // Device/Profile owner gets visibility by default.
         if (isProfileOwner(uid)) {
             return AccountManager.VISIBILITY_VISIBLE;
         }
@@ -650,7 +649,7 @@ public class AccountManagerService
         boolean preO = isPreOApplication(packageName);
         if ((signatureCheckResult != SIGNATURE_CHECK_MISMATCH)
                 || (preO && checkGetAccountsPermission(packageName, accounts.userId))
-                || canReadContacts) {
+                || canReadContacts || isPrivileged) {
             // Use legacy for preO apps with GET_ACCOUNTS permission or pre/postO with signature
             // match.
             visibility = getAccountVisibility(account,
