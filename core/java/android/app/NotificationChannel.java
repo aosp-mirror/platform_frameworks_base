@@ -21,7 +21,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.SystemApi;
-import android.app.NotificationManager;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Parcel;
@@ -51,7 +51,6 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
     private static final String ATT_LIGHTS = "lights";
-    //TODO: add support for light colors
     private static final String ATT_LIGHT_COLOR = "light_color";
     private static final String ATT_VIBRATION = "vibration";
     private static final String ATT_VIBRATION_ENABLED = "vibration_enabled";
@@ -129,7 +128,7 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_AUDIO_ATTRIBUTES
     };
 
-
+    private static final int DEFAULT_LIGHT_COLOR = 0;
     private static final int DEFAULT_VISIBILITY =
             NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE =
@@ -144,6 +143,7 @@ public final class NotificationChannel implements Parcelable {
     private int mLockscreenVisibility = DEFAULT_VISIBILITY;
     private Uri mSound;
     private boolean mLights;
+    private int mLightColor = DEFAULT_LIGHT_COLOR;
     private long[] mVibration;
     private int mUserLockedFields;
     private boolean mVibrationEnabled;
@@ -194,6 +194,7 @@ public final class NotificationChannel implements Parcelable {
             mGroup = null;
         }
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
+        mLightColor = in.readInt();
     }
 
     @Override
@@ -232,6 +233,7 @@ public final class NotificationChannel implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(mLightColor);
     }
 
     /**
@@ -331,8 +333,19 @@ public final class NotificationChannel implements Parcelable {
      * Only modifiable before the channel is submitted to
      * {@link NotificationManager#notify(String, int, Notification)}.
      */
-    public void setLights(boolean lights) {
+    public void enableLights(boolean lights) {
         this.mLights = lights;
+    }
+
+    /**
+     * Sets the notification light color for notifications posted to this channel, if lights are
+     * {@link #enableLights(boolean) enabled} on this channel and the device supports that feature.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#notify(String, int, Notification)}.
+     */
+    public void setLightColor(int argb) {
+        this.mLightColor = argb;
     }
 
     /**
@@ -411,6 +424,14 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns the notification light color for notifications posted to this channel. Irrelevant
+     * unless {@link #shouldShowLights()}.
+     */
+    public int getLightColor() {
+        return mLightColor;
+    }
+
+    /**
      * Returns whether notifications posted to this channel always vibrate.
      */
     public boolean shouldVibrate() {
@@ -478,7 +499,8 @@ public final class NotificationChannel implements Parcelable {
                 != safeInt(parser, ATT_PRIORITY, Notification.PRIORITY_DEFAULT));
         setLockscreenVisibility(safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY));
         setSound(safeUri(parser, ATT_SOUND), safeAudioAttributes(parser));
-        setLights(safeBool(parser, ATT_LIGHTS, false));
+        enableLights(safeBool(parser, ATT_LIGHTS, false));
+        setLightColor(safeInt(parser, ATT_LIGHT_COLOR, DEFAULT_LIGHT_COLOR));
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
@@ -518,6 +540,9 @@ public final class NotificationChannel implements Parcelable {
         }
         if (shouldShowLights()) {
             out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
+        }
+        if (getLightColor() != DEFAULT_LIGHT_COLOR) {
+            out.attribute(null, ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         }
         if (shouldVibrate()) {
             out.attribute(null, ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
@@ -569,6 +594,7 @@ public final class NotificationChannel implements Parcelable {
             record.put(ATT_FLAGS, Integer.toString(getAudioAttributes().getFlags()));
         }
         record.put(ATT_LIGHTS, Boolean.toString(shouldShowLights()));
+        record.put(ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
@@ -669,6 +695,7 @@ public final class NotificationChannel implements Parcelable {
         if (mBypassDnd != that.mBypassDnd) return false;
         if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
         if (mLights != that.mLights) return false;
+        if (getLightColor() != that.getLightColor()) return false;
         if (getUserLockedFields() != that.getUserLockedFields()) return false;
         if (mVibrationEnabled != that.mVibrationEnabled) return false;
         if (mShowBadge != that.mShowBadge) return false;
@@ -698,6 +725,7 @@ public final class NotificationChannel implements Parcelable {
         result = 31 * result + getLockscreenVisibility();
         result = 31 * result + (getSound() != null ? getSound().hashCode() : 0);
         result = 31 * result + (mLights ? 1 : 0);
+        result = 31 * result + getLightColor();
         result = 31 * result + Arrays.hashCode(mVibration);
         result = 31 * result + getUserLockedFields();
         result = 31 * result + (mVibrationEnabled ? 1 : 0);
@@ -718,6 +746,7 @@ public final class NotificationChannel implements Parcelable {
                 ", mLockscreenVisibility=" + mLockscreenVisibility +
                 ", mSound=" + mSound +
                 ", mLights=" + mLights +
+                ", mLightColor=" + mLightColor +
                 ", mVibration=" + Arrays.toString(mVibration) +
                 ", mUserLockedFields=" + mUserLockedFields +
                 ", mVibrationEnabled=" + mVibrationEnabled +

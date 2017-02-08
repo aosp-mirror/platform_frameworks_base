@@ -23,6 +23,7 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/fingerprint.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
+import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 
 package android.os;
@@ -55,4 +56,5 @@ message IncidentProto {
     android.service.NetworkStatsServiceDumpProto netstats = 3001;
     android.providers.settings.SettingsServiceDumpProto settings = 3002;
     android.service.appwidget.AppWidgetServiceDumpProto appwidget = 3003;
+    android.service.notification.NotificationServiceDumpProto notification = 3004;
 }

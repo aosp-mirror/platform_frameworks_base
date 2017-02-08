@@ -563,7 +563,8 @@ public class RankingHelper implements RankingConfig {
             channel.setImportance(updatedChannel.getImportance());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_LIGHTS) == 0) {
-            channel.setLights(updatedChannel.shouldShowLights());
+            channel.enableLights(updatedChannel.shouldShowLights());
+            channel.setLightColor(updatedChannel.getLightColor());
         }
         if ((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_PRIORITY) == 0) {
             channel.setBypassDnd(updatedChannel.canBypassDnd());

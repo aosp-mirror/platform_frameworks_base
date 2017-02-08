@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import com.android.server.lights.Light;
-import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -224,7 +223,7 @@ public class BuzzBeepBlinkTest {
             } else {
                 builder.setLights(CUSTOM_LIGHT_COLOR, CUSTOM_LIGHT_ON, CUSTOM_LIGHT_OFF);
             }
-            channel.setLights(true);
+            channel.enableLights(true);
         }
         builder.setDefaults(defaults);
 
