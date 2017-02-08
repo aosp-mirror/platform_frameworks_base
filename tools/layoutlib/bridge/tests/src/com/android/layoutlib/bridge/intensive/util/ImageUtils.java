@@ -54,7 +54,7 @@ public class ImageUtils {
      */
     private static final boolean FAIL_ON_MISSING_THUMBNAIL = true;
 
-    private static final int THUMBNAIL_SIZE = 250;
+    private static final int THUMBNAIL_SIZE = 1000;
 
     private static final double MAX_PERCENT_DIFFERENCE = 0.3;
 
