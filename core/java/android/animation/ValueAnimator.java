@@ -1031,6 +1031,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         // started-but-not-yet-reached-the-first-frame phase.
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
+        mStartTime = -1;
         addAnimationCallback(0);
 
         if (mStartDelay == 0 || mSeekFraction >= 0 || mReversing) {
@@ -1199,7 +1200,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStartListenersCalled = false;
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
-        mReversing = false;
+        mStartTime = -1;
         if (notify && mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
@@ -1208,6 +1209,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 tmpListeners.get(i).onAnimationEnd(this, mReversing);
             }
         }
+        // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
         mReversing = false;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
@@ -1392,9 +1394,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * @hide
      */
     public final boolean doAnimationFrame(long frameTime) {
-        if (!mRunning && mStartTime < 0) {
-            // First frame during delay
-            mStartTime = frameTime + mStartDelay;
+        if (mStartTime < 0) {
+            // First frame. If there is start delay, start delay count down will happen *after* this
+            // frame.
+            mStartTime = mReversing ? frameTime : frameTime + mStartDelay;
         }
 
         // Handle pause/resume
@@ -1411,25 +1414,23 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
 
         if (!mRunning) {
-            // If not running, that means the animation is in the start delay phase. In the case of
-            // reversing, we want to run start delay in the end.
-            if (mStartTime > frameTime) {
-                // During start delay
+            // If not running, that means the animation is in the start delay phase of a forward
+            // running animation. In the case of reversing, we want to run start delay in the end.
+            if (mStartTime > frameTime && mSeekFraction == -1) {
+                // This is when no seek fraction is set during start delay. If developers change the
+                // seek fraction during the delay, animation will start from the seeked position
+                // right away.
                 return false;
             } else {
-                // Start delay has passed.
+                // If mRunning is not set by now, that means non-zero start delay,
+                // no seeking, not reversing. At this point, start delay has passed.
                 mRunning = true;
+                startAnimation();
             }
         }
 
         if (mLastFrameTime < 0) {
-            // First frame
-            if (mStartDelay > 0) {
-                startAnimation();
-            }
-            if (mSeekFraction < 0) {
-                mStartTime = frameTime;
-            } else {
+            if (mSeekFraction >= 0) {
                 long seekTime = (long) (getScaledDuration() * mSeekFraction);
                 mStartTime = frameTime - seekTime;
                 mSeekFraction = -1;
