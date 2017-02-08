@@ -83,9 +83,7 @@ public class PipMediaController {
     private MediaController.Callback mPlaybackChangedListener = new MediaController.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            if (!mListeners.isEmpty()) {
-                notifyActionsChanged(getMediaActions());
-            }
+            notifyActionsChanged();
         }
     };
 
@@ -146,9 +144,9 @@ public class PipMediaController {
         boolean isPlaying = MediaSession.isActiveState(state);
         long actions = mMediaController.getPlaybackState().getActions();
         if (!isPlaying && ((actions & PlaybackState.ACTION_PLAY) != 0)) {
-            mediaActions.add(mPauseAction);
-        } else if (isPlaying && ((actions & PlaybackState.ACTION_PAUSE) != 0)) {
             mediaActions.add(mPlayAction);
+        } else if (isPlaying && ((actions & PlaybackState.ACTION_PAUSE) != 0)) {
+            mediaActions.add(mPauseAction);
         }
         return mediaActions;
     }
@@ -202,9 +200,7 @@ public class PipMediaController {
             if (controller != null) {
                 controller.registerCallback(mPlaybackChangedListener);
             }
-            if (!mListeners.isEmpty()) {
-                notifyActionsChanged(getMediaActions());
-            }
+            notifyActionsChanged();
 
             // TODO(winsonc): Consider if we want to close the PIP after a timeout (like on TV)
         }
@@ -213,8 +209,9 @@ public class PipMediaController {
     /**
      * Notifies all listeners that the actions have changed.
      */
-    private void notifyActionsChanged(List<RemoteAction> actions) {
+    private void notifyActionsChanged() {
         if (!mListeners.isEmpty()) {
+            List<RemoteAction> actions = getMediaActions();
             mListeners.forEach(l -> l.onMediaActionsChanged(actions));
         }
     }
