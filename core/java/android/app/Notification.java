@@ -4962,9 +4962,6 @@ public class Notification implements Parcelable
      */
     public static class BigTextStyle extends Style {
 
-        private static final int MAX_LINES = 13;
-        private static final int LINES_CONSUMED_BY_ACTIONS = 4;
-
         private CharSequence mBigText;
 
         public BigTextStyle() {
@@ -5070,17 +5067,7 @@ public class Notification implements Parcelable
             builder.setTextViewColorSecondary(contentView, R.id.big_text);
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
-            contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines(builder));
             contentView.setBoolean(R.id.big_text, "setHasImage", builder.mN.hasLargeIcon());
-        }
-
-        private static int calculateMaxLines(Builder builder) {
-            int lineCount = MAX_LINES;
-            boolean hasActions = builder.mActions.size() > 0;
-            if (hasActions) {
-                lineCount -= LINES_CONSUMED_BY_ACTIONS;
-            }
-            return lineCount;
         }
     }
 

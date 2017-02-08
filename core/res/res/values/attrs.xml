@@ -8355,7 +8355,6 @@
     </declare-styleable>
 
     <declare-styleable name="MessagingLinearLayout">
-        <attr name="maxHeight" />
         <attr name="spacing" />
     </declare-styleable>
 
