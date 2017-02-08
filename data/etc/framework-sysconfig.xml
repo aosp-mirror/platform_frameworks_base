@@ -23,4 +23,9 @@
     <allow-implicit-broadcast action="android.intent.action.PACKAGE_CHANGED" />
     <allow-implicit-broadcast action="android.intent.action.MEDIA_SCANNER_SCAN_FILE" />
 
+    <!-- Whitelist of what components are permitted as backup data transports.  The
+         'service' attribute here is a flattened ComponentName string. -->
+    <backup-transport-whitelisted-service
+        service="android/com.android.internal.backup.LocalTransportService" />
+
 </config>
