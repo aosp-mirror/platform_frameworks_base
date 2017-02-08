@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
@@ -855,6 +856,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public VerifierDeviceIdentity getVerifierDeviceIdentity() {
+        return null;
+    }
+
+    @Override
+    public ChangedPackages getChangedPackages(int sequenceNumber) {
         return null;
     }
 

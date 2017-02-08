@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
@@ -371,6 +372,12 @@ public class MockPackageManager extends PackageManager {
     /** @hide */
     @Override
     public boolean setInstantAppCookie(@NonNull byte[] cookie) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public ChangedPackages getChangedPackages(int sequenceNumber) {
         throw new UnsupportedOperationException();
     }
 

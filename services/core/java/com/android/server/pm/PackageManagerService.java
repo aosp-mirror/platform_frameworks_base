@@ -126,6 +126,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
+import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.EphemeralRequest;
@@ -719,6 +720,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     boolean mFoundPolicyFile;
 
     private final InstantAppRegistry mInstantAppRegistry;
+
+    @GuardedBy("mPackages")
+    int mChangedPackagesSequenceNumber;
+    /**
+     * List of changed [installed, removed or updated] packages.
+     * mapping from user id -> sequence number -> package name
+     */
+    @GuardedBy("mPackages")
+    final SparseArray<SparseArray<String>> mChangedPackages = new SparseArray<>();
+    /**
+     * The sequence number of the last change to a package.
+     * mapping from user id -> package name -> sequence number
+     */
+    @GuardedBy("mPackages")
+    final SparseArray<Map<String, Integer>> mChangedPackagesSequenceNumbers = new SparseArray<>();
 
     public static final class SharedLibraryEntry {
         public final String path;
@@ -4217,6 +4233,52 @@ public class PackageManagerService extends IPackageManager.Stub {
     public @NonNull String getSharedSystemSharedLibraryPackageName() {
         synchronized (mPackages) {
             return mSharedSystemSharedLibraryPackageName;
+        }
+    }
+
+    private void updateSequenceNumberLP(String packageName, int[] userList) {
+        for (int i = userList.length - 1; i >= 0; --i) {
+            final int userId = userList[i];
+            SparseArray<String> changedPackages = mChangedPackages.get(userId);
+            if (changedPackages == null) {
+                changedPackages = new SparseArray<>();
+                mChangedPackages.put(userId, changedPackages);
+            }
+            Map<String, Integer> sequenceNumbers = mChangedPackagesSequenceNumbers.get(userId);
+            if (sequenceNumbers == null) {
+                sequenceNumbers = new HashMap<>();
+                mChangedPackagesSequenceNumbers.put(userId, sequenceNumbers);
+            }
+            final Integer sequenceNumber = sequenceNumbers.get(packageName);
+            if (sequenceNumber != null) {
+                changedPackages.remove(sequenceNumber);
+            }
+            changedPackages.put(mChangedPackagesSequenceNumber, packageName);
+            sequenceNumbers.put(packageName, mChangedPackagesSequenceNumber);
+        }
+        mChangedPackagesSequenceNumber++;
+    }
+
+    @Override
+    public ChangedPackages getChangedPackages(int sequenceNumber, int userId) {
+        synchronized (mPackages) {
+            if (sequenceNumber >= mChangedPackagesSequenceNumber) {
+                return null;
+            }
+            final SparseArray<String> changedPackages = mChangedPackages.get(userId);
+            if (changedPackages == null) {
+                return null;
+            }
+            final List<String> packageNames =
+                    new ArrayList<>(mChangedPackagesSequenceNumber - sequenceNumber);
+            for (int i = sequenceNumber; i < mChangedPackagesSequenceNumber; i++) {
+                final String packageName = changedPackages.get(i);
+                if (packageName != null) {
+                    packageNames.add(packageName);
+                }
+            }
+            return packageNames.isEmpty()
+                    ? null : new ChangedPackages(mChangedPackagesSequenceNumber, packageNames);
         }
     }
 
@@ -13263,6 +13325,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
+                synchronized (mPackages) {
+                    updateSequenceNumberLP(packageName, new int[]{ userId });
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -16847,6 +16912,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                             sUserManager.getUserIds(), true);
                 }
             }
+
+            if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                updateSequenceNumberLP(pkgName, res.newUsers);
+            }
         }
     }
 
@@ -17429,6 +17498,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (res) {
                     mInstantAppRegistry.onPackageUninstalledLPw(uninstalledPs.pkg,
                             info.removedUsers);
+                    updateSequenceNumberLP(packageName, info.removedUsers);
                 }
             }
         }
@@ -19725,6 +19795,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
             scheduleWritePackageRestrictionsLocked(userId);
+            updateSequenceNumberLP(packageName, new int[] { userId });
             components = mPendingBroadcasts.get(userId, packageName);
             final boolean newPackage = components == null;
             if (newPackage) {

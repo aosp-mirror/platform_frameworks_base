@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver2;
@@ -610,6 +611,8 @@ interface IPackageManager {
 
     String getServicesSystemSharedLibraryPackageName();
     String getSharedSystemSharedLibraryPackageName();
+
+    ChangedPackages getChangedPackages(int sequenceNumber, int userId);
 
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
