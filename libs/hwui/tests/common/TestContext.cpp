@@ -16,6 +16,8 @@
 
 #include "tests/common/TestContext.h"
 
+#include <cutils/trace.h>
+
 namespace android {
 namespace uirenderer {
 namespace test {
@@ -98,6 +100,11 @@ void TestContext::createOffscreenSurface() {
 }
 
 void TestContext::waitForVsync() {
+    // Hacky fix for not getting sysprop change callbacks
+    // We just poll the sysprop in vsync since it's when the UI thread is
+    // "idle" and shouldn't burn too much time
+    atrace_update_tags();
+
     if (mConsumer.get()) {
         BufferItem buffer;
         if (mConsumer->acquireBuffer(&buffer, 0, false) == OK) {
