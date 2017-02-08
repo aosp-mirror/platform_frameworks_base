@@ -1322,6 +1322,27 @@
     <permission android:name="android.permission.NETWORK_SETTINGS"
         android:protectionLevel="signature" />
 
+    <!-- #SystemApi @hide Allows applications to access information about LoWPAN interfaces.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.ACCESS_LOWPAN_STATE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- #SystemApi @hide Allows applications to change LoWPAN connectivity state.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CHANGE_LOWPAN_STATE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- #SystemApi @hide Allows applications to read LoWPAN credential.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_LOWPAN_CREDENTIAL"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- #SystemApi @hide Allows a service to register or unregister
+         new LoWPAN interfaces.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.MANAGE_LOWPAN_INTERFACES"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
     <!-- ======================================= -->
