@@ -25,11 +25,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
 public class PipDismissViewController {
 
@@ -65,8 +68,10 @@ public class PipDismissViewController {
     public void createDismissTarget() {
         if (mDismissView == null) {
             // Determine sizes for the gradient
-            Point windowSize = new Point();
-            mWindowManager.getDefaultDisplay().getSize(windowSize);
+            final Rect stableInsets = new Rect();
+            SystemServicesProxy.getInstance(mContext).getStableInsets(stableInsets);
+            final Point windowSize = new Point();
+            mWindowManager.getDefaultDisplay().getRealSize(windowSize);
             mMinHeight = windowSize.y * DISMISS_GRADIENT_MIN_HEIGHT_PERCENT;
             mMaxHeight = windowSize.y * DISMISS_GRADIENT_MAX_HEIGHT_PERCENT;
 
@@ -74,13 +79,16 @@ public class PipDismissViewController {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mDismissView = inflater.inflate(R.layout.pip_dismiss_view, null);
             mGradientView = mDismissView.findViewById(R.id.gradient_view);
-            FrameLayout.LayoutParams glp = (android.widget.FrameLayout.LayoutParams) mGradientView
-                    .getLayoutParams();
+            FrameLayout.LayoutParams glp =
+                    (FrameLayout.LayoutParams) mGradientView.getLayoutParams();
             glp.height = (int) mMaxHeight;
             mGradientView.setLayoutParams(glp);
             mGradientView.setPivotY(windowSize.y);
             mGradientView.setScaleY(mMaxHeight / mMinHeight); // Set to min height via scaling
             mDismissContainer = mDismissView.findViewById(R.id.pip_dismiss_container);
+            FrameLayout.LayoutParams clp =
+                    (FrameLayout.LayoutParams) mDismissContainer.getLayoutParams();
+            clp.bottomMargin = stableInsets.bottom;
             mDismissContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
                 @Override
                 public void onLayoutChange(View v, int left, int top, int right, int bottom,
@@ -92,15 +100,16 @@ public class PipDismissViewController {
             });
 
             // Add the target to the window
-            WindowManager.LayoutParams lp =  new WindowManager.LayoutParams(
-                    windowSize.x,
-                    (int) mMaxHeight,
-                    WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            LayoutParams lp =  new LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, (int) mMaxHeight,
+                    0, windowSize.y - (int) mMaxHeight,
+                    LayoutParams.TYPE_SYSTEM_DIALOG,
+                    LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                            | LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                            | LayoutParams.FLAG_NOT_TOUCHABLE
+                            | LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
-            lp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
             mWindowManager.addView(mDismissView, lp);
         }
         mDismissView.animate().cancel();
@@ -132,7 +141,7 @@ public class PipDismissViewController {
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
-                            mWindowManager.removeView(mDismissView);
+                            mWindowManager.removeViewImmediate(mDismissView);
                             mDismissView = null;
                         }
                     })
