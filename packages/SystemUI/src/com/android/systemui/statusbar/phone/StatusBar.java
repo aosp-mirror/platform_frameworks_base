@@ -894,7 +894,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 null, null);
         updateCurrentProfilesCache();
 
-        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
+                Context.VR_SERVICE));
         try {
             vrManager.registerListener(mVrStateCallbacks);
         } catch (RemoteException e) {

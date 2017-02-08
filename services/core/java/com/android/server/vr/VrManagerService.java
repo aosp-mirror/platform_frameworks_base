@@ -89,8 +89,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     public static final String TAG = "VrManagerService";
 
-    public static final String VR_MANAGER_BINDER_SERVICE = "vrmanager";
-
     private static final int PENDING_STATE_DELAY_MS = 300;
     private static final int EVENT_LOG_SIZE = 32;
     private static final int INVALID_APPOPS_MODE = -1;
@@ -377,7 +375,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         @Override
         public void setPersistentVrModeEnabled(boolean enabled) {
-            enforceCallerPermission(Manifest.permission.ACCESS_VR_MANAGER);
+            enforceCallerPermission(Manifest.permission.RESTRICTED_VR_ACCESS);
             VrManagerService.this.setPersistentVrModeEnabled(enabled);
         }
 
@@ -487,7 +485,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         publishLocalService(VrManagerInternal.class, new LocalService());
-        publishBinderService(VR_MANAGER_BINDER_SERVICE, mVrManager.asBinder());
+        publishBinderService(Context.VR_SERVICE, mVrManager.asBinder());
     }
 
     @Override

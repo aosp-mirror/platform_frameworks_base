@@ -772,7 +772,8 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void registerVrStateListener() {
-        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+        IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
+                Context.VR_SERVICE));
         try {
             if (vrManager != null) {
                 vrManager.registerListener(mVrStateCallbacks);
