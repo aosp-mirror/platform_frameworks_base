@@ -351,7 +351,7 @@ public class SyncRequest implements Parcelable {
          * @param requiresCharging true if sync requires the phone to be plugged in. Default false.
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
-            mRequiresCharging = true;
+            mRequiresCharging = requiresCharging;
             return this;
         }
 
