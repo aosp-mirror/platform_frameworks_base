@@ -72,6 +72,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
+import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
@@ -5975,7 +5976,8 @@ public final class ViewRootImpl implements ViewParent,
      * {@inheritDoc}
      */
     @Override
-    public View keyboardNavigationClusterSearch(View currentCluster, int direction) {
+    public View keyboardNavigationClusterSearch(View currentCluster,
+            @FocusDirection int direction) {
         checkThread();
         return FocusFinder.getInstance().findNextKeyboardNavigationCluster(
                 mView, currentCluster, direction);

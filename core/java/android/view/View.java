@@ -9433,7 +9433,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The nearest keyboard navigation cluster in the specified direction, or null if none
      *         can be found
      */
-    public View keyboardNavigationClusterSearch(View currentCluster, int direction) {
+    public View keyboardNavigationClusterSearch(View currentCluster,
+            @FocusDirection int direction) {
         if (isKeyboardNavigationCluster()) {
             currentCluster = this;
         }
