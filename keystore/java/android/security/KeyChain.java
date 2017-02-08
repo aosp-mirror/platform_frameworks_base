@@ -588,7 +588,7 @@ public final class KeyChain {
      * @hide for reuse by CertInstaller and Settings.
      * @see KeyChain#bind
      */
-    public final static class KeyChainConnection implements Closeable {
+    public static class KeyChainConnection implements Closeable {
         private final Context context;
         private final ServiceConnection serviceConnection;
         private final IKeyChainService service;

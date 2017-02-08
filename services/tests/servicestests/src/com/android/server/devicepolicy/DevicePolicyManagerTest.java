@@ -21,6 +21,8 @@ import static android.os.UserManagerInternal.CAMERA_NOT_DISABLED;
 
 import android.Manifest.permission;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -32,6 +34,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.IIpConnectivityMetrics;
@@ -52,10 +55,13 @@ import android.util.ArraySet;
 import android.util.Pair;
 
 import com.android.internal.R;
+import com.android.internal.util.ParcelableString;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserRestrictionsUtils;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -76,13 +82,16 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -1191,6 +1200,53 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         doReturn(new String[]{packageName})
             .when(mContext.ipackageManager).getPackagesForUid(eq(uid));
         return uid;
+    }
+
+    public void testCertificateDisclosure() throws Exception {
+        final int userId = DpmMockContext.CALLER_USER_HANDLE;
+        final UserHandle user = UserHandle.of(userId);
+
+        mContext.applicationInfo = new ApplicationInfo();
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+        mContext.packageName = "com.android.frameworks.servicestests";
+        mContext.userContexts.put(user, mContext);
+        when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
+
+        ParceledListSlice<ParcelableString> oneCert = asSlice(new String[] {"1"});
+        ParceledListSlice<ParcelableString> fourCerts = asSlice(new String[] {"1", "2", "3", "4"});
+
+        final String TEST_STRING = "Test for exactly 2 certs out of 4";
+        doReturn(TEST_STRING).when(mContext.resources).getQuantityText(anyInt(), eq(2));
+
+        // Given that we have exactly one certificate installed,
+        when(mContext.keyChainConnection.getService().getUserCaAliases()).thenReturn(oneCert);
+        // when that certificate is approved,
+        dpms.approveCaCert(oneCert.getList().get(0).string, userId, true);
+        // a notification should not be shown.
+        verify(mContext.notificationManager, timeout(1000))
+                .cancelAsUser(anyString(), anyInt(), eq(user));
+
+        // Given that we have four certificates installed,
+        when(mContext.keyChainConnection.getService().getUserCaAliases()).thenReturn(fourCerts);
+        // when two of them are approved (one of them approved twice hence no action),
+        dpms.approveCaCert(fourCerts.getList().get(0).string, userId, true);
+        dpms.approveCaCert(fourCerts.getList().get(1).string, userId, true);
+        // a notification should be shown saying that there are two certificates left to approve.
+        verify(mContext.notificationManager, timeout(1000))
+                .notifyAsUser(anyString(), anyInt(), argThat(
+                        new BaseMatcher<Notification>() {
+                            @Override
+                            public boolean matches(Object item) {
+                                final Notification noti = (Notification) item;
+                                return TEST_STRING.equals(
+                                        noti.extras.getString(Notification.EXTRA_TITLE));
+                            }
+                            @Override
+                            public void describeTo(Description description) {
+                                description.appendText(
+                                        "Notification{title=\"" + TEST_STRING + "\"}");
+                            }
+                        }), eq(user));
     }
 
     /**
@@ -3733,5 +3789,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActiveAdmin(admin, false, userId);
         assertTrue(dpm.setProfileOwner(admin, null, userId));
         mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
+    }
+
+    /**
+     * Convert String[] to ParceledListSlice&lt;ParcelableString&gt;.
+     * <p>
+     * TODO: This shouldn't be necessary. If ParcelableString does need to exist, it also needs
+     * a real constructor.
+     */
+    private static ParceledListSlice<ParcelableString> asSlice(String[] s) {
+        List<ParcelableString> list = new ArrayList<>(s.length);
+        for (int i = 0; i < s.length; i++) {
+            ParcelableString item = new ParcelableString();
+            item.string = s[i];
+            list.add(i, item);
+        }
+        return new ParceledListSlice<ParcelableString>(list);
     }
 }
