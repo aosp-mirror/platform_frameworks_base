@@ -60,6 +60,7 @@ struct JMediaExtractor : public RefBase {
     status_t getSampleTime(int64_t *sampleTimeUs);
     status_t getSampleFlags(uint32_t *sampleFlags);
     status_t getSampleMeta(sp<MetaData> *sampleMeta);
+    status_t getMetrics(Parcel *reply) const;
 
     bool getCachedDuration(int64_t *durationUs, bool *eos) const;
 
