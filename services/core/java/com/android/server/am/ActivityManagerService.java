@@ -5326,7 +5326,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     for (int pid : pids) {
                         if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
                         final long sime = SystemClock.elapsedRealtime();
-                        Debug.dumpNativeBacktraceToFile(pid, tracesPath);
+
+                        Debug.dumpNativeBacktraceToFileTimeout(pid, tracesPath, 10);
                         if (DEBUG_ANR) Slog.d(TAG, "Done with native pid " + pid
                                 + " in " + (SystemClock.elapsedRealtime()-sime) + "ms");
                     }
