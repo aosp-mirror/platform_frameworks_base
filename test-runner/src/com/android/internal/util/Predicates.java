@@ -21,6 +21,7 @@ import java.util.Arrays;
 /**
  * Predicates contains static methods for creating the standard set of
  * {@code Predicate} objects.
+ * @hide
  */
 public class Predicates {
 
