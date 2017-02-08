@@ -364,39 +364,62 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
     public void testImeSubtypeListComparator() throws Exception {
         {
             final List<ImeSubtypeListItem> items = Arrays.asList(
-                    createDummyItem("X", "A", "en_US", 0, "en_US"),
-                    createDummyItem("X", "A", "en", 1, "en_US"),
-                    createDummyItem("X", "A", "ja", 2, "en_US"),
+                    // Subtypes of IME "X".
+                    // Subtypes that has the same locale of the system's.
+                    createDummyItem("X", "E", "en_US", 0, "en_US"),
                     createDummyItem("X", "Z", "en_US", 3, "en_US"),
-                    createDummyItem("X", "Z", "en", 4, "en_US"),
-                    createDummyItem("X", "Z", "ja", 5, "en_US"),
                     createDummyItem("X", "", "en_US", 6, "en_US"),
+                    // Subtypes that has the same language of the system's.
+                    createDummyItem("X", "E", "en", 1, "en_US"),
+                    createDummyItem("X", "Z", "en", 4, "en_US"),
                     createDummyItem("X", "", "en", 7, "en_US"),
+                    // Subtypes that has different language than the system's.
+                    createDummyItem("X", "A", "hi_IN", 27, "en_US"),
+                    createDummyItem("X", "E", "ja", 2, "en_US"),
+                    createDummyItem("X", "Z", "ja", 5, "en_US"),
                     createDummyItem("X", "", "ja", 8, "en_US"),
-                    createDummyItem("Y", "A", "en_US", 9, "en_US"),
-                    createDummyItem("Y", "A", "en", 10, "en_US"),
-                    createDummyItem("Y", "A", "ja", 11, "en_US"),
+
+                    // Subtypes of IME "Y".
+                    // Subtypes that has the same locale of the system's.
+                    createDummyItem("Y", "E", "en_US", 9, "en_US"),
                     createDummyItem("Y", "Z", "en_US", 12, "en_US"),
-                    createDummyItem("Y", "Z", "en", 13, "en_US"),
-                    createDummyItem("Y", "Z", "ja", 14, "en_US"),
                     createDummyItem("Y", "", "en_US", 15, "en_US"),
+                    // Subtypes that has the same language of the system's.
+                    createDummyItem("Y", "E", "en", 10, "en_US"),
+                    createDummyItem("Y", "Z", "en", 13, "en_US"),
                     createDummyItem("Y", "", "en", 16, "en_US"),
+                    // Subtypes that has different language than the system's.
+                    createDummyItem("Y", "A", "hi_IN", 28, "en_US"),
+                    createDummyItem("Y", "E", "ja", 11, "en_US"),
+                    createDummyItem("Y", "Z", "ja", 14, "en_US"),
                     createDummyItem("Y", "", "ja", 17, "en_US"),
-                    createDummyItem("", "A", "en_US", 18, "en_US"),
-                    createDummyItem("", "A", "en", 19, "en_US"),
-                    createDummyItem("", "A", "ja", 20, "en_US"),
+
+                    // Subtypes of IME "".
+                    // Subtypes that has the same locale of the system's.
+                    createDummyItem("", "E", "en_US", 18, "en_US"),
                     createDummyItem("", "Z", "en_US", 21, "en_US"),
-                    createDummyItem("", "Z", "en", 22, "en_US"),
-                    createDummyItem("", "Z", "ja", 23, "en_US"),
                     createDummyItem("", "", "en_US", 24, "en_US"),
+                    // Subtypes that has the same language of the system's.
+                    createDummyItem("", "E", "en", 19, "en_US"),
+                    createDummyItem("", "Z", "en", 22, "en_US"),
                     createDummyItem("", "", "en", 25, "en_US"),
+                    // Subtypes that has different language than the system's.
+                    createDummyItem("", "A", "hi_IN", 29, "en_US"),
+                    createDummyItem("", "E", "ja", 20, "en_US"),
+                    createDummyItem("", "Z", "ja", 23, "en_US"),
                     createDummyItem("", "", "ja", 26, "en_US"));
 
+            // Ensure {@link java.lang.Comparable#compareTo} contracts are satisfied.
             for (int i = 0; i < items.size(); ++i) {
-                assertEquals(0, items.get(i).compareTo(items.get(i)));
+                final ImeSubtypeListItem item1 = items.get(i);
+                // Ensures sgn(x.compareTo(y)) == -sgn(y.compareTo(x)).
+                assertTrue(item1 + " has the same order of itself", item1.compareTo(item1) == 0);
+                // Ensures (x.compareTo(y) > 0 && y.compareTo(z) > 0) implies x.compareTo(z) > 0.
                 for (int j = i + 1; j < items.size(); ++j) {
-                    assertTrue(items.get(i).compareTo(items.get(j)) < 0);
-                    assertTrue(items.get(j).compareTo(items.get(i)) > 0);
+                    final ImeSubtypeListItem item2 = items.get(j);
+                    // Ensures sgn(x.compareTo(y)) == -sgn(y.compareTo(x)).
+                    assertTrue(item1 + " is less than " + item2, item1.compareTo(item2) < 0);
+                    assertTrue(item2 + " is greater than " + item1, item2.compareTo(item1) > 0);
                 }
             }
         }
@@ -404,11 +427,14 @@ public class InputMethodSubtypeSwitchingControllerTest extends InstrumentationTe
         {
             // Following two items have the same priority.
             final ImeSubtypeListItem nonSystemLocale1 =
-                    createDummyItem("X", "A", "ja_JP", 0, "en_us");
+                    createDummyItem("X", "A", "ja_JP", 0, "en_US");
             final ImeSubtypeListItem nonSystemLocale2 =
-                    createDummyItem("X", "A", "hi_IN", 1, "en_us");
-            assertEquals(0, nonSystemLocale1.compareTo(nonSystemLocale2));
-            assertEquals(0, nonSystemLocale2.compareTo(nonSystemLocale1));
+                    createDummyItem("X", "A", "hi_IN", 1, "en_US");
+            assertTrue(nonSystemLocale1.compareTo(nonSystemLocale2) == 0);
+            assertTrue(nonSystemLocale2.compareTo(nonSystemLocale1) == 0);
+            // But those aren't equal to each other.
+            assertFalse(nonSystemLocale1.equals(nonSystemLocale2));
+            assertFalse(nonSystemLocale2.equals(nonSystemLocale1));
         }
     }
 }
