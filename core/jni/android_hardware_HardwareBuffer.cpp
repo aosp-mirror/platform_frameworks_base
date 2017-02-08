@@ -30,6 +30,7 @@
 #include <binder/Parcel.h>
 #include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceComposer.h>
+#include <hardware/gralloc1.h>
 #include <ui/GraphicBuffer.h>
 
 #include <private/gui/ComposerService.h>
@@ -96,10 +97,15 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
         }
         return NULL;
     }
-    uint32_t grallocUsage = android_hardware_HardwareBuffer_convertToGrallocUsageBits(usage, 0);
+    uint64_t producerUsage = 0;
+    uint64_t consumerUsage = 0;
+    android_hardware_HardwareBuffer_convertToGrallocUsageBits(usage, 0, &producerUsage,
+            &consumerUsage);
     status_t error;
     sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, pixelFormat,
-            layers, grallocUsage, &error));
+            layers, producerUsage, consumerUsage,
+            std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]",
+            &error));
     if (buffer == NULL) {
         if (kDebugGraphicBuffer) {
             ALOGW("createGraphicBuffer() failed in HardwareBuffer.create()");
@@ -158,7 +164,7 @@ static jlong android_hardware_HardwareBuffer_getUsage(JNIEnv* env,
     jobject clazz, jlong nativeObject) {
     GraphicBuffer* buffer = GraphicBufferWrapper_to_GraphicBuffer(nativeObject);
     return android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
-            buffer->getUsage());
+            buffer->getUsage(), buffer->getUsage());
 }
 
 // ----------------------------------------------------------------------------
@@ -261,52 +267,58 @@ uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format) {
     }
 }
 
-uint32_t android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t usage0,
-        uint64_t usage1) {
-    uint32_t bits = 0;
+void android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t usage0,
+        uint64_t usage1, uint64_t* outProducerUsage,
+        uint64_t* outConsumerUsage) {
+    *outProducerUsage = 0;
+    *outConsumerUsage = 0;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_READ))
-        bits |= GRALLOC_USAGE_SW_READ_RARELY;
+        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_CPU_READ;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_READ_OFTEN))
-        bits |= GRALLOC_USAGE_SW_READ_OFTEN;
+        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_CPU_READ_OFTEN;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_WRITE))
-        bits |= GRALLOC_USAGE_SW_WRITE_RARELY;
+        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_CPU_WRITE;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_WRITE_OFTEN))
-        bits |= GRALLOC_USAGE_SW_WRITE_OFTEN;
+        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_SAMPLED_IMAGE))
-        bits |= GRALLOC_USAGE_HW_TEXTURE;
+        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_GPU_TEXTURE;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_COLOR_OUTPUT))
-        bits |= GRALLOC_USAGE_HW_RENDER;
+        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_GPU_RENDER_TARGET;
     // Not sure what this should be.
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_CUBEMAP)) bits |= 0;
-    //if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_DATA_BUFFER) bits |= 0;
+    //if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_CUBEMAP)) bits |= 0;
+    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_DATA_BUFFER))
+        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_GPU_DATA_BUFFER;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_VIDEO_ENCODE))
-        bits |= GRALLOC_USAGE_HW_VIDEO_ENCODER;
+        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_VIDEO_ENCODER;
     if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_PROTECTED_CONTENT))
-        bits |= GRALLOC_USAGE_PROTECTED;
-
-    (void)usage1;
-
-    return bits;
+        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_PROTECTED;
+    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_SENSOR_DIRECT_DATA))
+        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_SENSOR_DIRECT_DATA;
 }
 
-uint64_t android_hardware_HardwareBuffer_convertFromGrallocUsageBits(uint64_t usage0) {
+uint64_t android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
+        uint64_t producerUsage, uint64_t consumerUsage) {
     uint64_t bits = 0;
-    if (containsBits(usage0, GRALLOC_USAGE_SW_READ_RARELY))
+    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_CPU_READ))
         bits |= AHARDWAREBUFFER_USAGE0_CPU_READ;
-    if (containsBits(usage0, GRALLOC_USAGE_SW_READ_OFTEN))
+    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_CPU_READ_OFTEN))
         bits |= AHARDWAREBUFFER_USAGE0_CPU_READ_OFTEN;
-    if (containsBits(usage0, GRALLOC_USAGE_SW_WRITE_RARELY))
+    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_CPU_WRITE))
         bits |= AHARDWAREBUFFER_USAGE0_CPU_WRITE;
-    if (containsBits(usage0, GRALLOC_USAGE_SW_WRITE_OFTEN))
+    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN))
         bits |= AHARDWAREBUFFER_USAGE0_CPU_WRITE_OFTEN;
-    if (containsBits(usage0, GRALLOC_USAGE_HW_TEXTURE))
+    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_GPU_TEXTURE))
         bits |= AHARDWAREBUFFER_USAGE0_GPU_SAMPLED_IMAGE;
-    if (containsBits(usage0, GRALLOC_USAGE_HW_RENDER))
+    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_GPU_RENDER_TARGET))
         bits |= AHARDWAREBUFFER_USAGE0_GPU_COLOR_OUTPUT;
-    if (containsBits(usage0, GRALLOC_USAGE_HW_VIDEO_ENCODER))
+    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_GPU_DATA_BUFFER))
+        bits |= AHARDWAREBUFFER_USAGE0_GPU_DATA_BUFFER;
+    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_VIDEO_ENCODER))
         bits |= AHARDWAREBUFFER_USAGE0_VIDEO_ENCODE;
-    if (containsBits(usage0, GRALLOC_USAGE_PROTECTED))
+    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_PROTECTED))
         bits |= AHARDWAREBUFFER_USAGE0_PROTECTED_CONTENT;
+    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_SENSOR_DIRECT_DATA))
+        bits |= AHARDWAREBUFFER_USAGE0_SENSOR_DIRECT_DATA;
 
     return bits;
 }
