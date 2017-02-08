@@ -151,7 +151,7 @@ public class PipManager {
     private List<MediaListener> mMediaListeners = new ArrayList<>();
     private Rect mCurrentPipBounds;
     private Rect mPipBounds;
-    private Rect mDefaultPipBounds;
+    private Rect mDefaultPipBounds = new Rect();
     private Rect mSettingsPipBounds;
     private Rect mMenuModePipBounds;
     private Rect mRecentsPipBounds;
