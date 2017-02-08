@@ -1339,11 +1339,20 @@ struct ResTable_typeSpec
 
 /**
  * A collection of resource entries for a particular resource data
- * type. Followed by an array of uint32_t defining the resource
+ * type.
+ *
+ * If the flag FLAG_SPARSE is not set in `flags`, then this struct is
+ * followed by an array of uint32_t defining the resource
  * values, corresponding to the array of type strings in the
  * ResTable_package::typeStrings string block. Each of these hold an
  * index from entriesStart; a value of NO_ENTRY means that entry is
  * not defined.
+ *
+ * If the flag FLAG_SPARSE is set in `flags`, then this struct is followed
+ * by an array of ResTable_sparseTypeEntry defining only the entries that
+ * have values for this type. Each entry is sorted by their entry ID such
+ * that a binary search can be performed over the entries. The ID and offset
+ * are encoded in a uint32_t. See ResTabe_sparseTypeEntry.
  *
  * There may be multiple of these chunks for a particular resource type,
  * supply different configuration variations for the resource values of
@@ -1365,10 +1374,17 @@ struct ResTable_type
     // resource identifier).  0 is invalid.
     uint8_t id;
     
+    enum {
+        // If set, the entry is sparse, and encodes both the entry ID and offset into each entry,
+        // and a binary search is used to find the key. Only available on platforms >= O.
+        // Mark any types that use this with a v26 qualifier to prevent runtime issues on older
+        // platforms.
+        FLAG_SPARSE = 0x01,
+    };
+    uint8_t flags;
+
     // Must be 0.
-    uint8_t res0;
-    // Must be 0.
-    uint16_t res1;
+    uint16_t reserved;
     
     // Number of uint32_t entry indices that follow.
     uint32_t entryCount;
@@ -1379,6 +1395,24 @@ struct ResTable_type
     // Configuration this collection of entries is designed for.
     ResTable_config config;
 };
+
+/**
+ * An entry in a ResTable_type with the flag `FLAG_SPARSE` set.
+ */
+union ResTable_sparseTypeEntry {
+    // Holds the raw uint32_t encoded value. Do not read this.
+    uint32_t entry;
+    struct {
+        // The index of the entry.
+        uint16_t idx;
+
+        // The offset from ResTable_type::entriesStart, divided by 4.
+        uint16_t offset;
+    };
+};
+
+static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
+        "ResTable_sparseTypeEntry must be 4 bytes in size");
 
 /**
  * This is the beginning of information about an entry in the resource

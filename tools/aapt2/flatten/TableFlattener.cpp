@@ -26,6 +26,7 @@
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "flatten/ChunkWriter.h"
 #include "flatten/ResourceTypeExtensions.h"
@@ -216,8 +217,11 @@ class MapFlattenVisitor : public RawValueVisitor {
 
 class PackageFlattener {
  public:
-  PackageFlattener(IDiagnostics* diag, ResourceTablePackage* package)
-      : diag_(diag), package_(package) {}
+  PackageFlattener(IAaptContext* context, ResourceTablePackage* package, bool use_sparse_entries)
+      : context_(context),
+        diag_(context->GetDiagnostics()),
+        package_(package),
+        use_sparse_entries_(use_sparse_entries) {}
 
   bool FlattenPackage(BigBuffer* buffer) {
     ChunkWriter pkg_writer(buffer);
@@ -298,9 +302,12 @@ class PackageFlattener {
     return true;
   }
 
-  bool FlattenConfig(const ResourceTableType* type,
-                     const ConfigDescription& config,
-                     std::vector<FlatEntry>* entries, BigBuffer* buffer) {
+  bool FlattenConfig(const ResourceTableType* type, const ConfigDescription& config,
+                     const size_t num_total_entries, std::vector<FlatEntry>* entries,
+                     BigBuffer* buffer) {
+    CHECK(num_total_entries != 0);
+    CHECK(num_total_entries <= std::numeric_limits<uint16_t>::max());
+
     ChunkWriter type_writer(buffer);
     ResTable_type* type_header =
         type_writer.StartChunk<ResTable_type>(RES_TABLE_TYPE_TYPE);
@@ -308,39 +315,60 @@ class PackageFlattener {
     type_header->config = config;
     type_header->config.swapHtoD();
 
-    auto max_accum = [](uint32_t max,
-                        const std::unique_ptr<ResourceEntry>& a) -> uint32_t {
-      return std::max(max, (uint32_t)a->id.value());
-    };
+    std::vector<uint32_t> offsets;
+    offsets.resize(num_total_entries, 0xffffffffu);
 
-    // Find the largest entry ID. That is how many entries we will have.
-    const uint32_t entry_count =
-        std::accumulate(type->entries.begin(), type->entries.end(), 0,
-                        max_accum) +
-        1;
-
-    type_header->entryCount = util::HostToDevice32(entry_count);
-    uint32_t* indices = type_writer.NextBlock<uint32_t>(entry_count);
-
-    CHECK((size_t)entry_count <= std::numeric_limits<uint16_t>::max());
-    memset(indices, 0xff, entry_count * sizeof(uint32_t));
-
-    type_header->entriesStart = util::HostToDevice32(type_writer.size());
-
-    const size_t entry_start = type_writer.buffer()->size();
+    BigBuffer values_buffer(512);
     for (FlatEntry& flat_entry : *entries) {
-      CHECK(flat_entry.entry->id.value() < entry_count);
-      indices[flat_entry.entry->id.value()] =
-          util::HostToDevice32(type_writer.buffer()->size() - entry_start);
-      if (!FlattenValue(&flat_entry, type_writer.buffer())) {
+      CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
+      offsets[flat_entry.entry->id.value()] = values_buffer.size();
+      if (!FlattenValue(&flat_entry, &values_buffer)) {
         diag_->Error(DiagMessage()
                      << "failed to flatten resource '"
-                     << ResourceNameRef(package_->name, type->type,
-                                        flat_entry.entry->name)
+                     << ResourceNameRef(package_->name, type->type, flat_entry.entry->name)
                      << "' for configuration '" << config << "'");
         return false;
       }
     }
+
+    bool sparse_encode = use_sparse_entries_;
+
+    // Only sparse encode if the entries will be read on platforms O+.
+    sparse_encode =
+        sparse_encode && (context_->GetMinSdkVersion() >= SDK_O || config.sdkVersion >= SDK_O);
+
+    // Only sparse encode if the offsets are representable in 2 bytes.
+    sparse_encode =
+        sparse_encode && (values_buffer.size() / 4u) <= std::numeric_limits<uint16_t>::max();
+
+    // Only sparse encode if the ratio of populated entries to total entries is below some
+    // threshold.
+    sparse_encode =
+        sparse_encode && ((100 * entries->size()) / num_total_entries) < kSparseEncodingThreshold;
+
+    if (sparse_encode) {
+      type_header->entryCount = util::HostToDevice32(entries->size());
+      type_header->flags |= ResTable_type::FLAG_SPARSE;
+      ResTable_sparseTypeEntry* indices =
+          type_writer.NextBlock<ResTable_sparseTypeEntry>(entries->size());
+      for (size_t i = 0; i < num_total_entries; i++) {
+        if (offsets[i] != ResTable_type::NO_ENTRY) {
+          CHECK((offsets[i] & 0x03) == 0);
+          indices->idx = util::HostToDevice16(i);
+          indices->offset = util::HostToDevice16(offsets[i] / 4u);
+          indices++;
+        }
+      }
+    } else {
+      type_header->entryCount = util::HostToDevice32(num_total_entries);
+      uint32_t* indices = type_writer.NextBlock<uint32_t>(num_total_entries);
+      for (size_t i = 0; i < num_total_entries; i++) {
+        indices[i] = util::HostToDevice32(offsets[i]);
+      }
+    }
+
+    type_header->entriesStart = util::HostToDevice32(type_writer.size());
+    type_writer.buffer()->AppendBuffer(std::move(values_buffer));
     type_writer.Finish();
     return true;
   }
@@ -370,8 +398,7 @@ class PackageFlattener {
       CHECK(bool(entry->id)) << "entry must have an ID set";
       sorted_entries.push_back(entry.get());
     }
-    std::sort(sorted_entries.begin(), sorted_entries.end(),
-              cmp_ids<ResourceEntry>);
+    std::sort(sorted_entries.begin(), sorted_entries.end(), cmp_ids<ResourceEntry>);
     return sorted_entries;
   }
 
@@ -443,10 +470,12 @@ class PackageFlattener {
       type_pool_.MakeRef(ToString(type->type));
 
       std::vector<ResourceEntry*> sorted_entries = CollectAndSortEntries(type);
-
       if (!FlattenTypeSpec(type, &sorted_entries, buffer)) {
         return false;
       }
+
+      // Since the entries are sorted by ID, the last ID will be the largest.
+      const size_t num_entries = sorted_entries.back()->id.value() + 1;
 
       // The binary resource table lists resource entries for each
       // configuration.
@@ -454,11 +483,9 @@ class PackageFlattener {
       // each
       // configuration available. Here we reverse this to match the binary
       // table.
-      std::map<ConfigDescription, std::vector<FlatEntry>>
-          config_to_entry_list_map;
+      std::map<ConfigDescription, std::vector<FlatEntry>> config_to_entry_list_map;
       for (ResourceEntry* entry : sorted_entries) {
-        const uint32_t key_index =
-            (uint32_t)key_pool_.MakeRef(entry->name).index();
+        const uint32_t key_index = (uint32_t)key_pool_.MakeRef(entry->name).index();
 
         // Group values by configuration.
         for (auto& config_value : entry->values) {
@@ -469,7 +496,7 @@ class PackageFlattener {
 
       // Flatten a configuration value.
       for (auto& entry : config_to_entry_list_map) {
-        if (!FlattenConfig(type, entry.first, &entry.second, buffer)) {
+        if (!FlattenConfig(type, entry.first, num_entries, &entry.second, buffer)) {
           return false;
         }
       }
@@ -477,8 +504,10 @@ class PackageFlattener {
     return true;
   }
 
+  IAaptContext* context_;
   IDiagnostics* diag_;
   ResourceTablePackage* package_;
+  bool use_sparse_entries_;
   StringPool type_pool_;
   StringPool key_pool_;
 };
@@ -513,7 +542,7 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
 
   // Flatten each package.
   for (auto& package : table->packages) {
-    PackageFlattener flattener(context->GetDiagnostics(), package.get());
+    PackageFlattener flattener(context, package.get(), options_.use_sparse_entries);
     if (!flattener.FlattenPackage(&package_buffer)) {
       return false;
     }

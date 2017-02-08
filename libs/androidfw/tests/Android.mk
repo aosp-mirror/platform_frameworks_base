@@ -45,6 +45,8 @@ testFiles := \
 benchmarkFiles := \
     AssetManager2_bench.cpp \
     BenchMain.cpp \
+    BenchmarkHelpers.cpp \
+    SparseEntry_bench.cpp \
     TestHelpers.cpp \
     Theme_bench.cpp
 

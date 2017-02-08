@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -115,6 +116,8 @@ class BigBuffer {
 
   const_iterator begin() const;
   const_iterator end() const;
+
+  std::string to_string() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BigBuffer);

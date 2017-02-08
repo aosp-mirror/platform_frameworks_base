@@ -23,8 +23,7 @@
 namespace android {
 
 struct TypeVariant {
-    TypeVariant(const ResTable_type* data)
-        : data(data) {}
+    TypeVariant(const ResTable_type* data);
 
     class iterator {
     public:
@@ -72,10 +71,13 @@ struct TypeVariant {
     }
 
     iterator endEntries() const {
-        return iterator(this, dtohl(data->entryCount));
+        return iterator(this, mLength);
     }
 
     const ResTable_type* data;
+
+private:
+    size_t mLength;
 };
 
 } // namespace android

@@ -41,6 +41,34 @@ TEST(ResTableTest, ShouldLoadSuccessfully) {
   ASSERT_EQ(NO_ERROR, table.add(contents.data(), contents.size()));
 }
 
+TEST(ResTableTest, ShouldLoadSparseEntriesSuccessfully) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
+                                      &contents));
+
+  ResTable table;
+  ASSERT_EQ(NO_ERROR, table.add(contents.data(), contents.size()));
+
+  ResTable_config config;
+  memset(&config, 0, sizeof(config));
+  config.sdkVersion = 26;
+  table.setParameters(&config);
+
+  String16 name(u"com.android.sparse:integer/foo_9");
+  uint32_t flags;
+  uint32_t resid =
+      table.identifierForName(name.string(), name.size(), nullptr, 0, nullptr, 0, &flags);
+  ASSERT_NE(0u, resid);
+
+  Res_value val;
+  ResTable_config selected_config;
+  ASSERT_GE(
+      table.getResource(resid, &val, false /*mayBeBag*/, 0u /*density*/, &flags, &selected_config),
+      0);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+  EXPECT_EQ(900u, val.data);
+}
+
 TEST(ResTableTest, SimpleTypeIsRetrievedCorrectly) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk",
