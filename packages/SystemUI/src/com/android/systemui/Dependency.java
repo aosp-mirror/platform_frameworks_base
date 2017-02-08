@@ -27,6 +27,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
@@ -182,6 +183,9 @@ public class Dependency extends SystemUI {
 
         mProviders.put(TunerService.class.getName(), () ->
                 new TunerService(mContext));
+
+        mProviders.put(StatusBarWindowManager.class.getName(), () ->
+                new StatusBarWindowManager(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

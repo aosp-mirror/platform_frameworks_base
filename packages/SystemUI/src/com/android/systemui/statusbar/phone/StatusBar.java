@@ -1434,10 +1434,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.beginSection("StatusBar#startKeyguard");
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mFingerprintUnlockController = new FingerprintUnlockController(mContext,
-                mStatusBarWindowManager, mDozeScrimController, keyguardViewMediator,
+                mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
-                getBouncerContainer(), mStatusBarWindowManager, mScrimController,
+                getBouncerContainer(), mScrimController,
                 mFingerprintUnlockController);
         mKeyguardIndicationController.setStatusBarKeyguardViewManager(
                 mStatusBarKeyguardViewManager);
@@ -3384,9 +3384,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.print("  status bar gestures: ");
             mGestureRec.dump(fd, pw, args);
         }
-        if (mStatusBarWindowManager != null) {
-            mStatusBarWindowManager.dump(fd, pw, args);
-        }
 
         if (mHeadsUpManager != null) {
             mHeadsUpManager.dump(fd, pw, args);
@@ -3425,9 +3422,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void addStatusBarWindow() {
         makeStatusBarView();
-        mStatusBarWindowManager = new StatusBarWindowManager(mContext);
-        mRemoteInputController = new RemoteInputController(mStatusBarWindowManager,
-                mHeadsUpManager);
+        mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
+        mRemoteInputController = new RemoteInputController(mHeadsUpManager);
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 

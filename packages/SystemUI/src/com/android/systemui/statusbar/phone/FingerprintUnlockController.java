@@ -27,6 +27,7 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.LatencyTracker;
+import com.android.systemui.Dependency;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
 /**
@@ -101,7 +102,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private int mPendingAuthenticatedUserId = -1;
 
     public FingerprintUnlockController(Context context,
-            StatusBarWindowManager statusBarWindowManager,
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
             ScrimController scrimController,
@@ -111,7 +111,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mUpdateMonitor.registerCallback(this);
-        mStatusBarWindowManager = statusBarWindowManager;
+        mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;

@@ -15,11 +15,14 @@
 package com.android.systemui.plugin.testoverlayplugin;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.ViewTreeObserver.InternalInsetsInfo;
+import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import com.android.systemui.plugins.OverlayPlugin;
 
 public class SampleOverlayPlugin implements OverlayPlugin {
@@ -28,6 +31,9 @@ public class SampleOverlayPlugin implements OverlayPlugin {
 
     private View mStatusBarView;
     private View mNavBarView;
+    private boolean mInputSetup;
+    private boolean mCollapseDesired;
+    private float mStatusBarHeight;
 
     @Override
     public int getVersion() {
@@ -43,6 +49,10 @@ public class SampleOverlayPlugin implements OverlayPlugin {
 
     @Override
     public void onDestroy() {
+        if (mInputSetup) {
+            mStatusBarView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
+                    onComputeInternalInsetsListener);
+        }
         Log.d(TAG, "onDestroy");
         if (mStatusBarView != null) {
             mStatusBarView.post(
@@ -57,6 +67,9 @@ public class SampleOverlayPlugin implements OverlayPlugin {
     public void setup(View statusBar, View navBar) {
         Log.d(TAG, "Setup");
 
+        int id = mPluginContext.getResources().getIdentifier("status_bar_height", "dimen",
+                "android");
+        mStatusBarHeight = mPluginContext.getResources().getDimension(id);
         if (statusBar instanceof ViewGroup) {
             mStatusBarView = LayoutInflater.from(mPluginContext)
                     .inflate(R.layout.colored_overlay, (ViewGroup) statusBar, false);
@@ -68,4 +81,28 @@ public class SampleOverlayPlugin implements OverlayPlugin {
             ((ViewGroup) navBar).addView(mNavBarView);
         }
     }
+
+    @Override
+    public void setCollapseDesired(boolean collapseDesired) {
+        mCollapseDesired = collapseDesired;
+    }
+
+    @Override
+    public boolean holdStatusBarOpen() {
+        if (!mInputSetup) {
+            mInputSetup = true;
+            mStatusBarView.getViewTreeObserver().addOnComputeInternalInsetsListener(
+                    onComputeInternalInsetsListener);
+        }
+        return true;
+    }
+
+    final OnComputeInternalInsetsListener onComputeInternalInsetsListener = inoutInfo -> {
+        inoutInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        if (mCollapseDesired) {
+            inoutInfo.touchableRegion.set(new Rect(0, 0, 50000, (int) mStatusBarHeight));
+        } else {
+            inoutInfo.touchableRegion.set(new Rect(0, 0, 50000, 50000));
+        }
+    };
 }

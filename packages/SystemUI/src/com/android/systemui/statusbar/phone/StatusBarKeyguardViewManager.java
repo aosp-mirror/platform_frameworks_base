@@ -32,6 +32,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.keyguard.LatencyTracker;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.CommandQueue;
@@ -67,6 +68,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private static String TAG = "StatusBarKeyguardViewManager";
 
     protected final Context mContext;
+    private final StatusBarWindowManager mStatusBarWindowManager;
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
@@ -75,7 +77,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private FingerprintUnlockController mFingerprintUnlockController;
 
     private ViewGroup mContainer;
-    private StatusBarWindowManager mStatusBarWindowManager;
 
     private boolean mDeviceInteractive = false;
     private boolean mScreenTurnedOn;
@@ -101,16 +102,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
+        mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
     }
 
     public void registerStatusBar(StatusBar statusBar,
-            ViewGroup container, StatusBarWindowManager statusBarWindowManager,
+            ViewGroup container,
             ScrimController scrimController,
             FingerprintUnlockController fingerprintUnlockController,
             DismissCallbackRegistry dismissCallbackRegistry) {
         mStatusBar = statusBar;
         mContainer = container;
-        mStatusBarWindowManager = statusBarWindowManager;
         mScrimController = scrimController;
         mFingerprintUnlockController = fingerprintUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,

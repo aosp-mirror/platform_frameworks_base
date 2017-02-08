@@ -21,4 +21,14 @@ public interface OverlayPlugin extends Plugin {
     int VERSION = 1;
 
     void setup(View statusBar, View navBar);
+
+    default boolean holdStatusBarOpen() {
+        return false;
+    }
+
+    /**
+     * Only called if the plugin has returned true to holdStatusBarOpen().
+     */
+    default void setCollapseDesired(boolean collapseDesired) {
+    }
 }
