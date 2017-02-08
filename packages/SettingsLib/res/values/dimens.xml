@@ -58,8 +58,8 @@
     <dimen name="drawer_item_top_bottom_margin">4dp</dimen>
     <dimen name="drawer_spacer_height">32dp</dimen>
 
-    <dimen name="battery_height">48dp</dimen>
-    <dimen name="battery_width">38dp</dimen>
+    <dimen name="battery_height">14.5dp</dimen>
+    <dimen name="battery_width">9.5dp</dimen>
 
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <fraction name="battery_button_height_fraction">10.5%</fraction>
