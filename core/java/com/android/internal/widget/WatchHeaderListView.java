@@ -26,8 +26,7 @@ import android.widget.ListView;
 import android.widget.HeaderViewListAdapter;
 
 import java.util.ArrayList;
-
-import com.android.internal.util.Predicate;
+import java.util.function.Predicate;
 
 public class WatchHeaderListView extends ListView {
     private View mTopPanel;

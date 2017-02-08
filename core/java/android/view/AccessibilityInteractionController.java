@@ -42,7 +42,6 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Predicate;
 
 /**
  * Class for managing accessibility interactions initiated from the system
@@ -1205,7 +1205,7 @@ final class AccessibilityInteractionController {
         }
 
         @Override
-        public boolean apply(View view) {
+        public boolean test(View view) {
             if (view.getId() == mViewId && isShown(view)) {
                 mInfos.add(view.createAccessibilityNodeInfo());
             }

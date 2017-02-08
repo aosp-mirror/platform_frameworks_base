@@ -115,7 +115,6 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
-import com.android.internal.util.Predicate;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -140,6 +139,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * <p>
@@ -9325,7 +9325,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 final int id = mID;
                 return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
                     @Override
-                    public boolean apply(View t) {
+                    public boolean test(View t) {
                         return t.mNextFocusForwardId == id;
                     }
                 });
@@ -20002,7 +20002,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
-        if (predicate.apply(this)) {
+        if (predicate.test(this)) {
             return this;
         }
         return null;
@@ -24448,20 +24448,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private class MatchIdPredicate implements Predicate<View> {
+    private static class MatchIdPredicate implements Predicate<View> {
         public int mId;
 
         @Override
-        public boolean apply(View view) {
+        public boolean test(View view) {
             return (view.mID == mId);
         }
     }
 
-    private class MatchLabelForPredicate implements Predicate<View> {
+    private static class MatchLabelForPredicate implements Predicate<View> {
         private int mLabeledId;
 
         @Override
-        public boolean apply(View view) {
+        public boolean test(View view) {
             return (view.mLabelForId == mLabeledId);
         }
     }

@@ -49,12 +49,12 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
-import com.android.internal.util.Predicate;
 
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /*
  * Implementation Notes:

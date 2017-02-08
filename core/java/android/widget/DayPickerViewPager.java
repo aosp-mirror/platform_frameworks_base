@@ -21,10 +21,10 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.android.internal.util.Predicate;
 import com.android.internal.widget.ViewPager;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 /**
  * This displays a list of months in a calendar format with selectable days.
@@ -138,7 +138,7 @@ class DayPickerViewPager extends ViewPager {
 
     @Override
     protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
-        if (predicate.apply(this)) {
+        if (predicate.test(this)) {
             return this;
         }
 
