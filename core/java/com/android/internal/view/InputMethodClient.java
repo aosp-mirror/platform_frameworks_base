@@ -32,13 +32,14 @@ public final class InputMethodClient {
     public static final int START_INPUT_REASON_UNBOUND_FROM_IMMS = 6;
     public static final int START_INPUT_REASON_ACTIVATED_BY_IMMS = 7;
     public static final int START_INPUT_REASON_DEACTIVATED_BY_IMMS = 8;
+    public static final int START_INPUT_REASON_SESSION_CREATED_BY_IME = 9;
 
     @Retention(SOURCE)
     @IntDef({START_INPUT_REASON_UNSPECIFIED, START_INPUT_REASON_WINDOW_FOCUS_GAIN,
             START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY,
             START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, START_INPUT_REASON_CHECK_FOCUS,
             START_INPUT_REASON_BOUND_TO_IMMS, START_INPUT_REASON_ACTIVATED_BY_IMMS,
-            START_INPUT_REASON_DEACTIVATED_BY_IMMS})
+            START_INPUT_REASON_DEACTIVATED_BY_IMMS, START_INPUT_REASON_SESSION_CREATED_BY_IME})
     public @interface StartInputReason {}
 
     public static String getStartInputReason(@StartInputReason final int reason) {
@@ -61,6 +62,8 @@ public final class InputMethodClient {
                 return "ACTIVATED_BY_IMMS";
             case START_INPUT_REASON_DEACTIVATED_BY_IMMS:
                 return "DEACTIVATED_BY_IMMS";
+            case START_INPUT_REASON_SESSION_CREATED_BY_IME:
+                return "SESSION_CREATED_BY_IME";
             default:
                 return "Unknown=" + reason;
         }
