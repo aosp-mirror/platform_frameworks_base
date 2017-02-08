@@ -49,10 +49,17 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * that they lost focus.
      */
     static final boolean ENFORCE_DUCKING = false;
+    /**
+     * set to true so the framework enforces muting media/game itself when the device is ringing
+     * or in a call.
+     */
+    static final boolean ENFORCE_MUTING_FOR_RING_OR_CALL = true;
 
     private final Context mContext;
     private final AppOpsManager mAppOps;
     private PlayerFocusEnforcer mFocusEnforcer; // never null
+
+    private boolean mRingOrCallActive = false;
 
     protected MediaFocusControl(Context cntxt, PlayerFocusEnforcer pfe) {
         mContext = cntxt;
@@ -76,6 +83,16 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     @Override
     public void unduckPlayers(FocusRequester winner) {
         mFocusEnforcer.unduckPlayers(winner);
+    }
+
+    @Override
+    public void mutePlayersForCall(int[] usagesToMute) {
+        mFocusEnforcer.mutePlayersForCall(usagesToMute);
+    }
+
+    @Override
+    public void unmutePlayersForCall() {
+        mFocusEnforcer.unmutePlayersForCall();
     }
 
     //==========================================================================================
@@ -139,7 +156,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 stackIterator.next().dump(pw);
             }
         }
-        pw.println("\n Notify on duck: " + mNotifyFocusOwnerOnDuck +"\n");
+        pw.println("\n");
+        pw.println(" Notify on duck:  " + mNotifyFocusOwnerOnDuck + "\n");
+        pw.println(" In ring or call: " + mRingOrCallActive + "\n");
     }
 
     /**
@@ -401,6 +420,18 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /**
+     * Delay after entering ringing or call mode after which the framework will mute streams
+     * that are still playing.
+     */
+    private static final int RING_CALL_MUTING_ENFORCEMENT_DELAY_MS = 100;
+
+    /**
+     * Usages to mute when the device rings or is in a call
+     */
+    private final static int[] USAGES_TO_MUTE_IN_RING_OR_CALL =
+        { AudioAttributes.USAGE_MEDIA, AudioAttributes.USAGE_GAME };
+
+    /**
      * Return the volume ramp time expected before playback with the given AudioAttributes would
      * start after gaining audio focus.
      * @param attr attributes of the sound about to start playing
@@ -452,6 +483,10 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
 
         synchronized(mAudioFocusLock) {
+            boolean enteringRingOrCall = !mRingOrCallActive
+                    & (AudioSystem.IN_VOICE_COMM_FOCUS_ID.compareTo(clientId) == 0);
+            if (enteringRingOrCall) { mRingOrCallActive = true; }
+
             boolean focusGrantDelayed = false;
             if (!canReassignAudioFocus()) {
                 if ((flags & AudioManager.AUDIOFOCUS_FLAG_DELAY_OK) == 0) {
@@ -523,6 +558,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(),
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
 
+            if (ENFORCE_MUTING_FOR_RING_OR_CALL & enteringRingOrCall) {
+                runAudioCheckerForRingOrCallAsync(true/*enteringRingOrCall*/);
+            }
         }//synchronized(mAudioFocusLock)
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
@@ -539,7 +577,15 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         try {
             // this will take care of notifying the new focus owner if needed
             synchronized(mAudioFocusLock) {
+                boolean exitingRingOrCall = mRingOrCallActive
+                        & (AudioSystem.IN_VOICE_COMM_FOCUS_ID.compareTo(clientId) == 0);
+                if (exitingRingOrCall) { mRingOrCallActive = false; }
+
                 removeFocusStackEntry(clientId, true /*signal*/, true /*notifyFocusFollowers*/);
+
+                if (ENFORCE_MUTING_FOR_RING_OR_CALL & exitingRingOrCall) {
+                    runAudioCheckerForRingOrCallAsync(false/*enteringRingOrCall*/);
+                }
             }
         } catch (java.util.ConcurrentModificationException cme) {
             // Catching this exception here is temporary. It is here just to prevent
@@ -559,4 +605,26 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
     }
 
+    private void runAudioCheckerForRingOrCallAsync(final boolean enteringRingOrCall) {
+        new Thread() {
+            public void run() {
+                if (enteringRingOrCall) {
+                    try {
+                        Thread.sleep(RING_CALL_MUTING_ENFORCEMENT_DELAY_MS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                synchronized (mAudioFocusLock) {
+                    // since the new thread starting running the state could have changed, so
+                    // we need to check again mRingOrCallActive, not enteringRingOrCall
+                    if (mRingOrCallActive) {
+                        mFocusEnforcer.mutePlayersForCall(USAGES_TO_MUTE_IN_RING_OR_CALL);
+                    } else {
+                        mFocusEnforcer.unmutePlayersForCall();
+                    }
+                }
+            }
+        }.start();
+    }
 }
