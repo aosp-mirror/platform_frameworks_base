@@ -1107,14 +1107,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
-    /** @hide Overriding hidden method */
     @Override
-    public boolean hasFocusable(boolean allowAutoFocus) {
+    boolean hasFocusable(boolean allowAutoFocus, boolean dispatchExplicit) {
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
             return false;
         }
 
-        // TODO This should probably be super.hasFocusable, but that would change behavior
+        // TODO This should probably be super.hasFocusable, but that would change behavior.
+        // The below is a much simpler check than we do in the superclass implementation,
+        // but it's been this way for a long time and other code likely relies on it.
         if ((allowAutoFocus ? getFocusable() != NOT_FOCUSABLE : getFocusable() == FOCUSABLE)
                 && isFocusable()) {
             return true;
@@ -1127,7 +1128,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
-                if (child.hasFocusable(allowAutoFocus)) {
+
+                // In case the subclass has overridden has[Explicit]Focusable, dispatch
+                // to the expected one for each child even though we share logic here.
+                if ((dispatchExplicit && child.hasExplicitFocusable())
+                        || (!dispatchExplicit && child.hasFocusable())) {
                     return true;
                 }
             }
