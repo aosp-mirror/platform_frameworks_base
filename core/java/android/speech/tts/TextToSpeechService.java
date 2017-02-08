@@ -409,6 +409,10 @@ public abstract class TextToSpeechService extends Service {
         return getSecureSettingInt(Settings.Secure.TTS_DEFAULT_RATE, Engine.DEFAULT_RATE);
     }
 
+    private int getDefaultPitch() {
+        return getSecureSettingInt(Settings.Secure.TTS_DEFAULT_PITCH, Engine.DEFAULT_PITCH);
+    }
+
     private String[] getSettingsLocale() {
         final Locale locale = mEngineHelper.getLocalePrefForEngine(mPackageName);
         return TtsEngines.toOldLocaleStringFormat(locale);
@@ -936,7 +940,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         int getPitch() {
-            return getIntParam(mParams, Engine.KEY_PARAM_PITCH, Engine.DEFAULT_PITCH);
+            return getIntParam(mParams, Engine.KEY_PARAM_PITCH, getDefaultPitch());
         }
 
         @Override
