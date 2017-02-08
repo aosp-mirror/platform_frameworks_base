@@ -264,7 +264,7 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
         final MyThreadFactory factory = new MyThreadFactory();
         int firstMountId;
         try (final ParcelFileDescriptor fd = mSm.openProxyFileDescriptor(
-                ParcelFileDescriptor.MODE_READ_ONLY, callback, factory)) {
+                ParcelFileDescriptor.MODE_READ_ONLY, callback, null, factory)) {
             assertNotSame(Thread.State.TERMINATED, factory.thread.getState());
             firstMountId = mSm.getProxyFileDescriptorMountPointId();
             assertNotSame(-1, firstMountId);
@@ -276,7 +276,7 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
 
         // StorageManager should mount another bridge on the next open request.
         try (final ParcelFileDescriptor fd = mSm.openProxyFileDescriptor(
-                ParcelFileDescriptor.MODE_WRITE_ONLY, callback, factory)) {
+                ParcelFileDescriptor.MODE_WRITE_ONLY, callback, null, factory)) {
             assertNotSame(Thread.State.TERMINATED, factory.thread.getState());
             assertNotSame(firstMountId, mSm.getProxyFileDescriptorMountPointId());
         }
