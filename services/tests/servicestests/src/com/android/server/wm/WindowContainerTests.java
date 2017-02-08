@@ -392,7 +392,7 @@ public class WindowContainerTests extends WindowTestsBase {
         testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
             SCREEN_ORIENTATION_LANDSCAPE);
         testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-            SCREEN_ORIENTATION_UNSET);
+            SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,

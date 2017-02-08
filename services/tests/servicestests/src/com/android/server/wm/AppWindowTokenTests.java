@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
@@ -70,6 +71,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // The base application window should be below all other windows.
         assertEquals(baseWin, token.getFirstChild());
+        token.removeImmediately();
     }
 
     @Test
@@ -86,6 +88,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(window1, token.findMainWindow());
         final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, token, "window2");
         assertEquals(window2, token.findMainWindow());
+        token.removeImmediately();
     }
 
     @Test
@@ -123,6 +126,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @Ignore
+    // TODO(b/35034729): Need to fix before re-enabling
     public void testLandscapeSeascapeRotationByPolicy() throws Exception {
         // Some plumbing to get the service ready for rotation updates.
         sWm.mDisplayReady = true;

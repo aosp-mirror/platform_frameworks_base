@@ -173,10 +173,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             boolean showForAllUsers, int targetSdk, int orientation, int rotationAnimationHint,
             int configChanges, boolean launchTaskBehind, boolean alwaysFocusable,
             AppWindowContainerController controller) {
-        this(service, token, voiceInteraction, dc);
+        this(service, token, voiceInteraction, dc, fullscreen);
         setController(controller);
         mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-        mFillsParent = fullscreen;
         mShowForAllUsers = showForAllUsers;
         mTargetSdk = targetSdk;
         mOrientation = orientation;
@@ -191,11 +190,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
-            DisplayContent dc) {
+            DisplayContent dc, boolean fillsParent) {
         super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
                 false /* ownerCanManageAppTokens */);
         appToken = token;
         mVoiceInteraction = voiceInteraction;
+        mFillsParent = fillsParent;
         mInputApplicationHandle = new InputApplicationHandle(this);
         mAppAnimator = new AppWindowAnimator(this, service);
     }

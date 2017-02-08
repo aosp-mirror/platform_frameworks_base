@@ -135,8 +135,9 @@ public class WindowLayersControllerTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForImeNonAppImeTarget() throws Exception {
-        final WindowState imeSystemOverlayTarget =
-                createWindow(null, TYPE_SYSTEM_OVERLAY, sDisplayContent, "imeSystemOverlayTarget");
+        final WindowState imeSystemOverlayTarget = createWindow(null, TYPE_SYSTEM_OVERLAY,
+                sDisplayContent, "imeSystemOverlayTarget",
+                true /* ownerCanAddInternalSystemWindow */);
 
         sWm.mInputMethodTarget = imeSystemOverlayTarget;
         sLayersController.assignWindowLayers(sDisplayContent);
