@@ -18,8 +18,12 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import org.mockito.invocation.InvocationOnMock;
 
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -63,6 +67,19 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             if (LocalServices.getService(PowerManagerInternal.class) == null) {
                 LocalServices.addService(PowerManagerInternal.class,
                         mock(PowerManagerInternal.class));
+            }
+            if (LocalServices.getService(ActivityManagerInternal.class) == null) {
+                LocalServices.addService(ActivityManagerInternal.class,
+                        mock(ActivityManagerInternal.class));
+                final ActivityManagerInternal am =
+                        LocalServices.getService(ActivityManagerInternal.class);
+                doAnswer((InvocationOnMock invocationOnMock) -> {
+                    final Runnable runnable = invocationOnMock.getArgumentAt(0, Runnable.class);
+                    if (runnable != null) {
+                        runnable.run();
+                    }
+                    return null;
+                }).when(am).notifyKeyguardFlagsChanged(any());
             }
             sWm = WindowManagerService.main(context, mock(InputManagerService.class), true, false,
                     false, new TestWindowManagerPolicy());

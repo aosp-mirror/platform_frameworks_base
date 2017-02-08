@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
@@ -26,9 +25,8 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IApplicationToken;
 import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import android.app.ActivityManager.TaskSnapshot;
@@ -59,7 +57,8 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.mockito.Mockito.mock;
 
 import com.android.server.AttributeCache;
-import com.android.server.LocalServices;
+
+import java.util.HashSet;
 
 /**
  * Common base class for window manager unit test classes.
@@ -86,18 +85,16 @@ class WindowTestsBase {
     static WindowState sAppWindow;
     static WindowState sChildAppWindowAbove;
     static WindowState sChildAppWindowBelow;
-    static @Mock ActivityManagerInternal sMockAm;
+    static HashSet<WindowState> sCommonWindows;
 
     @Before
     public void setUp() throws Exception {
         if (sOneTimeSetupDone) {
-            Mockito.reset(sMockAm);
             return;
         }
         sOneTimeSetupDone = true;
         MockitoAnnotations.initMocks(this);
         final Context context = InstrumentationRegistry.getTargetContext();
-        LocalServices.addService(ActivityManagerInternal.class, sMockAm);
         AttributeCache.init(context);
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
         sPolicy = (TestWindowManagerPolicy) sWm.mPolicy;
@@ -119,20 +116,33 @@ class WindowTestsBase {
         sWm.mDisplayReady = true;
 
         // Set-up some common windows.
-        sWallpaperWindow = createWindow(null, TYPE_WALLPAPER, sDisplayContent, "wallpaperWindow");
-        sImeWindow = createWindow(null, TYPE_INPUT_METHOD, sDisplayContent, "sImeWindow");
-        sImeDialogWindow =
-                createWindow(null, TYPE_INPUT_METHOD_DIALOG, sDisplayContent, "sImeDialogWindow");
-        sStatusBarWindow = createWindow(null, TYPE_STATUS_BAR, sDisplayContent, "sStatusBarWindow");
-        sNavBarWindow =
-                createWindow(null, TYPE_NAVIGATION_BAR, sDisplayContent, "sNavBarWindow");
-        sDockedDividerWindow =
-                createWindow(null, TYPE_DOCK_DIVIDER, sDisplayContent, "sDockedDividerWindow");
-        sAppWindow = createWindow(null, TYPE_BASE_APPLICATION, sDisplayContent, "sAppWindow");
-        sChildAppWindowAbove = createWindow(sAppWindow,
-                TYPE_APPLICATION_ATTACHED_DIALOG, sAppWindow.mToken, "sChildAppWindowAbove");
-        sChildAppWindowBelow = createWindow(sAppWindow,
-                TYPE_APPLICATION_MEDIA_OVERLAY, sAppWindow.mToken, "sChildAppWindowBelow");
+        sCommonWindows = new HashSet();
+        sWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
+        sImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "sImeWindow");
+        sImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG, "sImeDialogWindow");
+        sStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "sStatusBarWindow");
+        sNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "sNavBarWindow");
+        sDockedDividerWindow = createCommonWindow(null, TYPE_DOCK_DIVIDER, "sDockedDividerWindow");
+        sAppWindow = createCommonWindow(null, TYPE_BASE_APPLICATION, "sAppWindow");
+        sChildAppWindowAbove = createCommonWindow(sAppWindow, TYPE_APPLICATION_ATTACHED_DIALOG,
+                "sChildAppWindowAbove");
+        sChildAppWindowBelow = createCommonWindow(sAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
+                "sChildAppWindowBelow");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        sWm.mRoot.forAllWindows(w -> {
+            if (!sCommonWindows.contains(w)) {
+                w.removeImmediately();
+            }
+        }, true /* traverseTopToBottom */);
+    }
+
+    private static WindowState createCommonWindow(WindowState parent, int type, String name) {
+        final WindowState win = createWindow(parent, type, name);
+        sCommonWindows.add(win);
+        return win;
     }
 
     /** Asserts that the first entry is greater than the second entry. */
@@ -176,12 +186,23 @@ class WindowTestsBase {
         return createWindow(parent, type, token, name);
     }
 
+    static WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
+            boolean ownerCanAddInternalSystemWindow) {
+        final WindowToken token = createWindowToken(dc, type);
+        return createWindow(parent, type, token, name, ownerCanAddInternalSystemWindow);
+    }
+
     static WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
+        return createWindow(parent, type, token, name, false /* ownerCanAddInternalSystemWindow */);
+    }
+
+    static WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
+            boolean ownerCanAddInternalSystemWindow) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
         attrs.setTitle(name);
 
         final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent, OP_NONE,
-                0, attrs, 0, 0, false /* ownerCanAddInternalSystemWindow */);
+                0, attrs, 0, 0, ownerCanAddInternalSystemWindow);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
@@ -240,7 +261,7 @@ class WindowTestsBase {
     static class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken(DisplayContent dc) {
-            super(sWm, null, false, dc);
+            super(sWm, null, false, dc, true /* fillsParent */);
         }
 
         TestAppWindowToken(WindowManagerService service, IApplicationToken token,

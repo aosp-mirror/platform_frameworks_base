@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -77,6 +78,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * as does some basic tests (e.g. dragging in Y only will keep X stable).
      */
     @Test
+    @Ignore
     public void testBasicFreeWindowResizing() throws Exception {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midY = (r.top + r.bottom) / 2;
@@ -137,6 +139,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * This tests that by dragging any edge, the fixed / opposite edge(s) remains anchored.
      */
     @Test
+    @Ignore
     public void testFreeWindowResizingTestAllEdges() throws Exception {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midX = (r.left + r.right) / 2;
@@ -221,6 +224,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top left corner.
      */
     @Test
+    @Ignore
     public void testLandscapePreservedWindowResizingDragTopLeft() throws Exception {
         final Rect r = new Rect(100, 220, 700, 520);
 
@@ -258,6 +262,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the left corner.
      */
     @Test
+    @Ignore
     public void testLandscapePreservedWindowResizingDragLeft() throws Exception {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midY = (r.top + r.bottom) / 2;
@@ -298,6 +303,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top corner.
      */
     @Test
+    @Ignore
     public void testLandscapePreservedWindowResizingDragTop() throws Exception {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midX = (r.left + r.right) / 2;
@@ -334,6 +340,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top left corner.
      */
     @Test
+    @Ignore
     public void testPortraitPreservedWindowResizingDragTopLeft() throws Exception {
         final Rect r = new Rect(330, 100, 630, 600);
 
@@ -366,6 +373,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the left corner.
      */
     @Test
+    @Ignore
     public void testPortraitPreservedWindowResizingDragLeft() throws Exception {
         final Rect r = new Rect(330, 100, 630, 600);
         final int midY = (r.top + r.bottom) / 2;
@@ -408,6 +416,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top corner.
      */
     @Test
+    @Ignore
     public void testPortraitPreservedWindowResizingDragTop() throws Exception {
         final Rect r = new Rect(330, 100, 630, 600);
         final int midX = (r.left + r.right) / 2;
