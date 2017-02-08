@@ -16,26 +16,25 @@
 
 package com.android.settingslib;
 
-import android.util.Log;
-import android.content.Context;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+
+import com.android.settingslib.drawer.Tile;
+import com.android.settingslib.drawer.TileUtilsTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import com.android.settingslib.drawer.Tile;
-import com.android.settingslib.drawer.TileUtilsTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +42,8 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
