@@ -569,11 +569,12 @@ public class LockPatternUtils {
     /**
      * Clear any lock pattern or password.
      */
-    public void clearLock(int userHandle) {
+    public void clearLock(String savedCredential, int userHandle) {
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
 
-        try {
-            getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE, null, userHandle);
+        try{
+            getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE, savedCredential,
+                    userHandle);
         } catch (RemoteException e) {
             // well, we tried...
         }
@@ -758,7 +759,6 @@ public class LockPatternUtils {
     public void saveLockPassword(String password, String savedPassword, int quality,
             int userHandle) {
         try {
-            DevicePolicyManager dpm = getDevicePolicyManager();
             if (password == null || password.length() < MIN_LOCK_PASSWORD_SIZE) {
                 throw new IllegalArgumentException("password must not be null and at least "
                         + "of length " + MIN_LOCK_PASSWORD_SIZE);
@@ -769,46 +769,53 @@ public class LockPatternUtils {
             getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
                     userHandle);
 
-            // Update the device encryption password.
-            if (userHandle == UserHandle.USER_SYSTEM
-                    && LockPatternUtils.isDeviceEncryptionEnabled()) {
-                if (!shouldEncryptWithCredentials(true)) {
-                    clearEncryptionPassword();
-                } else {
-                    boolean numeric = computedQuality
-                            == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-                    boolean numericComplex = computedQuality
-                            == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
-                    int type = numeric || numericComplex ? StorageManager.CRYPT_TYPE_PIN
-                            : StorageManager.CRYPT_TYPE_PASSWORD;
-                    updateEncryptionPassword(type, password);
-                }
-            }
-
-            // Add the password to the password history. We assume all
-            // password hashes have the same length for simplicity of implementation.
-            String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
-            if (passwordHistory == null) {
-                passwordHistory = "";
-            }
-            int passwordHistoryLength = getRequestedPasswordHistoryLength(userHandle);
-            if (passwordHistoryLength == 0) {
-                passwordHistory = "";
-            } else {
-                byte[] hash = passwordToHash(password, userHandle);
-                passwordHistory = new String(hash, StandardCharsets.UTF_8) + "," + passwordHistory;
-                // Cut it to contain passwordHistoryLength hashes
-                // and passwordHistoryLength -1 commas.
-                passwordHistory = passwordHistory.substring(0, Math.min(hash.length
-                        * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
-                        .length()));
-            }
-            setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
-            onAfterChangingPassword(userHandle);
+            addEncryptionPassword(password, computedQuality, userHandle);
+            updatePasswordHistory(password, userHandle);
         } catch (RemoteException re) {
             // Cant do much
             Log.e(TAG, "Unable to save lock password " + re);
         }
+    }
+
+    private void addEncryptionPassword(String password, int quality, int userHandle) {
+        // Update the device encryption password.
+        if (userHandle == UserHandle.USER_SYSTEM
+                && LockPatternUtils.isDeviceEncryptionEnabled()) {
+            if (!shouldEncryptWithCredentials(true)) {
+                clearEncryptionPassword();
+            } else {
+                boolean numeric = quality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+                boolean numericComplex = quality
+                        == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
+                int type = numeric || numericComplex ? StorageManager.CRYPT_TYPE_PIN
+                        : StorageManager.CRYPT_TYPE_PASSWORD;
+                updateEncryptionPassword(type, password);
+            }
+        }
+    }
+
+    private void updatePasswordHistory(String password, int userHandle) {
+
+        // Add the password to the password history. We assume all
+        // password hashes have the same length for simplicity of implementation.
+        String passwordHistory = getString(PASSWORD_HISTORY_KEY, userHandle);
+        if (passwordHistory == null) {
+            passwordHistory = "";
+        }
+        int passwordHistoryLength = getRequestedPasswordHistoryLength(userHandle);
+        if (passwordHistoryLength == 0) {
+            passwordHistory = "";
+        } else {
+            byte[] hash = passwordToHash(password, userHandle);
+            passwordHistory = new String(hash, StandardCharsets.UTF_8) + "," + passwordHistory;
+            // Cut it to contain passwordHistoryLength hashes
+            // and passwordHistoryLength -1 commas.
+            passwordHistory = passwordHistory.substring(0, Math.min(hash.length
+                    * passwordHistoryLength + passwordHistoryLength - 1, passwordHistory
+                    .length()));
+        }
+        setString(PASSWORD_HISTORY_KEY, passwordHistory, userHandle);
+        onAfterChangingPassword(userHandle);
     }
 
     /**

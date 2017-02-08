@@ -68,6 +68,7 @@ import android.security.keystore.KeyProtection;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
@@ -94,8 +95,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -231,7 +234,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         // Do not tie it to parent when parent does not have a screen lock
         final int parentId = mUserManager.getProfileParent(managedUserId).id;
-        if (!mStorage.hasPassword(parentId) && !mStorage.hasPattern(parentId)) {
+        if (!isUserSecure(parentId)) {
             if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock");
             return;
         }
@@ -378,7 +381,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         final UserHandle userHandle = user.getUserHandle();
-        final boolean isSecure = mStorage.hasPassword(userId) || mStorage.hasPattern(userId);
+        final boolean isSecure = isUserSecure(userId);
         if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
             UserInfo parent = mUserManager.getProfileParent(userId);
             if (parent != null &&
@@ -453,35 +456,34 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     public void onUnlockUser(final int userId) {
-        // Hide notification first, as tie managed profile lock takes time
-        hideEncryptionNotification(new UserHandle(userId));
+        // Perform tasks which require locks in LSS on a handler, as we are callbacks from
+        // ActivityManager.unlockUser()
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Hide notification first, as tie managed profile lock takes time
+                hideEncryptionNotification(new UserHandle(userId));
 
-        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
-            // As tieManagedProfileLockIfNecessary() may try to unlock user, we should not do it
-            // in onUnlockUser() synchronously, otherwise it may cause a deadlock
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
+                // Now we have unlocked the parent user we should show notifications
+                // about any profiles that exist.
+                List<UserInfo> profiles = mUserManager.getProfiles(userId);
+                for (int i = 0; i < profiles.size(); i++) {
+                    UserInfo profile = profiles.get(i);
+                    final boolean isSecure = isUserSecure(profile.id);
+                    if (isSecure && profile.isManagedProfile()) {
+                        UserHandle userHandle = profile.getUserHandle();
+                        if (!mUserManager.isUserUnlockingOrUnlocked(userHandle) &&
+                                !mUserManager.isQuietModeEnabled(userHandle)) {
+                            showEncryptionNotificationForProfile(userHandle);
+                        }
+                    }
+                }
+
+                if (mUserManager.getUserInfo(userId).isManagedProfile()) {
                     tieManagedProfileLockIfNecessary(userId, null);
                 }
-            });
-        }
-
-        // Now we have unlocked the parent user we should show notifications
-        // about any profiles that exist.
-        List<UserInfo> profiles = mUserManager.getProfiles(userId);
-        for (int i = 0; i < profiles.size(); i++) {
-            UserInfo profile = profiles.get(i);
-            final boolean isSecure =
-                    mStorage.hasPassword(profile.id) || mStorage.hasPattern(profile.id);
-            if (isSecure && profile.isManagedProfile()) {
-                UserHandle userHandle = profile.getUserHandle();
-                if (!mUserManager.isUserUnlockingOrUnlocked(userHandle) &&
-                        !mUserManager.isQuietModeEnabled(userHandle)) {
-                    showEncryptionNotificationForProfile(userHandle);
-                }
             }
-        }
+        });
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -809,6 +811,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mStorage.hasPattern(userId);
     }
 
+    private boolean isUserSecure(int userId) {
+        return mStorage.hasCredential(userId);
+    }
+
     private void setKeystorePassword(String password, int userHandle) {
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserPasswordChanged(userHandle, password);
@@ -914,21 +920,52 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private byte[] getCurrentHandle(int userId) {
-        CredentialHash credential = mStorage.readCredentialHash(userId);
-
-        // sanity check
-        if (credential.type != LockPatternUtils.CREDENTIAL_TYPE_NONE && credential.hash == null) {
-            Slog.e(TAG, "Stored handle type [" + credential.type + "] but no handle available");
+    private Map<Integer, String> getDecryptedPasswordsForAllTiedProfiles(int userId) {
+        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+            return null;
         }
-        return credential.hash;
+        Map<Integer, String> result = new ArrayMap<Integer, String>();
+        final List<UserInfo> profiles = mUserManager.getProfiles(userId);
+        final int size = profiles.size();
+        for (int i = 0; i < size; i++) {
+            final UserInfo profile = profiles.get(i);
+            if (!profile.isManagedProfile()) {
+                continue;
+            }
+            final int managedUserId = profile.id;
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(managedUserId)) {
+                continue;
+            }
+            try {
+                result.put(userId, getDecryptedPasswordForTiedProfile(userId));
+            } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
+                    | NoSuchPaddingException | InvalidKeyException
+                    | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                    | BadPaddingException | CertificateException | IOException e) {
+                // ignore
+            }
+        }
+        return result;
     }
 
-    private void onUserLockChanged(int userId) throws RemoteException {
+    /**
+     * Synchronize all profile's work challenge of the given user if it's unified: tie or clear them
+     * depending on the parent user's secure state.
+     *
+     * When clearing tied work challenges, a pre-computed password table for profiles are required,
+     * since changing password for profiles requires existing password, and existing passwords can
+     * only be computed before the parent user's password is cleared.
+     *
+     * Strictly this is a recursive function, since setLockCredentialInternal ends up calling this
+     * method again on profiles. However the recursion is guaranteed to terminate as this method
+     * terminates when the user is a managed profile.
+     */
+    private void synchronizeUnifiedWorkChallengeForProfiles(int userId,
+            Map<Integer, String> profilePasswordMap) throws RemoteException {
         if (mUserManager.getUserInfo(userId).isManagedProfile()) {
             return;
         }
-        final boolean isSecure = mStorage.hasPassword(userId) || mStorage.hasPattern(userId);
+        final boolean isSecure = isUserSecure(userId);
         final List<UserInfo> profiles = mUserManager.getProfiles(userId);
         final int size = profiles.size();
         for (int i = 0; i < size; i++) {
@@ -941,11 +978,17 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (isSecure) {
                     tieManagedProfileLockIfNecessary(managedUserId, null);
                 } else {
-                    clearUserKeyProtection(managedUserId);
-                    getGateKeeperService().clearSecureUserId(managedUserId);
-                    mStorage.writeCredentialHash(CredentialHash.createEmptyHash(), managedUserId);
-                    setKeystorePassword(null, managedUserId);
-                    fixateNewestUserKeyAuth(managedUserId);
+                    // We use cached work profile password computed before clearing the parent's
+                    // credential, otherwise they get lost
+                    if (profilePasswordMap != null && profilePasswordMap.containsKey(managedUserId)) {
+                        setLockCredentialInternal(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                                profilePasswordMap.get(managedUserId), managedUserId);
+                    } else {
+                        Slog.wtf(TAG, "clear tied profile challenges, but no password supplied.");
+                        // Supplying null here would lead to untrusted credential change
+                        setLockCredentialInternal(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, null,
+                                managedUserId);
+                    }
                     mStorage.removeChildProfileLock(managedUserId);
                     removeKeystoreProfileKey(managedUserId);
                 }
@@ -978,7 +1021,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setLockCredentialInternal(String credential, int credentialType,
             String savedCredential, int userId) throws RemoteException {
-        byte[] currentHandle = getCurrentHandle(userId);
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             if (credential != null) {
                 Slog.wtf(TAG, "CredentialType is none, but credential is non-null.");
@@ -988,27 +1030,31 @@ public class LockSettingsService extends ILockSettings.Stub {
             mStorage.writeCredentialHash(CredentialHash.createEmptyHash(), userId);
             setKeystorePassword(null, userId);
             fixateNewestUserKeyAuth(userId);
-            onUserLockChanged(userId);
+            synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             notifyActivePasswordMetricsAvailable(null, userId);
             return;
         }
         if (credential == null) {
             throw new RemoteException("Null credential with mismatched credential type");
         }
+
+        CredentialHash currentHandle = mStorage.readCredentialHash(userId);
         if (isManagedProfileWithUnifiedLock(userId)) {
             // get credential from keystore when managed profile has unified lock
-            try {
-                savedCredential = getDecryptedPasswordForTiedProfile(userId);
-            } catch (FileNotFoundException e) {
-                Slog.i(TAG, "Child profile key not found");
-            } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
-                    | NoSuchAlgorithmException | NoSuchPaddingException
-                    | InvalidAlgorithmParameterException | IllegalBlockSizeException
-                    | BadPaddingException | CertificateException | IOException e) {
-                Slog.e(TAG, "Failed to decrypt child profile key", e);
+            if (savedCredential == null) {
+                try {
+                    savedCredential = getDecryptedPasswordForTiedProfile(userId);
+                } catch (FileNotFoundException e) {
+                    Slog.i(TAG, "Child profile key not found");
+                } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
+                        | NoSuchAlgorithmException | NoSuchPaddingException
+                        | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                        | BadPaddingException | CertificateException | IOException e) {
+                    Slog.e(TAG, "Failed to decrypt child profile key", e);
+                }
             }
         } else {
-            if (currentHandle == null) {
+            if (currentHandle.hash == null) {
                 if (savedCredential != null) {
                     Slog.w(TAG, "Saved credential provided, but none stored");
                 }
@@ -1016,22 +1062,44 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, credential,
+        byte[] enrolledHandle = enrollCredential(currentHandle.hash, savedCredential, credential,
                 userId);
         if (enrolledHandle != null) {
             CredentialHash willStore = CredentialHash.create(enrolledHandle, credentialType);
             mStorage.writeCredentialHash(willStore, userId);
-            // Refresh the auth token
-            setUserKeyProtection(userId, credential,
-                    doVerifyCredential(credential, credentialType, true, 0, userId,
-                            null /* progressCallback */));
+            // push new secret and auth token to vold
+            GateKeeperResponse gkResponse = getGateKeeperService()
+                    .verifyChallenge(userId, 0, willStore.hash, credential.getBytes());
+            setUserKeyProtection(userId, credential, convertResponse(gkResponse));
             fixateNewestUserKeyAuth(userId);
-            onUserLockChanged(userId);
+            // Refresh the auth token
+            doVerifyCredential(credential, credentialType, true, 0, userId, null /* progressCallback */);
+            synchronizeUnifiedWorkChallengeForProfiles(userId, null);
         } else {
             throw new RemoteException("Failed to enroll " +
                     (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
                             : "pattern"));
         }
+    }
+
+    private VerifyCredentialResponse convertResponse(GateKeeperResponse gateKeeperResponse) {
+        VerifyCredentialResponse response;
+        int responseCode = gateKeeperResponse.getResponseCode();
+        if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
+            response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
+        } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
+            byte[] token = gateKeeperResponse.getPayload();
+            if (token == null) {
+                // something's wrong if there's no payload with a challenge
+                Slog.e(TAG, "verifyChallenge response had no associated payload");
+                response = VerifyCredentialResponse.ERROR;
+            } else {
+                response = new VerifyCredentialResponse(token);
+            }
+        } else {
+            response = VerifyCredentialResponse.ERROR;
+        }
+        return response;
     }
 
     @VisibleForTesting
@@ -1123,6 +1191,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setUserKeyProtection(int userId, String credential, VerifyCredentialResponse vcr)
             throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "setUserKeyProtection: user=" + userId);
         if (vcr == null) {
             throw new RemoteException("Null response verifying a credential we just set");
         }
@@ -1138,6 +1207,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void clearUserKeyProtection(int userId) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
         addUserKeyAuth(userId, null, null);
     }
 
@@ -1171,6 +1241,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void fixateNewestUserKeyAuth(int userId)
             throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "fixateNewestUserKeyAuth: user=" + userId);
         final IStorageManager storageManager = mInjector.getStorageManager();
         final long callingId = Binder.clearCallingIdentity();
         try {
@@ -1370,27 +1441,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return VerifyCredentialResponse.ERROR;
             }
         }
-
-        VerifyCredentialResponse response;
-        boolean shouldReEnroll = false;
         GateKeeperResponse gateKeeperResponse = getGateKeeperService()
                 .verifyChallenge(userId, challenge, storedHash.hash, credential.getBytes());
-        int responseCode = gateKeeperResponse.getResponseCode();
-        if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
-            response = new VerifyCredentialResponse(gateKeeperResponse.getTimeout());
-        } else if (responseCode == GateKeeperResponse.RESPONSE_OK) {
-            byte[] token = gateKeeperResponse.getPayload();
-            if (token == null) {
-                // something's wrong if there's no payload with a challenge
-                Slog.e(TAG, "verifyChallenge response had no associated payload");
-                response = VerifyCredentialResponse.ERROR;
-            } else {
-                shouldReEnroll = gateKeeperResponse.getShouldReEnroll();
-                response = new VerifyCredentialResponse(token);
-            }
-        } else {
-            response = VerifyCredentialResponse.ERROR;
-        }
+        VerifyCredentialResponse response = convertResponse(gateKeeperResponse);
+        boolean shouldReEnroll = gateKeeperResponse.getShouldReEnroll();
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
 

@@ -4297,7 +4297,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!TextUtils.isEmpty(password)) {
                 mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
             } else {
-                mLockPatternUtils.clearLock(userHandle);
+                mLockPatternUtils.clearLock(null, userHandle);
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
