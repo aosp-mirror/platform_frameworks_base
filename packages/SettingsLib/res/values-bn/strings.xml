@@ -53,7 +53,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"পরিচিতি শেয়ার করার কাজে ব্যবহার করুন"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ইন্টারনেট সংযোগ শেয়ার করা হচ্ছে"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"বার্তা অ্যাক্সেস"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM -এর অ্যাক্সেস"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"সিম -এর অ্যাক্সেস"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিওতে সংযুক্ত রয়েছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ফোন অডিওতে সংযুক্ত"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ফাইল স্থানান্তর সার্ভারের সঙ্গে সংযুক্ত"</string>
@@ -65,7 +65,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"ডিভাইসের সাথে স্থানীয় ইন্টারনেট সংযোগ ভাগ করছে"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"ইন্টারনেট অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"মানচিত্রের জন্য ব্যবহার করুন"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM -এর অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"সিম -এর অ্যাক্সেসের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"মিডিয়া অডিওয়ের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ফোন অডিওয়ের জন্য ব্যবহার করুন"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ফাইল স্থানান্তরের জন্য ব্যবহার করুন"</string>

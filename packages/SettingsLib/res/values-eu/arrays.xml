@@ -111,9 +111,9 @@
     <item msgid="8883739882299884241">"Estereoa"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"Audioaren kalitatea areagotzeko optimizatua (990 kb/s / 909 kb/s)"</item>
-    <item msgid="2921767058740704969">"Orekatu audioaren eta konexioaren kalitateak (660 kbps / 606 kbps)"</item>
-    <item msgid="8860982705384396512">"Konexioaren kalitatea areagotzeko optimizatua (330 kb/s / 303 kb/s)"</item>
+    <item msgid="7158319962230727476">"Audioaren kalitatea areagotzeko optimizatua (990 Kb/s / 909 Kb/s)"</item>
+    <item msgid="2921767058740704969">"Audioaren eta konexioaren kalitate orekatua (660 Kb/s / 606 Kb/s)"</item>
+    <item msgid="8860982705384396512">"Konexioaren kalitatea areagotzeko optimizatua (330 Kb/s / 303 Kb/s)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Audioaren kalitatea areagotzeko optimizatua"</item>

@@ -111,12 +111,12 @@
     <item msgid="8883739882299884241">"Ստերեո"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"Օպտիմալացված ձայնի որակ համար (990 կբ/վ / 909 կբ/վ)"</item>
+    <item msgid="7158319962230727476">"Օպտիմալացված ձայնի որակի համար (990 կբ/վ / 909 կբ/վ)"</item>
     <item msgid="2921767058740704969">"Ձայնի և կապի հավասարակշռված որակ (660 կբ/վ / 606 կբ/վ)"</item>
     <item msgid="8860982705384396512">"Օպտիմալացված կապի որակի համար (330 կբ/վ / 303 կբ/վ)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="6398189564246596868">"Օպտիմալացված ձայնի որակ համար"</item>
+    <item msgid="6398189564246596868">"Օպտիմալացված ձայնի որակի համար"</item>
     <item msgid="4327143584633311908">"Ձայնի և կապի հավասարակշռված որակ"</item>
     <item msgid="4681409244565426925">"Օպտիմալացված կապի որակի համար"</item>
   </string-array>

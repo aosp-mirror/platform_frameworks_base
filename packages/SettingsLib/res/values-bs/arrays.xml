@@ -111,9 +111,9 @@
     <item msgid="8883739882299884241">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="7158319962230727476">"Optimizirano za kvalitet zvuka (990kbps/909kbps)"</item>
+    <item msgid="7158319962230727476">"Optimizirano za kvalitet zvuka (990 kbps/909 kbps)"</item>
     <item msgid="2921767058740704969">"Uravnotežen kvalitet zvuka i veze (660kbps/606kbps)"</item>
-    <item msgid="8860982705384396512">"Optimizirano za kvalitet veze (330kbps/303kbps)"</item>
+    <item msgid="8860982705384396512">"Optimizirano za kvalitet veze (330 kbps/303 kbps)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Optimizirano za kvalitet zvuka"</item>
