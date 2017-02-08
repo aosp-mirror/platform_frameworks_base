@@ -673,7 +673,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Zabaldu"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizatu"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Baztertu"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Berotzen ari da telefonoa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Eginbide batzuk ezingo dira erabili telefonoa hoztu arte"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonoa automatikoki saiatuko da hozten. Hoztu bitartean, telefonoa erabiltzen jarrai dezakezu, baina mantsoago funtziona lezake.\n\nTelefonoaren tenperatura jaitsi bezain laster, ohi bezala funtzionatzen jarraituko du."</string>
@@ -681,10 +682,9 @@
     <string name="lockscreen_right" msgid="6093496261656102989">"Eskuinaldea"</string>
     <string name="lockscreen_customize" msgid="1288691376862981950">"Pertsonalizatu lasterbidea"</string>
     <string name="lockscreen_shortcut" msgid="3734369277470360642">"Lasterbidea"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Eskatu pasahizta"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Eskatu pasahitza"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pantaila-argazkiak"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Segurtasuna"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Erabiltzailearen egoera"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Mezu orokorrak"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Memoria"</string>
 </resources>

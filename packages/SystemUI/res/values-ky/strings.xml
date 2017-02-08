@@ -620,7 +620,7 @@
     <string name="clipboard" msgid="1313879395099896312">"Алмашуу буфери"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Ыңгайлаштырылган чабыттоо баскычы"</string>
     <string name="keycode" msgid="7335281375728356499">"Баскыч коду"</string>
-    <string name="icon" msgid="8732339849035837289">"Сөлөкөт"</string>
+    <string name="icon" msgid="8732339849035837289">"Сүрөтчө"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Керектүү нерселерди сүйрөп кошуңуз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Түзөтүү"</string>
@@ -671,18 +671,18 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Жайып көрсөтүү"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кичирейтүү"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Этибарга албоо"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Телефонуңуз ысып баратат"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон сууганча айрым элементтердин иши чектелген"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
     <string name="lockscreen_left" msgid="6806490081187499505">"Сол жакта"</string>
     <string name="lockscreen_right" msgid="6093496261656102989">"Оң жакта"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Кыска жолду ыңгайлаштыруу"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"Кыска жолду тууралоо"</string>
     <string name="lockscreen_shortcut" msgid="3734369277470360642">"Кыска жол"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Сырсөз үчүн ишарат"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Айгай кабарлар"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"Сырсөздү суроо"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Эскертүүлөр"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоттор"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Коопсуздук"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Колдонуучунун абалы"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Жалпы билдирүүлөр"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Сактагыч"</string>
 </resources>

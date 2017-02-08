@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> න් <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"දිග හරින්න"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"කුඩා කරන්න"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"අස් කරන්න"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"දුරකථනය උණුසුම් වෙමින්"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"මුරපදය සඳහා ප්‍රේරණය කරන්න"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"තිර රු"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"ආරක්ෂාව"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"පරිශීලක තත්ත්වය"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"පොදු පණිවිඩ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ගබඩාව"</string>
 </resources>

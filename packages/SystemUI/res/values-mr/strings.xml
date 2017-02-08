@@ -526,24 +526,15 @@
     <string name="notification_importance_high" msgid="3316555356062640222">"ध्वनी करा आणि स्क्रीनवर पॉप करा"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"अधिक सेटिंग्ज"</string>
     <string name="notification_done" msgid="5279426047273930175">"पूर्ण झाले"</string>
-    <!-- no translation found for notification_menu_accessibility (2046162834248888553) -->
-    <skip />
-    <!-- no translation found for notification_menu_gear_description (2204480013726775108) -->
-    <skip />
-    <!-- no translation found for notification_menu_snooze_description (3653669438131034525) -->
-    <skip />
-    <!-- no translation found for snooze_option_15_min (1068727451405610715) -->
-    <skip />
-    <!-- no translation found for snooze_option_30_min (867081342535195788) -->
-    <skip />
-    <!-- no translation found for snooze_option_1_hour (1098086401880077154) -->
-    <skip />
-    <!-- no translation found for snooze_option_dont_snooze (655446566007801922) -->
-    <skip />
-    <!-- no translation found for snooze_undo (6074877317002985129) -->
-    <skip />
-    <!-- no translation found for snoozed_for_time (2390718332980204462) -->
-    <skip />
+    <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रणे"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना स्नूझ पर्याय"</string>
+    <string name="snooze_option_15_min" msgid="1068727451405610715">"15 मिनिटे"</string>
+    <string name="snooze_option_30_min" msgid="867081342535195788">"30 मिनिटे"</string>
+    <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 तास"</string>
+    <string name="snooze_option_dont_snooze" msgid="655446566007801922">"स्नूझ करू नका"</string>
+    <string name="snooze_undo" msgid="6074877317002985129">"पूर्ववत करा"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> साठी स्नूझ करा"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"बॅटरी वापर"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज करताना बॅटरी बचतकर्ता उपलब्ध नाही"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"बॅटरी बचतकर्ता"</string>
@@ -605,24 +596,23 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"चालू"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
-    <!-- no translation found for nav_bar_layout (3664072994198772020) -->
-    <skip />
-    <!-- no translation found for nav_bar_left (731491280511316123) -->
-    <skip />
-    <!-- no translation found for nav_bar_right (2523774879720231974) -->
-    <skip />
-    <!-- no translation found for nav_bar_button_type (6947806619897153791) -->
-    <skip />
-    <!-- no translation found for nav_bar_default (8587114043070993007) -->
-    <skip />
-    <!-- no translation found for nav_bar_buttons:0 (1545641631806817203) -->
-    <!-- no translation found for nav_bar_buttons:1 (5742013440802239414) -->
-    <!-- no translation found for nav_bar_buttons:2 (8748101184830239843) -->
-    <!-- no translation found for nav_bar_buttons:3 (8175437057325747277) -->
-    <!-- no translation found for nav_bar_layouts:0 (4967898371682516967) -->
-    <!-- no translation found for nav_bar_layouts:1 (6210279084134579668) -->
-    <!-- no translation found for nav_bar_layouts:2 (89143234390889289) -->
-    <!-- no translation found for nav_bar_layouts:3 (7715533883382410603) -->
+    <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>
+    <string name="nav_bar_left" msgid="731491280511316123">"डावा"</string>
+    <string name="nav_bar_right" msgid="2523774879720231974">"उजवा"</string>
+    <string name="nav_bar_button_type" msgid="6947806619897153791">"बटणाचा प्रकार"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(डीफॉल्ट)"</string>
+  <string-array name="nav_bar_buttons">
+    <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
+    <item msgid="5742013440802239414">"कीकोड"</item>
+    <item msgid="8748101184830239843">"मेनू / कीबोर्ड स्विचर"</item>
+    <item msgid="8175437057325747277">"काहीही नाही"</item>
+  </string-array>
+  <string-array name="nav_bar_layouts">
+    <item msgid="4967898371682516967">"विभाजित (डीफॉल्ट)"</item>
+    <item msgid="6210279084134579668">"मध्यवर्ती"</item>
+    <item msgid="89143234390889289">"डावे-संरेखित"</item>
+    <item msgid="7715533883382410603">"उजवे-संरेखित"</item>
+  </string-array>
     <string name="menu_ime" msgid="4943221416525250684">"मेनू / कीबोर्ड स्विचर"</string>
     <string name="save" msgid="2311877285724540644">"जतन करा"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>
@@ -630,8 +620,7 @@
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"सानुकूल नेव्हिगेशन बटण"</string>
     <string name="keycode" msgid="7335281375728356499">"कीकोड"</string>
-    <!-- no translation found for icon (8732339849035837289) -->
-    <skip />
+    <string name="icon" msgid="8732339849035837289">"चिन्ह"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइल जोडण्यासाठी ड्रॅग करा"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"काढण्यासाठी येथे ड्रॅग करा"</string>
     <string name="qs_edit" msgid="2232596095725105230">"संपादित करा"</string>
@@ -682,28 +671,19 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत करा"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"लहान करा"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"डिसमिस करा"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"फोन ऊष्ण होत आहे"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन थंड होत असताना काही वैशिष्‍ट्ये मर्यादित असतात"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपला फोन स्वयंचलितपणे थंड होईल. आपण अद्यापही आपला फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nआपला फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
-    <!-- no translation found for lockscreen_left (6806490081187499505) -->
+    <string name="lockscreen_left" msgid="6806490081187499505">"डावा"</string>
+    <string name="lockscreen_right" msgid="6093496261656102989">"उजवा"</string>
+    <string name="lockscreen_customize" msgid="1288691376862981950">"शॉर्टकट सानुकूल करा"</string>
+    <string name="lockscreen_shortcut" msgid="3734369277470360642">"शॉर्टकट"</string>
+    <string name="lockscreen_unlock" msgid="4934466194763269051">"संकेतशब्दासाठी संकेत"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचना"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
+    <!-- no translation found for notification_channel_general (4525309436693914482) -->
     <skip />
-    <!-- no translation found for lockscreen_right (6093496261656102989) -->
-    <skip />
-    <!-- no translation found for lockscreen_customize (1288691376862981950) -->
-    <skip />
-    <!-- no translation found for lockscreen_shortcut (3734369277470360642) -->
-    <skip />
-    <!-- no translation found for lockscreen_unlock (4934466194763269051) -->
-    <skip />
-    <!-- no translation found for notification_channel_alerts (4496839309318519037) -->
-    <skip />
-    <!-- no translation found for notification_channel_screenshot (6314080179230000938) -->
-    <skip />
-    <!-- no translation found for notification_channel_security (7345516133431326347) -->
-    <skip />
-    <!-- no translation found for notification_channel_user_status (1436913581465146650) -->
-    <skip />
-    <!-- no translation found for notification_channel_storage (3077205683020695313) -->
-    <skip />
+    <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
 </resources>

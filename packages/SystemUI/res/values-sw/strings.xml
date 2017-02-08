@@ -467,13 +467,13 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gonga ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Inaonyesha %s ya vidhibiti vya sauti. Telezesha kidole juu ili uondoe."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Imeficha vidhibiti vya sauti"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Kipokea Ishara cha SystemUI"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Kirekebishi cha kiolesura cha mfumo"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Onyesha asilimia ya betri iliyopachikwa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Onyesha asilimia ya kiwango cha betri ndani ya aikoni ya sehemu ya arifa inapokuwa haichaji"</string>
     <string name="quick_settings" msgid="10042998191725428">"Mipangilio ya Haraka"</string>
     <string name="status_bar" msgid="4877645476959324760">"Sehemu ya kuonyesha hali"</string>
     <string name="overview" msgid="4018602013895926956">"Muhtasari"</string>
-    <string name="demo_mode" msgid="2532177350215638026">"Hali ya onyesho la UI ya mfumo"</string>
+    <string name="demo_mode" msgid="2532177350215638026">"Hali ya onyesho la kirekebishi cha kiolesura cha mfumo"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Washa hali ya onyesho"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Onyesha hali ya onyesho"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethaneti"</string>
@@ -490,12 +490,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Mtandao-hewa"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Wasifu wa kazini"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Kinafurahisha kwa baadhi ya watu lakini si wote"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Kipokea Ishara cha System UI kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Kirekebishi cha kiolesura cha mfumo kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika, au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>
     <string name="got_it" msgid="2239653834387972602">"Nimeelewa"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kipokea Ishara cha System UI kimeongezwa kwenye Mipangilio"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Hongera! Kirekebishi cha kiolesura cha mfumo kimeongezwa kwenye mipangilio"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ondoa kwenye Mipangilio"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kipokea ishara cha SystemUI kwenye Mipangilio na uache kutumia vipengele vyake vyote?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Je, ungependa kuondoa Kirekebishi cha kiolesura cha mfumo kwenye mipangilio na uache kutumia vipengele vyake vyote?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Programu haijasakinishwa kwenye kifaa chako"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Onyesha sekunde za saa"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Onyesha sekunde za saa katika sehemu ya arifa. Inaweza kuathiri muda wa matumizi ya betri."</string>
@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Ukurasa wa <xliff:g id="ID_1">%1$d</xliff:g> kati ya <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Panua"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Punguza"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Ondoa"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Joto la simu linaongezeka"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Omba nenosiri"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Arifa"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Picha za skrini"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Usalama"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Hali ya mtumiaji"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Ujumbe wa Jumla"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Hifadhi"</string>
 </resources>

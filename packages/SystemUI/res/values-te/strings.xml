@@ -600,7 +600,7 @@
     <string name="nav_bar_left" msgid="731491280511316123">"ఎడమ"</string>
     <string name="nav_bar_right" msgid="2523774879720231974">"కుడి"</string>
     <string name="nav_bar_button_type" msgid="6947806619897153791">"బటన్ రకం"</string>
-    <string name="nav_bar_default" msgid="8587114043070993007">"(yadha prakaram)"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(డిఫాల్ట్)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"క్లిప్‌బోర్డ్"</item>
     <item msgid="5742013440802239414">"కీకోడ్"</item>
@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"విస్తరింపజేయి"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"కనిష్టీకరించు"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"తీసివేయి"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"ఫోన్ వేడెక్కుతోంది"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని లక్షణాలు పరిమితం చేయబడ్డాయి"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"మీ ఫోన్ స్వయంచాలకంగా చల్లబడటానికి ప్రయత్నిస్తుంది. మీరు ఇప్పటికీ మీ ఫోన్‌ను ఉపయోగించవచ్చు, కానీ దాని పనితీరు నెమ్మదిగా ఉండవచ్చు.\n\nమీ ఫోన్ చల్లబడిన తర్వాత, అది సాధారణ రీతిలో పని చేస్తుంది."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"పాస్‌వర్డ్ కోసం ప్రాంప్ట్ చేయి"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"హెచ్చరికలు"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"స్క్రీన్‌షాట్‌లు"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"భద్రత"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"వినియోగదారు స్థితి"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"సాధారణ సందేశాలు"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"నిల్వ"</string>
 </resources>

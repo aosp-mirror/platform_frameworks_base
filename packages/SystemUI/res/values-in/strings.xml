@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> dari <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Luaskan"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalkan"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Tutup"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Ponsel menjadi hangat"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Beberapa fitur dibatasi saat ponsel mendingin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
@@ -680,9 +681,8 @@
     <string name="lockscreen_customize" msgid="1288691376862981950">"Sesuaikan pintasan"</string>
     <string name="lockscreen_shortcut" msgid="3734369277470360642">"Pintasan"</string>
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Minta sandi"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Lansiran"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikasi"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshot"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Keamanan"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Status pengguna"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Pesan Umum"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Penyimpanan"</string>
 </resources>

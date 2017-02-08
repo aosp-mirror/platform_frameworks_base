@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"بزرگ کردن"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"کوچک کردن"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"نپذیرفتن"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"تلفن درحال گرم شدن است"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"وقتی تلفن درحال خنک شدن است، بعضی از قابلیت‌ها محدود می‌شوند"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"درخواست وارد کردن گذرواژه"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"هشدارها"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"عکس‌های صفحه‌نمایش"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"امنیت"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"وضعیت کاربر"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"پیام‌های عمومی"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"فضای ذخیره‌سازی"</string>
 </resources>

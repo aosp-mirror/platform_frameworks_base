@@ -529,14 +529,14 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Boshqa sozlamalar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tayyor"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="notification_menu_gear_description" msgid="2204480013726775108">"bildirishnomalarni boshqarish elementlari"</string>
+    <string name="notification_menu_gear_description" msgid="2204480013726775108">"bildirishnoma sozlamalari"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"bildirishnomalarni kechiktirish parametrlari"</string>
     <string name="snooze_option_15_min" msgid="1068727451405610715">"15 daqiqa"</string>
     <string name="snooze_option_30_min" msgid="867081342535195788">"30 daqiqa"</string>
     <string name="snooze_option_1_hour" msgid="1098086401880077154">"1 soat"</string>
     <string name="snooze_option_dont_snooze" msgid="655446566007801922">"Kechiktirilmasin"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"BEKOR QILISH"</string>
-    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> kechiktirildi"</string>
+    <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> muddatga kechiktirildi"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batareya sarfi"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Quvvat tejash rejimidan quvvatlash vaqtida foydalanib bo‘lmaydi"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Quvvat tejash rejimi"</string>
@@ -606,12 +606,12 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Vaqtinchalik xotira"</item>
     <item msgid="5742013440802239414">"Tugma kodi"</item>
-    <item msgid="8748101184830239843">"Menyu yoki klaviatura"</item>
-    <item msgid="8175437057325747277">"Hech qaysi"</item>
+    <item msgid="8748101184830239843">"Menyu/klaviaturani almashtirish"</item>
+    <item msgid="8175437057325747277">"Hech biri"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Bo‘lingan (standart)"</item>
-    <item msgid="6210279084134579668">"O‘rtaga tekislangan"</item>
+    <item msgid="4967898371682516967">"Alohida (standart)"</item>
+    <item msgid="6210279084134579668">"Markazda"</item>
     <item msgid="89143234390889289">"Chapga tekislangan"</item>
     <item msgid="7715533883382410603">"O‘ngga tekislangan"</item>
   </string-array>
@@ -673,7 +673,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>-sahifa, jami: <xliff:g id="ID_2">%2$d</xliff:g> ta sahifa"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Yoyish"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Yig‘ish"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Yopish"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qizib ketdi"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
@@ -684,7 +685,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Parol uchun bildirgi"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skrinshotlar"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Xavfsizlik"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Foydalanuvchi holati"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Umumiy xabarlar"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Xotira"</string>
 </resources>

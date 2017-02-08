@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Дэлгэх"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Багасгах"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"Хаах"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"Утас халж эхэлж байна"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Таны утас хөрж байх зуур зарим онцлогийг хязгаарласан"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Таны утас автоматаар хөрөх болно. Та утсаа ашиглаж болох хэдий ч удаан ажиллаж болзошгүй.\n\nТаны утас хөрсний дараагаар хэвийн ажиллана."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Нууц үг шаардах"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сануулга"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Дэлгэцийн зураг дарах"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"Аюулгүй байдал"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"Хэрэглэгчийн төлөв"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"Энгийн зурвас"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хадгалах сан"</string>
 </resources>

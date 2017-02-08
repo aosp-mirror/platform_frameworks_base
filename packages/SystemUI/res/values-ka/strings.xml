@@ -671,7 +671,8 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"გვერდი <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>-დან"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"გაშლა"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ჩაკეცვა"</string>
-    <string name="pip_phone_dismiss" msgid="1305916715402775904">"დახურვა"</string>
+    <!-- no translation found for pip_phone_close (8416647892889710330) -->
+    <skip />
     <string name="high_temp_title" msgid="4589508026407318374">"ტელეფონი ცხელდება"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"თქვენი ტელეფონი გაგრილებას ავტომატურად შეეცდება. შეგიძლიათ გააგრძელოთ მისით სარგებლობა, თუმცა ტელეფონმა შეიძლება უფრო ნელა იმუშაოს.\n\nგაგრილების შემდგომ ის ჩვეულებრივად იმუშავებს."</string>
@@ -682,7 +683,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"პაროლის მოთხოვნა"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"გაფრთხილებები"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ეკრანის ანაბეჭდები"</string>
-    <string name="notification_channel_security" msgid="7345516133431326347">"უსაფრთხოება"</string>
-    <string name="notification_channel_user_status" msgid="1436913581465146650">"მომხმარებლის სტატუსი"</string>
+    <string name="notification_channel_general" msgid="4525309436693914482">"ზოგადი შეტყობინებები"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"მეხსიერება"</string>
 </resources>
