@@ -20,32 +20,13 @@ import android.annotation.Nullable;
 import android.provider.DocumentsContract.Document;
 
 import com.android.documentsui.model.DocumentInfo;
-import com.android.internal.util.Predicate;
 
-public class MimePredicate implements Predicate<DocumentInfo> {
-    private final String[] mFilters;
-
-    private static final String APK_TYPE = "application/vnd.android.package-archive";
+public class MimePredicate {
     /**
      * MIME types that are visual in nature. For example, they should always be
      * shown as thumbnails in list mode.
      */
     public static final String[] VISUAL_MIMES = new String[] { "image/*", "video/*" };
-
-    public MimePredicate(String[] filters) {
-        mFilters = filters;
-    }
-
-    @Override
-    public boolean apply(DocumentInfo doc) {
-        if (doc.isDirectory()) {
-            return true;
-        }
-        if (mimeMatches(mFilters, doc.mimeType)) {
-            return true;
-        }
-        return false;
-    }
 
     public static boolean mimeMatches(String[] filters, String[] tests) {
         if (tests == null) {
@@ -95,10 +76,6 @@ public class MimePredicate implements Predicate<DocumentInfo> {
         } else {
             return false;
         }
-    }
-
-    public static boolean isApkType(@Nullable String mimeType) {
-        return APK_TYPE.equals(mimeType);
     }
 
     public static boolean isDirectoryType(@Nullable String mimeType) {

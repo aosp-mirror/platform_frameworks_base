@@ -52,13 +52,13 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 
 import com.android.internal.R;
-import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
@@ -3994,7 +3994,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
-        if (predicate.apply(this)) {
+        if (predicate.test(this)) {
             return this;
         }
 

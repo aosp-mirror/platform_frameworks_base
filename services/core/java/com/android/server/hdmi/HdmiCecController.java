@@ -24,7 +24,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Predicate;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
@@ -34,6 +33,7 @@ import libcore.util.EmptyArray;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Manages HDMI-CEC command and behaviors. It converts user's command into CEC command
@@ -72,7 +72,7 @@ final class HdmiCecController {
     // Predicate for whether the given logical address is remote device's one or not.
     private final Predicate<Integer> mRemoteDeviceAddressPredicate = new Predicate<Integer>() {
         @Override
-        public boolean apply(Integer address) {
+        public boolean test(Integer address) {
             return !isAllocatedLocalDeviceAddress(address);
         }
     };
@@ -80,7 +80,7 @@ final class HdmiCecController {
     // Predicate whether the given logical address is system audio's one or not
     private final Predicate<Integer> mSystemAudioAddressPredicate = new Predicate<Integer>() {
         @Override
-        public boolean apply(Integer address) {
+        public boolean test(Integer address) {
             return HdmiUtils.getTypeFromAddress(address) == Constants.ADDR_AUDIO_SYSTEM;
         }
     };
@@ -403,7 +403,7 @@ final class HdmiCecController {
         switch (iterationStrategy) {
             case Constants.POLL_ITERATION_IN_ORDER:
                 for (int i = Constants.ADDR_TV; i <= Constants.ADDR_SPECIFIC_USE; ++i) {
-                    if (pickPredicate.apply(i)) {
+                    if (pickPredicate.test(i)) {
                         pollingCandidates.add(i);
                     }
                 }
@@ -411,7 +411,7 @@ final class HdmiCecController {
             case Constants.POLL_ITERATION_REVERSE_ORDER:
             default:  // The default is reverse order.
                 for (int i = Constants.ADDR_SPECIFIC_USE; i >= Constants.ADDR_TV; --i) {
-                    if (pickPredicate.apply(i)) {
+                    if (pickPredicate.test(i)) {
                         pollingCandidates.add(i);
                     }
                 }
