@@ -1698,7 +1698,7 @@ public class NotificationManagerService extends SystemService {
 
 
         @Override
-        public void clearData(String packageName, int uid) throws RemoteException {
+        public void clearData(String packageName, int uid, boolean fromApp) throws RemoteException {
             checkCallerIsSystem();
 
             // Cancel posted notifications
@@ -1713,8 +1713,10 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.onPackagesChanged(true, new String[] {packageName});
 
             // Reset notification preferences
-            mRankingHelper.onPackagesChanged(true, UserHandle.getCallingUserId(),
-                    new String[] {packageName}, new int[] {uid});
+            if (!fromApp) {
+                mRankingHelper.onPackagesChanged(true, UserHandle.getCallingUserId(),
+                        new String[]{packageName}, new int[]{uid});
+            }
 
             savePolicyFile();
         }
