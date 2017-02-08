@@ -2204,8 +2204,10 @@ uint32_t ResourceTable::getResId(const String16& package,
                            package.string(), package.size(),
                            &specFlags);
     if (rid != 0) {
-        if (onlyPublic) {
-            if ((specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+        if (onlyPublic && (specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+            // If this is a feature split and the resource has the same
+            // package name as us, then everything is public.
+            if (mPackageType != AppFeature || mAssetsPackage != package) {
                 return 0;
             }
         }
