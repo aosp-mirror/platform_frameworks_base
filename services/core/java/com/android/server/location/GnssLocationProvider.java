@@ -72,7 +72,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
-import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
@@ -82,17 +81,17 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Map;
@@ -411,7 +410,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private WorkSource mClientSource = new WorkSource();
 
     private GeofenceHardwareImpl mGeofenceHardwareImpl;
-
     private int mYearOfHardware = 0;
 
     // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
@@ -1125,6 +1123,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
             mGnssMeasurementsProvider.onGpsEnabledChanged();
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
+            enableBatching();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1156,6 +1155,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
 
+        disableBatching();
         // do this before releasing wakelock
         native_cleanup();
 
@@ -1791,6 +1791,84 @@ public class GnssLocationProvider implements LocationProviderInterface {
         };
     }
 
+    public interface GnssBatchingProvider {
+        /**
+         * Returns the GNSS batching size
+         */
+        int getSize();
+        /**
+         * Starts the hardware batching operation
+         */
+        boolean start(long periodNanos, boolean wakeOnFifoFull);
+        /**
+         * Forces a flush of existing locations from the hardware batching
+         */
+        void flush();
+        /**
+         * Stops the batching operation
+         */
+        boolean stop();
+    }
+
+    /**
+     * @hide
+     */
+    public GnssBatchingProvider getGnssBatchingProvider() {
+        return new GnssBatchingProvider() {
+            @Override
+            public int getSize() {
+                return native_get_batch_size();
+            }
+            @Override
+            public boolean start(long periodNanos, boolean wakeOnFifoFull) {
+                if (periodNanos <= 0) {
+                    Log.e(TAG, "Invalid periodNanos " + periodNanos +
+                            "in batching request, not started");
+                    return false;
+                }
+                return native_start_batch(periodNanos, wakeOnFifoFull);
+            }
+            @Override
+            public void flush() {
+                native_flush_batch();
+            }
+            @Override
+            public boolean stop() {
+                return native_stop_batch();
+            }
+        };
+    }
+
+    /**
+     * Initialize Batching if enabled
+     */
+    private void enableBatching() {
+        if (!native_init_batching()) {
+            Log.e(TAG, "Failed to initialize GNSS batching");
+        };
+    }
+
+    /**
+     * Disable batching
+     */
+    private void disableBatching() {
+        native_stop_batch();
+        native_cleanup_batching();
+    }
+
+    /**
+     * called from native code - GNSS location batch callback
+     */
+    private void reportLocationBatch(Location[] locationArray) {
+        List<Location> locations = new ArrayList<>(Arrays.asList(locationArray));
+        if(DEBUG) { Log.d(TAG, "Location batch of size " + locationArray.length + "reported"); }
+        try {
+            mILocationManager.reportLocationBatch(locations);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling reportLocationBatch");
+        }
+    }
+
     /**
      * called from native code to request XTRA data
      */
@@ -2117,7 +2195,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
-        Log.i(TAG, "WakeLock acquired by sendMessage(" + message + ", " + arg + ", " + obj + ")");
+        if (Log.isLoggable(TAG, Log.INFO)) {
+            Log.i(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
+                    + ", " + obj + ")");
+        }
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
@@ -2175,8 +2256,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
-                Log.i(TAG, "WakeLock released by handleMessage(" + message + ", " + msg.arg1 + ", "
-                        + msg.obj + ")");
+                if (Log.isLoggable(TAG, Log.INFO)) {
+                    Log.i(TAG, "WakeLock released by handleMessage(" + messageIdAsString(message)
+                            + ", " + msg.arg1 + ", " + msg.obj + ")");
+                }
             }
         }
 
@@ -2424,6 +2507,40 @@ public class GnssLocationProvider implements LocationProviderInterface {
         }
     }
 
+    /**
+     * @return A string representing the given message ID.
+     */
+    private String messageIdAsString(int message) {
+        switch (message) {
+            case ENABLE:
+                return "ENABLE";
+            case SET_REQUEST:
+                return "SET_REQUEST";
+            case UPDATE_NETWORK_STATE:
+                return "UPDATE_NETWORK_STATE";
+            case REQUEST_SUPL_CONNECTION:
+                return "REQUEST_SUPL_CONNECTION";
+            case RELEASE_SUPL_CONNECTION:
+                return "RELEASE_SUPL_CONNECTION";
+            case INJECT_NTP_TIME:
+                return "INJECT_NTP_TIME";
+            case DOWNLOAD_XTRA_DATA:
+                return "DOWNLOAD_XTRA_DATA";
+            case INJECT_NTP_TIME_FINISHED:
+                return "INJECT_NTP_TIME_FINISHED";
+            case DOWNLOAD_XTRA_DATA_FINISHED:
+                return "DOWNLOAD_XTRA_DATA_FINISHED";
+            case UPDATE_LOCATION:
+                return "UPDATE_LOCATION";
+            case SUBSCRIPTION_OR_SIM_CHANGED:
+                return "SUBSCRIPTION_OR_SIM_CHANGED";
+            case INITIALIZE_HANDLER:
+                return "INITIALIZE_HANDLER";
+            default:
+                return "<Unknown>";
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
@@ -2441,7 +2558,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
         s.append(")\n");
 
-        s.append(native_get_internal_state());
+        s.append("  internal state: ").append(native_get_internal_state());
+        s.append("\n");
+
         pw.append(s);
     }
 
@@ -2561,5 +2680,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static native boolean native_set_gnss_pos_protocol_select(int gnssPosProtocolSelect);
     private static native boolean native_set_gps_lock(int gpsLock);
     private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
+
+    // GNSS Batching
+    private static native int native_get_batch_size();
+    private static native boolean native_start_batch(long periodNanos, boolean wakeOnFifoFull);
+    private static native void native_flush_batch();
+    private static native boolean native_stop_batch();
+    private static native boolean native_init_batching();
+    private static native void native_cleanup_batching();
 
 }
