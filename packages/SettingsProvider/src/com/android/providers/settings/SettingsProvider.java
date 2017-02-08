@@ -2735,7 +2735,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 138;
+            private static final int SETTINGS_VERSION = 139;
 
             private final int mUserId;
 
@@ -3118,26 +3118,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 135) {
-                    // Version 135: Migrating the NETWORK_SCORER_APP setting to the
-                    // NETWORK_RECOMMENDATIONS_ENABLED setting.
-                    if (userId == UserHandle.USER_SYSTEM) {
-                        final SettingsState globalSettings = getGlobalSettingsLocked();
-                        Setting currentSetting = globalSettings.getSettingLocked(
-                            Global.NETWORK_SCORER_APP);
-                        if (!currentSetting.isNull()) {
-                            // A scorer was set so enable recommendations.
-                            globalSettings.insertSettingLocked(
-                                Global.NETWORK_RECOMMENDATIONS_ENABLED,
-                                "1", null, true,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
-
-                            // and clear the scorer setting since it's no longer needed.
-                            globalSettings.insertSettingLocked(
-                                Global.NETWORK_SCORER_APP,
-                                null, null, true,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
-                    }
+                    // Version 135 no longer used.
                     currentVersion = 136;
                 }
 
@@ -3198,6 +3179,28 @@ public class SettingsProvider extends ContentProvider {
                                 "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 138;
+                }
+
+                if (currentVersion == 138) {
+                    // Version 139: Applying the default to NETWORK_RECOMMENDATIONS_PACKAGE
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        final String defaultAppPackage = getContext().getResources()
+                                .getString(R.string.def_network_recommendations_package);
+
+                        // Set the network recommendations package name
+                        globalSettings.insertSettingLocked(
+                                Global.NETWORK_RECOMMENDATIONS_PACKAGE,
+                                defaultAppPackage, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // Clear the scorer setting since it's no longer needed.
+                        globalSettings.insertSettingLocked(
+                                Global.NETWORK_SCORER_APP,
+                                null, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 139;
                 }
 
                 if (currentVersion != newVersion) {
