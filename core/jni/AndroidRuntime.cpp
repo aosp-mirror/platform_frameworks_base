@@ -216,7 +216,7 @@ static void com_android_internal_os_RuntimeInit_nativeFinishInit(JNIEnv* env, jo
     gCurRuntime->onStarted();
 }
 
-static void com_android_internal_os_RuntimeInit_nativeZygoteInit(JNIEnv* env, jobject clazz)
+static void com_android_internal_os_ZygoteInit_nativeZygoteInit(JNIEnv* env, jobject clazz)
 {
     gCurRuntime->onZygoteInit();
 }
@@ -230,19 +230,27 @@ static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIE
 /*
  * JNI registration.
  */
-static const JNINativeMethod gMethods[] = {
-    { "nativeFinishInit", "()V",
-        (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
-    { "nativeZygoteInit", "()V",
-        (void*) com_android_internal_os_RuntimeInit_nativeZygoteInit },
-    { "nativeSetExitWithoutCleanup", "(Z)V",
-        (void*) com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup },
-};
 
 int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 {
+    const JNINativeMethod methods[] = {
+        { "nativeFinishInit", "()V",
+            (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
+        { "nativeSetExitWithoutCleanup", "(Z)V",
+            (void*) com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup },
+    };
     return jniRegisterNativeMethods(env, "com/android/internal/os/RuntimeInit",
-        gMethods, NELEM(gMethods));
+        methods, NELEM(methods));
+}
+
+int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
+{
+    const JNINativeMethod methods[] = {
+        { "nativeZygoteInit", "()V",
+            (void*) com_android_internal_os_ZygoteInit_nativeZygoteInit },
+    };
+    return jniRegisterNativeMethods(env, "com/android/internal/os/ZygoteInit",
+        methods, NELEM(methods));
 }
 
 // ----------------------------------------------------------------------
@@ -1271,6 +1279,7 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
 
 static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_com_android_internal_os_RuntimeInit),
+    REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_os_SystemClock),
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),

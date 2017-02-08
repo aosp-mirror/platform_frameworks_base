@@ -43,8 +43,8 @@ import org.apache.harmony.luni.internal.util.TimezoneGetter;
  * @hide
  */
 public class RuntimeInit {
-    private final static String TAG = "AndroidRuntime";
-    private final static boolean DEBUG = false;
+    final static String TAG = "AndroidRuntime";
+    final static boolean DEBUG = false;
 
     /** true if commonInit() has been called */
     private static boolean initialized;
@@ -53,7 +53,6 @@ public class RuntimeInit {
 
     private static volatile boolean mCrashing = false;
 
-    private static final native void nativeZygoteInit();
     private static final native void nativeFinishInit();
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
 
@@ -133,7 +132,7 @@ public class RuntimeInit {
         }
     }
 
-    private static final void commonInit() {
+    protected static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
 
         /*
@@ -287,50 +286,7 @@ public class RuntimeInit {
         if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
-    /**
-     * The main function called when started through the zygote process. This
-     * could be unified with main(), if the native code in nativeFinishInit()
-     * were rationalized with Zygote startup.<p>
-     *
-     * Current recognized args:
-     * <ul>
-     *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
-     * </ul>
-     *
-     * @param targetSdkVersion target SDK version
-     * @param argv arg strings
-     */
-    public static final void zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
-            throws Zygote.MethodAndArgsCaller {
-        if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
-
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "RuntimeInit");
-        redirectLogStreams();
-
-        commonInit();
-        nativeZygoteInit();
-        applicationInit(targetSdkVersion, argv, classLoader);
-    }
-
-    /**
-     * The main function called when an application is started through a
-     * wrapper process.
-     *
-     * When the wrapper starts, the runtime starts {@link RuntimeInit#main}
-     * which calls {@link WrapperInit#main} which then calls this method.
-     * So we don't need to call commonInit() here.
-     *
-     * @param targetSdkVersion target SDK version
-     * @param argv arg strings
-     */
-    public static void wrapperInit(int targetSdkVersion, String[] argv)
-            throws Zygote.MethodAndArgsCaller {
-        if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from wrapper");
-
-        applicationInit(targetSdkVersion, argv, null);
-    }
-
-    private static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
+    protected static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
             throws Zygote.MethodAndArgsCaller {
         // If the application calls System.exit(), terminate the process
         // immediately without running any shutdown hooks.  It is not possible to
