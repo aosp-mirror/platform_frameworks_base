@@ -34,7 +34,6 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.Trace;
-import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.Pools.Pool;
@@ -396,6 +395,7 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 9;
+    static final int MSG_REPORT_FULLSCREEN_MODE = 10;
 
     class H extends Handler {
         H(Looper looper) {
@@ -476,12 +476,13 @@ public final class InputMethodManager {
                 }
                 case MSG_SET_ACTIVE: {
                     final boolean active = msg.arg1 != 0;
+                    final boolean fullscreen = msg.arg2 != 0;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_SET_ACTIVE " + active + ", was " + mActive);
                     }
                     synchronized (mH) {
                         mActive = active;
-                        mFullscreenMode = false;
+                        mFullscreenMode = fullscreen;
                         if (!active) {
                             // Some other client has starting using the IME, so note
                             // that this happened and make sure our own editor's
@@ -523,6 +524,21 @@ public final class InputMethodManager {
                     synchronized (mH) {
                         mNextUserActionNotificationSequenceNumber = msg.arg1;
                     }
+                    return;
+                }
+                case MSG_REPORT_FULLSCREEN_MODE: {
+                    final boolean fullscreen = msg.arg1 != 0;
+                    InputConnection ic = null;
+                    synchronized (mH) {
+                        mFullscreenMode = fullscreen;
+                        if (mServedInputConnectionWrapper != null) {
+                            ic = mServedInputConnectionWrapper.getInputConnection();
+                        }
+                    }
+                    if (ic != null) {
+                        ic.reportFullscreenMode(fullscreen);
+                    }
+                    return;
                 }
             }
         }
@@ -557,18 +573,11 @@ public final class InputMethodManager {
         }
 
         @Override
-        protected void onReportFullscreenMode(boolean enabled, boolean calledInBackground) {
-            mParentInputMethodManager.onReportFullscreenMode(enabled, calledInBackground,
-                    getInputMethodId());
-        }
-
-        @Override
         public String toString() {
             return "ControlledInputConnectionWrapper{"
                     + "connection=" + getInputConnection()
                     + " finished=" + isFinished()
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
-                    + " mInputMethodId=" + getInputMethodId()
                     + "}";
         }
     }
@@ -600,24 +609,31 @@ public final class InputMethodManager {
 
         @Override
         public void onBindMethod(InputBindResult res) {
-            mH.sendMessage(mH.obtainMessage(MSG_BIND, res));
+            mH.obtainMessage(MSG_BIND, res).sendToTarget();
         }
 
         @Override
         public void onUnbindMethod(int sequence, @InputMethodClient.UnbindReason int unbindReason) {
-            mH.sendMessage(mH.obtainMessage(MSG_UNBIND, sequence, unbindReason));
+            mH.obtainMessage(MSG_UNBIND, sequence, unbindReason).sendToTarget();
         }
 
         @Override
-        public void setActive(boolean active) {
-            mH.sendMessage(mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, 0));
+        public void setActive(boolean active, boolean fullscreen) {
+            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0).sendToTarget();
         }
 
         @Override
         public void setUserActionNotificationSequenceNumber(int sequenceNumber) {
-            mH.sendMessage(mH.obtainMessage(MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
-                    sequenceNumber, 0));
+            mH.obtainMessage(MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER, sequenceNumber, 0)
+                    .sendToTarget();
         }
+
+        @Override
+        public void reportFullscreenMode(boolean fullscreen) {
+            mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
+                    .sendToTarget();
+        }
+
     };
 
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
@@ -731,16 +747,6 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void onReportFullscreenMode(boolean fullScreen, boolean calledInBackground,
-            String inputMethodId) {
-        synchronized (mH) {
-            if (!calledInBackground || TextUtils.equals(mCurId, inputMethodId)) {
-                mFullscreenMode = fullScreen;
-            }
-        }
-    }
-
-    /** @hide */
     public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
         try {
             mService.registerSuggestionSpansForNotification(spans);
@@ -766,6 +772,17 @@ public final class InputMethodManager {
     public boolean isFullscreenMode() {
         synchronized (mH) {
             return mFullscreenMode;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void reportFullscreenMode(IBinder token, boolean fullscreen) {
+        try {
+            mService.reportFullscreenMode(token, fullscreen);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1274,9 +1291,6 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mNextUserActionNotificationSequenceNumber =
                                 res.userActionNotificationSequenceNumber;
-                        if (mServedInputConnectionWrapper != null) {
-                            mServedInputConnectionWrapper.setInputMethodId(mCurId);
-                        }
                     } else {
                         if (res.channel != null && res.channel != mCurChannel) {
                             res.channel.dispose();
@@ -2341,6 +2355,7 @@ public final class InputMethodManager {
                 + " mHasBeenInactive=" + mHasBeenInactive
                 + " mBindSequence=" + mBindSequence
                 + " mCurId=" + mCurId);
+        p.println("  mFullscreenMode=" + mFullscreenMode);
         p.println("  mCurMethod=" + mCurMethod);
         p.println("  mCurRootView=" + mCurRootView);
         p.println("  mServedView=" + mServedView);

@@ -181,6 +181,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
+    static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
     static final int MSG_SWITCH_IME = 3050;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
@@ -409,6 +410,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * Set if we last told the input method to show itself.
      */
     boolean mInputShown;
+
+    /**
+     * {@code true} if the current input method is in fullscreen mode.
+     */
+    boolean mInFullscreenMode;
 
     /**
      * The Intent used to connect to the current input method.
@@ -1265,8 +1271,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                    MSG_SET_ACTIVE, 0, mCurClient));
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                    MSG_SET_ACTIVE, 0, 0, mCurClient));
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
                     MSG_UNBIND_CLIENT, mCurSeq, unbindClientReason, mCurClient.client));
             mCurClient.sessionRequested = false;
@@ -1649,6 +1655,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mStatusBar != null) {
             mStatusBar.setIconVisibility(mSlotIme, false);
         }
+        mInFullscreenMode = false;
     }
 
     @Override
@@ -2915,7 +2922,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             case MSG_SET_ACTIVE:
                 try {
-                    ((ClientState)msg.obj).client.setActive(msg.arg1 != 0);
+                    ((ClientState)msg.obj).client.setActive(msg.arg1 != 0, msg.arg2 != 0);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
                             + ((ClientState)msg.obj).pid + " uid "
@@ -2942,6 +2949,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
+            case MSG_REPORT_FULLSCREEN_MODE: {
+                final boolean fullscreen = msg.arg1 != 0;
+                final ClientState clientState = (ClientState)msg.obj;
+                try {
+                    clientState.client.reportFullscreenMode(fullscreen);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Got RemoteException sending "
+                            + "reportFullscreen(" + fullscreen + ") notification to pid="
+                            + clientState.pid + " uid=" + clientState.uid);
+                }
+                return true;
+            }
 
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
@@ -2962,8 +2981,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
-                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mCurClient));
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
+                        mCurClient));
             }
         }
     }
@@ -3963,6 +3983,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
+    public void reportFullscreenMode(IBinder token, boolean fullscreen) {
+        if (!calledFromValidUser()) {
+            return;
+        }
+        synchronized (mMethodMap) {
+            if (!calledWithValidToken(token)) {
+                return;
+            }
+            if (mCurClient != null && mCurClient.client != null) {
+                mInFullscreenMode = fullscreen;
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                        MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, mCurClient));
+            }
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -4014,6 +4051,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
+            p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mCurUserActionNotificationSequenceNumber="
                     + mCurUserActionNotificationSequenceNumber);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
