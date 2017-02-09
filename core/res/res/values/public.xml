@@ -2767,7 +2767,7 @@
         <public name="tooltipText" />
         <public name="autoSizeText" />
         <public name="autoSizeStepGranularity" />
-        <public name="autoSizeStepSizeSet" />
+        <public name="autoSizePresetSizes" />
         <public name="autoSizeMinTextSize" />
         <public name="min" />
         <public name="rotationAnimation" />
