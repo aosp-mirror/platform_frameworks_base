@@ -80,6 +80,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -122,6 +123,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
@@ -5440,7 +5442,9 @@ public class BackupManagerService {
 
         // Don't run the backup if we're in battery saver mode, but reschedule
         // to try again in the not-so-distant future.
-        if (mPowerManager.isPowerSaveMode()) {
+        final PowerSaveState result =
+                mPowerManager.getPowerSaveState(ServiceType.FULL_BACKUP);
+        if (result.batterySaverEnabled) {
             if (DEBUG) Slog.i(TAG, "Deferring scheduled full backups in battery saver mode");
             FullBackupJob.schedule(mContext, KeyValueBackupJob.BATCH_INTERVAL);
             return false;
@@ -9889,7 +9893,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
-        if (mPowerManager.isPowerSaveMode()) {
+        final PowerSaveState result =
+                mPowerManager.getPowerSaveState(ServiceType.KEYVALUE_BACKUP);
+        if (result.batterySaverEnabled) {
             if (DEBUG) Slog.v(TAG, "Not running backup while in battery save mode");
             KeyValueBackupJob.schedule(mContext);   // try again in several hours
         } else {

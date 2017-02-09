@@ -8956,6 +8956,30 @@ public final class Settings {
         public static final String DEVICE_IDLE_CONSTANTS_WATCH = "device_idle_constants_watch";
 
         /**
+         * Battery Saver specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "vibration_disabled=true,adjust_brightness_factor=0.5"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * vibration_disabled                (boolean)
+         * animation_disabled                (boolean)
+         * soundtrigger_disabled             (boolean)
+         * fullbackup_deferred               (boolean)
+         * keyvaluebackup_deferred           (boolean)
+         * firewall_disabled                 (boolean)
+         * gps_mode                          (int)
+         * adjust_brightness_disabled        (boolean)
+         * adjust_brightness_factor          (float)
+         * </pre>
+         * @hide
+         * @see com.android.server.power.BatterySaverPolicy
+         */
+        public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *

@@ -131,6 +131,7 @@ import android.net.NetworkTemplate;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.PowerSaveState;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -180,6 +181,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
+import com.android.server.power.BatterySaverPolicy.ServiceType;
 import libcore.io.IoUtils;
 
 import com.google.android.collect.Lists;
@@ -590,18 +592,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
                     mPowerManagerInternal.registerLowPowerModeObserver(
                             new PowerManagerInternal.LowPowerModeListener() {
-                        @Override
-                        public void onLowPowerModeChanged(boolean enabled) {
-                            if (LOGD) Slog.d(TAG, "onLowPowerModeChanged(" + enabled + ")");
-                            synchronized (mUidRulesFirstLock) {
-                                if (mRestrictPower != enabled) {
-                                    mRestrictPower = enabled;
-                                    updateRulesForRestrictPowerUL();
+                                @Override
+                                public int getServiceType() {
+                                    return ServiceType.NETWORK_FIREWALL;
                                 }
-                            }
-                        }
+
+                                @Override
+                                public void onLowPowerModeChanged(PowerSaveState result) {
+                                    final boolean enabled = result.batterySaverEnabled;
+                                    if (LOGD) Slog.d(TAG,
+                                            "onLowPowerModeChanged(" + enabled + ")");
+                                    synchronized (mUidRulesFirstLock) {
+                                        if (mRestrictPower != enabled) {
+                                            mRestrictPower = enabled;
+                                            updateRulesForRestrictPowerUL();
+                                        }
+                                    }
+                                }
                     });
-                    mRestrictPower = mPowerManagerInternal.getLowPowerModeEnabled();
+                    mRestrictPower = mPowerManagerInternal.getLowPowerState(
+                            ServiceType.NETWORK_FIREWALL).batterySaverEnabled;
 
                     mSystemReady = true;
 
