@@ -44,8 +44,9 @@ public final class TextClassificationManager {
     private final Object mLangIdLock = new Object();
 
     private final Context mContext;
-    // TODO: Implement a way to close the file descriptor.
-    private ParcelFileDescriptor mFd;
+    // TODO: Implement a way to close the file descriptors.
+    private ParcelFileDescriptor mSmartSelectionFd;
+    private ParcelFileDescriptor mLangIdFd;
     private TextClassifier mDefault;
     private LangId mLangId;
 
@@ -61,10 +62,10 @@ public final class TextClassificationManager {
         synchronized (mTextClassifierLock) {
             if (mDefault == null) {
                 try {
-                    mFd = ParcelFileDescriptor.open(
+                    mSmartSelectionFd = ParcelFileDescriptor.open(
                             new File("/etc/assistant/smart-selection.model"),
                             ParcelFileDescriptor.MODE_READ_ONLY);
-                    mDefault = new TextClassifierImpl(mContext, mFd);
+                    mDefault = new TextClassifierImpl(mContext, mSmartSelectionFd);
                 } catch (FileNotFoundException e) {
                     Log.e(LOG_TAG, "Error accessing 'text classifier selection' model file.", e);
                     mDefault = TextClassifier.NO_OP;
@@ -99,12 +100,13 @@ public final class TextClassificationManager {
         return Collections.emptyList();
     }
 
-    private LangId getLanguageDetector() {
+    private LangId getLanguageDetector() throws FileNotFoundException {
         synchronized (mLangIdLock) {
             if (mLangId == null) {
-                // TODO: Use a file descriptor as soon as we start to depend on a model file
-                // for language detection.
-                mLangId = new LangId(0);
+                mLangIdFd = ParcelFileDescriptor.open(
+                        new File("/etc/assistant/lang-id.model"),
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+                mLangId = new LangId(mLangIdFd.getFd());
             }
             return mLangId;
         }
