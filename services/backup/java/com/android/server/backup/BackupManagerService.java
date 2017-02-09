@@ -1515,10 +1515,14 @@ public class BackupManagerService {
                 // This isn't the current journal, so it must be a leftover.  Read
                 // out the package names mentioned there and schedule them for
                 // backup.
-                RandomAccessFile in = null;
+                DataInputStream in = null;
                 try {
                     Slog.i(TAG, "Found stale backup journal, scheduling");
-                    in = new RandomAccessFile(f, "r");
+                    // Journals will tend to be on the order of a few kilobytes(around 4k), hence,
+                    // setting the buffer size to 8192.
+                    InputStream bufferedInputStream = new BufferedInputStream(
+                            new FileInputStream(f), 8192);
+                    in = new DataInputStream(bufferedInputStream);
                     while (true) {
                         String packageName = in.readUTF();
                         if (MORE_DEBUG) Slog.i(TAG, "  " + packageName);
@@ -3371,7 +3375,7 @@ public class BackupManagerService {
                 this.notifyAll();
             }
         }
-        
+
     }
 
     private void routeSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
@@ -3829,7 +3833,7 @@ public class BackupManagerService {
         String mCurrentPassword;
         String mEncryptPassword;
 
-        PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
+        PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
                 boolean includeApks, boolean includeObbs, boolean includeShared,
                 boolean doWidgets, String curPassword, String encryptPassword, boolean doAllApps,
                 boolean doSystem, boolean doCompress, String[] packages, AtomicBoolean latch) {
@@ -4200,7 +4204,7 @@ public class BackupManagerService {
         IBackupObserver mBackupObserver;
         boolean mUserInitiated;
 
-        PerformFullTransportBackupTask(IFullBackupRestoreObserver observer, 
+        PerformFullTransportBackupTask(IFullBackupRestoreObserver observer,
                 String[] whichPackages, boolean updateSchedule,
                 FullBackupJob runningJob, CountDownLatch latch, IBackupObserver backupObserver,
                 boolean userInitiated) {
@@ -7947,20 +7951,20 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         /*
          * SKETCH OF OPERATION
-         * 
+         *
          * create one of these PerformUnifiedRestoreTask objects, telling it which
          * dataset & transport to address, and then parameters within the restore
          * operation: single target package vs many, etc.
          *
          * 1. transport.startRestore(token, list-of-packages).  If we need @pm@  it is
          * always placed first and the settings provider always placed last [for now].
-         * 
+         *
          * 1a [if we needed @pm@ then nextRestorePackage() and restore the PMBA inline]
-         * 
+         *
          *   [ state change => RUNNING_QUEUE ]
-         * 
+         *
          * NOW ITERATE:
-         * 
+         *
          * { 3. t.nextRestorePackage()
          *   4. does the metadata for this package allow us to restore it?
          *      does the on-disk app permit us to restore it? [re-check allowBackup etc]
@@ -7971,7 +7975,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
          *       5c. call into agent to perform restore
          *       5d. tear down agent
          *       [ state change => RUNNING_QUEUE ]
-         * 
+         *
          *   6. else it's a stream dataset:
          *       [ state change => RESTORE_FULL ]
          *       6a. instantiate the engine for a stream restore: engine handles agent lifecycles
@@ -7979,12 +7983,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
          *       6c. ITERATE getNextFullRestoreDataChunk() and copy data to engine runner socket
          *       [ state change => RUNNING_QUEUE ]
          * }
-         * 
+         *
          *   [ state change => FINAL ]
-         * 
+         *
          * 7. t.finishRestore(), release wakelock, etc.
-         * 
-         * 
+         *
+         *
          */
 
         // state INITIAL : set up for the restore and read the metadata if necessary
