@@ -1888,6 +1888,11 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public void updateDisplay(int displayId) {
+        // pass
+    }
+
+    @Override
     public int getUserId() {
         return 0; // not used
     }

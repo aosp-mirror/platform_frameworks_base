@@ -2730,6 +2730,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "addSplashScreen " + packageName
                     + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="
                     + Integer.toHexString(theme));
+
+            // Obtain proper context to launch on the right display.
+            final Context displayContext = getDisplayContext(context, displayId);
+            if (displayContext == null) {
+                // Can't show splash screen on requested display, so skip showing at all.
+                return null;
+            }
+            context = displayContext;
+
             if (theme != context.getThemeResId() || labelRes != 0) {
                 try {
                     context = context.createPackageContext(packageName, 0);
@@ -2814,14 +2823,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             params.setTitle("Splash Screen " + packageName);
-
-            // Obtain proper context to launch on the right display.
-            final Context displayContext = getDisplayContext(context, displayId);
-            if (displayContext == null) {
-                // Can't show splash screen on requested display, so skip showing at all.
-                return null;
-            }
-            wm = (WindowManager) displayContext.getSystemService(WINDOW_SERVICE);
+            wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
             view = win.getDecorView();
 
             if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "Adding splash screen window for "

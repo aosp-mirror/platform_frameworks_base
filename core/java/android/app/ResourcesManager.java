@@ -521,7 +521,8 @@ public class ResourcesManager {
             }
 
             // Update any existing Activity Resources references.
-            updateResourcesForActivity(activityToken, overrideConfig);
+            updateResourcesForActivity(activityToken, overrideConfig, displayId,
+                    false /* movedToDifferentDisplay */);
 
             // Now request an actual Resources object.
             return getOrCreateResources(activityToken, key, classLoader);
@@ -687,9 +688,12 @@ public class ResourcesManager {
      * still valid and will have the updated configuration.
      * @param activityToken The Activity token.
      * @param overrideConfig The configuration override to update.
+     * @param displayId Id of the display where activity currently resides.
+     * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
      */
     public void updateResourcesForActivity(@NonNull IBinder activityToken,
-            @Nullable Configuration overrideConfig) {
+            @Nullable Configuration overrideConfig, int displayId,
+            boolean movedToDifferentDisplay) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
                     "ResourcesManager#updateResourcesForActivity");
@@ -697,8 +701,9 @@ public class ResourcesManager {
                 final ActivityResources activityResources =
                         getOrCreateActivityResourcesStructLocked(activityToken);
 
-                if (Objects.equals(activityResources.overrideConfig, overrideConfig)) {
-                    // They are the same, no work to do.
+                if (Objects.equals(activityResources.overrideConfig, overrideConfig)
+                        && !movedToDifferentDisplay) {
+                    // They are the same and no change of display id, no work to do.
                     return;
                 }
 
@@ -721,7 +726,7 @@ public class ResourcesManager {
                             + Configuration.resourceQualifierString(oldConfig)
                             + " to newConfig="
                             + Configuration.resourceQualifierString(
-                            activityResources.overrideConfig),
+                            activityResources.overrideConfig) + " displayId=" + displayId,
                             here);
                 }
 
@@ -765,12 +770,12 @@ public class ResourcesManager {
                     // Create the new ResourcesKey with the rebased override config.
                     final ResourcesKey newKey = new ResourcesKey(oldKey.mResDir,
                             oldKey.mSplitResDirs,
-                            oldKey.mOverlayDirs, oldKey.mLibDirs, oldKey.mDisplayId,
+                            oldKey.mOverlayDirs, oldKey.mLibDirs, displayId,
                             rebasedOverrideConfig, oldKey.mCompatInfo);
 
                     if (DEBUG) {
                         Slog.d(TAG, "rebasing ref=" + resources + " from oldKey=" + oldKey
-                                + " to newKey=" + newKey);
+                                + " to newKey=" + newKey + ", displayId=" + displayId);
                     }
 
                     ResourcesImpl resourcesImpl = findResourcesImplForKeyLocked(newKey);

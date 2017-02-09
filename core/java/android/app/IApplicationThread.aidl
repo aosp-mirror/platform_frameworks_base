@@ -100,8 +100,9 @@ oneway interface IApplicationThread {
             int resultCode, in String data, in Bundle extras, boolean ordered,
             boolean sticky, int sendingUser, int processState);
     void scheduleLowMemory();
-    void scheduleActivityConfigurationChanged(IBinder token, in Configuration overrideConfig,
-            boolean reportToActivity);
+    void scheduleActivityConfigurationChanged(IBinder token, in Configuration overrideConfig);
+    void scheduleActivityMovedToDisplay(IBinder token, int displayId,
+            in Configuration overrideConfig);
     void scheduleRelaunchActivity(IBinder token, in List<ResultInfo> pendingResults,
             in List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
             in Configuration config, in Configuration overrideConfig, boolean preserveWindow);

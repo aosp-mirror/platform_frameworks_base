@@ -2072,6 +2072,13 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public void updateDisplay(int displayId) {
+        final DisplayAdjustments displayAdjustments = mResources.getDisplayAdjustments();
+        mDisplay = mResourcesManager.getAdjustedDisplay(displayId,
+                displayAdjustments);
+    }
+
+    @Override
     public DisplayAdjustments getDisplayAdjustments(int displayId) {
         return mResources.getDisplayAdjustments();
     }

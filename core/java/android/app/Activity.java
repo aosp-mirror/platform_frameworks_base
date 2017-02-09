@@ -1980,6 +1980,29 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    void dispatchMovedToDisplay(int displayId) {
+        updateDisplay(displayId);
+        onMovedToDisplay(displayId);
+    }
+
+    /**
+     * Called by the system when the activity is moved from one display to another without
+     * recreation. This means that this activity is declared to handle all changes to configuration
+     * that happened when it was switched to another display, so it wasn't destroyed and created
+     * again. This call will be followed by {@link #onConfigurationChanged(Configuration)} if the
+     * applied configuration actually changed.
+     *
+     * <p>Use this callback to track changes to the displays if some activity functionality relies
+     * on an association with some display properties.
+     *
+     * @param displayId The id of the display to which activity was moved.
+     *
+     * @see #onConfigurationChanged(Configuration)
+     * @see View#onMovedToDisplay(int)
+     */
+    public void onMovedToDisplay(int displayId) {
+    }
+
     /**
      * Called by the system when the device configuration changes while your
      * activity is running.  Note that this will <em>only</em> be called if

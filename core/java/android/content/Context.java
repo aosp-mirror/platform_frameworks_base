@@ -4429,6 +4429,11 @@ public abstract class Context {
     public abstract Display getDisplay();
 
     /**
+     * @hide
+     */
+    public abstract void updateDisplay(int displayId);
+
+    /**
      * Indicates whether this Context is restricted.
      *
      * @return {@code true} if this Context is restricted, {@code false} otherwise.

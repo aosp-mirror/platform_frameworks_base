@@ -739,6 +739,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public void updateDisplay(int displayId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public File[] getExternalFilesDirs(String type) {
         throw new UnsupportedOperationException();

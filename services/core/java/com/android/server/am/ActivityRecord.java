@@ -201,6 +201,7 @@ final class ActivityRecord implements AppWindowContainerListener {
     // WARNING: Reference points to {@link TaskRecord#getMergedOverrideConfig}, so its internal
     // state should never be altered directly.
     private Configuration mLastReportedOverrideConfiguration;
+    private int mLastReportedDisplayId;
     CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
@@ -513,16 +514,37 @@ final class ActivityRecord implements AppWindowContainerListener {
         mSmallestSizeConfigurations = smallestSizeConfigurations;
     }
 
-    private void scheduleConfigurationChanged(Configuration config, boolean reportToActivity) {
+    private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
         if (app == null || app.thread == null) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.w(TAG,
+                    "Can't report activity moved to display - client not running, activityRecord="
+                            + this + ", displayId=" + displayId);
             return;
         }
         try {
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
-                    "reportToActivity=" + reportToActivity + " and config: " + config);
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                    "Reporting activity moved to display" + ", activityRecord=" + this
+                            + ", displayId=" + displayId + ", config=" + config);
 
-            app.thread.scheduleActivityConfigurationChanged(appToken, new Configuration(config),
-                    reportToActivity);
+            app.thread.scheduleActivityMovedToDisplay(appToken, displayId,
+                    new Configuration(config));
+        } catch (RemoteException e) {
+            // If process died, whatever.
+        }
+    }
+
+    private void scheduleConfigurationChanged(Configuration config) {
+        if (app == null || app.thread == null) {
+            if (DEBUG_CONFIGURATION) Slog.w(TAG,
+                    "Can't report activity configuration update - client not running"
+                            + ", activityRecord=" + this);
+            return;
+        }
+        try {
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + ", config: "
+                    + config);
+
+            app.thread.scheduleActivityConfigurationChanged(appToken, new Configuration(config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -1969,26 +1991,31 @@ final class ActivityRecord implements AppWindowContainerListener {
             return true;
         }
 
+        // We don't worry about activities that are finishing.
+        if (finishing) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Configuration doesn't matter in finishing " + this);
+            stopFreezingScreenLocked(false);
+            return true;
+        }
+
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Ensuring correct configuration: " + this);
 
+        final int newDisplayId = getDisplayId();
+        final boolean displayChanged = mLastReportedDisplayId != newDisplayId;
+        if (displayChanged) {
+            mLastReportedDisplayId = newDisplayId;
+        }
         // Short circuit: if the two full configurations are equal (the common case), then there is
         // nothing to do.  We test the full configuration instead of the global and merged override
         // configurations because there are cases (like moving a task to the pinned stack) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig1.setTo(mLastReportedConfiguration);
         mTmpConfig1.updateFrom(mLastReportedOverrideConfiguration);
-        if (task.getConfiguration().equals(mTmpConfig1) && !forceNewConfig) {
+        if (task.getConfiguration().equals(mTmpConfig1) && !forceNewConfig && !displayChanged) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration unchanged in " + this);
-            return true;
-        }
-
-        // We don't worry about activities that are finishing.
-        if (finishing) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Configuration doesn't matter in finishing " + this);
-            stopFreezingScreenLocked(false);
+                    "Configuration & display unchanged in " + this);
             return true;
         }
 
@@ -2009,7 +2036,11 @@ final class ActivityRecord implements AppWindowContainerListener {
                     "Configuration no differences in " + this);
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
-            scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
+            if (displayChanged) {
+                scheduleActivityMovedToDisplay(newDisplayId, newTaskMergedOverrideConfig);
+            } else {
+                scheduleConfigurationChanged(newTaskMergedOverrideConfig);
+            }
             return true;
         }
 
@@ -2082,7 +2113,11 @@ final class ActivityRecord implements AppWindowContainerListener {
         // NOTE: We only forward the task override configuration as the system level configuration
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
-        scheduleConfigurationChanged(newTaskMergedOverrideConfig, true);
+        if (displayChanged) {
+            scheduleActivityMovedToDisplay(newDisplayId, newTaskMergedOverrideConfig);
+        } else {
+            scheduleConfigurationChanged(newTaskMergedOverrideConfig);
+        }
         stopFreezingScreenLocked(false);
 
         return true;

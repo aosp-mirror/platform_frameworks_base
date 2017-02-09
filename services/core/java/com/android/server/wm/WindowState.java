@@ -3027,6 +3027,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final Rect outsets = mLastOutsets;
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             final boolean reportOrientation = mReportOrientationChanged;
+            final int displayId = getDisplayId();
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
@@ -3036,7 +3037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         try {
                             dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
                                     stableInsets, outsets, reportDraw, newConfig,
-                                    reportOrientation);
+                                    reportOrientation, displayId);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
@@ -3044,7 +3045,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 });
             } else {
                 dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                        outsets, reportDraw, newConfig, reportOrientation);
+                        outsets, reportDraw, newConfig, reportOrientation, displayId);
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
@@ -3101,13 +3102,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig, boolean reportOrientation) throws RemoteException {
+            Configuration newConfig, boolean reportOrientation, int displayId)
+            throws RemoteException {
         final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing
                 || reportOrientation;
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, newConfig, getBackdropFrame(frame),
-                forceRelayout, mPolicy.isNavBarForcedShownLw(this));
+                forceRelayout, mPolicy.isNavBarForcedShownLw(this), displayId);
         mDragResizingChangeReported = true;
     }
 

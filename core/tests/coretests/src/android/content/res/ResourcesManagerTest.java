@@ -197,7 +197,8 @@ public class ResourcesManagerTest extends TestCase {
 
         final Configuration overrideConfig = new Configuration();
         overrideConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        mResourcesManager.updateResourcesForActivity(activity1, overrideConfig);
+        mResourcesManager.updateResourcesForActivity(activity1, overrideConfig,
+                Display.DEFAULT_DISPLAY, false /* movedToDifferentDisplay */);
         assertSame(resources1, theme.getResources());
 
         // Make sure we can still access the data.
@@ -246,7 +247,8 @@ public class ResourcesManagerTest extends TestCase {
 
         // Now update the Activity base override, and both resources should update.
         config1.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        mResourcesManager.updateResourcesForActivity(activity1, config1);
+        mResourcesManager.updateResourcesForActivity(activity1, config1, Display.DEFAULT_DISPLAY,
+                false /* movedToDifferentDisplay */);
 
         expectedConfig1.orientation = Configuration.ORIENTATION_LANDSCAPE;
         assertEquals(expectedConfig1, resources1.getConfiguration());
