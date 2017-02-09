@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"परत"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"मुख्‍यपृष्‍ठ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनू"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"विहंगावलोकन"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"शोधा"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कॅमेरा"</string>
@@ -683,7 +685,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"संकेतशब्दासाठी संकेत"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचना"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
-    <!-- no translation found for notification_channel_general (4525309436693914482) -->
-    <skip />
+    <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
 </resources>

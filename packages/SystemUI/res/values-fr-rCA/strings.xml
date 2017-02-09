@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Précédent"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Domicile"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"Aperçu"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Rechercher"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Appareil photo"</string>
@@ -673,8 +675,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Page <xliff:g id="ID_1">%1$d</xliff:g> sur <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Développer"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Réduire"</string>
-    <!-- no translation found for pip_phone_close (8416647892889710330) -->
-    <skip />
+    <string name="pip_phone_close" msgid="8416647892889710330">"Fermer"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Le téléphone commence à chauffer"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Les fonctionnalités sont limitées pendant que le téléphone refroidit"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Votre téléphone va essayer de se refroidir automatiquement. Vous pouvez toujours l\'utiliser, mais il risque d\'être plus lent.\n\nUne fois refroidi, il fonctionnera normalement."</string>
@@ -685,7 +686,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"Demander le mot de passe"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Saisies d\'écran"</string>
-    <!-- no translation found for notification_channel_general (4525309436693914482) -->
-    <skip />
+    <string name="notification_channel_general" msgid="4525309436693914482">"Messages généraux"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Stockage"</string>
 </resources>

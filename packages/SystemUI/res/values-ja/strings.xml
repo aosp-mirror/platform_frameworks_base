@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"戻る"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ホーム"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"メニュー"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"最近"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"検索"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"カメラ"</string>
@@ -673,8 +675,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"展開"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
-    <!-- no translation found for pip_phone_close (8416647892889710330) -->
-    <skip />
+    <string name="pip_phone_close" msgid="8416647892889710330">"閉じる"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"スマートフォンの温度が上昇中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"スマートフォンのクールダウン中は一部の機能が制限されます"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>

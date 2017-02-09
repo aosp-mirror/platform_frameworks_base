@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Orqaga"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Uyga"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"Umumiy nazar"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Qidirish"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
@@ -673,8 +675,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>-sahifa, jami: <xliff:g id="ID_2">%2$d</xliff:g> ta sahifa"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Yoyish"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Yig‘ish"</string>
-    <!-- no translation found for pip_phone_close (8416647892889710330) -->
-    <skip />
+    <string name="pip_phone_close" msgid="8416647892889710330">"Yopish"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qizib ketdi"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
