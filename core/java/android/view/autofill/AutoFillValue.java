@@ -104,8 +104,11 @@ public final class AutoFillValue implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        return "AutoFillValue[text=" + mText + ", listIndex=" + mListIndex + ", toggle=" + mToggle
-                + "]";
+        if (mText != null) {
+            return mText.length() + "_chars";
+        }
+
+        return "[listIndex=" + mListIndex + ", toggle=" + mToggle + "]";
     }
 
     /////////////////////////////////////
