@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.app.admin.DevicePolicyManager;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
@@ -46,6 +47,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -866,6 +868,16 @@ class GlobalScreenshot {
             .setAutoCancel(true)
             .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        final Intent intent = dpm.createAdminSupportIntent(
+                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
+        if (intent != null) {
+            final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                    context, 0, intent, 0, null, UserHandle.CURRENT);
+            b.setContentIntent(pendingIntent);
+        }
+
         SystemUI.overrideNotificationAppName(context, b);
 
         Notification n = new Notification.BigTextStyle(b)
