@@ -22,8 +22,13 @@ import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
 
+import com.android.systemui.ConfigurationChangedReceiver;
+import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -34,7 +39,7 @@ public class DependencyTest extends SysuiTestCase {
     public void testClassDependency() {
         FlashlightController f = mock(FlashlightController.class);
         injectTestDependency(FlashlightController.class, f);
-        assertEquals(f, Dependency.get(FlashlightController.class));
+        Assert.assertEquals(f, Dependency.get(FlashlightController.class));
     }
 
     @Test
