@@ -26,6 +26,7 @@ import android.icu.impl.CacheValue;
 import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
 import android.net.LocalServerSocket;
+import android.opengl.EGL14;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -79,6 +80,7 @@ public class ZygoteInit {
     private static final String TAG = "Zygote";
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
+    private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_RUNNING_IN_CONTAINER = "ro.boot.container";
 
     private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
@@ -198,6 +200,9 @@ public class ZygoteInit {
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadResources");
         preloadResources();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
+        preloadOpenGL();
+        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         preloadSharedLibraries();
         preloadTextResources();
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
@@ -236,6 +241,14 @@ public class ZygoteInit {
         System.loadLibrary("android");
         System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
+    }
+
+    private static void preloadOpenGL() {
+        String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
+        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) ||
+                driverPackageName == null || driverPackageName.isEmpty()) {
+            EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
+        }
     }
 
     private static void preloadTextResources() {
