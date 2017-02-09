@@ -113,6 +113,6 @@ public class SystemUIFactory {
         return null;
     }
 
-    public void injectDependencies(ArrayMap<String, DependencyProvider> providers,
+    public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
             Context context) { }
 }
