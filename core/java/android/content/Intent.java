@@ -6039,6 +6039,12 @@ public class Intent implements Parcelable, Cloneable {
                 case "--receiver-foreground":
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     break;
+                case "--receiver-no-abort":
+                    intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT);
+                    break;
+                case "--receiver-include-background":
+                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                    break;
                 case "--selector":
                     intent.setDataAndType(data, type);
                     intent = new Intent();
@@ -6162,7 +6168,8 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--activity-single-top] [--activity-clear-task]",
                 "    [--activity-task-on-home]",
                 "    [--receiver-registered-only] [--receiver-replace-pending]",
-                "    [--receiver-foreground]",
+                "    [--receiver-foreground] [--receiver-no-abort]",
+                "    [--receiver-include-background]",
                 "    [--selector]",
                 "    [<URI> | <PACKAGE> | <COMPONENT>]"
         };
