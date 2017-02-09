@@ -32,6 +32,7 @@ public interface IntentButtonProvider extends Plugin {
             public boolean isVisible = true;
             public CharSequence contentDescription = null;
             public Drawable drawable;
+            public boolean tint = true;
         }
 
         public IconState getIcon();

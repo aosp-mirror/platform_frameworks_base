@@ -26,6 +26,7 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -37,6 +38,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +50,7 @@ import android.widget.TextView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
+import com.android.systemui.statusbar.ScalingDrawableWrapper;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
 import com.android.systemui.tuner.ShortcutParser.Shortcut;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -365,8 +370,13 @@ public class LockscreenFragment extends PreferenceFragment {
             mShortcut = shortcut;
             mIconState = new IconState();
             mIconState.isVisible = true;
-            mIconState.drawable = shortcut.icon.loadDrawable(context);
+            mIconState.drawable = shortcut.icon.loadDrawable(context).mutate();
             mIconState.contentDescription = mShortcut.label;
+            int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32,
+                    context.getResources().getDisplayMetrics());
+            mIconState.drawable = new ScalingDrawableWrapper(mIconState.drawable,
+                    size / (float) mIconState.drawable.getIntrinsicWidth());
+            mIconState.tint = false;
         }
 
         @Override
@@ -388,8 +398,13 @@ public class LockscreenFragment extends PreferenceFragment {
             mIntent = new Intent().setComponent(new ComponentName(info.packageName, info.name));
             mIconState = new IconState();
             mIconState.isVisible = true;
-            mIconState.drawable = info.loadIcon(context.getPackageManager());
+            mIconState.drawable = info.loadIcon(context.getPackageManager()).mutate();
             mIconState.contentDescription = info.loadLabel(context.getPackageManager());
+            int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32,
+                    context.getResources().getDisplayMetrics());
+            mIconState.drawable = new ScalingDrawableWrapper(mIconState.drawable,
+                    size / (float) mIconState.drawable.getIntrinsicWidth());
+            mIconState.tint = false;
         }
 
         @Override
