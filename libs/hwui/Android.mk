@@ -189,13 +189,11 @@ hwui_c_includes += \
     external/harfbuzz_ng/src \
     external/freetype/include
 
-ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
-    hwui_cflags += -DANDROID_ENABLE_RENDERSCRIPT
-    hwui_c_includes += \
-        $(call intermediates-dir-for,STATIC_LIBRARIES,TARGET,) \
-        frameworks/rs/cpp \
-        frameworks/rs
-endif
+# enable RENDERSCRIPT
+hwui_c_includes += \
+    $(call intermediates-dir-for,STATIC_LIBRARIES,TARGET,) \
+    frameworks/rs/cpp \
+    frameworks/rs
 
 # ------------------------
 # static library

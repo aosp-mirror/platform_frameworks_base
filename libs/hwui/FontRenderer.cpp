@@ -33,13 +33,10 @@
 
 #include <algorithm>
 #include <cutils/properties.h>
+#include <RenderScript.h>
 #include <SkGlyph.h>
 #include <SkUtils.h>
 #include <utils/Log.h>
-
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
-#include <RenderScript.h>
-#endif
 
 namespace android {
 namespace uirenderer {
@@ -591,17 +588,12 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
         return image;
     }
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // Align buffers for renderscript usage
     if (paddedWidth & (RS_CPU_ALLOCATION_ALIGNMENT - 1)) {
         paddedWidth += RS_CPU_ALLOCATION_ALIGNMENT - paddedWidth % RS_CPU_ALLOCATION_ALIGNMENT;
     }
     int size = paddedWidth * paddedHeight;
     uint8_t* dataBuffer = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, size);
-#else
-    int size = paddedWidth * paddedHeight;
-    uint8_t* dataBuffer = (uint8_t*) malloc(size);
-#endif
 
     memset(dataBuffer, 0, size);
 
@@ -691,7 +683,6 @@ bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, cons
 
 void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, float radius) {
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF && radius <= 25.0f) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
@@ -729,7 +720,6 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
             return;
         }
     }
-#endif
 
     std::unique_ptr<float[]> gaussian(new float[2 * intRadius + 1]);
     Blur::generateGaussianWeights(gaussian.get(), radius);
