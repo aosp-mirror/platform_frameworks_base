@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -33,12 +34,14 @@ public class ActionMenuItem implements MenuItem {
     private final int mGroup;
     private final int mCategoryOrder;
     private final int mOrdering;
-    
+
     private CharSequence mTitle;
     private CharSequence mTitleCondensed;
     private Intent mIntent;
     private char mShortcutNumericChar;
+    private int mShortcutNumericModifiers = KeyEvent.META_CTRL_ON;
     private char mShortcutAlphabeticChar;
+    private int mShortcutAlphabeticModifiers = KeyEvent.META_CTRL_ON;
 
     private Drawable mIconDrawable;
     private int mIconResId = NO_ICON;
@@ -73,6 +76,10 @@ public class ActionMenuItem implements MenuItem {
         return mShortcutAlphabeticChar;
     }
 
+    public int getAlphabeticModifiers() {
+        return mShortcutAlphabeticModifiers;
+    }
+
     public int getGroupId() {
         return mGroup;
     }
@@ -95,6 +102,10 @@ public class ActionMenuItem implements MenuItem {
 
     public char getNumericShortcut() {
         return mShortcutNumericChar;
+    }
+
+    public int getNumericModifiers() {
+        return mShortcutNumericModifiers;
     }
 
     public int getOrder() {
@@ -135,6 +146,12 @@ public class ActionMenuItem implements MenuItem {
 
     public MenuItem setAlphabeticShortcut(char alphaChar) {
         mShortcutAlphabeticChar = alphaChar;
+        return this;
+    }
+
+    public MenuItem setAlphabeticShortcut(char alphachar, int alphaModifiers) {
+        mShortcutAlphabeticChar = alphachar;
+        mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
         return this;
     }
 
@@ -180,6 +197,12 @@ public class ActionMenuItem implements MenuItem {
         return this;
     }
 
+    public MenuItem setNumericShortcut(char numericChar, int numericModifiers) {
+        mShortcutNumericChar = numericChar;
+        mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
+        return this;
+    }
+
     public MenuItem setOnMenuItemClickListener(OnMenuItemClickListener menuItemClickListener) {
         mClickListener = menuItemClickListener;
         return this;
@@ -188,6 +211,15 @@ public class ActionMenuItem implements MenuItem {
     public MenuItem setShortcut(char numericChar, char alphaChar) {
         mShortcutNumericChar = numericChar;
         mShortcutAlphabeticChar = alphaChar;
+        return this;
+    }
+
+    public MenuItem setShortcut(char numericChar, char alphaChar, int numericModifiers,
+            int alphaModifiers) {
+        mShortcutNumericChar = numericChar;
+        mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
+        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
         return this;
     }
 

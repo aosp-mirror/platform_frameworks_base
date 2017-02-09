@@ -1744,13 +1744,14 @@ public class Activity extends ContextThemeWrapper
             final MenuItem item = menu.getItem(i);
             final CharSequence title = item.getTitle();
             final char alphaShortcut = item.getAlphabeticShortcut();
+            final int alphaModifiers = item.getAlphabeticModifiers();
             if (title != null && alphaShortcut != MIN_VALUE) {
                 if (group == null) {
                     final int resource = mApplication.getApplicationInfo().labelRes;
                     group = new KeyboardShortcutGroup(resource != 0 ? getString(resource) : null);
                 }
                 group.addItem(new KeyboardShortcutInfo(
-                    title, alphaShortcut, KeyEvent.META_CTRL_ON));
+                    title, alphaShortcut, alphaModifiers));
             }
         }
         if (group != null) {

@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -50,7 +51,9 @@ public final class MenuItemImpl implements MenuItem {
     private CharSequence mTitleCondensed;
     private Intent mIntent;
     private char mShortcutNumericChar;
+    private int mShortcutNumericModifiers = KeyEvent.META_CTRL_ON;
     private char mShortcutAlphabeticChar;
+    private int mShortcutAlphabeticModifiers = KeyEvent.META_CTRL_ON;
 
     /** The icon's drawable which is only created as needed */
     private Drawable mIconDrawable;
@@ -227,23 +230,45 @@ public final class MenuItemImpl implements MenuItem {
         mItemCallback = callback;
         return this;
     }
-    
+
     public char getAlphabeticShortcut() {
         return mShortcutAlphabeticChar;
     }
 
+    public int getAlphabeticModifiers() {
+        return mShortcutAlphabeticModifiers;
+    }
+
     public MenuItem setAlphabeticShortcut(char alphaChar) {
         if (mShortcutAlphabeticChar == alphaChar) return this;
-        
+
         mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
-        
+
         mMenu.onItemsChanged(false);
-        
+
+        return this;
+    }
+
+    public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers){
+        if (mShortcutAlphabeticChar == alphaChar &&
+                mShortcutAlphabeticModifiers == alphaModifiers) {
+            return this;
+        }
+
+        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
+
+        mMenu.onItemsChanged(false);
+
         return this;
     }
 
     public char getNumericShortcut() {
         return mShortcutNumericChar;
+    }
+
+    public int getNumericModifiers() {
+        return mShortcutNumericModifiers;
     }
 
     public MenuItem setNumericShortcut(char numericChar) {
@@ -256,12 +281,37 @@ public final class MenuItemImpl implements MenuItem {
         return this;
     }
 
+    public MenuItem setNumericShortcut(char numericChar, int numericModifiers){
+        if (mShortcutNumericChar == numericChar && mShortcutNumericModifiers == numericModifiers) {
+            return this;
+        }
+
+        mShortcutNumericChar = numericChar;
+        mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
+
+        mMenu.onItemsChanged(false);
+
+        return this;
+    }
+
     public MenuItem setShortcut(char numericChar, char alphaChar) {
         mShortcutNumericChar = numericChar;
         mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         
         mMenu.onItemsChanged(false);
         
+        return this;
+    }
+
+    public MenuItem setShortcut(char numericChar, int numericModifiers, char alphaChar,
+            int alphaModifiers) {
+        mShortcutNumericChar = numericChar;
+        mShortcutNumericModifiers = KeyEvent.normalizeMetaState(numericModifiers);
+        mShortcutAlphabeticChar = alphaChar;
+        mShortcutAlphabeticModifiers = KeyEvent.normalizeMetaState(alphaModifiers);
+
+        mMenu.onItemsChanged(false);
+
         return this;
     }
 

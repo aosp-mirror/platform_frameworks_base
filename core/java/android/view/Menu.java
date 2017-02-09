@@ -75,6 +75,13 @@ public interface Menu {
     static final int CATEGORY_SHIFT = 16;
 
     /**
+     * A mask of all supported modifiers for MenuItem's keyboard shortcuts
+     */
+    static final int SUPPORTED_MODIFIERS_MASK = KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON
+            | KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON
+            | KeyEvent.META_FUNCTION_ON;
+
+    /**
      * Value to use for group and item identifier integers when you don't care
      * about them.
      */
