@@ -2611,6 +2611,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPermissionReviewRequired = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
+        mHandlerThread = new ServiceThread(TAG,
+                android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
+        mHandlerThread.start();
+        mHandler = new MainHandler(mHandlerThread.getLooper());
+        mUiHandler = new UiHandler();
+
+        mConstants = new ActivityManagerConstants(this, mHandler);
+
         if (DEBUG_BACKGROUND_CHECK) {
             Slog.d(TAG, "Enforcing O+ bg restrictions: " + mConstants.ENFORCE_BG_CHECK);
             StringBuilder sb = new StringBuilder(200);
@@ -2621,14 +2629,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG, "Background implicit broadcasts:");
             Slog.d(TAG, sb.toString());
         }
-
-        mHandlerThread = new ServiceThread(TAG,
-                android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
-        mHandlerThread.start();
-        mHandler = new MainHandler(mHandlerThread.getLooper());
-        mUiHandler = new UiHandler();
-
-        mConstants = new ActivityManagerConstants(this, mHandler);
 
         /* static; one-time init here */
         if (sKillHandler == null) {
