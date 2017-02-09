@@ -1378,7 +1378,7 @@
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Крапка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Інші варіанти"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Більше"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"Внутрішнє спільне сховище"</string>
