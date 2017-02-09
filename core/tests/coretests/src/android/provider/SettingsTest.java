@@ -384,7 +384,6 @@ public class SettingsTest {
                  Settings.Secure.AUTO_FILL_SERVICE,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
-                 Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DOWNLOADS_DAYS_TO_RETAIN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.BACKUP_AUTO_RESTORE,
@@ -402,9 +401,6 @@ public class SettingsTest {
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DISPLAY_DENSITY_FORCED,
-                 Settings.Secure.DOWNLOADS_BACKUP_ALLOW_METERED,  // Candidate?
-                 Settings.Secure.DOWNLOADS_BACKUP_CHARGING_ONLY, // Candidate?
-                 Settings.Secure.DOWNLOADS_BACKUP_ENABLED, // Candidate?
                  Settings.Secure.DOZE_ALWAYS_ON,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,

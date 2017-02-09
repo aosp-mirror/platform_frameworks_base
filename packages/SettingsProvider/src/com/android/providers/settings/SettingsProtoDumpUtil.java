@@ -1429,18 +1429,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
                 SecureSettingsProto.SYSTEM_NAVIGATION_KEYS_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.DOWNLOADS_BACKUP_ENABLED,
-                SecureSettingsProto.DOWNLOADS_BACKUP_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.DOWNLOADS_BACKUP_ALLOW_METERED,
-                SecureSettingsProto.DOWNLOADS_BACKUP_ALLOW_METERED);
-        dumpSetting(s, p,
-                Settings.Secure.DOWNLOADS_BACKUP_CHARGING_ONLY,
-                SecureSettingsProto.DOWNLOADS_BACKUP_CHARGING_ONLY);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DOWNLOADS_DAYS_TO_RETAIN,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_DOWNLOADS_DAYS_TO_RETAIN);
-        dumpSetting(s, p,
                 Settings.Secure.QS_TILES,
                 SecureSettingsProto.QS_TILES);
         dumpSetting(s, p,
