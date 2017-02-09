@@ -36,7 +36,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
 
     private static final boolean DEFAULT_ENFORCE_BG_CHECK = SystemProperties.getBoolean(
-            "debug.bgcheck", false);
+            "debug.bgcheck", true);
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
 
     // Enforce background check on apps targeting O?
