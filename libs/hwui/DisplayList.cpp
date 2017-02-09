@@ -22,6 +22,7 @@
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayList.h"
+#include "OpDumper.h"
 #include "RecordedOp.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
@@ -125,6 +126,18 @@ bool DisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info,
         vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }
     return isDirty;
+}
+
+void DisplayList::output(std::ostream& output, uint32_t level) {
+    for (auto&& op : getOps()) {
+        OpDumper::dump(*op, output, level + 1);
+        if (op->opId == RecordedOpId::RenderNodeOp) {
+            auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
+            rnOp->renderNode->output(output, level + 1);
+        } else {
+            output << std::endl;
+        }
+    }
 }
 
 }; // namespace uirenderer

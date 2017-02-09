@@ -19,7 +19,6 @@
 #include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
 #include "Debug.h"
-#include "OpDumper.h"
 #include "RecordedOp.h"
 #include "TreeInfo.h"
 #include "utils/FatVector.h"
@@ -99,15 +98,7 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     properties().debugOutputProperties(output, level + 1);
 
     if (mDisplayList) {
-        for (auto&& op : mDisplayList->getOps()) {
-            OpDumper::dump(*op, output, level + 1);
-            if (op->opId == RecordedOpId::RenderNodeOp) {
-                auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
-                rnOp->renderNode->output(output, level + 1);
-            } else {
-                output << std::endl;
-            }
-        }
+        mDisplayList->output(output, level);
     }
     output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
     output << std::endl;

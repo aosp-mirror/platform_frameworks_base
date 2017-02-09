@@ -128,6 +128,8 @@ public:
     virtual bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
             std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
 
+    virtual void output(std::ostream& output, uint32_t level);
+
 protected:
     // allocator into which all ops and LsaVector arrays allocated
     LinearAllocator allocator;

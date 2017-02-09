@@ -126,6 +126,8 @@ public:
      */
     inline bool containsProjectionReceiver() const { return mProjectionReceiver; }
 
+    void output(std::ostream& output, uint32_t level) override;
+
     /**
      * We use std::deque here because (1) we need to iterate through these
      * elements and (2) mDrawable holds pointers to the elements, so they cannot
