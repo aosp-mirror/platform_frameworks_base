@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -84,7 +85,7 @@ class TransportManager {
             TransportBoundListener listener) {
         mContext = context;
         mPackageManager = context.getPackageManager();
-        mTransportWhitelist = whitelist;
+        mTransportWhitelist = (whitelist != null) ? whitelist : new ArraySet<>();
         mCurrentTransportName = defaultTransport;
         mTransportBoundListener = listener;
     }
