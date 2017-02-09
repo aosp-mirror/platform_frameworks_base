@@ -149,8 +149,12 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
 
     public void injectLeakCheckedDependencies(Class<?>... cls) {
         for (Class<?> c : cls) {
-            injectTestDependency(c, getLeakChecker(c));
+            injectLeakCheckedDependency(c);
         }
+    }
+
+    public <T> void injectLeakCheckedDependency(Class<T> c) {
+        injectTestDependency(c, getLeakChecker(c));
     }
 
     public <T extends CallbackController> T addListening(T mock, Class<T> cls, String tag) {

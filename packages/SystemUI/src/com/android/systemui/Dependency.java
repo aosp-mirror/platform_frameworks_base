@@ -23,6 +23,7 @@ import android.os.Process;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -92,18 +93,19 @@ public class Dependency extends SystemUI {
     /**
      * Key for getting a background Looper for background work.
      */
-    public static final String BG_LOOPER = "background_loooper";
+    public static final DependencyKey<Looper> BG_LOOPER = new DependencyKey<>("background_looper");
     /**
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
-    public static final String TIME_TICK_HANDLER = "time_tick_handler";
+    public static final DependencyKey<Handler> TIME_TICK_HANDLER =
+            new DependencyKey<>("time_tick_handler");
     /**
      * Generic handler on the main thread.
      */
-    public static final String MAIN_HANDLER = "main_handler";
+    public static final DependencyKey<Handler> MAIN_HANDLER = new DependencyKey<>("main_handler");
 
-    private final ArrayMap<String, Object> mDependencies = new ArrayMap<>();
-    private final ArrayMap<String, DependencyProvider> mProviders = new ArrayMap<>();
+    private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
+    private final ArrayMap<Object, DependencyProvider> mProviders = new ArrayMap<>();
 
     @Override
     public void start() {
@@ -122,87 +124,87 @@ public class Dependency extends SystemUI {
             return thread.getLooper();
         });
         mProviders.put(MAIN_HANDLER, () -> new Handler(Looper.getMainLooper()));
-        mProviders.put(ActivityStarter.class.getName(), () -> new ActivityStarterDelegate());
-        mProviders.put(ActivityStarterDelegate.class.getName(), () ->
+        mProviders.put(ActivityStarter.class, () -> new ActivityStarterDelegate());
+        mProviders.put(ActivityStarterDelegate.class, () ->
                 getDependency(ActivityStarter.class));
 
-        mProviders.put(BluetoothController.class.getName(), () ->
+        mProviders.put(BluetoothController.class, () ->
                 new BluetoothControllerImpl(mContext, getDependency(BG_LOOPER)));
 
-        mProviders.put(LocationController.class.getName(), () ->
+        mProviders.put(LocationController.class, () ->
                 new LocationControllerImpl(mContext, getDependency(BG_LOOPER)));
 
-        mProviders.put(RotationLockController.class.getName(), () ->
+        mProviders.put(RotationLockController.class, () ->
                 new RotationLockControllerImpl(mContext));
 
-        mProviders.put(NetworkController.class.getName(), () ->
+        mProviders.put(NetworkController.class, () ->
                 new NetworkControllerImpl(mContext, getDependency(BG_LOOPER),
                         getDependency(DeviceProvisionedController.class)));
 
-        mProviders.put(ZenModeController.class.getName(), () ->
+        mProviders.put(ZenModeController.class, () ->
                 new ZenModeControllerImpl(mContext, getDependency(MAIN_HANDLER)));
 
-        mProviders.put(HotspotController.class.getName(), () ->
+        mProviders.put(HotspotController.class, () ->
                 new HotspotControllerImpl(mContext));
 
-        mProviders.put(CastController.class.getName(), () ->
+        mProviders.put(CastController.class, () ->
                 new CastControllerImpl(mContext));
 
-        mProviders.put(FlashlightController.class.getName(), () ->
+        mProviders.put(FlashlightController.class, () ->
                 new FlashlightControllerImpl(mContext));
 
-        mProviders.put(KeyguardMonitor.class.getName(), () ->
+        mProviders.put(KeyguardMonitor.class, () ->
                 new KeyguardMonitorImpl(mContext));
 
-        mProviders.put(UserSwitcherController.class.getName(), () ->
+        mProviders.put(UserSwitcherController.class, () ->
                 new UserSwitcherController(mContext, getDependency(KeyguardMonitor.class),
                         getDependency(MAIN_HANDLER), getDependency(ActivityStarter.class)));
 
-        mProviders.put(UserInfoController.class.getName(), () ->
+        mProviders.put(UserInfoController.class, () ->
                 new UserInfoControllerImpl(mContext));
 
-        mProviders.put(BatteryController.class.getName(), () ->
+        mProviders.put(BatteryController.class, () ->
                 new BatteryControllerImpl(mContext));
 
-        mProviders.put(ManagedProfileController.class.getName(), () ->
+        mProviders.put(ManagedProfileController.class, () ->
                 new ManagedProfileControllerImpl(mContext));
 
-        mProviders.put(NextAlarmController.class.getName(), () ->
+        mProviders.put(NextAlarmController.class, () ->
                 new NextAlarmControllerImpl(mContext));
 
-        mProviders.put(DataSaverController.class.getName(), () ->
+        mProviders.put(DataSaverController.class, () ->
                 get(NetworkController.class).getDataSaverController());
 
-        mProviders.put(AccessibilityController.class.getName(), () ->
+        mProviders.put(AccessibilityController.class, () ->
                 new AccessibilityController(mContext));
 
-        mProviders.put(DeviceProvisionedController.class.getName(), () ->
+        mProviders.put(DeviceProvisionedController.class, () ->
                 new DeviceProvisionedControllerImpl(mContext));
 
-        mProviders.put(PluginManager.class.getName(), () ->
+        mProviders.put(PluginManager.class, () ->
                 new PluginManager(mContext));
 
-        mProviders.put(AssistManager.class.getName(), () ->
+        mProviders.put(AssistManager.class, () ->
                 new AssistManager(getDependency(DeviceProvisionedController.class), mContext));
 
-        mProviders.put(SecurityController.class.getName(), () ->
+        mProviders.put(SecurityController.class, () ->
                 new SecurityControllerImpl(mContext));
 
-        mProviders.put(LeakDetector.class.getName(), LeakDetector::create);
+        mProviders.put(LeakDetector.class, LeakDetector::create);
 
-        mProviders.put(TunerService.class.getName(), () ->
+        mProviders.put(TunerService.class, () ->
                 new TunerService(mContext));
 
-        mProviders.put(StatusBarWindowManager.class.getName(), () ->
+        mProviders.put(StatusBarWindowManager.class, () ->
                 new StatusBarWindowManager(mContext));
 
-        mProviders.put(DarkIconDispatcher.class.getName(), () ->
+        mProviders.put(DarkIconDispatcher.class, () ->
                 new DarkIconDispatcherImpl(mContext));
 
-        mProviders.put(ConfigurationController.class.getName(), () ->
+        mProviders.put(ConfigurationController.class, () ->
                 new ConfigurationControllerImpl(mContext));
 
-        mProviders.put(StatusBarIconController.class.getName(), () ->
+        mProviders.put(StatusBarIconController.class, () ->
                 new StatusBarIconControllerImpl(mContext));
 
         // Put all dependencies above here so the factory can override them if it wants.
@@ -225,20 +227,28 @@ public class Dependency extends SystemUI {
     }
 
     protected final <T> T getDependency(Class<T> cls) {
-        return getDependency(cls.getName());
+        return getDependencyInner(cls);
     }
 
-    protected final <T> T getDependency(String cls) {
-        T obj = (T) mDependencies.get(cls);
+    protected final <T> T getDependency(DependencyKey<T> key) {
+        return getDependencyInner(key);
+    }
+
+    private <T> T getDependencyInner(Object key) {
+        @SuppressWarnings("unchecked")
+        T obj = (T) mDependencies.get(key);
         if (obj == null) {
-            obj = createDependency(cls);
-            mDependencies.put(cls, obj);
+            obj = createDependency(key);
+            mDependencies.put(key, obj);
         }
         return obj;
     }
 
     @VisibleForTesting
-    protected <T> T createDependency(String cls) {
+    protected <T> T createDependency(Object cls) {
+        Preconditions.checkArgument(cls instanceof DependencyKey<?> || cls instanceof Class<?>);
+
+        @SuppressWarnings("unchecked")
         DependencyProvider<T> provider = mProviders.get(cls);
         if (provider == null) {
             throw new IllegalArgumentException("Unsupported dependency " + cls);
@@ -264,10 +274,23 @@ public class Dependency extends SystemUI {
     }
 
     public static <T> T get(Class<T> cls) {
-        return sDependency.getDependency(cls.getName());
+        return sDependency.getDependency(cls);
     }
 
-    public static <T> T get(String cls) {
+    public static <T> T get(DependencyKey<T> cls) {
         return sDependency.getDependency(cls);
+    }
+
+    public static final class DependencyKey<V> {
+        private final String mDisplayName;
+
+        public DependencyKey(String displayName) {
+            mDisplayName = displayName;
+        }
+
+        @Override
+        public String toString() {
+            return mDisplayName;
+        }
     }
 }
