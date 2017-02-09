@@ -93,11 +93,11 @@ public final class AutoFillId implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("FieldId [viewId=").append(mViewId);
+        final StringBuilder builder = new StringBuilder().append(mViewId);
         if (mVirtual) {
-            builder.append(", virtualId=").append(mVirtualId);
+            builder.append(":").append(mVirtualId);
         }
-        return builder.append(']').toString();
+        return builder.toString();
     }
 
     @Override

@@ -32,7 +32,7 @@ public final class Helper {
     static StringBuilder append(StringBuilder builder, Bundle bundle) {
         if (bundle == null) {
             builder.append("N/A");
-        } else if (!DEBUG) {
+        } else if (!VERBOSE) {
             builder.append(REDACTED);
         } else {
             final Set<String> keySet = bundle.keySet();
