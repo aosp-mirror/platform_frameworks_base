@@ -370,6 +370,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/statusbar/IStatusBar.aidl \
 	core/java/com/android/internal/statusbar/IStatusBarService.aidl \
 	core/java/com/android/internal/textservice/ISpellCheckerService.aidl \
+	core/java/com/android/internal/textservice/ISpellCheckerServiceCallback.aidl \
 	core/java/com/android/internal/textservice/ISpellCheckerSession.aidl \
 	core/java/com/android/internal/textservice/ISpellCheckerSessionListener.aidl \
 	core/java/com/android/internal/textservice/ITextServicesManager.aidl \
