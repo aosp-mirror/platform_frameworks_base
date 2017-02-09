@@ -19,7 +19,6 @@ package android.view.textclassifier;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
-import android.text.LangId;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
