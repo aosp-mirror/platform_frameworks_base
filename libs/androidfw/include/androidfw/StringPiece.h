@@ -271,7 +271,35 @@ inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<ch
   return out.write(str.data(), str.size());
 }
 
+template <typename TChar>
+inline ::std::basic_string<TChar>& operator+=(::std::basic_string<TChar>& lhs,
+                                              const BasicStringPiece<TChar>& rhs) {
+  return lhs.append(rhs.data(), rhs.size());
+}
+
+template <typename TChar>
+inline bool operator==(const ::std::basic_string<TChar>& lhs, const BasicStringPiece<TChar>& rhs) {
+  return rhs == lhs;
+}
+
+template <typename TChar>
+inline bool operator!=(const ::std::basic_string<TChar>& lhs, const BasicStringPiece<TChar>& rhs) {
+  return rhs != lhs;
+}
+
 }  // namespace android
+
+inline ::std::ostream& operator<<(::std::ostream& out, const std::u16string& str) {
+  ssize_t utf8_len = utf16_to_utf8_length(str.data(), str.size());
+  if (utf8_len < 0) {
+    return out << "???";
+  }
+
+  std::string utf8;
+  utf8.resize(static_cast<size_t>(utf8_len));
+  utf16_to_utf8(str.data(), str.size(), &*utf8.begin(), utf8_len + 1);
+  return out << utf8;
+}
 
 namespace std {
 

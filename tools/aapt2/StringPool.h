@@ -70,6 +70,8 @@ class StringPool {
     ~Ref();
 
     Ref& operator=(const Ref& rhs);
+    bool operator==(const Ref& rhs) const;
+    bool operator!=(const Ref& rhs) const;
     const std::string* operator->() const;
     const std::string& operator*() const;
 
@@ -93,6 +95,8 @@ class StringPool {
     ~StyleRef();
 
     StyleRef& operator=(const StyleRef& rhs);
+    bool operator==(const StyleRef& rhs) const;
+    bool operator!=(const StyleRef& rhs) const;
     const StyleEntry* operator->() const;
     const StyleEntry& operator*() const;
 

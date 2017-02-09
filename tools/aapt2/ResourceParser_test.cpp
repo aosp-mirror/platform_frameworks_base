@@ -76,6 +76,7 @@ TEST_F(ResourceParserTest, ParseQuotedString) {
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_NE(nullptr, str);
   EXPECT_EQ(std::string("  hey there "), *str->value);
+  EXPECT_TRUE(str->untranslatable_sections.empty());
 }
 
 TEST_F(ResourceParserTest, ParseEscapedString) {
@@ -85,6 +86,7 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_NE(nullptr, str);
   EXPECT_EQ(std::string("?123"), *str->value);
+  EXPECT_TRUE(str->untranslatable_sections.empty());
 }
 
 TEST_F(ResourceParserTest, ParseFormattedString) {
@@ -97,8 +99,7 @@ TEST_F(ResourceParserTest, ParseFormattedString) {
 
 TEST_F(ResourceParserTest, ParseStyledString) {
   // Use a surrogate pair unicode point so that we can verify that the span
-  // indices
-  // use UTF-16 length and not UTF-18 length.
+  // indices use UTF-16 length and not UTF-8 length.
   std::string input =
       "<string name=\"foo\">This is my aunt\u2019s <b>string</b></string>";
   ASSERT_TRUE(TestParse(input));
@@ -109,6 +110,7 @@ TEST_F(ResourceParserTest, ParseStyledString) {
   const std::string expected_str = "This is my aunt\u2019s string";
   EXPECT_EQ(expected_str, *str->value->str);
   EXPECT_EQ(1u, str->value->spans.size());
+  EXPECT_TRUE(str->untranslatable_sections.empty());
 
   EXPECT_EQ(std::string("b"), *str->value->spans[0].name);
   EXPECT_EQ(17u, str->value->spans[0].first_char);
@@ -122,6 +124,7 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_NE(nullptr, str);
   EXPECT_EQ(std::string("This is what I think"), *str->value);
+  EXPECT_TRUE(str->untranslatable_sections.empty());
 
   input = "<string name=\"foo2\">\"  This is what  I think  \"</string>";
   ASSERT_TRUE(TestParse(input));
@@ -131,16 +134,61 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
   EXPECT_EQ(std::string("  This is what  I think  "), *str->value);
 }
 
-TEST_F(ResourceParserTest, IgnoreXliffTags) {
-  std::string input =
-      "<string name=\"foo\" \n"
-      "        xmlns:xliff=\"urn:oasis:names:tc:xliff:document:1.2\">\n"
-      "  There are <xliff:g id=\"count\">%1$d</xliff:g> apples</string>";
+TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
+  std::string input = R"EOF(
+      <string name="foo" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+          There are <xliff:source>no</xliff:source> apples</string>)EOF";
+  ASSERT_TRUE(TestParse(input));
+
+  String* str = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_NE(nullptr, str);
+  EXPECT_EQ(StringPiece("There are no apples"), StringPiece(*str->value));
+  EXPECT_TRUE(str->untranslatable_sections.empty());
+}
+
+TEST_F(ResourceParserTest, NestedXliffGTagsAreIllegal) {
+  std::string input = R"EOF(
+      <string name="foo" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+          Do not <xliff:g>translate <xliff:g>this</xliff:g></xliff:g></string>)EOF";
+  EXPECT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInString) {
+  std::string input = R"EOF(
+      <string name="foo" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+          There are <xliff:g id="count">%1$d</xliff:g> apples</string>)EOF";
   ASSERT_TRUE(TestParse(input));
 
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_NE(nullptr, str);
   EXPECT_EQ(StringPiece("There are %1$d apples"), StringPiece(*str->value));
+
+  ASSERT_EQ(1u, str->untranslatable_sections.size());
+
+  // We expect indices and lengths that span to include the whitespace
+  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
+  // needed (to deal with line breaks, etc.).
+  EXPECT_EQ(9u, str->untranslatable_sections[0].start);
+  EXPECT_EQ(14u, str->untranslatable_sections[0].end);
+}
+
+TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInStyledString) {
+  std::string input = R"EOF(
+      <string name="foo" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+          There are <b><xliff:g id="count">%1$d</xliff:g></b> apples</string>)EOF";
+  ASSERT_TRUE(TestParse(input));
+
+  StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
+  ASSERT_NE(nullptr, str);
+  EXPECT_EQ(StringPiece("There are %1$d apples"), StringPiece(*str->value->str));
+
+  ASSERT_EQ(1u, str->untranslatable_sections.size());
+
+  // We expect indices and lengths that span to include the whitespace
+  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
+  // needed (to deal with line breaks, etc.).
+  EXPECT_EQ(9u, str->untranslatable_sections[0].start);
+  EXPECT_EQ(14u, str->untranslatable_sections[0].end);
 }
 
 TEST_F(ResourceParserTest, ParseNull) {
@@ -149,15 +197,11 @@ TEST_F(ResourceParserTest, ParseNull) {
 
   // The Android runtime treats a value of android::Res_value::TYPE_NULL as
   // a non-existing value, and this causes problems in styles when trying to
-  // resolve
-  // an attribute. Null values must be encoded as
-  // android::Res_value::TYPE_REFERENCE
+  // resolve an attribute. Null values must be encoded as android::Res_value::TYPE_REFERENCE
   // with a data value of 0.
-  BinaryPrimitive* integer =
-      test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
+  BinaryPrimitive* integer = test::GetValue<BinaryPrimitive>(&table_, "integer/foo");
   ASSERT_NE(nullptr, integer);
-  EXPECT_EQ(uint16_t(android::Res_value::TYPE_REFERENCE),
-            integer->value.dataType);
+  EXPECT_EQ(uint16_t(android::Res_value::TYPE_REFERENCE), integer->value.dataType);
   EXPECT_EQ(0u, integer->value.data);
 }
 

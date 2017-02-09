@@ -140,7 +140,23 @@ bool String::Equals(const Value* value) const {
   if (!other) {
     return false;
   }
-  return *this->value == *other->value;
+
+  if (this->value != other->value) {
+    return false;
+  }
+
+  if (untranslatable_sections.size() != other->untranslatable_sections.size()) {
+    return false;
+  }
+
+  auto other_iter = other->untranslatable_sections.begin();
+  for (const UntranslatableSection& this_section : untranslatable_sections) {
+    if (this_section != *other_iter) {
+      return false;
+    }
+    ++other_iter;
+  }
+  return true;
 }
 
 bool String::Flatten(android::Res_value* out_value) const {
@@ -158,6 +174,7 @@ String* String::Clone(StringPool* new_pool) const {
   String* str = new String(new_pool->MakeRef(*value));
   str->comment_ = comment_;
   str->source_ = source_;
+  str->untranslatable_sections = untranslatable_sections;
   return str;
 }
 
@@ -173,17 +190,22 @@ bool StyledString::Equals(const Value* value) const {
     return false;
   }
 
-  if (*this->value->str == *other->value->str) {
-    const std::vector<StringPool::Span>& spans_a = this->value->spans;
-    const std::vector<StringPool::Span>& spans_b = other->value->spans;
-    return std::equal(
-        spans_a.begin(), spans_a.end(), spans_b.begin(),
-        [](const StringPool::Span& a, const StringPool::Span& b) -> bool {
-          return *a.name == *b.name && a.first_char == b.first_char &&
-                 a.last_char == b.last_char;
-        });
+  if (this->value != other->value) {
+    return false;
   }
-  return false;
+
+  if (untranslatable_sections.size() != other->untranslatable_sections.size()) {
+    return false;
+  }
+
+  auto other_iter = other->untranslatable_sections.begin();
+  for (const UntranslatableSection& this_section : untranslatable_sections) {
+    if (this_section != *other_iter) {
+      return false;
+    }
+    ++other_iter;
+  }
+  return true;
 }
 
 bool StyledString::Flatten(android::Res_value* out_value) const {
@@ -200,6 +222,7 @@ StyledString* StyledString::Clone(StringPool* new_pool) const {
   StyledString* str = new StyledString(new_pool->MakeRef(value));
   str->comment_ = comment_;
   str->source_ = source_;
+  str->untranslatable_sections = untranslatable_sections;
   return str;
 }
 
@@ -218,7 +241,7 @@ bool FileReference::Equals(const Value* value) const {
   if (!other) {
     return false;
   }
-  return *path == *other->path;
+  return path == other->path;
 }
 
 bool FileReference::Flatten(android::Res_value* out_value) const {

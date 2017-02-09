@@ -34,44 +34,35 @@ namespace aapt {
 
 struct RawValueVisitor;
 
-/**
- * A resource value. This is an all-encompassing representation
- * of Item and Map and their subclasses. The way to do
- * type specific operations is to check the Value's type() and
- * cast it to the appropriate subclass. This isn't super clean,
- * but it is the simplest strategy.
- */
+// A resource value. This is an all-encompassing representation
+// of Item and Map and their subclasses. The way to do
+// type specific operations is to check the Value's type() and
+// cast it to the appropriate subclass. This isn't super clean,
+// but it is the simplest strategy.
 struct Value {
   virtual ~Value() = default;
 
-  /**
-   * Whether this value is weak and can be overridden without
-   * warning or error. Default is false.
-   */
+  // Whether this value is weak and can be overridden without warning or error. Default is false.
   bool IsWeak() const { return weak_; }
 
   void SetWeak(bool val) { weak_ = val; }
 
-  // Whether the value is marked as translateable.
+  // Whether the value is marked as translatable.
   // This does not persist when flattened.
   // It is only used during compilation phase.
-  void SetTranslateable(bool val) { translateable_ = val; }
+  void SetTranslatable(bool val) { translatable_ = val; }
 
   // Default true.
-  bool IsTranslateable() const { return translateable_; }
+  bool IsTranslatable() const { return translatable_; }
 
-  /**
-   * Returns the source where this value was defined.
-   */
+  // Returns the source where this value was defined.
   const Source& GetSource() const { return source_; }
 
   void SetSource(const Source& source) { source_ = source; }
 
   void SetSource(Source&& source) { source_ = std::move(source); }
 
-  /**
-   * Returns the comment that was associated with this resource.
-   */
+  // Returns the comment that was associated with this resource.
   const std::string& GetComment() const { return comment_; }
 
   void SetComment(const android::StringPiece& str) { comment_ = str.to_string(); }
@@ -80,70 +71,48 @@ struct Value {
 
   virtual bool Equals(const Value* value) const = 0;
 
-  /**
-   * Calls the appropriate overload of ValueVisitor.
-   */
+  // Calls the appropriate overload of ValueVisitor.
   virtual void Accept(RawValueVisitor* visitor) = 0;
 
-  /**
-   * Clone the value. new_pool is the new StringPool that
-   * any resources with strings should use when copying their string.
-   */
+  // Clone the value. `new_pool` is the new StringPool that
+  // any resources with strings should use when copying their string.
   virtual Value* Clone(StringPool* new_pool) const = 0;
 
-  /**
-   * Human readable printout of this value.
-   */
+  // Human readable printout of this value.
   virtual void Print(std::ostream* out) const = 0;
 
  protected:
   Source source_;
   std::string comment_;
   bool weak_ = false;
-  bool translateable_ = true;
+  bool translatable_ = true;
 };
 
-/**
- * Inherit from this to get visitor accepting implementations for free.
- */
+// Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseValue : public Value {
   void Accept(RawValueVisitor* visitor) override;
 };
 
-/**
- * A resource item with a single value. This maps to android::ResTable_entry.
- */
+// A resource item with a single value. This maps to android::ResTable_entry.
 struct Item : public Value {
-  /**
-   * Clone the Item.
-   */
+  // Clone the Item.
   virtual Item* Clone(StringPool* new_pool) const override = 0;
 
-  /**
-   * Fills in an android::Res_value structure with this Item's binary
-   * representation.
-   * Returns false if an error occurred.
-   */
+  // Fills in an android::Res_value structure with this Item's binary representation.
+  // Returns false if an error occurred.
   virtual bool Flatten(android::Res_value* out_value) const = 0;
 };
 
-/**
- * Inherit from this to get visitor accepting implementations for free.
- */
+// Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseItem : public Item {
   void Accept(RawValueVisitor* visitor) override;
 };
 
-/**
- * A reference to another resource. This maps to
- * android::Res_value::TYPE_REFERENCE.
- *
- * A reference can be symbolic (with the name set to a valid resource name) or
- * be
- * numeric (the id is set to a valid resource ID).
- */
+// A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
+// A reference can be symbolic (with the name set to a valid resource name) or be
+// numeric (the id is set to a valid resource ID).
 struct Reference : public BaseItem<Reference> {
   enum class Type {
     kResource,
@@ -169,9 +138,7 @@ struct Reference : public BaseItem<Reference> {
 bool operator<(const Reference&, const Reference&);
 bool operator==(const Reference&, const Reference&);
 
-/**
- * An ID resource. Has no real value, just a place holder.
- */
+// An ID resource. Has no real value, just a place holder.
 struct Id : public BaseItem<Id> {
   Id() { weak_ = true; }
   bool Equals(const Value* value) const override;
@@ -180,11 +147,8 @@ struct Id : public BaseItem<Id> {
   void Print(std::ostream* out) const override;
 };
 
-/**
- * A raw, unprocessed string. This may contain quotations,
- * escape sequences, and whitespace. This shall *NOT*
- * end up in the final resource table.
- */
+// A raw, unprocessed string. This may contain quotations, escape sequences, and whitespace.
+// This shall *NOT* end up in the final resource table.
 struct RawString : public BaseItem<RawString> {
   StringPool::Ref value;
 
@@ -196,8 +160,31 @@ struct RawString : public BaseItem<RawString> {
   void Print(std::ostream* out) const override;
 };
 
+// Identifies a range of characters in a string that are untranslatable.
+// These should not be pseudolocalized. The start and end indices are measured in bytes.
+struct UntranslatableSection {
+  // Start offset inclusive.
+  size_t start;
+
+  // End offset exclusive.
+  size_t end;
+};
+
+inline bool operator==(const UntranslatableSection& a, const UntranslatableSection& b) {
+  return a.start == b.start && a.end == b.end;
+}
+
+inline bool operator!=(const UntranslatableSection& a, const UntranslatableSection& b) {
+  return a.start != b.start || a.end != b.end;
+}
+
 struct String : public BaseItem<String> {
   StringPool::Ref value;
+
+  // Sections of the string to NOT translate. Mainly used
+  // for pseudolocalization. This data is NOT persisted
+  // in any format.
+  std::vector<UntranslatableSection> untranslatable_sections;
 
   explicit String(const StringPool::Ref& ref);
 
@@ -210,6 +197,11 @@ struct String : public BaseItem<String> {
 struct StyledString : public BaseItem<StyledString> {
   StringPool::StyleRef value;
 
+  // Sections of the string to NOT translate. Mainly used
+  // for pseudolocalization. This data is NOT persisted
+  // in any format.
+  std::vector<UntranslatableSection> untranslatable_sections;
+
   explicit StyledString(const StringPool::StyleRef& ref);
 
   bool Equals(const Value* value) const override;
@@ -221,9 +213,8 @@ struct StyledString : public BaseItem<StyledString> {
 struct FileReference : public BaseItem<FileReference> {
   StringPool::Ref path;
 
-  /**
-   * A handle to the file object from which this file can be read.
-   */
+  // A handle to the file object from which this file can be read.
+  // This field is NOT persisted in any format. It is transient.
   io::IFile* file = nullptr;
 
   FileReference() = default;
@@ -235,9 +226,7 @@ struct FileReference : public BaseItem<FileReference> {
   void Print(std::ostream* out) const override;
 };
 
-/**
- * Represents any other android::Res_value.
- */
+// Represents any other android::Res_value.
 struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
   android::Res_value value;
 
@@ -279,10 +268,7 @@ struct Style : public BaseValue<Style> {
 
   Maybe<Reference> parent;
 
-  /**
-   * If set to true, the parent was auto inferred from the
-   * style's name.
-   */
+  // If set to true, the parent was auto inferred from the style's name.
   bool parent_inferred = false;
 
   std::vector<Entry> entries;
@@ -319,9 +305,7 @@ struct Styleable : public BaseValue<Styleable> {
   void MergeWith(Styleable* styleable);
 };
 
-/**
- * Stream operator for printing Value objects.
- */
+// Stream operator for printing Value objects.
 inline ::std::ostream& operator<<(::std::ostream& out, const Value& value) {
   value.Print(&out);
   return out;

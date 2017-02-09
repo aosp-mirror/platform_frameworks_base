@@ -89,7 +89,7 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
 
   String* val = test::GetValue<String>(table.get(), "android:string/four");
   ASSERT_NE(nullptr, val);
-  val->SetTranslateable(false);
+  val->SetTranslatable(false);
 
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   PseudolocaleGenerator generator;
@@ -128,6 +128,49 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
   ASSERT_EQ(nullptr,
             test::GetValueForConfig<String>(table.get(), "android:string/four",
                                             test::ParseConfigOrDie("ar-rXB")));
+}
+
+TEST(PseudolocaleGeneratorTest, RespectUntranslateableSections) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("android").Build();
+  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
+
+  {
+    StyleString original_style;
+    original_style.str = "Hello world!";
+    original_style.spans = {Span{"b", 2, 3}, Span{"b", 6, 7}, Span{"i", 1, 10}};
+
+    auto styled_string =
+        util::make_unique<StyledString>(table->string_pool.MakeRef(original_style));
+    styled_string->untranslatable_sections.push_back(UntranslatableSection{6u, 8u});
+    styled_string->untranslatable_sections.push_back(UntranslatableSection{8u, 11u});
+
+    auto string = util::make_unique<String>(table->string_pool.MakeRef(original_style.str));
+    string->untranslatable_sections.push_back(UntranslatableSection{6u, 11u});
+
+    ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("android:string/foo"), ConfigDescription{},
+                                   {} /* product */, std::move(styled_string),
+                                   context->GetDiagnostics()));
+    ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("android:string/bar"), ConfigDescription{},
+                                   {} /* product */, std::move(string), context->GetDiagnostics()));
+  }
+
+  PseudolocaleGenerator generator;
+  ASSERT_TRUE(generator.Consume(context.get(), table.get()));
+
+  StyledString* new_styled_string = test::GetValueForConfig<StyledString>(
+      table.get(), "android:string/foo", test::ParseConfigOrDie("en-rXA"));
+  ASSERT_NE(nullptr, new_styled_string);
+
+  // "world" should be untranslated.
+  EXPECT_NE(std::string::npos, new_styled_string->value->str->find("world"));
+
+  String* new_string = test::GetValueForConfig<String>(table.get(), "android:string/bar",
+                                                       test::ParseConfigOrDie("en-rXA"));
+  ASSERT_NE(nullptr, new_string);
+
+  // "world" should be untranslated.
+  EXPECT_NE(std::string::npos, new_string->value->find("world"));
 }
 
 }  // namespace aapt
