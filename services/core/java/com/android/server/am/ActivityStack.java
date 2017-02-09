@@ -477,6 +477,8 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         mTmpRect2.setEmpty();
         mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2);
         postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
+        adjustFocusToNextFocusableStackLocked("reparent", true /* allowFocusSelf */);
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
     }
 
     /**
@@ -3235,8 +3237,18 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 mStackSupervisor.topRunningActivityLocked(), myReason);
     }
 
+    /** Find next proper focusable stack and make it focused. */
     private boolean adjustFocusToNextFocusableStackLocked(String reason) {
-        final ActivityStack stack = mStackSupervisor.getNextFocusableStackLocked(this);
+        return adjustFocusToNextFocusableStackLocked(reason, false /* allowFocusSelf */);
+    }
+
+    /**
+     * Find next proper focusable stack and make it focused.
+     * @param allowFocusSelf Is the focus allowed to remain on the same stack.
+     */
+    private boolean adjustFocusToNextFocusableStackLocked(String reason, boolean allowFocusSelf) {
+        final ActivityStack stack = mStackSupervisor.getNextFocusableStackLocked(
+                allowFocusSelf ? null : this);
         final String myReason = reason + " adjustFocusToNextFocusableStack";
         if (stack == null) {
             return false;
@@ -3246,7 +3258,8 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
         if (stack.isHomeOrRecentsStack() && (top == null || !top.visible)) {
             // If we will be focusing on the home stack next and its current top activity isn't
-            // visible, then use the task return to value to determine the home task to display next.
+            // visible, then use the task return to value to determine the home task to display
+            // next.
             return mStackSupervisor.moveHomeStackTaskToTop(reason);
         }
 

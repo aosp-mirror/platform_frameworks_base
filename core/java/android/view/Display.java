@@ -339,6 +339,21 @@ public final class Display {
     public static final int COLOR_MODE_DISPLAY_P3 = 9;
 
     /**
+     * Indicates that when display is removed, all its activities will be moved to the primary
+     * display and the topmost activity should become focused.
+     *
+     * @hide
+     */
+    public static final int REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY = 0;
+    /**
+     * Indicates that when display is removed, all its stacks and tasks will be removed, all
+     * activities will be destroyed according to the usual lifecycle.
+     *
+     * @hide
+     */
+    public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
+
+    /**
      * Internal method to create a display.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
@@ -767,6 +782,20 @@ public final class Display {
             updateDisplayInfoLocked();
             return mDisplayInfo.colorMode;
         }
+    }
+
+    /**
+     * @hide
+     * Get current remove mode of the display - what actions should be performed with the display's
+     * content when it is removed. Default behavior for public displays in this case is to move all
+     * activities to the primary display and make it focused. For private display - destroy all
+     * activities.
+     *
+     * @see #REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY
+     * @see #REMOVE_MODE_DESTROY_CONTENT
+     */
+    public int getRemoveMode() {
+        return mDisplayInfo.removeMode;
     }
 
     /**
