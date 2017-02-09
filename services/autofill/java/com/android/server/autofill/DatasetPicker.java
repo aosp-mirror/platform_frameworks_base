@@ -17,6 +17,7 @@ package com.android.server.autofill;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.autofill.Dataset;
 import android.view.View;
@@ -62,8 +63,10 @@ final class DatasetPicker extends ListView implements OnItemClickListener {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 final TextView textView = (TextView) super.getView(position, convertView, parent);
+                textView.setSingleLine();
+                textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setMinHeight(
-                    getDimen(com.android.internal.R.dimen.autofill_fill_item_height));
+                        getDimen(com.android.internal.R.dimen.autofill_fill_item_height));
                 return textView;
             }
         };
