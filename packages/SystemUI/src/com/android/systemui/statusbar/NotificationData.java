@@ -126,7 +126,8 @@ public class NotificationData {
         }
 
         public boolean cacheContentViews(Context ctx, Notification updatedNotification,
-                boolean isLowPriority, boolean useIncreasedCollapsedView) {
+                boolean isLowPriority, boolean useIncreasedCollapsedView,
+                boolean useIncreasedHeadsUp) {
             boolean applyInPlace = false;
             if (updatedNotification != null) {
                 final Notification.Builder updatedNotificationBuilder
@@ -136,7 +137,7 @@ public class NotificationData {
                 final RemoteViews newBigContentView = createBigContentView(
                         updatedNotificationBuilder, isLowPriority);
                 final RemoteViews newHeadsUpContentView =
-                        updatedNotificationBuilder.createHeadsUpContentView();
+                        updatedNotificationBuilder.createHeadsUpContentView(useIncreasedHeadsUp);
                 final RemoteViews newPublicNotification
                         = updatedNotificationBuilder.makePublicContentView();
                 final RemoteViews newAmbientNotification
@@ -165,7 +166,7 @@ public class NotificationData {
                 cachedContentView = createContentView(builder, isLowPriority,
                         useIncreasedCollapsedView);
                 cachedBigContentView = createBigContentView(builder, isLowPriority);
-                cachedHeadsUpContentView = builder.createHeadsUpContentView();
+                cachedHeadsUpContentView = builder.createHeadsUpContentView(useIncreasedHeadsUp);
                 cachedPublicContentView = builder.makePublicContentView();
                 cachedAmbientContentView = builder.makeAmbientNotification();
 

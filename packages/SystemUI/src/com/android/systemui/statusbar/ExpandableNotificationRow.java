@@ -76,6 +76,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mNotificationMinHeightLegacy;
     private int mMaxHeadsUpHeightLegacy;
     private int mMaxHeadsUpHeight;
+    private int mMaxHeadsUpHeightIncreased;
     private int mNotificationMinHeight;
     private int mNotificationMinHeightLarge;
     private int mNotificationMaxHeight;
@@ -209,6 +210,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsLowPriority;
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
+    private boolean mUseIncreasedHeadsUpHeight;
 
     @Override
     public boolean isGroupExpansionChanging() {
@@ -354,8 +356,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean headsUpCustom = layout.getHeadsUpChild() != null &&
                 layout.getHeadsUpChild().getId()
                         != com.android.internal.R.id.status_bar_latest_event_content;
-        int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
-                : mMaxHeadsUpHeight;
+        int headsUpheight;
+        if (headsUpCustom && beforeN) {
+            headsUpheight = mMaxHeadsUpHeightLegacy;
+        } else if (mUseIncreasedHeadsUpHeight && layout == mPrivateLayout) {
+            headsUpheight = mMaxHeadsUpHeightIncreased;
+        } else {
+            headsUpheight = mMaxHeadsUpHeight;
+        }
         layout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight,
                 mNotificationAmbientHeight);
     }
@@ -991,6 +999,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mUseIncreasedCollapsedHeight = use;
     }
 
+    public void setUseIncreasedHeadsUpHeight(boolean use) {
+        mUseIncreasedHeadsUpHeight = use;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -1005,12 +1017,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mNotificationMinHeightLegacy = getFontScaledHeight(R.dimen.notification_min_height_legacy);
         mNotificationMinHeight = getFontScaledHeight(R.dimen.notification_min_height);
         mNotificationMinHeightLarge = getFontScaledHeight(
-                R.dimen.notification_min_height_large);
+                R.dimen.notification_min_height_increased);
         mNotificationMaxHeight = getFontScaledHeight(R.dimen.notification_max_height);
         mNotificationAmbientHeight = getFontScaledHeight(R.dimen.notification_ambient_height);
         mMaxHeadsUpHeightLegacy = getFontScaledHeight(
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
+        mMaxHeadsUpHeightIncreased = getFontScaledHeight(
+                R.dimen.notification_max_heads_up_height_increased);
         mIncreasedPaddingBetweenElements = getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
         mIconTransformContentShiftNoIcon = getResources().getDimensionPixelSize(
