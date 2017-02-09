@@ -1252,11 +1252,20 @@ public class DeviceIdleController extends SystemService
     }
 
     public class LocalService {
+        // duration in milliseconds
+        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+                long duration, int userId, boolean sync, String reason) {
+            addPowerSaveTempWhitelistAppInternal(callingUid, packageName, duration,
+                    userId, sync, reason);
+        }
+
+        // duration in milliseconds
         public void addPowerSaveTempWhitelistAppDirect(int appId, long duration, boolean sync,
                 String reason) {
             addPowerSaveTempWhitelistAppDirectInternal(0, appId, duration, sync, reason);
         }
 
+        // duration in milliseconds
         public long getNotificationWhitelistDuration() {
             return mConstants.NOTIFICATION_WHITELIST_DURATION;
         }

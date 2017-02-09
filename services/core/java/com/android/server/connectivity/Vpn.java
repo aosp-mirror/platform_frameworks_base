@@ -85,6 +85,8 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
 
 import libcore.io.IoUtils;
@@ -114,6 +116,10 @@ public class Vpn {
     private static final String NETWORKTYPE = "VPN";
     private static final String TAG = "Vpn";
     private static final boolean LOGD = true;
+
+    // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
+    // the device idle whitelist during service launch and VPN bootstrap.
+    private static final long VPN_LAUNCH_IDLE_WHITELIST_DURATION = 60 * 1000;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -389,14 +395,26 @@ public class Vpn {
             }
         }
 
-        // Start the VPN service declared in the app's manifest.
-        Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
-        serviceIntent.setPackage(alwaysOnPackage);
+        // Tell the OS that background services in this app need to be allowed for
+        // a short time, so we can bootstrap the VPN service.
+        final long oldId = Binder.clearCallingIdentity();
         try {
-            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(mUserHandle)) != null;
-        } catch (RuntimeException e) {
-            Log.e(TAG, "VpnService " + serviceIntent + " failed to start", e);
-            return false;
+            DeviceIdleController.LocalService idleController =
+                    LocalServices.getService(DeviceIdleController.LocalService.class);
+            idleController.addPowerSaveTempWhitelistApp(Process.myUid(), alwaysOnPackage,
+                    VPN_LAUNCH_IDLE_WHITELIST_DURATION, mUserHandle, false, "vpn");
+
+            // Start the VPN service declared in the app's manifest.
+            Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
+            serviceIntent.setPackage(alwaysOnPackage);
+            try {
+                return mContext.startServiceAsUser(serviceIntent, UserHandle.of(mUserHandle)) != null;
+            } catch (RuntimeException e) {
+                Log.e(TAG, "VpnService " + serviceIntent + " failed to start", e);
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
     }
 
