@@ -22,8 +22,11 @@ import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
+import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -346,6 +349,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 mKeyguardDisableHandler.sendEmptyMessage(
                     KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED);
+            } else if (ACTION_USER_REMOVED.equals(action)) {
+                final int userId = intent.getIntExtra(EXTRA_USER_HANDLE, USER_NULL);
+                if (userId != USER_NULL) {
+                    synchronized (mWindowMap) {
+                        mScreenCaptureDisabled.remove(userId);
+                    }
+                }
             }
         }
     };
@@ -1021,9 +1031,11 @@ public class WindowManagerService extends IWindowManager.Stub
         setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
 
-        // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
+        // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        // Listen to user removal broadcasts so that we can remove the user-specific data.
+        filter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mSettingsObserver = new SettingsObserver();
