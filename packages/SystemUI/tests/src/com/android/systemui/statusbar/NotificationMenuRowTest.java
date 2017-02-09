@@ -14,12 +14,18 @@
 
 package com.android.systemui.statusbar;
 
+import com.android.systemui.SysUIRunner;
+import com.android.systemui.utils.TestableLooper;
+import com.android.systemui.utils.TestableLooper.RunWithLooper;
 import com.android.systemui.utils.ViewUtils;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SysUIRunner.class)
+@RunWithLooper
 public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Before
@@ -31,6 +37,8 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     public void testAttachDetach() {
         NotificationMenuRow row = new NotificationMenuRow(mContext);
         ViewUtils.attachView(row);
+        TestableLooper.get(this).processAllMessages();
         ViewUtils.detachView(row);
+        TestableLooper.get(this).processAllMessages();
     }
 }

@@ -34,13 +34,11 @@ public class ViewUtils {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> InstrumentationRegistry.getContext()
                 .getSystemService(WindowManager.class).addView(view, lp));
-        SysuiTestCase.waitForIdleSync(handler);
     }
 
     public static void detachView(View view) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> InstrumentationRegistry.getContext()
                 .getSystemService(WindowManager.class).removeView(view));
-        SysuiTestCase.waitForIdleSync(handler);
     }
 }

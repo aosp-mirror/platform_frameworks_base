@@ -24,13 +24,18 @@ import android.view.WindowManager;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.FragmentTestCase;
+import com.android.systemui.SysUIRunner;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.utils.TestableLooper.RunWithLooper;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(SysUIRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class NavigationBarFragmentTest extends FragmentTestCase {
 
     public NavigationBarFragmentTest() {
@@ -56,7 +61,8 @@ public class NavigationBarFragmentTest extends FragmentTestCase {
     public void testHomeLongPress() {
         NavigationBarFragment navigationBarFragment = (NavigationBarFragment) mFragment;
 
-        postAndWait(() -> mFragments.dispatchResume());
+        mFragments.dispatchResume();
+        processAllMessages();
         navigationBarFragment.onHomeLongClick(navigationBarFragment.getView());
     }
 
