@@ -79,6 +79,12 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsReader = new MetricsReader();
         mMetricsReader.checkpoint(); // clear out old logs
+        try {
+            // pause so that no new events arrive in the rest of this millisecond.
+            Thread.sleep(2);
+        } catch (InterruptedException e) {
+            // pass
+        }
     }
 
     @Test
