@@ -718,6 +718,15 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         return null;
     }
 
+    /**
+     * Returns the list of available scorer apps. The list will be empty if there are
+     * no valid scorers.
+     */
+    @Override
+    public List<NetworkScorerAppData> getAllValidScorers() {
+        return mNetworkScorerAppManager.getAllValidScorers();
+    }
+
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
