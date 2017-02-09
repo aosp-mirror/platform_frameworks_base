@@ -16,12 +16,20 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.AutoFillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
+
 import android.app.ActivityManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
+import com.android.internal.os.IResultReceiver;
+
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public final class AutoFillManagerServiceShellCommand extends ShellCommand {
 
@@ -37,17 +45,16 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
             return handleDefaultCommands(cmd);
         }
         final PrintWriter pw = getOutPrintWriter();
-        try {
-            switch (cmd) {
-                case "save":
-                    return requestSave();
-                default:
-                    return handleDefaultCommands(cmd);
-            }
-        } catch (RemoteException e) {
-            pw.println("error: " + e);
+        switch (cmd) {
+            case "save":
+                return requestSave();
+            case "list":
+                return requestList(pw);
+            case "reset":
+                return requestReset();
+            default:
+                return handleDefaultCommands(cmd);
         }
-        return -1;
     }
 
     @Override
@@ -57,22 +64,79 @@ public final class AutoFillManagerServiceShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("    Prints this help text.");
             pw.println("");
+            pw.println("  list sessions [--user USER_ID]");
+            pw.println("    List all pending sessions.");
+            pw.println("");
             pw.println("  save [--user USER_ID]");
             pw.println("    Request provider to save contents of the top activity. ");
+            pw.println("");
+            pw.println("  reset");
+            pw.println("    Reset all pending sessions and cached service connections.");
             pw.println("");
         }
     }
 
-    private int requestSave() throws RemoteException {
-        final int userId = getUserIdFromArgs();
+    private int requestSave() {
+        final int userId = getUserIdFromArgsOrCurrentUser();
         mService.requestSaveForUser(userId);
         return 0;
     }
 
-    private int getUserIdFromArgs() {
+    private int requestList(PrintWriter pw) {
+        final String type = getNextArgRequired();
+        if (!type.equals("sessions")) {
+            pw.println("Error: invalid list type");
+            return -1;
+
+        }
+        final int userId = getUserIdFromArgsOrAllUsers();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final IResultReceiver receiver = new IResultReceiver.Stub() {
+
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                final ArrayList<String> sessions = resultData
+                        .getStringArrayList(RECEIVER_BUNDLE_EXTRA_SESSIONS);
+
+                for (String session : sessions) {
+                    pw.println(session);
+                }
+                latch.countDown();
+            }
+        };
+
+        mService.listSessions(userId, receiver);
+
+        try {
+            final boolean received = latch.await(5, TimeUnit.SECONDS);
+            if (!received) {
+                pw.println("Timed out after 5 seconds");
+                return -1;
+            }
+        } catch (InterruptedException e) {
+            pw.println("System call interrupted");
+            Thread.currentThread().interrupt();
+            return -1;
+        }
+        return 0;
+    }
+
+    private int requestReset() {
+        mService.reset();
+        return 0;
+    }
+
+    private int getUserIdFromArgsOrCurrentUser() {
         if ("--user".equals(getNextArg())) {
             return UserHandle.parseUserArg(getNextArgRequired());
         }
         return ActivityManager.getCurrentUser();
+    }
+
+    private int getUserIdFromArgsOrAllUsers() {
+        if ("--user".equals(getNextArg())) {
+            return UserHandle.parseUserArg(getNextArgRequired());
+        }
+        return UserHandle.USER_ALL;
     }
 }
