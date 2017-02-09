@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"മടങ്ങുക"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ഹോം"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"മെനു"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"കാഴ്ച"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"തിരയൽ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ക്യാമറ"</string>
@@ -671,8 +673,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"വികസിപ്പിക്കുക"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ചെറുതാക്കുക‍"</string>
-    <!-- no translation found for pip_phone_close (8416647892889710330) -->
-    <skip />
+    <string name="pip_phone_close" msgid="8416647892889710330">"അടയ്‌ക്കുക"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ഫോൺ ചൂടായിക്കൊണ്ടിരിക്കുന്നു"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"നിങ്ങളുടെ ഫോൺ സ്വയമേവ തണുക്കാൻ ശ്രമിക്കും. നിങ്ങൾക്ക് അപ്പോഴും ഫോൺ ഉപയോഗിക്കാമെങ്കിലും പ്രവർത്തനം മന്ദഗതിയിലായിരിക്കും.\n\nതണുത്തുകഴിഞ്ഞാൽ, ഫോൺ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കും."</string>
@@ -683,7 +684,6 @@
     <string name="lockscreen_unlock" msgid="4934466194763269051">"പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"സ്‌ക്രീൻഷോട്ടുകൾ"</string>
-    <!-- no translation found for notification_channel_general (4525309436693914482) -->
-    <skip />
+    <string name="notification_channel_general" msgid="4525309436693914482">"പൊതുവായ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"സ്റ്റോറേജ്"</string>
 </resources>

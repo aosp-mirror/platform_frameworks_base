@@ -83,6 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Voltar"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página inicial"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
+    <!-- no translation found for accessibility_accessibility_button (7601252764577607915) -->
+    <skip />
     <string name="accessibility_recent" msgid="5208608566793607626">"Visão geral"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Pesquisar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Câmera"</string>
@@ -673,8 +675,7 @@
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expandir"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
-    <!-- no translation found for pip_phone_close (8416647892889710330) -->
-    <skip />
+    <string name="pip_phone_close" msgid="8416647892889710330">"Fechar"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"O smartphone está esquentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Alguns recursos ficam limitados enquanto o smartphone é resfriado"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
