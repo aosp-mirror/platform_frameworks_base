@@ -41,7 +41,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.annotation.WorkerThread;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -211,7 +210,7 @@ public class WifiTracker {
 
         mNetworkScoreManager = networkScoreManager;
 
-        mScoreCache = new WifiNetworkScoreCache(context, new CacheListener(mWorkHandler) {
+        mScoreCache = new WifiNetworkScoreCache(context, new CacheListener(mMainHandler) {
             @Override
             public void networkCacheUpdated(List<ScoredNetwork> networks) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -282,12 +281,7 @@ public class WifiTracker {
      * then forceUpdate() must be called to populate getAccessPoints().
      */
     public void startTracking() {
-        mWorkHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                registerScoreCache();
-            }
-        });
+        registerScoreCache();
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.NETWORK_SCORING_UI_ENABLED),
@@ -305,7 +299,6 @@ public class WifiTracker {
         }
     }
 
-    @WorkerThread
     private void registerScoreCache() {
         mNetworkScoreManager.registerNetworkScoreCache(
                 NetworkKey.TYPE_WIFI,
@@ -341,20 +334,17 @@ public class WifiTracker {
         }
         pauseScanning();
 
-        mWorkHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                unregisterAndClearScoreCache();
-            }
-        });
+        unregisterAndClearScoreCache();
+
         mContext.getContentResolver().unregisterContentObserver(mObserver);
     }
 
-    @WorkerThread
     private void unregisterAndClearScoreCache() {
-        mRequestedScores.clear();
         mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, mScoreCache);
         mScoreCache.clearScores();
+
+        // Clear the scores on the work handler to avoid concurrent modification exceptions
+        mWorkHandler.post(() -> mRequestedScores.clear());
     }
 
     /**

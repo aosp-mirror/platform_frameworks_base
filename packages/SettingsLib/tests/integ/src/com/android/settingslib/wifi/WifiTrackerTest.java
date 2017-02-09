@@ -72,7 +72,7 @@ import java.util.concurrent.TimeUnit;
 public class WifiTrackerTest {
 
     private static final String TAG = "WifiTrackerTest";
-    private static final int LATCH_TIMEOUT = 2000;
+    private static final int LATCH_TIMEOUT = 4000;
 
     private static final String SSID_1 = "ssid1";
     private static final String BSSID_1 = "00:00:00:00:00:00";
@@ -226,7 +226,7 @@ public class WifiTrackerTest {
 
         mAccessPointsChangedLatch = new CountDownLatch(1);
         sendScanResultsAndProcess(tracker);
-        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
         return tracker;
     }
@@ -242,7 +242,8 @@ public class WifiTrackerTest {
                     true,
                     mockWifiManager,
                     mockConnectivityManager,
-                        mockNetworkScoreManager, mMainLooper
+                    mockNetworkScoreManager,
+                    mMainLooper
                 );
 
         return tracker;
@@ -257,7 +258,7 @@ public class WifiTrackerTest {
                 latch.countDown();
             }
         });
-        latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     private void sendScanResultsAndProcess(WifiTracker tracker) throws InterruptedException {
@@ -265,7 +266,8 @@ public class WifiTrackerTest {
         Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         tracker.mReceiver.onReceive(mContext, i);
 
-        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue("Latch timed out",
+                mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     private void updateScores() {
@@ -348,7 +350,7 @@ public class WifiTrackerTest {
         // Test unregister
         tracker.stopTracking();
 
-        latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
         verify(mockNetworkScoreManager)
                 .unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, scoreCache);
     }
@@ -359,12 +361,15 @@ public class WifiTrackerTest {
         WifiTracker tracker =  createTrackerAndInjectInitialScanResults();
 
         tracker.stopTracking();
+        android.util.Log.d("WifiTrackerTest", "Clearing previously captured requested keys");
         mRequestedKeys.clear();
 
-        mRequestScoresLatch = new CountDownLatch(2);
+        mRequestScoresLatch = new CountDownLatch(1);
         startTracking(tracker);
-        mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue("Latch timed out",
+                mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
+        android.util.Log.d("WifiTrackerTest", "requested keys: " + mRequestedKeys);
         assertTrue(mRequestedKeys.contains(NETWORK_KEY_1));
         assertTrue(mRequestedKeys.contains(NETWORK_KEY_2));
     }
@@ -379,6 +384,8 @@ public class WifiTrackerTest {
     }
 
     private void updateScoresAndWaitForAccessPointsChangedCallback() throws InterruptedException {
+        // Updating scores can happen together or one after the other, so the latch countdown is set
+        // to 2.
         mAccessPointsChangedLatch = new CountDownLatch(2);
         updateScores();
         mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -462,6 +469,8 @@ public class WifiTrackerTest {
 
     @Test
     public void scoresShouldBeRequestedForNewScanResultOnly()  throws InterruptedException {
+        // Scores can be requested together or serially depending on how the scan results are
+        // processed.
         mRequestScoresLatch = new CountDownLatch(2);
         WifiTracker tracker = createTrackerAndInjectInitialScanResults();
         mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -484,9 +493,24 @@ public class WifiTrackerTest {
 
         mRequestScoresLatch = new CountDownLatch(1);
         sendScanResultsAndProcess(tracker);
-        mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
         assertEquals(1, mRequestedKeys.size());
         assertTrue(mRequestedKeys.contains(new NetworkKey(new WifiKey('"' + ssid + '"', bssid))));
+    }
+
+    @Test
+    public void scoreCacheAndListenerShouldBeUnregisteredWhenStopTrackingIsCalled() throws Exception
+    {
+        WifiTracker tracker =  createTrackerAndInjectInitialScanResults();
+        WifiNetworkScoreCache cache = mScoreCacheCaptor.getValue();
+
+        tracker.stopTracking();
+        verify(mockNetworkScoreManager).unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI, cache);
+
+        // Verify listener is unregistered so updating a score does not throw an error by posting
+        // a message to the dead work handler
+        mWorkerThread.quit();
+        updateScores();
     }
 }
