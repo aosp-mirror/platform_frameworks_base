@@ -38,7 +38,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
+import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;

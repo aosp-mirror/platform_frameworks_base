@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import com.android.settingslib.graph.BatteryMeterDrawableBase;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
@@ -41,17 +42,18 @@ import org.junit.runner.RunWith;
 public class BatteryMeterDrawableTest extends SysuiTestCase {
 
     private Resources mResources;
-    private BatteryMeterDrawable mBatteryMeter;
+    private BatteryMeterDrawableBase mBatteryMeter;
 
     @Before
     public void setUp() throws Exception {
         mResources = mContext.getResources();
-        mBatteryMeter = new BatteryMeterDrawable(mContext, 0);
+        mBatteryMeter = new BatteryMeterDrawableBase(mContext, 0);
     }
 
     @Test
     public void testDrawImageButNoTextIfPluggedIn() {
-        mBatteryMeter.onBatteryLevelChanged(0, true, true);
+        mBatteryMeter.setBatteryLevel(0);
+        mBatteryMeter.setPluggedIn(true);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         verify(canvas, atLeastOnce()).drawPath(any(), any());
@@ -60,7 +62,8 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
 
     @Test
     public void testDrawTextIfNotPluggedIn() {
-        mBatteryMeter.onBatteryLevelChanged(0, false, false);
+        mBatteryMeter.setBatteryLevel(0);
+        mBatteryMeter.setPluggedIn(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         verify(canvas, times(1)).drawText(anyString(), anyFloat(), anyFloat(), any());
@@ -68,8 +71,9 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
 
     @Test
     public void testDrawNoTextIfPowerSaveEnabled() {
-        mBatteryMeter.onBatteryLevelChanged(0, false, false);
-        mBatteryMeter.onPowerSaveChanged(true);
+        mBatteryMeter.setBatteryLevel(0);
+        mBatteryMeter.setPluggedIn(false);
+        mBatteryMeter.setPowerSave(true);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         verify(canvas, never()).drawText(anyString(), anyFloat(), anyFloat(), any());
@@ -79,7 +83,8 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     public void testDrawTextWarningAtCriticalLevel() {
         int criticalLevel = mResources.getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
-        mBatteryMeter.onBatteryLevelChanged(criticalLevel, false, false);
+        mBatteryMeter.setBatteryLevel(criticalLevel);
+        mBatteryMeter.setPluggedIn(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         String warningString = mResources.getString(R.string.battery_meter_very_low_overlay_symbol);
@@ -90,7 +95,8 @@ public class BatteryMeterDrawableTest extends SysuiTestCase {
     public void testDrawTextNoWarningAboveCriticalLevel() {
         int criticalLevel = mResources.getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
-        mBatteryMeter.onBatteryLevelChanged(criticalLevel + 1, false, false);
+        mBatteryMeter.setBatteryLevel(criticalLevel + 1);
+        mBatteryMeter.setPluggedIn(false);
         final Canvas canvas = mock(Canvas.class);
         mBatteryMeter.draw(canvas);
         String warningString = mResources.getString(R.string.battery_meter_very_low_overlay_symbol);

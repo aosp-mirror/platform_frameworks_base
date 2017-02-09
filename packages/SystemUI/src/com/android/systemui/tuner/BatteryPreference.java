@@ -25,7 +25,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
-import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
+import static com.android.systemui.BatteryMeterView.SHOW_PERCENT_SETTING;
 
 public class BatteryPreference extends DropDownPreference implements TunerService.Tunable {
 
