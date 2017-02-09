@@ -172,12 +172,10 @@ public class MainInteractionSession extends VoiceInteractionSession
     @Override
     public void onHandleAssist(Bundle data, AssistStructure structure, AssistContent content) {
         mAssistStructure = structure;
-        if (mAssistStructure != null) {
-            if (mAssistVisualizer != null) {
+        if (mAssistVisualizer != null) {
+            if (mAssistStructure != null) {
                 mAssistVisualizer.setAssistStructure(mAssistStructure);
-            }
-        } else {
-            if (mAssistVisualizer != null) {
+            } else {
                 mAssistVisualizer.clearAssistData();
             }
         }
@@ -207,19 +205,24 @@ public class MainInteractionSession extends VoiceInteractionSession
 
     @Override
     public void onHandleScreenshot(Bitmap screenshot) {
-        if (screenshot != null) {
-            mScreenshot.setImageBitmap(screenshot);
-            mScreenshot.setAdjustViewBounds(true);
-            mScreenshot.setMaxWidth(screenshot.getWidth() / 3);
-            mScreenshot.setMaxHeight(screenshot.getHeight() / 3);
-            mFullScreenshot.setImageBitmap(screenshot);
-        } else {
-            mScreenshot.setImageDrawable(null);
-            mFullScreenshot.setImageDrawable(null);
+        if (mScreenshot != null) {
+            if (screenshot != null) {
+                mScreenshot.setImageBitmap(screenshot);
+                mScreenshot.setAdjustViewBounds(true);
+                mScreenshot.setMaxWidth(screenshot.getWidth() / 3);
+                mScreenshot.setMaxHeight(screenshot.getHeight() / 3);
+                mFullScreenshot.setImageBitmap(screenshot);
+            } else {
+                mScreenshot.setImageDrawable(null);
+                mFullScreenshot.setImageDrawable(null);
+            }
         }
     }
 
     void updateState() {
+        if (mTopContent == null) {
+            return;
+        }
         if (mState == STATE_IDLE) {
             mTopContent.setVisibility(View.VISIBLE);
             mBottomContent.setVisibility(View.GONE);

@@ -135,6 +135,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     FrameLayout mContentFrame;
     SoftInputWindow mWindow;
 
+    boolean mUiEnabled = true;
     boolean mInitialized;
     boolean mWindowAdded;
     boolean mWindowVisible;
@@ -1001,35 +1002,40 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         try {
             mInShowWindow = true;
+            onPrepareShow(args, flags);
             if (!mWindowVisible) {
-                if (!mWindowAdded) {
-                    mWindowAdded = true;
-                    View v = onCreateContentView();
-                    if (v != null) {
-                        setContentView(v);
-                    }
-                }
+                ensureWindowAdded();
             }
             onShow(args, flags);
             if (!mWindowVisible) {
                 mWindowVisible = true;
-                mWindow.show();
+                if (mUiEnabled) {
+                    mWindow.show();
+                }
             }
             if (showCallback != null) {
-                mRootView.invalidate();
-                mRootView.getViewTreeObserver().addOnPreDrawListener(
-                        new ViewTreeObserver.OnPreDrawListener() {
-                            @Override
-                            public boolean onPreDraw() {
-                                mRootView.getViewTreeObserver().removeOnPreDrawListener(this);
-                                try {
-                                    showCallback.onShown();
-                                } catch (RemoteException e) {
-                                    Log.w(TAG, "Error calling onShown", e);
+                if (mUiEnabled) {
+                    mRootView.invalidate();
+                    mRootView.getViewTreeObserver().addOnPreDrawListener(
+                            new ViewTreeObserver.OnPreDrawListener() {
+                                @Override
+                                public boolean onPreDraw() {
+                                    mRootView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                    try {
+                                        showCallback.onShown();
+                                    } catch (RemoteException e) {
+                                        Log.w(TAG, "Error calling onShown", e);
+                                    }
+                                    return true;
                                 }
-                                return true;
-                            }
-                        });
+                            });
+                } else {
+                    try {
+                        showCallback.onShown();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Error calling onShown", e);
+                    }
+                }
             }
         } finally {
             mWindowWasVisible = true;
@@ -1039,7 +1045,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     void doHide() {
         if (mWindowVisible) {
-            mWindow.hide();
+            ensureWindowHidden();
             mWindowVisible = false;
             onHide();
         }
@@ -1058,19 +1064,56 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-    void initViews() {
+    void ensureWindowCreated() {
+        if (mInitialized) {
+            return;
+        }
+
+        if (!mUiEnabled) {
+            throw new IllegalStateException("setUiEnabled is false");
+        }
+
         mInitialized = true;
+        mInflater = (LayoutInflater)mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
+                mCallbacks, this, mDispatcherState,
+                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
+        mWindow.getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
 
         mThemeAttrs = mContext.obtainStyledAttributes(android.R.styleable.VoiceInteractionSession);
         mRootView = mInflater.inflate(
                 com.android.internal.R.layout.voice_interaction_session, null);
         mRootView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         mWindow.setContentView(mRootView);
         mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
 
         mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
+
+        mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
+        mWindow.setToken(mToken);
+    }
+
+    void ensureWindowAdded() {
+        if (mUiEnabled && !mWindowAdded) {
+            mWindowAdded = true;
+            ensureWindowCreated();
+            View v = onCreateContentView();
+            if (v != null) {
+                setContentView(v);
+            }
+        }
+    }
+
+    void ensureWindowHidden() {
+        if (mWindow != null) {
+            mWindow.hide();
+        }
     }
 
     /**
@@ -1147,6 +1190,24 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         try {
             mSystemService.hideSessionFromSession(mToken);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Control whether the UI layer for this session is enabled.  It is enabled by default.
+     * If set to false, you will not be able to provide a UI through {@link #onCreateContentView()}.
+     */
+    public void setUiEnabled(boolean enabled) {
+        if (mUiEnabled != enabled) {
+            mUiEnabled = enabled;
+            if (mWindowVisible) {
+                if (enabled) {
+                    ensureWindowAdded();
+                    mWindow.show();
+                } else {
+                    ensureWindowHidden();
+                }
+            }
         }
     }
 
@@ -1242,6 +1303,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * Convenience for inflating views.
      */
     public LayoutInflater getLayoutInflater() {
+        ensureWindowCreated();
         return mInflater;
     }
 
@@ -1249,6 +1311,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * Retrieve the window being used to show the session's UI.
      */
     public Dialog getWindow() {
+        ensureWindowCreated();
         return mWindow;
     }
 
@@ -1278,18 +1341,17 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     private void doOnCreate() {
         mTheme = mTheme != 0 ? mTheme
                 : com.android.internal.R.style.Theme_DeviceDefault_VoiceInteractionSession;
-        mInflater = (LayoutInflater)mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-        mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
-                mCallbacks, this, mDispatcherState,
-                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
-        mWindow.getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
-                WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
-        initViews();
-        mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
-        mWindow.setToken(mToken);
+    }
+
+    /**
+     * Called prior to {@link #onShow} before any UI setup has occurred.  Not generally useful.
+     *
+     * @param args The arguments that were supplied to
+     * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     * @param showFlags The show flags originally provided to
+     * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     */
+    public void onPrepareShow(Bundle args, int showFlags) {
     }
 
     /**
@@ -1327,6 +1389,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     public void setContentView(View view) {
+        ensureWindowCreated();
         mContentFrame.removeAllViews();
         mContentFrame.addView(view, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -1623,7 +1686,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.print(prefix); writer.print("mToken="); writer.println(mToken);
         writer.print(prefix); writer.print("mTheme=#"); writer.println(Integer.toHexString(mTheme));
-        writer.print(prefix); writer.print("mInitialized="); writer.println(mInitialized);
+        writer.print(prefix); writer.print("mUiEnabled="); writer.println(mUiEnabled);
+        writer.print(" mInitialized="); writer.println(mInitialized);
         writer.print(prefix); writer.print("mWindowAdded="); writer.print(mWindowAdded);
         writer.print(" mWindowVisible="); writer.println(mWindowVisible);
         writer.print(prefix); writer.print("mWindowWasVisible="); writer.print(mWindowWasVisible);
