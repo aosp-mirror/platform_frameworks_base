@@ -381,12 +381,7 @@ public final class KeyboardShortcuts {
                         if (appShortcuts != null) {
                             result.add(appShortcuts);
                         }
-                        synchronized (sLock) {
-                            // showKeyboardShortcutsDialog only if it has not been dismissed already
-                            if (sInstance != null) {
-                                showKeyboardShortcutsDialog(result);
-                            }
-                        }
+                        showKeyboardShortcutsDialog(result);
                     }
                 }, deviceId);
     }
@@ -585,7 +580,12 @@ public final class KeyboardShortcuts {
         mKeyboardShortcutsDialog.setCanceledOnTouchOutside(true);
         Window keyboardShortcutsWindow = mKeyboardShortcutsDialog.getWindow();
         keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
-        mKeyboardShortcutsDialog.show();
+        synchronized (sLock) {
+            // showKeyboardShortcutsDialog only if it has not been dismissed already
+            if (sInstance != null) {
+                mKeyboardShortcutsDialog.show();
+            }
+        }
     }
 
     private void populateKeyboardShortcuts(LinearLayout keyboardShortcutsLayout,
