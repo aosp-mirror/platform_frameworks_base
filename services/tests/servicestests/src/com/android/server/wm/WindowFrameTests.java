@@ -338,9 +338,12 @@ public class WindowFrameTests {
 
         w.mDockedResizingForTest = true;
         w.calculatePolicyCrop(policyCrop);
-        // But if we are docked resizing it won't be.
+        // But if we are docked resizing it won't be, however we will still be
+        // shrunk to the decor frame and the display.
         final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
-        assertRect(policyCrop, 0, 0, 1000, 1000);
+        assertRect(policyCrop, 0, 0,
+                Math.min(pf.width(), displayInfo.logicalWidth),
+                Math.min(pf.height(), displayInfo.logicalHeight));
     }
 
     private WindowStateWithTask createWindow(Task task, int width, int height) {
