@@ -1091,9 +1091,9 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"සම්බන්ධතාවයට ඉඩ දෙන්නද?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"යෙදුම් %1$s ක් WiFi ජාලය %2$s වෙත සම්බන්ධ කිරීමට කැමතියි"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"යෙදුම"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ඍජු Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ඍජු Wi-Fi ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ඍජු Wi-Fi ආරම්භ කළ නොහැක."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct ආරම්භ කළ නොහැක."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ක්‍රියාත්මකයි"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"සැකසීම් සඳහා තට්ටු කරන්න"</string>
     <string name="accept" msgid="1645267259272829559">"පිළිගන්න"</string>
@@ -1695,6 +1695,19 @@
     <string name="app_category_maps" msgid="5878491404538024367">"සිතියම් සහ සංචලනය"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ඵලදායිතාව"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"උපාංග ගබඩාව"</string>
-    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB නිදොස්කරණය"</string>
+    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
+    <skip />
+    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
+    <skip />
+    <!-- no translation found for time_picker_header_text (143536825321922567) -->
+    <skip />
+    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
+    <skip />
+    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
+    <skip />
+    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
+    <skip />
+    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
     <skip />
 </resources>
