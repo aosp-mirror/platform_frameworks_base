@@ -42,8 +42,9 @@ import java.util.TreeMap;
 /**
  * InputMethodSubtypeSwitchingController controls the switching behavior of the subtypes.
  * <p>
- * This class is designed to be used from and only from {@link InputMethodManagerService} by using
- * {@link InputMethodManagerService#mMethodMap} as a global lock.
+ * This class is designed to be used from and only from
+ * {@link com.android.server.InputMethodManagerService} by using
+ * {@link com.android.server.InputMethodManagerService#mMethodMap} as a global lock.
  * </p>
  */
 public class InputMethodSubtypeSwitchingController {
@@ -106,21 +107,39 @@ public class InputMethodSubtypeSwitchingController {
             return c1.toString().compareTo(c2.toString());
         }
 
+        /**
+         * Compares this object with the specified object for order. The fields of this class will
+         * be compared in the following order.
+         * <ol>
+         *   <li>{@link #mImeName}</li>
+         *   <li>{@link #mIsSystemLocale}</li>
+         *   <li>{@link #mIsSystemLanguage}</li>
+         *   <li>{@link #mSubtypeName}</li>
+         * </ol>
+         * Note: this class has a natural ordering that is inconsistent with {@link #equals(Object).
+         * This method doesn't compare {@link #mSubtypeId} but {@link #equals(Object)} does.
+         *
+         * @param other the object to be compared.
+         * @return a negative integer, zero, or positive integer as this object is less than, equal
+         *         to, or greater than the specified <code>other</code> object.
+         */
         @Override
         public int compareTo(ImeSubtypeListItem other) {
             int result = compareNullableCharSequences(mImeName, other.mImeName);
             if (result != 0) {
                 return result;
             }
-            result = compareNullableCharSequences(mSubtypeName, other.mSubtypeName);
-            if (result != 0) {
-                return result;
-            }
+            // Subtype that has the same locale of the system's has higher priority.
             result = (mIsSystemLocale ? -1 : 0) - (other.mIsSystemLocale ? -1 : 0);
             if (result != 0) {
                 return result;
             }
-            return (mIsSystemLanguage ? -1 : 0) - (other.mIsSystemLanguage ? -1 : 0);
+            // Subtype that has the same language of the system's has higher priority.
+            result = (mIsSystemLanguage ? -1 : 0) - (other.mIsSystemLanguage ? -1 : 0);
+            if (result != 0) {
+                return result;
+            }
+            return compareNullableCharSequences(mSubtypeName, other.mSubtypeName);
         }
 
         @Override
@@ -141,13 +160,7 @@ public class InputMethodSubtypeSwitchingController {
             }
             if (o instanceof ImeSubtypeListItem) {
                 final ImeSubtypeListItem that = (ImeSubtypeListItem)o;
-                if (!Objects.equals(this.mImi, that.mImi)) {
-                    return false;
-                }
-                if (this.mSubtypeId != that.mSubtypeId) {
-                    return false;
-                }
-                return true;
+                return Objects.equals(this.mImi, that.mImi) && this.mSubtypeId == that.mSubtypeId;
             }
             return false;
         }
