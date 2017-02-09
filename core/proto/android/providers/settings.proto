@@ -328,6 +328,7 @@ message GlobalSettingsProto {
     SettingProto enable_cellular_on_boot = 283;
     SettingProto max_notification_enqueue_rate = 284;
     SettingProto cell_on = 285;
+    SettingProto network_recommendations_package = 286;
 }
 
 message SecureSettingsProto {

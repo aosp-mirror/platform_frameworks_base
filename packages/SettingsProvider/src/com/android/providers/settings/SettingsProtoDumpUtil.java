@@ -495,6 +495,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
                 GlobalSettingsProto.NETWORK_RECOMMENDATIONS_ENABLED);
         dumpSetting(s, p,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
+                GlobalSettingsProto.NETWORK_RECOMMENDATIONS_PACKAGE);
+        dumpSetting(s, p,
                 Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
                 GlobalSettingsProto.BLE_SCAN_ALWAYS_AVAILABLE);
         dumpSetting(s, p,

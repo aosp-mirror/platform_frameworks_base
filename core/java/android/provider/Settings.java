@@ -48,6 +48,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkScoreManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -8218,6 +8219,19 @@ public final class Settings {
         @SystemApi
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
+
+        /**
+         * Which package name to use for network recommendations. If null, network recommendations
+         * will neither be requested nor accepted.
+         *
+         * Use {@link NetworkScoreManager#getActiveScorerPackage()} to read this value and
+         * {@link NetworkScoreManager#setActiveScorer(String)} to write it.
+         *
+         * Type: string - package name
+         * @hide
+         */
+        public static final String NETWORK_RECOMMENDATIONS_PACKAGE =
+                "network_recommendations_package";
 
         /**
          * Value to specify if the Wi-Fi Framework should defer to
