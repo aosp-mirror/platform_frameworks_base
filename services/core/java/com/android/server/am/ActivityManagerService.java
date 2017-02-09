@@ -8115,8 +8115,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // of service-launch policy, allow those callers to proceed unrestricted.
     int appServicesRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Persistent app?  NB: expects that persistent uids are always active.
-        final UidRecord uidRec = mActiveUids.get(uid);
-        if (uidRec != null && uidRec.persistent) {
+        final UidRecord appIdRec = mActiveUids.get(UserHandle.getAppId(uid));
+        if (appIdRec != null && appIdRec.persistent) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
                         + " is persistent; not restricted in background");
