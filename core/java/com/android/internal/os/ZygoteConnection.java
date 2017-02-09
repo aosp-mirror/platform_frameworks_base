@@ -789,7 +789,7 @@ class ZygoteConnection {
                     VMRuntime.getCurrentInstructionSet(),
                     pipeFd, parsedArgs.remainingArgs);
         } else {
-            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
+            ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion,
                     parsedArgs.remainingArgs, null /* classLoader */);
         }
     }
