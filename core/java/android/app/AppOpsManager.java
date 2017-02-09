@@ -247,8 +247,10 @@ public class AppOpsManager {
     public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
     /** @hide Enter picture-in-picture when hidden. */
     public static final int OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE = 67;
+    /** @hide Instant app start foreground service. */
+    public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
     /** @hide */
-    public static final int _NUM_OP = 68;
+    public static final int _NUM_OP = 69;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -351,6 +353,9 @@ public class AppOpsManager {
             = "android:get_accounts";
     public static final String OPSTR_READ_PHONE_NUMBER
             = "android:read_phone_number";
+    /** @hide */
+    public static final String OPSTR_INSTANT_APP_START_FOREGROUND
+            = "android:instant_app_start_foreground";
 
     private static final int[] RUNTIME_PERMISSIONS_OPS = {
             // Contacts
@@ -467,6 +472,7 @@ public class AppOpsManager {
             OP_READ_PHONE_NUMBER,
             OP_REQUEST_INSTALL_PACKAGES,
             OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE,
+            OP_INSTANT_APP_START_FOREGROUND,
     };
 
     /**
@@ -542,6 +548,7 @@ public class AppOpsManager {
             OPSTR_READ_PHONE_NUMBER,
             null, // OP_REQUEST_INSTALL_PACKAGES
             null,
+            OPSTR_INSTANT_APP_START_FOREGROUND,
     };
 
     /**
@@ -617,6 +624,7 @@ public class AppOpsManager {
             "READ_PHONE_NUMBER",
             "REQUEST_INSTALL_PACKAGES",
             "OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE",
+            "INSTANT_APP_START_FOREGROUND",
     };
 
     /**
@@ -692,6 +700,7 @@ public class AppOpsManager {
             Manifest.permission.READ_PHONE_NUMBER,
             Manifest.permission.REQUEST_INSTALL_PACKAGES,
             null, // no permission for entering picture-in-picture on hide
+            Manifest.permission.INSTANT_APP_FOREGROUND_SERVICE,
     };
 
     /**
@@ -768,6 +777,7 @@ public class AppOpsManager {
             null, // READ_PHONE_NUMBER
             null, // REQUEST_INSTALL_PACKAGES
             null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            null, // INSTANT_APP_START_FOREGROUND
     };
 
     /**
@@ -843,6 +853,7 @@ public class AppOpsManager {
             false, // READ_PHONE_NUMBER
             false, // REQUEST_INSTALL_PACKAGES
             false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            false, // INSTANT_APP_START_FOREGROUND
     };
 
     /**
@@ -917,6 +928,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_DEFAULT, // OP_REQUEST_INSTALL_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            AppOpsManager.MODE_DEFAULT, // OP_INSTANT_APP_START_FOREGROUND
     };
 
     /**
@@ -995,6 +1007,7 @@ public class AppOpsManager {
             false,
             false, // OP_REQUEST_INSTALL_PACKAGES
             false, // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            false,
     };
 
     /**

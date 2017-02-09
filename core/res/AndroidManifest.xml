@@ -3252,6 +3252,10 @@
     <permission android:name="android.permission.MODIFY_THEME_OVERLAY"
                 android:protectionLevel="signature" />
 
+    <!-- Allows an instant app to create foreground services. -->
+    <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
+        android:protectionLevel="signature|development|ephemeral|appop" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
