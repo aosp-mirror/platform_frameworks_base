@@ -21923,6 +21923,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final class LocalService extends ActivityManagerInternal {
         @Override
+        public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
+                int targetUserId) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.grantUriPermissionFromIntentLocked(callingUid,
+                        targetPkg, intent, null, targetUserId);
+            }
+        }
+
+        @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return ActivityManagerService.this.checkContentProviderAccess(authority, userId);
         }
