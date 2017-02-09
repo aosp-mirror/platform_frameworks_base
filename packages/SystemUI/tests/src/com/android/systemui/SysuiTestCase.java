@@ -18,11 +18,12 @@ package com.android.systemui;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.systemui.utils.TestableContext;
 import com.android.systemui.utils.leaks.Tracker;
@@ -30,17 +31,21 @@ import com.android.systemui.utils.leaks.Tracker;
 import org.junit.After;
 import org.junit.Before;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+
 /**
  * Base class that does System UI specific setup.
  */
 public abstract class SysuiTestCase {
 
+    private Throwable mException;
     private Handler mHandler;
     protected TestableContext mContext;
     protected TestDependency mDependency;
 
     @Before
     public void SysuiSetup() throws Exception {
+        mException = null;
         System.setProperty("dexmaker.share_classloader", "true");
         mContext = new TestableContext(InstrumentationRegistry.getTargetContext(), this);
         SystemUIFactory.createFromConfig(mContext);

@@ -24,9 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -48,6 +52,7 @@ public class PhoneStatusBarView extends PanelBar {
             }
         }
     };
+    private DarkReceiver mBattery;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -70,6 +75,20 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onFinishInflate() {
         mBarTransitions.init();
+        mBattery = (DarkReceiver) findViewById(R.id.battery);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        // Always have Battery meters in the status bar observe the dark/light modes.
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
     }
 
     @Override

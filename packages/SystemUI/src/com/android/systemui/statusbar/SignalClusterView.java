@@ -43,6 +43,8 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
@@ -54,10 +56,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
-public class SignalClusterView
-        extends LinearLayout
-        implements NetworkControllerImpl.SignalCallback,
-        SecurityController.SecurityControllerCallback, Tunable {
+public class SignalClusterView extends LinearLayout implements NetworkControllerImpl.SignalCallback,
+        SecurityController.SecurityControllerCallback, Tunable,
+        DarkReceiver {
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -581,7 +582,8 @@ public class SignalClusterView
         return colorAccent;
     }
 
-    public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
+    @Override
+    public void onDarkChanged(Rect tintArea, float darkIntensity, int tint) {
         boolean changed = tint != mIconTint || darkIntensity != mDarkIntensity
                 || !mTintArea.equals(tintArea);
         mIconTint = tint;
@@ -593,16 +595,16 @@ public class SignalClusterView
     }
 
     private void applyIconTint() {
-        setTint(mVpn, StatusBarIconController.getTint(mTintArea, mVpn, mIconTint));
-        setTint(mAirplane, StatusBarIconController.getTint(mTintArea, mAirplane, mIconTint));
+        setTint(mVpn, DarkIconDispatcher.getTint(mTintArea, mVpn, mIconTint));
+        setTint(mAirplane, DarkIconDispatcher.getTint(mTintArea, mAirplane, mIconTint));
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mNoSims, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mNoSims, mDarkIntensity),
                 mNoSims, mNoSimsDark);
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
                 mWifi, mWifiDark);
         applyDarkIntensity(
-                StatusBarIconController.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
+                DarkIconDispatcher.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
                 mEthernet, mEthernetDark);
         for (int i = 0; i < mPhoneStates.size(); i++) {
             mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity, mTintArea);
@@ -740,10 +742,10 @@ public class SignalClusterView
 
         public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
             applyDarkIntensity(
-                    StatusBarIconController.getDarkIntensity(tintArea, mMobile, darkIntensity),
+                    DarkIconDispatcher.getDarkIntensity(tintArea, mMobile, darkIntensity),
                     mMobile, mMobileDark);
-            setTint(mMobileType, StatusBarIconController.getTint(tintArea, mMobileType, tint));
-            setTint(mMobileRoaming, StatusBarIconController.getTint(tintArea, mMobileRoaming,
+            setTint(mMobileType, DarkIconDispatcher.getTint(tintArea, mMobileType, tint));
+            setTint(mMobileRoaming, DarkIconDispatcher.getTint(tintArea, mMobileRoaming,
                     tint));
         }
     }

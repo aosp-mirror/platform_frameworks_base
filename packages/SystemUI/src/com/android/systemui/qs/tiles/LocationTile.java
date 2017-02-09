@@ -141,7 +141,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         }
 
         @Override
-        public void onKeyguardChanged() {
+        public void onKeyguardShowingChanged() {
             refreshState();
         }
     };

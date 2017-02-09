@@ -36,14 +36,14 @@ public interface ZenModeController extends CallbackController<Callback> {
     int getCurrentUser();
     boolean isVolumeRestricted();
 
-    public static class Callback {
-        public void onZenChanged(int zen) {}
-        public void onConditionsChanged(Condition[] conditions) {}
-        public void onNextAlarmChanged() {}
-        public void onZenAvailableChanged(boolean available) {}
-        public void onEffectsSupressorChanged() {}
-        public void onManualRuleChanged(ZenRule rule) {}
-        public void onConfigChanged(ZenModeConfig config) {}
+    public static interface Callback {
+        default void onZenChanged(int zen) {}
+        default void onConditionsChanged(Condition[] conditions) {}
+        default void onNextAlarmChanged() {}
+        default void onZenAvailableChanged(boolean available) {}
+        default void onEffectsSupressorChanged() {}
+        default void onManualRuleChanged(ZenRule rule) {}
+        default void onConfigChanged(ZenModeConfig config) {}
     }
 
 }

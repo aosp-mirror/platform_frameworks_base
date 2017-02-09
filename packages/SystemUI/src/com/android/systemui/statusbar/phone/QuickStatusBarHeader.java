@@ -178,7 +178,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         SignalClusterView cluster = (SignalClusterView) findViewById(R.id.signal_cluster);
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
         float intensity = colorForeground == Color.WHITE ? 0 : 1;
-        cluster.setIconTint(colorForeground, intensity, new Rect(0, 0, 0, 0));
+        cluster.onDarkChanged(new Rect(0, 0, 0, 0), intensity, colorForeground);
         BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
         int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
         battery.setRawColors(colorForeground, colorSecondary);

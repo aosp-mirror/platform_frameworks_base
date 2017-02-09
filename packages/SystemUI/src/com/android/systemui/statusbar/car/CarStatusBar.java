@@ -32,17 +32,19 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -75,7 +77,6 @@ public class CarStatusBar extends StatusBar implements
 
         createBatteryController();
         mCarBatteryController.startListening();
-        mConnectedDeviceSignalController.startListening();
     }
 
     @Override
@@ -87,32 +88,40 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    protected PhoneStatusBarView makeStatusBarView() {
-        PhoneStatusBarView statusBarView = super.makeStatusBarView();
+    protected void makeStatusBarView() {
+        super.makeStatusBarView();
 
-        mBatteryMeterView = ((BatteryMeterView) statusBarView.findViewById(R.id.battery));
+        FragmentHostManager manager = FragmentHostManager.get(mStatusBarWindow);
+        manager.addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {
+            mBatteryMeterView = ((BatteryMeterView) fragment.getView().findViewById(
+                    R.id.battery));
 
-        // By default, the BatteryMeterView should not be visible. It will be toggled visible
-        // when a device has connected by bluetooth.
-        mBatteryMeterView.setVisibility(View.GONE);
+            // By default, the BatteryMeterView should not be visible. It will be toggled
+            // when a device has connected by bluetooth.
+            mBatteryMeterView.setVisibility(View.GONE);
 
-        ViewStub stub = (ViewStub) statusBarView.findViewById(R.id.connected_device_signals_stub);
-        View signalsView = stub.inflate();
+            ViewStub stub = (ViewStub) fragment.getView().findViewById(
+                    R.id.connected_device_signals_stub);
+            View signalsView = stub.inflate();
 
-        // When a ViewStub if inflated, it does not respect the margins on the inflated view.
-        // As a result, manually add the ending margin.
-        ((LinearLayout.LayoutParams) signalsView.getLayoutParams()).setMarginEnd(
-                mContext.getResources().getDimensionPixelOffset(
-                        R.dimen.status_bar_connected_device_signal_margin_end));
+            // When a ViewStub if inflated, it does not respect the margins on the
+            // inflated view.
+            // As a result, manually add the ending margin.
+            ((LinearLayout.LayoutParams) signalsView.getLayoutParams()).setMarginEnd(
+                    mContext.getResources().getDimensionPixelOffset(
+                            R.dimen.status_bar_connected_device_signal_margin_end));
 
-        mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
-                signalsView);
+            if (mConnectedDeviceSignalController != null) {
+                mConnectedDeviceSignalController.stopListening();
+            }
+            mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
+                    signalsView);
+            mConnectedDeviceSignalController.startListening();
 
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
-        }
-
-        return statusBarView;
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
+            }
+        });
     }
 
     private BatteryController createBatteryController() {

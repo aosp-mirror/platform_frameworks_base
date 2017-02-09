@@ -17,6 +17,8 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import java.util.function.Function;
  * A controller for the space in the status bar to the left of the system icons. This area is
  * normally reserved for notifications.
  */
-public class NotificationIconAreaController {
+public class NotificationIconAreaController implements DarkReceiver {
     private final NotificationColorUtil mNotificationColorUtil;
 
     private int mIconSize;
@@ -64,11 +66,12 @@ public class NotificationIconAreaController {
         mNotificationIcons = (NotificationIconContainer) mNotificationIconArea.findViewById(
                 R.id.notificationIcons);
 
-        NotificationShelf shelf = mStatusBar.getNotificationShelf();
+        mNotificationScrollLayout = mStatusBar.getNotificationScrollLayout();
+    }
+
+    public void setupShelf(NotificationShelf shelf) {
         mShelfIcons = shelf.getShelfIcons();
         shelf.setCollapsedIcons(mNotificationIcons);
-
-        mNotificationScrollLayout = mStatusBar.getNotificationScrollLayout();
     }
 
     public void onDensityOrFontScaleChanged(Context context) {
@@ -102,23 +105,18 @@ public class NotificationIconAreaController {
     }
 
     /**
-     * See {@link StatusBarIconController#setIconsDarkArea}.
+     * See {@link com.android.systemui.statusbar.policy.DarkIconDispatcher#setIconsDarkArea}.
+     * Sets the color that should be used to tint any icons in the notification area.
      *
      * @param tintArea the area in which to tint the icons, specified in screen coordinates
+     * @param darkIntensity
      */
-    public void setTintArea(Rect tintArea) {
+    public void onDarkChanged(Rect tintArea, float darkIntensity, int iconTint) {
         if (tintArea == null) {
             mTintArea.setEmpty();
         } else {
             mTintArea.set(tintArea);
         }
-        applyNotificationIconsTint();
-    }
-
-    /**
-     * Sets the color that should be used to tint any icons in the notification area.
-     */
-    public void setIconTint(int iconTint) {
         mIconTint = iconTint;
         applyNotificationIconsTint();
     }
@@ -231,7 +229,7 @@ public class NotificationIconAreaController {
             boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
             if (colorize) {
                 v.setImageTintList(ColorStateList.valueOf(
-                        StatusBarIconController.getTint(mTintArea, v, mIconTint)));
+                        DarkIconDispatcher.getTint(mTintArea, v, mIconTint)));
             }
             v.setIconTint(mIconTint);
         }

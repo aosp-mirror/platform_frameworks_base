@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -75,6 +76,7 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
             NetworkController.class,
             PluginManager.class,
             TunerService.class,
+            StatusBarIconController.class,
     };
 
     @Rule
@@ -121,6 +123,8 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
                 obj = new FakePluginManager(mContext, this);
             } else if (cls == TunerService.class) {
                 obj = new FakeTunerService(mContext, this);
+            } else if (cls == StatusBarIconController.class) {
+                obj = new FakeStatusBarIconController(this);
             } else {
                 Assert.fail(cls.getName() + " is not supported by LeakCheckedTest yet");
             }

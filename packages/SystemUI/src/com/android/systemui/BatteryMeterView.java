@@ -16,18 +16,29 @@
 package com.android.systemui;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 public class BatteryMeterView extends ImageView implements
-        BatteryController.BatteryStateChangeCallback, TunerService.Tunable {
+        BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
 
     private final BatteryMeterDrawable mDrawable;
     private final String mSlotBattery;
@@ -77,6 +88,7 @@ public class BatteryMeterView extends ImageView implements
         mBatteryController.addCallback(this);
         mDrawable.startListening();
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
@@ -85,6 +97,7 @@ public class BatteryMeterView extends ImageView implements
         mBatteryController.removeCallback(this);
         mDrawable.stopListening();
         Dependency.get(TunerService.class).removeTunable(this);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @Override
@@ -99,8 +112,35 @@ public class BatteryMeterView extends ImageView implements
 
     }
 
-    public void setDarkIntensity(float f) {
-        mDrawable.setDarkIntensity(f);
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        scaleBatteryMeterViews();
+    }
+
+    /**
+     * Looks up the scale factor for status bar icons and scales the battery view by that amount.
+     */
+    private void scaleBatteryMeterViews() {
+        Resources res = getContext().getResources();
+        TypedValue typedValue = new TypedValue();
+
+        res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        float iconScaleFactor = typedValue.getFloat();
+
+        int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
+        int batteryWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+        int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
+
+        LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
+                (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
+        scaledLayoutParams.setMarginsRelative(0, 0, 0, marginBottom);
+
+        setLayoutParams(scaledLayoutParams);
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        mDrawable.setDarkIntensity(DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0);
     }
 
     public void setRawColors(int fgColor, int bgColor) {

@@ -38,24 +38,35 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.DataSaverController.Listener;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
  * bar at boot time.  It goes through the normal API for icons, even though it probably
  * strictly doesn't need to.
  */
-public class PhoneStatusBarPolicy implements Callback, RotationLockController.RotationLockControllerCallback, DataSaverController.Listener {
+public class PhoneStatusBarPolicy implements Callback, Callbacks,
+        RotationLockControllerCallback, Listener,
+        ZenModeController.Callback, DeviceProvisionedListener, KeyguardMonitor.Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -82,7 +93,9 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private final StatusBarIconController mIconController;
     private final RotationLockController mRotationLockController;
     private final DataSaverController mDataSaver;
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final ZenModeController mZenController;
+    private final DeviceProvisionedController mProvisionedController;
+    private final KeyguardMonitor mKeyguardMonitor;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -106,13 +119,15 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mCast = Dependency.get(CastController.class);
         mHotspot = Dependency.get(HotspotController.class);
         mBluetooth = Dependency.get(BluetoothController.class);
-        mBluetooth.addCallback(this);
         mNextAlarm = Dependency.get(NextAlarmController.class);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = Dependency.get(UserInfoController.class);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mRotationLockController = Dependency.get(RotationLockController.class);
         mDataSaver = Dependency.get(DataSaverController.class);
+        mZenController = Dependency.get(ZenModeController.class);
+        mProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -127,7 +142,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
         mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
 
-        mRotationLockController.addCallback(this);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -158,7 +172,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         // Alarm clock
         mIconController.setIcon(mSlotAlarmClock, R.drawable.stat_sys_alarm, null);
         mIconController.setIconVisibility(mSlotAlarmClock, false);
-        mNextAlarm.addCallback(mNextAlarmCallback);
 
         // zen
         mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
@@ -172,13 +185,11 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         // cast
         mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
         mIconController.setIconVisibility(mSlotCast, false);
-        mCast.addCallback(mCastCallback);
 
         // hotspot
         mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
                 mContext.getString(R.string.accessibility_status_bar_hotspot));
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
-        mHotspot.addCallback(mHotspotCallback);
 
         // managed profile
         mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
@@ -189,15 +200,36 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
                 context.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
+
+        mRotationLockController.addCallback(this);
+        mBluetooth.addCallback(this);
+        mProvisionedController.addCallback(this);
+        mZenController.addCallback(this);
+        mCast.addCallback(mCastCallback);
+        mHotspot.addCallback(mHotspotCallback);
+        mNextAlarm.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
+        mKeyguardMonitor.addCallback(this);
+
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallbacks(this);
     }
 
-    public void setStatusBarKeyguardViewManager(
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+    public void destroy() {
+        mRotationLockController.removeCallback(this);
+        mBluetooth.removeCallback(this);
+        mProvisionedController.removeCallback(this);
+        mZenController.removeCallback(this);
+        mCast.removeCallback(mCastCallback);
+        mHotspot.removeCallback(mHotspotCallback);
+        mNextAlarm.removeCallback(mNextAlarmCallback);
+        mDataSaver.removeCallback(this);
+        mKeyguardMonitor.removeCallback(this);
+        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
+        mContext.unregisterReceiver(mIntentReceiver);
     }
 
-    public void setZenMode(int zen) {
+    @Override
+    public void onZenChanged(int zen) {
         mZen = zen;
         updateVolumeZen();
     }
@@ -394,7 +426,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
                 + mManagedProfileFocused);
         final boolean showIcon;
-        if (mManagedProfileFocused && !mStatusBarKeyguardViewManager.isShowing()) {
+        if (mManagedProfileFocused && !mKeyguardMonitor.isShowing()) {
             showIcon = true;
             mIconController.setIcon(mSlotManagedProfile,
                     R.drawable.stat_sys_managed_profile_status,
@@ -471,15 +503,20 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         }
     };
 
-    public void appTransitionStarting(long startTime, long duration) {
+    @Override
+    public void appTransitionStarting(long startTime, long duration, boolean forced) {
         updateManagedProfile();
     }
 
-    public void notifyKeyguardShowingChanged() {
+    @Override
+    public void onKeyguardShowingChanged() {
         updateManagedProfile();
     }
 
-    public void setCurrentUserSetup(boolean userSetup) {
+    @Override
+    public void onUserSetupChanged() {
+        boolean userSetup = mProvisionedController.isUserSetup(
+                mProvisionedController.getCurrentUser());
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();
