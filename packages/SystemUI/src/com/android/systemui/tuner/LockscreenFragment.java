@@ -52,11 +52,13 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
 import com.android.systemui.statusbar.phone.ExpandableIndicator;
+import com.android.systemui.statusbar.policy.ExtensionController.TunerFactory;
 import com.android.systemui.tuner.ShortcutParser.Shortcut;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class LockscreenFragment extends PreferenceFragment {
@@ -313,26 +315,39 @@ public class LockscreenFragment extends PreferenceFragment {
         }
     }
 
-    public static IntentButton getIntentButton(Context context, String buttonStr,
-            IntentButton plugin, IntentButton def) {
-        // Plugin wins.
-        if (plugin != null) return plugin;
-        // Then tuner options.
-        if (!TextUtils.isEmpty(buttonStr)) {
-            if (buttonStr.contains("::")) {
-                Shortcut shortcut = getShortcutInfo(context, buttonStr);
-                if (shortcut != null) {
-                    return new ShortcutButton(context, shortcut);
-                }
-            } else if (buttonStr.contains("/")) {
-                ActivityInfo info = getActivityinfo(context, buttonStr);
-                if (info != null) {
-                    return new ActivityButton(context, info);
+    public static class LockButtonFactory implements TunerFactory<IntentButton> {
+
+        private final String mKey;
+        private final Context mContext;
+
+        public LockButtonFactory(Context context, String key) {
+            mContext = context;
+            mKey = key;
+        }
+
+        @Override
+        public String[] keys() {
+            return new String[]{mKey};
+        }
+
+        @Override
+        public IntentButton create(Map<String, String> settings) {
+            String buttonStr = settings.get(mKey);
+            if (!TextUtils.isEmpty(buttonStr)) {
+                if (buttonStr.contains("::")) {
+                    Shortcut shortcut = getShortcutInfo(mContext, buttonStr);
+                    if (shortcut != null) {
+                        return new ShortcutButton(mContext, shortcut);
+                    }
+                } else if (buttonStr.contains("/")) {
+                    ActivityInfo info = getActivityinfo(mContext, buttonStr);
+                    if (info != null) {
+                        return new ActivityButton(mContext, info);
+                    }
                 }
             }
+            return null;
         }
-        // Then default.
-        return def;
     }
 
     private static class ShortcutButton implements IntentButton {

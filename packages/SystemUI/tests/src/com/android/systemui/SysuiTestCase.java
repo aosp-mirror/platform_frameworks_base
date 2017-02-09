@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.support.test.InstrumentationRegistry;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.android.systemui.Dependency.DependencyKey;
 import com.android.systemui.utils.TestableContext;
@@ -31,8 +30,6 @@ import com.android.systemui.utils.leaks.Tracker;
 
 import org.junit.After;
 import org.junit.Before;
-
-import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * Base class that does System UI specific setup.
@@ -92,8 +89,10 @@ public abstract class SysuiTestCase {
         return null;
     }
 
-    public <T> void injectMockDependency(Class<T> cls) {
-        injectTestDependency(cls, mock(cls));
+    public <T> T injectMockDependency(Class<T> cls) {
+        final T mock = mock(cls);
+        mDependency.injectTestDependency(cls, mock);
+        return mock;
     }
 
     public <T> void injectTestDependency(Class<T> cls, T obj) {
