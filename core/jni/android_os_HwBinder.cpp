@@ -127,18 +127,23 @@ status_t JHwBinder::onTransact(
         uint32_t flags,
         TransactCallback callback) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    bool isOneway = (flags & TF_ONE_WAY) != 0;
+    ScopedLocalRef<jobject> replyObj(env, nullptr);
+    sp<JHwParcel> replyContext = nullptr;
 
     ScopedLocalRef<jobject> requestObj(env, JHwParcel::NewObject(env));
     JHwParcel::GetNativeContext(env, requestObj.get())->setParcel(
             const_cast<hardware::Parcel *>(&data), false /* assumeOwnership */);
 
-    ScopedLocalRef<jobject> replyObj(env, JHwParcel::NewObject(env));
 
-    sp<JHwParcel> replyContext =
-        JHwParcel::GetNativeContext(env, replyObj.get());
+    if (!isOneway) {
+        replyObj.reset(JHwParcel::NewObject(env));
 
-    replyContext->setParcel(reply, false /* assumeOwnership */);
-    replyContext->setTransactCallback(callback);
+        replyContext = JHwParcel::GetNativeContext(env, replyObj.get());
+
+        replyContext->setParcel(reply, false /* assumeOwnership */);
+        replyContext->setTransactCallback(callback);
+    }
 
     env->CallVoidMethod(
             mObject,
@@ -166,25 +171,27 @@ status_t JHwBinder::onTransact(
 
     status_t err = OK;
 
-    if (!replyContext->wasSent()) {
-        // The implementation never finished the transaction.
-        err = UNKNOWN_ERROR;  // XXX special error code instead?
+    if (!isOneway) {
+        if (!replyContext->wasSent()) {
+            // The implementation never finished the transaction.
+            err = UNKNOWN_ERROR;  // XXX special error code instead?
 
-        reply->setDataPosition(0 /* pos */);
+            reply->setDataPosition(0 /* pos */);
+        }
+
+        // Release all temporary storage now that scatter-gather data
+        // has been consolidated, either by calling the TransactCallback,
+        // if wasSent() == true or clearing the reply parcel (setDataOffset above).
+        replyContext->getStorage()->release(env);
+
+        // We cannot permanently pass ownership of "data" and "reply" over to their
+        // Java object wrappers (we don't own them ourselves).
+        replyContext->setParcel(
+                NULL /* parcel */, false /* assumeOwnership */);
+
     }
 
-    // Release all temporary storage now that scatter-gather data
-    // has been consolidated, either by calling the TransactCallback,
-    // if wasSent() == true or clearing the reply parcel (setDataOffset above).
-    replyContext->getStorage()->release(env);
-
-    // We cannot permanently pass ownership of "data" and "reply" over to their
-    // Java object wrappers (we don't own them ourselves).
-
     JHwParcel::GetNativeContext(env, requestObj.get())->setParcel(
-            NULL /* parcel */, false /* assumeOwnership */);
-
-    replyContext->setParcel(
             NULL /* parcel */, false /* assumeOwnership */);
 
     return err;
