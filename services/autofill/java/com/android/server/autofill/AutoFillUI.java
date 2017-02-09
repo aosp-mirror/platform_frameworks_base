@@ -100,7 +100,7 @@ final class AutoFillUI {
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
-    void setCallback(AutoFillUiCallback callback, IBinder activityToken) {
+    void setCallbackLocked(AutoFillUiCallback callback, IBinder activityToken) {
         hideAll();
         mCallback = callback;
         mActivityToken = activityToken;
@@ -180,7 +180,11 @@ final class AutoFillUI {
                             synchronized (mLock) {
                                 callback = mCallback;
                             }
-                            callback.fill(dataset);
+                            if (callback != null) {
+                                callback.fill(dataset);
+                            } else {
+                                Slog.w(TAG, "null callback on showFillUi() for " + viewState.mId);
+                            }
                             hideFillUi();
                         });
 

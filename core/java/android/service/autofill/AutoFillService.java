@@ -172,7 +172,7 @@ public abstract class AutoFillService extends Service {
      * <p>You should generally do initialization here rather than in {@link #onCreate}.
      */
     public void onConnected() {
-
+        //TODO(b/33197203): is not called anymore, fix it!
     }
 
     /**
@@ -221,6 +221,6 @@ public abstract class AutoFillService extends Service {
      * <p> At this point this service may no longer be an active {@link AutoFillService}.
      */
     public void onDisconnected() {
-
+        //TODO(b/33197203): is not called anymore, fix it!
     }
 }
