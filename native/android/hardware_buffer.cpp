@@ -16,24 +16,25 @@
 
 #define LOG_TAG "AHardwareBuffer"
 
-#include <android/hardware_buffer_jni.h>
+#include <android/hardware_buffer.h>
 
 #include <errno.h>
 #include <sys/socket.h>
 
 #include <memory>
 
-#include <android_runtime/android_hardware_HardwareBuffer.h>
-#include <binder/Binder.h>
-#include <binder/Parcel.h>
-#include <binder/IServiceManager.h>
 #include <cutils/native_handle.h>
+
+#include <utils/Log.h>
+
+#include <ui/GraphicBuffer.h>
+
+#include <binder/IServiceManager.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/IGraphicBufferAlloc.h>
-#include <hardware/gralloc1.h>
-#include <ui/GraphicBuffer.h>
-#include <utils/Flattenable.h>
-#include <utils/Log.h>
+
+#include <android_runtime/android_hardware_HardwareBuffer.h>
+
 
 static constexpr int kDataBufferSize = 64 * sizeof(int);  // 64 ints
 
@@ -298,20 +299,4 @@ const struct native_handle* AHardwareBuffer_getNativeHandle(
     if (!buffer) return nullptr;
     const GraphicBuffer* gbuffer = AHardwareBuffer_to_GraphicBuffer(buffer);
     return gbuffer->handle;
-}
-
-// ----------------------------------------------------------------------------
-// JNI functions
-// ----------------------------------------------------------------------------
-
-AHardwareBuffer* AHardwareBuffer_fromHardwareBuffer(JNIEnv* env,
-        jobject hardwareBufferObj) {
-    return android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
-            hardwareBufferObj);
-}
-
-jobject AHardwareBuffer_toHardwareBuffer(JNIEnv* env,
-        AHardwareBuffer* hardwareBuffer) {
-    return android_hardware_HardwareBuffer_createFromAHardwareBuffer(env,
-            hardwareBuffer);
 }

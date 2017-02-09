@@ -12,10 +12,12 @@ LOCAL_SRC_FILES:= \
     choreographer.cpp \
     configuration.cpp \
     hardware_buffer.cpp \
+    hardware_buffer_jni.cpp \
     input.cpp \
     looper.cpp \
     native_activity.cpp \
     native_window.cpp \
+    native_window_jni.cpp \
     net.c \
     obb.cpp \
     sensor.cpp \
