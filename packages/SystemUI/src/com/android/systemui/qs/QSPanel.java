@@ -86,6 +86,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
         setOrientation(VERTICAL);
 
+        mBrightnessView = LayoutInflater.from(context).inflate(
+                R.layout.quick_settings_brightness_dialog, this, false);
+        addView(mBrightnessView);
+
         setupTileLayout();
 
         mFooter = new QSFooter(this, context);
@@ -99,10 +103,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
 
         updateResources();
-
-        mBrightnessView = LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_brightness_dialog, this, false);
-        addView(mBrightnessView);
 
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),

@@ -90,8 +90,7 @@ public class NotificationMenuRow extends FrameLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(PluginManager.class).addPluginListener(
-                NotificationMenuRowProvider.ACTION, this,
-                NotificationMenuRowProvider.VERSION, false /* Allow multiple */);
+                this, NotificationMenuRowProvider.class, false /* Allow multiple */);
     }
 
     @Override

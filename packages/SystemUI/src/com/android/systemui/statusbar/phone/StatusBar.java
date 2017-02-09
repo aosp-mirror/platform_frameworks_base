@@ -1128,7 +1128,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     .replace(R.id.qs_frame, new QSFragment(), QS.TAG)
                     .commit();
             new PluginFragmentListener(container, QS.TAG, QSFragment.class, QS.class)
-                    .startListening(QS.ACTION, QS.VERSION);
+                    .startListening();
             final QSTileHost qsh = SystemUIFactory.getInstance().createQSTileHost(mContext, this,
                     mIconController);
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);

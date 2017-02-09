@@ -17,7 +17,9 @@ package com.android.systemui.plugins.statusbar.phone;
 import android.view.MotionEvent;
 
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+@ProvidesInterface(action = NavGesture.ACTION, version = NavBarButtonProvider.VERSION)
 public interface NavGesture extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NAV_GESTURE";

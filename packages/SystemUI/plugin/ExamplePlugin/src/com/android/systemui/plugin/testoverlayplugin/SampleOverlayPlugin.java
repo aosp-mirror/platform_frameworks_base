@@ -24,7 +24,9 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import com.android.systemui.plugins.OverlayPlugin;
+import com.android.systemui.plugins.annotations.Requires;
 
+@Requires(target = OverlayPlugin.class, version = OverlayPlugin.VERSION)
 public class SampleOverlayPlugin implements OverlayPlugin {
     private static final String TAG = "SampleOverlayPlugin";
     private Context mPluginContext;
@@ -34,12 +36,6 @@ public class SampleOverlayPlugin implements OverlayPlugin {
     private boolean mInputSetup;
     private boolean mCollapseDesired;
     private float mStatusBarHeight;
-
-    @Override
-    public int getVersion() {
-        Log.d(TAG, "getVersion " + VERSION);
-        return VERSION;
-    }
 
     @Override
     public void onCreate(Context sysuiContext, Context pluginContext) {

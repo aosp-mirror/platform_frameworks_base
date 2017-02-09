@@ -20,10 +20,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
  * Provides a {@link DozeUi}.
  */
+@ProvidesInterface(action = DozeProvider.ACTION, version = DozeProvider.VERSION)
 public interface DozeProvider extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_DOZE";

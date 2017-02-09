@@ -14,6 +14,8 @@
 
 package com.android.systemui.plugins;
 
+import com.android.systemui.plugins.annotations.ProvidesInterface;
+
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
@@ -21,6 +23,7 @@ import android.graphics.drawable.Drawable;
  * An Intent Button represents a triggerable element in SysUI that consists of an
  * Icon and an intent to trigger when it is activated (clicked, swiped, etc.).
  */
+@ProvidesInterface(version = IntentButtonProvider.VERSION)
 public interface IntentButtonProvider extends Plugin {
 
     public static final int VERSION = 1;

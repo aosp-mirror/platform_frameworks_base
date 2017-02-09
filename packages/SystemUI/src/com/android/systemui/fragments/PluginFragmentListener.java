@@ -44,8 +44,9 @@ public class PluginFragmentListener implements PluginListener<Plugin> {
         mDefaultClass = defaultFragment;
     }
 
-    public void startListening(String action, int version) {
-        mPluginManager.addPluginListener(action, this, version, false /* Only allow one */);
+    public void startListening() {
+        mPluginManager.addPluginListener(this, mExpectedInterface,
+                false /* Only allow one */);
     }
 
     public void stopListening() {

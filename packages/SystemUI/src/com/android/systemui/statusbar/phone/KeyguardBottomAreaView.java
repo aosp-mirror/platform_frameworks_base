@@ -261,9 +261,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onAttachedToWindow();
         mAccessibilityController.addStateChangedCallback(this);
         Dependency.get(PluginManager.class).addPluginListener(RIGHT_BUTTON_PLUGIN,
-                mRightListener, IntentButtonProvider.VERSION, false /* Only allow one */);
+                mRightListener, IntentButtonProvider.class, false /* Only allow one */);
         Dependency.get(PluginManager.class).addPluginListener(LEFT_BUTTON_PLUGIN,
-                mLeftListener, IntentButtonProvider.VERSION, false /* Only allow one */);
+                mLeftListener, IntentButtonProvider.class, false /* Only allow one */);
         Dependency.get(TunerService.class).addTunable(this, LockscreenFragment.LOCKSCREEN_LEFT_BUTTON,
                 LockscreenFragment.LOCKSCREEN_RIGHT_BUTTON);
     }

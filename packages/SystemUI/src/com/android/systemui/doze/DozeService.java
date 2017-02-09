@@ -49,7 +49,7 @@ public class DozeService extends DreamService implements DozeMachine.Service {
         }
 
         DozeProvider provider = Dependency.get(PluginManager.class)
-                .getOneShotPlugin(DozeProvider.ACTION, DozeProvider.VERSION);
+                .getOneShotPlugin(DozeProvider.class);
         mDozeMachine = new DozeFactory(provider).assembleMachine(this);
     }
 

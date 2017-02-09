@@ -783,8 +783,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         onPluginDisconnected(null); // Create default gesture helper
-        Dependency.get(PluginManager.class).addPluginListener(NavGesture.ACTION, this,
-                NavGesture.VERSION, false /* Only one */);
+        Dependency.get(PluginManager.class).addPluginListener(this,
+                NavGesture.class, false /* Only one */);
     }
 
     @Override

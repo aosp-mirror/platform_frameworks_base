@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.media.RingtonePlayer;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.plugins.OverlayPlugin;
+import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.power.PowerUI;
@@ -205,7 +206,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 mServices[i].onBootCompleted();
             }
         }
-        Dependency.get(PluginManager.class).addPluginListener(OverlayPlugin.ACTION,
+        Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {
                     private ArraySet<OverlayPlugin> mOverlays;
 
@@ -234,7 +235,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                         Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
                                 mOverlays.size() != 0);
                     }
-                }, OverlayPlugin.VERSION, true /* Allow multiple plugins */);
+                }, OverlayPlugin.class, true /* Allow multiple plugins */);
 
         mServicesStarted = true;
     }
