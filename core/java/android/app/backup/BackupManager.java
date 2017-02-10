@@ -258,16 +258,46 @@ public class BackupManager {
      * @return Zero on success; nonzero on error.
      */
     public int requestRestore(RestoreObserver observer) {
+        return requestRestore(observer, null);
+    }
+
+    // system APIs start here
+
+    /**
+     * Restore the calling application from backup.  The data will be restored from the
+     * current backup dataset if the application has stored data there, or from
+     * the dataset used during the last full device setup operation if the current
+     * backup dataset has no matching data.  If no backup data exists for this application
+     * in either source, a nonzero value will be returned.
+     *
+     * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
+     * a backed-up dataset from the remote transport, instantiate the application's
+     * backup agent, and pass the dataset to the agent's
+     * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
+     * method.
+     *
+     * @param observer The {@link RestoreObserver} to receive callbacks during the restore
+     * operation. This must not be null.
+     *
+     * @param monitor the {@link BackupManagerMonitor} to receive callbacks during the restore
+     * operation.
+     *
+     * @return Zero on success; nonzero on error.
+     *
+     * @hide
+     */
+    @SystemApi
+    public int requestRestore(RestoreObserver observer, BackupManagerMonitor monitor) {
         int result = -1;
         checkServiceBinder();
         if (sService != null) {
             RestoreSession session = null;
             try {
                 IRestoreSession binder = sService.beginRestoreSession(mContext.getPackageName(),
-                        null);
+                    null);
                 if (binder != null) {
                     session = new RestoreSession(mContext, binder);
-                    result = session.restorePackage(mContext.getPackageName(), observer);
+                    result = session.restorePackage(mContext.getPackageName(), observer, monitor);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "restoreSelf() unable to contact service");
@@ -279,8 +309,6 @@ public class BackupManager {
         }
         return result;
     }
-
-    // system APIs start here
 
     /**
      * Begin the process of restoring data from backup.  See the

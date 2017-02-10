@@ -416,12 +416,14 @@ public class BackupManagerService {
         public IBackupTransport transport;
         public ActiveRestoreSession session;
         public IRestoreObserver observer;
+        public IBackupManagerMonitor monitor;
 
         RestoreGetSetsParams(IBackupTransport _transport, ActiveRestoreSession _session,
-                IRestoreObserver _observer) {
+                IRestoreObserver _observer, IBackupManagerMonitor _monitor) {
             transport = _transport;
             session = _session;
             observer = _observer;
+            monitor = _monitor;
         }
     }
 
@@ -440,10 +442,11 @@ public class BackupManagerService {
          * Restore a single package; no kill after restore
          */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-                long _token, PackageInfo _pkg) {
+                IBackupManagerMonitor _monitor, long _token, PackageInfo _pkg) {
             transport = _transport;
             dirName = _dirName;
             observer = _obs;
+            monitor = _monitor;
             token = _token;
             pkgInfo = _pkg;
             pmToken = 0;
@@ -455,10 +458,11 @@ public class BackupManagerService {
          * Restore at install: PM token needed, kill after restore
          */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-                long _token, String _pkgName, int _pmToken) {
+                IBackupManagerMonitor _monitor, long _token, String _pkgName, int _pmToken) {
             transport = _transport;
             dirName = _dirName;
             observer = _obs;
+            monitor = _monitor;
             token = _token;
             pkgInfo = null;
             pmToken = _pmToken;
@@ -471,10 +475,11 @@ public class BackupManagerService {
          * restore UXes use.
          */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-                long _token) {
+                IBackupManagerMonitor _monitor, long _token) {
             transport = _transport;
             dirName = _dirName;
             observer = _obs;
+            monitor = _monitor;
             token = _token;
             pkgInfo = null;
             pmToken = 0;
@@ -487,10 +492,12 @@ public class BackupManagerService {
          * whether it's to be considered a system-level restore.
          */
         RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
-                long _token, String[] _filterSet, boolean _isSystemRestore) {
+                IBackupManagerMonitor _monitor, long _token,
+                String[] _filterSet, boolean _isSystemRestore) {
             transport = _transport;
             dirName = _dirName;
             observer = _obs;
+            monitor = _monitor;
             token = _token;
             pkgInfo = null;
             pmToken = 0;
@@ -7785,6 +7792,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         // Restore observer; may be null
         private IRestoreObserver mObserver;
 
+        // BackuoManagerMonitor; may be null
+        private IBackupManagerMonitor mMonitor;
+
         // Token identifying the dataset to the transport
         private long mToken;
 
@@ -7856,6 +7866,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             mTransport = transport;
             mObserver = observer;
+            mMonitor = monitor;
             mToken = restoreSetToken;
             mPmToken = pmToken;
             mTargetPackage = targetPackage;
@@ -8582,6 +8593,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 if (DEBUG) {
                     Slog.w(TAG, "Full-data restore target timed out; shutting down");
                 }
+                mMonitor = monitorEvent(mMonitor, BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT,
+                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
                 mEngineThread.handleTimeout();
 
                 IoUtils.closeQuietly(mEnginePipes[1]);
@@ -8825,6 +8838,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         @Override
         public void handleTimeout() {
             Slog.e(TAG, "Timeout restoring application " + mCurrentPackage.packageName);
+            mMonitor = monitorEvent(mMonitor, BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT,
+                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                     mCurrentPackage.packageName, "restore timeout");
             // Handle like an agent that threw on invocation: wipe it and go on to the next
@@ -9839,7 +9854,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     Slog.d(TAG, "Restore at install of " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                msg.obj = new RestoreParams(transport, dirName, null,
+                msg.obj = new RestoreParams(transport, dirName, null, null,
                         restoreSet, packageName, token);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
@@ -9997,7 +10012,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         // --- Binder interface ---
-        public synchronized int getAvailableRestoreSets(IRestoreObserver observer) {
+        public synchronized int getAvailableRestoreSets(IRestoreObserver observer,
+                IBackupManagerMonitor monitor) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
             if (observer == null) {
@@ -10028,7 +10044,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // spin off the transport request to our service thread
                 mWakelock.acquire();
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_GET_RESTORE_SETS,
-                        new RestoreGetSetsParams(mRestoreTransport, this, observer));
+                        new RestoreGetSetsParams(mRestoreTransport, this, observer,
+                                monitor));
                 mBackupHandler.sendMessage(msg);
                 return 0;
             } catch (Exception e) {
@@ -10039,7 +10056,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
         }
 
-        public synchronized int restoreAll(long token, IRestoreObserver observer) {
+        public synchronized int restoreAll(long token, IRestoreObserver observer,
+                IBackupManagerMonitor monitor) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "performRestore");
 
@@ -10087,7 +10105,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         }
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                         msg.obj = new RestoreParams(mRestoreTransport, dirName,
-                                observer, token);
+                                observer, monitor, token);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
@@ -10101,7 +10119,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // Restores of more than a single package are treated as 'system' restores
         public synchronized int restoreSome(long token, IRestoreObserver observer,
-                String[] packages) {
+                IBackupManagerMonitor monitor, String[] packages) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "performRestore");
 
@@ -10111,6 +10129,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 b.append(Long.toHexString(token));
                 b.append(" observer=");
                 b.append(observer.toString());
+                b.append(" monitor=");
+                if (monitor == null) {
+                    b.append("null");
+                } else {
+                    b.append(monitor.toString());
+                }
                 b.append(" packages=");
                 if (packages == null) {
                     b.append("null");
@@ -10168,8 +10192,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             Slog.d(TAG, "restoreSome() of " + packages.length + " packages");
                         }
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token,
-                                packages, packages.length > 1);
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
+                                token, packages, packages.length > 1);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
@@ -10181,8 +10205,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             return -1;
         }
 
-        public synchronized int restorePackage(String packageName, IRestoreObserver observer) {
-            if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer);
+        public synchronized int restorePackage(String packageName, IRestoreObserver observer,
+                IBackupManagerMonitor monitor) {
+            if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName + " obs=" + observer
+                    + "monitor=" + monitor);
 
             if (mEnded) {
                 throw new IllegalStateException("Restore session already ended");
@@ -10255,7 +10281,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     Slog.d(TAG, "restorePackage() : " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token, app);
+                msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, monitor,
+                        token, app);
                 mBackupHandler.sendMessage(msg);
             } finally {
                 Binder.restoreCallingIdentity(oldId);
