@@ -70,6 +70,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.FgThread;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -327,6 +328,12 @@ final class AutoFillManagerServiceImpl {
                 pw.print(prefix); pw.print("#"); pw.println(i + 1);
                 mSessions.valueAt(i).dumpLocked(prefix2, pw);
             }
+        }
+    }
+
+    void listSessionsLocked(ArrayList<String> output) {
+        for (IBinder activityToken : mSessions.keySet()) {
+            output.add(mComponentName + ":" + activityToken);
         }
     }
 

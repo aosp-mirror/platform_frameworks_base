@@ -34,6 +34,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -54,12 +55,14 @@ import android.view.autofill.AutoFillValue;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,6 +80,10 @@ public final class AutoFillManagerService extends SystemService {
     private static final int MSG_UPDATE_SESSION = 2;
     private static final int MSG_FINISH_SESSION = 3;
     private static final int MSG_REQUEST_SAVE_FOR_USER = 4;
+    private static final int MSG_LIST_SESSIONS = 5;
+    private static final int MSG_RESET = 6;
+
+    static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
     private final Context mContext;
     private final AutoFillUI mUi;
@@ -110,6 +117,12 @@ public final class AutoFillManagerService extends SystemService {
                 final int userId = args.argi5;
                 final int flags = args.argi6;
                 handleUpdateSession(userId, activityToken, autoFillId, bounds, value, flags);
+                return;
+            } case MSG_LIST_SESSIONS: {
+                handleListForUser(msg.arg1, (IResultReceiver) msg.obj);
+                return;
+            } case MSG_RESET: {
+                handleReset();
                 return;
             } default: {
                 Slog.w(TAG, "Invalid message: " + msg);
@@ -203,10 +216,27 @@ public final class AutoFillManagerService extends SystemService {
         return service;
     }
 
+    // Called by Shell command.
     void requestSaveForUser(int userId) {
+        Slog.i(TAG, "requestSaveForUser(): " + userId);
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(
                 MSG_REQUEST_SAVE_FOR_USER, userId));
+    }
+
+    // Called by Shell command.
+    void listSessions(int userId, IResultReceiver receiver) {
+        Slog.i(TAG, "listSessions() for userId " + userId);
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        mHandlerCaller.sendMessage(
+                mHandlerCaller.obtainMessageIO(MSG_LIST_SESSIONS, userId, receiver));
+    }
+
+    // Called by Shell command.
+    void reset() {
+        Slog.i(TAG, "reset()");
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_RESET));
     }
 
     /**
@@ -276,6 +306,39 @@ public final class AutoFillManagerService extends SystemService {
 
                 service.requestSaveForUserLocked(activityToken);
             }
+        }
+    }
+
+    private void handleListForUser(int userId, IResultReceiver receiver) {
+        final Bundle resultData = new Bundle();
+        final ArrayList<String> sessions = new ArrayList<>();
+
+        synchronized (mLock) {
+            if (userId != UserHandle.USER_ALL) {
+                mServicesCache.get(userId).listSessionsLocked(sessions);
+            } else {
+                final int size = mServicesCache.size();
+                for (int i = 0; i < size; i++) {
+                    mServicesCache.valueAt(i).listSessionsLocked(sessions);
+                }
+            }
+        }
+
+        resultData.putStringArrayList(RECEIVER_BUNDLE_EXTRA_SESSIONS, sessions);
+        try {
+            receiver.send(0, resultData);
+        } catch (RemoteException e) {
+            // Just ignore it...
+        }
+    }
+
+    private void handleReset() {
+        synchronized (mLock) {
+            final int size = mServicesCache.size();
+            for (int i = 0; i < size; i++) {
+                mServicesCache.valueAt(i).destroyLocked();
+            }
+            mServicesCache.clear();
         }
     }
 
