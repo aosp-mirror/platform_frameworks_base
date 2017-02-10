@@ -283,10 +283,15 @@ LOCAL_SHARED_LIBRARIES := \
     libhidltransport \
     libhwbinder \
     libvintf \
+    libnativewindow \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
     libdl \
+
+# our headers include libnativewindow's public headers
+LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := \
+    libnativewindow \
 
 # we need to access the private Bionic header
 # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp

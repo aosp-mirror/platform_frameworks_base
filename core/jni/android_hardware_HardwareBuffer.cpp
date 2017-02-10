@@ -26,14 +26,16 @@
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include <private/android/AHardwareBufferHelpers.h>
 
 #include <binder/Parcel.h>
+
+#include <ui/GraphicBuffer.h>
 #include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceComposer.h>
-#include <hardware/gralloc1.h>
-#include <ui/GraphicBuffer.h>
-
 #include <private/gui/ComposerService.h>
+
+#include <hardware/gralloc1.h>
 
 #include "core_jni_helpers.h"
 
@@ -63,15 +65,6 @@ public:
 
     sp<GraphicBuffer> buffer;
 };
-
-
-// ----------------------------------------------------------------------------
-// Helper functions
-// ----------------------------------------------------------------------------
-
-static inline bool containsBits(uint64_t mask, uint64_t bitsToCheck) {
-    return (mask & bitsToCheck) == bitsToCheck;
-}
 
 // ----------------------------------------------------------------------------
 // HardwareBuffer lifecycle
@@ -121,8 +114,7 @@ static void destroyWrapper(GraphicBufferWrapper* wrapper) {
     delete wrapper;
 }
 
-static jlong android_hardware_HardwareBuffer_getNativeFinalizer(JNIEnv* env,
-        jobject clazz) {
+static jlong android_hardware_HardwareBuffer_getNativeFinalizer(JNIEnv* env, jobject clazz) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyWrapper));
 }
 
@@ -203,7 +195,8 @@ AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
     if (env->IsInstanceOf(hardwareBufferObj, gHardwareBufferClassInfo.clazz)) {
         GraphicBuffer* buffer = GraphicBufferWrapper_to_GraphicBuffer(
                 env->GetLongField(hardwareBufferObj, gHardwareBufferClassInfo.mNativeObject));
-        return reinterpret_cast<AHardwareBuffer*>(buffer);
+        return AHardwareBuffer_from_GraphicBuffer(buffer);
+
     } else {
         return nullptr;
     }
@@ -211,7 +204,7 @@ AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
 
 jobject android_hardware_HardwareBuffer_createFromAHardwareBuffer(
         JNIEnv* env, AHardwareBuffer* hardwareBuffer) {
-    GraphicBuffer* buffer = reinterpret_cast<GraphicBuffer*>(hardwareBuffer);
+    GraphicBuffer* buffer = AHardwareBuffer_to_GraphicBuffer(hardwareBuffer);
     GraphicBufferWrapper* wrapper = new GraphicBufferWrapper(buffer);
     jobject hardwareBufferObj = env->NewObject(gHardwareBufferClassInfo.clazz,
             gHardwareBufferClassInfo.ctor, reinterpret_cast<jlong>(wrapper));
@@ -228,103 +221,22 @@ jobject android_hardware_HardwareBuffer_createFromAHardwareBuffer(
 }
 
 uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(uint32_t format) {
-    switch (format) {
-        case HAL_PIXEL_FORMAT_RGBA_8888:
-            return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
-        case HAL_PIXEL_FORMAT_RGBX_8888:
-            return AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
-        case HAL_PIXEL_FORMAT_RGB_565:
-            return AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM;
-        case HAL_PIXEL_FORMAT_RGB_888:
-            return AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM;
-        case HAL_PIXEL_FORMAT_RGBA_FP16:
-            return AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT;
-        case HAL_PIXEL_FORMAT_RGBA_1010102:
-            return AHARDWAREBUFFER_FORMAT_A2R10G10B10_UNORM_PACK32;
-        case HAL_PIXEL_FORMAT_BLOB:
-            return AHARDWAREBUFFER_FORMAT_BLOB;
-        default:
-            ALOGE("Unknown pixel format %u", format);
-            return 0;
-    }
+    return AHardwareBuffer_convertFromPixelFormat(format);
 }
 
 uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format) {
-    switch (format) {
-        case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
-            return HAL_PIXEL_FORMAT_RGBA_8888;
-        case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
-            return HAL_PIXEL_FORMAT_RGBX_8888;
-        case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
-            return HAL_PIXEL_FORMAT_RGB_565;
-        case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
-            return HAL_PIXEL_FORMAT_RGB_888;
-        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT:
-            return HAL_PIXEL_FORMAT_RGBA_FP16;
-        case AHARDWAREBUFFER_FORMAT_A2R10G10B10_UNORM_PACK32:
-            return HAL_PIXEL_FORMAT_RGBA_1010102;
-        case AHARDWAREBUFFER_FORMAT_BLOB:
-            return HAL_PIXEL_FORMAT_BLOB;
-        default:
-            ALOGE("Unknown AHardwareBuffer format %u", format);
-            return 0;
-    }
+    return AHardwareBuffer_convertToPixelFormat(format);
 }
 
 void android_hardware_HardwareBuffer_convertToGrallocUsageBits(uint64_t usage0,
-        uint64_t usage1, uint64_t* outProducerUsage,
+        uint64_t /*usage1*/, uint64_t* outProducerUsage,
         uint64_t* outConsumerUsage) {
-    *outProducerUsage = 0;
-    *outConsumerUsage = 0;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_READ))
-        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_CPU_READ;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_READ_OFTEN))
-        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_CPU_READ_OFTEN;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_WRITE))
-        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_CPU_WRITE;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_CPU_WRITE_OFTEN))
-        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_SAMPLED_IMAGE))
-        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_GPU_TEXTURE;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_COLOR_OUTPUT))
-        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_GPU_RENDER_TARGET;
-    // Not sure what this should be.
-    //if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_CUBEMAP)) bits |= 0;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_GPU_DATA_BUFFER))
-        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_GPU_DATA_BUFFER;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_VIDEO_ENCODE))
-        *outConsumerUsage |= GRALLOC1_CONSUMER_USAGE_VIDEO_ENCODER;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_PROTECTED_CONTENT))
-        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_PROTECTED;
-    if (containsBits(usage0, AHARDWAREBUFFER_USAGE0_SENSOR_DIRECT_DATA))
-        *outProducerUsage |= GRALLOC1_PRODUCER_USAGE_SENSOR_DIRECT_DATA;
+    AHardwareBuffer_convertToGrallocUsageBits(usage0, outProducerUsage, outConsumerUsage);
 }
 
 uint64_t android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
         uint64_t producerUsage, uint64_t consumerUsage) {
-    uint64_t bits = 0;
-    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_CPU_READ))
-        bits |= AHARDWAREBUFFER_USAGE0_CPU_READ;
-    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_CPU_READ_OFTEN))
-        bits |= AHARDWAREBUFFER_USAGE0_CPU_READ_OFTEN;
-    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_CPU_WRITE))
-        bits |= AHARDWAREBUFFER_USAGE0_CPU_WRITE;
-    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_CPU_WRITE_OFTEN))
-        bits |= AHARDWAREBUFFER_USAGE0_CPU_WRITE_OFTEN;
-    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_GPU_TEXTURE))
-        bits |= AHARDWAREBUFFER_USAGE0_GPU_SAMPLED_IMAGE;
-    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_GPU_RENDER_TARGET))
-        bits |= AHARDWAREBUFFER_USAGE0_GPU_COLOR_OUTPUT;
-    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_GPU_DATA_BUFFER))
-        bits |= AHARDWAREBUFFER_USAGE0_GPU_DATA_BUFFER;
-    if (containsBits(consumerUsage, GRALLOC1_CONSUMER_USAGE_VIDEO_ENCODER))
-        bits |= AHARDWAREBUFFER_USAGE0_VIDEO_ENCODE;
-    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_PROTECTED))
-        bits |= AHARDWAREBUFFER_USAGE0_PROTECTED_CONTENT;
-    if (containsBits(producerUsage, GRALLOC1_PRODUCER_USAGE_SENSOR_DIRECT_DATA))
-        bits |= AHARDWAREBUFFER_USAGE0_SENSOR_DIRECT_DATA;
-
-    return bits;
+    return AHardwareBuffer_convertFromGrallocUsageBits(producerUsage, consumerUsage);
 }
 
 }  // namespace android
@@ -336,19 +248,21 @@ uint64_t android_hardware_HardwareBuffer_convertFromGrallocUsageBits(
 const char* const kClassPathName = "android/hardware/HardwareBuffer";
 
 static const JNINativeMethod gMethods[] = {
-    { "nCreateHardwareBuffer",  "(IIIIJ)J", (void*) android_hardware_HardwareBuffer_create },
-    { "nGetNativeFinalizer", "()J",          (void*) android_hardware_HardwareBuffer_getNativeFinalizer },
+    { "nCreateHardwareBuffer",  "(IIIIJ)J",
+            (void*) android_hardware_HardwareBuffer_create },
+    { "nGetNativeFinalizer", "()J",
+            (void*) android_hardware_HardwareBuffer_getNativeFinalizer },
     { "nWriteHardwareBufferToParcel",  "(JLandroid/os/Parcel;)V",
             (void*) android_hardware_HardwareBuffer_write },
     { "nReadHardwareBufferFromParcel", "(Landroid/os/Parcel;)J",
             (void*) android_hardware_HardwareBuffer_read },
 
     // --------------- @FastNative ----------------------
-    { "nGetWidth", "(J)I",                   (void*) android_hardware_HardwareBuffer_getWidth },
-    { "nGetHeight", "(J)I",                  (void*) android_hardware_HardwareBuffer_getHeight },
-    { "nGetFormat", "(J)I",                  (void*) android_hardware_HardwareBuffer_getFormat },
-    { "nGetLayers", "(J)I",                  (void*) android_hardware_HardwareBuffer_getLayers },
-    { "nGetUsage", "(J)J",                  (void*) android_hardware_HardwareBuffer_getUsage },
+    { "nGetWidth", "(J)I",      (void*) android_hardware_HardwareBuffer_getWidth },
+    { "nGetHeight", "(J)I",     (void*) android_hardware_HardwareBuffer_getHeight },
+    { "nGetFormat", "(J)I",     (void*) android_hardware_HardwareBuffer_getFormat },
+    { "nGetLayers", "(J)I",     (void*) android_hardware_HardwareBuffer_getLayers },
+    { "nGetUsage", "(J)J",      (void*) android_hardware_HardwareBuffer_getUsage },
 };
 
 int register_android_hardware_HardwareBuffer(JNIEnv* env) {

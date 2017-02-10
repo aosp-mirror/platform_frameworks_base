@@ -31,7 +31,6 @@
 #include <GrTypes.h>
 #include <vk/GrVkTypes.h>
 
-#include <android/native_window.h>
 #include <cutils/properties.h>
 #include <strings.h>
 

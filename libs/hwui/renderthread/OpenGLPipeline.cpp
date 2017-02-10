@@ -24,7 +24,6 @@
 #include "renderstate/RenderState.h"
 #include "OpenGLReadback.h"
 
-#include <android/native_window.h>
 #include <cutils/properties.h>
 #include <strings.h>
 
