@@ -75,6 +75,9 @@ import static android.net.wifi.WifiManager.EXTRA_CHANGE_REASON;
 import static android.net.wifi.WifiManager.EXTRA_NETWORK_INFO;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_CONFIGURATION;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_INFO;
+import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
+import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
+import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -141,6 +144,7 @@ import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -153,6 +157,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -174,6 +179,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -204,6 +210,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Calendar;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -317,6 +324,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private UsageStatsManagerInternal mUsageStats;
     private final TrustedTime mTime;
     private final UserManager mUserManager;
+    private final CarrierConfigManager mCarrierConfigManager;
 
     private IConnectivityManager mConnManager;
     private INotificationManager mNotifManager;
@@ -465,6 +473,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Context.DEVICE_IDLE_CONTROLLER));
         mTime = checkNotNull(time, "missing TrustedTime");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
         mIPm = pm;
 
         HandlerThread thread = new HandlerThread(TAG);
@@ -742,6 +751,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final IntentFilter wifiStateFilter = new IntentFilter(
                     WifiManager.NETWORK_STATE_CHANGED_ACTION);
             mContext.registerReceiver(mWifiStateReceiver, wifiStateFilter, null, mHandler);
+
+            // listen for carrier config changes to update data cycle information
+            final IntentFilter carrierConfigFilter = new IntentFilter(
+                    ACTION_CARRIER_CONFIG_CHANGED);
+            mContext.registerReceiver(mCarrierConfigReceiver, carrierConfigFilter, null, mHandler);
 
             mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
             // tell systemReady() that the service has been initialized
@@ -1293,6 +1307,213 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
+     * Update mobile policies with data cycle information from {@link CarrierConfigManager}
+     * if necessary.
+     *
+     * @param subId that has its associated NetworkPolicy updated if necessary
+     * @return if any policies were updated
+     */
+    private boolean maybeUpdateMobilePolicyCycleNL(int subId) {
+        if (LOGV) Slog.v(TAG, "maybeUpdateMobilePolicyCycleNL()");
+        final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+
+        if (config == null) {
+            return false;
+        }
+
+        boolean policyUpdated = false;
+        final String subscriberId = TelephonyManager.from(mContext).getSubscriberId(subId);
+
+        // find and update the mobile NetworkPolicy for this subscriber id
+        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+        for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
+            final NetworkTemplate template = mNetworkPolicy.keyAt(i);
+            if (template.matches(probeIdent)) {
+                NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+
+                // only update the policy if the user didn't change any of the defaults.
+                if (!policy.inferred) {
+                    // TODO: inferred could be split, so that if a user changes their data limit or
+                    // warning, it doesn't prevent their cycle date from being updated.
+                    if (LOGD) Slog.v(TAG, "Didn't update NetworkPolicy because policy.inferred");
+                    continue;
+                }
+
+                final int cycleDay = getCycleDayFromCarrierConfig(config, policy.cycleDay);
+                final long warningBytes = getWarningBytesFromCarrierConfig(config,
+                        policy.warningBytes);
+                final long limitBytes = getLimitBytesFromCarrierConfig(config,
+                        policy.limitBytes);
+
+                if (policy.cycleDay == cycleDay &&
+                        policy.warningBytes == warningBytes &&
+                        policy.limitBytes == limitBytes) {
+                    continue;
+                }
+
+                policyUpdated = true;
+                policy.cycleDay = cycleDay;
+                policy.warningBytes = warningBytes;
+                policy.limitBytes = limitBytes;
+
+                if (LOGD) {
+                    Slog.d(TAG, "Updated NetworkPolicy " + policy + " which matches subscriber "
+                            + NetworkIdentity.scrubSubscriberId(subscriberId)
+                            + " from CarrierConfigManager");
+                }
+            }
+        }
+
+        return policyUpdated;
+    }
+
+    /**
+     * Returns the cycle day that should be used for a mobile NetworkPolicy.
+     *
+     * It attempts to get an appropriate cycle day from the passed in CarrierConfig. If it's unable
+     * to do so, it returns the fallback value.
+     *
+     * @param config The CarrierConfig to read the value from.
+     * @param fallbackCycleDay to return if the CarrierConfig can't be read.
+     * @return cycleDay to use in the mobile NetworkPolicy.
+     */
+    @VisibleForTesting
+    public int getCycleDayFromCarrierConfig(@Nullable PersistableBundle config,
+            int fallbackCycleDay) {
+        if (config == null) {
+            return fallbackCycleDay;
+        }
+        int cycleDay =
+                config.getInt(CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT);
+        if (cycleDay == DATA_CYCLE_USE_PLATFORM_DEFAULT) {
+            return fallbackCycleDay;
+        }
+        // validate cycleDay value
+        final Calendar cal = Calendar.getInstance();
+        if (cycleDay < cal.getMinimum(Calendar.DAY_OF_MONTH) ||
+                cycleDay > cal.getMaximum(Calendar.DAY_OF_MONTH)) {
+            Slog.e(TAG, "Invalid date in "
+                    + "CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT: " + cycleDay);
+            return fallbackCycleDay;
+        }
+        return cycleDay;
+    }
+
+    /**
+     * Returns the warning bytes that should be used for a mobile NetworkPolicy.
+     *
+     * It attempts to get an appropriate value from the passed in CarrierConfig. If it's unable
+     * to do so, it returns the fallback value.
+     *
+     * @param config The CarrierConfig to read the value from.
+     * @param fallbackWarningBytes to return if the CarrierConfig can't be read.
+     * @return warningBytes to use in the mobile NetworkPolicy.
+     */
+    @VisibleForTesting
+    public long getWarningBytesFromCarrierConfig(@Nullable PersistableBundle config,
+            long fallbackWarningBytes) {
+        if (config == null) {
+            return fallbackWarningBytes;
+        }
+        long warningBytes =
+                config.getLong(CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG);
+
+        if (warningBytes == DATA_CYCLE_THRESHOLD_DISABLED) {
+            return WARNING_DISABLED;
+        } else if (warningBytes == DATA_CYCLE_USE_PLATFORM_DEFAULT) {
+            return getPlatformDefaultWarningBytes();
+        } else if (warningBytes < 0) {
+            Slog.e(TAG, "Invalid value in "
+                    + "CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG; expected a "
+                    + "non-negative value but got: " + warningBytes);
+            return fallbackWarningBytes;
+        }
+
+        return warningBytes;
+    }
+
+    /**
+     * Returns the limit bytes that should be used for a mobile NetworkPolicy.
+     *
+     * It attempts to get an appropriate value from the passed in CarrierConfig. If it's unable
+     * to do so, it returns the fallback value.
+     *
+     * @param config The CarrierConfig to read the value from.
+     * @param fallbackLimitBytes to return if the CarrierConfig can't be read.
+     * @return limitBytes to use in the mobile NetworkPolicy.
+     */
+    @VisibleForTesting
+    public long getLimitBytesFromCarrierConfig(@Nullable PersistableBundle config,
+            long fallbackLimitBytes) {
+        if (config == null) {
+            return fallbackLimitBytes;
+        }
+        long limitBytes =
+                config.getLong(CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG);
+
+        if (limitBytes == DATA_CYCLE_THRESHOLD_DISABLED) {
+            return LIMIT_DISABLED;
+        } else if (limitBytes == DATA_CYCLE_USE_PLATFORM_DEFAULT) {
+            return getPlatformDefaultLimitBytes();
+        } else if (limitBytes < 0) {
+            Slog.e(TAG, "Invalid value in "
+                    + "CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG; expected a "
+                    + "non-negative value but got: " + limitBytes);
+            return fallbackLimitBytes;
+        }
+        return limitBytes;
+    }
+
+    /**
+     * Receiver that watches for {@link CarrierConfigManager} to be changed.
+     */
+    private BroadcastReceiver mCarrierConfigReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // No need to do a permission check, because the ACTION_CARRIER_CONFIG_CHANGED
+            // broadcast is protected and can't be spoofed. Runs on a background handler thread.
+
+            if (!intent.hasExtra(PhoneConstants.SUBSCRIPTION_KEY)) {
+                return;
+            }
+            final int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, -1);
+            final TelephonyManager tele = TelephonyManager.from(mContext);
+            final String subscriberId = tele.getSubscriberId(subId);
+
+            maybeRefreshTrustedTime();
+            synchronized (mUidRulesFirstLock) {
+                synchronized (mNetworkPoliciesSecondLock) {
+                    final boolean added = ensureActiveMobilePolicyNL(subId, subscriberId);
+                    if (added) return;
+                    final boolean updated = maybeUpdateMobilePolicyCycleNL(subId);
+                    if (!updated) return;
+                    // update network and notification rules, as the data cycle changed and it's
+                    // possible that we should be triggering warnings/limits now
+                    handleNetworkPoliciesUpdateAL(true);
+                }
+            }
+        }
+    };
+
+    /**
+     * Handles all tasks that need to be run after a new network policy has been set, or an existing
+     * one has been updated.
+     *
+     * @param shouldNormalizePolicies true iff network policies need to be normalized after the
+     *                                update.
+     */
+    void handleNetworkPoliciesUpdateAL(boolean shouldNormalizePolicies) {
+        if (shouldNormalizePolicies) {
+            normalizePoliciesNL();
+        }
+        updateNetworkEnabledNL();
+        updateNetworkRulesNL();
+        updateNotificationsNL();
+        writePolicyAL();
+    }
+
+    /**
      * Proactively control network data connections when they exceed
      * {@link NetworkPolicy#limitBytes}.
      */
@@ -1517,11 +1738,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int[] subIds = sub.getActiveSubscriptionIdList();
         for (int subId : subIds) {
             final String subscriberId = tele.getSubscriberId(subId);
-            ensureActiveMobilePolicyNL(subscriberId);
+            ensureActiveMobilePolicyNL(subId, subscriberId);
         }
     }
 
-    private void ensureActiveMobilePolicyNL(String subscriberId) {
+    /**
+     * Once any {@link #mNetworkPolicy} are loaded from disk, ensure that we
+     * have at least a default mobile policy defined.
+     *
+     * @param subId to build a default policy for
+     * @param subscriberId that we check for an existing policy
+     * @return true if a mobile network policy was added, or false one already existed.
+     */
+    private boolean ensureActiveMobilePolicyNL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
@@ -1532,33 +1761,51 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     Slog.d(TAG, "Found template " + template + " which matches subscriber "
                             + NetworkIdentity.scrubSubscriberId(subscriberId));
                 }
-                return;
+                return false;
             }
         }
 
         Slog.i(TAG, "No policy for subscriber " + NetworkIdentity.scrubSubscriberId(subscriberId)
                 + "; generating default policy");
+        final NetworkPolicy policy = buildDefaultMobilePolicy(subId, subscriberId);
+        addNetworkPolicyNL(policy);
+        return true;
+    }
 
-        // Build default mobile policy, and assume usage cycle starts today
+    private long getPlatformDefaultWarningBytes() {
         final int dataWarningConfig = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_networkPolicyDefaultWarning);
-        final long warningBytes;
         if (dataWarningConfig == WARNING_DISABLED) {
-            warningBytes = WARNING_DISABLED;
+            return WARNING_DISABLED;
         } else {
-            warningBytes = dataWarningConfig * MB_IN_BYTES;
+            return dataWarningConfig * MB_IN_BYTES;
         }
+    }
 
+    private long getPlatformDefaultLimitBytes() {
+        return LIMIT_DISABLED;
+    }
+
+    @VisibleForTesting
+    public NetworkPolicy buildDefaultMobilePolicy(int subId, String subscriberId) {
+        PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+
+        // assume usage cycle starts today
         final Time time = new Time();
         time.setToNow();
 
-        final int cycleDay = time.monthDay;
         final String cycleTimezone = time.timezone;
+
+        final int cycleDay = getCycleDayFromCarrierConfig(config, time.monthDay);
+        final long warningBytes = getWarningBytesFromCarrierConfig(config,
+                getPlatformDefaultWarningBytes());
+        final long limitBytes = getLimitBytesFromCarrierConfig(config,
+                getPlatformDefaultLimitBytes());
 
         final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
         final NetworkPolicy policy = new NetworkPolicy(template, cycleDay, cycleTimezone,
-                warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true, true);
-        addNetworkPolicyNL(policy);
+                warningBytes, limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, true);
+        return policy;
     }
 
     private void readPolicyAL() {
@@ -2026,10 +2273,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     normalizePoliciesNL(policies);
-                    updateNetworkEnabledNL();
-                    updateNetworkRulesNL();
-                    updateNotificationsNL();
-                    writePolicyAL();
+                    handleNetworkPoliciesUpdateAL(false);
                 }
             }
         } finally {
@@ -2126,11 +2370,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         throw new IllegalArgumentException("unexpected type");
                 }
 
-                normalizePoliciesNL();
-                updateNetworkEnabledNL();
-                updateNetworkRulesNL();
-                updateNotificationsNL();
-                writePolicyAL();
+                handleNetworkPoliciesUpdateAL(true);
             }
         }
     }
@@ -2361,11 +2601,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mNetworkPolicy.valueAt(i).clearSnooze();
                     }
 
-                    normalizePoliciesNL();
-                    updateNetworkEnabledNL();
-                    updateNetworkRulesNL();
-                    updateNotificationsNL();
-                    writePolicyAL();
+                    handleNetworkPoliciesUpdateAL(true);
 
                     fout.println("Cleared snooze timestamps");
                     return;
