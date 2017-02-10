@@ -34,7 +34,6 @@
 
 #include <vector>
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"
 namespace RSC {
     class Element;
@@ -42,7 +41,6 @@ namespace RSC {
     class ScriptIntrinsicBlur;
     class sp;
 }
-#endif
 
 namespace android {
 namespace uirenderer {
@@ -201,12 +199,10 @@ private:
     FontCacheHistoryTracker mHistoryTracker;
 #endif
 
-#ifdef ANDROID_ENABLE_RENDERSCRIPT
     // RS constructs
     RSC::sp<RSC::RS> mRs;
     RSC::sp<const RSC::Element> mRsElement;
     RSC::sp<RSC::ScriptIntrinsicBlur> mRsScript;
-#endif
 
     static void computeGaussianWeights(float* weights, int32_t radius);
     static void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,

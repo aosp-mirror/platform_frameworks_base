@@ -28,6 +28,5 @@ LOCAL_SHARED_LIBRARIES += \
     libminikin \
     libandroidfw
 
-ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
-    LOCAL_SHARED_LIBRARIES += libRScpp
-endif
+# enable RENDERSCRIPT
+LOCAL_SHARED_LIBRARIES += libRScpp
