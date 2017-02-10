@@ -359,12 +359,12 @@ public final class PlaybackActivityMonitor
                     try {
                         if (DEBUG) { Log.v(TAG, "unmuting player" + piid); }
                         apc.getPlayerProxy().setVolume(1.0f);
-                        mMutedPlayers.remove(new Integer(piid));
                     } catch (Exception e) {
                         Log.e(TAG, "Error unmuting player " + piid, e);
                     }
                 }
             }
+            mMutedPlayers.clear();
         }
     }
 
