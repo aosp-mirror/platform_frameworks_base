@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
@@ -640,7 +641,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Settings.Secure.ENABLED_INPUT_METHODS, mergedImesAndSubtypesString);
     }
 
-    class MyPackageMonitor extends PackageMonitor {
+    final class MyPackageMonitor extends PackageMonitor {
+        /**
+         * Set of packages to be monitored.
+         *
+         * <p>No need to include packages because of direct-boot unaware IMEs since we always rescan
+         * all the packages when the user is unlocked, and direct-boot awareness will not be changed
+         * dynamically unless the entire package is updated, which also always triggers package
+         * rescanning.</p>
+         */
+        @GuardedBy("mMethodMap")
+        private ArraySet<String> mPackagesToMonitorComponentChange = new ArraySet<>();
+
+        @GuardedBy("mMethodMap")
+        void clearPackagesToMonitorComponentChangeLocked() {
+            mPackagesToMonitorComponentChange.clear();
+        }
+
+        @GuardedBy("mMethodMap")
+        final void addPackageToMonitorComponentChangeLocked(@NonNull String packageName) {
+            mPackagesToMonitorComponentChange.add(packageName);
+        }
+
         private boolean isChangingPackagesOfCurrentUser() {
             final int userId = getChangingUserId();
             final boolean retval = userId == mSettings.getCurrentUserId();
@@ -679,6 +701,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return false;
+        }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            // If this package is in the watch list, we want to check it.
+            synchronized (mMethodMap) {
+                return mPackagesToMonitorComponentChange.contains(packageName);
+            }
         }
 
         @Override
@@ -3039,6 +3069,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mMethodList.clear();
         mMethodMap.clear();
+        mMyPackageMonitor.clearPackagesToMonitorComponentChangeLocked();
 
         // Use for queryIntentServicesAsUser
         final PackageManager pm = mContext.getPackageManager();
@@ -3078,6 +3109,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to load input method " + imeId, e);
+            }
+        }
+
+        // Construct the set of possible IME packages for onPackageChanged() to avoid false
+        // negatives when the package state remains to be the same but only the component state is
+        // changed.
+        {
+            // Here we intentionally use PackageManager.MATCH_DISABLED_COMPONENTS since the purpose
+            // of this query is to avoid false negatives.  PackageManager.MATCH_ALL could be more
+            // conservative, but it seems we cannot use it for now (Issue 35176630).
+            final List<ResolveInfo> allInputMethodServices = pm.queryIntentServicesAsUser(
+                    new Intent(InputMethod.SERVICE_INTERFACE),
+                    PackageManager.MATCH_DISABLED_COMPONENTS, mSettings.getCurrentUserId());
+            final int N = allInputMethodServices.size();
+            for (int i = 0; i < N; ++i) {
+                final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
+                if (!android.Manifest.permission.BIND_INPUT_METHOD.equals(si.permission)) {
+                    continue;
+                }
+                mMyPackageMonitor.addPackageToMonitorComponentChangeLocked(si.packageName);
             }
         }
 
