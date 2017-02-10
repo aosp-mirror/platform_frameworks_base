@@ -211,6 +211,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsColorized;
     private boolean mUseIncreasedCollapsedHeight;
     private boolean mUseIncreasedHeadsUpHeight;
+    private float mTranslationWhenRemoved;
+    private boolean mWasChildInGroupWhenRemoved;
 
     @Override
     public boolean isGroupExpansionChanging() {
@@ -836,8 +838,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setRemoved() {
         mRemoved = true;
-
+        mTranslationWhenRemoved = getTranslationY();
+        mWasChildInGroupWhenRemoved = isChildInGroup();
+        if (isChildInGroup()) {
+            mTranslationWhenRemoved += getNotificationParent().getTranslationY();
+        }
         mPrivateLayout.setRemoved();
+    }
+
+    public boolean wasChildInGroupWhenRemoved() {
+        return mWasChildInGroupWhenRemoved;
+    }
+
+    public float getTranslationWhenRemoved() {
+        return mTranslationWhenRemoved;
     }
 
     public NotificationChildrenContainer getChildrenContainer() {
