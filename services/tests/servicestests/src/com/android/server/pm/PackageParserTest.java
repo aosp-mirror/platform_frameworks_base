@@ -140,6 +140,36 @@ public class PackageParserTest {
         assertAllFieldsExist(deserialized);
     }
 
+    @Test
+    public void test_stringInterning() throws Exception {
+        PackageParser.Package pkg = new PackageParser.Package("foo");
+        setKnownFields(pkg);
+
+        Parcel p = Parcel.obtain();
+        pkg.writeToParcel(p, 0 /* flags */);
+
+        p.setDataPosition(0);
+        PackageParser.Package deserialized = new PackageParser.Package(p);
+
+        p.setDataPosition(0);
+        PackageParser.Package deserialized2 = new PackageParser.Package(p);
+
+        assertSame(deserialized.packageName, deserialized2.packageName);
+        assertSame(deserialized.applicationInfo.permission,
+                deserialized2.applicationInfo.permission);
+        assertSame(deserialized.requestedPermissions.get(0),
+                deserialized2.requestedPermissions.get(0));
+        assertSame(deserialized.protectedBroadcasts.get(0),
+                deserialized2.protectedBroadcasts.get(0));
+        assertSame(deserialized.usesLibraries.get(0),
+                deserialized2.usesLibraries.get(0));
+        assertSame(deserialized.usesOptionalLibraries.get(0),
+                deserialized2.usesOptionalLibraries.get(0));
+        assertSame(deserialized.mVersionName, deserialized2.mVersionName);
+        assertSame(deserialized.mSharedUserId, deserialized2.mSharedUserId);
+    }
+
+
     /**
      * A trivial subclass of package parser that only caches the package name, and throws away
      * all other information.
@@ -407,11 +437,11 @@ public class PackageParserTest {
         pkg.mTrustedOverlay = true;
         pkg.use32bitAbi = true;
         pkg.packageName = "foo";
-        pkg.splitNames = new String[] { "foo" };
-        pkg.volumeUuid = "foo";
-        pkg.codePath = "foo";
-        pkg.baseCodePath = "foo";
-        pkg.splitCodePaths = new String[] { "foo" };
+        pkg.splitNames = new String[] { "foo2" };
+        pkg.volumeUuid = "foo3";
+        pkg.codePath = "foo4";
+        pkg.baseCodePath = "foo5";
+        pkg.splitCodePaths = new String[] { "foo6" };
         pkg.splitRevisionCodes = new int[] { 100 };
         pkg.splitFlags = new int[] { 100 };
         pkg.splitPrivateFlags = new int[] { 100 };
@@ -428,48 +458,55 @@ public class PackageParserTest {
         pkg.providers.add(new PackageParser.Provider(dummy, new ProviderInfo()));
         pkg.services.add(new PackageParser.Service(dummy, new ServiceInfo()));
         pkg.instrumentation.add(new PackageParser.Instrumentation(dummy, new InstrumentationInfo()));
-        pkg.requestedPermissions.add("foo");
+        pkg.requestedPermissions.add("foo7");
 
         pkg.protectedBroadcasts = new ArrayList<>();
-        pkg.protectedBroadcasts.add("foo");
+        pkg.protectedBroadcasts.add("foo8");
 
-        pkg.parentPackage = new PackageParser.Package("foo");
+        pkg.parentPackage = new PackageParser.Package("foo9");
 
         pkg.childPackages = new ArrayList<>();
         pkg.childPackages.add(new PackageParser.Package("bar"));
 
+        pkg.staticSharedLibName = "foo23";
+        pkg.staticSharedLibVersion = 100;
+        pkg.usesStaticLibraries = new ArrayList<>();
+        pkg.usesStaticLibraries.add("foo23");
+        pkg.usesStaticLibrariesCertDigests = new String[] { "digest" };
+        pkg.usesStaticLibrariesVersions = new int[] { 100 };
+
         pkg.libraryNames = new ArrayList<>();
-        pkg.libraryNames.add("foo");
+        pkg.libraryNames.add("foo10");
 
         pkg.usesLibraries = new ArrayList<>();
-        pkg.usesLibraries.add("foo");
+        pkg.usesLibraries.add("foo11");
 
         pkg.usesOptionalLibraries = new ArrayList<>();
-        pkg.usesOptionalLibraries.add("foo");
+        pkg.usesOptionalLibraries.add("foo12");
 
-        pkg.usesLibraryFiles = new String[] { "foo "};
+        pkg.usesLibraryFiles = new String[] { "foo13"};
 
         pkg.mOriginalPackages = new ArrayList<>();
-        pkg.mOriginalPackages.add("foo");
+        pkg.mOriginalPackages.add("foo14");
 
-        pkg.mRealPackage = "foo";
+        pkg.mRealPackage = "foo15";
 
         pkg.mAdoptPermissions = new ArrayList<>();
-        pkg.mAdoptPermissions.add("foo");
+        pkg.mAdoptPermissions.add("foo16");
 
         pkg.mAppMetaData = new Bundle();
-        pkg.mVersionName = "foo";
-        pkg.mSharedUserId = "foo";
+        pkg.mVersionName = "foo17";
+        pkg.mSharedUserId = "foo18";
         pkg.mSignatures = new Signature[] { new Signature(new byte[16]) };
         pkg.mCertificates = new Certificate[][] { new Certificate[] { null }};
         pkg.mExtras = new Bundle();
-        pkg.mRestrictedAccountType = "foo";
-        pkg.mRequiredAccountType = "foo";
-        pkg.mOverlayTarget = "foo";
+        pkg.mRestrictedAccountType = "foo19";
+        pkg.mRequiredAccountType = "foo20";
+        pkg.mOverlayTarget = "foo21";
         pkg.mSigningKeys = new ArraySet<>();
         pkg.mUpgradeKeySets = new ArraySet<>();
         pkg.mKeySetMapping = new ArrayMap<>();
-        pkg.cpuAbiOverride = "foo";
+        pkg.cpuAbiOverride = "foo22";
         pkg.restrictUpdateHash = new byte[16];
 
         pkg.preferredActivityFilters = new ArrayList<>();
@@ -504,7 +541,7 @@ public class PackageParserTest {
                 // Sanity check for list fields: Assume they're non-null and contain precisely
                 // one element.
                 List<?> list = (List<?>) f.get(pkg);
-                assertNotNull(list);
+                assertNotNull("List was null: " + f, list);
                 assertEquals(1, list.size());
             } else if (fieldType.getComponentType() != null) {
                 // Sanity check for array fields: Assume they're non-null and contain precisely
@@ -514,15 +551,16 @@ public class PackageParserTest {
             } else if (fieldType == String.class) {
                 // String fields: Check that they're set to "foo".
                 String value = (String) f.get(pkg);
-                assertEquals("foo", value);
+
+                assertTrue("Bad value for field: " + f, value != null && value.startsWith("foo"));
             } else if (fieldType == int.class) {
                 // int fields: Check that they're set to 100.
                 int value = (int) f.get(pkg);
-                assertEquals(100, value);
+                assertEquals("Bad value for field: " + f, 100, value);
             } else {
                 // All other fields: Check that they're set.
                 Object o = f.get(pkg);
-                assertNotNull("Field was null: " + f.getName(), o);
+                assertNotNull("Field was null: " + f, o);
             }
         }
     }
