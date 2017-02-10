@@ -361,7 +361,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final String ACTION_BUGREPORT_SHARING_ACCEPTED =
-            "com.android.server.action.BUGREPORT_SHARING_ACCEPTED";
+            "com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED";
 
     /**
      * Action: Bugreport sharing with device owner has been declined by the user.
@@ -369,7 +369,7 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final String ACTION_BUGREPORT_SHARING_DECLINED =
-            "com.android.server.action.BUGREPORT_SHARING_DECLINED";
+            "com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED";
 
     /**
      * Action: Bugreport has been collected and is dispatched to {@link DevicePolicyManagerService}.
