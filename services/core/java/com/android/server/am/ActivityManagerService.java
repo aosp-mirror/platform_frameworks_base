@@ -9916,7 +9916,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveStackToDisplay: moving stackId=" + stackId
                         + " to displayId=" + displayId);
-                mStackSupervisor.moveStackToDisplayLocked(stackId, displayId);
+                mStackSupervisor.moveStackToDisplayLocked(stackId, displayId, ON_TOP);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

@@ -216,6 +216,8 @@ final class LogicalDisplay {
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRIVATE;
+                // For private displays by default content is destroyed on removal.
+                mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_DESTROY_CONTENT;
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRESENTATION) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRESENTATION;

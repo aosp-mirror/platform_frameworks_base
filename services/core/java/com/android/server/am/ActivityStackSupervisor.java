@@ -40,6 +40,7 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
@@ -2616,8 +2617,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Move stack with all its existing content to specified display.
      * @param stackId Id of stack to move.
      * @param displayId Id of display to move stack to.
+     * @param onTop Indicates whether container should be place on top or on bottom.
      */
-    void moveStackToDisplayLocked(int stackId, int displayId) {
+    void moveStackToDisplayLocked(int stackId, int displayId, boolean onTop) {
         final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException("moveStackToDisplayLocked: Unknown displayId="
@@ -2631,7 +2633,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             + " to its current displayId=" + displayId);
                 }
 
-                activityContainer.moveToDisplayLocked(activityDisplay);
+                activityContainer.moveToDisplayLocked(activityDisplay, onTop);
             } else {
                 throw new IllegalStateException("moveStackToDisplayLocked: Stack with stackId="
                         + stackId + " is not attached to any display.");
@@ -3777,12 +3779,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         synchronized (mService) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             if (activityDisplay != null) {
+                final boolean destroyContentOnRemoval
+                        = activityDisplay.shouldDestroyContentOnRemove();
                 ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
                 for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                     final ActivityStack stack = stacks.get(stackNdx);
-                    // TODO: Implement proper stack removal and ability to choose the behavior -
-                    // remove stack completely or move it to other display.
-                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY);
+                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
+                            !destroyContentOnRemoval /* onTop */);
+                    if (destroyContentOnRemoval) {
+                        stack.finishAllActivitiesLocked(true /* immediately */);
+                    }
                 }
                 mActivityDisplays.remove(displayId);
             }
@@ -4451,8 +4457,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         /**
          * Move the stack to specified display.
          * @param activityDisplay Target display to move the stack to.
+         * @param onTop Indicates whether container should be place on top or on bottom.
          */
-        void moveToDisplayLocked(ActivityDisplay activityDisplay) {
+        void moveToDisplayLocked(ActivityDisplay activityDisplay, boolean onTop) {
             if (DEBUG_STACK) Slog.d(TAG_STACK, "moveToDisplayLocked: " + this + " from display="
                     + mActivityDisplay + " to display=" + activityDisplay
                     + " Callers=" + Debug.getCallers(2));
@@ -4460,7 +4467,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             removeFromDisplayLocked();
 
             mActivityDisplay = activityDisplay;
-            mStack.reparent(activityDisplay, ON_TOP);
+            mStack.reparent(activityDisplay, onTop);
         }
 
         @Override
@@ -4642,8 +4649,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         /** Actual Display this object tracks. */
         int mDisplayId;
         Display mDisplay;
-        private final DisplayMetrics mRealMetrics = new DisplayMetrics();
-        private final Point mRealSize = new Point();
 
         /** All of the stacks on this display. Order matters, topmost stack is in front of all other
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
@@ -4736,6 +4741,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 stack.getPresentUIDs(mDisplayAccessUIDs);
             }
             return mDisplayAccessUIDs;
+        }
+
+        boolean shouldDestroyContentOnRemove() {
+            return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
         }
     }
 
