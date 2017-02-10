@@ -2328,7 +2328,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
-            } case NOTIFY_VR_SLEEPING_MSG: {
+            } break;
+            case NOTIFY_VR_SLEEPING_MSG: {
                 notifyVrManagerOfSleepState(msg.arg1 != 0);
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
