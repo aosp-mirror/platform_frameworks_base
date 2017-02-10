@@ -37,7 +37,9 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
     public SchedulingPolicyService() {
     }
 
-    public int requestPriority(int pid, int tid, int prio) {
+    // TODO(b/35196900) We should pass the period in time units, rather
+    // than a fixed priority number.
+    public int requestPriority(int pid, int tid, int prio, boolean isForApp) {
         //Log.i(TAG, "requestPriority(pid=" + pid + ", tid=" + tid + ", prio=" + prio + ")");
 
         // Verify that the caller uid is permitted, priority is in range,
@@ -52,7 +54,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         }
         try {
             // make good use of our CAP_SYS_NICE capability
-            Process.setThreadGroup(tid, Binder.getCallingPid() == pid ?
+            Process.setThreadGroup(tid, !isForApp ?
                     Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_AUDIO_APP);
             // must be in this order or it fails the schedulability constraint
             Process.setThreadScheduler(tid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK,
