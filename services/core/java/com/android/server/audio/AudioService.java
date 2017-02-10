@@ -778,7 +778,8 @@ public class AudioService extends IAudioService.Stub
                 0,
                 0,
                 TAG,
-                SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
+                SystemProperties.getBoolean("audio.safemedia.bypass", false) ?
+                        0 : SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
         initA11yMonitoring();
         onIndicateSystemReady();
