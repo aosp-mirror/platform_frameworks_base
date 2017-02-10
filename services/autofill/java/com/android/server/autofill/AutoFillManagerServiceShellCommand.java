@@ -20,15 +20,14 @@ import android.app.ActivityManager;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.service.autofill.IAutoFillManagerService;
 
 import java.io.PrintWriter;
 
 public final class AutoFillManagerServiceShellCommand extends ShellCommand {
 
-    private final IAutoFillManagerService.Stub mService;
+    private final AutoFillManagerService mService;
 
-    public AutoFillManagerServiceShellCommand(IAutoFillManagerService.Stub service) {
+    public AutoFillManagerServiceShellCommand(AutoFillManagerService service) {
         mService = service;
     }
 
