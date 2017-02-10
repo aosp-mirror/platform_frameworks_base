@@ -876,9 +876,9 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     sk_sp<SkColorSpace> colorSpace;
     if (kRGBA_F16_SkColorType == colorType) {
-        colorSpace = SkColorSpace::MakeNamed(SkColorSpace::kSRGBLinear_Named);
+        colorSpace = SkColorSpace::MakeSRGBLinear();
     } else {
-        colorSpace = isSRGB ? SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named) : nullptr;
+        colorSpace = isSRGB ? SkColorSpace::MakeSRGB() : nullptr;
     }
 
     if (!bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType, colorSpace),
@@ -997,7 +997,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
     bool isSRGB = bitmap.colorSpace() == sRGB.get();
 
     p->writeInt32(isMutable);

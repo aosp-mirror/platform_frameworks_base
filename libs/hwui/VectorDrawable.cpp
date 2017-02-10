@@ -564,7 +564,7 @@ bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {
 #ifndef ANDROID_ENABLE_LINEAR_BLENDING
         sk_sp<SkColorSpace> colorSpace = nullptr;
 #else
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
 #endif
         SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
         cache.bitmap = Bitmap::allocateHeapBitmap(info);

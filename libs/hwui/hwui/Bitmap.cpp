@@ -232,7 +232,7 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(uirenderer::renderthread::RenderThr
         return nullptr;
     }
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
     bool needSRGB = skBitmap.info().colorSpace() == sRGB.get();
     bool hasSRGB = caches.extensions().hasSRGB();
     GLint format, type, internalFormat;
@@ -324,7 +324,7 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
     }
     SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
             kRGBA_8888_SkColorType, kPremul_SkAlphaType,
-            SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named));
+            SkColorSpace::MakeSRGB());
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
 }
 

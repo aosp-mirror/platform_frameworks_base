@@ -109,7 +109,7 @@ public:
     }
 
     bool capturePixels(SkBitmap* bmp) {
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
         SkImageInfo destinationConfig =
             SkImageInfo::Make(mSize.width(), mSize.height(),
                               kRGBA_8888_SkColorType, kPremul_SkAlphaType, colorSpace);
