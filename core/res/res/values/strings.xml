@@ -3527,11 +3527,6 @@
     <!-- Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE] -->
     <string name="description_target_unlock_tablet">Swipe to unlock.</string>
 
-    <!-- Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE] -->
-    <string name="keyboard_headset_required_to_hear_password">Plug in a headset to hear password keys spoken.</string>
-    <!-- The value of a keyboard key announced when accessibility is enabled and no headsed is used. [CHAR LIMIT=NONE] -->
-    <string name="keyboard_password_character_no_headset">Dot.</string>
-
     <!-- Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] -->
     <string name="action_bar_home_description">Navigate home</string>
     <!-- Content description for the action bar "up" affordance. [CHAR LIMIT=NONE] -->

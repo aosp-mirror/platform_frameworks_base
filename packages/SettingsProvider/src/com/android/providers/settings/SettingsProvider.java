@@ -2735,7 +2735,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 139;
+            private static final int SETTINGS_VERSION = 140;
 
             private final int mUserId;
 
@@ -3184,6 +3184,16 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 138) {
                     // Version 139: Removed.
                     currentVersion = 139;
+                }
+
+                if (currentVersion == 139) {
+                    // Version 140: Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD is deprecated and
+                    // the user can no longer change the value of this setting through the UI.
+                    // Force to true.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    secureSettings.updateSettingLocked(Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
+                            "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 140;
                 }
 
                 if (currentVersion != newVersion) {

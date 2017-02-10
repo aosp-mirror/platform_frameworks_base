@@ -988,49 +988,31 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mAccessibilityManager.isEnabled()) {
             AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
             onInitializeAccessibilityEvent(event);
-            String text = null;
-            // This is very efficient since the properties are cached.
-            final boolean speakPassword = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                    UserHandle.USER_CURRENT_OR_SELF) != 0;
-            // Add text only if password announcement is enabled or if headset is
-            // used to avoid leaking passwords.
-            if (speakPassword || mAudioManager.isBluetoothA2dpOn()
-                    || mAudioManager.isWiredHeadsetOn()) {
-                switch (code) {
-                    case Keyboard.KEYCODE_ALT:
-                        text = mContext.getString(R.string.keyboardview_keycode_alt);
-                        break;
-                    case Keyboard.KEYCODE_CANCEL:
-                        text = mContext.getString(R.string.keyboardview_keycode_cancel);
-                        break;
-                    case Keyboard.KEYCODE_DELETE:
-                        text = mContext.getString(R.string.keyboardview_keycode_delete);
-                        break;
-                    case Keyboard.KEYCODE_DONE:
-                        text = mContext.getString(R.string.keyboardview_keycode_done);
-                        break;
-                    case Keyboard.KEYCODE_MODE_CHANGE:
-                        text = mContext.getString(R.string.keyboardview_keycode_mode_change);
-                        break;
-                    case Keyboard.KEYCODE_SHIFT:
-                        text = mContext.getString(R.string.keyboardview_keycode_shift);
-                        break;
-                    case '\n':
-                        text = mContext.getString(R.string.keyboardview_keycode_enter);
-                        break;
-                    default:
-                        text = String.valueOf((char) code);
-                }
-            } else if (!mHeadsetRequiredToHearPasswordsAnnounced) {
-                // We want the waring for required head set to be send with both the
-                // hover enter and hover exit event, so set the flag after the exit.
-                if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-                    mHeadsetRequiredToHearPasswordsAnnounced = true;
-                }
-                text = mContext.getString(R.string.keyboard_headset_required_to_hear_password);
-            } else {
-                text = mContext.getString(R.string.keyboard_password_character_no_headset);
+            final String text;
+            switch (code) {
+                case Keyboard.KEYCODE_ALT:
+                    text = mContext.getString(R.string.keyboardview_keycode_alt);
+                    break;
+                case Keyboard.KEYCODE_CANCEL:
+                    text = mContext.getString(R.string.keyboardview_keycode_cancel);
+                    break;
+                case Keyboard.KEYCODE_DELETE:
+                    text = mContext.getString(R.string.keyboardview_keycode_delete);
+                    break;
+                case Keyboard.KEYCODE_DONE:
+                    text = mContext.getString(R.string.keyboardview_keycode_done);
+                    break;
+                case Keyboard.KEYCODE_MODE_CHANGE:
+                    text = mContext.getString(R.string.keyboardview_keycode_mode_change);
+                    break;
+                case Keyboard.KEYCODE_SHIFT:
+                    text = mContext.getString(R.string.keyboardview_keycode_shift);
+                    break;
+                case '\n':
+                    text = mContext.getString(R.string.keyboardview_keycode_enter);
+                    break;
+                default:
+                    text = String.valueOf((char) code);
             }
             event.getText().add(text);
             mAccessibilityManager.sendAccessibilityEvent(event);

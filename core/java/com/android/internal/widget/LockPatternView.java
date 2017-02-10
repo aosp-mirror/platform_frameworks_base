@@ -1489,21 +1489,10 @@ public class LockPatternView extends View {
             return bounds;
         }
 
-        private boolean shouldSpeakPassword() {
-            final boolean speakPassword = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                    UserHandle.USER_CURRENT_OR_SELF) != 0;
-            final boolean hasHeadphones = mAudioManager != null ?
-                    (mAudioManager.isWiredHeadsetOn() || mAudioManager.isBluetoothA2dpOn())
-                    : false;
-            return speakPassword || hasHeadphones;
-        }
-
         private CharSequence getTextForVirtualView(int virtualViewId) {
             final Resources res = getResources();
-            return shouldSpeakPassword() ? res.getString(
-                R.string.lockscreen_access_pattern_cell_added_verbose, virtualViewId)
-                : res.getString(R.string.lockscreen_access_pattern_cell_added);
+            return res.getString(R.string.lockscreen_access_pattern_cell_added_verbose,
+                    virtualViewId);
         }
 
         /**

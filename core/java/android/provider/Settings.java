@@ -5492,7 +5492,12 @@ public final class Settings {
 
         /**
          * Whether to speak passwords while in accessibility mode.
+         *
+         * @deprecated The speaking of passwords is controlled by individual accessibility services.
+         * Apps should ignore this setting and provide complete information to accessibility
+         * at all times, which was the behavior when this value was {@code true}.
          */
+        @Deprecated
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
 
         /**
