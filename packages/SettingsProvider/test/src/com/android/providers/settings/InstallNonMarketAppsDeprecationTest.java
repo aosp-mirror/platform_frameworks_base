@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -47,6 +48,7 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
 
     private UserManager mUm;
     private boolean mHasUserRestriction;
+    private boolean mSystemSetUserRestriction;
     private List<UserInfo> mCurrentUsers;
 
     private String waitTillValueChanges(String errorMessage, String oldValue) {
@@ -84,6 +86,9 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
     public void setUp() {
         mUm = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mHasUserRestriction = mUm.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        mSystemSetUserRestriction = mUm.getUserRestrictionSource(
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, Process.myUserHandle())
+                == UserManager.RESTRICTION_SOURCE_SYSTEM;
         mCurrentUsers = mUm.getUsers();
     }
 
@@ -117,6 +122,13 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
         String value = getSetting(SETTING_TYPE_SECURE, Settings.Secure.INSTALL_NON_MARKET_APPS);
         assertEquals(value, mHasUserRestriction ? "0" : "1");
 
+        if (mHasUserRestriction && !mSystemSetUserRestriction) {
+            // User restriction set by device policy. This case should be covered in DO/PO related
+            // tests. Pass.
+            Log.w(TAG, "User restriction set by PO/DO. Skipping testValueRespectsUserRestriction");
+            return;
+        }
+
         mUm.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, !mHasUserRestriction);
         value = waitTillValueChanges(
                 "Changing user restriction did not change the value of install_non_market_apps",
@@ -132,8 +144,8 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
 
     @After
     public void tearDown() {
-        if (mUm.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
-                != mHasUserRestriction) {
+        if (!mHasUserRestriction || mSystemSetUserRestriction) {
+            // The test may have modified the user restriction state. Restore it.
             mUm.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
                     mHasUserRestriction);
         }

@@ -193,6 +193,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2890,11 +2891,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private void ensureUnknownSourcesRestrictionForProfileOwners() {
+        synchronized (this) {
+            for (int userId : mOwners.getProfileOwnerKeys().toArray(new Integer[0])) {
+                if (!mUserManager.isManagedProfile(userId) ||
+                        Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) == 0) {
+                    continue;
+                }
+                setUserRestrictionOnBehalfOfProfileOwnerLocked(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId);
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
+            }
+        }
+    }
+
+    private void setUserRestrictionOnBehalfOfProfileOwnerLocked(String userRestrictionKey,
+            int userId) {
+        if (UserRestrictionsUtils.isValidRestriction(userRestrictionKey) &&
+                UserRestrictionsUtils.canProfileOwnerChange(userRestrictionKey, userId)) {
+            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
+            if (profileOwner == null) {
+                return;
+            }
+            Bundle restrictions = profileOwner.ensureUserRestrictions();
+            restrictions.putBoolean(userRestrictionKey, true);
+            saveUserRestrictionsLocked(userId);
+        }
+    }
+
     private void onLockSettingsReady() {
         getUserData(UserHandle.USER_SYSTEM);
         loadOwners();
         cleanUpOldUsers();
-
+        ensureUnknownSourcesRestrictionForProfileOwners();
         onStartUser(UserHandle.USER_SYSTEM);
 
         // Register an observer for watching for user setup complete.
@@ -6616,6 +6647,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.writeProfileOwner(userHandle);
             Slog.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
 
+            if (mUserManager.isManagedProfile(userHandle)) {
+                setUserRestrictionOnBehalfOfProfileOwnerLocked(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userHandle);
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userHandle);
+            }
             return true;
         }
     }
@@ -8697,7 +8734,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException(String.format(
                         "Permission denial: Profile owners cannot update %1$s", setting));
             }
-
+            if (setting.equals(Settings.Secure.INSTALL_NON_MARKET_APPS)) {
+                if (getTargetSdk(who.getPackageName(), callingUserId) >= Build.VERSION_CODES.O) {
+                    throw new UnsupportedOperationException(Settings.Secure.INSTALL_NON_MARKET_APPS
+                            + " is deprecated. Please use the user restriction "
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES + " instead.");
+                }
+                if (!mUserManager.isManagedProfile(callingUserId)) {
+                    Slog.e(LOG_TAG, "Ignoring setSecureSetting request for "
+                            + setting + ". User restriction "
+                            + UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES
+                            + " should be used instead.");
+                } else {
+                    try {
+                        setUserRestriction(who, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                                (Integer.parseInt(value) == 0) ? true : false);
+                    } catch (NumberFormatException exc) {
+                        Slog.e(LOG_TAG, "Invalid value: " + value + " for setting " + setting);
+                    }
+                }
+                return;
+            }
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
