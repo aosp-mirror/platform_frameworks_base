@@ -18,7 +18,7 @@ package com.android.internal.os;
 
 import android.os.Process;
 import android.util.Slog;
-
+import com.android.internal.os.Zygote.MethodAndArgsCaller;
 import dalvik.system.VMRuntime;
 import java.io.DataOutputStream;
 import java.io.FileDescriptor;
@@ -80,7 +80,7 @@ public class WrapperInit {
             // Launch the application.
             String[] runtimeArgs = new String[args.length - 2];
             System.arraycopy(args, 2, runtimeArgs, 0, runtimeArgs.length);
-            RuntimeInit.wrapperInit(targetSdkVersion, runtimeArgs);
+            WrapperInit.wrapperInit(targetSdkVersion, runtimeArgs);
         } catch (Zygote.MethodAndArgsCaller caller) {
             caller.run();
         }
@@ -120,5 +120,25 @@ public class WrapperInit {
         command.append(targetSdkVersion);
         Zygote.appendQuotedShellArgs(command, args);
         Zygote.execShell(command.toString());
+    }
+
+    /**
+     * The main function called when an application is started through a
+     * wrapper process.
+     *
+     * When the wrapper starts, the runtime starts {@link RuntimeInit#main}
+     * which calls {@link main} which then calls this method.
+     * So we don't need to call commonInit() here.
+     *
+     * @param targetSdkVersion target SDK version
+     * @param argv arg strings
+     */
+    private static void wrapperInit(int targetSdkVersion, String[] argv)
+            throws Zygote.MethodAndArgsCaller {
+        if (RuntimeInit.DEBUG) {
+            Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from wrapper");
+        }
+
+        RuntimeInit.applicationInit(targetSdkVersion, argv, null);
     }
 }
