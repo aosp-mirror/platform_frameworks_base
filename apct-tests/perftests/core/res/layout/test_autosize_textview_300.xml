@@ -19,8 +19,7 @@
           android:layout_width="400dp"
           android:layout_height="600dp"
           android:text="@string/long_text"
-          android:textDirection="rtl"
-          android:autoSizeText="xy"
+          android:autoSizeText="uniform"
           android:autoSizeMinTextSize="10px"
           android:textSize="310px"
           android:autoSizeStepGranularity="1px"/>

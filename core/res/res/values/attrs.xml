@@ -4714,16 +4714,16 @@
             <!-- No auto-sizing (default). -->
             <enum name="none" value="0" />
             <!-- Uniform horizontal and vertical scaling. -->
-            <enum name="xy" value="1" />
+            <enum name="uniform" value="1" />
         </attr>
         <!-- Specify the auto-size step size if <code>autoSizeText</code> is set to
         <code>xy</code>. The default is 1px. Overwrites
-        <code>autoSizeStepSizeSet</code> if set. -->
+        <code>autoSizePresetSizes</code> if set. -->
         <attr name="autoSizeStepGranularity" format="dimension" />
         <!-- Array of dimensions to be used in conjunction with
         <code>autoSizeText</code> set to <code>xy</code>. Overwrites
         <code>autoSizeStepGranularity</code> if set. -->
-        <attr name="autoSizeStepSizeSet"/>
+        <attr name="autoSizePresetSizes"/>
         <!-- The minimum text size constraint to be used when auto-sizing text -->
         <attr name="autoSizeMinTextSize" format="dimension" />
         <!-- The maximum text size constraint to be used when auto-sizing text -->
