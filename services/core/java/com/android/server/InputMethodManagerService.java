@@ -175,7 +175,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_CREATE_SESSION = 1050;
 
     static final int MSG_START_INPUT = 2000;
-    static final int MSG_RESTART_INPUT = 2010;
 
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
@@ -1341,15 +1340,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mBoundToMethod = true;
         }
         final SessionState session = mCurClient.curSession;
-        if (initial) {
-            executeOrSendMessage(session.method, mCaller.obtainMessageIOOO(
-                    MSG_START_INPUT, mCurInputContextMissingMethods, session, mCurInputContext,
-                    mCurAttribute));
-        } else {
-            executeOrSendMessage(session.method, mCaller.obtainMessageIOOO(
-                    MSG_RESTART_INPUT, mCurInputContextMissingMethods, session, mCurInputContext,
-                    mCurAttribute));
-        }
+        executeOrSendMessage(session.method, mCaller.obtainMessageIIOOO(
+                MSG_START_INPUT, initial ? 0 : 1 /* restarting */, mCurInputContextMissingMethods,
+                session, mCurInputContext, mCurAttribute));
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
@@ -2898,25 +2891,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             case MSG_START_INPUT: {
                 int missingMethods = msg.arg1;
+                boolean restarting = msg.arg2 != 0;
                 args = (SomeArgs) msg.obj;
                 try {
                     SessionState session = (SessionState) args.arg1;
                     setEnabledSessionInMainThread(session);
                     session.method.startInput((IInputContext) args.arg2, missingMethods,
-                            (EditorInfo) args.arg3);
-                } catch (RemoteException e) {
-                }
-                args.recycle();
-                return true;
-            }
-            case MSG_RESTART_INPUT: {
-                int missingMethods = msg.arg1;
-                args = (SomeArgs) msg.obj;
-                try {
-                    SessionState session = (SessionState) args.arg1;
-                    setEnabledSessionInMainThread(session);
-                    session.method.restartInput((IInputContext) args.arg2, missingMethods,
-                            (EditorInfo) args.arg3);
+                            (EditorInfo) args.arg3, restarting);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
