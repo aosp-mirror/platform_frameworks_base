@@ -18,6 +18,7 @@ package com.android.server.backup;
 
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
@@ -355,10 +356,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public int requestBackup(String[] packages, IBackupObserver observer, int flags)
-            throws RemoteException {
+    public int requestBackup(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags) throws RemoteException {
         BackupManagerService svc = mService;
-        return (svc != null) ? svc.requestBackup(packages, observer, flags) : null;
+        return (svc != null) ? svc.requestBackup(packages, observer, monitor, flags) : null;
     }
 
     @Override

@@ -19,6 +19,7 @@ package android.app.backup;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -556,7 +557,7 @@ public class BackupManager {
      */
     @SystemApi
     public int requestBackup(String[] packages, BackupObserver observer) {
-        return requestBackup(packages, observer, 0);
+        return requestBackup(packages, observer, null, 0);
     }
 
     /**
@@ -570,20 +571,26 @@ public class BackupManager {
      * @param packages List of package names to backup.
      * @param observer The {@link BackupObserver} to receive callbacks during the backup
      *                 operation. Could be {@code null}.
+     * @param monitor  The {@link BackupManagerMonitorWrapper} to receive callbacks of important
+     *                 events during the backup operation. Could be {@code null}.
      * @param flags    {@link #FLAG_NON_INCREMENTAL_BACKUP}.
      * @return {@link BackupManager#SUCCESS} on success; nonzero on error.
      * @throws IllegalArgumentException on null or empty {@code packages} param.
      * @hide
      */
     @SystemApi
-    public int requestBackup(String[] packages, BackupObserver observer, int flags) {
+    public int requestBackup(String[] packages, BackupObserver observer,
+            BackupManagerMonitor monitor, int flags) {
         checkServiceBinder();
         if (sService != null) {
             try {
                 BackupObserverWrapper observerWrapper = observer == null
                         ? null
                         : new BackupObserverWrapper(mContext, observer);
-                return sService.requestBackup(packages, observerWrapper, flags);
+                BackupManagerMonitorWrapper monitorWrapper = monitor == null
+                        ? null
+                        : new BackupManagerMonitorWrapper(monitor);
+                return sService.requestBackup(packages, observerWrapper, monitorWrapper, flags);
             } catch (RemoteException e) {
                 Log.e(TAG, "requestBackup() couldn't connect");
             }
@@ -680,4 +687,18 @@ public class BackupManager {
             });
         }
     }
+
+    private class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
+        final BackupManagerMonitor mMonitor;
+
+        BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
+            mMonitor = monitor;
+        }
+
+        @Override
+        public void onEvent(final Bundle event) throws RemoteException {
+            mMonitor.onEvent(event);
+        }
+    }
+
 }

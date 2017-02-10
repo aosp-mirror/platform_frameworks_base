@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.app.backup.IBackupObserver;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
@@ -376,9 +377,13 @@ interface IBackupManager {
      * @param observer The {@link BackupObserver} to receive callbacks during the backup
      * operation.
      *
+     * @param monitor the {@link BackupManagerMonitor} to receive callbacks about important events
+     * during the backup operation.
+     *
      * @param flags {@link BackupManager#FLAG_NON_INCREMENTAL_BACKUP}.
      *
      * @return Zero on success; nonzero on error.
      */
-    int requestBackup(in String[] packages, IBackupObserver observer, int flags);
+    int requestBackup(in String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor,
+        int flags);
 }

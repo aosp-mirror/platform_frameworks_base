@@ -104,6 +104,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/trust/ITrustListener.aidl \
 	core/java/android/app/backup/IBackupManager.aidl \
 	core/java/android/app/backup/IBackupObserver.aidl \
+	core/java/android/app/backup/IBackupManagerMonitor.aidl \
 	core/java/android/app/backup/IFullBackupRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreObserver.aidl \
 	core/java/android/app/backup/IRestoreSession.aidl \

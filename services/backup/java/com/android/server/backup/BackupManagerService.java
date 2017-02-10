@@ -30,18 +30,20 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
 import android.app.backup.BackupTransport;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
-import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
+import android.app.backup.IBackupManagerMonitor;
+import android.app.backup.RestoreDescription;
+import android.app.backup.RestoreSet;
+import android.app.backup.IBackupManager;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
-import android.app.backup.RestoreDescription;
-import android.app.backup.RestoreSet;
 import android.app.backup.SelectBackupTransportCallback;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -427,6 +429,7 @@ public class BackupManagerService {
         public IBackupTransport transport;
         public String dirName;
         public IRestoreObserver observer;
+        public IBackupManagerMonitor monitor;
         public long token;
         public PackageInfo pkgInfo;
         public int pmToken; // in post-install restore, the PM's token for this transaction
@@ -565,17 +568,19 @@ public class BackupManagerService {
         public ArrayList<String> kvPackages;
         public ArrayList<String> fullPackages;
         public IBackupObserver observer;
+        public IBackupManagerMonitor monitor;
         public boolean userInitiated;
         public boolean nonIncrementalBackup;
 
         BackupParams(IBackupTransport transport, String dirName, ArrayList<String> kvPackages,
-                ArrayList<String> fullPackages, IBackupObserver observer, boolean userInitiated,
-                boolean nonIncrementalBackup) {
+                ArrayList<String> fullPackages, IBackupObserver observer,
+                IBackupManagerMonitor monitor,boolean userInitiated, boolean nonIncrementalBackup) {
             this.transport = transport;
             this.dirName = dirName;
             this.kvPackages = kvPackages;
             this.fullPackages = fullPackages;
             this.observer = observer;
+            this.monitor = monitor;
             this.userInitiated = userInitiated;
             this.nonIncrementalBackup = nonIncrementalBackup;
         }
@@ -785,8 +790,8 @@ public class BackupManagerService {
                     // Spin up a backup state sequence and set it running
                     try {
                         String dirName = transport.transportDirName();
-                        PerformBackupTask pbt = new PerformBackupTask(transport, dirName,
-                                queue, oldJournal, null, null, false, false /* nonIncremental */);
+                        PerformBackupTask pbt = new PerformBackupTask(transport, dirName, queue,
+                                oldJournal, null, null, null, false, false /* nonIncremental */);
                         Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                         sendMessage(pbtMessage);
                     } catch (Exception e) {
@@ -861,8 +866,8 @@ public class BackupManagerService {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 BackupRestoreTask task = new PerformUnifiedRestoreTask(params.transport,
-                        params.observer, params.token, params.pkgInfo, params.pmToken,
-                        params.isSystemRestore, params.filterSet);
+                        params.observer, params.monitor, params.token, params.pkgInfo,
+                        params.pmToken, params.isSystemRestore, params.filterSet);
                 Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
                 sendMessage(restoreMsg);
                 break;
@@ -1025,7 +1030,7 @@ public class BackupManagerService {
                 mWakelock.acquire();
 
                 PerformBackupTask pbt = new PerformBackupTask(params.transport, params.dirName,
-                        kvQueue, null, params.observer, params.fullPackages, true,
+                        kvQueue, null, params.observer, params.monitor, params.fullPackages, true,
                         params.nonIncrementalBackup);
                 Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                 sendMessage(pbtMessage);
@@ -2281,11 +2286,18 @@ public class BackupManagerService {
     }
 
     public int requestBackup(String[] packages, IBackupObserver observer, int flags) {
+        return requestBackup(packages, observer, null, flags);
+    }
+
+    public int requestBackup(String[] packages, IBackupObserver observer,
+            IBackupManagerMonitor monitor, int flags) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
             Slog.e(TAG, "No packages named for backup request");
             sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
+            monitor = monitorEvent(monitor, BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
+                    null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT);
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
@@ -2340,7 +2352,7 @@ public class BackupManagerService {
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
         msg.obj = new BackupParams(transport, dirName, kvBackupList, fullBackupList, observer,
-                true, nonIncrementalBackup);
+                monitor, true, nonIncrementalBackup);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
     }
@@ -2456,6 +2468,7 @@ public class BackupManagerService {
         BackupState mCurrentState;
         ArrayList<String> mPendingFullBackups;
         IBackupObserver mObserver;
+        IBackupManagerMonitor mMonitor;
 
         // carried information about the current in-flight operation
         IBackupAgent mAgentBinder;
@@ -2473,12 +2486,13 @@ public class BackupManagerService {
 
         public PerformBackupTask(IBackupTransport transport, String dirName,
                 ArrayList<BackupRequest> queue, File journal, IBackupObserver observer,
-                ArrayList<String> pendingFullBackups, boolean userInitiated,
-                boolean nonIncremental) {
+                IBackupManagerMonitor monitor, ArrayList<String> pendingFullBackups,
+                boolean userInitiated, boolean nonIncremental) {
             mTransport = transport;
             mOriginalQueue = queue;
             mJournal = journal;
             mObserver = observer;
+            mMonitor = monitor;
             mPendingFullBackups = pendingFullBackups;
             mUserInitiated = userInitiated;
             mNonIncremental = nonIncremental;
@@ -2838,7 +2852,7 @@ public class BackupManagerService {
                 PerformFullTransportBackupTask task =
                         new PerformFullTransportBackupTask(/*fullBackupRestoreObserver*/ null,
                                 fullBackups, /*updateSchedule*/ false, /*runningJob*/ null, latch,
-                                mObserver, mUserInitiated);
+                                mObserver, mMonitor, mUserInitiated);
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-requested")).start();
@@ -3215,6 +3229,9 @@ public class BackupManagerService {
             Slog.e(TAG, "Timeout backing up " + mCurrentPackage.packageName);
             EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, mCurrentPackage.packageName,
                     "timeout");
+            mMonitor = monitorEvent(mMonitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_TIMEOUT,
+                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
             addBackupTrace("timeout of " + mCurrentPackage.packageName);
             agentErrorCleanup();
             dataChangedImpl(mCurrentPackage.packageName);
@@ -4197,17 +4214,19 @@ public class BackupManagerService {
     class PerformFullTransportBackupTask extends FullBackupTask {
         static final String TAG = "PFTBT";
         ArrayList<PackageInfo> mPackages;
+        PackageInfo mCurrentPackage;
         boolean mUpdateSchedule;
         CountDownLatch mLatch;
         AtomicBoolean mKeepRunning;     // signal from job scheduler
         FullBackupJob mJob;             // if a scheduled job needs to be finished afterwards
         IBackupObserver mBackupObserver;
+        IBackupManagerMonitor mMonitor;
         boolean mUserInitiated;
 
         PerformFullTransportBackupTask(IFullBackupRestoreObserver observer,
                 String[] whichPackages, boolean updateSchedule,
                 FullBackupJob runningJob, CountDownLatch latch, IBackupObserver backupObserver,
-                boolean userInitiated) {
+                IBackupManagerMonitor monitor, boolean userInitiated) {
             super(observer);
             mUpdateSchedule = updateSchedule;
             mLatch = latch;
@@ -4215,12 +4234,14 @@ public class BackupManagerService {
             mJob = runningJob;
             mPackages = new ArrayList<PackageInfo>(whichPackages.length);
             mBackupObserver = backupObserver;
+            mMonitor = monitor;
             mUserInitiated = userInitiated;
 
             for (String pkg : whichPackages) {
                 try {
                     PackageInfo info = mPackageManager.getPackageInfo(pkg,
                             PackageManager.GET_SIGNATURES);
+                    mCurrentPackage = info;
                     if (!appIsEligibleForBackup(info.applicationInfo)) {
                         // Cull any packages that have indicated that backups are not permitted,
                         // that run as system-domain uids but do not define their own backup agents,
@@ -4732,6 +4753,9 @@ public class BackupManagerService {
                 if (DEBUG) {
                     Slog.w(TAG, "Full backup timeout of " + mTarget.packageName);
                 }
+                mMonitor = monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_FULL_BACKUP_TIMEOUT,
+                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
                 tearDownAgentAndKill(mTarget.applicationInfo);
             }
         }
@@ -4993,7 +5017,7 @@ public class BackupManagerService {
             CountDownLatch latch = new CountDownLatch(1);
             String[] pkg = new String[] {entry.packageName};
             mRunningFullBackupTask = new PerformFullTransportBackupTask(null, pkg, true,
-                    scheduledJob, latch, null, false /* userInitiated */);
+                    scheduledJob, latch, null, null, false /* userInitiated */);
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             mWakelock.acquire();
             (new Thread(mRunningFullBackupTask)).start();
@@ -7825,8 +7849,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         // Invariant: mWakelock is already held, and this task is responsible for
         // releasing it at the end of the restore operation.
         PerformUnifiedRestoreTask(IBackupTransport transport, IRestoreObserver observer,
-                long restoreSetToken, PackageInfo targetPackage, int pmToken,
-                boolean isFullSystemRestore, String[] filterSet) {
+                IBackupManagerMonitor monitor, long restoreSetToken, PackageInfo targetPackage,
+                int pmToken, boolean isFullSystemRestore, String[] filterSet) {
             mState = UnifiedRestoreState.INITIAL;
             mStartRealtime = SystemClock.elapsedRealtime();
 
@@ -9247,7 +9271,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             try {
                 CountDownLatch latch = new CountDownLatch(1);
                 PerformFullTransportBackupTask task = new PerformFullTransportBackupTask(null,
-                        pkgNames, false, null, latch, null, false /* userInitiated */);
+                        pkgNames, false, null, latch, null, null, false /* userInitiated */);
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-master")).start();
@@ -10442,5 +10466,29 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
             }
         }
+    }
+
+    private static IBackupManagerMonitor monitorEvent(IBackupManagerMonitor monitor, int id,
+            PackageInfo pkg, int category) {
+        if (monitor != null) {
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
+                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
+                if (pkg != null) {
+                    bundle.putString(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME,
+                            pkg.packageName);
+                    bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
+                            pkg.versionCode);
+                }
+                monitor.onEvent(bundle);
+                return monitor;
+            } catch(RemoteException e) {
+                if (DEBUG) {
+                    Slog.w(TAG, "backup manager monitor went away");
+                }
+            }
+        }
+        return null;
     }
 }
