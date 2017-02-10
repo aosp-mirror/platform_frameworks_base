@@ -859,7 +859,7 @@ public class MediaRecorder
      * not start another recording session during recording.
      *
      * @throws IllegalStateException if it is called before
-     * prepare().
+     * prepare() or when the camera is already in use by another app.
      */
     public native void start() throws IllegalStateException;
 
