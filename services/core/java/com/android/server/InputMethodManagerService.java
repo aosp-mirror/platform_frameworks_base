@@ -227,6 +227,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             new LruCache<>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
     private final InputMethodSubtypeSwitchingController mSwitchingController;
 
+    /**
+     * Tracks how many times {@link #mMethodMap} was updated.
+     */
+    @GuardedBy("mMethodMap")
+    private int mMethodMapUpdateCount = 0;
+
     // Used to bring IME service up to visible adjustment while it is being shown.
     final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onServiceConnected(ComponentName name, IBinder service) {
@@ -3069,6 +3075,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mMethodList.clear();
         mMethodMap.clear();
+        mMethodMapUpdateCount++;
         mMyPackageMonitor.clearPackagesToMonitorComponentChangeLocked();
 
         // Use for queryIntentServicesAsUser
@@ -4070,7 +4077,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             p.println("Current Input Method Manager state:");
             int N = mMethodList.size();
-            p.println("  Input Methods:");
+            p.println("  Input Methods: mMethodMapUpdateCount=" + mMethodMapUpdateCount);
             for (int i=0; i<N; i++) {
                 InputMethodInfo info = mMethodList.get(i);
                 p.println("  InputMethod #" + i + ":");
