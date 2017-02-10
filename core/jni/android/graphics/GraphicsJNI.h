@@ -24,6 +24,21 @@ struct Typeface;
 
 class GraphicsJNI {
 public:
+    // This enum must keep these int values, to match the int values
+    // in the java Bitmap.Config enum.
+    enum LegacyBitmapConfig {
+        kNo_LegacyBitmapConfig          = 0,
+        kA8_LegacyBitmapConfig          = 1,
+        kIndex8_LegacyBitmapConfig      = 2,
+        kRGB_565_LegacyBitmapConfig     = 3,
+        kARGB_4444_LegacyBitmapConfig   = 4,
+        kARGB_8888_LegacyBitmapConfig   = 5,
+        kRGBA_16F_LegacyBitmapConfig    = 6,
+        kHardware_LegacyBitmapConfig    = 7,
+
+        kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
+    };
+
     // returns true if an exception is set (and dumps it out to the Log)
     static bool hasException(JNIEnv*);
 

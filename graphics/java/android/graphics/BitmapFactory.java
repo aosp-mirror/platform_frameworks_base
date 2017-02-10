@@ -350,9 +350,15 @@ public class BitmapFactory {
 
         /**
          * If known, this string is set to the mimetype of the decoded image.
-         * If not know, or there is an error, it is set to null.
+         * If not known, or there is an error, it is set to null.
          */
         public String outMimeType;
+
+        /**
+         * If known, the config the decoded bitmap will have.
+         * If not known, or there is an error, it is set to null.
+         */
+        public Bitmap.Config outConfig;
 
         /**
          * Temp storage to use for decoding.  Suggest 16K or so.

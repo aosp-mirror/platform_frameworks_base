@@ -287,21 +287,7 @@ void GraphicsJNI::point_to_jpointf(const SkPoint& r, JNIEnv* env, jobject obj)
     env->SetFloatField(obj, gPointF_yFieldID, SkScalarToFloat(r.fY));
 }
 
-// This enum must keep these int values, to match the int values
-// in the java Bitmap.Config enum.
-enum LegacyBitmapConfig {
-    kNo_LegacyBitmapConfig          = 0,
-    kA8_LegacyBitmapConfig          = 1,
-    kIndex8_LegacyBitmapConfig      = 2,
-    kRGB_565_LegacyBitmapConfig     = 3,
-    kARGB_4444_LegacyBitmapConfig   = 4,
-    kARGB_8888_LegacyBitmapConfig   = 5,
-    kRGBA_16F_LegacyBitmapConfig    = 6,
-    kHardware_LegacyBitmapConfig    = 7,
-
-    kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
-};
-
+// See enum values in GraphicsJNI.h
 jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
     switch (colorType) {
         case kRGBA_F16_SkColorType:
