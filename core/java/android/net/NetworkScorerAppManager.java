@@ -127,6 +127,14 @@ public class NetworkScorerAppManager {
     }
 
     /**
+     * Returns the list of available scorer apps. The list will be empty if there are
+     * no valid scorers.
+     */
+    public List<NetworkScorerAppData> getAllValidScorers() {
+        return Collections.emptyList();
+    }
+
+    /**
      * @return A {@link NetworkScorerAppData} instance containing information about the
      *         best configured network recommendation provider installed or {@code null}
      *         if none of the configured packages can recommend networks.

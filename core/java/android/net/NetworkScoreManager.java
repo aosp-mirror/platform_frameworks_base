@@ -37,6 +37,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -194,6 +195,20 @@ public class NetworkScoreManager {
     public NetworkScorerAppData getActiveScorer() {
         try {
             return mService.getActiveScorer();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of available scorer apps. The list will be empty if there are
+     * no valid scorers.
+     *
+     * @hide
+     */
+    public List<NetworkScorerAppData> getAllValidScorers() {
+        try {
+            return mService.getAllValidScorers();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

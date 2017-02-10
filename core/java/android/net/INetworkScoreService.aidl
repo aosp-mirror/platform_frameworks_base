@@ -132,5 +132,14 @@ interface INetworkScoreService
     oneway void requestRecommendationAsync(in RecommendationRequest request,
                                            in RemoteCallback remoteCallback);
 
+    /**
+     * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
+     */
     NetworkScorerAppManager.NetworkScorerAppData getActiveScorer();
+
+    /**
+     * Returns the list of available scorer apps. The list will be empty if there are
+     * no valid scorers.
+     */
+    List<NetworkScorerAppManager.NetworkScorerAppData> getAllValidScorers();
 }
