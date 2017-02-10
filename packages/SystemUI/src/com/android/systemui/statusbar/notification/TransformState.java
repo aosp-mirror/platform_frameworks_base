@@ -69,7 +69,8 @@ public class TransformState {
     public void transformViewFrom(TransformState otherState, float transformationAmount) {
         mTransformedView.animate().cancel();
         if (sameAs(otherState)) {
-            if (mTransformedView.getVisibility() == View.INVISIBLE) {
+            if (mTransformedView.getVisibility() == View.INVISIBLE
+                    || mTransformedView.getAlpha() != 1.0f) {
                 // We have the same content, lets show ourselves
                 mTransformedView.setAlpha(1.0f);
                 mTransformedView.setVisibility(View.VISIBLE);
