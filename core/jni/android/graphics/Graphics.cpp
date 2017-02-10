@@ -455,14 +455,14 @@ android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
 
 sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
 #ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    return SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+    return SkColorSpace::MakeSRGB();
 #else
     return nullptr;
 #endif
 }
 
 sk_sp<SkColorSpace> GraphicsJNI::linearColorSpace() {
-    return SkColorSpace::MakeNamed(SkColorSpace::kSRGBLinear_Named);
+    return SkColorSpace::MakeSRGBLinear();
 }
 
 sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {

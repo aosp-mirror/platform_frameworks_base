@@ -282,7 +282,7 @@ void Texture::upload(Bitmap& bitmap) {
         setDefaultParams = true;
     }
 
-    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeNamed(SkColorSpace::kSRGB_Named);
+    sk_sp<SkColorSpace> sRGB = SkColorSpace::MakeSRGB();
     bool needSRGB = bitmap.info().colorSpace() == sRGB.get();
 
     GLint internalFormat, format, type;
