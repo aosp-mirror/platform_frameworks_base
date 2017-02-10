@@ -44,10 +44,9 @@ import android.system.OsConstants;
 import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
-
-
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
@@ -468,7 +467,7 @@ public class ZygoteInit {
             /*
              * Pass the remaining arguments to SystemServer.
              */
-            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
+            ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);
         }
 
         /* should never reach here */
@@ -751,4 +750,33 @@ public class ZygoteInit {
      */
     private ZygoteInit() {
     }
+
+    /**
+     * The main function called when started through the zygote process. This
+     * could be unified with main(), if the native code in nativeFinishInit()
+     * were rationalized with Zygote startup.<p>
+     *
+     * Current recognized args:
+     * <ul>
+     *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
+     * </ul>
+     *
+     * @param targetSdkVersion target SDK version
+     * @param argv arg strings
+     */
+    public static final void zygoteInit(int targetSdkVersion, String[] argv,
+            ClassLoader classLoader) throws Zygote.MethodAndArgsCaller {
+        if (RuntimeInit.DEBUG) {
+            Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from zygote");
+        }
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ZygoteInit");
+        RuntimeInit.redirectLogStreams();
+
+        RuntimeInit.commonInit();
+        ZygoteInit.nativeZygoteInit();
+        RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+    }
+
+    private static final native void nativeZygoteInit();
 }
