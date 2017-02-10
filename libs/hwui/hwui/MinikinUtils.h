@@ -35,9 +35,9 @@ namespace android {
 class MinikinUtils {
 public:
     ANDROID_API static minikin::FontStyle prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-            minikin::FontCollection** pFont, const Paint* paint, Typeface* typeface);
+            const Paint* paint, Typeface* typeface);
 
-    ANDROID_API static void doLayout(minikin::Layout* layout, const Paint* paint, int bidiFlags,
+    ANDROID_API static minikin::Layout doLayout(const Paint* paint, int bidiFlags,
             Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
             size_t bufSize);
 
@@ -56,11 +56,11 @@ public:
     ANDROID_API static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getTextSkewX();
         bool savefakeBold = paint->isFakeBoldText();
-        minikin::MinikinFont* curFont = NULL;
+        const minikin::MinikinFont* curFont = nullptr;
         size_t start = 0;
         size_t nGlyphs = layout.nGlyphs();
         for (size_t i = 0; i < nGlyphs; i++) {
-          minikin::MinikinFont* nextFont = layout.getFont(i);
+            const minikin::MinikinFont* nextFont = layout.getFont(i);
             if (i > 0 && nextFont != curFont) {
                 MinikinFontSkia::populateSkPaint(paint, curFont, layout.getFakery(start));
                 f(start, i);

@@ -45,7 +45,7 @@ public:
     size_t GetFontSize() const;
     int GetFontIndex() const;
     const std::vector<minikin::FontVariation>& GetAxes() const;
-    minikin::MinikinFont* createFontWithVariation(
+    std::shared_ptr<minikin::MinikinFont> createFontWithVariation(
             const std::vector<minikin::FontVariation>&) const;
 
     static uint32_t packPaintFlags(const SkPaint* paint);

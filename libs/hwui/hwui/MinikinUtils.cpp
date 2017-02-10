@@ -27,9 +27,8 @@
 namespace android {
 
 minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-        minikin::FontCollection** pFont, const Paint* paint, Typeface* typeface) {
+        const Paint* paint, Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
-    *pFont = resolvedFace->fFontCollection;
     minikin::FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
@@ -54,23 +53,23 @@ minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* mini
     return minikinStyle;
 }
 
-void MinikinUtils::doLayout(minikin::Layout* layout, const Paint* paint, int bidiFlags,
+minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
         Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
         size_t bufSize) {
-    minikin::FontCollection *font;
     minikin::MinikinPaint minikinPaint;
-    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
-    layout->setFontCollection(font);
-    layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
+    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
+    minikin::Layout layout(Typeface::resolveDefault(typeface)->fFontCollection);
+    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
+    return layout;
 }
 
 float MinikinUtils::measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
         const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
-    minikin::FontCollection *font;
     minikin::MinikinPaint minikinPaint;
-    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
+    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
+    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle,
-            minikinPaint, font, advances);
+            minikinPaint, resolvedTypeface->fFontCollection, advances);
 }
 
 bool MinikinUtils::hasVariationSelector(Typeface* typeface, uint32_t codepoint, uint32_t vs) {

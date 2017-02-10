@@ -63,27 +63,27 @@ static jlong FontFamily_create(jlong builderPtr) {
         return 0;
     }
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    minikin::FontFamily* family = new minikin::FontFamily(
-            builder->langId, builder->variant, std::move(builder->fonts));
+    FontFamilyWrapper* family = new FontFamilyWrapper(
+            std::make_shared<minikin::FontFamily>(
+                    builder->langId, builder->variant, std::move(builder->fonts)));
     delete builder;
     return reinterpret_cast<jlong>(family);
 }
 
 static void FontFamily_abort(jlong builderPtr) {
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    minikin::Font::clearElementsWithLock(&builder->fonts);
     delete builder;
 }
 
 static void FontFamily_unref(jlong familyPtr) {
-    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
-    fontFamily->Unref();
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    delete family;
 }
 
 static void addSkTypeface(jlong builderPtr, sk_sp<SkTypeface> face, const void* fontData,
         size_t fontSize, int ttcIndex, jint givenWeight, jboolean givenItalic) {
-    minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(std::move(face), fontData, fontSize, ttcIndex,
+    std::shared_ptr<minikin::MinikinFont> minikinFont =
+            std::make_shared<MinikinFontSkia>(std::move(face), fontData, fontSize, ttcIndex,
                     std::vector<minikin::FontVariation>());
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
     int weight = givenWeight / 100;
@@ -96,8 +96,8 @@ static void addSkTypeface(jlong builderPtr, sk_sp<SkTypeface> face, const void* 
         }
     }
 
-    builder->fonts.push_back(minikin::Font(minikinFont, minikin::FontStyle(weight, italic)));
-    minikinFont->Unref();
+    builder->fonts.push_back(minikin::Font(
+            std::move(minikinFont), minikin::FontStyle(weight, italic)));
 }
 
 static void release_global_ref(const void* /*data*/, void* context) {
@@ -208,13 +208,12 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         ALOGE("addFont failed to create font, invalid request");
         return false;
     }
-    minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(std::move(face), fontPtr, fontSize, ttcIndex,
+    std::shared_ptr<minikin::MinikinFont> minikinFont =
+            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize, ttcIndex,
                     std::vector<minikin::FontVariation>());
     NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    builder->fonts.push_back(minikin::Font(minikinFont,
+    builder->fonts.push_back(minikin::Font(std::move(minikinFont),
             minikin::FontStyle(weight / 100, isItalic)));
-    minikinFont->Unref();
     return true;
 }
 

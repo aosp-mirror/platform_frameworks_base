@@ -159,11 +159,12 @@ static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
     minikin::LineBreaker* b = reinterpret_cast<minikin::LineBreaker*>(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
     Typeface* typeface = reinterpret_cast<Typeface*>(nativeTypeface);
-    minikin::FontCollection *font;
     minikin::MinikinPaint minikinPaint;
-    minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, &font, paint,
+    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
+    minikin::FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, paint,
             typeface);
-    return b->addStyleRun(&minikinPaint, font, style, start, end, isRtl);
+    return b->addStyleRun(&minikinPaint, resolvedTypeface->fFontCollection, style, start, end,
+            isRtl);
 }
 
 // Accept width measurements for the run, passed in from Java

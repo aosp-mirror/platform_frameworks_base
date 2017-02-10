@@ -153,8 +153,8 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
     // minikin may modify the original paint
     Paint paint(origPaint);
 
-    minikin::Layout layout;
-    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, start, count, contextCount);
+    minikin::Layout layout = MinikinUtils::doLayout(
+            &paint, bidiFlags, typeface, text, start, count, contextCount);
 
     size_t nGlyphs = layout.nGlyphs();
     std::unique_ptr<uint16_t[]> glyphs(new uint16_t[nGlyphs]);
@@ -205,8 +205,8 @@ private:
 void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
         float hOffset, float vOffset, const Paint& paint, Typeface* typeface) {
     Paint paintCopy(paint);
-    minikin::Layout layout;
-    MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);
+    minikin::Layout layout = MinikinUtils::doLayout(
+            &paintCopy, bidiFlags, typeface, text, 0, count, count);
     hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
 
     // Set align to left for drawing, as we don't want individual

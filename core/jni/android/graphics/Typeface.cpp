@@ -67,9 +67,7 @@ static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle
 
 static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
     Typeface* face = reinterpret_cast<Typeface*>(faceHandle);
-    if (face != NULL) {
-        face->unref();
-    }
+    delete face;
 }
 
 static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
@@ -79,12 +77,13 @@ static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
     ScopedLongArrayRO families(env, familyArray);
-    std::vector<minikin::FontFamily*> familyVec;
+    std::vector<std::shared_ptr<minikin::FontFamily>> familyVec;
+    familyVec.reserve(families.size());
     for (size_t i = 0; i < families.size(); i++) {
-        minikin::FontFamily* family = reinterpret_cast<minikin::FontFamily*>(families[i]);
-        familyVec.push_back(family);
+        FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(families[i]);
+        familyVec.emplace_back(family->family);
     }
-    return reinterpret_cast<jlong>(Typeface::createFromFamilies(familyVec));
+    return reinterpret_cast<jlong>(Typeface::createFromFamilies(std::move(familyVec)));
 }
 
 static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
