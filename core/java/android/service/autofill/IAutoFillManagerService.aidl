@@ -34,7 +34,4 @@ oneway interface IAutoFillManagerService {
     void updateSession(in IBinder activityToken, in AutoFillId id, in Rect bounds,
                        in AutoFillValue value, int flags);
     void finishSession(in IBinder activityToken);
-
-    // Methods called by ShellCommand
-    void requestSaveForUser(int userId);
 }

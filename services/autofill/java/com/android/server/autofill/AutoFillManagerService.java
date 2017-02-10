@@ -203,6 +203,12 @@ public final class AutoFillManagerService extends SystemService {
         return service;
     }
 
+    void requestSaveForUser(int userId) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(
+                MSG_REQUEST_SAVE_FOR_USER, userId));
+    }
+
     /**
      * Removes a cached service for a given user.
      */
@@ -318,13 +324,6 @@ public final class AutoFillManagerService extends SystemService {
         }
 
         @Override
-        public void requestSaveForUser(int userId) {
-            mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageI(MSG_REQUEST_SAVE_FOR_USER,
-                    userId));
-        }
-
-        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingPermission(
                     Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
@@ -355,7 +354,7 @@ public final class AutoFillManagerService extends SystemService {
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-            (new AutoFillManagerServiceShellCommand(this)).exec(
+            (new AutoFillManagerServiceShellCommand(AutoFillManagerService.this)).exec(
                     this, in, out, err, args, callback, resultReceiver);
         }
     }
