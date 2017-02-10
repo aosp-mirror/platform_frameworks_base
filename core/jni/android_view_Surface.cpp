@@ -31,6 +31,7 @@
 #include <binder/Parcel.h>
 
 #include <gui/Surface.h>
+#include <gui/view/Surface.h>
 #include <gui/SurfaceControl.h>
 #include <gui/GLConsumer.h>
 
