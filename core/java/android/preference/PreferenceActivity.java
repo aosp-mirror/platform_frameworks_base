@@ -602,7 +602,9 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mHeaders.size() > 0) {
             setListAdapter(new HeaderAdapter(this, mHeaders, mPreferenceHeaderItemResId,
                     mPreferenceHeaderRemoveEmptyIcon));
-            getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+            if (!mSinglePane) {
+                getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+            }
         }
 
         if (mSinglePane && initialFragment != null && initialTitle != 0) {
