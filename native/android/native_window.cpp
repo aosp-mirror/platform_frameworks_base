@@ -15,22 +15,9 @@
  */
 
 #define LOG_TAG "Surface"
-#include <utils/Log.h>
 
-#include <android/native_window_jni.h>
-#include <gui/Surface.h>
-#include <android_runtime/android_view_Surface.h>
-#include <android_runtime/android_graphics_SurfaceTexture.h>
-
-using namespace android;
-
-ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
-    sp<ANativeWindow> win = android_view_Surface_getNativeWindow(env, surface);
-    if (win != NULL) {
-        win->incStrong((void*)ANativeWindow_acquire);
-    }
-    return win.get();
-}
+#include <android/native_window.h>
+#include <system/window.h>
 
 void ANativeWindow_acquire(ANativeWindow* window) {
     window->incStrong((void*)ANativeWindow_acquire);
