@@ -2574,13 +2574,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setFocusTaskRegionLocked() {
+    void setFocusTaskRegionLocked(AppWindowToken previousFocus) {
         final Task focusedTask = mFocusedApp != null ? mFocusedApp.mTask : null;
-        if (focusedTask != null) {
-            final DisplayContent displayContent = focusedTask.getDisplayContent();
-            if (displayContent != null) {
-                displayContent.setTouchExcludeRegion(focusedTask);
-            }
+        final Task previousTask = previousFocus != null ? previousFocus.mTask : null;
+        final DisplayContent focusedDisplayContent =
+                focusedTask != null ? focusedTask.getDisplayContent() : null;
+        final DisplayContent previousDisplayContent =
+                previousTask != null ? previousTask.getDisplayContent() : null;
+        if (previousDisplayContent != null && previousDisplayContent != focusedDisplayContent) {
+            previousDisplayContent.setTouchExcludeRegion(null);
+        }
+        if (focusedDisplayContent != null) {
+            focusedDisplayContent.setTouchExcludeRegion(focusedTask);
         }
     }
 
@@ -2606,9 +2611,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final boolean changed = mFocusedApp != newFocus;
             if (changed) {
+                AppWindowToken prev = mFocusedApp;
                 mFocusedApp = newFocus;
                 mInputMonitor.setFocusedAppLw(newFocus);
-                setFocusTaskRegionLocked();
+                setFocusTaskRegionLocked(prev);
             }
 
             if (moveFocusNow && changed) {
@@ -7439,7 +7445,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController()
                     .setTouchRegion(touchRegion);
-            setFocusTaskRegionLocked();
+            setFocusTaskRegionLocked(null);
         }
     }
 

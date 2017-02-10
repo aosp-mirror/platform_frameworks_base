@@ -2031,6 +2031,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return runTaskDragTaskTest(pw);
         } else if (op.equals("size-task-test")) {
             return runTaskSizeTaskTest(pw);
+        } else if (op.equals("focus")) {
+            return runTaskFocus(pw);
         } else {
             getErrPrintWriter().println("Error: unknown command '" + op + "'");
             return -1;
@@ -2319,6 +2321,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             taskResize(taskId, currentTaskBounds, delay_ms, true);
         } while (initialTaskBounds.bottom < currentTaskBounds.bottom
                 || initialTaskBounds.right < currentTaskBounds.right);
+        return 0;
+    }
+
+    int runTaskFocus(PrintWriter pw) throws RemoteException {
+        final int taskId = Integer.parseInt(getNextArgRequired());
+        pw.println("Setting focus to task " + taskId);
+        mInterface.setFocusedTask(taskId);
         return 0;
     }
 
