@@ -442,7 +442,10 @@ public class UsbDeviceManager {
             args.argi2 = sourcePower ? 1 :0;
             args.argi3 = sinkPower ? 1 :0;
 
-            obtainMessage(MSG_UPDATE_HOST_STATE, args).sendToTarget();
+            removeMessages(MSG_UPDATE_HOST_STATE);
+            Message msg = obtainMessage(MSG_UPDATE_HOST_STATE, args);
+            // debounce rapid transitions of connect/disconnect on type-c ports
+            sendMessageDelayed(msg, UPDATE_DELAY);
         }
 
         private boolean waitForState(String state) {
