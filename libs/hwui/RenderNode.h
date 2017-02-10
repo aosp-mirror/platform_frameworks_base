@@ -248,6 +248,8 @@ public:
     // Called by CanvasContext when it drops a RenderNode from being a root node
     void clearRoot();
 
+    void output(std::ostream& output, uint32_t level);
+
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
             std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
@@ -266,7 +268,6 @@ private:
 
     void incParentRefCount() { mParentCount++; }
     void decParentRefCount(TreeObserver& observer, TreeInfo* info = nullptr);
-    void output(std::ostream& output, uint32_t level);
 
     String8 mName;
     sp<VirtualLightRefBase> mUserContext;

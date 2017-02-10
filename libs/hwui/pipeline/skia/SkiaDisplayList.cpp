@@ -18,6 +18,7 @@
 
 #include "renderthread/CanvasContext.h"
 #include "VectorDrawable.h"
+#include "DumpOpsCanvas.h"
 
 #include <SkImagePriv.h>
 
@@ -114,6 +115,11 @@ void SkiaDisplayList::reset(SkRect bounds) {
     projectionReceiveIndex = -1;
     allocator.~LinearAllocator();
     new (&allocator) LinearAllocator();
+}
+
+void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
+    DumpOpsCanvas canvas(output, level, *this);
+    mDrawable->draw(&canvas, nullptr);
 }
 
 }; // namespace skiapipeline
