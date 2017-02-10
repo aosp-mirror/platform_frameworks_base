@@ -600,12 +600,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     restoreEnabledInputMethods(mContext, prevValue, newValue);
                 }
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
-                synchronized (mMethodMap) {
-                    resetStateIfCurrentLocaleChangedLocked();
-                }
+                onActionLocaleChanged();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
+        }
+    }
+
+    /**
+     * Handles {@link Intent#ACTION_LOCALE_CHANGED}.
+     *
+     * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
+     * the users. We should ignore this event if this is about any background user's locale.</p>
+     *
+     * <p>Caution: This method must not be called when system is not ready.</p>
+     */
+    void onActionLocaleChanged() {
+        synchronized (mMethodMap) {
+            final LocaleList possibleNewLocale = mRes.getConfiguration().getLocales();
+            if (possibleNewLocale != null && possibleNewLocale.equals(mLastSystemLocales)) {
+                return;
+            }
+            buildInputMethodListLocked(true);
+            // If the locale is changed, needs to reset the default ime
+            resetDefaultImeLocked(mContext);
+            updateFromSettingsLocked(true);
+            mLastSystemLocales = possibleNewLocale;
         }
     }
 
@@ -980,51 +1000,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
     }
 
-    private void resetAllInternalStateLocked(final boolean updateOnlyWhenLocaleChanged,
-            final boolean resetDefaultEnabledIme) {
-        if (!mSystemReady) {
-            // not system ready
-            return;
-        }
-        final LocaleList newLocales = mRes.getConfiguration().getLocales();
-        if (!updateOnlyWhenLocaleChanged
-                || (newLocales != null && !newLocales.equals(mLastSystemLocales))) {
-            if (!updateOnlyWhenLocaleChanged) {
-                hideCurrentInputLocked(0, null);
-                resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_RESET_IME);
-            }
-            if (DEBUG) {
-                Slog.i(TAG, "LocaleList has been changed to " + newLocales);
-            }
-            buildInputMethodListLocked(resetDefaultEnabledIme);
-            if (!updateOnlyWhenLocaleChanged) {
-                final String selectedImiId = mSettings.getSelectedInputMethod();
-                if (TextUtils.isEmpty(selectedImiId)) {
-                    // This is the first time of the user switch and
-                    // set the current ime to the proper one.
-                    resetDefaultImeLocked(mContext);
-                }
-            } else {
-                // If the locale is changed, needs to reset the default ime
-                resetDefaultImeLocked(mContext);
-            }
-            updateFromSettingsLocked(true);
-            mLastSystemLocales = newLocales;
-            if (!updateOnlyWhenLocaleChanged) {
-                try {
-                    startInputInnerLocked();
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Unexpected exception", e);
-                }
-            }
-        }
-    }
-
-    private void resetStateIfCurrentLocaleChangedLocked() {
-        resetAllInternalStateLocked(true /* updateOnlyWhenLocaleChanged */,
-                true /* resetDefaultImeLocked */);
-    }
-
     private void switchUserLocked(int newUserId) {
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
@@ -1051,8 +1026,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Even in such cases, IMMS works fine because it will find the most applicable
         // IME for that user.
         final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
-        resetAllInternalStateLocked(false  /* updateOnlyWhenLocaleChanged */,
-                initialUserSwitch /* needsToResetDefaultIme */);
+        mLastSystemLocales = mRes.getConfiguration().getLocales();
+
+        // TODO: Is it really possible that switchUserLocked() happens before system ready?
+        if (mSystemReady) {
+            hideCurrentInputLocked(0, null);
+            resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_SWITCH_USER);
+            buildInputMethodListLocked(initialUserSwitch);
+            if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
+                // This is the first time of the user switch and
+                // set the current ime to the proper one.
+                resetDefaultImeLocked(mContext);
+            }
+            updateFromSettingsLocked(true);
+            try {
+                startInputInnerLocked();
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Unexpected exception", e);
+            }
+        }
+
         if (initialUserSwitch) {
             InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
                     mSettings.getEnabledInputMethodListLocked(), newUserId,

@@ -75,12 +75,12 @@ public final class InputMethodClient {
     public static final int UNBIND_REASON_DISCONNECT_IME = 3;
     public static final int UNBIND_REASON_NO_IME = 4;
     public static final int UNBIND_REASON_SWITCH_IME_FAILED = 5;
-    public static final int UNBIND_REASON_RESET_IME = 6;
+    public static final int UNBIND_REASON_SWITCH_USER = 6;
 
     @Retention(SOURCE)
     @IntDef({UNBIND_REASON_UNSPECIFIED, UNBIND_REASON_SWITCH_CLIENT, UNBIND_REASON_SWITCH_IME,
             UNBIND_REASON_DISCONNECT_IME, UNBIND_REASON_NO_IME, UNBIND_REASON_SWITCH_IME_FAILED,
-            UNBIND_REASON_RESET_IME})
+            UNBIND_REASON_SWITCH_USER})
     public @interface UnbindReason {}
 
     public static String getUnbindReason(@UnbindReason final int reason) {
@@ -97,8 +97,8 @@ public final class InputMethodClient {
                 return "NO_IME";
             case UNBIND_REASON_SWITCH_IME_FAILED:
                 return "SWITCH_IME_FAILED";
-            case UNBIND_REASON_RESET_IME:
-                return "RESET_IME";
+            case UNBIND_REASON_SWITCH_USER:
+                return "SWITCH_USER";
             default:
                 return "Unknown=" + reason;
         }
