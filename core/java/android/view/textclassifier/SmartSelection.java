@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package android.text;
+package android.view.textclassifier;
 
 /**
  *  Java wrapper for SmartSelection native library interface.
  *  This library is used for detecting entities in text.
- *  @hide
  */
-public final class SmartSelection {
-    // TODO: Move this to android.view.textclassifier and make it package-private.
-    // We'll have to update the native library code to do this.
+final class SmartSelection {
 
     static {
         System.loadLibrary("smart-selection_jni");
@@ -35,7 +32,7 @@ public final class SmartSelection {
      * Creates a new instance of SmartSelect predictor, using the provided model image,
      * given as a file descriptor.
      */
-    public SmartSelection(int fd) {
+    SmartSelection(int fd) {
         mCtx = nativeNew(fd);
     }
 

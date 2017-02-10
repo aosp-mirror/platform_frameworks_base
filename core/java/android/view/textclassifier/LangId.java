@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.text;
+package android.view.textclassifier;
 
 /**
  *  Java wrapper for LangId native library interface.
  *  This class is used to detect languages in text.
- *  @hide
  */
-public final class LangId {
-    // TODO: Move this to android.view.textclassifier and make it package-private.
-    // We'll have to update the native library code to do this.
+final class LangId {
 
     static {
         System.loadLibrary("smart-selection_jni");
@@ -33,7 +30,7 @@ public final class LangId {
     /**
      * Creates a new instance of LangId predictor, using the provided model image.
      */
-    public LangId(int fd) {
+    LangId(int fd) {
         mModelPtr = nativeNew(fd);
     }
 

@@ -27,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.icu.text.BreakIterator;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.text.SmartSelection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
