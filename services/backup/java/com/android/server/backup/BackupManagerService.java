@@ -9577,7 +9577,14 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     public String[] getTransportWhitelist() {
         // No permission check, intentionally.
-        return mTransportManager.getTransportWhitelist().toArray(new String[0]);
+        Set<ComponentName> whitelistedComponents = mTransportManager.getTransportWhitelist();
+        String[] whitelistedTransports = new String[whitelistedComponents.size()];
+        int i = 0;
+        for (ComponentName component : whitelistedComponents) {
+            whitelistedTransports[i] = component.flattenToShortString();
+            i++;
+        }
+        return whitelistedTransports;
     }
 
     // Select which transport to use for the next backup operation.
