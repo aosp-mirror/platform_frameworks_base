@@ -462,7 +462,7 @@ public final class ActiveServices {
 
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
         if (notification != null) {
-            setServiceForegroundInnerLocked(r, callingUid, notification, 0);
+            setServiceForegroundInnerLocked(r, id, notification, 0);
         }
         return cmp;
     }
