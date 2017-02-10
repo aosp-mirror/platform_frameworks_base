@@ -2916,7 +2916,7 @@ public final class ActivityThread {
             for (int id : dm.getDisplayIds()) {
                 if (id != Display.DEFAULT_DISPLAY) {
                     Display display =
-                            dm.getCompatibleDisplay(id, appContext.getDisplayAdjustments(id));
+                            dm.getCompatibleDisplay(id, appContext.getResources());
                     appContext = (ContextImpl) appContext.createDisplayContext(display);
                     break;
                 }

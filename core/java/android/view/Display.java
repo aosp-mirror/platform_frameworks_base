@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -71,7 +72,8 @@ public final class Display {
     private final String mAddress;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
-    private final DisplayAdjustments mDisplayAdjustments;
+    private final Resources mResources;
+    private DisplayAdjustments mDisplayAdjustments;
 
     private DisplayInfo mDisplayInfo; // never null
     private boolean mIsValid;
@@ -355,19 +357,39 @@ public final class Display {
 
     /**
      * Internal method to create a display.
+     * The display created with this method will have a static {@link DisplayAdjustments} applied.
      * Applications should use {@link android.view.WindowManager#getDefaultDisplay()}
      * or {@link android.hardware.display.DisplayManager#getDisplay}
      * to get a display object.
      *
      * @hide
      */
-    public Display(DisplayManagerGlobal global,
-            int displayId, DisplayInfo displayInfo /*not null*/,
+    public Display(DisplayManagerGlobal global, int displayId, /*@NotNull*/ DisplayInfo displayInfo,
             DisplayAdjustments daj) {
+        this(global, displayId, displayInfo, daj, null /*res*/);
+    }
+
+    /**
+     * Internal method to create a display.
+     * The display created with this method will be adjusted based on the adjustments in the
+     * supplied {@link Resources}.
+     *
+     * @hide
+     */
+    public Display(DisplayManagerGlobal global, int displayId, /*@NotNull*/ DisplayInfo displayInfo,
+            Resources res) {
+        this(global, displayId, displayInfo, null /*daj*/, res);
+    }
+
+    private Display(DisplayManagerGlobal global, int displayId,
+            /*@NotNull*/ DisplayInfo displayInfo, DisplayAdjustments daj, Resources res) {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
-        mDisplayAdjustments = new DisplayAdjustments(daj);
+        mResources = res;
+        mDisplayAdjustments = mResources != null
+            ? new DisplayAdjustments(mResources.getConfiguration())
+            : daj != null ? new DisplayAdjustments(daj) : null;
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
@@ -512,6 +534,13 @@ public final class Display {
      * @hide
      */
     public DisplayAdjustments getDisplayAdjustments() {
+        if (mResources != null) {
+            final DisplayAdjustments currentAdjustements = mResources.getDisplayAdjustments();
+            if (!mDisplayAdjustments.equals(currentAdjustements)) {
+                mDisplayAdjustments = new DisplayAdjustments(currentAdjustements);
+            }
+        }
+
         return mDisplayAdjustments;
     }
 
@@ -562,7 +591,7 @@ public final class Display {
     public void getSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
+            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
             outSize.x = mTempMetrics.widthPixels;
             outSize.y = mTempMetrics.heightPixels;
         }
@@ -577,7 +606,7 @@ public final class Display {
     public void getRectSize(Rect outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
+            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
             outSize.set(0, 0, mTempMetrics.widthPixels, mTempMetrics.heightPixels);
         }
     }
@@ -908,7 +937,7 @@ public final class Display {
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(outMetrics, mDisplayAdjustments);
+            mDisplayInfo.getAppMetrics(outMetrics, getDisplayAdjustments());
         }
     }
 
@@ -1017,7 +1046,7 @@ public final class Display {
         long now = SystemClock.uptimeMillis();
         if (now > mLastCachedAppSizeUpdate + CACHED_APP_SIZE_DURATION_MILLIS) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
+            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
             mCachedAppWidthCompat = mTempMetrics.widthPixels;
             mCachedAppHeightCompat = mTempMetrics.heightPixels;
             mLastCachedAppSizeUpdate = now;
@@ -1029,7 +1058,7 @@ public final class Display {
     public String toString() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
+            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
             return "Display id " + mDisplayId + ": " + mDisplayInfo
                     + ", " + mTempMetrics + ", isValid=" + mIsValid;
         }

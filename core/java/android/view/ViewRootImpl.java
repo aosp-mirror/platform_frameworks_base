@@ -1047,8 +1047,8 @@ public final class ViewRootImpl implements ViewParent,
 
         // Get new instance of display based on current display adjustments. It may be updated later
         // if moving between the displays also involved a configuration change.
-        final DisplayAdjustments displayAdjustments = mView.getResources().getDisplayAdjustments();
-        mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId, displayAdjustments);
+        mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
+            mView.getResources());
         mAttachInfo.mDisplayState = mDisplay.getState();
         // Internal state updated, now notify the view hierarchy.
         mView.dispatchMovedToDisplay(mDisplay);
@@ -3384,7 +3384,7 @@ public final class ViewRootImpl implements ViewParent,
             if (force || mLastConfiguration.diff(config) != 0) {
                 // Update the display with new DisplayAdjustments.
                 mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(
-                        mDisplay.getDisplayId(), localResources.getDisplayAdjustments());
+                        mDisplay.getDisplayId(), localResources);
 
                 final int lastLayoutDirection = mLastConfiguration.getLayoutDirection();
                 final int currentLayoutDirection = config.getLayoutDirection();

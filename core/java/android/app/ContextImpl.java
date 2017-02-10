@@ -2067,24 +2067,17 @@ class ContextImpl extends Context {
 
     @Override
     public Display getDisplay() {
-        final DisplayAdjustments displayAdjustments = mResources.getDisplayAdjustments();
         if (mDisplay == null) {
             return mResourcesManager.getAdjustedDisplay(Display.DEFAULT_DISPLAY,
-                    displayAdjustments);
+                    mResources);
         }
 
-        if (!mDisplay.getDisplayAdjustments().equals(displayAdjustments)) {
-            mDisplay = mResourcesManager.getAdjustedDisplay(mDisplay.getDisplayId(),
-                    displayAdjustments);
-        }
         return mDisplay;
     }
 
     @Override
     public void updateDisplay(int displayId) {
-        final DisplayAdjustments displayAdjustments = mResources.getDisplayAdjustments();
-        mDisplay = mResourcesManager.getAdjustedDisplay(displayId,
-                displayAdjustments);
+        mDisplay = mResourcesManager.getAdjustedDisplay(displayId, mResources);
     }
 
     @Override
@@ -2202,7 +2195,7 @@ class ContextImpl extends Context {
                 compatInfo,
                 classLoader);
         context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
-                context.mResources.getDisplayAdjustments());
+                context.getResources());
         return context;
     }
 
