@@ -259,6 +259,10 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("Unknow surface source class type");
         }
 
+        if (surfaceSize.getWidth() == 0 || surfaceSize.getHeight() == 0) {
+            throw new IllegalArgumentException("Surface size needs to be non-zero");
+        }
+
         mSurfaceGroupId = SURFACE_GROUP_ID_NONE;
         mSurfaces = new ArrayList<Surface>();
         mRotation = ROTATION_0;
