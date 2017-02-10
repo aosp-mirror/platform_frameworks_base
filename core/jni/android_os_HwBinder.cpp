@@ -33,6 +33,7 @@
 #include <hidl/HidlTransportSupport.h>
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <vintf/parse_string.h>
 
 #include "core_jni_helpers.h"
 
@@ -300,6 +301,8 @@ static jobject JHwBinder_native_getService(
         jstring ifaceNameObj,
         jstring serviceNameObj) {
 
+    using ::android::vintf::operator<<;
+
     if (ifaceNameObj == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
         return NULL;
@@ -317,27 +320,41 @@ static jobject JHwBinder_native_getService(
         return NULL;
     }
 
-    const char *ifaceName = env->GetStringUTFChars(ifaceNameObj, NULL);
-    if (ifaceName == NULL) {
+    const char *ifaceNameCStr = env->GetStringUTFChars(ifaceNameObj, NULL);
+    if (ifaceNameCStr == NULL) {
         return NULL; // XXX exception already pending?
     }
-    const char *serviceName = env->GetStringUTFChars(serviceNameObj, NULL);
-    if (serviceName == NULL) {
-        env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
+    std::string ifaceName(ifaceNameCStr);
+    env->ReleaseStringUTFChars(ifaceNameObj, ifaceNameCStr);
+    ::android::hardware::hidl_string ifaceNameHStr;
+    ifaceNameHStr.setToExternal(ifaceName.c_str(), ifaceName.size());
+
+    const char *serviceNameCStr = env->GetStringUTFChars(serviceNameObj, NULL);
+    if (serviceNameCStr == NULL) {
         return NULL; // XXX exception already pending?
     }
+    std::string serviceName(serviceNameCStr);
+    env->ReleaseStringUTFChars(serviceNameObj, serviceNameCStr);
+    ::android::hardware::hidl_string serviceNameHStr;
+    serviceNameHStr.setToExternal(serviceName.c_str(), serviceName.size());
 
     LOG(INFO) << "Looking for service "
               << ifaceName
               << "/"
               << serviceName;
 
-    Return<sp<hidl::base::V1_0::IBase>> ret = manager->get(ifaceName, serviceName);
+    ::android::vintf::Transport transport =
+            ::android::hardware::getTransport(ifaceName);
+    if (   transport != ::android::vintf::Transport::EMPTY
+        && transport != ::android::vintf::Transport::HWBINDER) {
+        LOG(ERROR) << "service " << ifaceName << " declares transport method "
+                   << transport << " but framework expects "
+                   << ::android::vintf::Transport::HWBINDER;
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        return NULL;
+    }
 
-    env->ReleaseStringUTFChars(ifaceNameObj, ifaceName);
-    ifaceName = NULL;
-    env->ReleaseStringUTFChars(serviceNameObj, serviceName);
-    serviceName = NULL;
+    Return<sp<hidl::base::V1_0::IBase>> ret = manager->get(ifaceNameHStr, serviceNameHStr);
 
     if (!ret.isOk()) {
         signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
