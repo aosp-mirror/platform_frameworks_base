@@ -24,6 +24,7 @@ import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
+import android.telephony.ClientRequestStats;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
@@ -1192,4 +1193,14 @@ interface ITelephony {
      * @hide
      */
     void setPolicyDataEnabled(boolean enabled, int subId);
+
+
+    /**
+     * Get Client request stats which will contain statistical information
+     * on each request made by client.
+     * @param callingPackage package making the call.
+     * @param subId Subscription index
+     * @hide
+     */
+    List<ClientRequestStats> getClientRequestStats(String callingPackage, int subid);
 }
