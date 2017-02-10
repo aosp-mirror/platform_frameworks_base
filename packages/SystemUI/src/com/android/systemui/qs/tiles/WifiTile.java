@@ -372,9 +372,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                     item.icon = mWifiController.getIcon(ap);
                     item.line1 = ap.getSsid();
                     item.line2 = ap.isActive() ? ap.getSummary() : null;
-                    item.overlay = ap.getSecurity() != AccessPoint.SECURITY_NONE
-                            ? mContext.getDrawable(R.drawable.qs_ic_wifi_lock)
-                            : null;
+                    item.icon2 = ap.getSecurity() != AccessPoint.SECURITY_NONE
+                            ? R.drawable.qs_ic_wifi_lock
+                            : -1;
                     items[i] = item;
                 }
             }
