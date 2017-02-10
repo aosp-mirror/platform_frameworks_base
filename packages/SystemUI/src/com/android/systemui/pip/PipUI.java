@@ -24,10 +24,15 @@ import android.content.res.Configuration;
 
 import com.android.systemui.SystemUI;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * Controls the picture-in-picture window.
  */
 public class PipUI extends SystemUI {
+
+    private BasePipManager mPipManager;
 
     private boolean mSupportsPip;
     private boolean mIsLeanBackOnly;
@@ -36,27 +41,32 @@ public class PipUI extends SystemUI {
     public void start() {
         PackageManager pm = mContext.getPackageManager();
         mSupportsPip = pm.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
-        mIsLeanBackOnly = pm.hasSystemFeature(FEATURE_LEANBACK_ONLY);
         if (!mSupportsPip) {
             return;
         }
-        if (mIsLeanBackOnly) {
-            com.android.systemui.pip.tv.PipManager.getInstance().initialize(mContext);
-        } else {
-            com.android.systemui.pip.phone.PipManager.getInstance().initialize(mContext);
-        }
+
+        mPipManager = pm.hasSystemFeature(FEATURE_LEANBACK_ONLY)
+                ? com.android.systemui.pip.tv.PipManager.getInstance()
+                : com.android.systemui.pip.phone.PipManager.getInstance();
+        mPipManager.initialize(mContext);
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (!mSupportsPip) {
+        if (mPipManager == null) {
             return;
         }
-        if (mIsLeanBackOnly) {
-            com.android.systemui.pip.tv.PipManager.getInstance().onConfigurationChanged();
-        } else {
-            com.android.systemui.pip.phone.PipManager.getInstance().onConfigurationChanged();
+
+        mPipManager.onConfigurationChanged();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mPipManager == null) {
+            return;
         }
+
+        mPipManager.dump(pw);
     }
 }

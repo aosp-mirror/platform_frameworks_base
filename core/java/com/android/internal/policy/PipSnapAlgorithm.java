@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -321,5 +322,14 @@ public class PipSnapAlgorithm {
                 // Skip otherwise
                 break;
         }
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + PipSnapAlgorithm.class.getSimpleName());
+        pw.println(innerPrefix + "mSnapMode=" + mSnapMode);
+        pw.println(innerPrefix + "mOrientation=" + mOrientation);
+        pw.println(innerPrefix + "mMinimizedVisibleSize=" + mMinimizedVisibleSize);
+        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
     }
 }

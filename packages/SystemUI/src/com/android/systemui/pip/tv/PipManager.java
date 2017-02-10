@@ -47,9 +47,11 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +63,7 @@ import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SH
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
-public class PipManager {
+public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_ONBOARDING =
@@ -778,5 +780,10 @@ public class PipManager {
 
     private void updatePipVisibility(final boolean visible) {
         SystemServicesProxy.getInstance(mContext).setTvPipVisibility(visible);
+    }
+
+    @Override
+    public void dump(PrintWriter pw) {
+        // Do nothing
     }
 }

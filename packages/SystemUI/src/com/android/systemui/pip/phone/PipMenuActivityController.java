@@ -35,6 +35,7 @@ import android.view.IWindowManager;
 
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,5 +264,12 @@ public class PipMenuActivityController {
             }
         }
         mVisible = visible;
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mVisible=" + mVisible);
+        pw.println(innerPrefix + "mListeners=" + mListeners.size());
     }
 }
