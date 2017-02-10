@@ -404,9 +404,11 @@ public class ClipboardService extends SystemService {
             return;
         }
         clipboard.primaryClip = clip;
-        final ClipDescription description = clipboard.primaryClip.getDescription();
-        if (description != null) {
-            description.setTimestamp(SystemClock.elapsedRealtime());
+        if (clip != null) {
+            final ClipDescription description = clip.getDescription();
+            if (description != null) {
+                description.setTimestamp(SystemClock.elapsedRealtime());
+            }
         }
         final long ident = Binder.clearCallingIdentity();
         final int n = clipboard.primaryClipListeners.beginBroadcast();
