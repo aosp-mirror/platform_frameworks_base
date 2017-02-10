@@ -25,8 +25,10 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.os.storage.VolumeInfo;
+import android.service.pm.PackageProto;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -563,5 +565,33 @@ abstract class PackageSettingBase extends SettingBase {
     void clearDomainVerificationStatusForUser(int userId) {
         modifyUserState(userId).domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+    }
+
+    protected void writeUsersInfoToProto(ProtoOutputStream proto, long fieldId) {
+        int count = userState.size();
+        for (int i = 0; i < count; i++) {
+            final long userToken = proto.start(fieldId);
+            final int userId = userState.keyAt(i);
+            final PackageUserState state = userState.valueAt(i);
+            proto.write(PackageProto.UserInfoProto.ID, userId);
+            final int installType;
+            if (state.instantApp) {
+                installType = PackageProto.UserInfoProto.INSTANT_APP_INSTALL;
+            } else if (state.installed) {
+                installType = PackageProto.UserInfoProto.FULL_APP_INSTALL;
+            } else {
+                installType = PackageProto.UserInfoProto.NOT_INSTALLED_FOR_USER;
+            }
+            proto.write(PackageProto.UserInfoProto.INSTALL_TYPE, installType);
+            proto.write(PackageProto.UserInfoProto.IS_HIDDEN, state.hidden);
+            proto.write(PackageProto.UserInfoProto.IS_SUSPENDED, state.suspended);
+            proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.stopped);
+            proto.write(PackageProto.UserInfoProto.IS_LAUNCHED, !state.notLaunched);
+            proto.write(PackageProto.UserInfoProto.ENABLED_STATE, state.enabled);
+            proto.write(
+                    PackageProto.UserInfoProto.LAST_DISABLED_APP_CALLER,
+                    state.lastDisableAppCaller);
+            proto.end(userToken);
+        }
     }
 }

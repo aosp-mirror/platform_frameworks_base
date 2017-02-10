@@ -128,7 +128,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
-import android.content.pm.InstantAppInfo;
 import android.content.pm.EphemeralRequest;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralResponse;
@@ -143,6 +142,7 @@ import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -204,15 +204,16 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
-import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
+import android.service.pm.PackageServiceDumpProto;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -235,6 +236,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
 import android.util.jar.StrictJarFile;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.R;
@@ -316,8 +318,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20284,6 +20286,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 checkin = true;
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
+            } else if ("--proto".equals(opt)) {
+                dumpProto(fd);
+                return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
@@ -20810,6 +20815,98 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 } finally {
                     IoUtils.closeQuietly(in);
                 }
+            }
+        }
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        synchronized (mPackages) {
+            final long requiredVerifierPackageToken =
+                    proto.start(PackageServiceDumpProto.REQUIRED_VERIFIER_PACKAGE);
+            proto.write(PackageServiceDumpProto.PackageShortProto.NAME, mRequiredVerifierPackage);
+            proto.write(
+                    PackageServiceDumpProto.PackageShortProto.UID,
+                    getPackageUid(
+                            mRequiredVerifierPackage,
+                            MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.USER_SYSTEM));
+            proto.end(requiredVerifierPackageToken);
+
+            if (mIntentFilterVerifierComponent != null) {
+                String verifierPackageName = mIntentFilterVerifierComponent.getPackageName();
+                final long verifierPackageToken =
+                        proto.start(PackageServiceDumpProto.VERIFIER_PACKAGE);
+                proto.write(PackageServiceDumpProto.PackageShortProto.NAME, verifierPackageName);
+                proto.write(
+                        PackageServiceDumpProto.PackageShortProto.UID,
+                        getPackageUid(
+                                verifierPackageName,
+                                MATCH_DEBUG_TRIAGED_MISSING,
+                                UserHandle.USER_SYSTEM));
+                proto.end(verifierPackageToken);
+            }
+
+            dumpSharedLibrariesProto(proto);
+            dumpFeaturesProto(proto);
+            mSettings.dumpPackagesProto(proto);
+            mSettings.dumpSharedUsersProto(proto);
+            dumpMessagesProto(proto);
+        }
+        proto.flush();
+    }
+
+    private void dumpMessagesProto(ProtoOutputStream proto) {
+        BufferedReader in = null;
+        String line = null;
+        try {
+            in = new BufferedReader(new FileReader(getSettingsProblemFile()));
+            while ((line = in.readLine()) != null) {
+                if (line.contains("ignored: updated version")) continue;
+                proto.write(PackageServiceDumpProto.MESSAGES, line);
+            }
+        } catch (IOException ignored) {
+        } finally {
+            IoUtils.closeQuietly(in);
+        }
+    }
+
+    private void dumpFeaturesProto(ProtoOutputStream proto) {
+        synchronized (mAvailableFeatures) {
+            final int count = mAvailableFeatures.size();
+            for (int i = 0; i < count; i++) {
+                final FeatureInfo feat = mAvailableFeatures.valueAt(i);
+                final long featureToken = proto.start(PackageServiceDumpProto.FEATURES);
+                proto.write(PackageServiceDumpProto.FeatureProto.NAME, feat.name);
+                proto.write(PackageServiceDumpProto.FeatureProto.VERSION, feat.version);
+                proto.end(featureToken);
+            }
+        }
+    }
+
+    private void dumpSharedLibrariesProto(ProtoOutputStream proto) {
+        final int count = mSharedLibraries.size();
+        for (int i = 0; i < count; i++) {
+            final String libName = mSharedLibraries.keyAt(i);
+            SparseArray<SharedLibraryEntry> versionedLib = mSharedLibraries.get(libName);
+            if (versionedLib == null) {
+                continue;
+            }
+            final int versionCount = versionedLib.size();
+            for (int j = 0; j < versionCount; j++) {
+                final SharedLibraryEntry libEntry = versionedLib.valueAt(j);
+                final long sharedLibraryToken =
+                        proto.start(PackageServiceDumpProto.SHARED_LIBRARIES);
+                proto.write(PackageServiceDumpProto.SharedLibraryProto.NAME, libEntry.info.getName());
+                final boolean isJar = (libEntry.path != null);
+                proto.write(PackageServiceDumpProto.SharedLibraryProto.IS_JAR, isJar);
+                if (isJar) {
+                    proto.write(PackageServiceDumpProto.SharedLibraryProto.PATH, libEntry.path);
+                } else {
+                    proto.write(PackageServiceDumpProto.SharedLibraryProto.APK, libEntry.apk);
+                }
+                proto.end(sharedLibraryToken);
             }
         }
     }

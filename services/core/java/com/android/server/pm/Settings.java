@@ -65,6 +65,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.service.pm.PackageServiceDumpProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -77,6 +78,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
@@ -4876,6 +4878,16 @@ final class Settings {
         }
     }
 
+    void dumpPackagesProto(ProtoOutputStream proto) {
+        List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
+
+        final int count = mPackages.size();
+        for (int i = 0; i < count; i++) {
+            final PackageSetting ps = mPackages.valueAt(i);
+            ps.writeToProto(proto, PackageServiceDumpProto.PACKAGES, users);
+        }
+    }
+
     void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
         boolean printedSomething = false;
@@ -4963,6 +4975,17 @@ final class Settings {
             } else {
                 pw.print("suid,"); pw.print(su.userId); pw.print(","); pw.println(su.name);
             }
+        }
+    }
+
+    void dumpSharedUsersProto(ProtoOutputStream proto) {
+        final int count = mSharedUsers.size();
+        for (int i = 0; i < count; i++) {
+            final SharedUserSetting su = mSharedUsers.valueAt(i);
+            final long sharedUserToken = proto.start(PackageServiceDumpProto.SHARED_USERS);
+            proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, su.userId);
+            proto.write(PackageServiceDumpProto.SharedUserProto.NAME, su.name);
+            proto.end(sharedUserToken);
         }
     }
 
