@@ -356,6 +356,24 @@ public class TelecomManager {
             "android.telecom.INCLUDE_EXTERNAL_CALLS";
 
     /**
+     * A boolean meta-data value indicating whether an {@link InCallService} wants to be informed of
+     * calls which have the {@link Call.Details#PROPERTY_SELF_MANAGED} property.  A self-managed
+     * call is one which originates from a self-managed {@link ConnectionService} which has chosen
+     * to implement its own call user interface.  An {@link InCallService} implementation which
+     * would like to be informed of external calls should set this meta-data to {@code true} in the
+     * manifest registration of their {@link InCallService}.  By default, the {@link InCallService}
+     * will NOT be informed about self-managed calls.
+     * <p>
+     * An {@link InCallService} which receives self-managed calls is free to view and control the
+     * state of calls in the self-managed {@link ConnectionService}.  An example use-case is
+     * exposing these calls to a wearable or automotive device via its companion app.
+     * <p>
+     * See also {@link Connection#PROPERTY_SELF_MANAGED}.
+     */
+    public static final String METADATA_INCLUDE_SELF_MANAGED_CALLS =
+            "android.telecom.INCLUDE_SELF_MANAGED_CALLS";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */
@@ -1034,10 +1052,12 @@ public class TelecomManager {
 
     /**
      * Returns whether there is an ongoing phone call (can be in dialing, ringing, active or holding
-     * states).
+     * states) originating from either a manager or self-managed {@link ConnectionService}.
      * <p>
      * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
-     * </p>
+     *
+     * @return {@code true} if there is an ongoing call in either a managed or self-managed
+     *      {@link ConnectionService}, {@code false} otherwise.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public boolean isInCall() {
@@ -1047,6 +1067,31 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling isInCall().", e);
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether there is an ongoing call originating from a managed
+     * {@link ConnectionService}.  An ongoing call can be in dialing, ringing, active or holding
+     * states.
+     * <p>
+     * If you also need to know if there are ongoing self-managed calls, use {@link #isInCall()}
+     * instead.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     *
+     * @return {@code true} if there is an ongoing call in a managed {@link ConnectionService},
+     *      {@code false} otherwise.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public boolean isInManagedCall() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().isInManagedCall(mContext.getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling isInManagedCall().", e);
         }
         return false;
     }
@@ -1062,6 +1107,9 @@ public class TelecomManager {
      * {@link android.Manifest.permission#READ_PHONE_STATE} permission. This is intentional, to
      * preserve the behavior of {@link TelephonyManager#getCallState()}, which also did not require
      * the permission.
+     *
+     * Takes into consideration both managed and self-managed calls.
+     *
      * @hide
      */
     @SystemApi
@@ -1079,6 +1127,7 @@ public class TelecomManager {
     /**
      * Returns whether there currently exists is a ringing incoming-call.
      *
+     * @return {@code true} if there is a managed or self-managed ringing call.
      * @hide
      */
     @SystemApi
