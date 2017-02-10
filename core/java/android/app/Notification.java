@@ -110,6 +110,13 @@ public class Notification implements Parcelable
             = "android.intent.category.NOTIFICATION_PREFERENCES";
 
     /**
+     * Optional extra for {@link #INTENT_CATEGORY_NOTIFICATION_PREFERENCES}. If provided, will
+     * contain a {@link NotificationChannel#getId() channel id} that can be used to narrow down
+     * what in app notifications settings should be shown.
+     */
+    public static final String EXTRA_CHANNEL_ID = "android.intent.extra.CHANNEL_ID";
+
+    /**
      * Use all default values (where applicable).
      */
     public static final int DEFAULT_ALL = ~0;
