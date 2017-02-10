@@ -29,9 +29,6 @@ import android.widget.TextView;
 /**
  * A movement method that traverses links in the text buffer and scrolls if necessary.
  * Supports clicking on links with DPad Center or Enter.
- *
- * <p>Note: Starting from Android 8.0 (API level 25) this class no longer handles the touch
- * clicks.
  */
 public class LinkMovementMethod extends ScrollingMovementMethod {
     private static final int CLICK = 1;
@@ -198,7 +195,7 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
                                 MotionEvent event) {
         int action = event.getAction();
 
-        if (action == MotionEvent.ACTION_DOWN) {
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
             int x = (int) event.getX();
             int y = (int) event.getY();
 
@@ -215,9 +212,13 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
             ClickableSpan[] links = buffer.getSpans(off, off, ClickableSpan.class);
 
             if (links.length != 0) {
-                Selection.setSelection(buffer,
+                if (action == MotionEvent.ACTION_UP) {
+                    links[0].onClick(widget);
+                } else if (action == MotionEvent.ACTION_DOWN) {
+                    Selection.setSelection(buffer,
                         buffer.getSpanStart(links[0]),
                         buffer.getSpanEnd(links[0]));
+                }
                 return true;
             } else {
                 Selection.removeSelection(buffer);
