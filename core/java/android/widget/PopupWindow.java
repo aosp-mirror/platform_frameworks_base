@@ -223,7 +223,7 @@ public class PopupWindow {
                         mDecorView.getLayoutParams();
 
                 updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
-                        p.width, p.height, mAnchoredGravity));
+                        p.width, p.height, mAnchoredGravity, false));
                 update(p.x, p.y, -1, -1, true);
             }
         }
@@ -1227,7 +1227,7 @@ public class PopupWindow {
         preparePopup(p);
 
         final boolean aboveAnchor = findDropDownPosition(anchor, p, xoff, yoff,
-                p.width, p.height, gravity);
+                p.width, p.height, gravity, mAllowScrollingAnchorParent);
         updateAboveAnchor(aboveAnchor);
         p.accessibilityIdOfAnchor = (anchor != null) ? anchor.getAccessibilityViewId() : -1;
 
@@ -1519,10 +1519,12 @@ public class PopupWindow {
      * @param xOffset absolute horizontal offset from the left of the anchor
      * @param yOffset absolute vertical offset from the top of the anchor
      * @param gravity horizontal gravity specifying popup alignment
+     * @param allowScroll whether the anchor view's parent may be scrolled
+     *                    when the popup window doesn't fit on screen
      * @return true if the popup is translated upwards to fit on screen
      */
     private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams outParams,
-            int xOffset, int yOffset, int width, int height, int gravity) {
+            int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
         final int anchorHeight = anchor.getHeight();
         final int anchorWidth = anchor.getWidth();
         if (mOverlapAnchor) {
@@ -1576,7 +1578,7 @@ public class PopupWindow {
             final int scrollY = anchor.getScrollY();
             final Rect r = new Rect(scrollX, scrollY, scrollX + width + xOffset,
                     scrollY + height + anchorHeight + yOffset);
-            if (mAllowScrollingAnchorParent && anchor.requestRectangleOnScreen(r, true)) {
+            if (allowScroll && anchor.requestRectangleOnScreen(r, true)) {
                 // Reset for the new anchor position.
                 anchor.getLocationInWindow(drawingLocation);
                 outParams.x = drawingLocation[0] + xOffset;
@@ -2172,15 +2174,19 @@ public class PopupWindow {
         }
 
         final boolean aboveAnchor = findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
-                width, height, gravity);
+                width, height, gravity, mAllowScrollingAnchorParent);
         updateAboveAnchor(aboveAnchor);
 
         final boolean paramsChanged = oldGravity != p.gravity || oldX != p.x || oldY != p.y
                 || oldWidth != p.width || oldHeight != p.height;
-        // If width and mWidth were both < 0 then we have a MATCH_PARENT/WRAP_CONTENT case.
-        // findDropDownPosition will have resolved this to absolute values,
-        // but we don't want to update mWidth/mHeight to these absolute values.
-        update(p.x, p.y, width < 0 ? width : p.width, height < 0 ? height : p.height, paramsChanged);
+
+        // If width and mWidth were both < 0 then we have a MATCH_PARENT or
+        // WRAP_CONTENT case. findDropDownPosition will have resolved this to
+        // absolute values, but we don't want to update mWidth/mHeight to these
+        // absolute values.
+        final int newWidth = width < 0 ? width : p.width;
+        final int newHeight = height < 0 ? height : p.height;
+        update(p.x, p.y, newWidth, newHeight, paramsChanged);
     }
 
     /**
