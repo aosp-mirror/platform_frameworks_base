@@ -148,7 +148,10 @@ bool set_seccomp_filter() {
     AllowSyscall(f, 128); // __NR_restart_syscall
 
     // b/35034743
-    AllowSyscall(f, 267); // __NR_fstatfs64
+    AllowSyscall(f, 267); // __NR_syncfs
+
+    // b/34763393
+    AllowSyscall(f, 277); // __NR_seccomp
 
     Trap(f);
 
