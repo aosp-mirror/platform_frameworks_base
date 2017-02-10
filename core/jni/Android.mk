@@ -273,6 +273,7 @@ LOCAL_SHARED_LIBRARIES := \
     libhidlbase \
     libhidltransport \
     libhwbinder \
+    libvintf \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
