@@ -1221,13 +1221,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (andResume) {
-            r.startFreezingScreenLocked(app, 0);
-            r.setVisibility(true);
+        r.startFreezingScreenLocked(app, 0);
+        r.setVisibility(true);
 
-            // schedule launch ticks to collect information about slow apps.
-            r.startLaunchTickingLocked();
-        }
+        // schedule launch ticks to collect information about slow apps.
+        r.startLaunchTickingLocked();
 
         // Have the window manager re-evaluate the orientation of the screen based on the new
         // activity order.  Note that as a result of this, it can call back into the activity
@@ -1277,17 +1275,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             List<ResultInfo> results = null;
             List<ReferrerIntent> newIntents = null;
             if (andResume) {
+                // We don't need to deliver new intents and/or set results if activity is going
+                // to pause immediately after launch.
                 results = r.results;
                 newIntents = r.newIntents;
             }
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
                     "Launching: " + r + " icicle=" + r.icicle + " with results=" + results
                     + " newIntents=" + newIntents + " andResume=" + andResume);
-            if (andResume) {
-                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY,
-                        r.userId, System.identityHashCode(r),
-                        task.taskId, r.shortComponentName);
-            }
+            EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.userId,
+                    System.identityHashCode(r), task.taskId, r.shortComponentName);
             if (r.isHomeActivity()) {
                 // Home process is the root process of the task.
                 mService.mHomeProcess = task.mActivities.get(0).app;
@@ -1327,10 +1324,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
             }
 
-            if (andResume) {
-                app.hasShownUi = true;
-                app.pendingUiClean = true;
-            }
+            app.hasShownUi = true;
+            app.pendingUiClean = true;
             app.forceProcessStateUpTo(mService.mTopProcessState);
             // Because we could be starting an Activity in the system process this may not go across
             // a Binder interface which would create a new Configuration. Consequently we have to
