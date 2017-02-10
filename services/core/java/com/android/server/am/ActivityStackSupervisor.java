@@ -2375,19 +2375,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
-                final Rect tempOtherTaskRect = new Rect();
-                final Rect tempOtherTaskInsetRect = new Rect();
+                final Rect otherTaskRect = new Rect();
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     final ActivityStack current = getStack(i);
                     if (current != null && StackId.isResizeableByDockedStack(i)) {
-                        current.getStackDockedModeBounds(tempRect, tempOtherTaskRect,
-                                tempOtherTaskInsetRect, true /* ignoreVisibility */);
+                        current.getStackDockedModeBounds(
+                                tempOtherTaskBounds /* currentTempTaskBounds */,
+                                tempRect /* outStackBounds */,
+                                otherTaskRect /* outTempTaskBounds */, true /* ignoreVisibility */);
+
                         resizeStackLocked(i, tempRect,
-                                !tempOtherTaskRect.isEmpty() ? tempOtherTaskRect :
-                                        tempOtherTaskBounds,
-                                !tempOtherTaskInsetRect.isEmpty() ? tempOtherTaskInsetRect :
-                                        tempOtherTaskInsetBounds,
-                                preserveWindows, true /* allowResizeInDockedMode */, deferResume);
+                                !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
+                                tempOtherTaskInsetBounds, preserveWindows,
+                                true /* allowResizeInDockedMode */, deferResume);
                     }
                 }
             }

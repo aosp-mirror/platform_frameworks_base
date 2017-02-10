@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 import android.annotation.NonNull;
@@ -1057,15 +1058,18 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns the window rect for the RecentsActivity, based on the dimensions of the home stack.
+     * Returns the window rect for the RecentsActivity, based on the dimensions of the recents stack
      */
     public Rect getWindowRect() {
         Rect windowRect = new Rect();
         if (mIam == null) return windowRect;
 
         try {
-            // Use the home stack bounds
-            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(HOME_STACK_ID);
+            // Use the recents stack bounds, fallback to fullscreen stack if it is null
+            ActivityManager.StackInfo stackInfo = mIam.getStackInfo(RECENTS_STACK_ID);
+            if (stackInfo == null) {
+                stackInfo = mIam.getStackInfo(FULLSCREEN_WORKSPACE_STACK_ID);
+            }
             if (stackInfo != null) {
                 windowRect.set(stackInfo.bounds);
             }
