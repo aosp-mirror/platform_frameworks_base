@@ -6625,14 +6625,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        final UserHandle callingUser = mInjector.binderGetCallingUserHandle();
-        final int userId = callingUser.getIdentifier();
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        final int userId = mInjector.userHandleGetCallingUserId();
         enforceNotManagedProfile(userId, "clear profile owner");
         enforceUserUnlocked(userId);
-        // Check if this is the profile owner who is calling
-        final ActiveAdmin admin =
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
+            // Check if this is the profile owner who is calling
+            final ActiveAdmin admin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
             final long ident = mInjector.binderClearCallingIdentity();
             try {
                 clearProfileOwnerLocked(admin, userId);
