@@ -278,8 +278,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"પ્રદર્શનનું ઝૂમ સ્તર અને સ્થિતિનિર્ધારણ નિયંત્રિત કરો."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"હાવભાવ કરો"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ટૅપ, સ્વાઇપ, પિંચ કરી અને અન્ય હાવભાવ કરી શકે છે."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ફિંગરપ્રિન્ટ હાવભાવો"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ઉપકરણોનાં ફિંગરપ્રિન્ટ સેન્સર પર ભજવેલા હાવભાવ કૅપ્ચર કરી શકે છે."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ફિંગરપ્રિન્ટ સંકેતો"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ઉપકરણોનાં ફિંગરપ્રિન્ટ સેન્સર પર ભજવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"સ્થિતિ બાર અક્ષમ કરો અથવા સંશોધિત કરો"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"એપ્લિકેશનને સ્થિતિ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"સ્થિતિ બાર થાઓ"</string>
@@ -1694,6 +1694,19 @@
     <string name="app_category_maps" msgid="5878491404538024367">"નકશા અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ઉત્પાદકતા"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ઉપકરણ સ્ટૉરેજ"</string>
-    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ડિબગિંગ"</string>
+    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
+    <skip />
+    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
+    <skip />
+    <!-- no translation found for time_picker_header_text (143536825321922567) -->
+    <skip />
+    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
+    <skip />
+    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
+    <skip />
+    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
+    <skip />
+    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
     <skip />
 </resources>

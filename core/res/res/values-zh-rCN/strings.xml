@@ -1693,6 +1693,19 @@
     <string name="app_category_maps" msgid="5878491404538024367">"地图和导航"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"办公"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"设备存储空间"</string>
-    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 调试"</string>
+    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
+    <skip />
+    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
+    <skip />
+    <!-- no translation found for time_picker_header_text (143536825321922567) -->
+    <skip />
+    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
+    <skip />
+    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
+    <skip />
+    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
+    <skip />
+    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
     <skip />
 </resources>

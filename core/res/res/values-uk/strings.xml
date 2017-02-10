@@ -1362,7 +1362,7 @@
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Крапка."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Інші варіанти"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Більше"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"Внутрішнє спільне сховище"</string>
@@ -1755,6 +1755,19 @@
     <string name="app_category_maps" msgid="5878491404538024367">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Продуктивність"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Пам’ять пристрою"</string>
-    <!-- no translation found for adb_debugging_notification_channel_tv (5537766997350092316) -->
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Налагодження USB"</string>
+    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
+    <skip />
+    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
+    <skip />
+    <!-- no translation found for time_picker_header_text (143536825321922567) -->
+    <skip />
+    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
+    <skip />
+    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
+    <skip />
+    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
+    <skip />
+    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
     <skip />
 </resources>
