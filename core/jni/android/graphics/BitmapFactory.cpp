@@ -39,6 +39,7 @@ jfieldID gOptions_targetDensityFieldID;
 jfieldID gOptions_widthFieldID;
 jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
+jfieldID gOptions_outConfigFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
 
@@ -46,6 +47,9 @@ jfieldID gBitmap_ninePatchInsetsFieldID;
 
 jclass gInsetStruct_class;
 jmethodID gInsetStruct_constructorMethodID;
+
+jclass gBitmapConfig_class;
+jmethodID gBitmapConfig_nativeToConfigMethodID;
 
 using namespace android;
 
@@ -298,6 +302,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         env->SetIntField(options, gOptions_widthFieldID, -1);
         env->SetIntField(options, gOptions_heightFieldID, -1);
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
+        env->SetObjectField(options, gOptions_outConfigFieldID, 0);
 
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
@@ -352,6 +357,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         scaledHeight = codec->getInfo().height() / sampleSize;
     }
 
+    // Set the decode colorType
+    SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
+
     // Set the options and return if the client only wants the size.
     if (options != NULL) {
         jstring mimeType = encodedFormatToString(
@@ -362,6 +370,20 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         env->SetIntField(options, gOptions_widthFieldID, scaledWidth);
         env->SetIntField(options, gOptions_heightFieldID, scaledHeight);
         env->SetObjectField(options, gOptions_mimeFieldID, mimeType);
+
+        SkColorType outColorType = decodeColorType;
+        // Scaling can affect the output color type
+        if (willScale || scale != 1.0f) {
+            outColorType = colorTypeForScaledOutput(outColorType);
+        }
+
+        jint configID = GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType);
+        if (isHardware) {
+            configID = GraphicsJNI::kHardware_LegacyBitmapConfig;
+        }
+        jobject config = env->CallStaticObjectMethod(gBitmapConfig_class,
+                gBitmapConfig_nativeToConfigMethodID, configID);
+        env->SetObjectField(options, gOptions_outConfigFieldID, config);
 
         if (onlyDecodeSize) {
             return nullptr;
@@ -408,10 +430,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     } else {
         decodeAllocator = &defaultAllocator;
     }
-
-    // Set the decode colorType.  This is necessary because we can't always support
-    // the requested colorType.
-    SkColorType decodeColorType = codec->computeOutputColorType(prefColorType);
 
     // Construct a color table for the decode if necessary
     sk_sp<SkColorTable> colorTable(nullptr);
@@ -747,6 +765,8 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_widthFieldID = GetFieldIDOrDie(env, options_class, "outWidth", "I");
     gOptions_heightFieldID = GetFieldIDOrDie(env, options_class, "outHeight", "I");
     gOptions_mimeFieldID = GetFieldIDOrDie(env, options_class, "outMimeType", "Ljava/lang/String;");
+    gOptions_outConfigFieldID = GetFieldIDOrDie(env, options_class, "outConfig",
+             "Landroid/graphics/Bitmap$Config;");
     gOptions_mCancelID = GetFieldIDOrDie(env, options_class, "mCancel", "Z");
 
     jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
@@ -757,6 +777,11 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
         "android/graphics/NinePatch$InsetStruct"));
     gInsetStruct_constructorMethodID = GetMethodIDOrDie(env, gInsetStruct_class, "<init>",
                                                         "(IIIIIIIIFIF)V");
+
+    gBitmapConfig_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
+            "android/graphics/Bitmap$Config"));
+    gBitmapConfig_nativeToConfigMethodID = GetStaticMethodIDOrDie(env, gBitmapConfig_class,
+            "nativeToConfig", "(I)Landroid/graphics/Bitmap$Config;");
 
     return android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory",
                                          gMethods, NELEM(gMethods));
