@@ -695,6 +695,7 @@ public class BugreportReceiverTest {
 
     private void sendBugreportStarted(int id, int pid, String name, int max) throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
+        intent.setPackage("com.android.shell");
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(EXTRA_ID, id);
         intent.putExtra(EXTRA_PID, pid);
@@ -754,6 +755,7 @@ public class BugreportReceiverTest {
      */
     private void sendBugreportFinished(int id, String bugreportPath, String screenshotPath) {
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
+        intent.setPackage("com.android.shell");
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         if (id != NO_ID) {
             intent.putExtra(EXTRA_ID, id);
