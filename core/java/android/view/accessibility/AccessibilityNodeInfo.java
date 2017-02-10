@@ -3315,6 +3315,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
         mDrawingOrderInParent = 0;
+        mExtraDataKeys = null;
         mPackageName = null;
         mClassName = null;
         mText = null;
