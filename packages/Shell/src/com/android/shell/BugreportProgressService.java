@@ -92,6 +92,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.util.SparseArray;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
@@ -579,6 +580,16 @@ public class BugreportProgressService extends Service {
         }
 
         collapseNotificationBar();
+
+        // Dissmiss keyguard first.
+        final IWindowManager wm = IWindowManager.Stub
+                .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
+        try {
+            wm.dismissKeyguard(null);
+        } catch (Exception e) {
+            // ignore it
+        }
+
         mInfoDialog.initialize(mContext, info);
     }
 
