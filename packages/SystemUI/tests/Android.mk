@@ -32,10 +32,10 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) \
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
     frameworks/base/packages/SystemUI/res \
+    frameworks/base/packages/SystemUI/res-keyguard \
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
-    Keyguard \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
@@ -52,7 +52,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
 
-LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui
+LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken
