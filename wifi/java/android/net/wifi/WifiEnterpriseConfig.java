@@ -263,11 +263,17 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int MSCHAPV2    = 3;
         /** Generic Token Card */
         public static final int GTC         = 4;
+        /** EAP-Subscriber Identity Module */
+        public static final int SIM         = 5;
+        /** EAP-Authentication and Key Agreement */
+        public static final int AKA         = 6;
+        /** EAP-Authentication and Key Agreement Prime */
+        public static final int AKA_PRIME   = 7;
         private static final String AUTH_PREFIX = "auth=";
         private static final String AUTHEAP_PREFIX = "autheap=";
         /** @hide */
         public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP",
-                "MSCHAPV2", "GTC" };
+                "MSCHAPV2", "GTC", "SIM", "AKA", "AKA'" };
 
         /** Prevent initialization */
         private Phase2() {}
@@ -426,6 +432,9 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Phase2.MSCHAP:
             case Phase2.MSCHAPV2:
             case Phase2.GTC:
+            case Phase2.SIM:
+            case Phase2.AKA:
+            case Phase2.AKA_PRIME:
                 mPhase2Method = phase2Method;
                 break;
             default:
