@@ -103,6 +103,12 @@ void SkiaCanvasProxy::onDrawRRect(const SkRRect& roundRect, const SkPaint& paint
     }
 }
 
+void SkiaCanvasProxy::onDrawArc(const SkRect& rect, SkScalar startAngle, SkScalar sweepAngle,
+                                bool useCenter, const SkPaint& paint) {
+    mCanvas->drawArc(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom,
+                     startAngle, sweepAngle, useCenter, paint);
+}
+
 void SkiaCanvasProxy::onDrawPath(const SkPath& path, const SkPaint& paint) {
     mCanvas->drawPath(path, paint);
 }
