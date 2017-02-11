@@ -849,15 +849,19 @@ public class BugreportProgressService extends Service {
             .append(SystemProperties.get("ro.build.description"))
             .append("\nSerial number: ")
             .append(SystemProperties.get("ro.serialno"));
+        int descriptionLength = 0;
         if (!TextUtils.isEmpty(info.description)) {
             messageBody.append("\nDescription: ").append(info.description);
+            descriptionLength = info.description.length();
         }
         intent.putExtra(Intent.EXTRA_TEXT, messageBody.toString());
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
+        Log.d(TAG, "share intent: bureportUri=" + bugreportUri);
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
         for (File screenshot : info.screenshotFiles) {
             final Uri screenshotUri = getUri(context, screenshot);
+            Log.d(TAG, "share intent: screenshotUri=" + screenshotUri);
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
@@ -875,6 +879,10 @@ public class BugreportProgressService extends Service {
             // We probably need to change ChooserActivity to take an extra argument for the
             // default profile.
         }
+
+        // Log what was sent to the intent
+        Log.d(TAG, "share intent: EXTRA_SUBJECT=" + subject + ", EXTRA_TEXT=" + messageBody.length()
+                + " chars, description=" + descriptionLength + " chars");
 
         return intent;
     }
@@ -1255,14 +1263,17 @@ public class BugreportProgressService extends Service {
             return;
         }
         if (title != null && !title.equals(info.title)) {
+            Log.d(TAG, "updating bugreport title: " + title);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_TITLE_CHANGED);
         }
         info.title = title;
         if (description != null && !description.equals(info.description)) {
+            Log.d(TAG, "updating bugreport description: " + description.length() + " chars");
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED);
         }
         info.description = description;
         if (name != null && !name.equals(info.name)) {
+            Log.d(TAG, "updating bugreport name: " + name);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_NAME_CHANGED);
             info.name = name;
             updateProgress(info);
@@ -1673,17 +1684,34 @@ public class BugreportProgressService extends Service {
         public String toString() {
             final float percent = ((float) progress * 100 / max);
             final float realPercent = ((float) realProgress * 100 / realMax);
-            return "\tid: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
-                    + "\n\ttitle: " + title
-                    + "\n\tdescription: " + description
-                    + "\n\tfile: " + bugreportFile
-                    + "\n\tscreenshots: " + screenshotFiles
-                    + "\n\tprogress: " + progress + "/" + max + " (" + percent + ")"
-                    + "\n\treal progress: " + realProgress + "/" + realMax + " (" + realPercent
-                    + ")"
-                    + "\n\tlast_update: " + getFormattedLastUpdate()
-                    + "\n\taddingDetailsToZip: " + addingDetailsToZip + " addedDetailsToZip: "
-                    + addedDetailsToZip;
+
+            final StringBuilder builder = new StringBuilder()
+                    .append("\tid: ").append(id)
+                    .append(", pid: ").append(pid)
+                    .append(", name: ").append(name)
+                    .append(", finished: ").append(finished)
+                    .append("\n\ttitle: ").append(title)
+                    .append("\n\tdescription: ");
+            if (description == null) {
+                builder.append("null");
+            } else {
+                if (TextUtils.getTrimmedLength(description) == 0) {
+                    builder.append("empty ");
+                }
+                builder.append("(").append(description.length()).append(" chars)");
+            }
+
+            return builder
+                .append("\n\tfile: ").append(bugreportFile)
+                .append("\n\tscreenshots: ").append(screenshotFiles)
+                .append("\n\tprogress: ").append(progress).append("/").append(max)
+                .append(" (").append(percent).append(")")
+                .append("\n\treal progress: ").append(realProgress).append("/").append(realMax)
+                .append(" (").append(realPercent).append(")")
+                .append("\n\tlast_update: ").append(getFormattedLastUpdate())
+                .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
+                .append(" addedDetailsToZip: ").append(addedDetailsToZip)
+                .toString();
         }
 
         // Parcelable contract
