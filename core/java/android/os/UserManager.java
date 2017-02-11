@@ -1048,6 +1048,10 @@ public class UserManager {
      * allowed to run code through scheduled alarms, receiving broadcasts,
      * etc.  A started user may be either the current foreground user or a
      * background user; the result here does not distinguish between the two.
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a managed profile associated with it.
+     *
      * @param user The user to retrieve the running state for.
      */
     public boolean isUserRunning(UserHandle user) {
@@ -1068,6 +1072,10 @@ public class UserManager {
      * This is like {@link #isUserRunning(UserHandle)}, but will also return
      * true if the user had been running but is in the process of being stopped
      * (but is not yet fully stopped, and still running some code).
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a managed profile associated with it.
+     *
      * @param user The user to retrieve the running state for.
      */
     public boolean isUserRunningOrStopping(UserHandle user) {
@@ -1142,6 +1150,9 @@ public class UserManager {
      * When a user is locked, only device-protected data storage is available.
      * When a user is unlocked, both device-protected and credential-protected
      * private app data storage is available.
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a managed profile associated with it.
      *
      * @param user to retrieve the unlocked state for.
      * @see Intent#ACTION_USER_UNLOCKED
