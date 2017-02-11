@@ -157,13 +157,15 @@ status_t JHwBinder::onTransact(
     if (env->ExceptionCheck()) {
         jthrowable excep = env->ExceptionOccurred();
         env->ExceptionDescribe();
+        env->ExceptionClear();
 
+        // It is illegal to call IsInstanceOf if there is a pending exception.
+        // Attempting to do so results in a JniAbort which crashes the entire process.
         if (env->IsInstanceOf(excep, gErrorClass)) {
             /* It's an error */
             LOG(ERROR) << "Forcefully exiting";
             exit(1);
         } else {
-            env->ExceptionClear();
             LOG(ERROR) << "Uncaught exception!";
         }
 
