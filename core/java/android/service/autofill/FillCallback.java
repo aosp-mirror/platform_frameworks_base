@@ -19,27 +19,19 @@ package android.service.autofill;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.RemoteException;
-import android.view.autofill.FillResponse;
 
 /**
  * Handles auto-fill requests from the {@link AutoFillService} into the {@link Activity} being
  * auto-filled.
  */
-public final class FillCallback implements Parcelable {
+public final class FillCallback {
     private final IFillCallback mCallback;
     private boolean mCalled;
 
     /** @hide */
     public FillCallback(IFillCallback callback) {
         mCallback = callback;
-    }
-
-    /** @hide */
-    private FillCallback(Parcel parcel) {
-        mCallback = IFillCallback.Stub.asInterface(parcel.readStrongBinder());
     }
 
     /**
@@ -79,33 +71,9 @@ public final class FillCallback implements Parcelable {
         }
     }
 
-    /** @hide */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /** @hide */
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeStrongBinder(mCallback.asBinder());
-    }
-
     private void assertNotCalled() {
         if (mCalled) {
             throw new IllegalStateException("Already called");
         }
     }
-
-    public static final Creator<FillCallback> CREATOR = new Creator<FillCallback>() {
-        @Override
-        public FillCallback createFromParcel(Parcel parcel) {
-            return new FillCallback(parcel);
-        }
-
-        @Override
-        public FillCallback[] newArray(int size) {
-            return new FillCallback[size];
-        }
-    };
 }

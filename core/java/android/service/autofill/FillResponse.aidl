@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.view.autofill;
+package android.service.autofill;
 
 parcelable FillResponse;

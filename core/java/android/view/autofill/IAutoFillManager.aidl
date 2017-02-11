@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package android.service.autofill;
+package android.view.autofill;
 
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
+import android.view.autofill.IAutoFillManagerClient;
 
 /**
  * Mediator between apps being auto-filled and auto-fill service implementations.
  *
  * {@hide}
  */
-oneway interface IAutoFillManagerService {
-    // Methods called by AutoFillManager
-    void startSession(in IBinder activityToken, in IBinder appCallback, in AutoFillId autoFillId,
-                      in Rect bounds, in AutoFillValue value);
-    void updateSession(in IBinder activityToken, in AutoFillId id, in Rect bounds,
-                       in AutoFillValue value, int flags);
-    void finishSession(in IBinder activityToken);
+interface IAutoFillManager {
+    boolean addClient(in IAutoFillManagerClient client, int userId);
+    oneway void startSession(in IBinder activityToken, in IBinder appCallback,
+            in AutoFillId autoFillId, in Rect bounds, in AutoFillValue value, int userId);
+    oneway void updateSession(in IBinder activityToken, in AutoFillId id, in Rect bounds,
+            in AutoFillValue value, int flags, int userId);
+    oneway void finishSession(in IBinder activityToken, int userId);
+    oneway void setAuthenticationResult(in Bundle data,
+            in IBinder activityToken, int userId);
 }

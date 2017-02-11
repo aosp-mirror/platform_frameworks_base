@@ -18,7 +18,7 @@ package android.service.autofill;
 
 import android.os.ICancellationSignal;
 
-import android.view.autofill.FillResponse;
+import android.service.autofill.FillResponse;
 
 /**
  * Interface to receive the result of a save request.

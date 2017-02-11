@@ -18,11 +18,11 @@ package com.android.server.autofill;
 
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.autofill.Dataset;
+import android.service.autofill.FillResponse;
 import android.util.ArraySet;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
-import android.view.autofill.Dataset;
-import android.view.autofill.FillResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,25 +78,25 @@ final class Helper {
     }
 
     /**
-     * Finds a data set by id in a response.
+     * Finds the index of a data set given its name.
      *
-     * @param id The dataset id.
+     * @param name The dataset name.
      * @param response The response to search.
-     * @return The dataset if found or null.
+     * @return The index of dataset if found or -1.
      */
-    static Dataset findDatasetById(String id, FillResponse response) {
+    static int indexOfDataset(CharSequence name, FillResponse response) {
         ArraySet<Dataset> datasets = response.getDatasets();
         if (datasets == null || datasets.isEmpty()) {
-            return null;
+            return -1;
         }
         final int datasetCount = datasets.size();
         for (int i = 0; i < datasetCount; i++) {
             Dataset dataset = datasets.valueAt(i);
-            if (dataset.getId().equals(id)) {
-                return dataset;
+            if (dataset.getName().toString().equals(name.toString())) {
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
     private Helper() {

@@ -126,13 +126,13 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
             int oldLeft, int oldTop, int oldRight, int oldBottom) {
         if (view == mWindowSizeListenerView) {
             if (DEBUG) Slog.d(TAG, "onLayoutChange() for mWindowSizeListenerView");
-            // mWindowSizeListenerView layout changed, get the size of the display bounds and update
+            // mWindowSizeListenerView layout changed, get the size of the display bounds and updateLocked
             // the window.
             final Rect displayBounds = new Rect();
             view.getBoundsOnScreen(displayBounds);
             updateDisplayBounds(displayBounds);
         } else if (view == mContentView) {
-            // mContentView layout changed, update the window in case its height changed.
+            // mContentView layout changed, updateLocked the window in case its height changed.
             if (DEBUG) Slog.d(TAG, "onLayoutChange() for mContentView");
             updateHeight();
         }
@@ -159,7 +159,7 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
                 MeasureSpec.makeMeasureSpec(displayBounds.height(), MeasureSpec.AT_MOST));
         int height = mContentView.getMeasuredHeight();
         if (height != mLastHeight) {
-            if (DEBUG) Slog.d(TAG, "update height=" + height);
+            if (DEBUG) Slog.d(TAG, "updateLocked height=" + height);
             mLastHeight = height;
             update(height, mLastBounds, displayBounds);
             return true;
@@ -170,7 +170,7 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
 
     private void updateBounds(Rect bounds) {
         if (!bounds.equals(mLastBounds)) {
-            if (DEBUG) Slog.d(TAG, "update bounds=" + bounds);
+            if (DEBUG) Slog.d(TAG, "updateLocked bounds=" + bounds);
             mLastBounds = bounds;
 
             update(mLastHeight, bounds, mLastDisplayBounds);
@@ -179,7 +179,7 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
 
     private void updateDisplayBounds(Rect displayBounds) {
         if (!displayBounds.equals(mLastDisplayBounds)) {
-            if (DEBUG) Slog.d(TAG, "update displayBounds=" + displayBounds);
+            if (DEBUG) Slog.d(TAG, "updateLocked displayBounds=" + displayBounds);
             mLastDisplayBounds = displayBounds;
 
             if (!updateHeight()) {
@@ -195,7 +195,7 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
             return;
         }
 
-        if (DEBUG) Slog.d(TAG, "update height=" + height + ", bounds=" + bounds
+        if (DEBUG) Slog.d(TAG, "updateLocked height=" + height + ", bounds=" + bounds
                 + ", displayBounds=" + displayBounds);
 
         final LayoutParams params = createWindowLayoutParams(mAppToken,
@@ -220,7 +220,7 @@ final class AnchoredWindow implements View.OnLayoutChangeListener, View.OnTouchL
      * the bounds is preferred, if it fits. Otherwise, anchor the window on the side with more
      * space.
      *
-     * @param params the params to update
+     * @param params the params to updateLocked
      * @param height the requested height of the window
      * @param minMargin the minimum margin between the window and the display bounds
      * @param bounds the region the window should be anchored to

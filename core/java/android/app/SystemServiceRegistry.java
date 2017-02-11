@@ -114,7 +114,8 @@ import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
-import android.service.autofill.IAutoFillManagerService;
+import android.view.autofill.AutoFillManager;
+import android.view.autofill.IAutoFillManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.service.vr.IVrManager;
@@ -130,7 +131,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
-import android.view.autofill.AutoFillManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
@@ -826,8 +826,8 @@ final class SystemServiceRegistry {
             @Override
             public AutoFillManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.AUTO_FILL_MANAGER_SERVICE);
-                IAutoFillManagerService service = IAutoFillManagerService.Stub.asInterface(b);
-                return new AutoFillManager(ctx, service);
+                IAutoFillManager service = IAutoFillManager.Stub.asInterface(b);
+                return new AutoFillManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {

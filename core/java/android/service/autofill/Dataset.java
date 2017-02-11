@@ -14,56 +14,45 @@
  * limitations under the License.
  */
 
-package android.view.autofill;
-
-import static android.view.autofill.Helper.DEBUG;
+package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
-import android.app.assist.AssistStructure.ViewNode;
 import android.content.IntentSender;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 
 /**
- * A set of data that can be used to auto-fill an {@link Activity}.
+ * A set of data that can be used to auto-fill an {@link android.app.Activity}.
  *
  * <p>It contains:
  *
  * <ol>
  *   <li>A name used to identify the dataset in the UI.
  *   <li>A list of id/value pairs for the fields that can be auto-filled.
- *   <li>An optional {@link Bundle} with extras (used only by the service creating it).
+ *   <li>A list of savable ids in addition to the ones with a provided value.
  * </ol>
  *
- * @see FillResponse for examples.
+ * @see android.service.autofill.FillResponse for examples.
  */
 public final class Dataset implements Parcelable {
-    private final String mId;
+    private static final boolean DEBUG = false;
+
     private final CharSequence mName;
     private final ArrayList<AutoFillId> mFieldIds;
     private final ArrayList<AutoFillValue> mFieldValues;
-    private final Bundle mExtras;
     private final IntentSender mAuthentication;
 
     private Dataset(Builder builder) {
-        mId = builder.mId;
         mName = builder.mName;
         mFieldIds = builder.mFieldIds;
         mFieldValues = builder.mFieldValues;
-        mExtras = builder.mExtras;
         mAuthentication = builder.mAuthentication;
-    }
-
-    /** @hide */
-    public @NonNull String getId() {
-        return mId;
     }
 
     /** @hide */
@@ -82,11 +71,6 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable Bundle getExtras() {
-        return mExtras;
-    }
-
-    /** @hide */
     public @Nullable IntentSender getAuthentication() {
         return mAuthentication;
     }
@@ -100,40 +84,11 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("Dataset [id=").append(mId)
-                .append(", name=").append(mName)
+        final StringBuilder builder = new StringBuilder("Dataset [name=").append(mName)
                 .append(", fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(", hasExtras=").append(mExtras != null);
+                .append(", hasAuthentication=").append(mAuthentication != null);
         return builder.append(']').toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Dataset other = (Dataset) obj;
-        if (mId == null) {
-            if (other.mId != null) {
-                return false;
-            }
-        } else if (!mId.equals(other.mId)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return mId != null ? mId.hashCode() : 0;
     }
 
     /**
@@ -141,30 +96,20 @@ public final class Dataset implements Parcelable {
      * one value for a field or set an authentication intent.
      */
     public static final class Builder {
-        private String mId;
         private CharSequence mName;
         private ArrayList<AutoFillId> mFieldIds;
         private ArrayList<AutoFillValue> mFieldValues;
-        private Bundle mExtras;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
-
-        /** @hide */
-        // TODO(b/33197203): Remove once GCore migrates
-        public Builder(@NonNull CharSequence name) {
-            this(String.valueOf(System.currentTimeMillis()), name);
-        }
 
         /**
          * Creates a new builder.
          *
-         * @param id A required id to identify this dataset for future interactions related to it.
          * @param name Name used to identify the dataset in the UI. Typically it's the same value as
          * the first field in the dataset (like username or email address) or a user-provided name
          * (like "My Work Address").
          */
-        public Builder(@NonNull String id, @NonNull CharSequence name) {
-            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty or null");
+        public Builder(@NonNull CharSequence name) {
             mName = Preconditions.checkStringNotEmpty(name, "name cannot be empty or null");
         }
 
@@ -172,50 +117,36 @@ public final class Dataset implements Parcelable {
          * Requires a dataset authentication before auto-filling the activity with this dataset.
          *
          * <p>This method is called when you need to provide an authentication
-         * UI for the dataset. For example, when a dataset contains credit card information
+         * UI for the data set. For example, when a data set contains credit card information
          * (such as number, expiration date, and verification code), you can display UI
          * asking for the verification code to before filing in the data). Even if the
-         * dataset is completely populated the system will launch the specified authentication
-         * intent and will need your approval to fill it in. Since the dataset is "locked"
-         * until the user authenticates it, typically this dataset name is masked
-         * (for example, "VISA....1234"). Typically you would want to store the dataset
-         * labels non-encypted and the actual sensitive data encrypted and not in memory.
+         * data set is completely populated the system will launch the specified authentication
+         * intent and will need your approval to fill it in. Since the data set is "locked"
+         * until the user authenticates it, typically this data set name is masked
+         * (for example, "VISA....1234"). Typically you would want to store the data set
+         * labels non-encrypted and the actual sensitive data encrypted and not in memory.
          * This allows showing the labels in the UI while involving the user if one of
          * the items with these labels is chosen. Note that if you use sensitive data as
-         * a label, for example an email address, then it should also be encrypted.
-         *</p>
+         * a label, for example an email address, then it should also be encrypted.</p>
          *
-         * <p>When a user selects this dataset, the system triggers the provided intent
-         * whose extras will have the {@link android.content.Intent#EXTRA_AUTO_FILL_ITEM_ID id}
-         * of the {@link android.view.autofill.Dataset dataset} to authenticate, the {@link
-         * android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras} associated with this
-         * dataset, and a {@link android.content.Intent#EXTRA_AUTO_FILL_CALLBACK callback}
-         * to dispatch the authentication result.</p>
+         * <p>When a user triggers auto-fill, the system launches the provided intent
+         * whose extras will have the {@link
+         * android.view.autofill.AutoFillManager#EXTRA_ASSIST_STRUCTURE screen content}. Once
+         * you complete your authentication flow you should set the activity result to {@link
+         * android.app.Activity#RESULT_OK} and provide the fully populated {@link Dataset
+         * dataset} by setting it to the {@link
+         * android.view.autofill.AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra. For example,
+         * if you provided an credit card information without the CVV for the data set in the
+         * {@link FillResponse response} then the returned data set should contain the
+         * CVV entry.</p>
          *
-         * <p>Once you complete your authentication flow you should use the provided callback
-         * to notify for a failure or a success. In case of a success you need to provide
-         * only the fully populated dataset that is being authenticated. For example, if you
-         * provided a {@link FillResponse} with two {@link Dataset}s and marked that
-         * only the first dataset needs an authentication then in the provided response
-         * you need to provide only the fully populated dataset being authenticated instead
-         * of both of them.
-         * </p>
-         *
-         * <p>The indent sender mechanism allows you to have your authentication UI
-         * implemented as an activity or a service or a receiver. However, the recommended
-         * way is to do this is with an activity which the system will start in the
-         * filled activity's task meaning it will properly work with back, recent apps, and
-         * free-form multi-window, while avoiding the need for the "draw on top of other"
-         * apps special permission. You can still theme your authentication activity's
-         * UI to look like a dialog if desired.</p>
-         *
-         * <p></><strong>Note:</strong> Do not make the provided intent sender
+         * <p></><strong>Note:</strong> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.</p>
          *
-         * @param authentication Intent to trigger your authentication flow.
+         * @param authentication Intent to an activity with your authentication flow.
          *
-         * @see android.app.PendingIntent#getIntentSender()
+         * @see android.app.PendingIntent
          */
         public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
             throwIfDestroyed();
@@ -226,7 +157,8 @@ public final class Dataset implements Parcelable {
         /**
          * Sets the value of a field.
          *
-         * @param id id returned by {@link ViewNode#getAutoFillId()}.
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutoFillId()}.
          * @param value value to be auto filled.
          */
         public @NonNull Builder setValue(@NonNull AutoFillId id, @NonNull AutoFillValue value) {
@@ -245,18 +177,6 @@ public final class Dataset implements Parcelable {
             }
             mFieldIds.add(id);
             mFieldValues.add(value);
-            return this;
-        }
-
-        /**
-         * Sets a {@link Bundle} that will be passed to subsequent APIs that
-         * manipulate this dataset. For example, they are passed in as {@link
-         * android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras} to your
-         * authentication flow.
-         */
-        public @NonNull Builder setExtras(@Nullable Bundle extras) {
-            throwIfDestroyed();
-            mExtras = extras;
             return this;
         }
 
@@ -292,21 +212,19 @@ public final class Dataset implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mId);
         parcel.writeCharSequence(mName);
         parcel.writeTypedArrayList(mFieldIds, 0);
         parcel.writeTypedArrayList(mFieldValues, 0);
-        parcel.writeBundle(mExtras);
         parcel.writeParcelable(mAuthentication, flags);
     }
 
-    public static final Parcelable.Creator<Dataset> CREATOR = new Parcelable.Creator<Dataset>() {
+    public static final Creator<Dataset> CREATOR = new Creator<Dataset>() {
         @Override
         public Dataset createFromParcel(Parcel parcel) {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readString(), parcel.readCharSequence());
+            final Builder builder = new Builder(parcel.readCharSequence());
             final ArrayList<AutoFillId> ids = parcel.readTypedArrayList(null);
             final ArrayList<AutoFillValue> values = parcel.readTypedArrayList(null);
             final int idCount = (ids != null) ? ids.size() : 0;
@@ -316,7 +234,6 @@ public final class Dataset implements Parcelable {
                 AutoFillValue value = (valueCount > i) ? values.get(i) : null;
                 builder.setValue(id, value);
             }
-            builder.setExtras(parcel.readBundle());
             builder.setAuthentication(parcel.readParcelable(null));
             return builder.build();
         }

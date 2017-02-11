@@ -31,43 +31,44 @@ import static com.android.server.autofill.Helper.findValue;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.IActivityManager;
+import android.app.AppGlobals;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.WindowNode;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ICancellationSignal;
 import android.os.Looper;
+import android.os.Parcelable;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.service.autofill.AutoFillService;
 import android.service.autofill.AutoFillServiceInfo;
-import android.service.autofill.FillCallback;
-import android.service.autofill.IAutoFillAppCallback;
+import android.service.autofill.Dataset;
+import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
-import android.service.autofill.IFillCallback;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillValue;
-import android.view.autofill.Dataset;
-import android.view.autofill.FillResponse;
 
+import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.IResultReceiver;
-import com.android.server.FgThread;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -86,26 +87,14 @@ final class AutoFillManagerServiceImpl {
     private static final int MSG_SERVICE_SAVE = 1;
 
     private final int mUserId;
-    private final ComponentName mComponent;
-    private final String mComponentName;
     private final Context mContext;
-    private final IActivityManager mAm;
     private final Object mLock;
-    private final AutoFillServiceInfo mInfo;
     private final AutoFillUI mUi;
 
-    private final LocalLog mRequestsHistory;
+    private RemoteCallbackList<IAutoFillManagerClient> mClients;
+    private AutoFillServiceInfo mInfo;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                final String reason = intent.getStringExtra("reason");
-                if (DEBUG) Slog.d(TAG, "close system dialogs: " + reason);
-                mUi.hideAll();
-            }
-        }
-    };
+    private final LocalLog mRequestsHistory;
 
     private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
         switch (msg.what) {
@@ -119,6 +108,7 @@ final class AutoFillManagerServiceImpl {
 
     private final HandlerCaller mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(),
             mHandlerCallback, true);
+
     /**
      * Cache of pending {@link Session}s, keyed by {@code activityToken}.
      *
@@ -139,7 +129,6 @@ final class AutoFillManagerServiceImpl {
             if (DEBUG) Slog.d(TAG, "resultCode on mAssistReceiver: " + resultCode);
 
             final AssistStructure structure = resultData.getParcelable(KEY_STRUCTURE);
-
             if (structure == null) {
                 Slog.w(TAG, "no assist structure for id " + resultCode);
                 return;
@@ -183,28 +172,61 @@ final class AutoFillManagerServiceImpl {
     };
 
     AutoFillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
-            int userId, ComponentName component, AutoFillUI ui)
-            throws PackageManager.NameNotFoundException {
+            int userId, AutoFillUI ui) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
         mUserId = userId;
-        mComponent = component;
-        mComponentName = mComponent.flattenToShortString();
-        mAm = ActivityManager.getService();
         mUi = ui;
-        mInfo = new AutoFillServiceInfo(context.getPackageManager(), component, mUserId);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
+        updateLocked();
     }
 
+    void updateLocked() {
+        ComponentName serviceComponent = null;
+        ServiceInfo serviceInfo = null;
+        final String componentName = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.AUTO_FILL_SERVICE, mUserId);
+        if (!TextUtils.isEmpty(componentName)) {
+            try {
+                serviceComponent = ComponentName.unflattenFromString(componentName);
+                serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
+                        0, mUserId);
+            } catch (RuntimeException | RemoteException e) {
+                Slog.e(TAG, "Bad auto-fill service name " + componentName, e);
+                return;
+            }
+        }
+        try {
+            final boolean hadService = hasService();
+            if (serviceInfo != null) {
+                mInfo = new AutoFillServiceInfo(mContext.getPackageManager(),
+                        serviceComponent, mUserId);
+            } else {
+                mInfo = null;
+            }
+            if (hadService != hasService()) {
+                if (!hasService()) {
+                    final int sessionCount = mSessions.size();
+                    for (int i = sessionCount - 1; i >= 0; i--) {
+                        Session session = mSessions.valueAt(i);
+                        session.destroyLocked();
+                        mSessions.removeAt(i);
+                    }
+                }
+                sendStateToClients();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Bad auto-fill service name " + componentName, e);
+        }
+    }
 
     /**
      * Used by {@link AutoFillManagerServiceShellCommand} to request save for the current top app.
      */
     void requestSaveForUserLocked(IBinder activityToken) {
+        if (!hasService()) {
+            return;
+        }
         final Session session = mSessions.get(activityToken);
         if (session == null) {
             Slog.w(TAG, "requestSaveForUserLocked(): no session for " + activityToken);
@@ -214,9 +236,32 @@ final class AutoFillManagerServiceImpl {
         session.callSaveLocked();
     }
 
+    boolean addClientLocked(IAutoFillManagerClient client) {
+        if (mClients == null) {
+            mClients = new RemoteCallbackList<>();
+        }
+        mClients.register(client);
+        return hasService();
+    }
+
+    void setAuthenticationResultLocked(Bundle data, IBinder activityToken) {
+        if (!hasService()) {
+            return;
+        }
+        final Session session = mSessions.get(activityToken);
+        if (session != null) {
+            session.setAuthenticationResultLocked(data);
+        }
+    }
+
     void startSessionLocked(IBinder activityToken, IBinder appCallbackToken, AutoFillId autoFillId,
             Rect bounds, AutoFillValue value) {
-        final String historyItem = "s=" + mComponentName + " u=" + mUserId + " a=" + activityToken
+        if (!hasService()) {
+            return;
+        }
+
+        final String historyItem = "s=" + new ComponentName(mInfo.getServiceInfo().packageName,
+                mInfo.getServiceInfo().name) + " u=" + mUserId + " a=" + activityToken
                 + " i=" + autoFillId + " b=" + bounds + " v=" + value;
         mRequestsHistory.log(historyItem);
 
@@ -229,24 +274,23 @@ final class AutoFillManagerServiceImpl {
 
         final Session newSession = createSessionByTokenLocked(activityToken, appCallbackToken);
         newSession.updateLocked(autoFillId, bounds, value, FLAG_START_SESSION);
-        newSession.enableSessionLocked();
     }
 
     void finishSessionLocked(IBinder activityToken) {
-        if (DEBUG) Slog.d(TAG, "finishSessionLocked(): " + activityToken);
-        final Session session = mSessions.get(activityToken);
+        if (!hasService()) {
+            return;
+        }
 
+        final Session session = mSessions.get(activityToken);
         if (session == null) {
             Slog.w(TAG, "finishSessionLocked(): no session for " + activityToken);
             return;
         }
 
-        mUi.hideFillUi();
         session.showSaveLocked();
     }
 
     private Session createSessionByTokenLocked(IBinder activityToken, IBinder appCallbackToken) {
-
         final Session newSession = new Session(mContext, activityToken, appCallbackToken);
         mSessions.put(activityToken, newSession);
 
@@ -261,10 +305,16 @@ final class AutoFillManagerServiceImpl {
             // TODO(b/33197203): add MetricsLogger call
             final Bundle receiverExtras = new Bundle();
             receiverExtras.putBinder(EXTRA_ACTIVITY_TOKEN, activityToken);
-            if (!mAm.requestAutoFillData(mAssistReceiver, receiverExtras, activityToken)) {
-                // TODO(b/33197203): might need a way to warn user (perhaps a new method on
-                // AutoFillService).
-                Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (!ActivityManager.getService().requestAutoFillData(mAssistReceiver,
+                        receiverExtras, activityToken)) {
+                    // TODO(b/33197203): might need a way to warn user (perhaps a new method on
+                    // AutoFillService).
+                    Slog.w(TAG, "failed to request auto-fill data for " + activityToken);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         } catch (RemoteException e) {
             // Should not happen, it's a local call.
@@ -274,7 +324,6 @@ final class AutoFillManagerServiceImpl {
 
     void updateSessionLocked(IBinder activityToken, AutoFillId autoFillId, Rect bounds,
             AutoFillValue value, int flags) {
-
         // TODO(b/33197203): add MetricsLogger call
         final Session session = mSessions.get(activityToken);
         if (session == null) {
@@ -286,7 +335,6 @@ final class AutoFillManagerServiceImpl {
     }
 
     private void handleSessionSave(IBinder activityToken) {
-
         synchronized (mLock) {
             final Session session = mSessions.get(activityToken);
             if (session == null) {
@@ -301,7 +349,6 @@ final class AutoFillManagerServiceImpl {
     void destroyLocked() {
         if (VERBOSE) Slog.v(TAG, "destroyLocked()");
 
-        mContext.unregisterReceiver(mBroadcastReceiver);
         for (Session session : mSessions.values()) {
             session.destroyLocked();
         }
@@ -311,7 +358,8 @@ final class AutoFillManagerServiceImpl {
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.println("Component:"); pw.println(mComponentName);
+        pw.print(prefix); pw.println("Component:"); pw.println(mInfo != null
+                ? mInfo.getServiceInfo().getComponentName() : null);
 
         if (VERBOSE) {
             // ServiceInfo dump is too noisy and redundant (it can be obtained through other dumps)
@@ -333,14 +381,44 @@ final class AutoFillManagerServiceImpl {
 
     void listSessionsLocked(ArrayList<String> output) {
         for (IBinder activityToken : mSessions.keySet()) {
-            output.add(mComponentName + ":" + activityToken);
+            output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
+                    : null) + ":" + activityToken);
         }
+    }
+
+    private void sendStateToClients() {
+        final RemoteCallbackList<IAutoFillManagerClient> clients;
+        final int userClientCount;
+        synchronized (mLock) {
+            if (mClients == null) {
+                return;
+            }
+            clients = mClients;
+            userClientCount = clients.beginBroadcast();
+        }
+        try {
+            for (int i = 0; i < userClientCount; i++) {
+                IAutoFillManagerClient client = clients.getBroadcastItem(i);
+                try {
+                    client.setState(hasService());
+                } catch (RemoteException re) {
+                    /* ignore */
+                }
+            }
+        } finally {
+            clients.finishBroadcast();
+        }
+    }
+
+    private boolean hasService() {
+        return mInfo != null;
     }
 
     @Override
     public String toString() {
         return "AutoFillManagerServiceImpl: [userId=" + mUserId
-                + ", component=" + mComponentName + "]";
+                + ", component=" + (mInfo != null
+                ? mInfo.getServiceInfo().getComponentName() : null) + "]";
     }
 
     /**
@@ -418,7 +496,6 @@ final class AutoFillManagerServiceImpl {
             pw.print(prefix); pw.print("updated:" ); pw.println(mValueUpdated);
             pw.print(prefix); pw.print("bounds:" ); pw.println(mBounds);
         }
-
     }
 
     /**
@@ -448,7 +525,7 @@ final class AutoFillManagerServiceImpl {
         @Nullable
         private ViewState mCurrentViewState;
 
-        private final IAutoFillAppCallback mAppCallback;
+        private final IAutoFillManagerClient mClient;
 
         @GuardedBy("mLock")
         RemoteFillService mRemoteFillService;
@@ -471,19 +548,20 @@ final class AutoFillManagerServiceImpl {
         @GuardedBy("mLock")
         private AssistStructure mStructure;
 
-        private Session(Context context, IBinder activityToken, IBinder appCallback) {
-            mRemoteFillService = new RemoteFillService(context, mComponent, mUserId, this);
+        private Session(Context context, IBinder activityToken, IBinder client) {
+            mRemoteFillService = new RemoteFillService(context,
+                    mInfo.getServiceInfo().getComponentName(), mUserId, this);
             mActivityToken = activityToken;
 
-            mAppCallback = IAutoFillAppCallback.Stub.asInterface(appCallback);
+            mClient = IAutoFillManagerClient.Stub.asInterface(client);
             try {
-                appCallback.linkToDeath(() -> {
+                client.linkToDeath(() -> {
                     if (DEBUG) Slog.d(TAG, "app binder died");
 
                     removeSelf();
                 }, 0);
             } catch (RemoteException e) {
-                Slog.w(TAG, "linkToDeath() on mAppCallback failed: " + e);
+                Slog.w(TAG, "linkToDeath() on mClient failed: " + e);
             }
         }
 
@@ -528,7 +606,7 @@ final class AutoFillManagerServiceImpl {
         // FillServiceCallbacks
         @Override
         public void authenticate(IntentSender intent, Intent fillInIntent) {
-            startAuthIntent(intent, fillInIntent);
+            startAuthentication(intent, fillInIntent);
         }
 
         // FillServiceCallbacks
@@ -548,6 +626,30 @@ final class AutoFillManagerServiceImpl {
         public void save() {
             mHandlerCaller.getHandler().obtainMessage(MSG_SERVICE_SAVE, mActivityToken)
                     .sendToTarget();
+        }
+
+        public void setAuthenticationResultLocked(Bundle data) {
+            if (mCurrentResponse == null || data == null) {
+                removeSelf();
+            } else {
+                Parcelable result = data.getParcelable(
+                        AutoFillManager.EXTRA_AUTHENTICATION_RESULT);
+                if (result instanceof FillResponse) {
+                    mCurrentResponse = (FillResponse) result;
+                    processResponseLocked(mCurrentResponse);
+                } else if (result instanceof Dataset) {
+                    Dataset dataset = (Dataset) result;
+                    final int datasetIndex = Helper.indexOfDataset(
+                            dataset.getName(), mCurrentResponse);
+                    if (datasetIndex <= 0) {
+                        Slog.e(TAG, "Response for a dataset auth has"
+                                + " an invalid dataset result: " + dataset.getName());
+                    }
+                    mCurrentResponse.getDatasets().removeAt(datasetIndex);
+                    mCurrentResponse.getDatasets().add(dataset);
+                    autoFill(dataset);
+                }
+            }
         }
 
         /**
@@ -665,7 +767,7 @@ final class AutoFillManagerServiceImpl {
                 mViewStates.put(id, viewState);
             }
 
-            if ((flags & FLAG_START_SESSION) != 0 ) {
+            if ((flags & FLAG_START_SESSION) != 0) {
                 // View is triggering auto-fill.
                 mCurrentViewState = viewState;
                 viewState.update(value, bounds);
@@ -738,7 +840,7 @@ final class AutoFillManagerServiceImpl {
 
         private void processResponseLocked(FillResponse response) {
             if (DEBUG) Slog.d(TAG, "processResponseLocked(authRequired="
-                    + response.getAuthentication() +"):" + response);
+                    + response.getAuthentication() + "):" + response);
 
             // TODO(b/33197203): add MetricsLogger calls
 
@@ -746,30 +848,10 @@ final class AutoFillManagerServiceImpl {
 
             if (mCurrentResponse.getAuthentication() != null) {
                 // Handle authentication.
-                final Intent fillInIntent = createAuthFillInIntent(response.getId(), mStructure,
-                        new Bundle(), new FillCallback(new IFillCallback.Stub() {
-                            @Override
-                            public void onCancellable(ICancellationSignal cancellation) {
-                                // TODO(b/33197203): Handle cancellation
-                            }
-
-                            @Override
-                            public void onSuccess(FillResponse response) {
-                                mCurrentResponse = createAuthenticatedResponse(
-                                        mCurrentResponse, response);
-                                processResponseLocked(mCurrentResponse);
-                            }
-
-                            @Override
-                            public void onFailure(CharSequence message) {
-                                getUiForShowing().showError(message);
-                                removeSelf();
-                            }
-                        }));
-
-                 getUiForShowing().showFillResponseAuthRequest(
-                         mCurrentResponse.getAuthentication(), fillInIntent);
-                 return;
+                final Intent fillInIntent = createAuthFillInIntent(mStructure);
+                getUiForShowing().showFillResponseAuthRequest(
+                        mCurrentResponse.getAuthentication(), fillInIntent);
+                return;
             }
 
             final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
@@ -797,48 +879,20 @@ final class AutoFillManagerServiceImpl {
                 }
 
                 // ...or handle authentication.
-                Intent fillInIntent = createAuthFillInIntent(dataset.getId(), mStructure,
-                        new Bundle(), new FillCallback(new IFillCallback.Stub() {
-                    @Override
-                    public void onCancellable(ICancellationSignal cancellation) {
-                        // TODO(b/33197203): Handle cancellation
-                    }
-
-                    @Override
-                    public void onSuccess(FillResponse response) {
-                        mCurrentResponse = createAuthenticatedResponse(
-                                mCurrentResponse, response);
-                        final Dataset augmentedDataset = Helper.findDatasetById(dataset.getId(),
-                                mCurrentResponse);
-                        if (augmentedDataset != null) {
-                            autoFill(augmentedDataset);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(CharSequence message) {
-                        getUiForShowing().showError(message);
-                        removeSelf();
-                    }
-                }));
-
-                startAuthIntent(dataset.getAuthentication(), fillInIntent);
+                Intent fillInIntent = createAuthFillInIntent(mStructure);
+                startAuthentication(dataset.getAuthentication(), fillInIntent);
             }
         }
 
-        private Intent createAuthFillInIntent(String itemId, AssistStructure structure,
-                Bundle extras, FillCallback fillCallback) {
+        private Intent createAuthFillInIntent(AssistStructure structure) {
             Intent fillInIntent = new Intent();
-            fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_ITEM_ID, itemId);
-            fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_ASSIST_STRUCTURE, structure);
-            fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_EXTRAS, extras);
-            fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_CALLBACK, fillCallback);
+            fillInIntent.putExtra(AutoFillManager.EXTRA_ASSIST_STRUCTURE, structure);
             return fillInIntent;
         }
 
-        private void startAuthIntent(IntentSender intent, Intent fillInIntent) {
+        private void startAuthentication(IntentSender intent, Intent fillInIntent) {
             try {
-                mAppCallback.startIntentSender(intent, fillInIntent);
+                mClient.authenticate(intent, fillInIntent);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error launching auth intent", e);
             }
@@ -874,21 +928,11 @@ final class AutoFillManagerServiceImpl {
                 try {
                     if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
 
-                    mAppCallback.autoFill(dataset);
+                    mClient.autoFill(dataset.getFieldIds(), dataset.getFieldValues());
                     mAutoFilledDataset = dataset;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error auto-filling activity: " + e);
                 }
-            }
-        }
-
-        void enableSessionLocked() {
-            if (DEBUG) Slog.d(TAG, "enableSessionLocked()");
-
-            try {
-                mAppCallback.enableSession();
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error enabling session: " + e);
             }
         }
 
@@ -945,82 +989,6 @@ final class AutoFillManagerServiceImpl {
                 destroyLocked();
                 mSessions.remove(mActivityToken);
             }
-        }
-
-        /**
-         * Creates a response from the {@code original} and an {@code update} by
-         * replacing all items that needed authentication (response or datasets)
-         * with their updated version if the latter does not need authentication.
-         * New datasets that don't require auth are appended.
-         *
-         * @param original The original response requiring auth at some level.
-         * @param update An updated response with auth not needed anymore at some level.
-         * @return A new response with updated items where auth is not needed anymore.
-         */
-        // TODO(b/33197203) Unit test
-        FillResponse createAuthenticatedResponse(FillResponse original, FillResponse update) {
-            // Can update only if ids match
-            if (!original.getId().equals(update.getId())) {
-                return original;
-            }
-
-            // If the original required auth and the update doesn't, the update wins
-            // but only if none of the update's datasets requires authentication.
-            if (original.getAuthentication() != null && update.getAuthentication() == null) {
-                ArraySet<Dataset> updateDatasets = update.getDatasets();
-                final int udpateDatasetCount = updateDatasets.size();
-                for (int i = 0; i < udpateDatasetCount; i++) {
-                    Dataset updateDataset = updateDatasets.valueAt(i);
-                    if (updateDataset.getAuthentication() != null) {
-                        return original;
-                    }
-                }
-                return update;
-            }
-
-            // If no auth on response level we create a response that has all
-            // datasets from the original with the ones that required auth but
-            // not anymore updated and new ones not requiring auth appended.
-
-            // The update shouldn't require auth
-            if (update.getAuthentication() != null) {
-                return original;
-            }
-
-            final FillResponse.Builder builder = new FillResponse.Builder(original.getId());
-
-            // Update existing datasets
-            final ArraySet<Dataset> origDatasets = original.getDatasets();
-            final int origDatasetCount = origDatasets.size();
-            for (int i = 0; i < origDatasetCount; i++) {
-                Dataset origDataset = origDatasets.valueAt(i);
-                ArraySet<Dataset> updateDatasets = update.getDatasets();
-                final int updateDatasetCount = updateDatasets.size();
-                for (int j = 0; j < updateDatasetCount; j++) {
-                    Dataset updateDataset = updateDatasets.valueAt(j);
-                    if (origDataset.getId().equals(updateDataset.getId())) {
-                        // The update shouldn't require auth
-                        if (updateDataset.getAuthentication() == null) {
-                            origDataset = updateDataset;
-                            updateDatasets.removeAt(j);
-                        }
-                        break;
-                    }
-                }
-                builder.addDataset(origDataset);
-            }
-
-            // Add new datasets
-            final ArraySet<Dataset> updateDatasets = update.getDatasets();
-            final int updateDatasetCount = updateDatasets.size();
-            for (int i = 0; i < updateDatasetCount; i++) {
-                final Dataset updateDataset = updateDatasets.valueAt(i);
-                builder.addDataset(updateDataset);
-            }
-
-            // For now no extras and savable id updates.
-
-            return builder.build();
         }
     }
 }

@@ -264,8 +264,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/storage/IObbActionListener.aidl \
 	core/java/android/security/IKeystoreService.aidl \
 	core/java/android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl \
-	core/java/android/service/autofill/IAutoFillAppCallback.aidl \
-	core/java/android/service/autofill/IAutoFillManagerService.aidl \
 	core/java/android/service/autofill/IAutoFillService.aidl \
 	core/java/android/service/autofill/IFillCallback.aidl \
 	core/java/android/service/autofill/ISaveCallback.aidl \
@@ -318,6 +316,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
+	core/java/android/view/autofill/IAutoFillManager.aidl \
+	core/java/android/view/autofill/IAutoFillManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl \
 	core/java/android/view/IDockedStackListener.aidl \
