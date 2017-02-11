@@ -173,10 +173,10 @@ public class NavigationBarTile extends QSTile<QSTile.State> {
         } else {
             if (navMode == 0) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_smartbar_off);
-                state.label = mContext.getString(R.string.quick_settings_smartbar_off);
+                state.label = mContext.getString(R.string.quick_settings_smartbar);
             } else if (navMode == 1){
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_fling_off);
-                state.label = mContext.getString(R.string.quick_settings_fling_off);
+                state.label = mContext.getString(R.string.quick_settings_fling);
             }
         }
     }

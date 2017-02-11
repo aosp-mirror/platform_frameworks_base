@@ -133,15 +133,15 @@ public class AmbientLiftToWakeTile extends QSTile<QSTile.BooleanState> {
         if (isSomethingEnabled()) {
             getUserDozeValue();
             getUserDozePickUpValue();
-            state.label = mContext.getString(R.string.quick_settings_doze_notifications_user);
+            state.label = mContext.getString(R.string.quick_settings_doze_notifications_label);
             state.icon = ResourceIcon.get(R.drawable.ic_qs_ambient_on);
             state.contentDescription =  mContext.getString(
-                    R.string.quick_settings_doze_notifications_user);
+                    R.string.quick_settings_doze_notifications_label);
         } else {
-            state.label = mContext.getString(R.string.quick_settings_doze_notifications_off);
+            state.label = mContext.getString(R.string.quick_settings_doze_notifications_label);
             state.icon = ResourceIcon.get(R.drawable.ic_qs_ambient_off);
             state.contentDescription =  mContext.getString(
-                    R.string.quick_settings_doze_notifications_off);
+                    R.string.quick_settings_doze_notifications_label);
         }
     }
 

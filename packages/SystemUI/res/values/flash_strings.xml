@@ -55,17 +55,14 @@
     <string name="quick_settings_location_battery_saving_label">Battery saving</string>
     <string name="quick_settings_location_gps_only_label">Device only</string>
     <string name="quick_settings_location_high_accuracy_label">High accuracy</string>
-    <string name="quick_settings_location_off_label">Location off</string>
+    <string name="quick_settings_location_off_custom_label">Location</string>
 
     <!-- Ambient display and lift gesture Tile -->
     <string name="quick_settings_doze_notifications_label">Doze notifications</string>
-    <string name="quick_settings_doze_notifications_user">Doze notifications</string>
-    <string name="quick_settings_doze_notifications_off">No doze notifications</string>
 
     <!-- ADB over network Tile -->
     <string name="quick_settings_adb_network">ADB network</string>
     <string name="quick_settings_network_adb_enabled_label">Enabled</string>
-    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
     <string name="accessibility_quick_settings_network_adb_off">ADB over network off.</string>
     <string name="accessibility_quick_settings_network_adb_on">ADB over network on.</string>
     <string name="accessibility_quick_settings_network_adb_changed_off">ADB over network turned off.</string>
@@ -93,9 +90,7 @@
     <!-- Navigation bar Tile -->
     <string name="quick_settings_navigation_bar">Navigation bar</string>
     <string name="quick_settings_smartbar">SmartBar</string>
-    <string name="quick_settings_smartbar_off">SmartBar off</string>
     <string name="quick_settings_fling">Fling</string>
-    <string name="quick_settings_fling_off">Fling off</string>
 
     <!-- Reboot/Recovery QS Tile -->
     <string name="quick_settings_reboot_label">Reboot</string>

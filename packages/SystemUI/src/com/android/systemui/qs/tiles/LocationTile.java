@@ -141,7 +141,7 @@ public class LocationTile extends QSTile<QSTile.State> {
                 break;
             default:
                 state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_location_off);
-                state.label = mContext.getString(R.string.quick_settings_location_off_label);
+                state.label = mContext.getString(R.string.quick_settings_location_off_custom_label);
                 state.icon = mDisable;
                 break;
         }
