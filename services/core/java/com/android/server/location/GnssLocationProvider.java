@@ -263,8 +263,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     private Object mLock = new Object();
 
-    private int mLocationFlags = LOCATION_INVALID;
-
     // current status
     private int mStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
 
@@ -1458,7 +1456,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
             native_stop();
             mTimeToFirstFix = 0;
             mLastFixTime = 0;
-            mLocationFlags = LOCATION_INVALID;
 
             // reset SV count to zero
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE, 0);
@@ -1482,12 +1479,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to update our position.
      */
-    private void reportLocation(int flags, double latitude, double longitude, double altitude,
-            float speedMetersPerSecond, float bearing, float horizontalAccuracyMeters,
-            float verticalAccuracyMeters, float speedAccuracyMetersPerSeconds,
-            float bearingAccuracyDegrees, long timestamp) {
-        if ((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
-            mItarSpeedLimitExceeded = speedMetersPerSecond > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
+    private void reportLocation(boolean hasLatLong, Location location) {
+        if (location.hasSpeed()) {
+            mItarSpeedLimitExceeded = location.getSpeed() > ITAR_SPEED_LIMIT_METERS_PER_SECOND;
         }
 
         if (mItarSpeedLimitExceeded) {
@@ -1496,54 +1490,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
             return;  // No output of location allowed
         }
 
-        if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
-                " timestamp: " + timestamp + " flags: " + flags);
+        if (VERBOSE) Log.v(TAG, "reportLocation " + location.toString());
 
         synchronized (mLocation) {
-            mLocationFlags = flags;
-            if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
-                mLocation.setLatitude(latitude);
-                mLocation.setLongitude(longitude);
-                mLocation.setTime(timestamp);
-                // It would be nice to push the elapsed real-time timestamp
-                // further down the stack, but this is still useful
-                mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-            }
-            if ((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
-                mLocation.setAltitude(altitude);
-            } else {
-                mLocation.removeAltitude();
-            }
-            if ((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
-                mLocation.setSpeed(speedMetersPerSecond);
-            } else {
-                mLocation.removeSpeed();
-            }
-            if ((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
-                mLocation.setBearing(bearing);
-            } else {
-                mLocation.removeBearing();
-            }
-            if ((flags & LOCATION_HAS_HORIZONTAL_ACCURACY) == LOCATION_HAS_HORIZONTAL_ACCURACY) {
-                mLocation.setAccuracy(horizontalAccuracyMeters);
-            } else {
-                mLocation.removeAccuracy();
-            }
-            if ((flags & LOCATION_HAS_VERTICAL_ACCURACY) == LOCATION_HAS_VERTICAL_ACCURACY) {
-              mLocation.setVerticalAccuracyMeters(verticalAccuracyMeters);
-            } else {
-              mLocation.removeVerticalAccuracy();
-            }
-            if((flags & LOCATION_HAS_SPEED_ACCURACY) == LOCATION_HAS_SPEED_ACCURACY) {
-              mLocation.setSpeedAccuracyMetersPerSecond(speedAccuracyMetersPerSeconds);
-            } else {
-              mLocation.removeSpeedAccuracy();
-            }
-            if((flags & LOCATION_HAS_BEARING_ACCURACY) == LOCATION_HAS_BEARING_ACCURACY) {
-              mLocation.setBearingAccuracyDegrees(bearingAccuracyDegrees);
-            } else {
-              mLocation.removeBearingAccuracy();
-            }
+            mLocation = location;
+            // It would be nice to push the elapsed real-time timestamp
+            // further down the stack, but this is still useful
+            mLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
             mLocation.setExtras(mLocationExtras);
 
             try {
@@ -1555,7 +1508,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         mLastFixTime = System.currentTimeMillis();
         // report time to first fix
-        if (mTimeToFirstFix == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+        if (mTimeToFirstFix == 0 && hasLatLong) {
             mTimeToFirstFix = (int)(mLastFixTime - mFixRequestTime);
             if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
 
@@ -1878,52 +1831,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     /**
-     * Helper method to construct a location object.
-     */
-    private Location buildLocation(
-            int flags,
-            double latitude,
-            double longitude,
-            double altitude,
-            float speed,
-            float bearing,
-            float horizontalAccuracy,
-            float verticalAccuracy,
-            float speedAccuracy,
-            float bearingAccuracy,
-            long timestamp) {
-        Location location = new Location(LocationManager.GPS_PROVIDER);
-        if((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setTime(timestamp);
-            location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        }
-        if((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
-            location.setAltitude(altitude);
-        }
-        if((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
-            location.setSpeed(speed);
-        }
-        if((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
-            location.setBearing(bearing);
-        }
-        if((flags & LOCATION_HAS_HORIZONTAL_ACCURACY) == LOCATION_HAS_HORIZONTAL_ACCURACY) {
-            location.setAccuracy(horizontalAccuracy);
-        }
-        if((flags & LOCATION_HAS_VERTICAL_ACCURACY) == LOCATION_HAS_VERTICAL_ACCURACY) {
-          location.setVerticalAccuracyMeters(verticalAccuracy);
-        }
-        if((flags & LOCATION_HAS_SPEED_ACCURACY) == LOCATION_HAS_SPEED_ACCURACY) {
-          location.setSpeedAccuracyMetersPerSecond(speedAccuracy);
-        }
-        if((flags & LOCATION_HAS_BEARING_ACCURACY) == LOCATION_HAS_BEARING_ACCURACY) {
-          location.setBearingAccuracyDegrees(bearingAccuracy);
-        }
-        return location;
-    }
-
-    /**
      * Converts the GPS HAL status to the internal Geofence Hardware status.
      */
     private int getGeofenceStatus(int status) {
@@ -1949,25 +1856,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * Called from native to report GPS Geofence transition
      * All geofence callbacks are called on the same thread
      */
-    private void reportGeofenceTransition(int geofenceId, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
-            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp,
-            int transition, long transitionTimestamp) {
+    private void reportGeofenceTransition(int geofenceId, Location location, int transition,
+                                          long transitionTimestamp) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        Location location = buildLocation(
-                flags,
-                latitude,
-                longitude,
-                altitude,
-                speed,
-                bearing,
-                horizontalAccuracy,
-                verticalAccuracy,
-                speedAccuracy,
-                bearingAccuracy,
-                timestamp);
+
         mGeofenceHardwareImpl.reportGeofenceTransition(
                 geofenceId,
                 location,
@@ -1980,24 +1874,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to report GPS status change.
      */
-    private void reportGeofenceStatus(int status, int flags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
-            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp) {
+    private void reportGeofenceStatus(int status, Location location) {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        Location location = buildLocation(
-                flags,
-                latitude,
-                longitude,
-                altitude,
-                speed,
-                bearing,
-                horizontalAccuracy,
-                verticalAccuracy,
-                speedAccuracy,
-                bearingAccuracy,
-                timestamp);
         int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
         if(status == GPS_GEOFENCE_AVAILABLE) {
             monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
