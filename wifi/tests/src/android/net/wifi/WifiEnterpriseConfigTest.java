@@ -283,6 +283,21 @@ public class WifiEnterpriseConfigTest {
         assertEquals("\"auth=GTC\"", getSupplicantPhase2Method());
     }
 
+    /** Verfies PEAP/SIM, PEAP/AKA, PEAP/AKA'. */
+    @Test
+    public void peapSimAkaAkaPrime() {
+        mEnterpriseConfig.setEapMethod(Eap.PEAP);
+        mEnterpriseConfig.setPhase2Method(Phase2.SIM);
+        assertEquals("PEAP", getSupplicantEapMethod());
+        assertEquals("\"auth=SIM\"", getSupplicantPhase2Method());
+
+        mEnterpriseConfig.setPhase2Method(Phase2.AKA);
+        assertEquals("\"auth=AKA\"", getSupplicantPhase2Method());
+
+        mEnterpriseConfig.setPhase2Method(Phase2.AKA_PRIME);
+        assertEquals("\"auth=AKA'\"", getSupplicantPhase2Method());
+    }
+
     /** Verfies that the copy constructor preseves the inner method information. */
     @Test
     public void copyConstructor() {
