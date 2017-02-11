@@ -455,6 +455,7 @@ parse_args(Options* options, int argc, const char** argv)
                 fprintf(stderr, "Test / activity supplied without a module to build: %s\n",
                         arg.c_str());
                 print_usage(stderr);
+                delete target;
                 exit(1);
             } else if (colonPos == string::npos) {
                 target->name = arg;
