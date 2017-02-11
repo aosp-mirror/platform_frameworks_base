@@ -239,6 +239,8 @@ uint32_t android_hardware_HardwareBuffer_convertFromPixelFormat(uint32_t format)
             return AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM;
         case HAL_PIXEL_FORMAT_RGBA_FP16:
             return AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT;
+        case HAL_PIXEL_FORMAT_RGBA_1010102:
+            return AHARDWAREBUFFER_FORMAT_A2R10G10B10_UNORM_PACK32;
         case HAL_PIXEL_FORMAT_BLOB:
             return AHARDWAREBUFFER_FORMAT_BLOB;
         default:
@@ -259,6 +261,8 @@ uint32_t android_hardware_HardwareBuffer_convertToPixelFormat(uint32_t format) {
             return HAL_PIXEL_FORMAT_RGB_888;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_SFLOAT:
             return HAL_PIXEL_FORMAT_RGBA_FP16;
+        case AHARDWAREBUFFER_FORMAT_A2R10G10B10_UNORM_PACK32:
+            return HAL_PIXEL_FORMAT_RGBA_1010102;
         case AHARDWAREBUFFER_FORMAT_BLOB:
             return HAL_PIXEL_FORMAT_BLOB;
         default:

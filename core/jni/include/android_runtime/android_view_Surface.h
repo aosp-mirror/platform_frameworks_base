@@ -49,6 +49,7 @@ enum class PublicFormat {
     RAW_PRIVATE       = 0x24,
     RAW10             = 0x25,
     RAW12             = 0x26,
+    RGBA_1010102      = 0x2b,
     JPEG              = 0x100,
     DEPTH_POINT_CLOUD = 0x101,
     YV12              = 0x32315659,
