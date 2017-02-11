@@ -131,6 +131,9 @@ public class ZygoteInit {
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
         preloadOpenGL();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
+        preloadOpenGL();
+        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         preloadSharedLibraries();
         preloadTextResources();
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
