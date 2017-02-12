@@ -79,18 +79,13 @@ class StripCommand {
       context_->GetDiagnostics()->Note(DiagMessage() << "Stripping APK...");
     }
 
-    // TODO(lecesne): Add support for more than one density.
-    if (options_.target_configs.size() > 1) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "Multiple densities not supported at the moment");
-      return 1;
-    }
-
     // Stripping the APK using the TableSplitter with no splits and the target
-    // density as the preferred density. The resource table is modified in
+    // densities as the preferred densities. The resource table is modified in
     // place in the LoadedApk.
     TableSplitterOptions splitter_options;
-    splitter_options.preferred_density = options_.target_configs[0].density;
+    for (auto& config : options_.target_configs) {
+      splitter_options.preferred_densities.push_back(config.density);
+    }
     std::vector<SplitConstraints> splits;
     TableSplitter splitter(splits, splitter_options);
     splitter.SplitTable(apk->GetResourceTable());

@@ -1634,7 +1634,7 @@ class LinkCommand {
 
     if (options_.static_lib) {
       if (options_.table_splitter_options.config_filter != nullptr ||
-          options_.table_splitter_options.preferred_density) {
+          !options_.table_splitter_options.preferred_densities.empty()) {
         context_->GetDiagnostics()
             ->Warn(DiagMessage()
                    << "can't strip resources when building static library");
@@ -2107,8 +2107,7 @@ int Link(const std::vector<StringPiece>& args) {
                         << "Preferred density must only be a density value");
       return 1;
     }
-    options.table_splitter_options.preferred_density =
-        preferred_density_config.density;
+    options.table_splitter_options.preferred_densities.push_back(preferred_density_config.density);
   }
 
   if (!options.static_lib && stable_id_file_path) {

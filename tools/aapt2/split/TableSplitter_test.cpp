@@ -39,7 +39,7 @@ TEST(TableSplitterTest, NoSplitPreferredDensity) {
           .Build();
 
   TableSplitterOptions options;
-  options.preferred_density = ConfigDescription::DENSITY_XHIGH;
+  options.preferred_densities.push_back(ConfigDescription::DENSITY_XHIGH);
   TableSplitter splitter({}, options);
   splitter.SplitTable(table.get());
 
@@ -57,6 +57,51 @@ TEST(TableSplitterTest, NoSplitPreferredDensity) {
                          test::ParseConfigOrDie("xxhdpi")));
   EXPECT_NE(nullptr, test::GetValue<Id>(table.get(), "android:string/one"));
 }
+
+TEST(TableSplitterTest, NoSplitMultiplePreferredDensities) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-mdpi/icon.png",
+                            test::ParseConfigOrDie("mdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-hdpi/icon.png",
+                            test::ParseConfigOrDie("hdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-xhdpi/icon.png",
+                            test::ParseConfigOrDie("xhdpi"))
+          .AddFileReference("android:drawable/icon",
+                            "res/drawable-xxhdpi/icon.png",
+                            test::ParseConfigOrDie("xxhdpi"))
+          .AddSimple("android:string/one")
+          .Build();
+
+  TableSplitterOptions options;
+  options.preferred_densities.push_back(ConfigDescription::DENSITY_LOW);
+  options.preferred_densities.push_back(ConfigDescription::DENSITY_XXXHIGH);
+  TableSplitter splitter({}, options);
+  splitter.SplitTable(table.get());
+
+  // Densities remaining:
+  // "mdpi" is the closest available density for the requested "ldpi" density.
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("mdpi")));
+  // "xxhdpi" is the closest available density for the requested "xxxhdpi" density.
+  EXPECT_NE(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("xxhdpi")));
+  EXPECT_NE(nullptr, test::GetValue<Id>(table.get(), "android:string/one"));
+
+  // Removed densities:
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("hdpi")));
+  EXPECT_EQ(nullptr, test::GetValueForConfig<FileReference>(
+                         table.get(), "android:drawable/icon",
+                         test::ParseConfigOrDie("xhdpi")));
+}
+
 
 TEST(TableSplitterTest, SplitTableByDensity) {
   std::unique_ptr<ResourceTable> table =

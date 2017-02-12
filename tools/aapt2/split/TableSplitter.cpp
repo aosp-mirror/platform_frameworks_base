@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 
@@ -124,29 +125,35 @@ class SplitValueSelector {
  * leaving only the preferred density behind.
  */
 static void MarkNonPreferredDensitiesAsClaimed(
-    uint16_t preferred_density, const ConfigDensityGroups& density_groups,
+    const std::vector<uint16_t>& preferred_densities, const ConfigDensityGroups& density_groups,
     ConfigClaimedMap* config_claimed_map) {
   for (auto& entry : density_groups) {
     const ConfigDescription& config = entry.first;
     const std::vector<ResourceConfigValue*>& related_values = entry.second;
 
-    ConfigDescription target_density = config;
-    target_density.density = preferred_density;
-    ResourceConfigValue* best_value = nullptr;
+    // There can be multiple best values if there are multiple preferred densities.
+    std::unordered_set<ResourceConfigValue*> best_values;
+
+    // For each preferred density, find the value that is the best.
+    for (uint16_t preferred_density : preferred_densities) {
+      ConfigDescription target_density = config;
+      target_density.density = preferred_density;
+      ResourceConfigValue* best_value = nullptr;
+      for (ResourceConfigValue* this_value : related_values) {
+        if (!best_value || this_value->config.isBetterThan(best_value->config, &target_density)) {
+          best_value = this_value;
+        }
+      }
+      CHECK(best_value != nullptr);
+      best_values.insert(best_value);
+    }
+
+    // Claim all the values that aren't the best so that they will be removed from the base.
     for (ResourceConfigValue* this_value : related_values) {
-      if (!best_value) {
-        best_value = this_value;
-      } else if (this_value->config.isBetterThan(best_value->config,
-                                                 &target_density)) {
-        // Claim the previous value so that it is not included in the base.
-        (*config_claimed_map)[best_value] = true;
-        best_value = this_value;
-      } else {
-        // Claim this value so that it is not included in the base.
+      if (best_values.find(this_value) == best_values.end()) {
         (*config_claimed_map)[this_value] = true;
       }
     }
-    CHECK(best_value != nullptr);
   }
 }
 bool TableSplitter::VerifySplitConstraints(IAaptContext* context) {
@@ -263,8 +270,8 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
           }
         }
 
-        if (options_.preferred_density) {
-          MarkNonPreferredDensitiesAsClaimed(options_.preferred_density.value(),
+        if (!options_.preferred_densities.empty()) {
+          MarkNonPreferredDensitiesAsClaimed(options_.preferred_densities,
                                              density_groups,
                                              &config_claimed_map);
         }
