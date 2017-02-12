@@ -17,6 +17,8 @@
 package android.app;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,13 +42,12 @@ public final class RecoverableSecurityException extends SecurityException implem
     private static final String TAG = "RecoverableSecurityException";
 
     private final CharSequence mUserMessage;
-    private final CharSequence mUserActionTitle;
-    private final PendingIntent mUserAction;
+    private final RemoteAction mUserAction;
 
     /** {@hide} */
     public RecoverableSecurityException(Parcel in) {
-        this(new SecurityException(in.readString()), in.readCharSequence(), in.readCharSequence(),
-                PendingIntent.CREATOR.createFromParcel(in));
+        this(new SecurityException(in.readString()), in.readCharSequence(),
+                RemoteAction.CREATOR.createFromParcel(in));
     }
 
     /**
@@ -56,24 +57,33 @@ public final class RecoverableSecurityException extends SecurityException implem
      *            audiences.
      * @param userMessage short message describing the issue for end user
      *            audiences, which may be shown in a notification or dialog.
-     *            This should be less than 64 characters. For example: <em>PIN
-     *            required to access Document.pdf</em>
-     * @param userActionTitle short title describing the primary action. This
-     *            should be less than 24 characters. For example: <em>Enter
-     *            PIN</em>
-     * @param userAction primary action that will initiate the recovery. This
-     *            must launch an activity that is expected to set
+     *            This should be localized and less than 64 characters. For
+     *            example: <em>PIN required to access Document.pdf</em>
+     * @param userAction primary action that will initiate the recovery. The
+     *            title should be localized and less than 24 characters. For
+     *            example: <em>Enter PIN</em>. This action must launch an
+     *            activity that is expected to set
      *            {@link Activity#setResult(int)} before finishing to
      *            communicate the final status of the recovery. For example,
      *            apps that observe {@link Activity#RESULT_OK} may choose to
      *            immediately retry their operation.
      */
     public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
-            CharSequence userActionTitle, PendingIntent userAction) {
+            RemoteAction userAction) {
         super(cause.getMessage());
         mUserMessage = Preconditions.checkNotNull(userMessage);
-        mUserActionTitle = Preconditions.checkNotNull(userActionTitle);
         mUserAction = Preconditions.checkNotNull(userAction);
+    }
+
+    /** {@hide} */
+    @Deprecated
+    public RecoverableSecurityException(Throwable cause, CharSequence userMessage,
+            CharSequence userActionTitle, PendingIntent userAction) {
+        this(cause, userMessage,
+                new RemoteAction(
+                        Icon.createWithResource("android",
+                                com.android.internal.R.drawable.ic_restart),
+                        userActionTitle, userActionTitle, userAction));
     }
 
     /**
@@ -85,16 +95,9 @@ public final class RecoverableSecurityException extends SecurityException implem
     }
 
     /**
-     * Return short title describing the primary action.
-     */
-    public CharSequence getUserActionTitle() {
-        return mUserActionTitle;
-    }
-
-    /**
      * Return primary action that will initiate the recovery.
      */
-    public PendingIntent getUserAction() {
+    public RemoteAction getUserAction() {
         return mUserAction;
     }
 
@@ -113,15 +116,21 @@ public final class RecoverableSecurityException extends SecurityException implem
      * remote UID; notifications from older exceptions will always be replaced.
      */
     public void showAsNotification(Context context) {
-        final Notification.Builder builder = new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
-                .setContentTitle(mUserActionTitle)
-                .setContentText(mUserMessage)
-                .setContentIntent(mUserAction)
-                .setCategory(Notification.CATEGORY_ERROR);
-
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
-        nm.notify(TAG, mUserAction.getCreatorUid(), builder.build());
+
+        // Create a channel per-sender, since we don't want one poorly behaved
+        // remote app to cause all of our notifications to be blocked
+        final String tag = TAG + "_" + mUserAction.getActionIntent().getCreatorUid();
+        nm.createNotificationChannel(new NotificationChannel(tag, TAG,
+                NotificationManager.IMPORTANCE_DEFAULT));
+
+        final Notification.Builder builder = new Notification.Builder(context, tag)
+                .setSmallIcon(com.android.internal.R.drawable.ic_print_error)
+                .setContentTitle(mUserAction.getTitle())
+                .setContentText(mUserMessage)
+                .setContentIntent(mUserAction.getActionIntent())
+                .setCategory(Notification.CATEGORY_ERROR);
+        nm.notify(tag, 0, builder.build());
     }
 
     /**
@@ -144,7 +153,7 @@ public final class RecoverableSecurityException extends SecurityException implem
         args.putParcelable(TAG, this);
         dialog.setArguments(args);
 
-        final String tag = TAG + "_" + mUserAction.getCreatorUid();
+        final String tag = TAG + "_" + mUserAction.getActionIntent().getCreatorUid();
         final FragmentManager fm = activity.getFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
         final Fragment old = fm.findFragmentByTag(tag);
@@ -162,9 +171,9 @@ public final class RecoverableSecurityException extends SecurityException implem
             final RecoverableSecurityException e = getArguments().getParcelable(TAG);
             return new AlertDialog.Builder(getActivity())
                     .setMessage(e.mUserMessage)
-                    .setPositiveButton(e.mUserActionTitle, (dialog, which) -> {
+                    .setPositiveButton(e.mUserAction.getTitle(), (dialog, which) -> {
                         try {
-                            e.mUserAction.send();
+                            e.mUserAction.getActionIntent().send();
                         } catch (PendingIntent.CanceledException ignored) {
                         }
                     })
@@ -182,7 +191,6 @@ public final class RecoverableSecurityException extends SecurityException implem
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getMessage());
         dest.writeCharSequence(mUserMessage);
-        dest.writeCharSequence(mUserActionTitle);
         mUserAction.writeToParcel(dest, flags);
     }
 
