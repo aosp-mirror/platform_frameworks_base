@@ -490,4 +490,14 @@ public class MockStorageManager implements IStorageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public long getAllocatableBytes(String path, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void allocateBytes(String path, long bytes, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
 }
