@@ -59,6 +59,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -3288,6 +3289,18 @@ class StorageManagerService extends IStorageManager.Stub
                     .queryStatsForUid(volumeUuid, uid).getCacheBytes();
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public long getAllocatableBytes(String path, int flags) {
+        return new File(path).getUsableSpace();
+    }
+
+    @Override
+    public void allocateBytes(String path, long bytes, int flags) {
+        if (bytes > new File(path).getUsableSpace()) {
+            throw new ParcelableException(new IOException("Not enough usable space"));
         }
     }
 

@@ -18,8 +18,10 @@ package android.os.storage;
 
 import static android.net.TrafficStats.MB_IN_BYTES;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
@@ -34,6 +36,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -60,10 +63,13 @@ import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1424,10 +1430,7 @@ public class StorageManager {
      * as a single unit.
      * </p>
      *
-     * @see #getCacheQuotaBytes()
      * @see #getCacheSizeBytes()
-     * @see #getExternalCacheQuotaBytes()
-     * @see #getExternalCacheSizeBytes()
      */
     public long getCacheQuotaBytes() {
         try {
@@ -1453,9 +1456,6 @@ public class StorageManager {
      * </p>
      *
      * @see #getCacheQuotaBytes()
-     * @see #getCacheSizeBytes()
-     * @see #getExternalCacheQuotaBytes()
-     * @see #getExternalCacheSizeBytes()
      */
     public long getCacheSizeBytes() {
         try {
@@ -1518,6 +1518,139 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Flag indicating that a disk space allocation request should operate in an
+     * aggressive mode. This flag should only be rarely used in situations that
+     * are critical to system health or security.
+     * <p>
+     * When set, the system is more aggressive about the data that it considers
+     * for possible deletion when allocating disk space.
+     * <p class="note">
+     * Note: your app must hold the
+     * {@link android.Manifest.permission#ALLOCATE_AGGRESSIVE} permission for
+     * this flag to take effect.
+     * </p>
+     *
+     * @see #getAllocatableBytes(File, int)
+     * @see #allocateBytes(File, long, int)
+     * @see #allocateBytes(FileDescriptor, long, int)
+     */
+    @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE)
+    public static final int FLAG_ALLOCATE_AGGRESSIVE = 1;
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_ALLOCATE_AGGRESSIVE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AllocateFlags {}
+
+    /**
+     * Return the maximum number of new bytes that your app can allocate for
+     * itself using {@link #allocateBytes(File, long, int)} at the given path.
+     * This value is typically larger than {@link File#getUsableSpace()}, since
+     * the system may automatically delete cached files to satisfy your request.
+     * <p>
+     * This method is best used as a pre-flight check, such as deciding if there
+     * is enough space to store an entire music album before you allocate space
+     * for each audio file in the album. Attempts to allocate disk space beyond
+     * this value will fail.
+     * <p class="note">
+     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
+     * then allocatable space for all packages in your shared UID is tracked
+     * together as a single unit.
+     * </p>
+     *
+     * @param file the directory where you're considering allocating disk space,
+     *            since allocatable space can vary widely depending on the
+     *            underlying storage device.
+     * @param flags to apply to the request.
+     * @return the maximum number of new bytes that the calling app can allocate
+     *         using {@link #allocateBytes(File, long, int)}.
+     */
+    public long getAllocatableBytes(File file, @AllocateFlags int flags) throws IOException {
+        try {
+            return mStorageManager.getAllocatableBytes(file.getAbsolutePath(), flags);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allocate the requested number of bytes for your application to use at the
+     * given path. This will cause the system to delete any cached files
+     * necessary to satisfy your request.
+     * <p>
+     * Attempts to allocate disk space beyond the value returned by
+     * {@link #getAllocatableBytes(File, int)} will fail.
+     * <p>
+     * Since multiple apps can be running simultaneously, this method may be
+     * subject to race conditions. If possible, consider using
+     * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
+     * that bytes are allocated to an opened file.
+     *
+     * @param file the directory where you'd like to allocate disk space.
+     * @param bytes the number of bytes to allocate.
+     * @param flags to apply to the request.
+     * @see #getAllocatableBytes(File, int)
+     */
+    public void allocateBytes(File file, long bytes, @AllocateFlags int flags) throws IOException {
+        try {
+            mStorageManager.allocateBytes(file.getAbsolutePath(), bytes, flags);
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allocate the requested number of bytes for your application to use at the
+     * given path. This will cause the system to delete any cached files
+     * necessary to satisfy your request.
+     * <p>
+     * Attempts to allocate disk space beyond the value returned by
+     * {@link #getAllocatableBytes(File, int)} will fail.
+     * <p>
+     * This method guarantees that bytes are allocated to the opened file,
+     * otherwise it will throw if fast allocation not possible. Fast allocation
+     * is typically only supported in private app data directories, and on
+     * shared/external storage devices which are emulated.
+     *
+     * @param fd the directory where you'd like to allocate disk space.
+     * @param bytes the number of bytes to allocate.
+     * @param flags to apply to the request.
+     * @see #getAllocatableBytes(File, int)
+     * @see Environment#isExternalStorageEmulated(File)
+     */
+    public void allocateBytes(FileDescriptor fd, long bytes, @AllocateFlags int flags)
+            throws IOException {
+        final File file;
+        try {
+            file = new File(Os.readlink("/proc/self/fd/" + fd.getInt$()));
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+        for (int i = 0; i < 3; i++) {
+            allocateBytes(file, bytes, flags);
+
+            try {
+                Os.posix_fallocate(fd, 0, bytes);
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.ENOSPC) {
+                    Log.w(TAG, "Odd, not enough space; let's try again?");
+                    continue;
+                }
+                throw e.rethrowAsIOException();
+            }
+        }
+        throw new IOException(
+                "Well this is embarassing; we can't allocate " + bytes + " for " + file);
     }
 
     private static final String XATTR_ATOMIC = "user.atomic";

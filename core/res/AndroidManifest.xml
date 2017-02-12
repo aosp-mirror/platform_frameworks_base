@@ -1650,6 +1650,12 @@
     <permission android:name="android.permission.CACHE_CONTENT"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to aggressively allocate disk space.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.ALLOCATE_AGGRESSIVE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ================================== -->
     <!-- Permissions for screenlock         -->
     <!-- ================================== -->
