@@ -43,7 +43,8 @@ import android.widget.FrameLayout;
 public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
-    private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .33f;
+    private static final float MAX_DIST_THRESHOLD = .33f;
+    private static final float MIN_DIST_THRESHOLD = .1f;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
@@ -73,6 +74,7 @@ public class SwipeDismissLayout extends FrameLayout {
     private int mActiveTouchId;
     private float mDownX;
     private float mDownY;
+    private float mLastX;
     private boolean mSwiping;
     private boolean mDismissed;
     private boolean mDiscardIntercept;
@@ -105,7 +107,6 @@ public class SwipeDismissLayout extends FrameLayout {
     };
     private IntentFilter mScreenOffFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 
-    private float mLastX;
 
     private boolean mDismissable = true;
 
@@ -174,7 +175,7 @@ public class SwipeDismissLayout extends FrameLayout {
                 mDownX = ev.getRawX();
                 mDownY = ev.getRawY();
                 mActiveTouchId = ev.getPointerId(0);
-                mVelocityTracker = VelocityTracker.obtain();
+                mVelocityTracker = VelocityTracker.obtain("int1");
                 mVelocityTracker.addMovement(ev);
                 break;
 
@@ -238,7 +239,10 @@ public class SwipeDismissLayout extends FrameLayout {
                 updateDismiss(ev);
                 if (mDismissed) {
                     mDismissAnimator.animateDismissal(ev.getRawX() - mDownX);
-                } else if (mSwiping) {
+                } else if (mSwiping
+                        // Only trigger animation if we had a MOVE event that would shift the
+                        // underlying view, otherwise the animation would be janky.
+                        && mLastX != Integer.MIN_VALUE) {
                     mDismissAnimator.animateRecovery(ev.getRawX() - mDownX);
                 }
                 resetMembers();
@@ -298,6 +302,7 @@ public class SwipeDismissLayout extends FrameLayout {
         mVelocityTracker = null;
         mTranslationX = 0;
         mDownX = 0;
+        mLastX = Integer.MIN_VALUE;
         mDownY = 0;
         mSwiping = false;
         mDismissed = false;
@@ -329,19 +334,32 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private void updateDismiss(MotionEvent ev) {
         float deltaX = ev.getRawX() - mDownX;
-        mVelocityTracker.addMovement(ev);
+        // Don't add the motion event as an UP event would clear the velocity tracker
         mVelocityTracker.computeCurrentVelocity(1000);
+        float xVelocity = mVelocityTracker.getXVelocity();
+        if (mLastX == Integer.MIN_VALUE) {
+            // If there's no changes to mLastX, we have only one point of data, and therefore no
+            // velocity. Estimate velocity from just the up and down event in that case.
+            xVelocity = deltaX / ((ev.getEventTime() - ev.getDownTime()) / 1000);
+        }
         if (!mDismissed) {
-            if ((deltaX > (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO) &&
-                    ev.getRawX() >= mLastX)
-                    || mVelocityTracker.getXVelocity() >= mMinFlingVelocity) {
+            // Adjust the distance threshold linearly between the min and max threshold based on the
+            // x-velocity scaled with the the fling threshold speed
+            float distanceThreshold = getWidth() * Math.max(
+                    Math.min((MIN_DIST_THRESHOLD - MAX_DIST_THRESHOLD)
+                            * xVelocity / mMinFlingVelocity // scale x-velocity with fling velocity
+                            + MAX_DIST_THRESHOLD, // offset to start at max threshold
+                            MAX_DIST_THRESHOLD), // cap at max threshold
+                    MIN_DIST_THRESHOLD); // bottom out at min threshold
+            if ((deltaX > distanceThreshold && ev.getRawX() >= mLastX)
+                    || xVelocity >= mMinFlingVelocity) {
                 mDismissed = true;
             }
         }
         // Check if the user tried to undo this.
         if (mDismissed && mSwiping) {
             // Check if the user's finger is actually flinging back to left
-            if (mVelocityTracker.getXVelocity() < -mMinFlingVelocity) {
+            if (xVelocity < -mMinFlingVelocity) {
                 mDismissed = false;
             }
         }
