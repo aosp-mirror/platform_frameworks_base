@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.Intent;
 
 /**
  * Activity manager local system service interface.
@@ -25,6 +26,13 @@ import android.content.ComponentName;
  * @hide Only for use within the system server.
  */
 public abstract class ActivityManagerInternal {
+    /**
+     * Grant Uri permissions from one app to another. This method only extends
+     * permission grants if {@code callingUid} has permission to them.
+     */
+    public abstract void grantUriPermissionFromIntent(int callingUid, String targetPkg,
+            Intent intent, int targetUserId);
+
     /**
      * Verify that calling app has access to the given provider.
      */
