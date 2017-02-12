@@ -61,6 +61,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
+    private static final int DO_RESTART_INPUT = 34;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
     private static final int DO_REVOKE_SESSION = 50;
@@ -165,17 +166,24 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_START_INPUT: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 int missingMethods = msg.arg1;
-                boolean restarting = msg.arg2 != 0;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
-                if (restarting) {
-                    inputMethod.restartInput(ic, info);
-                } else {
-                    inputMethod.startInput(ic, info);
-                }
+                inputMethod.startInput(ic, info);
+                args.recycle();
+                return;
+            }
+            case DO_RESTART_INPUT: {
+                SomeArgs args = (SomeArgs)msg.obj;
+                int missingMethods = msg.arg1;
+                IInputContext inputContext = (IInputContext)args.arg1;
+                InputConnection ic = inputContext != null
+                        ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
+                EditorInfo info = (EditorInfo)args.arg2;
+                info.makeCompatible(mTargetSdkVersion);
+                inputMethod.restartInput(ic, info);
                 args.recycle();
                 return;
             }
@@ -257,9 +265,17 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void startInput(IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
-            EditorInfo attribute, boolean restarting) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOO(DO_START_INPUT,
-                missingMethods, restarting ? 1 : 0, inputContext, attribute));
+            EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_START_INPUT,
+                missingMethods, inputContext, attribute));
+    }
+
+    @Override
+    public void restartInput(IInputContext inputContext,
+            @InputConnectionInspector.MissingMethodFlags final int missingMethods,
+            EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_RESTART_INPUT,
+                missingMethods, inputContext, attribute));
     }
 
     @Override
