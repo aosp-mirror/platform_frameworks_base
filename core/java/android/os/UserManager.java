@@ -635,7 +635,7 @@ public class UserManager {
      * @see #getUserRestrictions()
      * @hide
      */
-    public static final String DISALLLOW_UNMUTE_DEVICE = "disallow_unmute_device";
+    public static final String DISALLOW_UNMUTE_DEVICE = "disallow_unmute_device";
 
     /**
      * Specifies if a user is not allowed to use cellular data when roaming. This can only be set by
