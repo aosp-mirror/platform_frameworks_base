@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.KeyguardManager;
@@ -30,6 +31,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Objects;
 
@@ -1540,24 +1543,45 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_IS_FORWARD_NAVIGATION = 0x100;
 
         /**
+         * An internal annotation for flags that can be specified to {@link #softInputMode}.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, value = {
+                SOFT_INPUT_STATE_UNSPECIFIED,
+                SOFT_INPUT_STATE_UNCHANGED,
+                SOFT_INPUT_STATE_HIDDEN,
+                SOFT_INPUT_STATE_ALWAYS_HIDDEN,
+                SOFT_INPUT_STATE_VISIBLE,
+                SOFT_INPUT_STATE_ALWAYS_VISIBLE,
+                SOFT_INPUT_ADJUST_UNSPECIFIED,
+                SOFT_INPUT_ADJUST_RESIZE,
+                SOFT_INPUT_ADJUST_PAN,
+                SOFT_INPUT_ADJUST_NOTHING,
+                SOFT_INPUT_IS_FORWARD_NAVIGATION,
+        })
+        public @interface SoftInputModeFlags {}
+
+        /**
          * Desired operating mode for any soft input area.  May be any combination
          * of:
          *
          * <ul>
          * <li> One of the visibility states
          * {@link #SOFT_INPUT_STATE_UNSPECIFIED}, {@link #SOFT_INPUT_STATE_UNCHANGED},
-         * {@link #SOFT_INPUT_STATE_HIDDEN}, {@link #SOFT_INPUT_STATE_ALWAYS_VISIBLE}, or
-         * {@link #SOFT_INPUT_STATE_VISIBLE}.
+         * {@link #SOFT_INPUT_STATE_HIDDEN}, {@link #SOFT_INPUT_STATE_ALWAYS_HIDDEN},
+         * {@link #SOFT_INPUT_STATE_VISIBLE}, or {@link #SOFT_INPUT_STATE_ALWAYS_VISIBLE}.
          * <li> One of the adjustment options
-         * {@link #SOFT_INPUT_ADJUST_UNSPECIFIED},
-         * {@link #SOFT_INPUT_ADJUST_RESIZE}, or
-         * {@link #SOFT_INPUT_ADJUST_PAN}.
+         * {@link #SOFT_INPUT_ADJUST_UNSPECIFIED}, {@link #SOFT_INPUT_ADJUST_RESIZE},
+         * {@link #SOFT_INPUT_ADJUST_PAN}, or {@link #SOFT_INPUT_ADJUST_NOTHING}.
          * </ul>
          *
          *
          * <p>This flag can be controlled in your theme through the
          * {@link android.R.attr#windowSoftInputMode} attribute.</p>
          */
+        @SoftInputModeFlags
         public int softInputMode;
 
         /**

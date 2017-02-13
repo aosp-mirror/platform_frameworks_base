@@ -824,6 +824,7 @@ public class ActivityInfo extends ComponentInfo
      * WindowManager.LayoutParams.softInputMode}.  If 0 (unspecified),
      * the mode from the theme will be used.
      */
+    @android.view.WindowManager.LayoutParams.SoftInputModeFlags
     public int softInputMode;
 
     /**
