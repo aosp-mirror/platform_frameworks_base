@@ -381,6 +381,9 @@ public class JobStore {
             if (jobStatus.hasChargingConstraint()) {
                 out.attribute(null, "charging", Boolean.toString(true));
             }
+            if (jobStatus.hasBatteryNotLowConstraint()) {
+                out.attribute(null, "battery-not-low", Boolean.toString(true));
+            }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
 

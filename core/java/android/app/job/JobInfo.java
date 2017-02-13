@@ -174,12 +174,26 @@ public class JobInfo implements Parcelable {
      */
     public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
 
+    /**
+     * @hide
+     */
+    public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
+
+    /**
+     * @hide
+     */
+    public static final int CONSTRAINT_FLAG_BATTERY_NOT_LOW = 1 << 1;
+
+    /**
+     * @hide
+     */
+    public static final int CONSTRAINT_FLAG_DEVICE_IDLE = 1 << 2;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
     private final ComponentName service;
-    private final boolean requireCharging;
-    private final boolean requireDeviceIdle;
+    private final int constraintFlags;
     private final TriggerContentUri[] triggerContentUris;
     private final long triggerContentUpdateDelay;
     private final long triggerContentMaxDelay;
@@ -241,14 +255,28 @@ public class JobInfo implements Parcelable {
      * Whether this job needs the device to be plugged in.
      */
     public boolean isRequireCharging() {
-        return requireCharging;
+        return (constraintFlags & CONSTRAINT_FLAG_CHARGING) != 0;
+    }
+
+    /**
+     * Whether this job needs the device's battery level to not be at below the critical threshold.
+     */
+    public boolean isRequireBatteryNotLow() {
+        return (constraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0;
     }
 
     /**
      * Whether this job needs the device to be in an Idle maintenance window.
      */
     public boolean isRequireDeviceIdle() {
-        return requireDeviceIdle;
+        return (constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public int getConstraintFlags() {
+        return constraintFlags;
     }
 
     /**
@@ -376,8 +404,7 @@ public class JobInfo implements Parcelable {
         extras = in.readPersistableBundle();
         transientExtras = in.readBundle();
         service = in.readParcelable(null);
-        requireCharging = in.readInt() == 1;
-        requireDeviceIdle = in.readInt() == 1;
+        constraintFlags = in.readInt();
         triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
         triggerContentUpdateDelay = in.readLong();
         triggerContentMaxDelay = in.readLong();
@@ -401,8 +428,7 @@ public class JobInfo implements Parcelable {
         extras = b.mExtras.deepcopy();
         transientExtras = b.mTransientExtras.deepcopy();
         service = b.mJobService;
-        requireCharging = b.mRequiresCharging;
-        requireDeviceIdle = b.mRequiresDeviceIdle;
+        constraintFlags = b.mConstraintFlags;
         triggerContentUris = b.mTriggerContentUris != null
                 ? b.mTriggerContentUris.toArray(new TriggerContentUri[b.mTriggerContentUris.size()])
                 : null;
@@ -434,8 +460,7 @@ public class JobInfo implements Parcelable {
         out.writePersistableBundle(extras);
         out.writeBundle(transientExtras);
         out.writeParcelable(service, flags);
-        out.writeInt(requireCharging ? 1 : 0);
-        out.writeInt(requireDeviceIdle ? 1 : 0);
+        out.writeInt(constraintFlags);
         out.writeTypedArray(triggerContentUris, flags);
         out.writeLong(triggerContentUpdateDelay);
         out.writeLong(triggerContentMaxDelay);
@@ -563,8 +588,7 @@ public class JobInfo implements Parcelable {
         private int mPriority = PRIORITY_DEFAULT;
         private int mFlags;
         // Requirements.
-        private boolean mRequiresCharging;
-        private boolean mRequiresDeviceIdle;
+        private int mConstraintFlags;
         private int mNetworkType;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
@@ -651,7 +675,21 @@ public class JobInfo implements Parcelable {
          * @param requiresCharging Whether or not the device is plugged in.
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
-            mRequiresCharging = requiresCharging;
+            mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_CHARGING)
+                    | (requiresCharging ? CONSTRAINT_FLAG_CHARGING : 0);
+            return this;
+        }
+
+        /**
+         * Specify that to run this job, the device's battery level must not be low.
+         * This defaults to false.  If true, the job will only run when the battery level
+         * is not low, which is generally the point where the user is given a "low battery"
+         * warning.
+         * @param batteryNotLow Whether or not the device's battery level must not be low.
+         */
+        public Builder setRequiresBatteryNotLow(boolean batteryNotLow) {
+            mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_BATTERY_NOT_LOW)
+                    | (batteryNotLow ? CONSTRAINT_FLAG_BATTERY_NOT_LOW : 0);
             return this;
         }
 
@@ -666,7 +704,8 @@ public class JobInfo implements Parcelable {
          *                           window.
          */
         public Builder setRequiresDeviceIdle(boolean requiresDeviceIdle) {
-            mRequiresDeviceIdle = requiresDeviceIdle;
+            mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_DEVICE_IDLE)
+                    | (requiresDeviceIdle ? CONSTRAINT_FLAG_DEVICE_IDLE : 0);
             return this;
         }
 
@@ -816,8 +855,8 @@ public class JobInfo implements Parcelable {
          */
         public JobInfo build() {
             // Allow jobs with no constraints - What am I, a database?
-            if (!mHasEarlyConstraint && !mHasLateConstraint && !mRequiresCharging &&
-                    !mRequiresDeviceIdle && mNetworkType == NETWORK_TYPE_NONE &&
+            if (!mHasEarlyConstraint && !mHasLateConstraint && mConstraintFlags == 0 &&
+                    mNetworkType == NETWORK_TYPE_NONE &&
                     mTriggerContentUris == null) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
@@ -843,7 +882,7 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("Can't call setTransientExtras() on a " +
                         "persisted job");
             }
-            if (mBackoffPolicySet && mRequiresDeviceIdle) {
+            if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +
                         " back-off policy, so calling setBackoffCriteria with" +
                         " setRequiresDeviceIdle is an error.");

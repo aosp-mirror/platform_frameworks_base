@@ -118,6 +118,13 @@ public class BatteryManager {
      */
      public static final String EXTRA_CHARGE_COUNTER = "charge_counter";
 
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Current int sequence number of the update.
+     * {@hide}
+     */
+    public static final String EXTRA_SEQUENCE = "seq";
+
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
     public static final int BATTERY_STATUS_UNKNOWN = Constants.BATTERY_STATUS_UNKNOWN;
     public static final int BATTERY_STATUS_CHARGING = Constants.BATTERY_STATUS_CHARGING;
