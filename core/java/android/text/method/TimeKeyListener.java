@@ -16,8 +16,16 @@
 
 package android.text.method;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.text.InputType;
 import android.view.KeyEvent;
+
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Locale;
 
 /**
  * For entering times in a text field.
@@ -34,29 +42,80 @@ public class TimeKeyListener extends NumberKeyListener
     }
 
     @Override
+    @NonNull
     protected char[] getAcceptedChars()
     {
-        return CHARACTERS;
-    }
-
-    public static TimeKeyListener getInstance() {
-        if (sInstance != null)
-            return sInstance;
-
-        sInstance = new TimeKeyListener();
-        return sInstance;
+        return mCharacters;
     }
 
     /**
-     * The characters that are used.
+     * @deprecated Use {@link #TimeKeyListener(Locale)} instead.
+     */
+    @Deprecated
+    public TimeKeyListener() {
+        this(null);
+    }
+
+    private static final String SYMBOLS_TO_IGNORE = "ahHKkms";
+    private static final String SKELETON_12HOUR = "hms";
+    private static final String SKELETON_24HOUR = "Hms";
+
+    public TimeKeyListener(@Nullable Locale locale) {
+        final LinkedHashSet<Character> chars = new LinkedHashSet<>();
+        // First add the digits. Then, add all the character in AM and PM markers. Finally, add all
+        // the non-pattern characters seen in the patterns for "hms" and "Hms".
+        boolean success = NumberKeyListener.addDigits(chars, locale)
+                          && NumberKeyListener.addAmPmChars(chars, locale)
+                          && NumberKeyListener.addFormatCharsFromSkeleton(
+                              chars, locale, SKELETON_12HOUR, SYMBOLS_TO_IGNORE)
+                          && NumberKeyListener.addFormatCharsFromSkeleton(
+                              chars, locale, SKELETON_24HOUR, SYMBOLS_TO_IGNORE);
+        mCharacters = success ? NumberKeyListener.collectionToArray(chars) : CHARACTERS;
+    }
+
+    /**
+     * @deprecated Use {@link #getInstance(Locale)} instead.
+     */
+    @Deprecated
+    @NonNull
+    public static TimeKeyListener getInstance() {
+        return getInstance(null);
+    }
+
+    /**
+     * Returns an instance of TimeKeyListener appropriate for the given locale.
+     */
+    @NonNull
+    public static TimeKeyListener getInstance(@Nullable Locale locale) {
+        TimeKeyListener instance;
+        synchronized (sLock) {
+            instance = sInstanceCache.get(locale);
+            if (instance == null) {
+                instance = new TimeKeyListener(locale);
+                sInstanceCache.put(locale, instance);
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * This field used to list the characters that were used. But is now a fixed data
+     * field that is the list of code units used for the deprecated case where the class
+     * is instantiated with null or no input parameter.
      *
      * @see KeyEvent#getMatch
      * @see #getAcceptedChars
+     *
+     * @deprecated Use {@link #getAcceptedChars()} instead.
      */
     public static final char[] CHARACTERS = new char[] {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'm',
             'p', ':'
         };
 
-    private static TimeKeyListener sInstance;
+    private final char[] mCharacters;
+
+    private static final Object sLock = new Object();
+    @GuardedBy("sLock")
+    private static final HashMap<Locale, TimeKeyListener> sInstanceCache = new HashMap<>();
 }
