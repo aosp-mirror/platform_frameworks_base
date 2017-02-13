@@ -677,7 +677,14 @@ public class Canvas extends BaseCanvas {
      * @param rect The rect to intersect with the current clip
      * @param op How the clip is modified
      * @return true if the resulting clip is non-empty
+     *
+     * @deprecated Region.Op values other than {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} have the ability to expand the clip. The canvas clipping APIs
+     * are intended to only expand the clip as a result of a restore operation. This enables a view
+     * parent to clip a canvas to clearly define the maximal drawing area of its children. The
+     * recommended alternative calls are {@link #clipRect(RectF)} and {@link #clipOutRect(RectF)};
      */
+    @Deprecated
     public boolean clipRect(@NonNull RectF rect, @NonNull Region.Op op) {
         return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
@@ -690,7 +697,14 @@ public class Canvas extends BaseCanvas {
      * @param rect The rectangle to intersect with the current clip.
      * @param op How the clip is modified
      * @return true if the resulting clip is non-empty
+     *
+     * @deprecated Region.Op values other than {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} have the ability to expand the clip. The canvas clipping APIs
+     * are intended to only expand the clip as a result of a restore operation. This enables a view
+     * parent to clip a canvas to clearly define the maximal drawing area of its children. The
+     * recommended alternative calls are {@link #clipRect(Rect)} and {@link #clipOutRect(Rect)};
      */
+    @Deprecated
     public boolean clipRect(@NonNull Rect rect, @NonNull Region.Op op) {
         return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
@@ -709,6 +723,18 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Set the clip to the difference of the current clip and the specified rectangle, which is
+     * expressed in local coordinates.
+     *
+     * @param rect The rectangle to perform a difference op with the current clip.
+     * @return true if the resulting clip is non-empty
+     */
+    public boolean clipOutRect(@NonNull RectF rect) {
+        return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.DIFFERENCE.nativeInt);
+    }
+
+    /**
      * Intersect the current clip with the specified rectangle, which is
      * expressed in local coordinates.
      *
@@ -718,6 +744,18 @@ public class Canvas extends BaseCanvas {
     public boolean clipRect(@NonNull Rect rect) {
         return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 Region.Op.INTERSECT.nativeInt);
+    }
+
+    /**
+     * Set the clip to the difference of the current clip and the specified rectangle, which is
+     * expressed in local coordinates.
+     *
+     * @param rect The rectangle to perform a difference op with the current clip.
+     * @return true if the resulting clip is non-empty
+     */
+    public boolean clipOutRect(@NonNull Rect rect) {
+        return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.DIFFERENCE.nativeInt);
     }
 
     /**
@@ -734,7 +772,15 @@ public class Canvas extends BaseCanvas {
      *               clip
      * @param op     How the clip is modified
      * @return       true if the resulting clip is non-empty
+     *
+     * @deprecated Region.Op values other than {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} have the ability to expand the clip. The canvas clipping APIs
+     * are intended to only expand the clip as a result of a restore operation. This enables a view
+     * parent to clip a canvas to clearly define the maximal drawing area of its children. The
+     * recommended alternative calls are {@link #clipRect(float,float,float,float)} and
+     * {@link #clipOutRect(float,float,float,float)};
      */
+    @Deprecated
     public boolean clipRect(float left, float top, float right, float bottom,
             @NonNull Region.Op op) {
         return nClipRect(mNativeCanvasWrapper, left, top, right, bottom, op.nativeInt);
@@ -759,6 +805,21 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Set the clip to the difference of the current clip and the specified rectangle, which is
+     * expressed in local coordinates.
+     *
+     * @param left   The left side of the rectangle used in the difference operation
+     * @param top    The top of the rectangle used in the difference operation
+     * @param right  The right side of the rectangle used in the difference operation
+     * @param bottom The bottom of the rectangle used in the difference operation
+     * @return       true if the resulting clip is non-empty
+     */
+    public boolean clipOutRect(float left, float top, float right, float bottom) {
+        return nClipRect(mNativeCanvasWrapper, left, top, right, bottom,
+                Region.Op.DIFFERENCE.nativeInt);
+    }
+
+    /**
      * Intersect the current clip with the specified rectangle, which is
      * expressed in local coordinates.
      *
@@ -777,12 +838,35 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Set the clip to the difference of the current clip and the specified rectangle, which is
+     * expressed in local coordinates.
+     *
+     * @param left   The left side of the rectangle used in the difference operation
+     * @param top    The top of the rectangle used in the difference operation
+     * @param right  The right side of the rectangle used in the difference operation
+     * @param bottom The bottom of the rectangle used in the difference operation
+     * @return       true if the resulting clip is non-empty
+     */
+    public boolean clipOutRect(int left, int top, int right, int bottom) {
+        return nClipRect(mNativeCanvasWrapper, left, top, right, bottom,
+                Region.Op.DIFFERENCE.nativeInt);
+    }
+
+    /**
         * Modify the current clip with the specified path.
      *
      * @param path The path to operate on the current clip
      * @param op   How the clip is modified
      * @return     true if the resulting is non-empty
+     *
+     * @deprecated Region.Op values other than {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} have the ability to expand the clip. The canvas clipping APIs
+     * are intended to only expand the clip as a result of a restore operation. This enables a view
+     * parent to clip a canvas to clearly define the maximal drawing area of its children. The
+     * recommended alternative calls are {@link #clipPath(Path)} and
+     * {@link #clipOutPath(Path)};
      */
+    @Deprecated
     public boolean clipPath(@NonNull Path path, @NonNull Region.Op op) {
         return nClipPath(mNativeCanvasWrapper, path.readOnlyNI(), op.nativeInt);
     }
@@ -791,10 +875,20 @@ public class Canvas extends BaseCanvas {
      * Intersect the current clip with the specified path.
      *
      * @param path The path to intersect with the current clip
-     * @return     true if the resulting is non-empty
+     * @return     true if the resulting clip is non-empty
      */
     public boolean clipPath(@NonNull Path path) {
         return clipPath(path, Region.Op.INTERSECT);
+    }
+
+    /**
+     * Set the clip to the difference of the current clip and the specified path.
+     *
+     * @param path The path used in the difference operation
+     * @return     true if the resulting clip is non-empty
+     */
+    public boolean clipOutPath(@NonNull Path path) {
+        return clipPath(path, Region.Op.DIFFERENCE);
     }
 
     /**
