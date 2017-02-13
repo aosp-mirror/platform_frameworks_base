@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
 import android.metrics.MetricsReader;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.support.test.runner.AndroidJUnit4;
@@ -38,13 +39,15 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@SmallTest
-// @RunWith(AndroidJUnit4.class)
 // TODO(gpitsch): We have seen some flakes in these tests, needs some investigation.
 // Q: How is mMetricsReader being used by the tested code?
+// A: StatusBar uses MetricsLogger to write to the event log, then read back by MetricsReader
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public class StatusBarTest extends SysuiTestCase {
 
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -56,7 +59,7 @@ public class StatusBarTest extends SysuiTestCase {
     private MetricsReader mMetricsReader;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
-    // @Before
+    @Before
     public void setup() {
         mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager.class);
         mUnlockMethodCache = mock(UnlockMethodCache.class);
@@ -89,7 +92,7 @@ public class StatusBarTest extends SysuiTestCase {
         }
     }
 
-    // @Test
+    @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_showingAndOccluded() {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(true);
@@ -97,7 +100,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
-    // @Test
+    @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_showing() {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -105,7 +108,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
-    // @Test
+    @Test
     public void executeRunnableDismissingKeyguard_nullRunnable_notShowing() {
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -113,7 +116,9 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.executeRunnableDismissingKeyguard(null, null, false, false, false);
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void lockscreenStateMetrics_notShowing() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -131,7 +136,9 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(0));
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void lockscreenStateMetrics_notShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -149,7 +156,9 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void lockscreenStateMetrics_isShowing() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -167,7 +176,9 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(0));
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void lockscreenStateMetrics_isShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -185,7 +196,9 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void lockscreenStateMetrics_isShowingBouncer() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
@@ -203,7 +216,9 @@ public class StatusBarTest extends SysuiTestCase {
                         .setSubtype(1));
     }
 
-    // @Test
+    @Ignore("flaky test")
+    @FlakyTest
+    @Test
     public void onActivatedMetrics() {
         ActivatableNotificationView view =  mock(ActivatableNotificationView.class);
         mStatusBar.onActivated(view);
