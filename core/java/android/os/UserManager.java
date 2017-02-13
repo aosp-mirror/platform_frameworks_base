@@ -30,6 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -420,6 +421,14 @@ public class UserManager {
      * <li>clearing app defaults</li>
      * <p>
      * The default value is <code>false</code>.
+     *
+     * <p><strong>Note:</strong> The user will still be able to perform those actions via other
+     * means (such as adb). Third party apps will also be able to uninstall apps via the
+     * {@link android.content.pm.PackageInstaller}. {@link #DISALLOW_UNINSTALL_APPS} or
+     * {@link DevicePolicyManager#setUninstallBlocked(ComponentName, String, boolean)} should be
+     * used to prevent the user from uninstalling apps completely, and
+     * {@link DevicePolicyManager#addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}
+     * to add a default intent handler for a given intent filter.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
