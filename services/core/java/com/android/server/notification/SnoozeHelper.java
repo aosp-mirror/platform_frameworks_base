@@ -16,11 +16,14 @@
 package com.android.server.notification;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -99,7 +102,7 @@ public class SnoozeHelper {
         return Collections.EMPTY_LIST;
     }
 
-    protected List<NotificationRecord> getSnoozed() {
+    protected @NonNull List<NotificationRecord> getSnoozed() {
         List<NotificationRecord> snoozedForUser = new ArrayList<>();
         int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int N = userIds.length;
@@ -270,6 +273,9 @@ public class SnoozeHelper {
         final NotificationRecord record = pkgRecords.remove(key);
 
         if (record != null) {
+            MetricsLogger.action(record.getLogMaker()
+                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
+                    .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
             mCallback.repost(userId, record);
         }
     }

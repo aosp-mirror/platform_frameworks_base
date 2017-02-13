@@ -50,14 +50,18 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
+import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
+import android.service.notification.ZenModeProto;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -485,6 +489,24 @@ public class ZenModeHelper {
                 newConfig.manualRule = newRule;
             }
             setConfigLocked(newConfig, reason, setRingerMode);
+        }
+    }
+
+    void dump(ProtoOutputStream proto) {
+
+        proto.write(ZenModeProto.ZEN_MODE, mZenMode);
+        synchronized (mConfig) {
+            if (mConfig.manualRule != null) {
+                proto.write(ZenModeProto.ENABLED_ACTIVE_CONDITIONS, mConfig.manualRule.toString());
+            }
+            for (ZenRule rule : mConfig.automaticRules.values()) {
+                if (rule.enabled && rule.condition.state == Condition.STATE_TRUE
+                        && !rule.snoozing) {
+                    proto.write(ZenModeProto.ENABLED_ACTIVE_CONDITIONS, rule.toString());
+                }
+            }
+            proto.write(ZenModeProto.POLICY, mConfig.toNotificationPolicy().toString());
+            proto.write(ZenModeProto.SUPPRESSED_EFFECTS, mSuppressedEffects);
         }
     }
 
