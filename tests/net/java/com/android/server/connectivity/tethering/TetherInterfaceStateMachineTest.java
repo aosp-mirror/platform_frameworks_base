@@ -210,10 +210,9 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).enableNat(IFACE_NAME, UPSTREAM_IFACE2);
-        // TODO: Verify proper cleanup is performed:
-        // inOrder.verify(mStatsService).forceUpdate();
-        // inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
-        // inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE2);
+        inOrder.verify(mStatsService).forceUpdate();
+        inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
+        inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE2);
     }
 
     @Test
@@ -230,10 +229,9 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).enableNat(IFACE_NAME, UPSTREAM_IFACE2);
         inOrder.verify(mNMService).startInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
-        // TODO: Verify proper cleanup is performed:
-        // inOrder.verify(mStatsService).forceUpdate();
-        // inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
-        // inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE2);
+        inOrder.verify(mStatsService).forceUpdate();
+        inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
+        inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE2);
     }
 
     @Test
