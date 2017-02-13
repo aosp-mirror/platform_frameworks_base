@@ -77,7 +77,7 @@ public final class Policy implements Parcelable {
     public void setMinHomeDownlinkBandwidth(long minHomeDownlinkBandwidth) {
         mMinHomeDownlinkBandwidth = minHomeDownlinkBandwidth;
     }
-    public long getMinHomeDownlinkBandWidht() {
+    public long getMinHomeDownlinkBandwidth() {
         return mMinHomeDownlinkBandwidth;
     }
     private long mMinHomeUplinkBandwidth = Long.MIN_VALUE;

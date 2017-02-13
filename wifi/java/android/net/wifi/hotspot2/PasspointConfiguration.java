@@ -120,7 +120,7 @@ public final class PasspointConfiguration implements Parcelable {
     public void setUpdateIdentifier(int updateIdentifier) {
         mUpdateIdentifier = updateIdentifier;
     }
-    public int getUpdateIdentififer() {
+    public int getUpdateIdentifier() {
         return mUpdateIdentifier;
     }
 
