@@ -72,6 +72,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener {
      * @param pulsing whether we are currently pulsing for ambient display.
      */
     public void setPulsing(boolean pulsing) {
+        if (mPulsing == pulsing) {
+            return;
+        }
         mPulsing = pulsing;
         updateReorderingAllowed();
     }
