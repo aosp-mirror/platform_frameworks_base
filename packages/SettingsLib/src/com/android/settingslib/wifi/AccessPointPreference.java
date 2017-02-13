@@ -22,7 +22,6 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.NetworkBadging;
-import android.net.ScoredNetwork;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -61,7 +60,7 @@ public class AccessPointPreference extends Preference {
     private int mLevel;
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
-    private int mWifiBadge = ScoredNetwork.BADGING_NONE;
+    private int mWifiBadge = NetworkBadging.BADGING_NONE;
 
     static final int[] WIFI_CONNECTION_STRENGTH = {
             R.string.accessibility_wifi_one_bar,

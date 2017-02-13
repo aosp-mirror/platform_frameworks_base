@@ -15,10 +15,10 @@
  */
 package com.android.systemui.statusbar.policy;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.net.NetworkBadging;
 import android.net.NetworkCapabilities;
 import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
@@ -155,7 +155,7 @@ public class WifiSignalController extends
 
     @Override
     public int getCurrentIconId() {
-        if (mCurrentState.badgeEnum != ScoredNetwork.BADGING_NONE) {
+        if (mCurrentState.badgeEnum != NetworkBadging.BADGING_NONE) {
             return Utils.WIFI_PIE_FOR_BADGING[mCurrentState.level];
         }
         return super.getCurrentIconId();
@@ -201,14 +201,14 @@ public class WifiSignalController extends
      */
     private int getWifiBadgeEnum() {
         if (!mScoringUiEnabled || mWifiTracker.networkKey == null) {
-            return ScoredNetwork.BADGING_NONE;
+            return NetworkBadging.BADGING_NONE;
         }
         ScoredNetwork score = mScoreCache.getScoredNetwork(mWifiTracker.networkKey);
 
         if (score != null) {
             return score.calculateBadge(mWifiTracker.rssi);
         }
-        return ScoredNetwork.BADGING_NONE;
+        return NetworkBadging.BADGING_NONE;
     }
 
     @VisibleForTesting
