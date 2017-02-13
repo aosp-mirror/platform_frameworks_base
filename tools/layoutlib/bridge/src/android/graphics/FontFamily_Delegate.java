@@ -344,7 +344,9 @@ public class FontFamily_Delegate {
                     ffd.addFont(fontInfo);
                     return true;
                 }
-                fontStream = assetRepository.openAsset(path, AssetManager.ACCESS_STREAMING);
+                fontStream = isAsset ?
+                        assetRepository.openAsset(path, AssetManager.ACCESS_STREAMING) :
+                        assetRepository.openNonAsset(cookie, path, AssetManager.ACCESS_STREAMING);
                 if (fontStream == null) {
                     Bridge.getLog().error(LayoutLog.TAG_MISSING_ASSET, "Asset not found: " + path,
                             path);

@@ -43,6 +43,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.icu.text.PluralRules;
 import android.util.AttributeSet;
@@ -776,6 +777,35 @@ public class Resources_Delegate {
     static CharSequence getQuantityText(Resources resources, int id, int quantity) throws
             NotFoundException {
         return getQuantityString(resources, id, quantity);
+    }
+
+    @LayoutlibDelegate
+    static Typeface getFont(Resources resources, int id) throws
+            NotFoundException {
+        Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
+        if (value != null) {
+            return ResourceHelper.getFont(value.getSecond(), resources.mContext, null);
+        }
+
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
+    }
+
+    @LayoutlibDelegate
+    static Typeface getFont(Resources resources, TypedValue outValue, int id) throws
+            NotFoundException {
+        Resources_Delegate.getValue(resources, id, outValue, true);
+        if (outValue.string != null) {
+            return ResourceHelper.getFont(outValue.string.toString(), resources.mContext, null,
+                    mPlatformResourceFlag[0]);
+        }
+
+        throwException(resources, id);
+
+        // this is not used since the method above always throws
+        return null;
     }
 
     @LayoutlibDelegate

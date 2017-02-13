@@ -31,6 +31,7 @@ import com.android.resources.ResourceType;
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -695,6 +696,22 @@ public final class BridgeTypedArray extends TypedArray {
         return ResourceHelper.getDrawable(value, mContext, mTheme);
     }
 
+
+    /**
+     * Retrieve the Typeface for the attribute at <var>index</var>.
+     * @param index Index of attribute to retrieve.
+     *
+     * @return Typeface for the attribute, or null if not defined.
+     */
+    @Override
+    public Typeface getFont(int index) {
+        if (!hasValue(index)) {
+            return null;
+        }
+
+        ResourceValue value = mResourceData[index];
+        return ResourceHelper.getFont(value, mContext, mTheme);
+    }
 
     /**
      * Retrieve the CharSequence[] for the attribute at <var>index</var>.

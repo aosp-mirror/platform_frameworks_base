@@ -384,4 +384,10 @@ public class RenderTests extends RenderTestBase {
                 strings);
         assertTrue(sRenderMessages.isEmpty());
     }
+
+    @Test
+    public void testFonts() throws ClassNotFoundException {
+        // TODO: styles seem to be broken in TextView
+        renderAndVerify("fonts_test.xml", "font_test.png");
+    }
 }
