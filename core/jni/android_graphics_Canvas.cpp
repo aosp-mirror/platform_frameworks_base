@@ -27,6 +27,7 @@
 #include "Bitmap.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
+#include "SkRegion.h"
 
 namespace android {
 
