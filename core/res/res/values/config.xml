@@ -804,6 +804,16 @@
          Represented as milliseconds from midnight (e.g. 21600000 == 6am). -->
     <integer name="config_defaultNightDisplayCustomEndTime">21600000</integer>
 
+    <!-- Minimum color temperature, in Kelvin, supported by Night display. -->
+    <integer name="config_nightDisplayColorTemperatureMin">2596</integer>
+
+    <!-- Default color temperature, in Kelvin, to tint the screen when Night display is
+         activated. -->
+    <integer name="config_nightDisplayColorTemperatureDefault">2850</integer>
+
+    <!-- Maximum color temperature, in Kelvin, supported by Night display. -->
+    <integer name="config_nightDisplayColorTemperatureMax">4082</integer>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.

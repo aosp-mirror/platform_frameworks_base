@@ -677,7 +677,6 @@ public abstract class AbsSeekBar extends ProgressBar {
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawThumb(canvas);
-
     }
 
     @Override
@@ -703,9 +702,9 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
-     * Draw the tick marks.
+     * @hide
      */
-    void drawTickMarks(Canvas canvas) {
+    protected void drawTickMarks(Canvas canvas) {
         if (mTickMark != null) {
             final int count = getMax() - getMin();
             if (count > 1) {

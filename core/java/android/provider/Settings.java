@@ -6788,6 +6788,13 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_AUTO_MODE = "night_display_auto_mode";
 
         /**
+         * Control the color temperature of Night Display, represented in Kelvin.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_COLOR_TEMPERATURE =
+                "night_display_color_temperature";
+
+        /**
          * Custom time when Night display is scheduled to activate.
          * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
          * @hide
@@ -7022,6 +7029,7 @@ public final class Settings {
             INCALL_POWER_BUTTON_BEHAVIOR,
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
+            NIGHT_DISPLAY_COLOR_TEMPERATURE,
             NIGHT_DISPLAY_AUTO_MODE,
             NIGHT_DISPLAY_ACTIVATED,
             SYNC_PARENT_SOUNDS,

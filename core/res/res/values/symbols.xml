@@ -2767,6 +2767,9 @@
   <java-symbol type="integer" name="config_defaultNightDisplayAutoMode" />
   <java-symbol type="integer" name="config_defaultNightDisplayCustomStartTime" />
   <java-symbol type="integer" name="config_defaultNightDisplayCustomEndTime" />
+  <java-symbol type="integer" name="config_nightDisplayColorTemperatureDefault" />
+  <java-symbol type="integer" name="config_nightDisplayColorTemperatureMin" />
+  <java-symbol type="integer" name="config_nightDisplayColorTemperatureMax" />
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />

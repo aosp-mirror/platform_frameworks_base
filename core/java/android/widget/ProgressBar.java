@@ -851,6 +851,13 @@ public class ProgressBar extends View {
     }
 
     /**
+     * @hide
+     */
+    public boolean getMirrorForRtl() {
+        return mMirrorForRtl;
+    }
+
+    /**
      * Applies the progress tints in order of increasing specificity.
      */
     private void applyProgressTints() {
