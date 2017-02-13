@@ -456,6 +456,30 @@ interface ITelephony {
      */
     boolean setVoiceMailNumber(int subId, String alphaTag, String number);
 
+     /**
+      * Sets the voice activation state for a particular subscriber.
+      */
+    void setVoiceActivationState(int subId, int activationState);
+
+     /**
+      * Sets the data activation state for a particular subscriber.
+      */
+    void setDataActivationState(int subId, int activationState);
+
+     /**
+      * Returns the voice activation state for a particular subscriber.
+      * @param subId user preferred sub
+      * @param callingPackage package queries voice activation state
+      */
+    int getVoiceActivationState(int subId, String callingPackage);
+
+     /**
+      * Returns the data activation state for a particular subscriber.
+      * @param subId user preferred sub
+      * @param callingPackage package queris data activation state
+      */
+    int getDataActivationState(int subId, String callingPackage);
+
     /**
       * Returns the unread count of voicemails
       */
