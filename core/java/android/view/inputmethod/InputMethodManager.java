@@ -1495,7 +1495,7 @@ public final class InputMethodManager {
         boolean forceNewFocus = false;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onWindowFocus: " + focusedView
-                    + " softInputMode=" + softInputMode
+                    + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
             if (mHasBeenInactive) {

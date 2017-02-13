@@ -347,6 +347,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     IBinder mCurFocusedWindow;
 
     /**
+     * {@link WindowManager.LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
+     *
+     * @see #mCurFocusedWindow
+     */
+    int mCurFocusedWindowSoftInputMode;
+
+    /**
      * The client by which {@link #mCurFocusedWindow} was reported.  Used only for debugging.
      */
     ClientState mCurFocusedWindowClient;
@@ -2281,7 +2288,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
-                        + " softInputMode=#" + Integer.toHexString(softInputMode)
+                        + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
                         + " windowFlags=#" + Integer.toHexString(windowFlags));
 
                 ClientState cs = mClients.get(client.asBinder());
@@ -2326,6 +2333,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return null;
                 }
                 mCurFocusedWindow = windowToken;
+                mCurFocusedWindowSoftInputMode = softInputMode;
                 mCurFocusedWindowClient = cs;
 
                 // Should we auto-show the IME even if the caller has not
@@ -4069,9 +4077,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurMethodId=" + mCurMethodId);
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
-            p.println("  mCurFocusedWindow=" + mCurFocusedWindow);
+            p.println("  mCurFocusedWindow=" + mCurFocusedWindow
+                    + " softInputMode=" +
+                    InputMethodClient.softInputModeToString(mCurFocusedWindowSoftInputMode)
+                    + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
-            p.println("  mCurFocusedWindowClient=" + focusedWindowClient);
             p.println("  mCurId=" + mCurId + " mHaveConnect=" + mHaveConnection
                     + " mBoundToMethod=" + mBoundToMethod);
             p.println("  mCurToken=" + mCurToken);
