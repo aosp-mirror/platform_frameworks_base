@@ -48,7 +48,8 @@ import org.junit.runner.RunWith;
  * runtest frameworks-services -c com.android.server.wm.TaskSnapshotCacheTest
  */
 @SmallTest
-@Presubmit
+// TODO(b/35196891): Add back to presubmit once the bug is fixed.
+//@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
