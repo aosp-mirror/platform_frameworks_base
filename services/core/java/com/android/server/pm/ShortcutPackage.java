@@ -1581,6 +1581,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " still has an icon");
             }
+            if (si.hasMaskableBitmap() && !si.hasIconFile()) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                    + " has maskable bitmap but was not saved to a file.");
+            }
             if (si.hasIconFile() && si.hasIconResource()) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()

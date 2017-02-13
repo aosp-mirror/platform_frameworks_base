@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.MaskableIconDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -803,7 +804,15 @@ public class LauncherApps {
             }
             try {
                 final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
-                return (bmp == null) ? null : new BitmapDrawable(mContext.getResources(), bmp);
+                if (bmp != null) {
+                    BitmapDrawable dr = new BitmapDrawable(mContext.getResources(), bmp);
+                    if (shortcut.hasMaskableBitmap()) {
+                        return new MaskableIconDrawable(null, dr);
+                    } else {
+                        return dr;
+                    }
+                }
+                return null;
             } finally {
                 try {
                     pfd.close();
@@ -821,7 +830,8 @@ public class LauncherApps {
                     return loadDrawableResourceFromPackage(shortcut.getPackage(),
                             icon.getResId(), shortcut.getUserHandle(), density);
                 }
-                case Icon.TYPE_BITMAP: {
+                case Icon.TYPE_BITMAP:
+                case Icon.TYPE_BITMAP_MASKABLE: {
                     return icon.loadDrawable(mContext);
                 }
                 default:

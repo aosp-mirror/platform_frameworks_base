@@ -1216,7 +1216,8 @@ public class ShortcutService extends IShortcutService.Stub {
         // he XML we'd lose the icon.  We just remove all dangling files after saving the XML.
         shortcut.setIconResourceId(0);
         shortcut.setIconResName(null);
-        shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES);
+        shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE |
+            ShortcutInfo.FLAG_MASKABLE_BITMAP | ShortcutInfo.FLAG_HAS_ICON_RES);
     }
 
     public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
@@ -1351,7 +1352,8 @@ public class ShortcutService extends IShortcutService.Stub {
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_RES);
                         return;
                     }
-                    case Icon.TYPE_BITMAP: {
+                    case Icon.TYPE_BITMAP:
+                    case Icon.TYPE_BITMAP_MASKABLE: {
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
                     }
@@ -1382,6 +1384,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
                         shortcut.setBitmapPath(out.getFile().getAbsolutePath());
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_FILE);
+                        if (icon.getType() == Icon.TYPE_BITMAP_MASKABLE) {
+                            shortcut.addFlags(ShortcutInfo.FLAG_MASKABLE_BITMAP);
+                        }
                     } finally {
                         IoUtils.closeQuietly(out);
                     }

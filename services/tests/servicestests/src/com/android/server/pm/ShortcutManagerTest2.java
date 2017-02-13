@@ -932,6 +932,74 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         dumpUserFile(USER_10);
     }
 
+    public void testShortcutInfoSaveAndLoad_maskableBitmap() throws InterruptedException {
+        mRunningUsers.put(USER_10, true);
+
+        setCaller(CALLING_PACKAGE_1, USER_10);
+
+        final Icon bmp32x32 = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
+            getTestContext().getResources(), R.drawable.black_32x32));
+
+        PersistableBundle pb = new PersistableBundle();
+        pb.putInt("k", 1);
+        ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
+            .setId("id")
+            .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+            .setIcon(bmp32x32)
+            .setTitle("title")
+            .setText("text")
+            .setDisabledMessage("dismes")
+            .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
+            .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+            .setRank(123)
+            .setExtras(pb)
+            .build();
+        sorig.setTimestamp(mInjectedCurrentTimeMillis);
+
+        mManager.addDynamicShortcuts(list(sorig));
+
+        mInjectedCurrentTimeMillis += 1;
+        final long now = mInjectedCurrentTimeMillis;
+        mInjectedCurrentTimeMillis += 1;
+
+        dumpsysOnLogcat("before save");
+
+        // Save and load.
+        mService.saveDirtyInfo();
+        initService();
+        mService.handleUnlockUser(USER_10);
+
+        dumpUserFile(USER_10);
+        dumpsysOnLogcat("after load");
+
+        ShortcutInfo si;
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+
+        assertEquals(USER_10, si.getUserId());
+        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(CALLING_PACKAGE_1, si.getPackage());
+        assertEquals("id", si.getId());
+        assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("dismes", si.getDisabledMessage());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(0, si.getRank());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
+            | ShortcutInfo.FLAG_STRINGS_RESOLVED | ShortcutInfo.FLAG_MASKABLE_BITMAP,
+            si.getFlags());
+        assertNotNull(si.getBitmapPath()); // Something should be set.
+        assertEquals(0, si.getIconResourceId());
+        assertTrue(si.getLastChangedTimestamp() < now);
+
+        dumpUserFile(USER_10);
+    }
+
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
         mRunningUsers.put(USER_10, true);
 
