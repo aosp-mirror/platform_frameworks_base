@@ -317,9 +317,6 @@
     <!-- The height of the divider between the individual notifications when the notification wants it to be increased. This is currently the case for notification groups -->
     <dimen name="notification_divider_height_increased">6dp</dimen>
 
-    <!-- The height of an importance selection in the inline notification controls -->
-    <dimen name="notification_inline_importance_height">55dp</dimen>
-
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
 

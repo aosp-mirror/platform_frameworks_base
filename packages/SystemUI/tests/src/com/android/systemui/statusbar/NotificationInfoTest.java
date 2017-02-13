@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -32,38 +33,42 @@ import static org.mockito.Mockito.when;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import com.android.internal.util.CharSequences;
 import com.android.systemui.R;
+import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mockito.Mockito;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationGutsTest {
+public class NotificationInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";
     private static final String TEST_CHANNEL = "test_channel";
     private static final String TEST_CHANNEL_NAME = "TEST CHANNEL NAME";
 
-    private NotificationGuts mNotificationGuts;
     private NotificationInfo mNotificationInfo;
     private final INotificationManager mMockINotificationManager = mock(INotificationManager.class);
     private final PackageManager mMockPackageManager = mock(PackageManager.class);
@@ -76,12 +81,9 @@ public class NotificationGutsTest {
     public void setUp() throws Exception {
         // Inflate the layout
         final LayoutInflater layoutInflater =
-                LayoutInflater.from(InstrumentationRegistry.getTargetContext());
+                LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
                 null);
-        mNotificationGuts = (NotificationGuts) layoutInflater.inflate(R.layout.notification_guts,
-                null);
-        mNotificationInfo.setInteractionListener(mNotificationGuts);
 
         // PackageManager must return a packageInfo and applicationInfo.
         final PackageInfo packageInfo = new PackageInfo();
@@ -96,6 +98,20 @@ public class NotificationGutsTest {
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
         when(mMockStatusBarNotification.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(1);
+    }
+
+    private CharSequence getStringById(int resId) {
+        return mContext.getString(resId);
+    }
+
+    private CharSequence getNumChannelsString(int numChannels) {
+        return String.format(
+                mContext.getResources().getQuantityString(
+                        R.plurals.notification_num_channels_desc, numChannels),
+                numChannels);
     }
 
     @Test
@@ -106,6 +122,49 @@ public class NotificationGutsTest {
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
         final TextView textView = (TextView) mNotificationInfo.findViewById(R.id.pkgname);
         assertTrue(textView.getText().toString().contains("App Name"));
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_SetsPackageIcon() throws Exception {
+        final Drawable iconDrawable = mock(Drawable.class);
+        when(mMockPackageManager.getApplicationIcon(any(ApplicationInfo.class)))
+                .thenReturn(iconDrawable);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final ImageView iconView = (ImageView) mNotificationInfo.findViewById(R.id.pkgicon);
+        assertEquals(iconDrawable, iconView.getDrawable());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_GroupNameHiddenIfNoGroup() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView groupNameView = (TextView) mNotificationInfo.findViewById(R.id.group_name);
+        assertEquals(View.GONE, groupNameView.getVisibility());
+        final TextView groupDividerView =
+                (TextView) mNotificationInfo.findViewById(R.id.pkg_group_divider);
+        assertEquals(View.GONE, groupDividerView.getVisibility());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_SetsGroupNameIfNonNull() throws Exception {
+        mNotificationChannel.setGroup("test_group_id");
+        final NotificationChannelGroup notificationChannelGroup =
+                new NotificationChannelGroup("test_group_id", "Test Group Name");
+        when(mMockINotificationManager.getNotificationChannelGroupForPackage(
+                eq("test_group_id"), eq(TEST_PACKAGE_NAME), anyInt()))
+                .thenReturn(notificationChannelGroup);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView groupNameView = (TextView) mNotificationInfo.findViewById(R.id.group_name);
+        assertEquals(View.VISIBLE, groupNameView.getVisibility());
+        assertEquals("Test Group Name", groupNameView.getText());
+        final TextView groupDividerView =
+                (TextView) mNotificationInfo.findViewById(R.id.pkg_group_divider);
+        assertEquals(View.VISIBLE, groupDividerView.getVisibility());
     }
 
     @Test
@@ -125,11 +184,35 @@ public class NotificationGutsTest {
                 mMockStatusBarNotification, mNotificationChannel,
                 (View v, int appUid) -> { latch.countDown(); }, null, null);
 
-        final TextView settingsButton = 
+        final TextView settingsButton =
                 (TextView) mNotificationInfo.findViewById(R.id.more_settings);
         settingsButton.performClick();
         // Verify that listener was triggered.
         assertEquals(0, latch.getCount());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_SettingsTextWithOneChannel() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, (View v, int appUid) -> {}, null,
+                null);
+        final TextView settingsButton =
+                (TextView) mNotificationInfo.findViewById(R.id.more_settings);
+        assertEquals(getStringById(R.string.notification_more_settings), settingsButton.getText());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_SettingsTextWithMultipleChannels() throws Exception {
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(2);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, (View v, int appUid) -> {}, null,
+                null);
+        final TextView settingsButton =
+                (TextView) mNotificationInfo.findViewById(R.id.more_settings);
+        assertEquals(getStringById(R.string.notification_all_categories), settingsButton.getText());
     }
 
     @Test
@@ -149,6 +232,69 @@ public class NotificationGutsTest {
 
     @Test
     @UiThreadTest
+    public void testBindNotification_NumChannelsTextHiddenWhenDefaultChannel() throws Exception {
+        final NotificationChannel defaultChannel = new NotificationChannel(
+                NotificationChannel.DEFAULT_CHANNEL_ID, TEST_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, defaultChannel, null, null, null);
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertTrue(numChannelsView.getVisibility() != View.VISIBLE);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_NumChannelsTextDisplaysWhenNotDefaultChannel()
+            throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertEquals(numChannelsView.getVisibility(), View.VISIBLE);
+        assertEquals(getNumChannelsString(1), numChannelsView.getText());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testBindNotification_NumChannelsTextScalesWithNumberOfChannels()
+            throws Exception {
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), anyBoolean())).thenReturn(2);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertEquals(getNumChannelsString(2), numChannelsView.getText());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testbindNotification_ChannelDisabledTextGoneWhenNotDisabled() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView channelDisabledView =
+                (TextView) mNotificationInfo.findViewById(R.id.channel_disabled);
+        assertEquals(channelDisabledView.getVisibility(), View.GONE);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testbindNotification_ChannelDisabledTextVisibleWhenDisabled() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_NONE);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+        final TextView channelDisabledView =
+                (TextView) mNotificationInfo.findViewById(R.id.channel_disabled);
+        assertEquals(channelDisabledView.getVisibility(), View.VISIBLE);
+        // Replaces the numChannelsView
+        final TextView numChannelsView =
+                (TextView) mNotificationInfo.findViewById(R.id.num_channels_desc);
+        assertEquals(numChannelsView.getVisibility(), View.GONE);
+    }
+
+    @Test
+    @UiThreadTest
     public void testHasImportanceChanged_DefaultsToFalse() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
@@ -157,25 +303,14 @@ public class NotificationGutsTest {
 
     @Test
     @UiThreadTest
-    public void testHasImportanceChanged_ReturnsTrueAfterButtonChecked() throws Exception {
+    public void testHasImportanceChanged_ReturnsTrueAfterChannelDisabled() throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
         // Find the high button and check it.
-        RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
-        highButton.setChecked(true);
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        enabledSwitch.setChecked(false);
         assertTrue(mNotificationInfo.hasImportanceChanged());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testImportanceButtonCheckedBasedOnInitialImportance() throws Exception {
-        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_HIGH);
-        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, mNotificationChannel, null, null, null);
-
-        RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
-        assertTrue(highButton.isChecked());
     }
 
     @Test
@@ -194,49 +329,35 @@ public class NotificationGutsTest {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
-        RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
-        highButton.setChecked(true);
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        enabledSwitch.setChecked(false);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
 
     @Test
     @UiThreadTest
-    public void testSaveImportance_DoesNotUpdateNotificationChannelIfUnchanged() throws Exception {
+    public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnchanged()
+            throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
-        mNotificationInfo.saveImportance();
+        mNotificationInfo.handleCloseControls(true);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
     }
 
     @Test
     @UiThreadTest
-    public void testSaveImportance_DoesNotUpdateNotificationChannelIfUnspecified()
+    public void testHandleCloseControls_DoesNotUpdateNotificationChannelIfUnspecified()
             throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 mMockStatusBarNotification, mNotificationChannel, null, null, null);
 
-        mNotificationInfo.saveImportance();
+        mNotificationInfo.handleCloseControls(true);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testSaveImportance_CallsUpdateNotificationChannelIfChanged() throws Exception {
-        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
-        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, mNotificationChannel, null, null, null);
-
-        RadioButton highButton = (RadioButton) mNotificationInfo.findViewById(R.id.high_importance);
-        highButton.setChecked(true);
-        mNotificationInfo.saveImportance();
-        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
-                eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
-        assertEquals(NotificationManager.IMPORTANCE_HIGH, mNotificationChannel.getImportance());
     }
 
     @Test
@@ -248,6 +369,17 @@ public class NotificationGutsTest {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         assertTrue(enabledSwitch.isChecked());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testEnabledButtonOffWhenAlreadyBanned() throws Exception {
+        mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_NONE);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+
+        Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
+        assertFalse(enabledSwitch.isChecked());
     }
 
     @Test
@@ -283,23 +415,23 @@ public class NotificationGutsTest {
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.saveImportance();
+        mNotificationInfo.handleCloseControls(true);
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }
 
     @Test
     @UiThreadTest
-    public void testEnabledSwitchOverridesOtherButtons() throws Exception {
+    public void testCloseControlsDoesNotUpdateIfSaveIsFalse() throws Exception {
         mNotificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
-                mMockStatusBarNotification, mNotificationChannel, null, null, null);
+                mMockStatusBarNotification, mNotificationChannel, null, null,
+                Collections.singleton(TEST_PACKAGE_NAME));
 
         Switch enabledSwitch = (Switch) mNotificationInfo.findViewById(R.id.channel_enabled_switch);
-        RadioButton lowButton = (RadioButton) mNotificationInfo.findViewById(R.id.low_importance);
-        lowButton.setChecked(true);
         enabledSwitch.setChecked(false);
-        mNotificationInfo.saveImportance();
-        assertEquals(NotificationManager.IMPORTANCE_NONE, mNotificationChannel.getImportance());
+        mNotificationInfo.handleCloseControls(false);
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                eq(TEST_PACKAGE_NAME), anyInt(), eq(mNotificationChannel));
     }
 }

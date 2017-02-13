@@ -1335,37 +1335,23 @@
     <!-- Notification Inline Controls: Header for apps that are not yet using notification channels. -->
     <string name="notification_header_default_channel">Notifications</string>
 
+    <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
+    <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
+
     <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
     <string name="notification_channel_disabled">You won\'t get these notifications anymore.</string>
 
-    <!-- Notification Inline Controls: Header text for describing from which app this notification
-        originates.  The line below this in the layout will display the channel name.
-        Note for localization:  For languages in which the two separate lines cannot be a continuous
-        sentence, translate this as a separate statement: "[Calendar] notifications" -->
-    <string name="notification_importance_header_app"><xliff:g id="app" example="Calendar">%s</xliff:g> notifications for</string>
-
-    <!-- Notification importance title, min status-->
-    <string name="min_importance">Low</string>
-    <!-- Notification importance title, low status-->
-    <string name="low_importance">Medium</string>
-    <!-- Notification importance title, normal status-->
-    <string name="default_importance">High</string>
-    <!-- Notification importance title, high status-->
-    <string name="high_importance">Urgent</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: min importance level description -->
-    <string name="notification_importance_min">No sound or visual interruption</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: low importance level description -->
-    <string name="notification_importance_low">Show silently</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: normal importance level description -->
-    <string name="notification_importance_default">Make sound</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
-    <string name="notification_importance_high">Make sound and pop on screen</string>
-
-    <!-- Notification: Control panel: Label for button that launches notification settings. [CHAR LIMIT=NONE] -->
+    <!-- Notification: Control panel: Label that shows how many channels this application has
+        defined, describing the current notification channel as "1 out of n". -->
+    <plurals name="notification_num_channels_desc">
+        <item quantity="one">1 out of <xliff:g id="number">%d</xliff:g> category from this app</item>
+        <item quantity="other">1 out of <xliff:g id="number">%d</xliff:g> categories from this app</item>
+    </plurals>
+    <!-- Notification: Control panel: Label for button that launches notification settings. Used
+        when this app has defined more than a single channel for notifications. -->
+    <string name="notification_all_categories">All Categories</string>
+    <!-- Notification: Control panel: Label for button that launches notification settings. Used
+        when this app has only defined a single channel for notifications. -->
     <string name="notification_more_settings">More settings</string>
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>

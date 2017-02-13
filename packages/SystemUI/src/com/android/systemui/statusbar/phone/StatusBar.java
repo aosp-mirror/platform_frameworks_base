@@ -5807,7 +5807,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void saveAndCloseNotificationMenu(NotificationInfo info,
             ExpandableNotificationRow row, NotificationGuts guts, View done) {
         guts.resetFalsingCheck();
-        info.saveImportance();
         int[] rowLocation = new int[2];
         int[] doneLocation = new int[2];
         row.getLocationOnScreen(rowLocation);

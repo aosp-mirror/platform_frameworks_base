@@ -670,6 +670,13 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
+            int uid) {
+        Preconditions.checkNotNull(pkg);
+        Record r = getRecord(pkg, uid);
+        return r.groups.get(groupId);
+    }
+
     @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted) {

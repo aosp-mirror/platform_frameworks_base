@@ -39,7 +39,7 @@ public interface NotificationMenuRowProvider extends Plugin {
 
         public View getContentView();
 
-        public boolean handleCloseControls();
+        public boolean handleCloseControls(boolean save);
     }
 
     public interface SnoozeGutsContent extends GutsContent {
