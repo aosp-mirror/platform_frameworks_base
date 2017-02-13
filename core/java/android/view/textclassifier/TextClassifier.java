@@ -35,6 +35,7 @@ public interface TextClassifier {
     String TYPE_EMAIL = "email";
     String TYPE_PHONE = "phone";
     String TYPE_ADDRESS = "address";
+    String TYPE_URL = "url";
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

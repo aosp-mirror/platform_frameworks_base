@@ -2602,10 +2602,13 @@
     <string name="email">Email</string>
 
     <!-- Label for item in the text selection menu to trigger a Dialer app [CHAR LIMIT=20] -->
-    <string name="dial">Dial</string>
+    <string name="dial">Phone</string>
 
     <!-- Label for item in the text selection menu to trigger a Map app [CHAR LIMIT=20] -->
     <string name="map">Map</string>
+
+    <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
+    <string name="browse">Browse</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>

@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.icu.text.BreakIterator;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.provider.Browser;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -44,6 +45,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -112,7 +114,7 @@ final class TextClassifierImpl implements TextClassifier {
                 String type = getSmartSelection()
                         .classifyText(text.toString(), startIndex, endIndex);
                 if (!TextUtils.isEmpty(type)) {
-                    type = type.toLowerCase().trim();
+                    type = type.toLowerCase(Locale.ENGLISH).trim();
                     // TODO: Added this log for debug only. Remove before release.
                     Log.d(LOG_TAG, String.format("Classification type: %s", type));
                     return createClassificationResult(type, classified);
@@ -125,7 +127,6 @@ final class TextClassifierImpl implements TextClassifier {
         // Getting here means something went wrong, return a NO_OP result.
         return TextClassifier.NO_OP.getTextClassificationResult(text, startIndex, endIndex);
     }
-
 
     @Override
     public LinksInfo getLinks(CharSequence text, int linkMask) {
@@ -151,20 +152,25 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     private TextClassificationResult createClassificationResult(String type, CharSequence text) {
-        final Intent intent = IntentFactory.create(type, text.toString());
-        if (intent == null) {
-            return TextClassificationResult.EMPTY;
-        }
-
         final TextClassificationResult.Builder builder = new TextClassificationResult.Builder()
                 .setText(text.toString())
-                .setEntityType(type, 1.0f /* confidence */)
-                .setIntent(intent)
-                .setOnClickListener(TextClassificationResult.createStartActivityOnClick(
-                        mContext, intent));
-        final PackageManager pm = mContext.getPackageManager();
-        final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
+                .setEntityType(type, 1.0f /* confidence */);
+
+        final Intent intent = IntentFactory.create(mContext, type, text.toString());
+        final PackageManager pm;
+        final ResolveInfo resolveInfo;
+        if (intent != null) {
+            pm = mContext.getPackageManager();
+            resolveInfo = pm.resolveActivity(intent, 0);
+        } else {
+            pm = null;
+            resolveInfo = null;
+        }
         if (resolveInfo != null && resolveInfo.activityInfo != null) {
+            builder.setIntent(intent)
+                    .setOnClickListener(TextClassificationResult.createStartActivityOnClickListener(
+                            mContext, intent));
+
             final String packageName = resolveInfo.activityInfo.packageName;
             if ("android".equals(packageName)) {
                 // Requires the chooser to find an activity to handle the intent.
@@ -227,7 +233,7 @@ final class TextClassifierImpl implements TextClassifier {
                             smartSelection.classifyText(text, selectionStart, selectionEnd);
                     if (matches(type, linkMask)) {
                         final Intent intent = IntentFactory.create(
-                                type, text.substring(selectionStart, selectionEnd));
+                                context, type, text.substring(selectionStart, selectionEnd));
                         if (hasActivityHandler(context, intent)) {
                             final ClickableSpan span = createSpan(context, intent);
                             spans.add(new SpanSpec(selectionStart, selectionEnd, span));
@@ -253,6 +259,10 @@ final class TextClassifierImpl implements TextClassifier {
             }
             if ((linkMask & Linkify.MAP_ADDRESSES) != 0
                     && TextClassifier.TYPE_ADDRESS.equals(type)) {
+                return true;
+            }
+            if ((linkMask & Linkify.WEB_URLS) != 0
+                    && TextClassifier.TYPE_URL.equals(type)) {
                 return true;
             }
             return false;
@@ -369,7 +379,7 @@ final class TextClassifierImpl implements TextClassifier {
         private IntentFactory() {}
 
         @Nullable
-        public static Intent create(String type, String text) {
+        public static Intent create(Context context, String type, String text) {
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
                     return new Intent(Intent.ACTION_SENDTO)
@@ -380,6 +390,9 @@ final class TextClassifierImpl implements TextClassifier {
                 case TextClassifier.TYPE_ADDRESS:
                     return new Intent(Intent.ACTION_VIEW)
                             .setData(Uri.parse(String.format("geo:0,0?q=%s", text)));
+                case TextClassifier.TYPE_URL:
+                    return new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
                 default:
                     return null;
                 // TODO: Add other classification types.
@@ -395,6 +408,8 @@ final class TextClassifierImpl implements TextClassifier {
                     return context.getString(com.android.internal.R.string.dial);
                 case TextClassifier.TYPE_ADDRESS:
                     return context.getString(com.android.internal.R.string.map);
+                case TextClassifier.TYPE_URL:
+                    return context.getString(com.android.internal.R.string.browse);
                 default:
                     return null;
                 // TODO: Add other classification types.
