@@ -146,6 +146,9 @@ public class SystemConfig {
     final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
 
+    final ArrayMap<String, ArraySet<String>> mVendorPrivAppPermissions = new ArrayMap<>();
+    final ArrayMap<String, ArraySet<String>> mVendorPrivAppDenyPermissions = new ArrayMap<>();
+
     final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
 
     public static SystemConfig getInstance() {
@@ -229,6 +232,14 @@ public class SystemConfig {
         return mPrivAppDenyPermissions.get(packageName);
     }
 
+    public ArraySet<String> getVendorPrivAppPermissions(String packageName) {
+        return mVendorPrivAppPermissions.get(packageName);
+    }
+
+    public ArraySet<String> getVendorPrivAppDenyPermissions(String packageName) {
+        return mVendorPrivAppDenyPermissions.get(packageName);
+    }
+
     public Map<String, Boolean> getOemPermissions(String packageName) {
         final Map<String, Boolean> oemPermissions = mOemPermissions.get(packageName);
         if (oemPermissions != null) {
@@ -248,7 +259,7 @@ public class SystemConfig {
 
         // Allow Vendor to customize system configs around libs, features, permissions and apps
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
-                ALLOW_APP_CONFIGS;
+                ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS;
         readPermissions(Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
         readPermissions(Environment.buildPath(
@@ -587,7 +598,19 @@ public class SystemConfig {
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
-                    readPrivAppPermissions(parser);
+                    // privapp permissions from system and vendor partitions are stored
+                    // separately. This is to prevent xml files in the vendor partition from
+                    // granting permissions to priv apps in the system partition and vice
+                    // versa.
+                    boolean vendor = permFile.toPath().startsWith(
+                            Environment.getVendorDirectory().toPath());
+                    if (vendor) {
+                        readPrivAppPermissions(parser, mVendorPrivAppPermissions,
+                                mVendorPrivAppDenyPermissions);
+                    } else {
+                        readPrivAppPermissions(parser, mPrivAppPermissions,
+                                mPrivAppDenyPermissions);
+                    }
                 } else if ("oem-permissions".equals(name) && allowOemPermissions) {
                     readOemPermissions(parser);
                 } else {
@@ -674,7 +697,10 @@ public class SystemConfig {
         }
     }
 
-    void readPrivAppPermissions(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private void readPrivAppPermissions(XmlPullParser parser,
+            ArrayMap<String, ArraySet<String>> grantMap,
+            ArrayMap<String, ArraySet<String>> denyMap)
+            throws IOException, XmlPullParserException {
         String packageName = parser.getAttributeValue(null, "package");
         if (TextUtils.isEmpty(packageName)) {
             Slog.w(TAG, "package is required for <privapp-permissions> in "
@@ -682,11 +708,11 @@ public class SystemConfig {
             return;
         }
 
-        ArraySet<String> permissions = mPrivAppPermissions.get(packageName);
+        ArraySet<String> permissions = grantMap.get(packageName);
         if (permissions == null) {
             permissions = new ArraySet<>();
         }
-        ArraySet<String> denyPermissions = mPrivAppDenyPermissions.get(packageName);
+        ArraySet<String> denyPermissions = denyMap.get(packageName);
         int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
             String name = parser.getName();
@@ -711,9 +737,9 @@ public class SystemConfig {
                 denyPermissions.add(permName);
             }
         }
-        mPrivAppPermissions.put(packageName, permissions);
+        grantMap.put(packageName, permissions);
         if (denyPermissions != null) {
-            mPrivAppDenyPermissions.put(packageName, denyPermissions);
+            denyMap.put(packageName, denyPermissions);
         }
     }
 

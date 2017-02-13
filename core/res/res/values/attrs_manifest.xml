@@ -262,6 +262,9 @@
              and the OEM has white-listed the app to receive this permission by the OEM.
          -->
         <flag name="oem" value="0x4000" />
+        <!-- Additional flag from base permission type: this permission can be granted to
+             privileged apps in vendor partition. -->
+        <flag name="vendorPrivileged" value="0x8000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

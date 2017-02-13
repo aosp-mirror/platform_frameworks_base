@@ -225,6 +225,9 @@ public final class BasePermission {
     public boolean isVerifier() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0;
     }
+    public boolean isVendorPrivileged() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_VENDOR_PRIVILEGED) != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {

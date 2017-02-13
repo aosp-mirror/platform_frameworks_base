@@ -467,6 +467,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_SYSTEM = 1<<17;
     static final int SCAN_AS_PRIVILEGED = 1<<18;
     static final int SCAN_AS_OEM = 1<<19;
+    static final int SCAN_AS_VENDOR = 1<<20;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -2574,8 +2575,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_SYSTEM,
                     0);
 
-            // Collect all vendor packages.
-            File vendorAppDir = new File("/vendor/app");
+            // Collected privileged vendor packages.
+                File privilegedVendorAppDir = new File(Environment.getVendorDirectory(),
+                        "priv-app");
+            try {
+                privilegedVendorAppDir = privilegedVendorAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(privilegedVendorAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_VENDOR
+                    | SCAN_AS_PRIVILEGED,
+                    0);
+
+            // Collect ordinary vendor packages.
+            File vendorAppDir = new File(Environment.getVendorDirectory(), "app");
             try {
                 vendorAppDir = vendorAppDir.getCanonicalFile();
             } catch (IOException e) {
@@ -2585,7 +2603,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
-                    | SCAN_AS_SYSTEM,
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_VENDOR,
                     0);
 
             // Collect all OEM packages.
@@ -2770,13 +2789,23 @@ public class PackageManagerService extends IPackageManager.Stub
                             rescanFlags =
                                     scanFlags
                                     | SCAN_AS_SYSTEM;
+                        } else if (FileUtils.contains(privilegedVendorAppDir, scanFile)) {
+                            reparseFlags =
+                                    mDefParseFlags |
+                                    PackageParser.PARSE_IS_SYSTEM_DIR;
+                            rescanFlags =
+                                    scanFlags
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_VENDOR
+                                    | SCAN_AS_PRIVILEGED;
                         } else if (FileUtils.contains(vendorAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
                                     PackageParser.PARSE_IS_SYSTEM_DIR;
                             rescanFlags =
                                     scanFlags
-                                    | SCAN_AS_SYSTEM;
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_VENDOR;
                         } else if (FileUtils.contains(oemAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
@@ -8335,6 +8364,13 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 updatedPs.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_OEM;
             }
+            // If new package is not located in "/vendor" (e.g. due to an OTA),
+            // it needs to drop FLAG_VENDOR.
+            if (locationIsVendor(pkg.codePath)) {
+                updatedPs.pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_VENDOR;
+            } else {
+                updatedPs.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VENDOR;
+            }
 
             if (ps != null && !ps.codePathString.equals(pkg.codePath)) {
                 // The path has changed from what was last scanned...  check the
@@ -8455,10 +8491,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags |= SCAN_AS_PRIVILEGED;
             }
 
-            // An updated OEM app will not have the PARSE_IS_OEM
+            // An updated OEM app will not have the SCAN_AS_OEM
             // flag set initially
             if ((updatedPs.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
                 scanFlags |= SCAN_AS_OEM;
+            }
+
+            // An updated vendor app will not have the SCAN_AS_VENDOR
+            // flag set initially
+            if ((updatedPs.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
+                scanFlags |= SCAN_AS_VENDOR;
             }
         }
 
@@ -10206,6 +10248,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if ((scanFlags & SCAN_AS_OEM) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_OEM;
+        }
+
+        if ((scanFlags & SCAN_AS_VENDOR) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VENDOR;
         }
 
         if (!isSystemApp(pkg)) {
@@ -15574,18 +15620,22 @@ public class PackageManagerService extends IPackageManager.Stub
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            // Set the system/privileged/oem flags as needed
+            // Set the system/privileged/oem/vendor flags as needed
             final boolean privileged =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
             final boolean oem =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+            final boolean vendor =
+                    (oldPackage.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
             final @ParseFlags int systemParseFlags = parseFlags;
             final @ScanFlags int systemScanFlags = scanFlags
                     | SCAN_AS_SYSTEM
                     | (privileged ? SCAN_AS_PRIVILEGED : 0)
-                    | (oem ? SCAN_AS_OEM : 0);
+                    | (oem ? SCAN_AS_OEM : 0)
+                    | (vendor ? SCAN_AS_VENDOR : 0);
 
             replaceSystemPackageLIF(oldPackage, pkg, systemParseFlags, systemScanFlags,
                     user, allUsers, installerPackageName, res, installReason);
@@ -16759,6 +16809,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
     }
 
+    private static boolean isVendorApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+    }
+
     private static boolean hasDomainURLs(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
     }
@@ -17493,7 +17547,9 @@ public class PackageManagerService extends IPackageManager.Stub
     static boolean locationIsPrivileged(String path) {
         try {
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
-            return path.startsWith(privilegedAppDir.getCanonicalPath());
+            final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
+            return path.startsWith(privilegedAppDir.getCanonicalPath())
+                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17503,6 +17559,15 @@ public class PackageManagerService extends IPackageManager.Stub
     static boolean locationIsOem(String path) {
         try {
             return path.startsWith(Environment.getOemDirectory().getCanonicalPath());
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
+    static boolean locationIsVendor(String path) {
+        try {
+            return path.startsWith(Environment.getVendorDirectory().getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -17629,6 +17694,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (locationIsOem(codePathString)) {
             scanFlags |= SCAN_AS_OEM;
+        }
+        if (locationIsVendor(codePathString)) {
+            scanFlags |= SCAN_AS_VENDOR;
         }
 
         final File codePath = new File(codePathString);
