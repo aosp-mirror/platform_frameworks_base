@@ -33,6 +33,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothLEDeviceFilter;
+import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceDiscoveryService;
 import android.companion.ICompanionDeviceDiscoveryServiceCallback;
 import android.companion.IFindDeviceCallback;
@@ -71,7 +72,6 @@ public class DeviceDiscoveryService extends Service {
     DevicesAdapter mDevicesAdapter;
     IFindDeviceCallback mFindCallback;
     ICompanionDeviceDiscoveryServiceCallback mServiceCallback;
-    String mCallingPackage;
 
     private final ICompanionDeviceDiscoveryService mBinder =
             new ICompanionDeviceDiscoveryService.Stub() {
@@ -88,7 +88,6 @@ public class DeviceDiscoveryService extends Service {
             }
             mFindCallback = findCallback;
             mServiceCallback = serviceCallback;
-            mCallingPackage = callingPackage;
             DeviceDiscoveryService.this.startDiscovery(request);
         }
     };
@@ -174,14 +173,6 @@ public class DeviceDiscoveryService extends Service {
         return super.onUnbind(intent);
     }
 
-    public void onDeviceSelected() {
-        try {
-            mServiceCallback.onDeviceSelected(mCallingPackage, getUserId());
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Error reporting selected device");
-        }
-    }
-
     private void stopScan() {
         if (DEBUG) Log.i(LOG_TAG, "stopScan() called");
         mBluetoothAdapter.cancelDiscovery();
@@ -231,6 +222,17 @@ public class DeviceDiscoveryService extends Service {
         mDevicesAdapter.notifyDataSetChanged();
         if (DEBUG) {
             Log.i(LOG_TAG, "Lost device " + getDeviceDisplayName(device));
+        }
+    }
+
+    void onDeviceSelected(String callingPackage, String deviceAddress) {
+        try {
+            mServiceCallback.onDeviceSelected(
+                    //TODO is this the right userId?
+                    callingPackage, getUserId(), deviceAddress);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Failed to record association: "
+                    + callingPackage + " <-> " + deviceAddress);
         }
     }
 

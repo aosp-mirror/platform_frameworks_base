@@ -20,6 +20,7 @@ package com.android.server.print;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceDiscoveryService;
@@ -34,16 +35,39 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.util.AtomicFile;
+import android.util.ExceptionUtils;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+
 //TODO move to own package!
+//TODO un/linkToDeath & onBinderDied - unbind
+//TODO onStop schedule unbind in 5 seconds
+//TODO Prune association on app uninstall
 /** @hide */
 public class CompanionDeviceManagerService extends SystemService {
 
@@ -54,7 +78,14 @@ public class CompanionDeviceManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
 
+    private static final String XML_TAG_ASSOCIATIONS = "associations";
+    private static final String XML_TAG_ASSOCIATION = "association";
+    private static final String XML_ATTR_PACKAGE = "package";
+    private static final String XML_ATTR_DEVICE = "device";
+    private static final String XML_FILE_NAME = "companion_device_manager_associations.xml";
+
     private final CompanionDeviceManagerImpl mImpl;
+    private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
@@ -89,6 +120,24 @@ public class CompanionDeviceManagerService extends SystemService {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
         }
+
+
+        @Override
+        public List<String> getAssociations(String callingPackage) {
+            return ArrayUtils.map(
+                    readAllAssociations(getUserId(), callingPackage),
+                    (a) -> a.deviceAddress);
+        }
+
+        @Override
+        public void disassociate(String deviceMacAddress, String callingPackage) {
+            updateAssociations((associations) -> ArrayUtils.remove(associations,
+                    new Association(getUserId(), checkNotNull(deviceMacAddress), callingPackage)));
+        }
+    }
+
+    private int getUserId() {
+        return UserHandle.getUserId(Binder.getCallingUid());
     }
 
     private ServiceConnection getServiceConnection(
@@ -125,9 +174,12 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private ICompanionDeviceDiscoveryServiceCallback.Stub getServiceCallback() {
         return new ICompanionDeviceDiscoveryServiceCallback.Stub() {
+
             @Override
-            public void onDeviceSelected(String packageName, int userId) {
+            public void onDeviceSelected(String packageName, int userId, String deviceAddress) {
+                //TODO unbind
                 grantSpecialAccessPermissionsIfNeeded(packageName, userId);
+                recordAssociation(packageName, deviceAddress);
             }
         };
     }
@@ -136,14 +188,14 @@ public class CompanionDeviceManagerService extends SystemService {
         final long identity = Binder.clearCallingIdentity();
         final PackageInfo packageInfo;
         try {
-            packageInfo = getContext().getPackageManager().getPackageInfoAsUser(
-                    packageName, PackageManager.GET_PERMISSIONS, userId);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(LOG_TAG, "Error granting special access permissions to package:"
-                    + packageName, e);
-            return;
-        }
-        try {
+            try {
+                packageInfo = getContext().getPackageManager().getPackageInfoAsUser(
+                        packageName, PackageManager.GET_PERMISSIONS, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(LOG_TAG, "Error granting special access permissions to package:"
+                        + packageName, e);
+                return;
+            }
             if (ArrayUtils.contains(packageInfo.requestedPermissions,
                     Manifest.permission.RUN_IN_BACKGROUND)) {
                 IDeviceIdleController idleController = IDeviceIdleController.Stub.asInterface(
@@ -164,4 +216,134 @@ public class CompanionDeviceManagerService extends SystemService {
             Binder.restoreCallingIdentity(identity);
         }
     }
+
+    private void recordAssociation(String priviledgedPackage, String deviceAddress) {
+        updateAssociations((associations) -> ArrayUtils.add(associations,
+                new Association(getUserId(), deviceAddress, priviledgedPackage)));
+    }
+
+    private void updateAssociations(
+            Function<ArrayList<Association>, ArrayList<Association>> update) {
+        final int userId = getUserId();
+        final AtomicFile file = getStorageFileForUser(userId);
+        synchronized (file) {
+            final ArrayList<Association> old = readAllAssociations(userId);
+            final ArrayList<Association> associations = update.apply(old);
+            if (Objects.equals(old, associations)) return;
+
+            file.write((out) -> {
+                XmlSerializer xml = Xml.newSerializer();
+                try {
+                    xml.setOutput(out, StandardCharsets.UTF_8.name());
+                    xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                    xml.startDocument(null, true);
+                    xml.startTag(null, XML_TAG_ASSOCIATIONS);
+
+                    for (int i = 0; i < ArrayUtils.size(associations); i++) {
+                        Association association = associations.get(i);
+                        xml.startTag(null, XML_TAG_ASSOCIATION)
+                            .attribute(null, XML_ATTR_PACKAGE, association.companionAppPackage)
+                            .attribute(null, XML_ATTR_DEVICE, association.deviceAddress)
+                            .endTag(null, XML_TAG_ASSOCIATION);
+                    }
+
+                    xml.endTag(null, XML_TAG_ASSOCIATIONS);
+                    xml.endDocument();
+                } catch (Exception e) {
+                    Slog.e(LOG_TAG, "Error while writing associations file", e);
+                    throw ExceptionUtils.propagate(e);
+                }
+
+            });
+        }
+
+
+        //TODO Show dialog before recording notification access
+//        final SettingStringHelper setting =
+//                new SettingStringHelper(
+//                        getContext().getContentResolver(),
+//                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+//                        getUserId());
+//        setting.write(ColonDelimitedSet.OfStrings.add(setting.read(), priviledgedPackage));
+    }
+
+    private AtomicFile getStorageFileForUser(int uid) {
+        return mUidToStorage.computeIfAbsent(uid, (u) ->
+                new AtomicFile(new File(
+                        //TODO deprecated method - what's the right replacement?
+                        Environment.getUserSystemDirectory(u),
+                        XML_FILE_NAME)));
+    }
+
+    @Nullable
+    private ArrayList<Association> readAllAssociations(int uid) {
+        return readAllAssociations(uid, null);
+    }
+
+    @Nullable
+    private ArrayList<Association> readAllAssociations(int userId, @Nullable String packageFilter) {
+        final AtomicFile file = getStorageFileForUser(userId);
+
+        if (!file.getBaseFile().exists()) return null;
+
+        ArrayList<Association> result = null;
+        final XmlPullParser parser = Xml.newPullParser();
+        synchronized (file) {
+            try (FileInputStream in = file.openRead()) {
+                parser.setInput(in, StandardCharsets.UTF_8.name());
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type != XmlPullParser.START_TAG
+                            && !XML_TAG_ASSOCIATIONS.equals(parser.getName())) continue;
+
+                    final String appPackage = parser.getAttributeValue(null, XML_ATTR_PACKAGE);
+                    final String deviceAddress = parser.getAttributeValue(null, XML_ATTR_DEVICE);
+
+                    if (appPackage == null || deviceAddress == null) continue;
+                    if (packageFilter != null && !packageFilter.equals(appPackage)) continue;
+
+                    result = ArrayUtils.add(result,
+                            new Association(userId, deviceAddress, appPackage));
+                }
+                return result;
+            } catch (XmlPullParserException | IOException e) {
+                Slog.e(LOG_TAG, "Error while reading associations file", e);
+                return null;
+            }
+        }
+    }
+
+    private class Association {
+        public final int uid;
+        public final String deviceAddress;
+        public final String companionAppPackage;
+
+        private Association(int uid, String deviceAddress, String companionAppPackage) {
+            this.uid = uid;
+            this.deviceAddress = checkNotNull(deviceAddress);
+            this.companionAppPackage = checkNotNull(companionAppPackage);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Association that = (Association) o;
+
+            if (uid != that.uid) return false;
+            if (!deviceAddress.equals(that.deviceAddress)) return false;
+            return companionAppPackage.equals(that.companionAppPackage);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = uid;
+            result = 31 * result + deviceAddress.hashCode();
+            result = 31 * result + companionAppPackage.hashCode();
+            return result;
+        }
+    }
+
 }

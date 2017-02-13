@@ -16,7 +16,10 @@
 
 package android.util;
 
+import android.annotation.NonNull;
 import android.os.ParcelableException;
+
+import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 
@@ -50,5 +53,12 @@ public class ExceptionUtils {
 
     public static String getCompleteMessage(Throwable t) {
         return getCompleteMessage(null, t);
+    }
+
+    public static RuntimeException propagate(@NonNull Throwable t) {
+        Preconditions.checkNotNull(t);
+        if (t instanceof Error) throw (Error)t;
+        if (t instanceof RuntimeException) throw (RuntimeException)t;
+        throw new RuntimeException(t);
     }
 }
