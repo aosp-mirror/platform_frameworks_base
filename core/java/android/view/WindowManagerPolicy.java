@@ -786,13 +786,13 @@ public interface WindowManagerPolicy {
             case TYPE_PRIORITY_PHONE:
                 // SIM errors and unlock.  Not sure if this really should be in a high layer.
                 return  9;
-            case TYPE_DREAM:
-                // used for Dreams (screensavers with TYPE_DREAM windows)
-                return  10;
             case TYPE_SYSTEM_ALERT:
                 // like the ANR / app crashed dialogs
                 return  canAddInternalSystemWindow ? 11 : 10;
             case TYPE_APPLICATION_OVERLAY:
+                return  12;
+            case TYPE_DREAM:
+                // used for Dreams (screensavers with TYPE_DREAM windows)
                 return  13;
             case TYPE_INPUT_METHOD:
                 // on-screen keyboards and other such input method user interfaces go here.

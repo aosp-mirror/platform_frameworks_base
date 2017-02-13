@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -69,6 +70,7 @@ public class Session extends IWindowSession.Stub
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
+    private int mNumOverlayWindow = 0;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
 
@@ -542,7 +544,7 @@ public class Session extends IWindowSession.Stub
         }
     }
 
-    void windowAddedLocked() {
+    void windowAddedLocked(int type) {
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
                 TAG_WM, "First window added to " + this + ", creating SurfaceSession");
@@ -555,36 +557,56 @@ public class Session extends IWindowSession.Stub
             }
         }
         mNumWindow++;
+        if (type == TYPE_APPLICATION_OVERLAY) {
+            mNumOverlayWindow++;
+            setHasOverlayUi(true);
+        }
     }
 
-    void windowRemovedLocked() {
+    void windowRemovedLocked(int type) {
         mNumWindow--;
+        if (type == TYPE_APPLICATION_OVERLAY) {
+            mNumOverlayWindow--;
+            if (mNumOverlayWindow == 0) {
+                setHasOverlayUi(false);
+            } else if (mNumOverlayWindow < 0) {
+                throw new IllegalStateException("mNumOverlayWindow=" + mNumOverlayWindow
+                        + " less than 0 for session=" + this);
+            }
+        }
         killSessionLocked();
     }
 
-    void killSessionLocked() {
-        if (mNumWindow <= 0 && mClientDead) {
-            mService.mSessions.remove(this);
-            if (mSurfaceSession != null) {
-                if (WindowManagerService.localLOGV) Slog.v(
-                    TAG_WM, "Last window removed from " + this
-                    + ", destroying " + mSurfaceSession);
-                if (SHOW_TRANSACTIONS) Slog.i(
-                        TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
-                try {
-                    mSurfaceSession.kill();
-                } catch (Exception e) {
-                    Slog.w(TAG_WM, "Exception thrown when killing surface session "
-                        + mSurfaceSession + " in session " + this
-                        + ": " + e.toString());
-                }
-                mSurfaceSession = null;
-            }
+    private void killSessionLocked() {
+        if (mNumWindow > 0 || !mClientDead) {
+            return;
         }
+
+        mService.mSessions.remove(this);
+        if (mSurfaceSession == null) {
+            return;
+        }
+
+        if (WindowManagerService.localLOGV) Slog.v(TAG_WM, "Last window removed from " + this
+                + ", destroying " + mSurfaceSession);
+        if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
+        try {
+            mSurfaceSession.kill();
+        } catch (Exception e) {
+            Slog.w(TAG_WM, "Exception thrown when killing surface session " + mSurfaceSession
+                    + " in session " + this + ": " + e.toString());
+        }
+        mSurfaceSession = null;
+        setHasOverlayUi(false);
+    }
+
+    private void setHasOverlayUi(boolean hasOverlayUi) {
+        mService.mH.obtainMessage(H.SET_HAS_OVERLAY_UI, mPid, hasOverlayUi ? 1 : 0).sendToTarget();
     }
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
+                pw.print(" mNumOverlayWindow="); pw.print(mNumOverlayWindow);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
     }

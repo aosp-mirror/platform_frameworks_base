@@ -224,4 +224,13 @@ public abstract class ActivityManagerInternal {
      * Called when the trusted state of Keyguard has changed.
      */
     public abstract void notifyKeyguardTrustedChanged();
+
+    /**
+     * Sets if the given pid has an overlay UI or not.
+     *
+     * @param pid The pid we are setting overlay UI for.
+     * @param hasOverlayUi True if the process has overlay UI.
+     * @see android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
+     */
+    public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
 }

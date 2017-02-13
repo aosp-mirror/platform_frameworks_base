@@ -31,14 +31,11 @@ import com.android.internal.os.BatteryStatsImpl;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.IApplicationThread;
-import android.app.IInstrumentationWatcher;
-import android.app.IUiAutomationConnection;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -46,7 +43,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
@@ -116,8 +112,18 @@ final class ProcessRecord {
     boolean repForegroundActivities; // Last reported foreground activities.
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
     boolean hasShownUi;         // Has UI been shown in this process since it was started?
-    boolean hasTopUi;           // Is this process currently showing "top-level" UI that is not an
-                                // activity?
+    boolean hasTopUi;           // Is this process currently showing a non-activity UI that the user
+                                // is interacting with? E.g. The status bar when it is expanded, but
+                                // not when it is minimized. When true the
+                                // process will be set to use the ProcessList#SCHED_GROUP_TOP_APP
+                                // scheduling group to boost performance.
+    boolean hasOverlayUi;       // Is the process currently showing a non-activity UI that
+                                // overlays on-top of activity UIs on screen. E.g. display a window
+                                // of type
+                                // android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
+                                // When true the process will oom adj score will be set to
+                                // ProcessList#PERCEPTIBLE_APP_ADJ at minimum to reduce the chance
+                                // of the process getting killed.
     boolean pendingUiClean;     // Want to clean up resources from showing UI?
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean treatLikeActivity;  // Bound using BIND_TREAT_LIKE_ACTIVITY
@@ -424,6 +430,9 @@ final class ProcessRecord {
         }
         if (hasTopUi) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
+        }
+        if (hasOverlayUi) {
+            pw.print(prefix); pw.print("hasOverlayUi="); pw.print(hasOverlayUi);
         }
     }
 
