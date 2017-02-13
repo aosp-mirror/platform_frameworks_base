@@ -36,7 +36,8 @@ import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
-    static final String TAG = "IInputConnectionWrapper";
+    private static final String TAG = "IInputConnectionWrapper";
+    private static final boolean DEBUG = false;
 
     private static final int DO_GET_TEXT_AFTER_CURSOR = 10;
     private static final int DO_GET_TEXT_BEFORE_CURSOR = 20;
@@ -392,6 +393,14 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_FINISH_COMPOSING_TEXT: {
+                if (isFinished()) {
+                    // In this case, #finishComposingText() is guaranteed to be called already.
+                    // There should be no negative impact if we ignore this call silently.
+                    if (DEBUG) {
+                        Log.w(TAG, "Bug 35301295: Redundant finishComposingText.");
+                    }
+                    return;
+                }
                 InputConnection ic = getInputConnection();
                 // Note we do NOT check isActive() here, because this is safe
                 // for an IME to call at any time, and we need to allow it
