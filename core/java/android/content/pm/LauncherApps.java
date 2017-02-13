@@ -127,9 +127,10 @@ public class LauncherApps {
     public static final String EXTRA_PIN_ITEM_REQUEST =
             "android.content.pm.extra.PIN_ITEM_REQUEST";
 
-    private Context mContext;
-    private ILauncherApps mService;
-    private PackageManager mPm;
+    private final Context mContext;
+    private final ILauncherApps mService;
+    private final PackageManager mPm;
+    private final UserManager mUserManager;
 
     private List<CallbackMessageHandler> mCallbacks
             = new ArrayList<CallbackMessageHandler>();
@@ -387,6 +388,7 @@ public class LauncherApps {
         mContext = context;
         mService = service;
         mPm = context.getPackageManager();
+        mUserManager = context.getSystemService(UserManager.class);
     }
 
     /** @hide */
@@ -397,20 +399,29 @@ public class LauncherApps {
     }
 
     /**
+     * Show an error log on logcat, when the calling user is a managed profile, and the target
+     * user is different from the calling user, in order to help developers to detect it.
+     */
+    private void logErrorForInvalidProfileAccess(@NonNull UserHandle target) {
+        if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()) {
+            Log.e(TAG, "Accessing other profiles/users from managed profile is no longer allowed.");
+        }
+    }
+
+    /**
      * Return a list of profiles that the caller can access via the {@link LauncherApps} APIs.
      *
      * <p>If the caller is running on a managed profile, it'll return only the current profile.
      * Otherwise it'll return the same list as {@link UserManager#getUserProfiles()} would.
      */
     public List<UserHandle> getProfiles() {
-        final UserManager um = mContext.getSystemService(UserManager.class);
-        if (um.isManagedProfile()) {
+        if (mUserManager.isManagedProfile()) {
             // If it's a managed profile, only return the current profile.
             final List result =  new ArrayList(1);
             result.add(android.os.Process.myUserHandle());
             return result;
         } else {
-            return um.getUserProfiles();
+            return mUserManager.getUserProfiles();
         }
     }
 
@@ -424,6 +435,7 @@ public class LauncherApps {
      * @return List of launchable activities. Can be an empty list but will not be null.
      */
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
                     packageName, user), user);
@@ -441,6 +453,7 @@ public class LauncherApps {
      * @return An activity info object if there is a match.
      */
     public LauncherActivityInfo resolveActivity(Intent intent, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             ActivityInfo ai = mService.resolveActivity(mContext.getPackageName(),
                     intent.getComponent(), user);
@@ -464,6 +477,7 @@ public class LauncherApps {
      */
     public void startMainActivity(ComponentName component, UserHandle user, Rect sourceBounds,
             Bundle opts) {
+        logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "StartMainActivity " + component + " " + user.getIdentifier());
         }
@@ -486,6 +500,7 @@ public class LauncherApps {
      */
     public void startAppDetailsActivity(ComponentName component, UserHandle user,
             Rect sourceBounds, Bundle opts) {
+        logErrorForInvalidProfileAccess(user);
         try {
             mService.showAppDetailsAsUser(mContext.getPackageName(),
                     component, sourceBounds, opts, user);
@@ -507,6 +522,7 @@ public class LauncherApps {
      */
     public List<LauncherActivityInfo> getShortcutConfigActivityList(@Nullable String packageName,
             @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return convertToActivityList(mService.getShortcutConfigActivities(
                     mContext.getPackageName(), packageName, user),
@@ -553,6 +569,7 @@ public class LauncherApps {
      * @see Intent#ACTION_CREATE_SHORTCUT
      * @see android.app.Activity#startIntentSenderForResult
      */
+    @Nullable
     public IntentSender getShortcutConfigActivityIntent(@NonNull LauncherActivityInfo info) {
         try {
             return mService.getShortcutConfigActivityIntent(
@@ -571,6 +588,7 @@ public class LauncherApps {
      * @return true if the package exists and is enabled.
      */
     public boolean isPackageEnabled(String packageName, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return mService.isPackageEnabled(mContext.getPackageName(), packageName, user);
         } catch (RemoteException re) {
@@ -591,6 +609,7 @@ public class LauncherApps {
      */
     public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,
             UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return mService.getApplicationInfo(mContext.getPackageName(), packageName, flags, user);
         } catch (RemoteException re) {
@@ -607,6 +626,7 @@ public class LauncherApps {
      * @return true if the activity exists and is enabled.
      */
     public boolean isActivityEnabled(ComponentName component, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return mService.isActivityEnabled(mContext.getPackageName(), component, user);
         } catch (RemoteException re) {
@@ -656,6 +676,7 @@ public class LauncherApps {
     @Nullable
     public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
             @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             return mService.getShortcuts(mContext.getPackageName(),
                     query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
@@ -699,6 +720,7 @@ public class LauncherApps {
      */
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
         try {
             mService.pinShortcuts(mContext.getPackageName(), packageName, shortcutIds, user);
         } catch (RemoteException e) {
@@ -866,6 +888,8 @@ public class LauncherApps {
     public void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+
         startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
                 user.getIdentifier());
     }

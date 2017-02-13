@@ -64,6 +64,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -216,29 +217,35 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-        /**
-         * Checks if the caller is in the same group as the userToCheck.
-         */
-        private void ensureInUserProfiles(
-                String callingPackage, UserHandle userToCheck, String message) {
-            ensureInUserProfiles(callingPackage, userToCheck.getIdentifier(), message);
+        /** See {@link #canAccessProfile(String, int, String)} */
+        private boolean canAccessProfile(
+                String callingPackage, UserHandle targetUser, String message) {
+            return canAccessProfile(callingPackage, targetUser.getIdentifier(), message);
         }
 
-        private void ensureInUserProfiles(String callingPackage, int targetUserId, String message) {
+        /**
+         * Checks if the calling user is in the same group as {@code targetUser}, and allowed
+         * to access it.
+         *
+         * @return TRUE if the calling user can access {@code targetUserId}.  FALSE if not *but
+         * they're still in the same profile group*.
+         *
+         * @throws SecurityException if the calling user and {@code targetUser} are not in the same
+         * group.
+         */
+        private boolean canAccessProfile(String callingPackage, int targetUserId, String message) {
             final int callingUserId = injectCallingUserId();
 
-            if (targetUserId == callingUserId) return;
+            if (targetUserId == callingUserId) return true;
 
             long ident = injectClearCallingIdentity();
             try {
                 UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
                 if (callingUserInfo.isManagedProfile()) {
-                    // TODO: Make it SecurityException.  See b/34650921
-                    // throw new SecurityException(message + " for another profile " + targetUserId);
-
-                    // TODO: Report caller package name.
                     Slog.wtfStack(TAG, message + " by " + callingPackage + " for another profile "
                             + targetUserId + " from " + callingUserId);
+
+                    return false;
                 }
 
                 UserInfo targetUserInfo = mUm.getUserInfo(targetUserId);
@@ -250,6 +257,7 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
+            return true;
         }
 
         @VisibleForTesting // We override it in unit tests
@@ -301,7 +309,9 @@ public class LauncherAppsService extends SystemService {
         public ActivityInfo resolveActivity(
                 String callingPackage, ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(callingPackage, user, "Cannot resolve activity");
+            if (!canAccessProfile(callingPackage, user, "Cannot resolve activity")) {
+                return null;
+            }
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -328,7 +338,9 @@ public class LauncherAppsService extends SystemService {
 
         private ParceledListSlice<ResolveInfo> queryActivitiesForUser(String callingPackage,
                 Intent intent, UserHandle user) {
-            ensureInUserProfiles(callingPackage, user, "Cannot retrieve activities");
+            if (!canAccessProfile(callingPackage, user, "Cannot retrieve activities")) {
+                return null;
+            }
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -348,7 +360,10 @@ public class LauncherAppsService extends SystemService {
         @Override
         public IntentSender getShortcutConfigActivityIntent(String callingPackage,
                 ComponentName component, UserHandle user) throws RemoteException {
-            ensureShortcutPermission(callingPackage, user);
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(callingPackage, user, "Cannot check package")) {
+                return null;
+            }
             Preconditions.checkNotNull(component);
             Preconditions.checkArgument(isUserEnabled(user), "User not enabled");
 
@@ -356,11 +371,11 @@ public class LauncherAppsService extends SystemService {
             Intent intent = new Intent(Intent.ACTION_CREATE_SHORTCUT).setComponent(component);
             final long identity = Binder.clearCallingIdentity();
             try {
-                return PendingIntent.getActivityAsUser(
+                final PendingIntent pi = PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
-                        null, user)
-                        .getIntentSender();
+                        null, user);
+                return pi == null ? null : pi.getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -369,7 +384,9 @@ public class LauncherAppsService extends SystemService {
         @Override
         public boolean isPackageEnabled(String callingPackage, String packageName, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(callingPackage, user, "Cannot check package");
+            if (!canAccessProfile(callingPackage, user, "Cannot check package")) {
+                return false;
+            }
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -391,7 +408,9 @@ public class LauncherAppsService extends SystemService {
         public ApplicationInfo getApplicationInfo(
                 String callingPackage, String packageName, int flags, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(callingPackage, user, "Cannot check package");
+            if (!canAccessProfile(callingPackage, user, "Cannot check package")) {
+                return null;
+            }
             if (!isUserEnabled(user)) {
                 return null;
             }
@@ -407,14 +426,8 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-        private void ensureShortcutPermission(@NonNull String callingPackage, UserHandle user) {
-            ensureShortcutPermission(callingPackage, user.getIdentifier());
-        }
-
-        private void ensureShortcutPermission(@NonNull String callingPackage, int userId) {
+        private void ensureShortcutPermission(@NonNull String callingPackage) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(callingPackage, userId, "Cannot access shortcuts");
-
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage)) {
                 throw new SecurityException("Caller can't access shortcut information");
@@ -424,10 +437,11 @@ public class LauncherAppsService extends SystemService {
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
                 String packageName, List shortcutIds, ComponentName componentName, int flags,
-                UserHandle user) {
-            ensureShortcutPermission(callingPackage, user);
-            if (!isUserEnabled(user)) {
-                return new ParceledListSlice<>(new ArrayList(0));
+                UserHandle targetUser) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(callingPackage, targetUser, "Cannot get shortcuts")
+                    || !isUserEnabled(targetUser)) {
+                return new ParceledListSlice<>(Collections.EMPTY_LIST);
             }
             if (shortcutIds != null && packageName == null) {
                 throw new IllegalArgumentException(
@@ -438,44 +452,53 @@ public class LauncherAppsService extends SystemService {
             return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
-                            componentName, flags, user.getIdentifier()));
+                            componentName, flags, targetUser.getIdentifier()));
         }
 
         @Override
         public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
-                UserHandle user) {
-            ensureShortcutPermission(callingPackage, user);
-            if (!isUserEnabled(user)) {
+                UserHandle targetUser) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(callingPackage, targetUser, "Cannot pin shortcuts")) {
+                return;
+            }
+            if (!isUserEnabled(targetUser)) {
                 throw new IllegalStateException("Cannot pin shortcuts for disabled profile "
-                        + user);
+                        + targetUser);
             }
 
             mShortcutServiceInternal.pinShortcuts(getCallingUserId(),
-                    callingPackage, packageName, ids, user.getIdentifier());
+                    callingPackage, packageName, ids, targetUser.getIdentifier());
         }
 
         @Override
         public int getShortcutIconResId(String callingPackage, String packageName, String id,
-                int userId) {
-            ensureShortcutPermission(callingPackage, userId);
-            if (!isUserEnabled(userId)) {
+                int targetUserId) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(callingPackage, targetUserId, "Cannot access shortcuts")) {
+                return 0;
+            }
+            if (!isUserEnabled(targetUserId)) {
                 return 0;
             }
 
             return mShortcutServiceInternal.getShortcutIconResId(getCallingUserId(),
-                    callingPackage, packageName, id, userId);
+                    callingPackage, packageName, id, targetUserId);
         }
 
         @Override
         public ParcelFileDescriptor getShortcutIconFd(String callingPackage,
-                String packageName, String id, int userId) {
-            ensureShortcutPermission(callingPackage, userId);
-            if (!isUserEnabled(userId)) {
+                String packageName, String id, int targetUserId) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(callingPackage, targetUserId, "Cannot access shortcuts")) {
+                return null;
+            }
+            if (!isUserEnabled(targetUserId)) {
                 return null;
             }
 
             return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
-                    callingPackage, packageName, id, userId);
+                    callingPackage, packageName, id, targetUserId);
         }
 
         @Override
@@ -487,23 +510,27 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
-                Rect sourceBounds, Bundle startActivityOptions, int userId) {
+                Rect sourceBounds, Bundle startActivityOptions, int targetUserId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(callingPackage, userId, "Cannot start activity");
-
-            if (!isUserEnabled(userId)) {
+            if (!canAccessProfile(callingPackage, targetUserId, "Cannot start activity")) {
+                return false;
+            }
+            if (!canAccessProfile(callingPackage, targetUserId, "Cannot access shortcuts")) {
+                return false;
+            }
+            if (!isUserEnabled(targetUserId)) {
                 throw new IllegalStateException("Cannot start a shortcut for disabled profile "
-                        + userId);
+                        + targetUserId);
             }
 
             // Even without the permission, pinned shortcuts are always launchable.
             if (!mShortcutServiceInternal.isPinnedByCaller(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, userId)) {
-                ensureShortcutPermission(callingPackage, userId);
+                    callingPackage, packageName, shortcutId, targetUserId)) {
+                ensureShortcutPermission(callingPackage);
             }
 
             final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
-                    getCallingUserId(), callingPackage, packageName, shortcutId, userId);
+                    getCallingUserId(), callingPackage, packageName, shortcutId, targetUserId);
             if (intents == null || intents.length == 0) {
                 return false;
             }
@@ -513,7 +540,7 @@ public class LauncherAppsService extends SystemService {
             intents[0].setSourceBounds(sourceBounds);
 
             return startShortcutIntentsAsPublisher(
-                    intents, packageName, startActivityOptions, userId);
+                    intents, packageName, startActivityOptions, targetUserId);
         }
 
         private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
@@ -543,7 +570,9 @@ public class LauncherAppsService extends SystemService {
         public boolean isActivityEnabled(
                 String callingPackage, ComponentName component, UserHandle user)
                 throws RemoteException {
-            ensureInUserProfiles(callingPackage , user, "Cannot check component");
+            if (!canAccessProfile(callingPackage , user, "Cannot check component")) {
+                return false;
+            }
             if (!isUserEnabled(user)) {
                 return false;
             }
@@ -565,7 +594,9 @@ public class LauncherAppsService extends SystemService {
         public void startActivityAsUser(String callingPackage,
                 ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(callingPackage, user, "Cannot start activity");
+            if (!canAccessProfile(callingPackage, user, "Cannot start activity")) {
+                return;
+            }
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot start activity for disabled profile "  + user);
             }
@@ -618,7 +649,9 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void showAppDetailsAsUser(String callingPackage, ComponentName component,
                 Rect sourceBounds, Bundle opts, UserHandle user) throws RemoteException {
-            ensureInUserProfiles(callingPackage, user, "Cannot show app details");
+            if (!canAccessProfile(callingPackage, user, "Cannot show app details")) {
+                return;
+            }
             if (!isUserEnabled(user)) {
                 throw new IllegalStateException("Cannot show app details for disabled profile "
                         + user);
@@ -642,8 +675,12 @@ public class LauncherAppsService extends SystemService {
         private boolean isEnabledProfileOf(UserHandle user, UserHandle listeningUser,
                 String debugMsg) {
             if (user.getIdentifier() == listeningUser.getIdentifier()) {
-                if (DEBUG) Log.d(TAG, "Delivering msg to same user " + debugMsg);
+                if (DEBUG) Log.d(TAG, "Delivering msg to same user: " + debugMsg);
                 return true;
+            }
+            if (mUm.isManagedProfile(listeningUser.getIdentifier())) {
+                if (DEBUG) Log.d(TAG, "Managed profile can't see other profiles: " + debugMsg);
+                return false;
             }
             long ident = injectClearCallingIdentity();
             try {

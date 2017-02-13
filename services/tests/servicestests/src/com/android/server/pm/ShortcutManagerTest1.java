@@ -2099,6 +2099,24 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     list("s1", "s2", "s3"), HANDLE_USER_10);
         });
 
+        // First, make sure managed profile can't see other profiles.
+        runWithCaller(LAUNCHER_1, USER_P1, () -> {
+
+            final ShortcutQuery q = new ShortcutQuery().setQueryFlags(
+                    ShortcutQuery.FLAG_MATCH_DYNAMIC | ShortcutQuery.FLAG_MATCH_PINNED
+                    | ShortcutQuery.FLAG_MATCH_MANIFEST);
+
+            // No shortcuts are visible.
+            assertWith(mLauncherApps.getShortcuts(q, HANDLE_USER_0)).isEmpty();
+
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_0);
+
+            // Should have no effects.
+            assertWith(mLauncherApps.getShortcuts(q, HANDLE_USER_0)).isEmpty();
+
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "s1", USER_0);
+        });
+
         // Cross profile pinning.
         final int PIN_AND_DYNAMIC = ShortcutQuery.FLAG_GET_PINNED | ShortcutQuery.FLAG_GET_DYNAMIC;
 
@@ -2930,6 +2948,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final LauncherApps.Callback c0_4 = mock(LauncherApps.Callback.class);
 
         final LauncherApps.Callback cP0_1 = mock(LauncherApps.Callback.class);
+        final LauncherApps.Callback cP1_1 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c10_1 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c10_2 = mock(LauncherApps.Callback.class);
         final LauncherApps.Callback c11_1 = mock(LauncherApps.Callback.class);
@@ -2942,6 +2961,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 case USER_0:
                     return LAUNCHER_2.equals(pkg);
                 case USER_P0:
+                    return LAUNCHER_1.equals(pkg);
+                case USER_P1:
                     return LAUNCHER_1.equals(pkg);
                 case USER_10:
                     return LAUNCHER_1.equals(pkg);
@@ -2957,6 +2978,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(LAUNCHER_3, USER_0, () -> mLauncherApps.registerCallback(c0_3, h));
         runWithCaller(LAUNCHER_4, USER_0, () -> mLauncherApps.registerCallback(c0_4, h));
         runWithCaller(LAUNCHER_1, USER_P0, () -> mLauncherApps.registerCallback(cP0_1, h));
+        runWithCaller(LAUNCHER_1, USER_P1, () -> mLauncherApps.registerCallback(cP1_1, h));
         runWithCaller(LAUNCHER_1, USER_10, () -> mLauncherApps.registerCallback(c10_1, h));
         runWithCaller(LAUNCHER_2, USER_10, () -> mLauncherApps.registerCallback(c10_2, h));
         runWithCaller(LAUNCHER_1, USER_11, () -> mLauncherApps.registerCallback(c11_1, h));
@@ -2977,6 +2999,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c0_2, HANDLE_USER_0, CALLING_PACKAGE_1, "s1", "s2", "s3");
         assertCallbackReceived(cP0_1, HANDLE_USER_0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s4");
+        assertCallbackNotReceived(cP1_1);
 
         // User 0, different package.
 
@@ -2995,6 +3018,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackReceived(c0_2, HANDLE_USER_0, CALLING_PACKAGE_3, "s1", "s2", "s3", "s4");
         assertCallbackReceived(cP0_1, HANDLE_USER_0, CALLING_PACKAGE_3,
                 "s1", "s2", "s3", "s4", "s5", "s6");
+        assertCallbackNotReceived(cP1_1);
 
         // Work profile.
         resetAll(all);
@@ -3011,6 +3035,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c0_2, HANDLE_USER_P0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s5");
         assertCallbackReceived(cP0_1, HANDLE_USER_P0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s4");
+        assertCallbackNotReceived(cP1_1);
 
         // Normal secondary user.
         mRunningUsers.put(USER_10, true);
@@ -3030,6 +3055,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackNotReceived(c11_1);
         assertCallbackReceived(c10_1, HANDLE_USER_10, CALLING_PACKAGE_1,
                 "x1", "x2", "x3", "x4", "x5");
+        assertCallbackNotReceived(cP1_1);
     }
 
     // === Test for persisting ===
