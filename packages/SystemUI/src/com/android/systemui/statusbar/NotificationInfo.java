@@ -274,6 +274,11 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
     }
 
     @Override
+    public boolean willBeRemoved() {
+        return !mChannelEnabledSwitch.isChecked();
+    }
+
+    @Override
     public View getContentView() {
         return this;
     }

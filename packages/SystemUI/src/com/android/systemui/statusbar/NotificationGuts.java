@@ -244,6 +244,10 @@ public class NotificationGuts extends FrameLayout
         }
     }
 
+    public boolean willBeRemoved() {
+        return mGutsContent != null ? mGutsContent.willBeRemoved() : false;
+    }
+
     public boolean isExposed() {
         return mExposed;
     }

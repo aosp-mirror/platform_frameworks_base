@@ -5753,7 +5753,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         row.setTag(sbn.getPackageName());
         final NotificationGuts guts = row.getGuts();
         guts.setClosedListener((NotificationGuts g) -> {
-            if (!row.isRemoved()) {
+            if (!g.willBeRemoved() && !row.isRemoved()) {
                 mStackScroller.onHeightChanged(row, !isPanelFullyCollapsed() /* needsAnimation */);
             }
             mNotificationGutsExposed = null;

@@ -879,6 +879,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return whether the notification is currently showing a view with an icon.
      */
     public boolean isShowingIcon() {
+        if (areGutsExposed()) {
+            return false;
+        }
         if (mIsSummaryWithChildren) {
             return true;
         }
