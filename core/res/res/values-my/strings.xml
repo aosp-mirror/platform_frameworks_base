@@ -1695,18 +1695,11 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"ထုတ်လုပ်နိုင်မှု"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"စက်ပစ္စည်း သိုလှောင်ခန်း"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB အမှားရှာပြင်ခြင်း"</string>
-    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
-    <skip />
-    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
-    <skip />
-    <!-- no translation found for time_picker_header_text (143536825321922567) -->
-    <skip />
-    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
-    <skip />
-    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
-    <skip />
-    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
-    <skip />
-    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
-    <skip />
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"နာရီ"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"မိ​နစ်​"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"အချိန်သတ်မှတ်ရန်"</string>
+    <string name="time_picker_input_error" msgid="7574999942502513765">"မှန်ကန်သည့် အမည်တစ်ခု ထည့်ရန်"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"အချိန်ကို ရိုက်ရန်"</string>
+    <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"အချိန်ထည့်သွင်းရန် စာသားထည့်သွင်းမှုမုဒ်သို့ ပြောင်းပါ။"</string>
+    <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"အချိန်ထည့်သွင်းမှုအတွက် နာရီမုဒ်သို့ ပြောင်းပါ။"</string>
 </resources>
