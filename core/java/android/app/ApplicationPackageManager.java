@@ -62,6 +62,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -293,7 +294,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean isPermissionReviewModeEnabled() {
-        return mContext.getResources().getBoolean(
+        return Build.PERMISSIONS_REVIEW_REQUIRED || mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
     }
 
