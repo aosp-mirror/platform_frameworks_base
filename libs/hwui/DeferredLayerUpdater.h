@@ -68,9 +68,8 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture, bool needsAttach) {
+    ANDROID_API void setSurfaceTexture(const sp<GLConsumer>& texture) {
         if (texture.get() != mSurfaceTexture.get()) {
-            mNeedsGLContextAttach = needsAttach;
             mSurfaceTexture = texture;
 
             GLenum target = texture->getCurrentTextureTarget();
@@ -122,7 +121,7 @@ private:
     SkBlendMode mMode = SkBlendMode::kSrcOver;
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
-    bool mNeedsGLContextAttach;
+    bool mGLContextAttached;
     bool mUpdateTexImage;
 
     Layer* mLayer;
