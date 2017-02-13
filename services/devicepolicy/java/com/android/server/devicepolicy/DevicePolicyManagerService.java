@@ -8741,7 +8741,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            setUserRestriction(who, UserManager.DISALLLOW_UNMUTE_DEVICE, on);
+            setUserRestriction(who, UserManager.DISALLOW_UNMUTE_DEVICE, on);
         }
     }
 

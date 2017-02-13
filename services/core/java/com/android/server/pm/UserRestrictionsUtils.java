@@ -108,7 +108,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SET_USER_ICON,
             UserManager.DISALLOW_SET_WALLPAPER,
             UserManager.DISALLOW_OEM_UNLOCK,
-            UserManager.DISALLLOW_UNMUTE_DEVICE,
+            UserManager.DISALLOW_UNMUTE_DEVICE,
     });
 
     /**
@@ -156,7 +156,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ADJUST_VOLUME,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
-            UserManager.DISALLLOW_UNMUTE_DEVICE
+            UserManager.DISALLOW_UNMUTE_DEVICE
     );
 
     /**
