@@ -3416,6 +3416,19 @@ message MetricsEvent {
     // ACTION: Settings advanced button is expanded
     ACTION_SETTINGS_ADVANCED_BUTTON_EXPAND = 834;
 
+    // ACTION: Logs the number of times the saved network evaluator was used to
+    // recommend a wifi network
+    WIFI_NETWORK_RECOMMENDATION_SAVED_NETWORK_EVALUATOR = 835;
+
+    // ACTION: Logs the number of times the recommended network evaluator was
+    // used to recommend a wifi network
+    WIFI_NETWORK_RECOMMENDATION_RECOMMENDED_NETWORK_EVALUATOR = 836;
+
+    // ACTION: Logs the number of times a recommended network was resulted in a
+    // successful connection
+    // VALUE: true if the connection was successful, false if the connection failed
+    WIFI_NETWORK_RECOMMENDATION_CONNECTION_SUCCESS = 837;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
