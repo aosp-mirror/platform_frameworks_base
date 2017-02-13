@@ -47,6 +47,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.os.SomeArgs;
@@ -1490,8 +1491,8 @@ public final class InputMethodManager {
      * Called by ViewAncestor when its window gets input focus.
      * @hide
      */
-    public void onPostWindowFocus(View rootView, View focusedView, int softInputMode,
-            boolean first, int windowFlags) {
+    public void onPostWindowFocus(View rootView, View focusedView,
+            @SoftInputModeFlags int softInputMode, boolean first, int windowFlags) {
         boolean forceNewFocus = false;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onWindowFocus: " + focusedView

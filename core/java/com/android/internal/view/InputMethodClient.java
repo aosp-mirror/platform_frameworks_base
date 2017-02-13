@@ -18,6 +18,7 @@ package com.android.internal.view;
 
 import android.annotation.IntDef;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import java.lang.annotation.Retention;
 
@@ -105,7 +106,7 @@ public final class InputMethodClient {
         }
     }
 
-    public static String softInputModeToString(final int softInputMode) {
+    public static String softInputModeToString(@SoftInputModeFlags final int softInputMode) {
         final StringBuilder sb = new StringBuilder();
         final int state = softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE;
         final int adjust = softInputMode & LayoutParams.SOFT_INPUT_MASK_ADJUST;

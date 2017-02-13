@@ -73,6 +73,7 @@ import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
@@ -334,6 +335,7 @@ public final class ViewRootImpl implements ViewParent,
     final Configuration mPendingConfiguration = new Configuration();
 
     boolean mScrollMayChange;
+    @SoftInputModeFlags
     int mSoftInputMode;
     WeakReference<View> mLastScrolledFocus;
     int mScrollY;

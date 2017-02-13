@@ -2278,7 +2278,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private InputBindResult windowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
+            IInputMethodClient client, IBinder windowToken, int controlFlags,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */  final int missingMethods) {
         // Needs to check the validity before clearing calling identity

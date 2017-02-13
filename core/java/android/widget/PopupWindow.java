@@ -54,6 +54,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.R;
 
@@ -162,6 +163,7 @@ public class PopupWindow {
 
     private boolean mFocusable;
     private int mInputMethodMode = INPUT_METHOD_FROM_FOCUSABLE;
+    @SoftInputModeFlags
     private int mSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED;
     private boolean mTouchable = true;
     private boolean mOutsideTouchable = false;
@@ -724,7 +726,7 @@ public class PopupWindow {
      * @see android.view.WindowManager.LayoutParams#softInputMode
      * @see #getSoftInputMode()
      */
-    public void setSoftInputMode(int mode) {
+    public void setSoftInputMode(@SoftInputModeFlags int mode) {
         mSoftInputMode = mode;
     }
 
@@ -734,6 +736,7 @@ public class PopupWindow {
      * @see #setSoftInputMode(int)
      * @see android.view.WindowManager.LayoutParams#softInputMode
      */
+    @SoftInputModeFlags
     public int getSoftInputMode() {
         return mSoftInputMode;
     }

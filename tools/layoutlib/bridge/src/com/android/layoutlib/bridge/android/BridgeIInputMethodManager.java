@@ -228,7 +228,8 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
-            IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
+            IInputMethodClient client, IBinder windowToken, int controlFlags,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags)
             throws RemoteException {

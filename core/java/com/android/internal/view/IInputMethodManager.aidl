@@ -58,8 +58,8 @@ interface IInputMethodManager {
     InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken, int controlFlags,
-            int softInputMode, int windowFlags, in EditorInfo attribute,
-            IInputContext inputContext,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
+            int windowFlags, in EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
