@@ -29,7 +29,7 @@ namespace android {
 class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
     explicit MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-        int ttcIndex);
+        int ttcIndex, const std::vector<minikin::FontVariation>& axes);
 
     float GetHorizontalAdvance(uint32_t glyph_id,
         const minikin::MinikinPaint &paint) const;
@@ -44,6 +44,7 @@ public:
     const void* GetFontData() const;
     size_t GetFontSize() const;
     int GetFontIndex() const;
+    const std::vector<minikin::FontVariation>& GetAxes() const;
     minikin::MinikinFont* createFontWithVariation(
             const std::vector<minikin::FontVariation>&) const;
 
@@ -61,6 +62,7 @@ private:
     const void* mFontData;
     size_t mFontSize;
     int mTtcIndex;
+    std::vector<minikin::FontVariation> mAxes;
 };
 
 }  // namespace android
