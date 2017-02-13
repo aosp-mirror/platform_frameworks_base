@@ -131,7 +131,7 @@ public final class HomeSp implements Parcelable {
     public void setMatchAnyOis(long[] matchAnyOis) {
         mMatchAnyOis = matchAnyOis;
     }
-    public long[] getMatchAnysOis() {
+    public long[] getMatchAnyOis() {
         return mMatchAnyOis;
     }
 
