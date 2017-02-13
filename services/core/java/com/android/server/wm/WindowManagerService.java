@@ -75,6 +75,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -7899,6 +7900,17 @@ public class WindowManagerService extends IWindowManager.Stub
         public void clearLastInputMethodWindowForTransition() {
             synchronized (mWindowMap) {
                 mPolicy.setLastInputMethodWindowLw(null, null);
+            }
+        }
+
+        @Override
+        public void updateInputMethodWindowStatus(IBinder imeToken, boolean imeWindowVisible,
+                IBinder targetWindowToken) {
+            // TODO (b/34628091): Use this method to address the window animation issue.
+            if (DEBUG_INPUT_METHOD) {
+                Slog.w(TAG_WM, "updateInputMethodWindowStatus: imeToken=" + imeToken
+                        + " imeWindowVisible=" + imeWindowVisible
+                        + " targetWindowToken=" + targetWindowToken);
             }
         }
 
