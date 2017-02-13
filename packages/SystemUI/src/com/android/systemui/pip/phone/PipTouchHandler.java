@@ -41,6 +41,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.tuner.TunerService;
 
+import java.io.PrintWriter;
+
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
@@ -565,5 +567,25 @@ public class PipTouchHandler implements TunerService.Tunable {
         mMovementBounds = mIsMenuVisible
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mMovementBounds=" + mMovementBounds);
+        pw.println(innerPrefix + "mNormalBounds=" + mNormalBounds);
+        pw.println(innerPrefix + "mNormalMovementBounds=" + mNormalMovementBounds);
+        pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
+        pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
+        pw.println(innerPrefix + "mIsTappingThrough=" + mIsTappingThrough);
+        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
+        pw.println(innerPrefix + "mIsMenuVisible=" + mIsMenuVisible);
+        pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
+        pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
+        pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
+        pw.println(innerPrefix + "mEnableDragToDismiss=" + mEnableDragToDismiss);
+        mSnapAlgorithm.dump(pw, innerPrefix);
+        mTouchState.dump(pw, innerPrefix);
+        mMotionHelper.dump(pw, innerPrefix);
     }
 }

@@ -21,10 +21,13 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
+import java.io.PrintWriter;
+
 /**
  * This keeps track of the touch state throughout the current touch gesture.
  */
 public class PipTouchState {
+    private static final String TAG = "PipTouchHandler";
 
     private ViewConfiguration mViewConfig;
 
@@ -194,5 +197,19 @@ public class PipTouchState {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mDownTouch=" + mDownTouch);
+        pw.println(innerPrefix + "mDownDelta=" + mDownDelta);
+        pw.println(innerPrefix + "mLastTouch=" + mLastTouch);
+        pw.println(innerPrefix + "mLastDelta=" + mLastDelta);
+        pw.println(innerPrefix + "mVelocity=" + mVelocity);
+        pw.println(innerPrefix + "mIsUserInteracting=" + mIsUserInteracting);
+        pw.println(innerPrefix + "mIsDragging=" + mIsDragging);
+        pw.println(innerPrefix + "mStartedDragging=" + mStartedDragging);
+        pw.println(innerPrefix + "mAllowDraggingOffscreen=" + mAllowDraggingOffscreen);
     }
 }

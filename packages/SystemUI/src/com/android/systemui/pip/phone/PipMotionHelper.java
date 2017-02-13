@@ -43,6 +43,8 @@ import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.io.PrintWriter;
+
 /**
  * A helper to animate and manipulate the PiP.
  */
@@ -374,5 +376,12 @@ public class PipMotionHelper {
      */
     private float distanceBetweenRectOffsets(Rect r1, Rect r2) {
         return PointF.length(r1.left - r2.left, r1.top - r2.top);
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mBounds=" + mBounds);
+        pw.println(innerPrefix + "mStableInsets=" + mStableInsets);
     }
 }

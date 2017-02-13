@@ -32,13 +32,16 @@ import android.view.IPinnedStackListener;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+
+import java.io.PrintWriter;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
-public class PipManager {
+public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
 
     private static PipManager sPipController;
@@ -178,5 +181,12 @@ public class PipManager {
             sPipController = new PipManager();
         }
         return sPipController;
+    }
+
+    public void dump(PrintWriter pw) {
+        final String innerPrefix = "  ";
+        pw.println(TAG);
+        mMenuController.dump(pw, innerPrefix);
+        mTouchHandler.dump(pw, innerPrefix);
     }
 }
