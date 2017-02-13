@@ -346,8 +346,8 @@ public final class PendingIntent implements Parcelable {
                     flags, options, UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -371,8 +371,8 @@ public final class PendingIntent implements Parcelable {
                     flags, options, user.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -487,8 +487,8 @@ public final class PendingIntent implements Parcelable {
                     UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -513,8 +513,8 @@ public final class PendingIntent implements Parcelable {
                     flags, options, user.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -566,8 +566,8 @@ public final class PendingIntent implements Parcelable {
                     flags, null, userHandle.getIdentifier());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -609,8 +609,8 @@ public final class PendingIntent implements Parcelable {
                     flags, null, UserHandle.myUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -856,8 +856,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -885,8 +884,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .getPackageForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -913,8 +911,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .getUidForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -945,8 +942,7 @@ public final class PendingIntent implements Parcelable {
                 .getUidForIntentSender(mTarget);
             return uid > 0 ? new UserHandle(UserHandle.getUserId(uid)) : null;
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -959,8 +955,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .isIntentSenderTargetedToPackage(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -973,8 +968,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .isIntentSenderAnActivity(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -987,8 +981,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .getIntentForIntentSender(mTarget);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1001,8 +994,7 @@ public final class PendingIntent implements Parcelable {
             return ActivityManager.getService()
                 .getTagForIntentSender(mTarget, prefix);
         } catch (RemoteException e) {
-            // Should never happen.
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
