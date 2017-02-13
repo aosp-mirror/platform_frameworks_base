@@ -2867,4 +2867,12 @@
 
   <!-- resolver activity -->
   <java-symbol type="drawable" name="resolver_icon_placeholder" />
+
+  <!-- Alert windows notification -->
+  <java-symbol type="string" name="alert_windows_notification_channel_name" />
+  <java-symbol type="string" name="alert_windows_notification_title" />
+  <java-symbol type="string" name="alert_windows_notification_message" />
+  <java-symbol type="string" name="alert_windows_notification_turn_off_action" />
+  <java-symbol type="drawable" name="alert_window_layer" />
+
 </resources>

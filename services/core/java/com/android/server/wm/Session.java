@@ -80,8 +80,10 @@ public class Session extends IWindowSession.Stub
     // Set of visible alert window surfaces connected to this session.
     private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
     final boolean mCanAddInternalSystemWindow;
+    private AlertWindowNotification mAlertWindowNotification;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
+    private String mPackageName;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback,
             IInputMethodClient client, IInputContext inputContext) {
@@ -555,7 +557,8 @@ public class Session extends IWindowSession.Stub
         }
     }
 
-    void windowAddedLocked() {
+    void windowAddedLocked(String packageName) {
+        mPackageName = packageName;
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
                 TAG_WM, "First window added to " + this + ", creating SurfaceSession");
@@ -595,7 +598,12 @@ public class Session extends IWindowSession.Stub
             }
 
             if (changed) {
-                // TODO: Update notification.
+                if (mAlertWindowSurfaces.isEmpty()) {
+                    cancelAlertWindowNotification();
+                } else if (mAlertWindowNotification == null){
+                    mAlertWindowNotification = new AlertWindowNotification(
+                            mService, mPackageName, mUid);
+                }
             }
         }
 
@@ -636,12 +644,22 @@ public class Session extends IWindowSession.Stub
                     + " in session " + this + ": " + e.toString());
         }
         mSurfaceSession = null;
+        mAlertWindowSurfaces.clear();
+        mAppOverlaySurfaces.clear();
         setHasOverlayUi(false);
-        // TODO: Update notification
+        cancelAlertWindowNotification();
     }
 
     private void setHasOverlayUi(boolean hasOverlayUi) {
         mService.mH.obtainMessage(H.SET_HAS_OVERLAY_UI, mPid, hasOverlayUi ? 1 : 0).sendToTarget();
+    }
+
+    private void cancelAlertWindowNotification() {
+        if (mAlertWindowNotification == null) {
+            return;
+        }
+        mAlertWindowNotification.cancel();
+        mAlertWindowNotification = null;
     }
 
     void dump(PrintWriter pw, String prefix) {
