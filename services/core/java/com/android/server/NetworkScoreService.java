@@ -131,10 +131,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      * manages the service connection.
      */
     private class NetworkScorerPackageMonitor extends PackageMonitor {
-        final List<String> mPackagesToWatch;
+        final String mPackageToWatch;
 
-        private NetworkScorerPackageMonitor(List<String> packagesToWatch) {
-            mPackagesToWatch = packagesToWatch;
+        private NetworkScorerPackageMonitor(String packageToWatch) {
+            mPackageToWatch = packageToWatch;
         }
 
         @Override
@@ -167,37 +167,27 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             evaluateBinding(packageName, true /* forceUnbind */);
         }
 
-        private void evaluateBinding(String scorerPackageName, boolean forceUnbind) {
-            if (!mPackagesToWatch.contains(scorerPackageName)) {
+        private void evaluateBinding(String changedPackageName, boolean forceUnbind) {
+            if (!mPackageToWatch.equals(changedPackageName)) {
                 // Early exit when we don't care about the package that has changed.
                 return;
             }
 
             if (DBG) {
-                Log.d(TAG, "Evaluating binding for: " + scorerPackageName
+                Log.d(TAG, "Evaluating binding for: " + changedPackageName
                         + ", forceUnbind=" + forceUnbind);
             }
+
             final NetworkScorerAppData activeScorer = mNetworkScorerAppManager.getActiveScorer();
             if (activeScorer == null) {
                 // Package change has invalidated a scorer, this will also unbind any service
                 // connection.
                 if (DBG) Log.d(TAG, "No active scorers available.");
-                unbindFromScoringServiceIfNeeded();
-            } else if (activeScorer.getRecommendationServicePackageName().equals(scorerPackageName))
-            {
-                // The active scoring service changed in some way.
-                if (DBG) {
-                    Log.d(TAG, "Possible change to the active scorer: "
-                            + activeScorer.getRecommendationServicePackageName());
-                }
+                refreshBinding();
+            } else { // The scoring service changed in some way.
                 if (forceUnbind) {
                     unbindFromScoringServiceIfNeeded();
                 }
-                bindToScoringServiceIfNeeded(activeScorer);
-            } else {
-                // One of the scoring apps on the device has changed and we may no longer be
-                // bound to the correct scoring app. The logic in bindToScoringServiceIfNeeded()
-                // will sort that out to leave us bound to the most recent active scorer.
                 if (DBG) {
                     Log.d(TAG, "Binding to " + activeScorer.getRecommendationServiceComponent()
                             + " if needed.");
@@ -271,60 +261,71 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     /** Called when the system is ready to run third-party code but before it actually does so. */
     void systemReady() {
         if (DBG) Log.d(TAG, "systemReady");
-        registerPackageMonitorIfNeeded();
         registerRecommendationSettingsObserver();
-        refreshRecommendationRequestTimeoutMs();
     }
 
     /** Called when the system is ready for us to start third-party code. */
     void systemRunning() {
         if (DBG) Log.d(TAG, "systemRunning");
-        bindToScoringServiceIfNeeded();
     }
 
-    private void onUserUnlocked(int userId) {
+    @VisibleForTesting
+    void onUserUnlocked(int userId) {
+        if (DBG) Log.d(TAG, "onUserUnlocked(" + userId + ")");
+        refreshBinding();
+    }
+
+    private void refreshBinding() {
+        if (DBG) Log.d(TAG, "refreshBinding()");
+        // Apply the default package name if the Setting isn't set.
+        mNetworkScorerAppManager.revertToDefaultIfNoActive();
         registerPackageMonitorIfNeeded();
         bindToScoringServiceIfNeeded();
     }
 
     private void registerRecommendationSettingsObserver() {
-        final List<String> providerPackages =
-            mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
-        if (!providerPackages.isEmpty()) {
-            final Uri enabledUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
-            mContentObserver.observe(enabledUri,
-                    ServiceHandler.MSG_RECOMMENDATIONS_ENABLED_CHANGED);
-        }
+        final Uri packageNameUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_PACKAGE);
+        mContentObserver.observe(packageNameUri,
+                ServiceHandler.MSG_RECOMMENDATIONS_PACKAGE_CHANGED);
 
         final Uri timeoutUri = Global.getUriFor(Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS);
         mContentObserver.observe(timeoutUri,
                 ServiceHandler.MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED);
     }
 
+    /**
+     * Ensures the package manager is registered to monitor the current active scorer.
+     * If a discrepancy is found any previous monitor will be cleaned up
+     * and a new monitor will be created.
+     *
+     * This method is idempotent.
+     */
     private void registerPackageMonitorIfNeeded() {
-        if (DBG) Log.d(TAG, "registerPackageMonitorIfNeeded");
-        final List<String> providerPackages =
-            mNetworkScorerAppManager.getPotentialRecommendationProviderPackages();
+        if (DBG) Log.d(TAG, "registerPackageMonitorIfNeeded()");
+        final NetworkScorerAppData appData = mNetworkScorerAppManager.getActiveScorer();
         synchronized (mPackageMonitorLock) {
             // Unregister the current monitor if needed.
-            if (mPackageMonitor != null) {
+            if (mPackageMonitor != null && (appData == null
+                    || !appData.getRecommendationServicePackageName().equals(
+                            mPackageMonitor.mPackageToWatch))) {
                 if (DBG) {
                     Log.d(TAG, "Unregistering package monitor for "
-                            + mPackageMonitor.mPackagesToWatch);
+                            + mPackageMonitor.mPackageToWatch);
                 }
                 mPackageMonitor.unregister();
                 mPackageMonitor = null;
             }
 
-            // Create and register the monitor if there are packages that could be providers.
-            if (!providerPackages.isEmpty()) {
-                mPackageMonitor = new NetworkScorerPackageMonitor(providerPackages);
+            // Create and register the monitor if a scorer is active.
+            if (appData != null && mPackageMonitor == null) {
+                mPackageMonitor = new NetworkScorerPackageMonitor(
+                        appData.getRecommendationServicePackageName());
                 // TODO: Need to update when we support per-user scorers. http://b/23422763
                 mPackageMonitor.register(mContext, null /* thread */, UserHandle.SYSTEM,
                         false /* externalStorage */);
                 if (DBG) {
                     Log.d(TAG, "Registered package monitor for "
-                            + mPackageMonitor.mPackagesToWatch);
+                            + mPackageMonitor.mPackageToWatch);
                 }
             }
         }
@@ -336,6 +337,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         bindToScoringServiceIfNeeded(scorerData);
     }
 
+    /**
+     * Ensures the service connection is bound to the current active scorer.
+     * If a discrepancy is found any previous connection will be cleaned up
+     * and a new connection will be created.
+     *
+     * This method is idempotent.
+     */
     private void bindToScoringServiceIfNeeded(NetworkScorerAppData appData) {
         if (DBG) Log.d(TAG, "bindToScoringServiceIfNeeded(" + appData + ")");
         if (appData != null) {
@@ -364,6 +372,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         synchronized (mServiceConnectionLock) {
             if (mServiceConnection != null) {
                 mServiceConnection.disconnect(mContext);
+                if (DBG) Log.d(TAG, "Disconnected from: "
+                        + mServiceConnection.mAppData.getRecommendationServiceComponent());
             }
             mServiceConnection = null;
         }
@@ -652,17 +662,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean setActiveScorer(String packageName) {
-        // TODO: For now, since SCORE_NETWORKS requires an app to be privileged, we allow such apps
-        // to directly set the scorer app rather than having to use the consent dialog. The
-        // assumption is that anyone bundling a scorer app with the system is trusted by the OEM to
-        // do the right thing and not enable this feature without explaining it to the user.
-        // In the future, should this API be opened to 3p apps, we will need to lock this down and
-        // figure out another way to streamline the UX.
-
-        mContext.enforceCallingOrSelfPermission(permission.SCORE_NETWORKS, TAG);
-
-        // Scorers (recommendation providers) are selected and no longer set.
-        return false;
+        // Only the system can set the active scorer
+        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
+            return mNetworkScorerAppManager.setActiveScorer(packageName);
+        } else {
+            throw new SecurityException(
+                    "Caller is neither the system process nor a score requester.");
+        }
     }
 
     /**
@@ -699,7 +705,6 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         return null;
     }
 
-
     /**
      * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
      */
@@ -726,7 +731,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      */
     @Override
     public List<NetworkScorerAppData> getAllValidScorers() {
-        return mNetworkScorerAppManager.getAllValidScorers();
+        // Only the system can access this data.
+        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
+            return mNetworkScorerAppManager.getAllValidScorers();
+        } else {
+            throw new SecurityException(
+                    "Caller is neither the system process nor a score requester.");
+        }
     }
 
     @Override
@@ -1158,7 +1169,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @VisibleForTesting
     public final class ServiceHandler extends Handler {
         public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT = 1;
-        public static final int MSG_RECOMMENDATIONS_ENABLED_CHANGED = 2;
+        public static final int MSG_RECOMMENDATIONS_PACKAGE_CHANGED = 2;
         public static final int MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED = 3;
 
         public ServiceHandler(Looper looper) {
@@ -1180,8 +1191,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     sendDefaultRecommendationResponse(request, remoteCallback);
                     break;
 
-                case MSG_RECOMMENDATIONS_ENABLED_CHANGED:
-                    bindToScoringServiceIfNeeded();
+                case MSG_RECOMMENDATIONS_PACKAGE_CHANGED:
+                    refreshBinding();
                     break;
 
                 case MSG_RECOMMENDATION_REQUEST_TIMEOUT_CHANGED:

@@ -19,7 +19,6 @@ package com.android.server;
 import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,12 +26,12 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppData;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,78 +42,68 @@ import java.util.List;
  *
  * @hide
  */
+@VisibleForTesting
 public class NetworkScorerAppManager {
     private static final String TAG = "NetworkScorerAppManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
     private final Context mContext;
+    private final SettingsFacade mSettingsFacade;
 
     public NetworkScorerAppManager(Context context) {
-      mContext = context;
+      this(context, new SettingsFacade());
+    }
+
+    @VisibleForTesting
+    public NetworkScorerAppManager(Context context, SettingsFacade settingsFacade) {
+        mContext = context;
+        mSettingsFacade = settingsFacade;
     }
 
     /**
      * Returns the list of available scorer apps. The list will be empty if there are
      * no valid scorers.
      */
+    @VisibleForTesting
     public List<NetworkScorerAppData> getAllValidScorers() {
-        return Collections.emptyList();
-    }
-
-    /**
-     * @return A {@link NetworkScorerAppData} instance containing information about the
-     *         best configured network recommendation provider installed or {@code null}
-     *         if none of the configured packages can recommend networks.
-     *
-     * <p>A network recommendation provider is any application which:
-     * <ul>
-     * <li>Is listed in the <code>config_networkRecommendationPackageNames</code> config.
-     * <li>Declares the {@link permission#SCORE_NETWORKS} permission.
-     * <li>Includes a Service for {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS}.
-     * </ul>
-     */
-    @Nullable public NetworkScorerAppData getNetworkRecommendationProviderData() {
-        // Network recommendation apps can only run as the primary user right now.
-        // http://b/23422763
-        if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {
-            return null;
+        if (VERBOSE) Log.v(TAG, "getAllValidScorers()");
+        final PackageManager pm = mContext.getPackageManager();
+        final Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
+        final List<ResolveInfo> resolveInfos =
+                pm.queryIntentServices(serviceIntent, PackageManager.GET_META_DATA);
+        if (resolveInfos == null || resolveInfos.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "Found 0 Services able to handle " + serviceIntent);
+            return Collections.emptyList();
         }
 
-        final List<String> potentialPkgs = getPotentialRecommendationProviderPackages();
-        if (potentialPkgs.isEmpty()) {
-            if (DEBUG) {
-                Log.d(TAG, "No Network Recommendation Providers specified.");
-            }
-            return null;
-        }
-
-        for (int i = 0; i < potentialPkgs.size(); i++) {
-            final String potentialPkg = potentialPkgs.get(i);
-
-            // Look for the recommendation service class and required receiver.
-            final ServiceInfo serviceInfo = findRecommendationService(potentialPkg);
-            if (serviceInfo != null) {
+        List<NetworkScorerAppData> appDataList = new ArrayList<>();
+        for (int i = 0; i < resolveInfos.size(); i++) {
+            final ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
+            if (hasPermissions(serviceInfo.packageName)) {
+                if (VERBOSE) {
+                    Log.v(TAG, serviceInfo.packageName + " is a valid scorer/recommender.");
+                }
                 final ComponentName serviceComponentName =
-                    new ComponentName(potentialPkg, serviceInfo.name);
+                        new ComponentName(serviceInfo.packageName, serviceInfo.name);
                 final ComponentName useOpenWifiNetworksActivity =
                         findUseOpenWifiNetworksActivity(serviceInfo);
-                return new NetworkScorerAppData(serviceInfo.applicationInfo.uid,
-                    serviceComponentName, useOpenWifiNetworksActivity);
+                appDataList.add(
+                        new NetworkScorerAppData(serviceInfo.applicationInfo.uid,
+                                serviceComponentName, useOpenWifiNetworksActivity));
             } else {
-                if (DEBUG) {
-                    Log.d(TAG, potentialPkg + " does not have the required components, skipping.");
-                }
+                if (VERBOSE) Log.v(TAG, serviceInfo.packageName
+                        + " is NOT a valid scorer/recommender.");
             }
         }
 
-        // None of the configured packages are valid.
-        return null;
+        return appDataList;
     }
 
-    @Nullable private ComponentName findUseOpenWifiNetworksActivity(ServiceInfo serviceInfo) {
+    @Nullable
+    private ComponentName findUseOpenWifiNetworksActivity(ServiceInfo serviceInfo) {
         if (serviceInfo.metaData == null) {
             if (DEBUG) {
-                Log.d(TAG, "No metadata found on recommendation service.");
+                Log.d(TAG, "No metadata found on " + serviceInfo.getComponentName());
             }
             return null;
         }
@@ -122,7 +111,8 @@ public class NetworkScorerAppManager {
                 .getString(NetworkScoreManager.USE_OPEN_WIFI_PACKAGE_META_DATA);
         if (TextUtils.isEmpty(useOpenWifiPackage)) {
             if (DEBUG) {
-                Log.d(TAG, "No use_open_wifi_package metadata found.");
+                Log.d(TAG, "No use_open_wifi_package metadata found on "
+                        + serviceInfo.getComponentName());
             }
             return null;
         }
@@ -131,73 +121,13 @@ public class NetworkScorerAppManager {
         final ResolveInfo resolveActivityInfo = mContext.getPackageManager()
                 .resolveActivity(enableUseOpenWifiIntent, 0 /* flags */);
         if (VERBOSE) {
-            Log.d(TAG, "Resolved " + enableUseOpenWifiIntent + " to " + serviceInfo);
+            Log.d(TAG, "Resolved " + enableUseOpenWifiIntent + " to " + resolveActivityInfo);
         }
 
         if (resolveActivityInfo != null && resolveActivityInfo.activityInfo != null) {
             return resolveActivityInfo.activityInfo.getComponentName();
         }
 
-        return null;
-    }
-
-    /**
-     * @return A priority order list of package names that have been granted the
-     *         permission needed for them to act as a network recommendation provider.
-     *         The packages in the returned list may not contain the other required
-     *         network recommendation provider components so additional checks are required
-     *         before making a package the network recommendation provider.
-     */
-    public List<String> getPotentialRecommendationProviderPackages() {
-        final String[] packageArray = mContext.getResources().getStringArray(
-                R.array.config_networkRecommendationPackageNames);
-        if (packageArray == null || packageArray.length == 0) {
-            if (DEBUG) {
-                Log.d(TAG, "No Network Recommendation Providers specified.");
-            }
-            return Collections.emptyList();
-        }
-
-        if (VERBOSE) {
-            Log.d(TAG, "Configured packages: " + TextUtils.join(", ", packageArray));
-        }
-
-        List<String> packages = new ArrayList<>();
-        final PackageManager pm = mContext.getPackageManager();
-        for (String potentialPkg : packageArray) {
-            if (pm.checkPermission(permission.SCORE_NETWORKS, potentialPkg)
-                    == PackageManager.PERMISSION_GRANTED) {
-                packages.add(potentialPkg);
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, potentialPkg + " has not been granted " + permission.SCORE_NETWORKS
-                            + ", skipping.");
-                }
-            }
-        }
-
-        return packages;
-    }
-
-    @Nullable private ServiceInfo findRecommendationService(String packageName) {
-        final PackageManager pm = mContext.getPackageManager();
-        final int resolveFlags = PackageManager.GET_META_DATA;
-        final Intent serviceIntent = new Intent(NetworkScoreManager.ACTION_RECOMMEND_NETWORKS);
-        serviceIntent.setPackage(packageName);
-        final ResolveInfo resolveServiceInfo =
-                pm.resolveService(serviceIntent, resolveFlags);
-
-        if (VERBOSE) {
-            Log.d(TAG, "Resolved " + serviceIntent + " to " + resolveServiceInfo);
-        }
-
-        if (resolveServiceInfo != null && resolveServiceInfo.serviceInfo != null) {
-            return resolveServiceInfo.serviceInfo;
-        }
-
-        if (VERBOSE) {
-            Log.v(TAG, packageName + " does not have a service for " + serviceIntent);
-        }
         return null;
     }
 
@@ -209,35 +139,107 @@ public class NetworkScorerAppManager {
      *     it was disabled or uninstalled).
      */
     @Nullable
+    @VisibleForTesting
     public NetworkScorerAppData getActiveScorer() {
-        if (isNetworkRecommendationsDisabled()) {
-            // If recommendations are disabled then there can't be an active scorer.
+        return getScorer(getNetworkRecommendationsPackage());
+    }
+
+    private NetworkScorerAppData getScorer(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
             return null;
         }
 
         // Otherwise return the recommendation provider (which may be null).
-        return getNetworkRecommendationProviderData();
+        List<NetworkScorerAppData> apps = getAllValidScorers();
+        for (int i = 0; i < apps.size(); i++) {
+            NetworkScorerAppData app = apps.get(i);
+            if (app.getRecommendationServicePackageName().equals(packageName)) {
+                return app;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean hasPermissions(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        return pm.checkPermission(permission.SCORE_NETWORKS, packageName)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
      * Set the specified package as the default scorer application.
      *
-     * <p>The caller must have permission to write to {@link android.provider.Settings.Global}.
+     * <p>The caller must have permission to write to {@link Settings.Global}.
      *
-     * @param packageName the packageName of the new scorer to use. If null, scoring will be
-     *     disabled. Otherwise, the scorer will only be set if it is a valid scorer application.
+     * @param packageName the packageName of the new scorer to use. If null, the scoring app will
+     *                    revert back to the configured default. Otherwise, the scorer will only
+     *                    be set if it is a valid scorer application.
      * @return true if the scorer was changed, or false if the package is not a valid scorer or
      *         a valid network recommendation provider exists.
-     * @deprecated Scorers are now selected from a configured list.
      */
-    @Deprecated
+    @VisibleForTesting
     public boolean setActiveScorer(String packageName) {
-        return false;
+        String oldPackageName = getNetworkRecommendationsPackage();
+        if (TextUtils.equals(oldPackageName, packageName)) {
+            // No change.
+            return true;
+        }
+
+        Log.i(TAG, "Changing network scorer from " + oldPackageName + " to " + packageName);
+
+        if (packageName == null) {
+            // revert to the default setting.
+            setNetworkRecommendationsPackage(getDefaultPackageSetting());
+            return true;
+        } else {
+            // We only make the change if the new package is valid.
+            if (getScorer(packageName) != null) {
+                setNetworkRecommendationsPackage(packageName);
+                return true;
+            } else {
+                Log.w(TAG, "Requested network scorer is not valid: " + packageName);
+                return false;
+            }
+        }
     }
 
-    private boolean isNetworkRecommendationsDisabled() {
-        final ContentResolver cr = mContext.getContentResolver();
-        // A value of 1 indicates enabled.
-        return Settings.Global.getInt(cr, Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED, 0) != 1;
+    /**
+     * If the active scorer is null then revert to the default scorer.
+     */
+    @VisibleForTesting
+    public void revertToDefaultIfNoActive() {
+        if (getActiveScorer() == null) {
+            final String defaultPackage = getDefaultPackageSetting();
+            setNetworkRecommendationsPackage(defaultPackage);
+            Log.i(TAG, "Defaulted the network recommendations app to: " + defaultPackage);
+        }
+    }
+
+    private String getDefaultPackageSetting() {
+        return mContext.getResources().getString(
+                R.string.config_defaultNetworkRecommendationProviderPackage);
+    }
+
+    private String getNetworkRecommendationsPackage() {
+        return mSettingsFacade.getString(mContext, Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE);
+    }
+
+    private void setNetworkRecommendationsPackage(String packageName) {
+        mSettingsFacade.putString(mContext,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE, packageName);
+    }
+
+    /**
+     * Wrapper around Settings to make testing easier.
+     */
+    public static class SettingsFacade {
+        public boolean putString(Context context, String name, String value) {
+            return Settings.Global.putString(context.getContentResolver(), name, value);
+        }
+
+        public String getString(Context context, String name) {
+            return Settings.Global.getString(context.getContentResolver(), name);
+        }
     }
 }
