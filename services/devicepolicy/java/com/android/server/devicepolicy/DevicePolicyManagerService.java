@@ -7271,6 +7271,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mIPackageManager.addPersistentPreferredActivity(filter, activity, userHandle);
+                mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
@@ -7289,6 +7290,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mIPackageManager.clearPackagePersistentPreferredActivities(packageName, userHandle);
+                mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
