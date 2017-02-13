@@ -973,6 +973,11 @@ public final class SystemServer {
                     traceBeginAndSlog("StartPersistentDataBlock");
                     mSystemServiceManager.startService(PersistentDataBlockService.class);
                     traceEnd();
+
+                    // Implementation depends on persistent data block
+                    traceBeginAndSlog("StartOemLockService");
+                    mSystemServiceManager.startService(OemLockService.class);
+                    traceEnd();
                 }
 
                 traceBeginAndSlog("StartDeviceIdleController");

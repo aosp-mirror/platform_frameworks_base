@@ -682,8 +682,10 @@ public class UserManager {
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
+     * @deprecated use {@link OemLockManager#setOemUnlockAllowedByCarrier(boolean, byte[])} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
 

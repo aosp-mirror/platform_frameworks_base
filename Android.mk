@@ -308,6 +308,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/companion/IFindDeviceCallback.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
+	core/java/android/service/oemlock/IOemLockService.aidl \
 	core/java/android/service/persistentdata/IPersistentDataBlockService.aidl \
 	core/java/android/service/trust/ITrustAgentService.aidl \
 	core/java/android/service/trust/ITrustAgentServiceCallback.aidl \

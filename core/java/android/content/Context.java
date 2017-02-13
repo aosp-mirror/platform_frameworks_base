@@ -2872,6 +2872,7 @@ public abstract class Context {
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
             //@hide: PERSISTENT_DATA_BLOCK_SERVICE,
+            //@hide: OEM_LOCK_SERVICE,
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
             RADIO_SERVICE,
@@ -3791,6 +3792,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.service.oemlock.OemLockManager} instance for managing the OEM lock.
+     *
+     * @see #getSystemService
+     * @see android.service.oemlock.OemLockManager
+     * @hide
+     */
+    @SystemApi
+    public static final String OEM_LOCK_SERVICE = "oem_lock";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

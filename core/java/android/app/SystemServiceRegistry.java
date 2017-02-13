@@ -118,6 +118,8 @@ import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
+import android.service.oemlock.IOemLockService;
+import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.service.vr.IVrManager;
@@ -735,6 +737,20 @@ final class SystemServiceRegistry {
                         IPersistentDataBlockService.Stub.asInterface(b);
                 if (persistentDataBlockService != null) {
                     return new PersistentDataBlockManager(persistentDataBlockService);
+                } else {
+                    // not supported
+                    return null;
+                }
+            }});
+
+        registerService(Context.OEM_LOCK_SERVICE, OemLockManager.class,
+                new StaticServiceFetcher<OemLockManager>() {
+            @Override
+            public OemLockManager createService() throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.OEM_LOCK_SERVICE);
+                IOemLockService oemLockService = IOemLockService.Stub.asInterface(b);
+                if (oemLockService != null) {
+                    return new OemLockManager(oemLockService);
                 } else {
                     // not supported
                     return null;
