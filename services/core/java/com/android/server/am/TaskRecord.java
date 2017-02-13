@@ -35,7 +35,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -52,6 +51,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.StackWindowController;
 import com.android.server.wm.TaskWindowContainerController;
 import com.android.server.wm.TaskWindowContainerListener;
 
@@ -278,7 +278,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
     private final Rect mTmpRect = new Rect();
-    private final Rect mTmpRect2 = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate stack to launch the
@@ -1838,66 +1837,38 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return !mTmpConfig.equals(newConfig);
     }
 
-    private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds,
-                                        boolean overrideWidth, boolean overrideHeight) {
-        mTmpRect2.set(inInsetBounds);
-        mService.mWindowManager.subtractNonDecorInsets(mTmpRect2);
-        int leftInset = mTmpRect2.left - inInsetBounds.left;
-        int topInset = mTmpRect2.top - inInsetBounds.top;
-        int rightInset = overrideWidth ? 0 : inInsetBounds.right - mTmpRect2.right;
-        int bottomInset = overrideHeight ? 0 : inInsetBounds.bottom - mTmpRect2.bottom;
-        inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
-    }
-
-    private void subtractStableInsets(Rect inOutBounds, Rect inInsetBounds,
-                                      boolean overrideWidth, boolean overrideHeight) {
-        mTmpRect2.set(inInsetBounds);
-        mService.mWindowManager.subtractStableInsets(mTmpRect2);
-        int leftInset = mTmpRect2.left - inInsetBounds.left;
-        int topInset = mTmpRect2.top - inInsetBounds.top;
-        int rightInset = overrideWidth ? 0 : inInsetBounds.right - mTmpRect2.right;
-        int bottomInset = overrideHeight ? 0 : inInsetBounds.bottom - mTmpRect2.bottom;
-        inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
-    }
-
     /** Clears passed config and fills it with new override values. */
     private void calculateOverrideConfig(Configuration config, Rect bounds, Rect insetBounds,
             boolean overrideWidth, boolean overrideHeight) {
         mTmpNonDecorBounds.set(bounds);
         mTmpStableBounds.set(bounds);
 
-        final Configuration parentConfig = getParent().getConfiguration();
         config.unset();
+        final Configuration parentConfig = getParent().getConfiguration();
         final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        final boolean isFloatingTask = mStack != null && StackId.tasksAreFloating(mStack.mStackId);
-        if (isFloatingTask) {
-            // Floating tasks should not be resized to the screen's bounds.
-            config.screenWidthDp = (int) (mTmpStableBounds.width() / density);
-            config.screenHeightDp = (int) (mTmpStableBounds.height() / density);
-        } else {
-            // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
-            // i.e. the screen area without the system bars.
-            // Additionally task dimensions should not be bigger than its parents dimensions.
-            subtractNonDecorInsets(mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds,
-                    overrideWidth, overrideHeight);
-            subtractStableInsets(mTmpStableBounds, insetBounds != null ? insetBounds : bounds,
-                    overrideWidth, overrideHeight);
-            config.screenWidthDp = Math.min(
-                    (int) (mTmpStableBounds.width() / density), parentConfig.screenWidthDp);
-            config.screenHeightDp = Math.min(
-                    (int) (mTmpStableBounds.height() / density), parentConfig.screenHeightDp);
-        }
 
         // TODO: Orientation?
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
+        if (mStack != null) {
+            final StackWindowController stackController = mStack.getWindowContainerController();
+            stackController.adjustConfigurationForBounds(bounds, insetBounds,
+                    mTmpNonDecorBounds, mTmpStableBounds, overrideWidth, overrideHeight, density,
+                    config, parentConfig);
+        } else {
+            // No stack, give some default values
+            config.smallestScreenWidthDp =
+                    mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
+            config.screenWidthDp = config.screenHeightDp = config.smallestScreenWidthDp;
+            Slog.wtf(TAG, "Expected stack when caclulating override config");
+        }
 
         // For calculating screen layout, we need to use the non-decor inset screen area for the
         // calculation for compatibility reasons, i.e. screen area without system bars that could
         // never go away in Honeycomb.
-        final int compatScreenWidthDp = (int)(mTmpNonDecorBounds.width() / density);
-        final int compatScreenHeightDp = (int)(mTmpNonDecorBounds.height() / density);
+        final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
+        final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
         // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start override
         // calculation with partial default.
         final int sl = Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_XLARGE;
@@ -1905,8 +1876,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
 
-        config.smallestScreenWidthDp = mService.mWindowManager.getSmallestWidthForTaskBounds(
-                insetBounds != null ? insetBounds : bounds);
     }
 
     /**
