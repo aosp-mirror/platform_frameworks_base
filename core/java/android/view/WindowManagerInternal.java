@@ -168,6 +168,14 @@ public abstract class WindowManagerInternal {
     public abstract void setMagnificationSpec(MagnificationSpec spec);
 
     /**
+     * Set by the accessibility framework to indicate whether the magnifiable regions of the display
+     * should be shown.
+     *
+     * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
+     */
+    public abstract void setForceShowMagnifiableBounds(boolean show);
+
+    /**
      * Obtains the magnification regions.
      *
      * @param magnificationRegion the current magnification region

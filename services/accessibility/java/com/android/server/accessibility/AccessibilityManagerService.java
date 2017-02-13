@@ -781,6 +781,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 userState.mIsTouchExplorationEnabled = false;
                 userState.mIsEnhancedWebAccessibilityEnabled = false;
                 userState.mIsDisplayMagnificationEnabled = false;
+                userState.mIsNavBarMagnificationEnabled = false;
                 userState.mIsAutoclickEnabled = false;
                 userState.mEnabledServices.clear();
             }
@@ -831,6 +832,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mIsTouchExplorationEnabled = touchExplorationEnabled;
             userState.mIsEnhancedWebAccessibilityEnabled = false;
             userState.mIsDisplayMagnificationEnabled = false;
+            userState.mIsNavBarMagnificationEnabled = false;
             userState.mIsAutoclickEnabled = false;
             userState.mEnabledServices.clear();
             userState.mEnabledServices.add(service);
@@ -1152,11 +1154,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void notifyAccessibilityButtonClickedLocked() {
         final UserState state = getCurrentUserStateLocked();
-        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-            final Service service = state.mBoundServices.get(i);
-            // TODO(b/34720082): Only notify a single user-defined service
-            if (service.mRequestAccessibilityButton) {
-                service.notifyAccessibilityButtonClickedLocked();
+        if (state.mIsNavBarMagnificationEnabled) {
+            mMainHandler.obtainMessage(
+                    MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
+        } else {
+            for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+                final Service service = state.mBoundServices.get(i);
+                // TODO(b/34720082): Only notify a single user-defined service
+                if (service.mRequestAccessibilityButton) {
+                    service.notifyAccessibilityButtonClickedLocked();
+                }
             }
         }
     }
@@ -1548,6 +1555,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (userState.mIsDisplayMagnificationEnabled) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
             }
+            if (userState.mIsNavBarMagnificationEnabled) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
+            }
             if (userHasMagnificationServicesLocked(userState)) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER;
             }
@@ -1781,7 +1791,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somethingChanged |= readTouchExplorationEnabledSettingLocked(userState);
         somethingChanged |= readHighTextContrastEnabledSettingLocked(userState);
         somethingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
-        somethingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
+        somethingChanged |= readMagnificationEnabledSettingsLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
         somethingChanged |= readAccessibilityShortcutSettingLocked(userState);
         return somethingChanged;
@@ -1810,13 +1820,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return false;
     }
 
-    private boolean readDisplayMagnificationEnabledSettingLocked(UserState userState) {
+    private boolean readMagnificationEnabledSettingsLocked(UserState userState) {
         final boolean displayMagnificationEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
                 0, userState.mUserId) == 1;
-        if (displayMagnificationEnabled != userState.mIsDisplayMagnificationEnabled) {
+        final boolean navBarMagnificationEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+                0, userState.mUserId) == 1;
+        if ((displayMagnificationEnabled != userState.mIsDisplayMagnificationEnabled)
+                || (navBarMagnificationEnabled != userState.mIsNavBarMagnificationEnabled)) {
             userState.mIsDisplayMagnificationEnabled = displayMagnificationEnabled;
+            userState.mIsNavBarMagnificationEnabled = navBarMagnificationEnabled;
             return true;
         }
         return false;
@@ -2018,8 +2034,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return;
         }
 
-        if (userState.mIsDisplayMagnificationEnabled ||
-                userHasListeningMagnificationServicesLocked(userState)) {
+        if (userState.mIsDisplayMagnificationEnabled || userState.mIsNavBarMagnificationEnabled
+                || userHasListeningMagnificationServicesLocked(userState)) {
             // Initialize the magnification controller if necessary
             getMagnificationController();
             mMagnificationController.register();
@@ -2241,6 +2257,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 pw.append(", touchExplorationEnabled=" + userState.mIsTouchExplorationEnabled);
                 pw.append(", displayMagnificationEnabled="
                         + userState.mIsDisplayMagnificationEnabled);
+                pw.append(", navBarMagnificationEnabled="
+                        + userState.mIsNavBarMagnificationEnabled);
                 pw.append(", autoclickEnabled=" + userState.mIsAutoclickEnabled);
                 if (userState.mUiAutomationService != null) {
                     pw.append(", ");
@@ -2320,6 +2338,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public static final int MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS = 10;
         public static final int MSG_UPDATE_FINGERPRINT = 11;
         public static final int MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS = 12;
+        public static final int MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER = 13;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2406,6 +2425,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     });
                 } break;
+
+               case MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER: {
+                    synchronized (mLock) {
+                        if (mHasInputFilter && mInputFilter != null) {
+                            mInputFilter.notifyAccessibilityButtonClicked();
+                        }
+                    }
+                }
             }
         }
 
@@ -4788,6 +4815,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsTextHighContrastEnabled;
         public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
+        public boolean mIsNavBarMagnificationEnabled;
         public boolean mIsAutoclickEnabled;
         public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
@@ -4856,6 +4884,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsTouchExplorationEnabled = false;
             mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
+            mIsNavBarMagnificationEnabled = false;
             mIsAutoclickEnabled = false;
             mSoftKeyboardShowMode = 0;
 
@@ -4887,6 +4916,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         private final Uri mDisplayMagnificationEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
+
+        private final Uri mNavBarMagnificationEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
 
         private final Uri mAutoclickEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED);
@@ -4927,6 +4959,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mDisplayMagnificationEnabledUri,
                     false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(mNavBarMagnificationEnabledUri,
+                    false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mAutoclickEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mEnabledAccessibilityServicesUri,
@@ -4966,8 +5000,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (readTouchExplorationEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
-                } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
-                    if (readDisplayMagnificationEnabledSettingLocked(userState)) {
+                } else if (mDisplayMagnificationEnabledUri.equals(uri)
+                        || mNavBarMagnificationEnabledUri.equals(uri)) {
+                    if (readMagnificationEnabledSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mAutoclickEnabledUri.equals(uri)) {

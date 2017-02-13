@@ -685,6 +685,12 @@ class MagnificationController implements Handler.Callback {
         }
     }
 
+    void setForceShowMagnifiableBounds(boolean show) {
+        if (mRegistered) {
+            mWindowManager.setForceShowMagnifiableBounds(show);
+        }
+    }
+
     private void getMagnifiedFrameInContentCoordsLocked(Rect outFrame) {
         final float scale = getSentScale();
         final float offsetX = getSentOffsetX();

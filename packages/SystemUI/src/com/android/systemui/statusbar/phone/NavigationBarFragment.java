@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
@@ -46,6 +47,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -104,6 +106,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private int mNavigationIconHints = 0;
     private int mNavigationBarMode;
     private AccessibilityManager mAccessibilityManager;
+    private MagnificationContentObserver mMagnificationObserver;
 
     private int mDisabledFlags1;
     private StatusBar mStatusBar;
@@ -135,6 +138,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         mAccessibilityManager.addAccessibilityServicesStateChangeListener(
                 this::updateAccessibilityServicesState);
+        mMagnificationObserver = new MagnificationContentObserver(
+                getContext().getMainThreadHandler());
+        getContext().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED), false,
+                mMagnificationObserver);
+
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
         }
@@ -154,6 +163,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mCommandQueue.removeCallbacks(this);
         mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
                 this::updateAccessibilityServicesState);
+        getContext().getContentResolver().unregisterContentObserver(mMagnificationObserver);
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .removeRotationWatcher(mRotationWatcher);
@@ -387,6 +397,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
+        updateAccessibilityServicesState();
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -550,10 +561,18 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private void updateAccessibilityServicesState() {
+        int requestingServices = 0;
+        try {
+            if (Settings.Secure.getInt(getContext().getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED) == 1) {
+                requestingServices++;
+            }
+        } catch (Settings.SettingNotFoundException e) {
+        }
+
         final List<AccessibilityServiceInfo> services =
                 mAccessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-        int requestingServices = 0;
         for (int i = services.size() - 1; i >= 0; --i) {
             AccessibilityServiceInfo info = services.get(i);
             if ((info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0) {
@@ -598,6 +617,18 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     public void finishBarAnimations() {
         mNavigationBarView.getBarTransitions().finishAnimations();
+    }
+
+    private class MagnificationContentObserver extends ContentObserver {
+
+        public MagnificationContentObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            NavigationBarFragment.this.updateAccessibilityServicesState();
+        }
     }
 
     private final Stub mRotationWatcher = new Stub() {

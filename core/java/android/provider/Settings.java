@@ -5605,10 +5605,10 @@ public final class Settings {
             "accessibility_web_content_key_bindings";
 
         /**
-         * Setting that specifies whether the display magnification is enabled.
-         * Display magnifications allows the user to zoom in the display content
-         * and is targeted to low vision users. The current magnification scale
-         * is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
+         * Setting that specifies whether the display magnification is enabled via a system-wide
+         * triple tap gesture. Display magnifications allows the user to zoom in the display content
+         * and is targeted to low vision users. The current magnification scale is controlled by
+         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
          *
          * @hide
          */
@@ -5616,11 +5616,23 @@ public final class Settings {
                 "accessibility_display_magnification_enabled";
 
         /**
+         * Setting that specifies whether the display magnification is enabled via a shortcut
+         * affordance within the system's navigation area. Display magnifications allows the user to
+         * zoom in the display content and is targeted to low vision users. The current
+         * magnification scale is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED =
+                "accessibility_display_magnification_navbar_enabled";
+
+        /**
          * Setting that specifies what the display magnification scale is.
          * Display magnifications allows the user to zoom in the display
          * content and is targeted to low vision users. Whether a display
          * magnification is performed is controlled by
-         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED}
+         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED} and
+         * {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED}
          *
          * @hide
          */
@@ -6950,6 +6962,7 @@ public final class Settings {
             ACCESSIBILITY_DISPLAY_DALTONIZER,
             ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+            ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
             ACCESSIBILITY_SCRIPT_INJECTION,
             ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
