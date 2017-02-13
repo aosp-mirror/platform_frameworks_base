@@ -22,14 +22,11 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 
-import com.android.internal.util.ArrayUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
@@ -38,10 +35,9 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingLibRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class RestrictedLockUtilsTest {
 
