@@ -5920,8 +5920,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (displayContent.mBaseDisplayWidth != width
                             || displayContent.mBaseDisplayHeight != height) {
                         Slog.i(TAG_WM, "FORCED DISPLAY SIZE: " + width + "x" + height);
-                        displayContent.mBaseDisplayWidth = width;
-                        displayContent.mBaseDisplayHeight = height;
+                        displayContent.updateBaseDisplayMetrics(width, height,
+                                displayContent.mBaseDisplayDensity);
                     }
                 } catch (NumberFormatException ex) {
                 }
@@ -5946,8 +5946,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // displayContent must not be null
     private void setForcedDisplaySizeLocked(DisplayContent displayContent, int width, int height) {
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        displayContent.mBaseDisplayWidth = width;
-        displayContent.mBaseDisplayHeight = height;
+        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity);
         reconfigureDisplayLocked(displayContent);
     }
 
