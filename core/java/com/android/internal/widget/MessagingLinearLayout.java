@@ -36,6 +36,7 @@ import android.widget.RemoteViews;
 @RemoteViews.RemoteView
 public class MessagingLinearLayout extends ViewGroup {
 
+    private static final int NOT_MEASURED_BEFORE = -1;
     /**
      * Spacing to be applied between views.
      */
@@ -52,6 +53,11 @@ public class MessagingLinearLayout extends ViewGroup {
      * Id of the child that's also visible in the contracted layout.
      */
     private int mContractedChildId;
+    /**
+     * The last measured with in a layout pass if it was measured before or
+     * {@link #NOT_MEASURED_BEFORE} if this is the first layout pass.
+     */
+    private int mLastMeasuredWidth = NOT_MEASURED_BEFORE;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -64,18 +70,10 @@ public class MessagingLinearLayout extends ViewGroup {
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
             switch (attr) {
-                case R.styleable.MessagingLinearLayout_maxHeight:
-                    mMaxHeight = a.getDimensionPixelSize(i, 0);
-                    break;
                 case R.styleable.MessagingLinearLayout_spacing:
                     mSpacing = a.getDimensionPixelSize(i, 0);
                     break;
             }
-        }
-
-        if (mMaxHeight <= 0) {
-            throw new IllegalStateException(
-                    "MessagingLinearLayout: Must specify positive maxHeight");
         }
 
         a.recycle();
@@ -86,62 +84,63 @@ public class MessagingLinearLayout extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // This is essentially a bottom-up linear layout that only adds children that fit entirely
         // up to a maximum height.
-
+        int targetHeight = MeasureSpec.getSize(heightMeasureSpec);
         switch (MeasureSpec.getMode(heightMeasureSpec)) {
-            case MeasureSpec.AT_MOST:
-                heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        Math.min(mMaxHeight, MeasureSpec.getSize(heightMeasureSpec)),
-                        MeasureSpec.AT_MOST);
-                break;
             case MeasureSpec.UNSPECIFIED:
-                heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        mMaxHeight,
-                        MeasureSpec.AT_MOST);
-                break;
-            case MeasureSpec.EXACTLY:
+                targetHeight = Integer.MAX_VALUE;
                 break;
         }
-        final int targetHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        boolean recalculateVisibility = mLastMeasuredWidth == NOT_MEASURED_BEFORE
+                || getMeasuredHeight() != targetHeight
+                || mLastMeasuredWidth != widthSize;
+
         final int count = getChildCount();
-
-        for (int i = 0; i < count; ++i) {
-            final View child = getChildAt(i);
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            lp.hide = true;
-        }
-
-        int totalHeight = mPaddingTop + mPaddingBottom;
-        boolean first = true;
-
-        // Starting from the bottom: we measure every view as if it were the only one. If it still
-        // fits, we take it, otherwise we stop there.
-        for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
-            if (getChildAt(i).getVisibility() == GONE) {
-                continue;
-            }
-            final View child = getChildAt(i);
-            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-
-            if (child instanceof ImageFloatingTextView) {
-                // Pretend we need the image padding for all views, we don't know which
-                // one will end up needing to do this (might end up not using all the space,
-                // but calculating this exactly would be more expensive).
-                ((ImageFloatingTextView) child).setNumIndentLines(
-                        mIndentLines == 2 ? 3 : mIndentLines);
+        if (recalculateVisibility) {
+            // We only need to recalculate the view visibilities if the view wasn't measured already
+            // in this pass, otherwise we may drop messages here already since we are measured
+            // exactly with what we returned before, which was optimized already with the
+            // line-indents.
+            for (int i = 0; i < count; ++i) {
+                final View child = getChildAt(i);
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                lp.hide = true;
             }
 
-            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            int totalHeight = mPaddingTop + mPaddingBottom;
+            boolean first = true;
 
-            final int childHeight = child.getMeasuredHeight();
-            int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
-                    lp.bottomMargin + (first ? 0 : mSpacing));
-            first = false;
+            // Starting from the bottom: we measure every view as if it were the only one. If it still
 
-            if (newHeight <= targetHeight) {
-                totalHeight = newHeight;
-                lp.hide = false;
-            } else {
-                break;
+            // fits, we take it, otherwise we stop there.
+            for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
+                if (getChildAt(i).getVisibility() == GONE) {
+                    continue;
+                }
+                final View child = getChildAt(i);
+                LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
+
+                if (child instanceof ImageFloatingTextView) {
+                    // Pretend we need the image padding for all views, we don't know which
+                    // one will end up needing to do this (might end up not using all the space,
+                    // but calculating this exactly would be more expensive).
+                    ((ImageFloatingTextView) child).setNumIndentLines(
+                            mIndentLines == 2 ? 3 : mIndentLines);
+                }
+
+                measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+
+                final int childHeight = child.getMeasuredHeight();
+                int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
+                        lp.bottomMargin + (first ? 0 : mSpacing));
+                first = false;
+
+                if (newHeight <= targetHeight) {
+                    totalHeight = newHeight;
+                    lp.hide = false;
+                } else {
+                    break;
+                }
             }
         }
 
@@ -149,8 +148,8 @@ public class MessagingLinearLayout extends ViewGroup {
         int measuredWidth = mPaddingLeft + mPaddingRight;
         int imageLines = mIndentLines;
         // Need to redo the height because it may change due to changing indents.
-        totalHeight = mPaddingTop + mPaddingBottom;
-        first = true;
+        int totalHeight = mPaddingTop + mPaddingBottom;
+        boolean first = true;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -168,7 +167,7 @@ public class MessagingLinearLayout extends ViewGroup {
                     imageLines = 3;
                 }
                 boolean changed = textChild.setNumIndentLines(Math.max(0, imageLines));
-                if (changed) {
+                if (changed || !recalculateVisibility) {
                     measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
                 }
                 imageLines -= textChild.getLineCount();
@@ -188,6 +187,7 @@ public class MessagingLinearLayout extends ViewGroup {
                         widthMeasureSpec),
                 resolveSize(Math.max(getSuggestedMinimumHeight(), totalHeight),
                         heightMeasureSpec));
+        mLastMeasuredWidth = widthSize;
     }
 
     @Override
@@ -236,6 +236,7 @@ public class MessagingLinearLayout extends ViewGroup {
 
             first = false;
         }
+        mLastMeasuredWidth = NOT_MEASURED_BEFORE;
     }
 
     @Override

@@ -602,7 +602,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      */
     public void setExpanded(NotificationData.Entry entry, boolean expanded) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(entry.key);
-        if (headsUpEntry != null && headsUpEntry.expanded != expanded) {
+        if (headsUpEntry != null && headsUpEntry.expanded != expanded && entry.row.isPinned()) {
             headsUpEntry.expanded = expanded;
             if (expanded) {
                 headsUpEntry.removeAutoRemovalCallbacks();
