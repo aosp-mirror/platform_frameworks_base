@@ -41,6 +41,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.SystemServiceRegistry_Accessor;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -631,31 +632,7 @@ public class BridgeContext extends Context {
 
     @Override
     public String getSystemServiceName(Class<?> serviceClass) {
-        if (serviceClass.equals(LayoutInflater.class)) {
-            return LAYOUT_INFLATER_SERVICE;
-        }
-
-        if (serviceClass.equals(TextServicesManager.class)) {
-            return TEXT_SERVICES_MANAGER_SERVICE;
-        }
-
-        if (serviceClass.equals(WindowManager.class)) {
-            return WINDOW_SERVICE;
-        }
-
-        if (serviceClass.equals(PowerManager.class)) {
-            return POWER_SERVICE;
-        }
-
-        if (serviceClass.equals(DisplayManager.class)) {
-            return DISPLAY_SERVICE;
-        }
-
-        if (serviceClass.equals(AccessibilityManager.class)) {
-            return ACCESSIBILITY_SERVICE;
-        }
-
-        throw new UnsupportedOperationException("Unsupported Service: " + serviceClass);
+        return SystemServiceRegistry_Accessor.getSystemServiceName(serviceClass);
     }
 
     @Override
