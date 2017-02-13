@@ -32,9 +32,12 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.IBinder;
 import android.os.Binder;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -784,4 +787,58 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
     }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+            throws RemoteException {
+        new VibratorShellCommand(this).exec(this, in, out, err, args, callback, resultReceiver);
+    }
+
+    private final class VibratorShellCommand extends ShellCommand {
+
+        private static final long MAX_VIBRATION_MS = 200;
+
+        private final IBinder mToken;
+
+        private VibratorShellCommand(IBinder token) {
+            mToken = token;
+        }
+
+        @Override
+        public int onCommand(String cmd) {
+            if ("vibrate".equals(cmd)) {
+                return runVibrate();
+            }
+            return handleDefaultCommands(cmd);
+        }
+
+        private int runVibrate() {
+            final long duration = Long.parseLong(getNextArgRequired());
+            if (duration > MAX_VIBRATION_MS) {
+                throw new IllegalArgumentException("maximum duration is " + MAX_VIBRATION_MS);
+            }
+            String description = getNextArg();
+            if (description == null) {
+                description = "Shell command";
+            }
+            vibrate(Binder.getCallingUid(), description, duration, AudioAttributes.USAGE_UNKNOWN,
+                    mToken);
+            return 0;
+        }
+
+        @Override
+        public void onHelp() {
+            try (PrintWriter pw = getOutPrintWriter();) {
+                pw.println("Vibrator commands:");
+                pw.println("  help");
+                pw.println("    Prints this help text.");
+                pw.println("");
+                pw.println("  vibrate duration [description]");
+                pw.println("    Vibrates for duration milliseconds.");
+                pw.println("");
+            }
+        }
+    }
+
 }
