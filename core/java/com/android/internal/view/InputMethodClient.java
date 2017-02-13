@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.annotation.IntDef;
+import android.view.WindowManager.LayoutParams;
 
 import java.lang.annotation.Retention;
 
@@ -102,5 +103,66 @@ public final class InputMethodClient {
             default:
                 return "Unknown=" + reason;
         }
+    }
+
+    public static String softInputModeToString(final int softInputMode) {
+        final StringBuilder sb = new StringBuilder();
+        final int state = softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE;
+        final int adjust = softInputMode & LayoutParams.SOFT_INPUT_MASK_ADJUST;
+        final boolean isForwardNav =
+                (softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0;
+
+        switch (state) {
+            case LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
+                sb.append("STATE_UNSPECIFIED");
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+                sb.append("STATE_UNCHANGED");
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                sb.append("STATE_HIDDEN");
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                sb.append("STATE_ALWAYS_HIDDEN");
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+                sb.append("STATE_VISIBLE");
+                break;
+            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
+                sb.append("STATE_ALWAYS_VISIBLE");
+                break;
+            default:
+                sb.append("STATE_UNKNOWN(");
+                sb.append(state);
+                sb.append(")");
+                break;
+        }
+
+        switch (adjust) {
+            case LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED:
+                sb.append("|ADJUST_UNSPECIFIED");
+                break;
+            case LayoutParams.SOFT_INPUT_ADJUST_RESIZE:
+                sb.append("|ADJUST_RESIZE");
+                break;
+            case LayoutParams.SOFT_INPUT_ADJUST_PAN:
+                sb.append("|ADJUST_PAN");
+                break;
+            case LayoutParams.SOFT_INPUT_ADJUST_NOTHING:
+                sb.append("|ADJUST_NOTHING");
+                break;
+            default:
+                sb.append("|ADJUST_UNKNOWN(");
+                sb.append(adjust);
+                sb.append(")");
+                break;
+        }
+
+        if (isForwardNav) {
+            // This is a special bit that is set by the system only during the window navigation.
+            sb.append("|IS_FORWARD_NAVIGATION");
+        }
+
+        return sb.toString();
     }
 }
