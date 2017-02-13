@@ -784,7 +784,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (updateInputWindowsNeeded) {
             mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
-        mService.setFocusTaskRegionLocked();
+        mService.setFocusTaskRegionLocked(null);
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.

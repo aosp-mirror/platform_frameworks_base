@@ -1072,19 +1072,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void setTouchExcludeRegion(Task focusedTask) {
-        mTouchExcludeRegion.set(mBaseDisplayRect);
-        final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        mTmpRect2.setEmpty();
-        for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mTaskStackContainers.get(stackNdx);
-            stack.setTouchExcludeRegion(
-                    focusedTask, delta, mTouchExcludeRegion, mContentRect, mTmpRect2);
-        }
-        // If we removed the focused task above, add it back and only leave its
-        // outside touch area in the exclusion. TapDectector is not interested in
-        // any touch inside the focused task itself.
-        if (!mTmpRect2.isEmpty()) {
-            mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
+        // The provided task is the task on this display with focus, so if WindowManagerService's
+        // focused app is not on this display, focusedTask will be null.
+        if (focusedTask == null) {
+            mTouchExcludeRegion.setEmpty();
+        } else {
+            mTouchExcludeRegion.set(mBaseDisplayRect);
+            final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
+            mTmpRect2.setEmpty();
+            for (int stackNdx = mTaskStackContainers.size() - 1; stackNdx >= 0; --stackNdx) {
+                final TaskStack stack = mTaskStackContainers.get(stackNdx);
+                stack.setTouchExcludeRegion(
+                        focusedTask, delta, mTouchExcludeRegion, mContentRect, mTmpRect2);
+            }
+            // If we removed the focused task above, add it back and only leave its
+            // outside touch area in the exclusion. TapDectector is not interested in
+            // any touch inside the focused task itself.
+            if (!mTmpRect2.isEmpty()) {
+                mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
+            }
         }
         final WindowState inputMethod = mService.mInputMethodWindow;
         if (inputMethod != null && inputMethod.isVisibleLw()) {
