@@ -33,8 +33,8 @@ import android.util.ArrayMap;
 import android.view.LayoutInflater;
 
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.utils.leaks.Tracker;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.utils.leaks.Tracker;
 
 public class TestableContext extends ContextWrapper implements SysUiServiceProvider {
 
@@ -79,6 +79,10 @@ public class TestableContext extends ContextWrapper implements SysUiServiceProvi
     @Override
     public Resources getResources() {
         return super.getResources();
+    }
+
+    public <T> void addMockSystemService(Class<T> service, T mock) {
+        addMockSystemService(getSystemServiceName(service), mock);
     }
 
     public void addMockSystemService(String name, Object service) {

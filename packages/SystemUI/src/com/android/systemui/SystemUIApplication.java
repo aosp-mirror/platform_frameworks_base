@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
 
 import java.util.HashMap;
@@ -81,6 +82,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             PipUI.class,
             ShortcutKeyDispatcher.class,
             VendorServices.class,
+            GarbageMonitor.Service.class,
             LatencyTester.class,
     };
 

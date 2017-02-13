@@ -106,6 +106,20 @@ public class TrackedGarbage {
         }
     }
 
+    public synchronized int countOldGarbage() {
+        cleanUp();
+
+        long now = SystemClock.uptimeMillis();
+
+        int result = 0;
+        for (LeakReference ref : mGarbage) {
+            if (isOld(ref.createdUptimeMillis, now)) {
+                result++;
+            }
+        }
+        return result;
+    }
+
     private boolean isOld(long createdUptimeMillis, long now) {
         return createdUptimeMillis + GARBAGE_COLLECTION_DEADLINE_MILLIS < now;
     }
