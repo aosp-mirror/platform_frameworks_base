@@ -515,9 +515,6 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(callingPackage, targetUserId, "Cannot start activity")) {
                 return false;
             }
-            if (!canAccessProfile(callingPackage, targetUserId, "Cannot access shortcuts")) {
-                return false;
-            }
             if (!isUserEnabled(targetUserId)) {
                 throw new IllegalStateException("Cannot start a shortcut for disabled profile "
                         + targetUserId);
