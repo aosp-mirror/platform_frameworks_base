@@ -331,7 +331,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"מאפשרת לאפליקציה ליצור חלקים ממנה השמורים בזיכרון באופן עקבי. הדבר עלול להגביל את הזיכרון הזמין לאפליקציות אחרות וכתוצאה מכך להאט את פעולת הטלוויזיה."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטלפון."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"מדידת נפח האחסון של אפליקציות"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"מאפשר לאפליקציה לאחזר את הקוד, הנתונים, וגודלי הקבצים השמורים שלו"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"מאפשר לאפליקציה לאחזר את הקוד, הנתונים, וגודלי קובצי המטמון שלו"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"שינוי הגדרות מערכת"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"מאפשר לאפליקציה לשנות את נתוני הגדרות המערכת. אפליקציות זדוניות עלולות לשבש את תצורת המערכת שלך."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"הפעלה בעת אתחול"</string>
@@ -1756,18 +1756,11 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"פרודוקטיביות"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"שטח האחסון במכשיר"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏ניקוי באגים ב-USB"</string>
-    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
-    <skip />
-    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
-    <skip />
-    <!-- no translation found for time_picker_header_text (143536825321922567) -->
-    <skip />
-    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
-    <skip />
-    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
-    <skip />
-    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
-    <skip />
-    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
-    <skip />
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"שעה"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"דקה"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"הגדר שעה"</string>
+    <string name="time_picker_input_error" msgid="7574999942502513765">"הזן שעה חוקית"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"הקלד את השעה"</string>
+    <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"העבר למצב קלט טקסט לצורך הזנת השעה"</string>
+    <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"העבר למצב שעון לצורך הזנת השעה"</string>
 </resources>
