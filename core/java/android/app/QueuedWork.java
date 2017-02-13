@@ -16,197 +16,86 @@
 
 package android.app;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
-import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
-
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * Internal utility class to keep track of process-global work that's outstanding and hasn't been
- * finished yet.
+ * Internal utility class to keep track of process-global work that's
+ * outstanding and hasn't been finished yet.
  *
- * New work will be {@link #queue queued}.
- *
- * It is possible to add 'finisher'-runnables that are {@link #waitToFinish guaranteed to be run}.
- * This is used to make sure the work has been finished.
- *
- * This was created for writing SharedPreference edits out asynchronously so we'd have a mechanism
- * to wait for the writes in Activity.onPause and similar places, but we may use this mechanism for
- * other things in the future.
- *
- * The queued asynchronous work is performed on a separate, dedicated thread.
+ * This was created for writing SharedPreference edits out
+ * asynchronously so we'd have a mechanism to wait for the writes in
+ * Activity.onPause and similar places, but we may use this mechanism
+ * for other things in the future.
  *
  * @hide
  */
 public class QueuedWork {
-    private static final String LOG_TAG = QueuedWork.class.getSimpleName();
 
-    /** Delay for delayed runnables */
-    private static final long DELAY = 50;
+    // The set of Runnables that will finish or wait on any async
+    // activities started by the application.
+    private static final ConcurrentLinkedQueue<Runnable> sPendingWorkFinishers =
+            new ConcurrentLinkedQueue<Runnable>();
 
-    /** Lock for this class */
-    private static final Object sLock = new Object();
-
-    /** Finishers {@link #addFinisher added} and not yet {@link #removeFinisher removed} */
-    @GuardedBy("sLock")
-    private static final LinkedList<Runnable> sFinishers = new LinkedList<>();
-
-    /** {@link #getHandler() Lazily} created handler */
-    @GuardedBy("sLock")
-    private static Handler sHandler = null;
-
-    /** Work queued via {@link #queue} */
-    @GuardedBy("sLock")
-    private static final LinkedList<Runnable> sWork = new LinkedList<>();
-
-    /** If new work can be delayed or not */
-    @GuardedBy("sLock")
-    private static boolean sCanDelay = true;
+    private static ExecutorService sSingleThreadExecutor = null; // lazy, guarded by class
 
     /**
-     * Lazily create a handler on a separate thread.
-     *
-     * @return the handler
+     * Returns a single-thread Executor shared by the entire process,
+     * creating it if necessary.
      */
-    private static Handler getHandler() {
-        synchronized (sLock) {
-            if (sHandler == null) {
-                HandlerThread handlerThread = new HandlerThread("queued-work-looper",
-                        Process.THREAD_PRIORITY_BACKGROUND);
-                handlerThread.start();
-
-                sHandler = new QueuedWorkHandler(handlerThread.getLooper());
+    public static ExecutorService singleThreadExecutor() {
+        synchronized (QueuedWork.class) {
+            if (sSingleThreadExecutor == null) {
+                // TODO: can we give this single thread a thread name?
+                sSingleThreadExecutor = Executors.newSingleThreadExecutor();
             }
-            return sHandler;
+            return sSingleThreadExecutor;
         }
     }
 
     /**
-     * Add a finisher-runnable to wait for {@link #queue asynchronously processed work}.
+     * Add a runnable to finish (or wait for) a deferred operation
+     * started in this context earlier.  Typically finished by e.g.
+     * an Activity#onPause.  Used by SharedPreferences$Editor#startCommit().
      *
-     * Used by SharedPreferences$Editor#startCommit().
-     *
-     * Note that this doesn't actually start it running.  This is just a scratch set for callers
-     * doing async work to keep updated with what's in-flight. In the common case, caller code
-     * (e.g. SharedPreferences) will pretty quickly call remove() after an add(). The only time
-     * these Runnables are run is from {@link #waitToFinish}.
-     *
-     * @param finisher The runnable to add as finisher
+     * Note that this doesn't actually start it running.  This is just
+     * a scratch set for callers doing async work to keep updated with
+     * what's in-flight.  In the common case, caller code
+     * (e.g. SharedPreferences) will pretty quickly call remove()
+     * after an add().  The only time these Runnables are run is from
+     * waitToFinish(), below.
      */
-    public static void addFinisher(Runnable finisher) {
-        synchronized (sLock) {
-            sFinishers.add(finisher);
-        }
+    public static void add(Runnable finisher) {
+        sPendingWorkFinishers.add(finisher);
+    }
+
+    public static void remove(Runnable finisher) {
+        sPendingWorkFinishers.remove(finisher);
     }
 
     /**
-     * Remove a previously {@link #addFinisher added} finisher-runnable.
+     * Finishes or waits for async operations to complete.
+     * (e.g. SharedPreferences$Editor#startCommit writes)
      *
-     * @param finisher The runnable to remove.
-     */
-    public static void removeFinisher(Runnable finisher) {
-        synchronized (sLock) {
-            sFinishers.remove(finisher);
-        }
-    }
-
-    /**
-     * Trigger queued work to be processed immediately. The queued work is processed on a separate
-     * thread asynchronous. While doing that run and process all finishers on this thread. The
-     * finishers can be implemented in a way to check weather the queued work is finished.
-     *
-     * Is called from the Activity base class's onPause(), after BroadcastReceiver's onReceive,
-     * after Service command handling, etc. (so async work is never lost)
+     * Is called from the Activity base class's onPause(), after
+     * BroadcastReceiver's onReceive, after Service command handling,
+     * etc.  (so async work is never lost)
      */
     public static void waitToFinish() {
-        Handler handler = getHandler();
-
-        synchronized (sLock) {
-            if (handler.hasMessages(QueuedWorkHandler.MSG_RUN)) {
-                // Force the delayed work to be processed now
-                handler.removeMessages(QueuedWorkHandler.MSG_RUN);
-                handler.sendEmptyMessage(QueuedWorkHandler.MSG_RUN);
-            }
-
-            // We should not delay any work as this might delay the finishers
-            sCanDelay = false;
-        }
-
-        try {
-            while (true) {
-                Runnable finisher;
-
-                synchronized (sLock) {
-                    finisher = sFinishers.poll();
-                }
-
-                if (finisher == null) {
-                    break;
-                }
-
-                finisher.run();
-            }
-        } finally {
-            sCanDelay = true;
+        Runnable toFinish;
+        while ((toFinish = sPendingWorkFinishers.poll()) != null) {
+            toFinish.run();
         }
     }
-
+    
     /**
-     * Queue a work-runnable for processing asynchronously.
-     *
-     * @param work The new runnable to process
-     * @param shouldDelay If the message should be delayed
-     */
-    public static void queue(Runnable work, boolean shouldDelay) {
-        Handler handler = getHandler();
-
-        synchronized (sLock) {
-            sWork.add(work);
-
-            if (shouldDelay && sCanDelay) {
-                handler.sendEmptyMessageDelayed(QueuedWorkHandler.MSG_RUN, DELAY);
-            } else {
-                handler.sendEmptyMessage(QueuedWorkHandler.MSG_RUN);
-            }
-        }
-    }
-
-    /**
-     * @return True iff there is any {@link #queue async work queued}.
+     * Returns true if there is pending work to be done.  Note that the
+     * result is out of data as soon as you receive it, so be careful how you
+     * use it.
      */
     public static boolean hasPendingWork() {
-        synchronized (sLock) {
-            return !sWork.isEmpty();
-        }
+        return !sPendingWorkFinishers.isEmpty();
     }
-
-    private static class QueuedWorkHandler extends Handler {
-        static final int MSG_RUN = 1;
-
-        QueuedWorkHandler(Looper looper) {
-            super(looper);
-        }
-
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_RUN) {
-                LinkedList<Runnable> work;
-
-                synchronized (sWork) {
-                    work = (LinkedList<Runnable>) sWork.clone();
-                    sWork.clear();
-
-                    // Remove all msg-s as all work will be processed now
-                    removeMessages(MSG_RUN);
-                }
-
-                work.forEach(Runnable::run);
-            }
-        }
-    }
+    
 }
