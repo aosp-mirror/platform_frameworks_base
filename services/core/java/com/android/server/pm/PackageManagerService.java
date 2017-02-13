@@ -22791,6 +22791,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean isPackagePersistent(String packageName) {
+            synchronized (mPackages) {
+                PackageParser.Package pkg = mPackages.get(packageName);
+                return pkg != null
+                        ? ((pkg.applicationInfo.flags&(ApplicationInfo.FLAG_SYSTEM
+                                        | ApplicationInfo.FLAG_PERSISTENT)) ==
+                                (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_PERSISTENT))
+                        : false;
+            }
+        }
+
+        @Override
         public List<PackageInfo> getOverlayPackages(int userId) {
             final ArrayList<PackageInfo> overlayPackages = new ArrayList<PackageInfo>();
             synchronized (mPackages) {

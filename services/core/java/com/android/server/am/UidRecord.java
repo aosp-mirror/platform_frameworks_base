@@ -26,7 +26,6 @@ import android.util.TimeUtils;
  */
 public final class UidRecord {
     final int uid;
-    final boolean persistent;
     int curProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     long lastBackgroundTime;
@@ -52,9 +51,8 @@ public final class UidRecord {
 
     ChangeItem pendingChange;
 
-    public UidRecord(int _uid, boolean _persist) {
+    public UidRecord(int _uid) {
         uid = _uid;
-        persistent = _persist;
         reset();
     }
 
