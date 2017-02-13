@@ -103,7 +103,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
 
         final String pkg = sbn.getPackageName();
         int appUid = -1;
-        String appname = pkg;
+        String appName = pkg;
         Drawable pkgicon = null;
         try {
             final ApplicationInfo info = pm.getApplicationInfo(pkg,
@@ -113,7 +113,7 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
                 appUid = info.uid;
-                appname = String.valueOf(pm.getApplicationLabel(info));
+                appName = String.valueOf(pm.getApplicationLabel(info));
                 pkgicon = pm.getApplicationIcon(info);
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -135,16 +135,13 @@ public class NotificationInfo extends LinearLayout implements GutsContent {
                 R.plurals.notification_num_channels_desc, numChannels), numChannels));
 
         // If this is the placeholder channel, don't use our channel-specific text.
-        String appNameText;
         CharSequence channelNameText;
         if (channel.getId().equals(NotificationChannel.DEFAULT_CHANNEL_ID)) {
-            appNameText = appname;
             channelNameText = mContext.getString(R.string.notification_header_default_channel);
         } else {
-            appNameText = mContext.getString(R.string.notification_importance_header_app, appname);
             channelNameText = channel.getName();
         }
-        ((TextView) findViewById(R.id.pkgname)).setText(appNameText);
+        ((TextView) findViewById(R.id.pkgname)).setText(appName);
         ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
 
         // Set group information if this channel has an associated group.
