@@ -14,6 +14,7 @@
 
 package com.android.systemui.fragments;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +22,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 
+import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIApplication;
 
@@ -28,16 +30,16 @@ import com.android.systemui.SystemUIApplication;
  * Holds a map of root views to FragmentHostStates and generates them as needed.
  * Also dispatches the configuration changes to all current FragmentHostStates.
  */
-public class FragmentService extends SystemUI {
+public class FragmentService implements ConfigurationChangedReceiver {
 
     private static final String TAG = "FragmentService";
 
     private final ArrayMap<View, FragmentHostState> mHosts = new ArrayMap<>();
     private final Handler mHandler = new Handler();
+    private final Context mContext;
 
-    @Override
-    public void start() {
-        putComponent(FragmentService.class, this);
+    public FragmentService(Context context) {
+        mContext = context;
     }
 
     public FragmentHostManager getFragmentHostManager(View view) {
@@ -50,8 +52,14 @@ public class FragmentService extends SystemUI {
         return state.getFragmentHostManager();
     }
 
+    public void destroyAll() {
+        for (FragmentHostState state : mHosts.values()) {
+            state.mFragmentHostManager.destroy();
+        }
+    }
+
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration newConfig) {
         for (FragmentHostState state : mHosts.values()) {
             state.sendConfigurationChange(newConfig);
         }

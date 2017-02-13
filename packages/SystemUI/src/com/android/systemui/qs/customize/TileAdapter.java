@@ -301,6 +301,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         if (position == mEditIndex) position--;
 
         move(mAccessibilityFromIndex, position, v);
+
         notifyDataSetChanged();
     }
 

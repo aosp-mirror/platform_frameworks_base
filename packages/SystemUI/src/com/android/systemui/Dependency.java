@@ -25,6 +25,8 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
@@ -74,6 +76,7 @@ import com.android.systemui.util.leak.LeakReporter;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -227,6 +230,9 @@ public class Dependency extends SystemUI {
         mProviders.put(StatusBarIconController.class, () ->
                 new StatusBarIconControllerImpl(mContext));
 
+        mProviders.put(FragmentService.class, () ->
+                new FragmentService(mContext));
+
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
     }
@@ -282,15 +288,40 @@ public class Dependency extends SystemUI {
         T createDependency();
     }
 
+    private <T> void destroyDependency(Class<T> cls, Consumer<T> destroy) {
+        T dep = (T) mDependencies.remove(cls);
+        if (dep != null && destroy != null) {
+            destroy.accept(dep);
+        }
+    }
+
     /**
      * Used in separate processes (like tuner settings) to init the dependencies.
      */
     public static void initDependencies(Context context) {
         if (sDependency != null) return;
         Dependency d = new Dependency();
-        d.mContext = context.getApplicationContext();
+        d.mContext = context;
         d.mComponents = new HashMap<>();
         d.start();
+    }
+
+    /**
+     * Used in separate process teardown to ensure the context isn't leaked.
+     *
+     * TODO: Remove once PreferenceFragment doesn't reference getActivity()
+     * anymore and these context hacks are no longer needed.
+     */
+    public static void clearDependencies() {
+        sDependency = null;
+    }
+
+    /**
+     * Checks to see if a dependency is instantiated, if it is it removes it from
+     * the cache and calls the destroy callback.
+     */
+    public static <T> void destroy(Class<T> cls, Consumer<T> destroy) {
+        sDependency.destroyDependency(cls, destroy);
     }
 
     public static <T> T get(Class<T> cls) {

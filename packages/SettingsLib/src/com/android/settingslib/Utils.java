@@ -215,6 +215,13 @@ public class Utils {
         return colorAccent;
     }
 
+    public static Drawable getDrawable(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        Drawable drawable = ta.getDrawable(0);
+        ta.recycle();
+        return drawable;
+    }
+
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.

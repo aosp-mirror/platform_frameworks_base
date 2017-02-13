@@ -67,7 +67,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
      */
     private final Class<?>[] SERVICES = new Class[] {
             Dependency.class,
-            FragmentService.class,
             NotificationChannels.class,
             CommandQueue.CommandQueueStart.class,
             KeyguardViewMediator.class,

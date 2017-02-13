@@ -22,10 +22,12 @@ import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.android.settingslib.drawer.SettingsDrawerActivity;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.fragments.FragmentService;
 
 public class TunerActivity extends SettingsDrawerActivity implements
         PreferenceFragment.OnPreferenceStartFragmentCallback,
@@ -51,6 +53,22 @@ public class TunerActivity extends SettingsDrawerActivity implements
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Dependency.destroy(FragmentService.class, s -> s.destroyAll());
+        Dependency.clearDependencies();
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
+    }
+
+    @Override
     public void onBackPressed() {
         if (!getFragmentManager().popBackStackImmediate()) {
             super.onBackPressed();
@@ -62,6 +80,9 @@ public class TunerActivity extends SettingsDrawerActivity implements
         try {
             Class<?> cls = Class.forName(pref.getFragment());
             Fragment fragment = (Fragment) cls.newInstance();
+            final Bundle b = new Bundle(1);
+            b.putString(PreferenceFragment.ARG_PREFERENCE_ROOT, pref.getKey());
+            fragment.setArguments(b);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             setTitle(pref.getTitle());
             transaction.replace(R.id.content_frame, fragment);

@@ -18,7 +18,7 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/nav_bar">
 
-    <ListPreference
+    <com.android.systemui.tuner.RadioListPreference
         android:key="layout"
         android:title="@string/nav_bar_layout"
         android:summary="%s"
@@ -26,54 +26,42 @@
         android:entries="@array/nav_bar_layouts"
         android:entryValues="@array/nav_bar_layouts_values" />
 
-    <PreferenceCategory
-        android:key="left"
-        android:title="@string/nav_bar_left">
+    <com.android.systemui.tuner.RadioListPreference
+        android:key="type_left"
+        android:title="@string/left_nav_bar_button_type"
+        android:persistent="false"
+        android:summary="%s"
+        android:entries="@array/nav_bar_buttons"
+        android:entryValues="@array/nav_bar_button_values" />
 
-        <DropDownPreference
-            android:key="type_left"
-            android:title="@string/nav_bar_button_type"
-            android:persistent="false"
-            android:summary="%s"
-            android:entries="@array/nav_bar_buttons"
-            android:entryValues="@array/nav_bar_button_values" />
+    <Preference
+        android:key="keycode_left"
+        android:persistent="false"
+        android:title="@string/left_keycode" />
 
-        <Preference
-            android:key="keycode_left"
-            android:persistent="false"
-            android:title="@string/keycode" />
+    <com.android.systemui.tuner.RadioListPreference
+        android:key="icon_left"
+        android:persistent="false"
+        android:summary="%s"
+        android:title="@string/left_icon" />
 
-        <com.android.systemui.tuner.BetterListPreference
-            android:key="icon_left"
-            android:persistent="false"
-            android:summary="%s"
-            android:title="@string/icon" />
+    <com.android.systemui.tuner.RadioListPreference
+        android:key="type_right"
+        android:title="@string/right_nav_bar_button_type"
+        android:summary="%s"
+        android:persistent="false"
+        android:entries="@array/nav_bar_buttons"
+        android:entryValues="@array/nav_bar_button_values" />
 
-    </PreferenceCategory>
+    <Preference
+        android:key="keycode_right"
+        android:persistent="false"
+        android:title="@string/right_keycode" />
 
-    <PreferenceCategory
-        android:key="right"
-        android:title="@string/nav_bar_right">
-
-        <DropDownPreference
-            android:key="type_right"
-            android:title="@string/nav_bar_button_type"
-            android:summary="%s"
-            android:persistent="false"
-            android:entries="@array/nav_bar_buttons"
-            android:entryValues="@array/nav_bar_button_values" />
-
-        <Preference
-            android:key="keycode_right"
-            android:persistent="false"
-            android:title="@string/keycode" />
-
-        <com.android.systemui.tuner.BetterListPreference
-            android:key="icon_right"
-            android:persistent="false"
-            android:summary="%s"
-            android:title="@string/icon" />
-
-    </PreferenceCategory>
+    <com.android.systemui.tuner.RadioListPreference
+        android:key="icon_right"
+        android:persistent="false"
+        android:summary="%s"
+        android:title="@string/right_icon" />
 
 </PreferenceScreen>

@@ -121,6 +121,7 @@
 
     </PreferenceScreen>
 
+    <!--
     <PreferenceScreen
       android:key="picture_in_picture"
       android:title="@string/picture_in_picture">
@@ -143,6 +144,7 @@
           sysui:defValue="false" />
 
     </PreferenceScreen>
+    -->
 
     <Preference
         android:key="nav_bar"
@@ -151,13 +153,8 @@
 
     <Preference
             android:key="lockscreen"
-            android:title="@string/accessibility_desc_lock_screen"
+            android:title="@string/tuner_lock_screen"
             android:fragment="com.android.systemui.tuner.LockscreenFragment" />
-
-    <Preference
-            android:key="other"
-            android:title="@string/other"
-            android:fragment="com.android.systemui.tuner.OtherPrefs" />
 
     <Preference
             android:key="plugins"
