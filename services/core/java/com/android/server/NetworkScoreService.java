@@ -917,6 +917,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return;
             }
             writer.println("Current scorer: " + currentScorer);
+            writer.println("RecommendationRequestTimeoutMs: " + mRecommendationRequestTimeoutMs);
 
             sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
                 @Override
@@ -1086,6 +1087,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     final RecommendationResult result =
                             data.getParcelable(EXTRA_RECOMMENDATION_RESULT);
                     final int sequence = data.getInt(EXTRA_SEQUENCE, -1);
+                    if (VERBOSE) Log.v(TAG, "callback received for sequence " + sequence);
                     onRemoteMethodResult(result, sequence);
                 }
             };
@@ -1105,6 +1107,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         RecommendationResult getRecommendationResult(INetworkRecommendationProvider target,
                 RecommendationRequest request) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
+            if (VERBOSE) Log.v(TAG, "getRecommendationResult() seq=" + sequence);
             target.requestRecommendation(request, mCallback, sequence);
             return getResultTimed(sequence);
         }

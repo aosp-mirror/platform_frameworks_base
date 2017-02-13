@@ -1,6 +1,7 @@
 package android.net;
 
 import android.annotation.SystemApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SystemApi
 public abstract class NetworkRecommendationProvider {
     private static final String TAG = "NetworkRecProvider";
+    private static final boolean VERBOSE = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
     /** The key into the callback Bundle where the RecommendationResult will be found. */
     public static final String EXTRA_RECOMMENDATION_RESULT =
             "android.net.extra.RECOMMENDATION_RESULT";
@@ -91,8 +93,10 @@ public abstract class NetworkRecommendationProvider {
          * @param result a {@link RecommendationResult} instance.
          */
         public void onResult(RecommendationResult result) {
+            if (VERBOSE) Log.v(TAG, "onResult(seq=" + mSequence + ")");
             if (!mCallbackRun.compareAndSet(false, true)) {
-                throw new IllegalStateException("The callback cannot be run more than once.");
+                throw new IllegalStateException("The callback cannot be run more than once. "
+                        + "seq=" + mSequence);
             }
             final Bundle data = new Bundle();
             data.putInt(EXTRA_SEQUENCE, mSequence);
@@ -102,6 +106,7 @@ public abstract class NetworkRecommendationProvider {
             } catch (RemoteException e) {
                 Log.w(TAG, "Callback failed for seq: " + mSequence, e);
             }
+            if (VERBOSE) Log.v(TAG, "onResult() complete. seq=" + mSequence);
         }
 
         @Override
@@ -134,9 +139,13 @@ public abstract class NetworkRecommendationProvider {
         @Override
         public void requestRecommendation(final RecommendationRequest request,
                 final IRemoteCallback callback, final int sequence) throws RemoteException {
+            if (VERBOSE) Log.v(TAG, "requestRecommendation(seq=" + sequence + ")");
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (VERBOSE) {
+                        Log.v(TAG, "requestRecommendation(seq=" + sequence + ") running...");
+                    }
                     ResultCallback resultCallback = new ResultCallback(callback, sequence);
                     onRequestRecommendation(request, resultCallback);
                 }
