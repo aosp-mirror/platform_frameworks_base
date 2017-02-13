@@ -4227,7 +4227,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             validateUid = mValidateUids.get(item.uid);
                             if (validateUid == null && change != UidRecord.CHANGE_GONE
                                     && change != UidRecord.CHANGE_GONE_IDLE) {
-                                validateUid = new UidRecord(item.uid, false);
+                                validateUid = new UidRecord(item.uid);
                                 mValidateUids.put(item.uid, validateUid);
                             }
                         }
@@ -6335,7 +6335,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
-            uidRec = new UidRecord(proc.uid, proc.persistent);
+            uidRec = new UidRecord(proc.uid);
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
@@ -8134,9 +8134,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // some other background operations are not.  If we're doing a check
     // of service-launch policy, allow those callers to proceed unrestricted.
     int appServicesRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
-        // Persistent app?  NB: expects that persistent uids are always active.
-        final UidRecord appIdRec = mActiveUids.get(UserHandle.getAppId(uid));
-        if (appIdRec != null && appIdRec.persistent) {
+        // Persistent app?
+        if (mPackageManagerInt.isPackagePersistent(packageName)) {
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName
                         + " is persistent; not restricted in background");

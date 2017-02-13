@@ -275,6 +275,11 @@ public abstract class PackageManagerInternal {
     public abstract void setExternalSourcesPolicy(ExternalSourcesPolicy policy);
 
     /**
+     * Return true if the given package is a persistent app process.
+     */
+    public abstract boolean isPackagePersistent(String packageName);
+
+    /**
      * Get all overlay packages for a user.
      * @param userId The user for which to get the overlays.
      * @return A list of overlay packages. An empty list is returned if the
