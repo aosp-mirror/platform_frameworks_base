@@ -230,6 +230,11 @@ public class WallpaperBackupAgent extends BackupAgent {
                     Slog.i(TAG, "Using wallpaper service " + wpService);
                 }
                 mWm.setWallpaperComponent(wpService, UserHandle.USER_SYSTEM);
+                if (!lockImageStage.exists()) {
+                    // We have a live wallpaper and no static lock image,
+                    // allow live wallpaper to show "through" on lock screen.
+                    mWm.clear(FLAG_LOCK);
+                }
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, "Can't use wallpaper service " + wpService);
