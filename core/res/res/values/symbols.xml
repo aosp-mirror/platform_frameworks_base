@@ -423,6 +423,7 @@
 
   <java-symbol type="dimen" name="accessibility_touch_slop" />
   <java-symbol type="dimen" name="alert_dialog_round_padding"/>
+  <java-symbol type="dimen" name="config_minScrollbarTouchTarget" />
   <java-symbol type="dimen" name="config_prefDialogWidth" />
   <java-symbol type="dimen" name="config_viewConfigurationTouchSlop" />
   <java-symbol type="dimen" name="config_viewMinFlingVelocity" />
