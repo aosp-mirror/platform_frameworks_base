@@ -38,8 +38,8 @@ oneway interface IInputMethod {
 
     void unbindInput();
 
-    void startInput(in IInputContext inputContext, int missingMethods, in EditorInfo attribute,
-            boolean restarting);
+    void startInput(in IBinder startInputToken, in IInputContext inputContext, int missingMethods,
+            in EditorInfo attribute, boolean restarting);
 
     void createSession(in InputChannel channel, IInputSessionCallback callback);
 

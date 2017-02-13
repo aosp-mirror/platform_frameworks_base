@@ -24,6 +24,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -291,7 +292,20 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mCandidatesViewStarted;
     InputConnection mStartedInputConnection;
     EditorInfo mInputEditorInfo;
-    
+
+    /**
+     * A token to keep tracking the last IPC that triggered
+     * {@link #doStartInput(InputConnection, EditorInfo, boolean)}. If
+     * {@link #doStartInput(InputConnection, EditorInfo, boolean)} was not caused by IPCs from
+     * {@link com.android.server.InputMethodManagerService}, this needs to remain unchanged.
+     *
+     * <p>Some IPCs to {@link com.android.server.InputMethodManagerService} require this token to
+     * disentangle event flows for various purposes such as better window animation and providing
+     * fine-grained debugging information.</p>
+     */
+    @Nullable
+    private IBinder mStartInputToken;
+
     int mShowInputFlags;
     boolean mShowInputRequested;
     boolean mLastShowInputRequested;
@@ -416,6 +430,23 @@ public class InputMethodService extends AbstractInputMethodService {
         }
 
         /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
+                @NonNull EditorInfo editorInfo, boolean restarting,
+                @NonNull IBinder startInputToken) {
+            mStartInputToken = startInputToken;
+
+            // This needs to be dispatched to interface methods rather than doStartInput().
+            // Otherwise IME developers who have overridden those interface methods will lose
+            // notifications.
+            super.dispatchStartInputWithToken(inputConnection, editorInfo, restarting,
+                    startInputToken);
+        }
+
+        /**
          * Handle a request by the system to hide the soft input area.
          */
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
@@ -454,8 +485,8 @@ public class InputMethodService extends AbstractInputMethodService {
             clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = isInputViewShown();
-            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
-                    mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken,
+                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -926,8 +957,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
-                    mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken,
+                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
         }
     }
 
@@ -1653,7 +1684,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
         final int nextImeWindowStatus = IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
         if (previousImeWindowStatus != nextImeWindowStatus) {
-            mImm.setImeWindowStatus(mToken, nextImeWindowStatus, mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mStartInputToken, nextImeWindowStatus,
+                    mBackDisposition);
         }
         if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
@@ -1678,7 +1710,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void doHideWindow() {
-        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
+        mImm.setImeWindowStatus(mToken, mStartInputToken, 0, mBackDisposition);
         hideWindow();
     }
 
@@ -2643,7 +2675,8 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mInputStarted=" + mInputStarted
                 + " mInputViewStarted=" + mInputViewStarted
                 + " mCandidatesViewStarted=" + mCandidatesViewStarted);
-        
+        p.println("  mStartInputToken=" + mStartInputToken);
+
         if (mInputEditorInfo != null) {
             p.println("  mInputEditorInfo:");
             mInputEditorInfo.dump(p, "    ");
