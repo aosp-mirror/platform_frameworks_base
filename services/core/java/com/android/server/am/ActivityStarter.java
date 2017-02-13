@@ -25,6 +25,7 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
@@ -69,6 +70,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
@@ -1090,8 +1092,8 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
         mService.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
                 mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));
-        if (mSourceRecord != null && mSourceRecord.isRecentsActivity()) {
-            mStartActivity.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
+        if (mSourceRecord != null) {
+            mStartActivity.task.setTaskToReturnTo(mSourceRecord);
         }
         if (newTask) {
             EventLog.writeEvent(
@@ -1503,9 +1505,14 @@ class ActivityStarter {
             // Caller wants to appear on home activity.
             task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
             return;
-        } else if (focusedStack == null || focusedStack.mStackId == HOME_STACK_ID) {
+        } else if (focusedStack == null || focusedStack.isHomeStack()) {
             // Task will be launched over the home stack, so return home.
             task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            return;
+        } else if (focusedStack != null && focusedStack != task.getStack() &&
+                focusedStack.isAssistantStack()) {
+            // Task was launched over the assistant stack, so return there
+            task.setTaskToReturnTo(ASSISTANT_ACTIVITY_TYPE);
             return;
         }
 
@@ -1848,13 +1855,6 @@ class ActivityStarter {
     private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
             int launchFlags, ActivityOptions aOptions) {
         final TaskRecord task = r.task;
-        if (r.isRecentsActivity()) {
-            return mSupervisor.getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-        }
-        if (r.isHomeActivity()) {
-            return mSupervisor.mHomeStack;
-        }
-
         ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions);
         if (stack != null) {
             return stack;
@@ -1927,6 +1927,9 @@ class ActivityStarter {
             case FULLSCREEN_WORKSPACE_STACK_ID:
                 canUseFocusedStack = true;
                 break;
+            case ASSISTANT_STACK_ID:
+                canUseFocusedStack = r.isAssistantActivity();
+                break;
             case DOCKED_STACK_ID:
                 canUseFocusedStack = r.supportsSplitScreen();
                 break;
@@ -1945,6 +1948,18 @@ class ActivityStarter {
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
             ActivityOptions aOptions) {
+
+        // If the activity is of a specific type, return the associated stack, creating it if
+        // necessary
+        if (r.isHomeActivity()) {
+            return mSupervisor.mHomeStack;
+        }
+        if (r.isRecentsActivity()) {
+            return mSupervisor.getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        }
+        if (r.isAssistantActivity()) {
+            return mSupervisor.getStack(ASSISTANT_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        }
 
         // We are reusing a task, keep the stack!
         if (mReuseTask != null) {
@@ -1996,7 +2011,7 @@ class ActivityStarter {
                 return mSupervisor.mFocusedStack;
             }
 
-            if (parentStack != null && parentStack.mStackId == DOCKED_STACK_ID) {
+            if (parentStack != null && parentStack.isDockedStack()) {
                 // If parent was in docked stack, the natural place to launch another activity
                 // will be fullscreen, so it can appear alongside the docked window.
                 return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED,
@@ -2032,6 +2047,8 @@ class ActivityStarter {
                 return r.supportsPictureInPicture();
             case RECENTS_STACK_ID:
                 return r.isRecentsActivity();
+            case ASSISTANT_STACK_ID:
+                return r.isAssistantActivity();
             default:
                 if (StackId.isDynamicStack(stackId)) {
                     return true;

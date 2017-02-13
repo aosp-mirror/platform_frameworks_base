@@ -616,11 +616,14 @@ public class ActivityManager {
         /** ID of stack that always on top (always visible) when it exist. */
         public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
 
-        /** Recents activity stack ID. */
+        /** ID of stack that contains the Recents activity. */
         public static final int RECENTS_STACK_ID = PINNED_STACK_ID + 1;
 
+        /** ID of stack that contains activities launched by the assistant. */
+        public static final int ASSISTANT_STACK_ID = RECENTS_STACK_ID + 1;
+
         /** Last static stack stack ID. */
-        public static final int LAST_STATIC_STACK_ID = RECENTS_STACK_ID;
+        public static final int LAST_STATIC_STACK_ID = ASSISTANT_STACK_ID;
 
         /** Start of ID range used by stacks that are created dynamically. */
         public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
@@ -665,7 +668,7 @@ public class ActivityManager {
          * Returns true if dynamic stacks are allowed to be visible behind the input stack.
          */
         public static boolean isDynamicStacksVisibleBehindAllowed(int stackId) {
-            return stackId == PINNED_STACK_ID;
+            return stackId == PINNED_STACK_ID || stackId == ASSISTANT_STACK_ID;
         }
 
         /**
@@ -681,8 +684,8 @@ public class ActivityManager {
          * Returns true if Stack size is affected by the docked stack changing size.
          */
         public static boolean isResizeableByDockedStack(int stackId) {
-            return isStaticStack(stackId) &&
-                    stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+            return isStaticStack(stackId) && stackId != DOCKED_STACK_ID
+                    && stackId != PINNED_STACK_ID && stackId != ASSISTANT_STACK_ID;
         }
 
         /**
@@ -691,14 +694,16 @@ public class ActivityManager {
          */
         public static boolean isTaskResizeableByDockedStack(int stackId) {
             return isStaticStack(stackId) && stackId != FREEFORM_WORKSPACE_STACK_ID
-                    && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+                    && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID
+                    && stackId != ASSISTANT_STACK_ID;
         }
 
         /**
          * Returns true if the input stack is affected by drag resizing.
          */
         public static boolean isStackAffectedByDragResizing(int stackId) {
-            return isStaticStack(stackId) && stackId != PINNED_STACK_ID;
+            return isStaticStack(stackId) && stackId != PINNED_STACK_ID
+                    && stackId != ASSISTANT_STACK_ID;
         }
 
         /**
@@ -722,19 +727,31 @@ public class ActivityManager {
         }
 
         /**
+         * Return whether a stackId is a stack that be a backdrop to a translucent activity.  These
+         * are generally fullscreen stacks.
+         */
+        public static boolean isBackdropToTranslucentActivity(int stackId) {
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    || stackId == ASSISTANT_STACK_ID;
+        }
+
+        /**
          * Returns true if animation specs should be constructed for app transition that moves
          * the task to the specified stack.
          */
         public static boolean useAnimationSpecForAppTransition(int stackId) {
-
             // TODO: INVALID_STACK_ID is also animated because we don't persist stack id's across
             // reboots.
             return stackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    || stackId == ASSISTANT_STACK_ID
+                    || stackId == DOCKED_STACK_ID
                     || stackId == INVALID_STACK_ID;
         }
 
-        /** Returns true if the windows in the stack can receive input keys. */
+        /**
+         * Returns true if the windows in the stack can receive input keys.
+         */
         public static boolean canReceiveKeys(int stackId) {
             return stackId != PINNED_STACK_ID;
         }
@@ -743,7 +760,17 @@ public class ActivityManager {
          * Returns true if the stack can be visible above lockscreen.
          */
         public static boolean isAllowedOverLockscreen(int stackId) {
-            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID ||
+                    stackId == ASSISTANT_STACK_ID;
+        }
+
+        /**
+         * Returns true if activities from stasks in the given {@param stackId} are allowed to
+         * enter picture-in-picture.
+         */
+        public static boolean isAllowedToEnterPictureInPicture(int stackId) {
+            return stackId != HOME_STACK_ID && stackId != ASSISTANT_STACK_ID &&
+                    stackId != RECENTS_STACK_ID;
         }
 
         public static boolean isAlwaysOnTop(int stackId) {
@@ -799,8 +826,8 @@ public class ActivityManager {
          * @see android.app.ActivityManager#supportsMultiWindow
          */
         public static boolean isMultiWindowStack(int stackId) {
-            return isStaticStack(stackId) || stackId == PINNED_STACK_ID
-                    || stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+            return stackId == PINNED_STACK_ID || stackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stackId == DOCKED_STACK_ID;
         }
 
         /**
@@ -815,20 +842,20 @@ public class ActivityManager {
          * calling {@link Activity#requestVisibleBehind}.
          */
         public static boolean activitiesCanRequestVisibleBehind(int stackId) {
-            return stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID ||
+                    stackId == ASSISTANT_STACK_ID;
         }
 
         /**
-         * Returns true if this stack may be scaled without resizing,
-         * and windows within may need to be configured as such.
+         * Returns true if this stack may be scaled without resizing, and windows within may need
+         * to be configured as such.
          */
         public static boolean windowsAreScaleable(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
 
         /**
-         * Returns true if windows in this stack should be given move animations
-         * by default.
+         * Returns true if windows in this stack should be given move animations by default.
          */
         public static boolean hasMovementAnimations(int stackId) {
             return stackId != PINNED_STACK_ID;
@@ -836,8 +863,11 @@ public class ActivityManager {
 
         /** Returns true if the input stack and its content can affect the device orientation. */
         public static boolean canSpecifyOrientation(int stackId) {
-            return stackId == HOME_STACK_ID || stackId == RECENTS_STACK_ID
-                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || isDynamicStack(stackId);
+            return stackId == HOME_STACK_ID
+                    || stackId == RECENTS_STACK_ID
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    || stackId == ASSISTANT_STACK_ID
+                    || isDynamicStack(stackId);
         }
     }
 

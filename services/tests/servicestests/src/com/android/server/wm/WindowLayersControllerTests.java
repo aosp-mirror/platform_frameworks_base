@@ -23,6 +23,9 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -153,6 +156,22 @@ public class WindowLayersControllerTests extends WindowTestsBase {
 
         // And, IME dialogs should always have an higher layer than the IME.
         assertWindowLayerGreaterThan(sImeDialogWindow, sImeWindow);
+    }
+
+    @Test
+    public void testStackLayers() throws Exception {
+        WindowState pinnedStackWindow = createWindowOnStack(null, PINNED_STACK_ID,
+                TYPE_BASE_APPLICATION, sDisplayContent, "pinnedStackWindow");
+        WindowState dockedStackWindow = createWindowOnStack(null, DOCKED_STACK_ID,
+                TYPE_BASE_APPLICATION, sDisplayContent, "dockedStackWindow");
+        WindowState assistantStackWindow = createWindowOnStack(null, ASSISTANT_STACK_ID,
+                TYPE_BASE_APPLICATION, sDisplayContent, "assistantStackWindow");
+
+        sLayersController.assignWindowLayers(sDisplayContent);
+
+        assertWindowLayerGreaterThan(dockedStackWindow, sAppWindow);
+        assertWindowLayerGreaterThan(assistantStackWindow, dockedStackWindow);
+        assertWindowLayerGreaterThan(pinnedStackWindow, assistantStackWindow);
     }
 
     private void assertWindowLayerGreaterThan(WindowState first, WindowState second)

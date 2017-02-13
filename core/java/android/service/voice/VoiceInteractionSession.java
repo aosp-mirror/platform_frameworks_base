@@ -1261,6 +1261,36 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
+
+
+    /**
+     * <p>Ask that a new assistant activity be started.  This will create a new task in the
+     * in activity manager: this means that
+     * {@link Intent#FLAG_ACTIVITY_NEW_TASK Intent.FLAG_ACTIVITY_NEW_TASK}
+     * will be set for you to make it a new task.</p>
+     *
+     * <p>The newly started activity will be displayed on top of other activities in the system
+     * in a new layer that is not affected by multi-window mode.  Tasks started from this activity
+     * will go into the normal activity layer and not this new layer.</p>
+     *
+     * <p>By default, the system will create a window for the UI for this session.  If you are using
+     * an assistant activity instead, then you can disable the window creation by calling
+     * {@link #setUiEnabled} in {@link #onPrepareShow(Bundle, int)}.</p>
+     */
+    public void startAssistantActivity(Intent intent) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        try {
+            intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess(mContext);
+            int res = mSystemService.startAssistantActivity(mToken, intent,
+                    intent.resolveType(mContext.getContentResolver()));
+            Instrumentation.checkStartActivityResult(res, intent);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Set whether this session will keep the device awake while it is running a voice
      * activity.  By default, the system holds a wake lock for it while in this state,
