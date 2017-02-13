@@ -329,7 +329,7 @@
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"מאפשרת לאפליקציה ליצור חלקים ממנה השמורים בזיכרון באופן עקבי. הדבר עלול להגביל את הזיכרון הזמין לאפליקציות אחרות וכתוצאה מכך להאט את פעולת הטלוויזיה."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטלפון."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"מדידת נפח האחסון של אפליקציות"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"מאפשר לאפליקציה לאחזר את הקוד, הנתונים, וגודלי הקבצים השמורים שלו"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"מאפשר לאפליקציה לאחזר את הקוד, הנתונים, וגודלי קובצי המטמון שלו"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"שינוי הגדרות מערכת"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"מאפשר לאפליקציה לשנות את נתוני הגדרות המערכת. אפליקציות זדוניות עלולות לשבש את תצורת המערכת שלך."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"הפעלה בעת אתחול"</string>
