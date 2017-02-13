@@ -28,6 +28,7 @@
 #include <gui/Surface.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
+#include <media/MediaAnalyticsItem.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
 
@@ -35,6 +36,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #include <system/audio.h>
@@ -625,6 +627,36 @@ void android_media_MediaRecorder_setInputSurface(
             "java/lang/IllegalArgumentException", "native_setInputSurface failed.");
 }
 
+static jobject
+android_media_MediaRecorder_getMetrics(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_MediaRecorder_getMetrics");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    // get what we have for the metrics from the codec
+    Parcel reply;
+    status_t err = mr->getMetrics(&reply);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        return (jobject) NULL;
+    }
+
+    // build and return the Bundle
+    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    item->readFromParcel(reply);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+    return mybundle;
+
+}
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -655,6 +687,8 @@ static const JNINativeMethod gMethods[] = {
                                                                 (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
     {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
+
+    {"getMetrics",          "()Landroid/os/Bundle;",            (void *)android_media_MediaRecorder_getMetrics},
 };
 
 // This function only registers the native methods, and is called from
