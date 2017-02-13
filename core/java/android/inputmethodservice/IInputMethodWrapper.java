@@ -166,8 +166,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final SomeArgs args = (SomeArgs) msg.obj;
                 final int missingMethods = msg.arg1;
                 final boolean restarting = msg.arg2 != 0;
-                final IInputContext inputContext = (IInputContext) args.arg1;
-                final EditorInfo info = (EditorInfo) args.arg2;
+                final IBinder startInputToken = (IBinder) args.arg1;
+                final IInputContext inputContext = (IInputContext) args.arg2;
+                final EditorInfo info = (EditorInfo) args.arg3;
                 final InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
                 info.makeCompatible(mTargetSdkVersion);
@@ -176,6 +177,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 } else {
                     inputMethod.startInput(ic, info);
                 }
+                inputMethod.dispatchStartInputWithToken(ic, info, true /* initial */,
+                        startInputToken);
                 args.recycle();
                 return;
             }
@@ -255,11 +258,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     }
 
     @Override
-    public void startInput(IInputContext inputContext,
+    public void startInput(IBinder startInputToken, IInputContext inputContext,
             @InputConnectionInspector.MissingMethodFlags final int missingMethods,
             EditorInfo attribute, boolean restarting) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOO(DO_START_INPUT,
-                missingMethods, restarting ? 1 : 0, inputContext, attribute));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_START_INPUT,
+                missingMethods, restarting ? 1 : 0, startInputToken, inputContext, attribute));
     }
 
     @Override

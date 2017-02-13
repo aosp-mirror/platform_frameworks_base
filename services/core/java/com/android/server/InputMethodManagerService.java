@@ -124,6 +124,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerInternal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
@@ -152,6 +153,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * This class provides a system service that manages input methods.
@@ -498,6 +500,36 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final String mSlotIme;
     @HardKeyboardBehavior
     private final int mHardKeyboardBehavior;
+
+    /**
+     * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
+     * internal message queue. Any subsequent state change inside {@link InputMethodManagerService}
+     * will not affect those tasks that are already posted.
+     *
+     * <p>Posting {@link #MSG_START_INPUT} message basically means that
+     * {@link InputMethodService#doStartInput(InputConnection, EditorInfo, boolean)} will be called
+     * back in the current IME process shortly, which will also affect what the current IME starts
+     * receiving from {@link InputMethodService#getCurrentInputConnection()}. In other words, this
+     * snapshot will be taken every time when {@link InputMethodManagerService} is initiating a new
+     * logical input session between the client application and the current IME.</p>
+     *
+     * <p>Be careful to not keep strong references to this object forever, which can prevent
+     * {@link StartInputInfo#mImeToken} and {@link StartInputInfo#mTargetWindow} from being GC-ed.
+     * </p>
+     */
+    private static class StartInputInfo {
+        @NonNull
+        final IBinder mImeToken;
+        @Nullable
+        final IBinder mTargetWindow;
+
+        StartInputInfo(@NonNull IBinder imeToken, @Nullable IBinder targetWindow) {
+            mImeToken = imeToken;
+            mTargetWindow = targetWindow;
+        }
+    }
+
+    private WeakHashMap<IBinder, StartInputInfo> mStartInputMap = new WeakHashMap<>();
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -1338,10 +1370,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     MSG_BIND_INPUT, mCurMethod, mCurClient.binding));
             mBoundToMethod = true;
         }
+
+        final Binder startInputToken = new Binder();
+        final StartInputInfo info = new StartInputInfo(mCurToken, mCurFocusedWindow);
+        mStartInputMap.put(startInputToken, info);
+
         final SessionState session = mCurClient.curSession;
-        executeOrSendMessage(session.method, mCaller.obtainMessageIIOOO(
+        executeOrSendMessage(session.method, mCaller.obtainMessageIIOOOO(
                 MSG_START_INPUT, mCurInputContextMissingMethods, initial ? 0 : 1 /* restarting */,
-                session, mCurInputContext, mCurAttribute));
+                startInputToken, session, mCurInputContext, mCurAttribute));
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
@@ -1809,12 +1846,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @SuppressWarnings("deprecation")
     @Override
-    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder token, IBinder startInputToken, int vis,
+            int backDisposition) {
+        if (startInputToken == null) {
+            throw new InvalidParameterException("startInputToken cannot be null");
+        }
+
         if (!calledWithValidToken(token)) {
             return;
         }
 
         synchronized (mMethodMap) {
+            final StartInputInfo info = mStartInputMap.get(startInputToken);
+            if (info == null) {
+                throw new InvalidParameterException("Unknown startInputToken=" + startInputToken);
+            }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
@@ -2892,12 +2938,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final int missingMethods = msg.arg1;
                 final boolean restarting = msg.arg2 != 0;
                 args = (SomeArgs) msg.obj;
-                final SessionState session = (SessionState) args.arg1;
-                final IInputContext inputContext = (IInputContext) args.arg2;
-                final EditorInfo editorInfo = (EditorInfo) args.arg3;
+                final IBinder startInputToken = (IBinder) args.arg1;
+                final SessionState session = (SessionState) args.arg2;
+                final IInputContext inputContext = (IInputContext) args.arg3;
+                final EditorInfo editorInfo = (EditorInfo) args.arg4;
                 try {
                     setEnabledSessionInMainThread(session);
-                    session.method.startInput(inputContext, missingMethods, editorInfo, restarting);
+                    session.method.startInput(startInputToken, inputContext, missingMethods,
+                            editorInfo, restarting);
                 } catch (RemoteException e) {
                 }
                 args.recycle();

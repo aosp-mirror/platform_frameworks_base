@@ -738,9 +738,10 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void setImeWindowStatus(IBinder imeToken, int vis, int backDisposition) {
+    public void setImeWindowStatus(IBinder imeToken, IBinder startInputToken, int vis,
+            int backDisposition) {
         try {
-            mService.setImeWindowStatus(imeToken, vis, backDisposition);
+            mService.setImeWindowStatus(imeToken, startInputToken, vis, backDisposition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

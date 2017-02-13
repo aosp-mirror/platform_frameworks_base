@@ -135,7 +135,8 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
-    public void setImeWindowStatus(IBinder arg0, int arg1, int arg2) throws RemoteException {
+    public void setImeWindowStatus(IBinder arg0, IBinder arg1, int arg2, int arg3)
+            throws RemoteException {
         // TODO Auto-generated method stub
     }
 
