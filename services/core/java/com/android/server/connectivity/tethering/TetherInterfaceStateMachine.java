@@ -250,31 +250,33 @@ public class TetherInterfaceStateMachine extends StateMachine {
         }
 
         private void cleanupUpstream() {
-            if (mMyUpstreamIfaceName != null) {
-                // note that we don't care about errors here.
-                // sometimes interfaces are gone before we get
-                // to remove their rules, which generates errors.
-                // just do the best we can.
-                try {
-                    // about to tear down NAT; gather remaining statistics
-                    mStatsService.forceUpdate();
-                } catch (Exception e) {
-                    if (VDBG) Log.e(TAG, "Exception in forceUpdate: " + e.toString());
-                }
-                try {
-                    mNMService.stopInterfaceForwarding(mIfaceName, mMyUpstreamIfaceName);
-                } catch (Exception e) {
-                    if (VDBG) Log.e(
-                            TAG, "Exception in removeInterfaceForward: " + e.toString());
-                }
-                try {
-                    mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
-                } catch (Exception e) {
-                    if (VDBG) Log.e(TAG, "Exception in disableNat: " + e.toString());
-                }
-                mMyUpstreamIfaceName = null;
+            if (mMyUpstreamIfaceName == null) return;
+
+            cleanupUpstreamInterface(mMyUpstreamIfaceName);
+            mMyUpstreamIfaceName = null;
+        }
+
+        private void cleanupUpstreamInterface(String upstreamIface) {
+            // Note that we don't care about errors here.
+            // Sometimes interfaces are gone before we get
+            // to remove their rules, which generates errors.
+            // Just do the best we can.
+            try {
+                // About to tear down NAT; gather remaining statistics.
+                mStatsService.forceUpdate();
+            } catch (Exception e) {
+                if (VDBG) Log.e(TAG, "Exception in forceUpdate: " + e.toString());
             }
-            return;
+            try {
+                mNMService.stopInterfaceForwarding(mIfaceName, upstreamIface);
+            } catch (Exception e) {
+                if (VDBG) Log.e(TAG, "Exception in removeInterfaceForward: " + e.toString());
+            }
+            try {
+                mNMService.disableNat(mIfaceName, upstreamIface);
+            } catch (Exception e) {
+                if (VDBG) Log.e(TAG, "Exception in disableNat: " + e.toString());
+            }
         }
 
         @Override
@@ -306,6 +308,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                                     newUpstreamIfaceName);
                         } catch (Exception e) {
                             Log.e(TAG, "Exception enabling Nat: " + e.toString());
+                            cleanupUpstreamInterface(newUpstreamIfaceName);
                             mLastError = ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
                             transitionTo(mInitialState);
                             return true;
