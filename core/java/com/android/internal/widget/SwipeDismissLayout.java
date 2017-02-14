@@ -79,7 +79,6 @@ public class SwipeDismissLayout extends FrameLayout {
     private boolean mDismissed;
     private boolean mDiscardIntercept;
     private VelocityTracker mVelocityTracker;
-    private float mTranslationX;
     private boolean mBlockGesture = false;
     private boolean mActivityTranslucencyConverted = false;
 
@@ -166,8 +165,10 @@ public class SwipeDismissLayout extends FrameLayout {
             return super.onInterceptTouchEvent(ev);
         }
 
-        // offset because the view is translated during swipe
-        ev.offsetLocation(mTranslationX, 0);
+        // Offset because the view is translated during swipe, match X with raw X. Active touch
+        // coordinates are mostly used by the velocity tracker, so offset it to match the raw
+        // coordinates which is what is primarily used elsewhere.
+        ev.offsetLocation(ev.getRawX() - ev.getX(), 0);
 
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
@@ -232,8 +233,12 @@ public class SwipeDismissLayout extends FrameLayout {
         if (mVelocityTracker == null || !mDismissable) {
             return super.onTouchEvent(ev);
         }
-        // offset because the view is translated during swipe
-        ev.offsetLocation(mTranslationX, 0);
+
+        // Offset because the view is translated during swipe, match X with raw X. Active touch
+        // coordinates are mostly used by the velocity tracker, so offset it to match the raw
+        // coordinates which is what is primarily used elsewhere.
+        ev.offsetLocation(ev.getRawX() - ev.getX(), 0);
+
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_UP:
                 updateDismiss(ev);
@@ -266,7 +271,6 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     private void setProgress(float deltaX) {
-        mTranslationX = deltaX;
         if (mProgressListener != null && deltaX >= 0)  {
             mProgressListener.onSwipeProgressChanged(
                     this, progressToAlpha(deltaX / getWidth()), deltaX);
@@ -300,7 +304,6 @@ public class SwipeDismissLayout extends FrameLayout {
             mVelocityTracker.recycle();
         }
         mVelocityTracker = null;
-        mTranslationX = 0;
         mDownX = 0;
         mLastX = Integer.MIN_VALUE;
         mDownY = 0;
