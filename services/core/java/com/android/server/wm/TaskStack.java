@@ -423,8 +423,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         mBoundsAfterRotation.setEmpty();
         final DockedStackDividerController controller = getDisplayContent()
                 .mDividerControllerLocked;
-        if (controller.isMinimizedDock() && mStackId == DOCKED_STACK_ID) {
-            outTempBounds.set(controller.getMiddlePositionDockedStackRect());
+        if (mStackId == DOCKED_STACK_ID) {
+            final Rect dockedStackRect = controller.getMiddlePositionDockedStackRect();
+
+            if (dockedStackRect != null) {
+                outTempBounds.set(dockedStackRect);
+            }
         }
     }
 
