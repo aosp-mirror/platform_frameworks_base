@@ -24796,13 +24796,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Sets the tooltip text which will be displayed in a small popup next to the view.
      * <p>
      * The tooltip will be displayed:
+     * <ul>
      * <li>On long click, unless is not handled otherwise (by OnLongClickListener or a context
      * menu). </li>
      * <li>On hover, after a brief delay since the pointer has stopped moving </li>
+     * </ul>
+     * <p>
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the text displayed in the tooltip.
      *
      * @param tooltipText the tooltip text, or null if no tooltip is required
+     * @see #getTooltipText()
+     * @attr ref android.R.styleable#View_tooltipText
      */
-    public final void setTooltipText(@Nullable CharSequence tooltipText) {
+    public void setTooltipText(@Nullable CharSequence tooltipText) {
         if (TextUtils.isEmpty(tooltipText)) {
             setFlags(0, TOOLTIP);
             hideTooltip();
@@ -24831,10 +24838,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns the view's tooltip text.
      *
+     * <strong>Note:</strong> Do not override this method, as it will have no
+     * effect on the text displayed in the tooltip. You must call
+     * {@link #setTooltipText(CharSequence)} to modify the tooltip text.
+     *
      * @return the tooltip text
+     * @see #setTooltipText(CharSequence)
+     * @attr ref android.R.styleable#View_tooltipText
      */
     @Nullable
-    public final CharSequence getTooltipText() {
+    public CharSequence getTooltipText() {
         return mTooltipInfo != null ? mTooltipInfo.mTooltipText : null;
     }
 
@@ -24847,21 +24860,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean showTooltip(int x, int y, boolean fromLongClick) {
-        if (mAttachInfo == null) {
+        if (mAttachInfo == null || mTooltipInfo == null) {
             return false;
         }
         if ((mViewFlags & ENABLED_MASK) != ENABLED) {
             return false;
         }
-        final CharSequence tooltipText = getTooltipText();
-        if (TextUtils.isEmpty(tooltipText)) {
+        if (TextUtils.isEmpty(mTooltipInfo.mTooltipText)) {
             return false;
         }
         hideTooltip();
         mTooltipInfo.mTooltipFromLongClick = fromLongClick;
         mTooltipInfo.mTooltipPopup = new TooltipPopup(getContext());
         final boolean fromTouch = (mPrivateFlags3 & PFLAG3_FINGER_DOWN) == PFLAG3_FINGER_DOWN;
-        mTooltipInfo.mTooltipPopup.show(this, x, y, fromTouch, tooltipText);
+        mTooltipInfo.mTooltipPopup.show(this, x, y, fromTouch, mTooltipInfo.mTooltipText);
         mAttachInfo.mTooltipHost = this;
         return true;
     }
