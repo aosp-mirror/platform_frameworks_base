@@ -61,7 +61,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_SYNC_SETTINGS);
+        return new Intent(Settings.ACTION_MANAGED_PROFILE_SETTINGS);
     }
 
     @Override
