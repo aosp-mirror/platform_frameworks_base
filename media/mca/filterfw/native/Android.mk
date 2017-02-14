@@ -41,6 +41,8 @@ LOCAL_EXPORT_LDLIBS := -llog -lgcc
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
+LOCAL_STATIC_LIBRARIES := libarect
+
 # TODO: Build a shared library as well?
 include $(BUILD_STATIC_LIBRARY)
 

@@ -27,8 +27,9 @@
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 
-#include <gui/IGraphicBufferProducer.h>
-#include <gui/Surface.h>
+#include <utils/StrongPointer.h>
+
+struct ANativeWindow;
 
 namespace android {
 
