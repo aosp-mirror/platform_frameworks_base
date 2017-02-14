@@ -868,6 +868,14 @@ public class SystemServicesProxy {
         return null;
     }
 
+    public ActivityManager.TaskDescription getTaskDescription(int taskId) {
+        try {
+            return mIam.getTaskDescription(taskId);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /**
      * Returns the given icon for a user, badging if necessary.
      */

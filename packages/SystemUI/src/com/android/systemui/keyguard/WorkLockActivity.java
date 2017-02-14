@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import static android.app.ActivityManager.TaskDescription;
-import static android.app.ActivityManager.StackId;
 
 import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
@@ -32,12 +31,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Bouncer between work activities and the activity used to confirm credentials before unlocking
@@ -51,44 +51,31 @@ public class WorkLockActivity extends Activity {
     private static final String TAG = "WorkLockActivity";
 
     /**
-     * ID of the locked user that this activity blocks access to.
+     * Contains a {@link TaskDescription} for the activity being covered.
      */
-    @UserIdInt
-    private int mUserId;
-
+    static final String EXTRA_TASK_DESCRIPTION =
+            "com.android.systemui.keyguard.extra.TASK_DESCRIPTION";
+  
     /**
-     * {@see KeyguardManager}
+     * Cached keyguard manager instance populated by {@link #getKeyguardManager}.
+     * @see KeyguardManager
      */
     private KeyguardManager mKgm;
-
-    /**
-     * {@see DevicePolicyManager}
-     */
-    private DevicePolicyManager mDpm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mUserId = getIntent().getIntExtra(Intent.EXTRA_USER_ID, UserHandle.myUserId());
-        mDpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-        mKgm = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-
-        final IntentFilter lockFilter = new IntentFilter();
-        lockFilter.addAction(Intent.ACTION_DEVICE_LOCKED_CHANGED);
-        registerReceiverAsUser(mLockEventReceiver, UserHandle.ALL, lockFilter,
-                /* permission */ null, /* scheduler */ null);
+        registerReceiverAsUser(mLockEventReceiver, UserHandle.ALL,
+                new IntentFilter(Intent.ACTION_DEVICE_LOCKED_CHANGED), /* permission */ null,
+                /* scheduler */ null);
 
         // Once the receiver is registered, check whether anything happened between now and the time
         // when this activity was launched. If it did and the user is unlocked now, just quit.
-        if (!mKgm.isDeviceLocked(mUserId)) {
+        if (!getKeyguardManager().isDeviceLocked(getTargetUserId())) {
             finish();
             return;
         }
-
-        // Get the organization color; this is a 24-bit integer provided by a DPC, guaranteed to
-        // be completely opaque.
-        final @ColorInt int color = mDpm.getOrganizationColorForUser(mUserId);
 
         // Draw captions overlaid on the content view, so the whole window is one solid color.
         setOverlayWithDecorCaptionEnabled(true);
@@ -96,7 +83,7 @@ public class WorkLockActivity extends Activity {
         // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
         // redaction switched on.
         final View blankView = new View(this);
-        blankView.setBackgroundColor(color);
+        blankView.setBackgroundColor(getPrimaryColor());
         setContentView(blankView);
     }
 
@@ -127,26 +114,28 @@ public class WorkLockActivity extends Activity {
 
     @Override
     public void setTaskDescription(TaskDescription taskDescription) {
-        // Use the previous activity's task description.
+        // Leave unset so we use the previous activity's task description.
     }
 
     private final BroadcastReceiver mLockEventReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, mUserId);
-            if (userId == mUserId && !mKgm.isDeviceLocked(mUserId)) {
+            final int targetUserId = getTargetUserId();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, targetUserId);
+            if (userId == targetUserId && !getKeyguardManager().isDeviceLocked(targetUserId)) {
                 finish();
             }
         }
     };
 
     private void showConfirmCredentialActivity() {
-        if (isFinishing() || !mKgm.isDeviceLocked(mUserId)) {
+        if (isFinishing() || !getKeyguardManager().isDeviceLocked(getTargetUserId())) {
             // Don't show the confirm credentials screen if we are already unlocked / unlocking.
             return;
         }
 
-        final Intent credential = mKgm.createConfirmDeviceCredentialIntent(null, null, mUserId);
+        final Intent credential = getKeyguardManager()
+                .createConfirmDeviceCredentialIntent(null, null, getTargetUserId());
         if (credential == null) {
             return;
         }
@@ -180,5 +169,33 @@ public class WorkLockActivity extends Activity {
         // using our own decor as the starting position.
         final View view = getWindow().getDecorView();
         return ActivityOptions.makeScaleUpAnimation(view, 0, 0, view.getWidth(), view.getHeight());
+    }
+
+    private KeyguardManager getKeyguardManager() {
+        if (mKgm == null) {
+            mKgm = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        }
+        return mKgm;
+    }
+
+    @VisibleForTesting
+    @UserIdInt
+    final int getTargetUserId() {
+        return getIntent().getIntExtra(Intent.EXTRA_USER_ID, UserHandle.myUserId());
+    }
+
+    @VisibleForTesting
+    @ColorInt
+    final int getPrimaryColor() {
+        final TaskDescription taskDescription = (TaskDescription)
+                getIntent().getExtra(EXTRA_TASK_DESCRIPTION);
+        if (taskDescription != null && Color.alpha(taskDescription.getPrimaryColor()) == 255) {
+            return taskDescription.getPrimaryColor();
+        } else {
+            // No task description. Use an organization color set by the policy controller.
+            final DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
+                    getSystemService(Context.DEVICE_POLICY_SERVICE);
+            return devicePolicyManager.getOrganizationColorForUser(getTargetUserId());
+        }
     }
 }
