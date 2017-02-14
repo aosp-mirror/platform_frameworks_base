@@ -10042,7 +10042,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isDeviceProvisioned() {
-        return !TextUtils.isEmpty(mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT));
+        synchronized (this) {
+            return getUserDataUnchecked(UserHandle.USER_SYSTEM).mUserSetupComplete;
+        }
     }
 
     private void removePackageIfRequired(final String packageName, final int userId) {
