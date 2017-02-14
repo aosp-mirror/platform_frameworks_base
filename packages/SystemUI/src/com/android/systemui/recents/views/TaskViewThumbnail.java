@@ -77,10 +77,11 @@ public class TaskViewThumbnail extends View {
     @ViewDebug.ExportedProperty(category="recents")
     private float mDimAlpha;
     private Matrix mMatrix = new Matrix();
-    protected Paint mDrawPaint = new Paint();
-    private Paint mLockedPaint = new Paint();
+    private Paint mDrawPaint = new Paint();
+    protected Paint mLockedPaint = new Paint();
     protected Paint mBgFillPaint = new Paint();
     protected BitmapShader mBitmapShader;
+    protected boolean mUserLocked = false;
     private LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
     // Clip the top of the thumbnail against the opaque header bar that overlaps this view
@@ -152,7 +153,7 @@ public class TaskViewThumbnail extends View {
         int thumbnailHeight = Math.min(viewHeight,
                 (int) (mThumbnailRect.height() * mThumbnailScale));
 
-        if (mTask != null && mTask.isLocked) {
+        if (mUserLocked) {
             canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
                     mLockedPaint);
         } else if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
@@ -344,6 +345,17 @@ public class TaskViewThumbnail extends View {
     }
 
     /**
+     * Returns the {@link Paint} used to draw a task screenshot, or {@link #mLockedPaint} if the
+     * thumbnail shouldn't be drawn because it belongs to a locked user.
+     */
+    protected Paint getDrawPaint() {
+        if (mUserLocked) {
+            return mLockedPaint;
+        }
+        return mDrawPaint;
+    }
+
+    /**
      * Binds the thumbnail view to the task.
      */
     void bindToTask(Task t, boolean disabledInSafeMode, int displayOrientation, Rect displayRect) {
@@ -354,7 +366,10 @@ public class TaskViewThumbnail extends View {
         if (t.colorBackground != 0) {
             mBgFillPaint.setColor(t.colorBackground);
         }
-        mLockedPaint.setColor(t.colorPrimary);
+        if (t.colorPrimary != 0) {
+            mLockedPaint.setColor(t.colorPrimary);
+        }
+        mUserLocked = t.isLocked;
         EventBus.getDefault().register(this);
     }
 
