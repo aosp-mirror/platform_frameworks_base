@@ -5726,7 +5726,7 @@ public final class ActivityThread {
         // Preload fonts resources
         try {
             final ApplicationInfo info =
-                    sPackageManager.getApplicationInfo(
+                    getPackageManager().getApplicationInfo(
                             data.appInfo.packageName,
                             PackageManager.GET_META_DATA /*flags*/,
                             UserHandle.myUserId());
