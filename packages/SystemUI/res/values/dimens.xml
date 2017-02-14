@@ -69,8 +69,8 @@
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">92dp</dimen>
 
-    <!-- Height of a small notification in the status bar if it is a large (like messaging)-->
-    <dimen name="notification_min_height_large">132dp</dimen>
+    <!-- Increased height of a small notification in the status bar -->
+    <dimen name="notification_min_height_increased">132dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
@@ -86,6 +86,9 @@
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height">148dp</dimen>
+
+    <!-- Height of a heads up notification in the status bar -->
+    <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- a threshold in dp per second that is considered fast scrolling -->
     <dimen name="scroll_fast_threshold">1500dp</dimen>

@@ -712,6 +712,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NetworkController mNetworkController;
     private KeyguardMonitorImpl mKeyguardMonitor;
     private BatteryController mBatteryController;
+    private boolean mPanelExpanded;
     private LogMaker mStatusBarStateLog;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private NotificationIconAreaController mNotificationIconAreaController;
@@ -2679,6 +2680,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void setPanelExpanded(boolean isExpanded) {
+        mPanelExpanded = isExpanded;
         mStatusBarWindowManager.setPanelExpanded(isExpanded);
         mVisualStabilityManager.setPanelExpanded(isExpanded);
         if (isExpanded && getBarState() != StatusBarState.KEYGUARD) {
@@ -6094,8 +6096,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(sbn,
                 mNotificationData.getImportance(sbn.getKey()));
+        boolean useIncreasedHeadsUp = useIncreasedCollapsedHeight && mPanelExpanded;
         try {
-            entry.cacheContentViews(mContext, null, isLowPriority, useIncreasedCollapsedHeight);
+            entry.cacheContentViews(mContext, null, isLowPriority, useIncreasedCollapsedHeight,
+                    useIncreasedHeadsUp);
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             return false;
@@ -6266,6 +6270,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         row.setUserLocked(userLocked);
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
+        row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         row.onNotificationUpdated(entry);
         return true;
     }
@@ -6760,10 +6765,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean useIncreasedCollapsedHeight = mMessagingUtil.isImportantMessaging(notification,
                 mNotificationData.getImportance(notification.getKey()));
         entry.row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
+        boolean useIncreasedHeadsUp = useIncreasedCollapsedHeight && mPanelExpanded;
+        entry.row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         boolean applyInPlace;
         try {
             applyInPlace = entry.cacheContentViews(mContext, notification.getNotification(),
-                    mNotificationData.isAmbient(key), useIncreasedCollapsedHeight);
+                    mNotificationData.isAmbient(key), useIncreasedCollapsedHeight,
+                    useIncreasedHeadsUp);
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to get notification remote views", e);
             applyInPlace = false;

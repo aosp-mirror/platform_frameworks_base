@@ -4082,21 +4082,35 @@ public class Notification implements Parcelable
 
         /**
          * Construct a RemoteViews for the final heads-up notification layout.
+         *
+         * @param increasedHeight true if this layout be created with an increased height. Some
+         * styles may support showing more then just that basic 1U size
+         * and the system may decide to render important notifications
+         * slightly bigger even when collapsed.
+         *
+         * @hide
          */
-        public RemoteViews createHeadsUpContentView() {
+        public RemoteViews createHeadsUpContentView(boolean increasedHeight) {
             if (mN.headsUpContentView != null
                     && (mStyle == null ||  !mStyle.displayCustomViewInline())) {
                 return mN.headsUpContentView;
             } else if (mStyle != null) {
-                    final RemoteViews styleView = mStyle.makeHeadsUpContentView();
-                    if (styleView != null) {
-                        return styleView;
-                    }
+                final RemoteViews styleView = mStyle.makeHeadsUpContentView(increasedHeight);
+                if (styleView != null) {
+                    return styleView;
+                }
             } else if (mActions.size() == 0) {
                 return null;
             }
 
             return applyStandardTemplateWithActions(getBigBaseLayoutResource());
+        }
+
+        /**
+         * Construct a RemoteViews for the final heads-up notification layout.
+         */
+        public RemoteViews createHeadsUpContentView() {
+            return createHeadsUpContentView(false /* useIncreasedHeight */);
         }
 
         /**
@@ -4823,9 +4837,11 @@ public class Notification implements Parcelable
 
         /**
          * Construct a Style-specific RemoteViews for the final HUN layout.
+         *
+         * @param increasedHeight true if this layout be created with an increased height.
          * @hide
          */
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return null;
         }
 
@@ -5166,6 +5182,17 @@ public class Notification implements Parcelable
                 return remoteViews;
             }
             return super.makeContentView(increasedHeight);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            if (increasedHeight && mBuilder.mActions.size() > 0) {
+                return makeBigContentView();
+            }
+            return super.makeHeadsUpContentView(increasedHeight);
         }
 
         /**
@@ -5578,7 +5605,10 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            if (increasedHeight) {
+                return makeBigContentView();
+            }
             Message m = findLatestIncomingMessage();
             CharSequence title = mConversationTitle != null
                     ? mConversationTitle
@@ -6028,7 +6058,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             RemoteViews expanded = makeMediaBigContentView();
             return expanded != null ? expanded : makeMediaContentView();
         }
@@ -6208,7 +6238,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return makeDecoratedHeadsUpContentView();
         }
 
@@ -6344,7 +6374,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             RemoteViews customRemoteView = mBuilder.mN.headsUpContentView != null
                     ? mBuilder.mN.headsUpContentView
                     : mBuilder.mN.contentView;
