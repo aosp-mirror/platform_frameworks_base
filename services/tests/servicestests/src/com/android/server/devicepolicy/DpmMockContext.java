@@ -43,9 +43,11 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.security.KeyChain;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
+import android.util.ArrayMap;
 import android.view.IWindowManager;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -58,10 +60,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -290,6 +294,7 @@ public class DpmMockContext extends MockContext {
     public final TelephonyManager telephonyManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
+    public final KeyChain.KeyChainConnection keyChainConnection;
 
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -299,6 +304,9 @@ public class DpmMockContext extends MockContext {
     private final ArrayList<UserInfo> mUserInfos = new ArrayList<>();
 
     public final BuildMock buildMock = new BuildMock();
+
+    /** Optional mapping of other user contexts for {@link #createPackageContextAsUser} to return */
+    public final Map<UserHandle, Context> userContexts = new ArrayMap<>();
 
     public String packageName = null;
 
@@ -335,6 +343,7 @@ public class DpmMockContext extends MockContext {
         telephonyManager = mock(TelephonyManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
+        keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(context.getPackageManager());
@@ -687,6 +696,19 @@ public class DpmMockContext extends MockContext {
     @Override
     public void unregisterReceiver(BroadcastReceiver receiver) {
         spiedContext.unregisterReceiver(receiver);
+    }
+
+    @Override
+    public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
+            throws PackageManager.NameNotFoundException {
+        if (!userContexts.containsKey(user)) {
+            return super.createPackageContextAsUser(packageName, flags, user);
+        }
+        if (!getPackageName().equals(packageName)) {
+            throw new UnsupportedOperationException(
+                    "Creating a context as another package is not implemented");
+        }
+        return userContexts.get(user);
     }
 
     @Override
