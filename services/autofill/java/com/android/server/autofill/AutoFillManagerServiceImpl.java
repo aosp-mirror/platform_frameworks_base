@@ -353,18 +353,12 @@ final class AutoFillManagerServiceImpl {
 
         final AutoFillId mId;
         private final Listener mListener;
-        // TODO(b/33197203): would not need a reference to response if it was an inner class of
-        // Session...
-        FillResponse mResponse;
-
-        Intent mAuthIntent;
-
-        ComponentName mServiceComponent;
+        // // TODO(b/33197203): does it really need a reference to the session's response?
+        private FillResponse mResponse;
         private AutoFillValue mAutoFillValue;
         private Rect mBounds;
 
         private boolean mValueUpdated;
-
 
         ViewState(AutoFillId id, Listener listener) {
             mId = id;
@@ -378,16 +372,6 @@ final class AutoFillManagerServiceImpl {
             mResponse = response;
             maybeCallOnFillReady();
         }
-
-        /**
-         * Used when a {@link FillResponse} requires authentication to be unlocked.
-         */
-        void setResponse(FillResponse response, ComponentName serviceComponent, Intent authIntent) {
-            mAuthIntent = authIntent;
-            mServiceComponent = serviceComponent;
-            setResponse(response);
-        }
-
 
         // TODO(b/33197203): need to refactor / rename / document this method to make it clear that
         // it can change  the value and update the UI; similarly, should replace code that
@@ -426,9 +410,8 @@ final class AutoFillManagerServiceImpl {
             pw.print(prefix); pw.print("value:" ); pw.println(mAutoFillValue);
             pw.print(prefix); pw.print("updated:" ); pw.println(mValueUpdated);
             pw.print(prefix); pw.print("bounds:" ); pw.println(mBounds);
-            pw.print(prefix); pw.print("authIntent:" ); pw.println(mAuthIntent);
-            pw.print(prefix); pw.print("serviceComponent:" ); pw.println(mServiceComponent);
         }
+
     }
 
     /**
@@ -461,7 +444,7 @@ final class AutoFillManagerServiceImpl {
         private final IAutoFillAppCallback mAppCallback;
 
         @GuardedBy("mLock")
-        private RemoteFillService mRemoteFillService;
+        RemoteFillService mRemoteFillService;
 
         // TODO(b/33197203): Get a response per view instead of per activity.
         @GuardedBy("mLock")
@@ -741,6 +724,7 @@ final class AutoFillManagerServiceImpl {
                     filterText = text.toString();
                 }
             }
+
             getUiForShowing().showFillUi(mActivityToken, viewState, response.getDatasets(),
                     bounds, filterText);
         }
@@ -750,12 +734,6 @@ final class AutoFillManagerServiceImpl {
                     + response.getAuthentication() +"):" + response);
 
             // TODO(b/33197203): add MetricsLogger calls
-
-            if (mCurrentViewState == null) {
-                // TODO(b/33197203): temporary sanity check; should never happen
-                Slog.w(TAG, "processResponseLocked(): mCurrentResponse is null");
-                return;
-            }
 
             mCurrentResponse = response;
 
@@ -777,13 +755,14 @@ final class AutoFillManagerServiceImpl {
 
                             @Override
                             public void onFailure(CharSequence message) {
-                                // TODO(b/33197203): call enableSessionLocked(false)
                                 getUiForShowing().showError(message);
                                 removeSelf();
                             }
                         }));
-                mCurrentViewState.setResponse(mCurrentResponse, mComponent, fillInIntent);
-                return;
+
+                 getUiForShowing().showFillResponseAuthRequest(
+                         mCurrentResponse.getAuthentication(), fillInIntent);
+                 return;
             }
 
             final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
@@ -797,7 +776,9 @@ final class AutoFillManagerServiceImpl {
             }
 
             // TODO(b/33197203): Consider using mCurrentResponse, depends on partitioning design
-            mCurrentViewState.setResponse(mCurrentResponse);
+            if (mCurrentViewState != null) {
+                mCurrentViewState.setResponse(mCurrentResponse);
+            }
         }
 
         void autoFill(Dataset dataset) {
@@ -829,7 +810,6 @@ final class AutoFillManagerServiceImpl {
 
                     @Override
                     public void onFailure(CharSequence message) {
-                        // TODO(b/33197203): call enableSessionLocked(false)
                         getUiForShowing().showError(message);
                         removeSelf();
                     }
@@ -841,7 +821,7 @@ final class AutoFillManagerServiceImpl {
 
         private Intent createAuthFillInIntent(String itemId, AssistStructure structure,
                 Bundle extras, FillCallback fillCallback) {
-            final Intent fillInIntent = new Intent();
+            Intent fillInIntent = new Intent();
             fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_ITEM_ID, itemId);
             fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_ASSIST_STRUCTURE, structure);
             fillInIntent.putExtra(Intent.EXTRA_AUTO_FILL_EXTRAS, extras);

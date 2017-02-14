@@ -18,22 +18,29 @@ package com.android.server.autofill;
 import static com.android.server.autofill.Helper.DEBUG;
 
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.os.Looper;
 import android.text.format.DateUtils;
-import android.util.ArraySet;
 import android.util.Slog;
+import android.view.autofill.Dataset;
+import android.view.autofill.FillResponse;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.autofill.Dataset;
 import android.widget.Toast;
 
 import com.android.internal.os.HandlerCaller;
@@ -51,15 +58,19 @@ final class AutoFillUI {
     private static final long SNACK_BAR_LIFETIME_MS = 30 * DateUtils.SECOND_IN_MILLIS;
     private static final int MSG_HIDE_SNACK_BAR = 1;
 
+    private static final String EXTRA_AUTH_INTENT_SENDER =
+            "com.android.server.autofill.extra.AUTH_INTENT_SENDER";
+    private static final String EXTRA_AUTH_FILL_IN_INTENT =
+            "com.android.server.autofill.extra.AUTH_FILL_IN_INTENT";
+
     private final Context mContext;
     private final WindowManager mWm;
 
     // TODO(b/33197203) Fix locking - some state requires lock and some not - requires refactoring
-    private final Object mLock = new Object();
 
     // Fill UI variables
     private AnchoredWindow mFillWindow;
-    private View mFillView;
+    private DatasetPicker mFillView;
     private ViewState mViewState;
 
     private AutoFillUiCallback mCallback;
@@ -147,85 +158,62 @@ final class AutoFillUI {
 
         UiThread.getHandler().runWithScissors(() -> {
             hideSnackbarUiThread();
+            hideFillResponseAuthUiUiThread();
         }, 0);
 
-        if (datasets == null && viewState.mAuthIntent == null) {
+        if (datasets == null) {
             // TODO(b/33197203): shouldn't be called, but keeping the WTF for a while just to be
             // safe, otherwise it would crash system server...
             Slog.wtf(TAG, "showFillUI(): no dataset");
             return;
         }
 
-        // TODO(b/33197203): should not display UI after we launched an authentication intent, since
-        // we have no warranty the provider will call onFailure() if the authentication failed or
-        // user dismissed the auth window
-        // because if the service does not handle calling the callback,
-
         UiThread.getHandler().runWithScissors(() -> {
-            // The dataset picker is only shown when authentication is not required...
-            DatasetPicker datasetPicker = null;
-
             if (mViewState == null || !mViewState.mId.equals(viewState.mId)) {
                 hideFillUiUiThread();
+
                 mViewState = viewState;
 
-                if (viewState.mAuthIntent != null) {
-                    final String packageName = viewState.mServiceComponent.getPackageName();
-                    CharSequence serviceName = null;
-                    try {
-                        final PackageManager pm = mContext.getPackageManager();
-                        final ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
-                        serviceName = pm.getApplicationLabel(info);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Could not get label for " + packageName + ": " + e);
-                        serviceName = packageName;
-                    }
+                mFillView = new DatasetPicker(mContext, datasets,
+                        (dataset) -> {
+                            final AutoFillUiCallback callback;
+                            synchronized (mLock) {
+                                callback = mCallback;
+                            }
+                            if (callback != null) {
+                                callback.fill(dataset);
+                            } else {
+                                Slog.w(TAG, "null callback on showFillUi() for " + viewState.mId);
+                            }
+                            hideFillUi();
+                        });
 
-                    mFillView = new SignInPrompt(mContext, serviceName, (e) -> {
-                        final IntentSender intentSender = viewState.mResponse.getAuthentication();
-                        final AutoFillUiCallback callback;
-                        final Intent authIntent;
-                        synchronized (mLock) {
-                            callback = mCallback;
-                            authIntent = viewState.mAuthIntent;
-                            // Must reset the authentication intent so UI display the datasets after
-                            // the user authenticated.
-                            viewState.mAuthIntent = null;
-                        }
-                        if (callback != null) {
-                            callback.authenticate(intentSender, authIntent);
-                        } else {
-                            // TODO(b/33197203): need to figure out why it's null sometimes
-                            Slog.w(TAG, "no callback on showFillUi().auth for " + viewState.mId);
-                        }
-                    });
-
-                } else {
-                    mFillView = datasetPicker = new DatasetPicker(mContext, datasets,
-                            (dataset) -> {
-                                final AutoFillUiCallback callback;
-                                synchronized (mLock) {
-                                    callback = mCallback;
-                                }
-                                if (callback != null) {
-                                    callback.fill(dataset);
-                                } else {
-                                    // TODO(b/33197203): need to figure out why it's null sometimes
-                                    Slog.w(TAG, "no callback on showFillUi() for " + viewState.mId);
-                                }
-                                hideFillUiUiThread();
-                            });
-                }
                 mFillWindow = new AnchoredWindow(mWm, appToken, mFillView);
 
-                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed for: " + viewState.mId);
+                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed");
             }
 
-            if (datasetPicker != null) {
-                datasetPicker.update(filterText);
-            }
+            if (DEBUG) Slog.d(TAG, "showFillUi(): bounds=" + bounds + ", filterText=" + filterText);
+            mFillView.update(filterText);
             mFillWindow.show(bounds);
+        }, 0);
+    }
 
+    /**
+     * Shows an UI affordance indicating that user action is required before a {@link FillResponse}
+     * can be used.
+     *
+     * <p>It typically replaces the auto-fill bar with a message saying "Press fingerprint or tap to
+     * autofill" or "Tap to autofill", depending on the value of {@code usesFingerprint}.
+     */
+    void showFillResponseAuthRequest(IntentSender intent, Intent fillInIntent) {
+        if (!hasCallback()) {
+            return;
+        }
+        hideAll();
+        UiThread.getHandler().runWithScissors(() -> {
+            // TODO(b/33197203): proper implementation
+            showFillResponseAuthUiUiThread(intent, fillInIntent);
         }, 0);
     }
 
@@ -263,12 +251,14 @@ final class AutoFillUI {
         UiThread.getHandler().runWithScissors(() -> {
             hideSnackbarUiThread();
             hideFillUiUiThread();
+            hideFillResponseAuthUiUiThread();
         }, 0);
     }
 
     void dump(PrintWriter pw) {
         pw.println("AufoFill UI");
         final String prefix = "  ";
+        pw.print(prefix); pw.print("sResultCode: "); pw.println(sResultCode);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
         pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
@@ -320,4 +310,104 @@ final class AutoFillUI {
         void authenticate(IntentSender intent, Intent fillInIntent);
         void fill(Dataset dataset);
         void save();
-    }}
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(b/33197203): temporary code using a notification to request auto-fill. //
+    // Will be removed once UX decide the right way to present it to the user.     //
+    /////////////////////////////////////////////////////////////////////////////////
+
+    // TODO(b/33197203): remove from frameworks/base/core/res/AndroidManifest.xml once not used
+    private static final String NOTIFICATION_AUTO_FILL_INTENT =
+            "com.android.internal.autofill.action.REQUEST_AUTOFILL";
+
+    private BroadcastReceiver mNotificationReceiver;
+    private final Object mLock = new Object();
+
+    // Hack used to generate unique pending intents
+    static int sResultCode = 0;
+
+    private void ensureNotificationListener() {
+        synchronized (mLock) {
+            if (mNotificationReceiver == null) {
+                mNotificationReceiver = new NotificationReceiver();
+                mContext.registerReceiver(mNotificationReceiver,
+                        new IntentFilter(NOTIFICATION_AUTO_FILL_INTENT));
+            }
+        }
+    }
+
+    final class NotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final AutoFillUiCallback callback;
+            synchronized (mLock) {
+                callback = mCallback;
+            }
+            if (callback != null) {
+                IntentSender intentSender = intent.getParcelableExtra(EXTRA_AUTH_INTENT_SENDER);
+                Intent fillInIntent = intent.getParcelableExtra(EXTRA_AUTH_FILL_IN_INTENT);
+                callback.authenticate(intentSender, fillInIntent);
+            }
+            collapseStatusBar();
+        }
+    }
+
+    @android.annotation.UiThread
+    private void showFillResponseAuthUiUiThread(IntentSender intent, Intent fillInIntent) {
+        final String title = "AutoFill Authentication";
+        final StringBuilder subTitle = new StringBuilder("Provider require user authentication.\n");
+
+        final Intent authIntent = new Intent(NOTIFICATION_AUTO_FILL_INTENT);
+        authIntent.putExtra(EXTRA_AUTH_INTENT_SENDER, intent);
+        authIntent.putExtra(EXTRA_AUTH_FILL_IN_INTENT, fillInIntent);
+
+        final PendingIntent authPendingIntent = PendingIntent.getBroadcast(
+                mContext, ++sResultCode, authIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        subTitle.append("Tap notification to launch its authentication UI.");
+
+        final Notification.Builder notification = newNotificationBuilder()
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setContentTitle(title)
+                .setStyle(new Notification.BigTextStyle().bigText(subTitle.toString()))
+                .setContentIntent(authPendingIntent);
+
+        ensureNotificationListener();
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            NotificationManager.from(mContext).notify(0, notification.build());
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @android.annotation.UiThread
+    private void hideFillResponseAuthUiUiThread() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            NotificationManager.from(mContext).cancel(0);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private Notification.Builder newNotificationBuilder() {
+        return new Notification.Builder(mContext)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setLocalOnly(true)
+                .setColor(mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+    }
+
+    private void collapseStatusBar() {
+        final StatusBarManager sbm = (StatusBarManager) mContext.getSystemService("statusbar");
+        sbm.collapsePanels();
+    }
+    /////////////////////////////////////////
+    // End of temporary notification code. //
+    /////////////////////////////////////////
+}
