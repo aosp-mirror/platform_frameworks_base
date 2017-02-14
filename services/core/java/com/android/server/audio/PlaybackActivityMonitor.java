@@ -103,6 +103,10 @@ public final class PlaybackActivityMonitor
         final boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
+            // FIXME SoundPool not ready for state reporting
+            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+                return;
+            }
             if (checkConfigurationCaller(piid, apc, binderUid)) {
                 //TODO add generation counter to only update to the latest state
                 change = apc.handleStateEvent(event);
