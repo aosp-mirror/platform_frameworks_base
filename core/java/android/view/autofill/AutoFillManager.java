@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import static android.view.autofill.Helper.DEBUG;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -37,7 +39,6 @@ import java.util.List;
 // TODO(b/33197203): improve this javadoc
 //TODO(b/33197203): restrict manager calls to activity
 public final class AutoFillManager {
-    private static final boolean DEBUG = false;
 
     private static final String TAG = "AutoFillManager";
 
@@ -247,12 +248,18 @@ public final class AutoFillManager {
 
     /** @hide */
     public void onAuthenticationResult(Intent data) {
+        // TODO(b/33197203): the result code is being ignored, so this method is not reliably
+        // handling the cases where it's not RESULT_OK: it works fine if the service does not
+        // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
+        // service set the extra and returned RESULT_CANCELED...
+
+        if (DEBUG) Log.d(TAG, "onAuthenticationResult(): d=" + data);
+
         if (data == null) {
             return;
         }
-        Parcelable result = data.getParcelableExtra(
-                EXTRA_AUTHENTICATION_RESULT);
-        Bundle responseData = new Bundle();
+        final Parcelable result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
+        final Bundle responseData = new Bundle();
         responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
         try {
             mService.setAuthenticationResult(responseData,

@@ -15,6 +15,8 @@
  */
 package android.service.autofill;
 
+import static android.view.autofill.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentSender;
@@ -152,7 +154,6 @@ import android.view.autofill.AutoFillManager;
  * experience.</p>
  */
 public final class FillResponse implements Parcelable {
-    private static final boolean DEBUG = false;
 
     private final ArraySet<Dataset> mDatasets;
     private final ArraySet<AutoFillId> mSavableIds;
