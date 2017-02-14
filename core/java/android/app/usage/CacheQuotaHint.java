@@ -24,8 +24,10 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
- * CacheQuotaRequest represents a triplet of a uid, the volume UUID it is stored upon, and
+ * CacheQuotaHint represents a triplet of a uid, the volume UUID it is stored upon, and
  * its usage stats. When processed, it obtains a cache quota as defined by the system which
  * allows apps to understand how much cache to use.
  * {@hide}
@@ -78,6 +80,23 @@ public final class CacheQuotaHint implements Parcelable {
         return 0;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof CacheQuotaHint) {
+            final CacheQuotaHint other = (CacheQuotaHint) o;
+            return Objects.equals(mUuid, other.mUuid)
+                    && Objects.equals(mUsageStats, other.mUsageStats)
+                    && mUid == other.mUid && mQuota == other.mQuota;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.mUuid, this.mUid, this.mUsageStats, this.mQuota);
+    }
+
     public static final class Builder {
         private String mUuid;
         private int mUid;
@@ -100,7 +119,7 @@ public final class CacheQuotaHint implements Parcelable {
         }
 
         public @NonNull Builder setUid(int uid) {
-            Preconditions.checkArgumentPositive(uid, "Proposed uid was not positive.");
+            Preconditions.checkArgumentNonnegative(uid, "Proposed uid was negative.");
             mUid = uid;
             return this;
         }
@@ -117,7 +136,6 @@ public final class CacheQuotaHint implements Parcelable {
         }
 
         public @NonNull CacheQuotaHint build() {
-            Preconditions.checkNotNull(mUsageStats);
             return new CacheQuotaHint(this);
         }
     }

@@ -34,20 +34,36 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.AtomicFile;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * CacheQuotaStrategy is a strategy for determining cache quotas using usage stats and foreground
@@ -58,17 +74,28 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
 
     private final Object mLock = new Object();
 
+    // XML Constants
+    private static final String CACHE_INFO_TAG = "cache-info";
+    private static final String ATTR_PREVIOUS_BYTES = "previousBytes";
+    private static final String TAG_QUOTA = "quota";
+    private static final String ATTR_UUID = "uuid";
+    private static final String ATTR_UID = "uid";
+    private static final String ATTR_QUOTA_IN_BYTES = "bytes";
+
     private final Context mContext;
     private final UsageStatsManagerInternal mUsageStats;
     private final Installer mInstaller;
     private ServiceConnection mServiceConnection;
     private ICacheQuotaService mRemoteService;
+    private AtomicFile mPreviousValuesFile;
 
     public CacheQuotaStrategy(
             Context context, UsageStatsManagerInternal usageStatsManager, Installer installer) {
         mContext = Preconditions.checkNotNull(context);
         mUsageStats = Preconditions.checkNotNull(usageStatsManager);
         mInstaller = Preconditions.checkNotNull(installer);
+        mPreviousValuesFile = new AtomicFile(new File(
+                new File(Environment.getDataDirectory(), "system"), "cachequota.xml"));
     }
 
     /**
@@ -128,7 +155,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     /**
-     * Returns a list of CacheQuotaRequests which do not have their quotas filled out for apps
+     * Returns a list of CacheQuotaHints which do not have their quotas filled out for apps
      * which have been used in the last year.
      */
     private List<CacheQuotaHint> getUnfulfilledRequests() {
@@ -176,6 +203,11 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         final List<CacheQuotaHint> processedRequests =
                 data.getParcelableArrayList(
                         CacheQuotaService.REQUEST_LIST_KEY);
+        pushProcessedQuotas(processedRequests);
+        writeXmlToFile(processedRequests);
+    }
+
+    private void pushProcessedQuotas(List<CacheQuotaHint> processedRequests) {
         final int requestSize = processedRequests.size();
         for (int i = 0; i < requestSize; i++) {
             CacheQuotaHint request = processedRequests.get(i);
@@ -200,8 +232,10 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     private void disconnectService() {
-        mContext.unbindService(mServiceConnection);
-        mServiceConnection = null;
+        if (mServiceConnection != null) {
+            mContext.unbindService(mServiceConnection);
+            mServiceConnection = null;
+        }
     }
 
     private ComponentName getServiceComponentName() {
@@ -222,5 +256,132 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         }
         ServiceInfo serviceInfo = resolveInfo.serviceInfo;
         return new ComponentName(serviceInfo.packageName, serviceInfo.name);
+    }
+
+    private void writeXmlToFile(List<CacheQuotaHint> processedRequests) {
+        FileOutputStream fileStream = null;
+        try {
+            XmlSerializer out = new FastXmlSerializer();
+            fileStream = mPreviousValuesFile.startWrite();
+            out.setOutput(fileStream, StandardCharsets.UTF_8.name());
+            saveToXml(out, processedRequests, 0);
+            mPreviousValuesFile.finishWrite(fileStream);
+        } catch (Exception e) {
+            Slog.e(TAG, "An error occurred while writing the cache quota file.", e);
+            mPreviousValuesFile.failWrite(fileStream);
+        }
+    }
+
+    /**
+     * Initializes the quotas from the file.
+     * @return the number of bytes that were free on the device when the quotas were last calced.
+     */
+    public long setupQuotasFromFile() throws IOException {
+        FileInputStream stream;
+        try {
+            stream = mPreviousValuesFile.openRead();
+        } catch (FileNotFoundException e) {
+            // The file may not exist yet -- this isn't truly exceptional.
+            return -1;
+        }
+
+        Pair<Long, List<CacheQuotaHint>> cachedValues = null;
+        try {
+            cachedValues = readFromXml(stream);
+        } catch (XmlPullParserException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+
+        if (cachedValues == null) {
+            Slog.e(TAG, "An error occurred while parsing the cache quota file.");
+            return -1;
+        }
+        pushProcessedQuotas(cachedValues.second);
+        return cachedValues.first;
+    }
+
+    @VisibleForTesting
+    static void saveToXml(XmlSerializer out,
+            List<CacheQuotaHint> requests, long bytesWhenCalculated) throws IOException {
+        out.startDocument(null, true);
+        out.startTag(null, CACHE_INFO_TAG);
+        int requestSize = requests.size();
+        out.attribute(null, ATTR_PREVIOUS_BYTES, Long.toString(bytesWhenCalculated));
+
+        for (int i = 0; i < requestSize; i++) {
+            CacheQuotaHint request = requests.get(i);
+            out.startTag(null, TAG_QUOTA);
+            String uuid = request.getVolumeUuid();
+            if (uuid != null) {
+                out.attribute(null, ATTR_UUID, request.getVolumeUuid());
+            }
+            out.attribute(null, ATTR_UID, Integer.toString(request.getUid()));
+            out.attribute(null, ATTR_QUOTA_IN_BYTES, Long.toString(request.getQuota()));
+            out.endTag(null, TAG_QUOTA);
+        }
+        out.endTag(null, CACHE_INFO_TAG);
+        out.endDocument();
+    }
+
+    protected static Pair<Long, List<CacheQuotaHint>> readFromXml(InputStream inputStream)
+            throws XmlPullParserException, IOException {
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.START_TAG &&
+                eventType != XmlPullParser.END_DOCUMENT) {
+            eventType = parser.next();
+        }
+
+        if (eventType == XmlPullParser.END_DOCUMENT) {
+            Slog.d(TAG, "No quotas found in quota file.");
+            return null;
+        }
+
+        String tagName = parser.getName();
+        if (!CACHE_INFO_TAG.equals(tagName)) {
+            throw new IllegalStateException("Invalid starting tag.");
+        }
+
+        final List<CacheQuotaHint> quotas = new ArrayList<>();
+        long previousBytes;
+        try {
+            previousBytes = Long.parseLong(parser.getAttributeValue(
+                    null, ATTR_PREVIOUS_BYTES));
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(
+                    "Previous bytes formatted incorrectly; aborting quota read.");
+        }
+
+        eventType = parser.next();
+        do {
+            if (eventType == XmlPullParser.START_TAG) {
+                tagName = parser.getName();
+                if (TAG_QUOTA.equals(tagName)) {
+                    CacheQuotaHint request = getRequestFromXml(parser);
+                    if (request == null) {
+                        continue;
+                    }
+                    quotas.add(request);
+                }
+            }
+            eventType = parser.next();
+        } while (eventType != XmlPullParser.END_DOCUMENT);
+        return new Pair<>(previousBytes, quotas);
+    }
+
+    @VisibleForTesting
+    static CacheQuotaHint getRequestFromXml(XmlPullParser parser) {
+        try {
+            String uuid = parser.getAttributeValue(null, ATTR_UUID);
+            int uid = Integer.parseInt(parser.getAttributeValue(null, ATTR_UID));
+            long bytes = Long.parseLong(parser.getAttributeValue(null, ATTR_QUOTA_IN_BYTES));
+            return new CacheQuotaHint.Builder()
+                    .setVolumeUuid(uuid).setUid(uid).setQuota(bytes).build();
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Invalid cache quota request, skipping.");
+            return null;
+        }
     }
 }
