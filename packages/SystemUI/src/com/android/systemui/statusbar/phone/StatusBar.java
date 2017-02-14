@@ -839,7 +839,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         createAndAddWindows();
 
         mSettingsObserver.onChange(false); // set up
-        disable(switches[0], switches[6], false /* animate */);
+        mCommandQueue.disable(switches[0], switches[6], false /* animate */);
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
                 fullscreenStackBounds, dockedStackBounds);
         topAppWindowChanged(switches[2] != 0);
@@ -2511,7 +2511,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * This needs to be called if state used by {@link #adjustDisableFlags} changes.
      */
     public void recomputeDisableFlags(boolean animate) {
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, animate);
+        mCommandQueue.disable(mDisabledUnmodified1, mDisabledUnmodified2, animate);
     }
 
     protected H createHandler() {
