@@ -55,9 +55,15 @@ void GlLayer::onGlContextLost() {
     texture.deleteTexture();
 }
 
-void GlLayer::bindTexture() const {
-    if (texture.mId) {
-        caches.textureState().bindTexture(texture.target(), texture.mId);
+void GlLayer::setRenderTarget(GLenum renderTarget) {
+    if (renderTarget != getRenderTarget()) {
+        // new render target: bind with new target, and update filter/wrap
+        texture.mTarget = renderTarget;
+        if (texture.mId) {
+            caches.textureState().bindTexture(texture.target(), texture.mId);
+        }
+        texture.setFilter(GL_NEAREST, false, true);
+        texture.setWrap(GL_CLAMP_TO_EDGE, false, true);
     }
 }
 

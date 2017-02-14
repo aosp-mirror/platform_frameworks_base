@@ -44,7 +44,12 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     // push the deferred updates to the layer
     Matrix4 scaledMatrix;
     scaledMatrix.loadScale(0.5, 0.5, 0.0);
-    layerUpdater->updateLayer(true, GL_TEXTURE_EXTERNAL_OES, scaledMatrix.data);
+    layerUpdater->updateLayer(true, scaledMatrix.data);
+    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
+        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
+        glLayer->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
+    }
+
 
     // the backing layer should now have all the properties applied.
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
