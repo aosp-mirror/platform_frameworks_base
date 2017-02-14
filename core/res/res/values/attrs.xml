@@ -8507,6 +8507,12 @@
         <attr name="fontWeight" format="integer" />
     </declare-styleable>
 
+    <!-- Attributes that are read when parsing a <fontfamily> tag, -->
+    <declare-styleable name="FontFamily">
+        <attr name="fontProviderAuthority" format="string" />
+        <attr name="fontProviderQuery" format="string" />
+    </declare-styleable>
+
     <!-- @hide -->
     <declare-styleable name="RecyclerView">
         <attr name="layoutManager" format="string" />

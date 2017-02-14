@@ -32,6 +32,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.FontFamily;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -52,6 +53,7 @@ import android.view.DisplayAdjustments;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -779,6 +781,43 @@ public class ResourcesImpl {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void preloadFonts(Resources wrapper, TypedValue value, int id) {
+        if (value.string == null) {
+            throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
+                    + Integer.toHexString(id) + ") is not a Font: " + value);
+        }
+
+        final String file = value.string.toString();
+
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+        try {
+            final XmlResourceParser rp = loadXmlResourceParser(
+                    file, id, value.assetCookie, "font");
+            final FontConfig config = FontResourcesParser.parse(rp, wrapper);
+            final List<FontConfig.Family> families = config.getFamilies();
+            if (families == null || families.isEmpty()) {
+                return;
+            }
+            for (int j = 0; j < families.size(); j++) {
+                final FontConfig.Family family = families.get(j);
+                final List<FontConfig.Font> fonts = family.getFonts();
+                for (int i = 0; i < fonts.size(); i++) {
+                    int resourceId = fonts.get(i).getResourceId();
+                    wrapper.getFont(resourceId);
+                }
+            }
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "Failed to parse xml resource " + file, e);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read xml resource " + file, e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
     }
 
     /**

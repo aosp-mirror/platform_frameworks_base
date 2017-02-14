@@ -2794,6 +2794,8 @@
         <public name="canCaptureFingerprintGestures" />
         <public name="alphabeticModifiers" />
         <public name="numericModifiers" />
+        <public name="fontProviderAuthority" />
+        <public name="fontProviderQuery" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
@@ -2805,6 +2807,7 @@
 
     <public type="attr" name="primaryContentAlpha" />
     <public type="attr" name="secondaryContentAlpha" />
+
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

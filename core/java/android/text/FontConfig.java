@@ -170,14 +170,24 @@ public final class FontConfig implements Parcelable {
         private final int mWeight;
         private final boolean mIsItalic;
         private ParcelFileDescriptor mFd;
+        private final int mResourceId;
 
-        public Font(String fontName, int ttcIndex, List<Axis> axes, int weight, boolean isItalic) {
+        /**
+         * @hide
+         */
+        public Font(String fontName, int ttcIndex, List<Axis> axes, int weight, boolean isItalic,
+                int resourceId) {
             mFontName = fontName;
             mTtcIndex = ttcIndex;
             mAxes = axes;
             mWeight = weight;
             mIsItalic = isItalic;
             mFd = null;
+            mResourceId = resourceId;
+        }
+
+        public Font(String fontName, int ttcIndex, List<Axis> axes, int weight, boolean isItalic) {
+            this(fontName, ttcIndex, axes, weight, isItalic, 0);
         }
 
         public Font(Font origin) {
@@ -193,6 +203,7 @@ public final class FontConfig implements Parcelable {
                     e.printStackTrace();
                 }
             }
+            mResourceId = origin.mResourceId;
         }
 
         /**
@@ -254,6 +265,13 @@ public final class FontConfig implements Parcelable {
         /**
          * @hide
          */
+        public int getResourceId() {
+            return mResourceId;
+        }
+
+        /**
+         * @hide
+         */
         public Font(Parcel in) {
             mFontName = in.readString();
             mTtcIndex = in.readInt();
@@ -269,6 +287,7 @@ public final class FontConfig implements Parcelable {
             } else {
                 mFd = null;
             }
+            mResourceId = in.readInt();
         }
 
         @Override
@@ -285,6 +304,7 @@ public final class FontConfig implements Parcelable {
             if (mFd != null) {
                 mFd.writeToParcel(out, flag);
             }
+            out.writeInt(mResourceId);
         }
 
         @Override
@@ -382,22 +402,40 @@ public final class FontConfig implements Parcelable {
         private final List<Font> mFonts;
         private final String mLanguage;
         private final String mVariant;
+        private final String mProviderAuthority;
+        private final String mQuery;
 
         public Family(String name, List<Font> fonts, String language, String variant) {
-            this.mName = name;
-            this.mFonts = fonts;
-            this.mLanguage = language;
-            this.mVariant = variant;
+            mName = name;
+            mFonts = fonts;
+            mLanguage = language;
+            mVariant = variant;
+            mProviderAuthority = null;
+            mQuery = null;
+        }
+
+        /**
+         * @hide
+         */
+        public Family(String providerAuthority, String query) {
+            mName = null;
+            mFonts = null;
+            mLanguage = null;
+            mVariant = null;
+            mProviderAuthority = providerAuthority;
+            mQuery = query;
         }
 
         public Family(Family origin) {
-            this.mName = origin.mName;
-            this.mLanguage = origin.mLanguage;
-            this.mVariant = origin.mVariant;
-            this.mFonts = new ArrayList<>();
+            mName = origin.mName;
+            mLanguage = origin.mLanguage;
+            mVariant = origin.mVariant;
+            mFonts = new ArrayList<>();
             for (int i = 0; i < origin.mFonts.size(); i++) {
                 mFonts.add(new Font(origin.mFonts.get(i)));
             }
+            mProviderAuthority = origin.mProviderAuthority;
+            mQuery = origin.mQuery;
         }
 
         /**
@@ -431,6 +469,20 @@ public final class FontConfig implements Parcelable {
         /**
          * @hide
          */
+        public String getProviderAuthority() {
+            return mProviderAuthority;
+        }
+
+        /**
+         * @hide
+         */
+        public String getQuery() {
+            return mQuery;
+        }
+
+        /**
+         * @hide
+         */
         public Family(Parcel in) {
             mName = in.readString();
             final int size = in.readInt();
@@ -440,6 +492,16 @@ public final class FontConfig implements Parcelable {
             }
             mLanguage = in.readString();
             mVariant = in.readString();
+            if (in.readInt() == 1) {
+                mProviderAuthority = in.readString();
+            } else {
+                mProviderAuthority = null;
+            }
+            if (in.readInt() == 1) {
+                mQuery = in.readString();
+            } else {
+                mQuery = null;
+            }
         }
 
         @Override
@@ -451,6 +513,14 @@ public final class FontConfig implements Parcelable {
             }
             out.writeString(mLanguage);
             out.writeString(mVariant);
+            out.writeInt(mProviderAuthority == null ? 0 : 1);
+            if (mProviderAuthority != null) {
+                out.writeString(mProviderAuthority);
+            }
+            out.writeInt(mQuery == null ? 0 : 1);
+            if (mQuery != null) {
+                out.writeString(mQuery);
+            }
         }
 
         @Override

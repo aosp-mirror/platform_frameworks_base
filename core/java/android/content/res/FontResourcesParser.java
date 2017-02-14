@@ -64,6 +64,17 @@ public class FontResourcesParser {
 
     private static FontConfig.Family readFamily(XmlPullParser parser, Resources resources)
             throws XmlPullParserException, IOException {
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        TypedArray array = resources.obtainAttributes(attrs, R.styleable.FontFamily);
+        String authority = array.getString(R.styleable.FontFamily_fontProviderAuthority);
+        String query = array.getString(R.styleable.FontFamily_fontProviderQuery);
+        array.recycle();
+        if (authority != null && query != null) {
+            while (parser.next() != XmlPullParser.END_TAG) {
+                skip(parser);
+            }
+            return new FontConfig.Family(authority, query);
+        }
         List<FontConfig.Font> fonts = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -84,11 +95,12 @@ public class FontResourcesParser {
         int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight, NORMAL_WEIGHT);
         boolean isItalic = ITALIC == array.getInt(R.styleable.FontFamilyFont_fontStyle, 0);
         String filename = array.getString(R.styleable.FontFamilyFont_font);
+        int resourceId = array.getResourceId(R.styleable.FontFamilyFont_font, 0);
         array.recycle();
         while (parser.next() != XmlPullParser.END_TAG) {
             skip(parser);
         }
-        return new FontConfig.Font(filename, 0, null, weight, isItalic);
+        return new FontConfig.Font(filename, 0, null, weight, isItalic, resourceId);
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
