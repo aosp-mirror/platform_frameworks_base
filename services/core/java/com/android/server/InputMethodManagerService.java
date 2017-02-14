@@ -149,11 +149,15 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class provides a system service that manages input methods.
@@ -525,19 +529,188 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * </p>
      */
     private static class StartInputInfo {
+        private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
+
+        final int mSequenceNumber;
+        final long mTimestamp;
+        final long mWallTime;
         @NonNull
         final IBinder mImeToken;
+        @NonNull
+        final String mImeId;
+        // @InputMethodClient.StartInputReason
+        final int mStartInputReason;
+        final boolean mRestarting;
         @Nullable
         final IBinder mTargetWindow;
+        @NonNull
+        final EditorInfo mEditorInfo;
+        final int mTargetWindowSoftInputMode;
+        final int mClientBindSequenceNumber;
 
-        StartInputInfo(@NonNull IBinder imeToken, @Nullable IBinder targetWindow) {
+        StartInputInfo(@NonNull IBinder imeToken, @NonNull String imeId,
+                /* @InputMethodClient.StartInputReason */ int startInputReason, boolean restarting,
+                @Nullable IBinder targetWindow, @NonNull EditorInfo editorInfo,
+                int targetWindowSoftInputMode, int clientBindSequenceNumber) {
+            mSequenceNumber = sSequenceNumber.getAndIncrement();
+            mTimestamp = SystemClock.uptimeMillis();
+            mWallTime = System.currentTimeMillis();
             mImeToken = imeToken;
+            mImeId = imeId;
+            mStartInputReason = startInputReason;
+            mRestarting = restarting;
             mTargetWindow = targetWindow;
+            mEditorInfo = editorInfo;
+            mTargetWindowSoftInputMode = targetWindowSoftInputMode;
+            mClientBindSequenceNumber = clientBindSequenceNumber;
         }
     }
 
     @GuardedBy("mMethodMap")
     private final WeakHashMap<IBinder, StartInputInfo> mStartInputMap = new WeakHashMap<>();
+
+    /**
+     * A ring buffer to store the history of {@link StartInputInfo}.
+     */
+    private static final class StartInputHistory {
+        /**
+         * Entry size for non low-RAM devices.
+         *
+         * <p>TODO: Consider to follow what other system services have been doing to manage
+         * constants (e.g. {@link android.provider.Settings.Global#ACTIVITY_MANAGER_CONSTANTS}).</p>
+         */
+        private final static int ENTRY_SIZE_FOR_HIGH_RAM_DEVICE = 16;
+
+        /**
+         * Entry size for non low-RAM devices.
+         *
+         * <p>TODO: Consider to follow what other system services have been doing to manage
+         * constants (e.g. {@link android.provider.Settings.Global#ACTIVITY_MANAGER_CONSTANTS}).</p>
+         */
+        private final static int ENTRY_SIZE_FOR_LOW_RAM_DEVICE = 5;
+
+        private static int getEntrySize() {
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                return ENTRY_SIZE_FOR_LOW_RAM_DEVICE;
+            } else {
+                return ENTRY_SIZE_FOR_HIGH_RAM_DEVICE;
+            }
+        }
+
+        /**
+         * Backing store for the ring bugger.
+         */
+        private final Entry[] mEntries = new Entry[getEntrySize()];
+
+        /**
+         * An index of {@link #mEntries}, to which next {@link #addEntry(StartInputInfo)} should
+         * write.
+         */
+        private int mNextIndex = 0;
+
+        /**
+         * Recyclable entry to store the information in {@link StartInputInfo}.
+         */
+        private static final class Entry {
+            int mSequenceNumber;
+            long mTimestamp;
+            long mWallTime;
+            @NonNull
+            String mImeTokenString;
+            @NonNull
+            String mImeId;
+            /* @InputMethodClient.StartInputReason */
+            int mStartInputReason;
+            boolean mRestarting;
+            @NonNull
+            String mTargetWindowString;
+            @NonNull
+            EditorInfo mEditorInfo;
+            int mTargetWindowSoftInputMode;
+            int mClientBindSequenceNumber;
+
+            Entry(@NonNull StartInputInfo original) {
+                set(original);
+            }
+
+            void set(@NonNull StartInputInfo original) {
+                mSequenceNumber = original.mSequenceNumber;
+                mTimestamp = original.mTimestamp;
+                mWallTime = original.mWallTime;
+                // Intentionally convert to String so as not to keep a strong reference to a Binder
+                // object.
+                mImeTokenString = String.valueOf(original.mImeToken);
+                mImeId = original.mImeId;
+                mStartInputReason = original.mStartInputReason;
+                mRestarting = original.mRestarting;
+                // Intentionally convert to String so as not to keep a strong reference to a Binder
+                // object.
+                mTargetWindowString = String.valueOf(original.mTargetWindow);
+                mEditorInfo = original.mEditorInfo;
+                mTargetWindowSoftInputMode = original.mTargetWindowSoftInputMode;
+                mClientBindSequenceNumber = original.mClientBindSequenceNumber;
+            }
+        }
+
+        /**
+         * Add a new entry and discard the oldest entry as needed.
+         * @param info {@lin StartInputInfo} to be added.
+         */
+        void addEntry(@NonNull StartInputInfo info) {
+            final int index = mNextIndex;
+            if (mEntries[index] == null) {
+                mEntries[index] = new Entry(info);
+            } else {
+                mEntries[index].set(info);
+            }
+            mNextIndex = (mNextIndex + 1) % mEntries.length;
+        }
+
+        void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+            final SimpleDateFormat dataFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+
+            for (int i = 0; i < mEntries.length; ++i) {
+                final Entry entry = mEntries[(i + mNextIndex) % mEntries.length];
+                if (entry == null) {
+                    continue;
+                }
+                pw.print(prefix);
+                pw.println("StartInput #" + entry.mSequenceNumber + ":");
+
+                pw.print(prefix);
+                pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
+                        + " (timestamp=" + entry.mTimestamp + ")"
+                        + " reason="
+                        + InputMethodClient.getStartInputReason(entry.mStartInputReason)
+                        + " restarting=" + entry.mRestarting);
+
+                pw.print(prefix);
+                pw.println(" imeToken=" + entry.mImeTokenString + " [" + entry.mImeId + "]");
+
+                pw.print(prefix);
+                pw.println(" targetWin=" + entry.mTargetWindowString
+                        + " [" + entry.mEditorInfo.packageName + "]"
+                        + " clientBindSeq=" + entry.mClientBindSequenceNumber);
+
+                pw.print(prefix);
+                pw.println(" softInputMode=" + InputMethodClient.softInputModeToString(
+                                entry.mTargetWindowSoftInputMode));
+
+                pw.print(prefix);
+                pw.println(" inputType=0x" + Integer.toHexString(entry.mEditorInfo.inputType)
+                        + " imeOptions=0x" + Integer.toHexString(entry.mEditorInfo.imeOptions)
+                        + " fieldId=0x" + Integer.toHexString(entry.mEditorInfo.fieldId)
+                        + " fieldName=" + entry.mEditorInfo.fieldName
+                        + " actionId=" + entry.mEditorInfo.actionId
+                        + " actionLabel=" + entry.mEditorInfo.actionLabel);
+            }
+        }
+    }
+
+    @GuardedBy("mMethodMap")
+    @NonNull
+    private final StartInputHistory mStartInputHistory = new StartInputHistory();
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -1380,8 +1553,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         final Binder startInputToken = new Binder();
-        final StartInputInfo info = new StartInputInfo(mCurToken, mCurFocusedWindow);
+        final StartInputInfo info = new StartInputInfo(mCurToken, mCurId, startInputReason,
+                !initial, mCurFocusedWindow, mCurAttribute, mCurFocusedWindowSoftInputMode,
+                mCurSeq);
         mStartInputMap.put(startInputToken, info);
+        mStartInputHistory.addEntry(info);
 
         final SessionState session = mCurClient.curSession;
         executeOrSendMessage(session.method, mCaller.obtainMessageIIOOOO(
@@ -4156,6 +4332,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingController.dump(p);
             p.println("  mSettings:");
             mSettings.dumpLocked(p, "    ");
+
+            p.println("  mStartInputHistory:");
+            mStartInputHistory.dump(pw, "   ");
         }
 
         p.println(" ");
