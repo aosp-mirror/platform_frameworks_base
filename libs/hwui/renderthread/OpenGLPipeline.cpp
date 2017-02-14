@@ -120,6 +120,8 @@ bool OpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& sc
 
 bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     ATRACE_CALL();
+    // acquire most recent buffer for drawing
+    layer->updateTexImage();
     layer->apply();
     return OpenGLReadbackImpl::copyLayerInto(mRenderThread,
             static_cast<GlLayer&>(*layer->backingLayer()), bitmap);

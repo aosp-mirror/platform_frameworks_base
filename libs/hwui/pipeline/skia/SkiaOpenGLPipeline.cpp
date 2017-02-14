@@ -128,6 +128,8 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
         return false;
     }
 
+    // acquire most recent buffer for drawing
+    deferredLayer->updateTexImage();
     deferredLayer->apply();
 
     SkCanvas canvas(*bitmap);
