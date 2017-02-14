@@ -39,12 +39,10 @@ SkBitmap createSkBitmap(int width, int height) {
  */
 TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkBitmap origBitmap = createSkBitmap(1, 1);
-    sk_sp<SkShader> s = SkMakeBitmapShader(
-            origBitmap,
+    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(origBitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkShader> s = image->makeShader(
             SkShader::kClamp_TileMode,
             SkShader::kRepeat_TileMode,
-            nullptr,
-            kNever_SkCopyPixelsMode,
             nullptr);
 
     SkBitmap bitmap;

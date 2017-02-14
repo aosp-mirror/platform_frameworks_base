@@ -48,21 +48,17 @@ public:
         SkBitmap bitmap;
         SkPaint paint;
         hwuiBitmap->getSkBitmapForShaders(&bitmap);
-
-        sk_sp<SkShader> repeatShader = SkMakeBitmapShader(bitmap,
+        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkShader> repeatShader = image->makeShader(
                 SkShader::TileMode::kRepeat_TileMode,
                 SkShader::TileMode::kRepeat_TileMode,
-                nullptr,
-                kNever_SkCopyPixelsMode,
                 nullptr);
         paint.setShader(std::move(repeatShader));
         canvas.drawRoundRect(0, 0, 500, 500, 50.0f, 50.0f, paint);
 
-        sk_sp<SkShader> mirrorShader = SkMakeBitmapShader(bitmap,
+        sk_sp<SkShader> mirrorShader = image->makeShader(
                 SkShader::TileMode::kMirror_TileMode,
                 SkShader::TileMode::kMirror_TileMode,
-                nullptr,
-                kNever_SkCopyPixelsMode,
                 nullptr);
         paint.setShader(std::move(mirrorShader));
         canvas.drawRoundRect(0, 600, 500, 1100, 50.0f, 50.0f, paint);

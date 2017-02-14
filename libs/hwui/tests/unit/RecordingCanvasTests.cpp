@@ -748,11 +748,10 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, refBitmapInShader_bitmapShader) {
         SkPaint paint;
         SkBitmap skBitmap;
         bitmap->getSkBitmap(&skBitmap);
-        sk_sp<SkShader> shader = SkMakeBitmapShader(skBitmap,
+        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkShader> shader = image->makeShader(
                 SkShader::TileMode::kClamp_TileMode,
                 SkShader::TileMode::kClamp_TileMode,
-                nullptr,
-                kNever_SkCopyPixelsMode,
                 nullptr);
         paint.setShader(std::move(shader));
         canvas.drawRoundRect(0, 0, 100, 100, 20.0f, 20.0f, paint);
@@ -767,11 +766,10 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, refBitmapInShader_composeShader) {
         SkPaint paint;
         SkBitmap skBitmap;
         bitmap->getSkBitmap(&skBitmap);
-        sk_sp<SkShader> shader1 = SkMakeBitmapShader(skBitmap,
+        sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(skBitmap, kNever_SkCopyPixelsMode);
+        sk_sp<SkShader> shader1 = image->makeShader(
                 SkShader::TileMode::kClamp_TileMode,
                 SkShader::TileMode::kClamp_TileMode,
-                nullptr,
-                kNever_SkCopyPixelsMode,
                 nullptr);
 
         SkPoint center;
