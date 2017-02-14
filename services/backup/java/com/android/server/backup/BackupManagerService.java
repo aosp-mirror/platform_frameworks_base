@@ -224,8 +224,7 @@ public class BackupManagerService {
     private static final int MSG_RUN_CLEAR = 4;
     private static final int MSG_RUN_INITIALIZE = 5;
     private static final int MSG_RUN_GET_RESTORE_SETS = 6;
-    private static final int MSG_TIMEOUT = 7;
-    private static final int MSG_RESTORE_TIMEOUT = 8;
+    private static final int MSG_RESTORE_SESSION_TIMEOUT = 8;
     private static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
     private static final int MSG_RUN_ADB_RESTORE = 10;
     private static final int MSG_RETRY_INIT = 11;
@@ -234,6 +233,8 @@ public class BackupManagerService {
     private static final int MSG_RUN_FULL_TRANSPORT_BACKUP = 14;
     private static final int MSG_REQUEST_BACKUP = 15;
     private static final int MSG_SCHEDULE_BACKUP_PACKAGE = 16;
+    private static final int MSG_BACKUP_OPERATION_TIMEOUT = 17;
+    private static final int MSG_RESTORE_OPERATION_TIMEOUT = 18;
 
     // backup task state machine tick
     static final int MSG_BACKUP_RESTORE_STEP = 20;
@@ -599,8 +600,14 @@ public class BackupManagerService {
     static final int OP_ACKNOWLEDGED = 1;
     static final int OP_TIMEOUT = -1;
 
-    private static final int OP_TYPE_WAIT = 0;    // Waiting for BackupAgent.
-    private static final int OP_TYPE_BACKUP = 1;  // Backup operation in progress.
+    // Waiting for backup agent to respond during backup operation.
+    private static final int OP_TYPE_BACKUP_WAIT = 0;
+
+    // Waiting for backup agent to respond during restore operation.
+    private static final int OP_TYPE_RESTORE_WAIT = 1;
+
+    // An entire backup operation spanning multiple packages.
+    private static final int OP_TYPE_BACKUP = 2;
 
     class Operation {
         int state;
@@ -984,22 +991,23 @@ public class BackupManagerService {
                     }
 
                     // Done: reset the session timeout clock
-                    removeMessages(MSG_RESTORE_TIMEOUT);
-                    sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
+                    removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
+                    sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
 
                     mWakelock.release();
                 }
                 break;
             }
 
-            case MSG_TIMEOUT:
+            case MSG_BACKUP_OPERATION_TIMEOUT:
+            case MSG_RESTORE_OPERATION_TIMEOUT:
             {
                 Slog.d(TAG, "Timeout message received for token=" + Integer.toHexString(msg.arg1));
                 handleCancel(msg.arg1, false);
                 break;
             }
 
-            case MSG_RESTORE_TIMEOUT:
+            case MSG_RESTORE_SESSION_TIMEOUT:
             {
                 synchronized (BackupManagerService.this) {
                     if (mActiveRestoreSession != null) {
@@ -2435,13 +2443,32 @@ public class BackupManagerService {
 
     void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
             int operationType) {
+        if (operationType != OP_TYPE_BACKUP_WAIT && operationType != OP_TYPE_RESTORE_WAIT) {
+            Slog.wtf(TAG, "prepareOperationTimeout() doesn't support operation " +
+                    Integer.toHexString(token) + " of type " + operationType);
+            return;
+        }
         if (MORE_DEBUG) Slog.v(TAG, "starting timeout: token=" + Integer.toHexString(token)
                 + " interval=" + interval + " callback=" + callback);
+
         synchronized (mCurrentOpLock) {
             mCurrentOperations.put(token, new Operation(OP_PENDING, callback, operationType));
-
-            Message msg = mBackupHandler.obtainMessage(MSG_TIMEOUT, token, 0, callback);
+            Message msg = mBackupHandler.obtainMessage(getMessageIdForOperationType(operationType),
+                    token, 0, callback);
             mBackupHandler.sendMessageDelayed(msg, interval);
+        }
+    }
+
+    private int getMessageIdForOperationType(int operationType) {
+        switch (operationType) {
+            case OP_TYPE_BACKUP_WAIT:
+                return MSG_BACKUP_OPERATION_TIMEOUT;
+            case OP_TYPE_RESTORE_WAIT:
+                return MSG_RESTORE_OPERATION_TIMEOUT;
+            default:
+                Slog.wtf(TAG, "getMessageIdForOperationType called on invalid operation type: " +
+                        operationType);
+                return -1;
         }
     }
 
@@ -2491,7 +2518,9 @@ public class BackupManagerService {
         }
 
         removeOperation(token);
-        mBackupHandler.removeMessages(MSG_TIMEOUT);
+        if (op != null) {
+            mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
+        }
         if (MORE_DEBUG) Slog.v(TAG, "operation " + Integer.toHexString(token)
                 + " complete: finalState=" + finalState);
         return finalState == OP_ACKNOWLEDGED;
@@ -2520,6 +2549,9 @@ public class BackupManagerService {
                 op.state = OP_TIMEOUT;
                 // Can't delete op from mCurrentOperations here. waitUntilOperationComplete may be
                 // called after we receive cancel here. We need this op's state there.
+
+                // Remove all pending timeout messages for this operation type.
+                mBackupHandler.removeMessages(getMessageIdForOperationType(op.type));
             }
             mCurrentOpLock.notifyAll();
         }
@@ -2768,7 +2800,7 @@ public class BackupManagerService {
                         // Because the PMBA is a local instance, it has already executed its
                         // backup callback and returned.  Blow away the lingering (spurious)
                         // pending timeout message for it.
-                        mBackupHandler.removeMessages(MSG_TIMEOUT);
+                        mBackupHandler.removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
                     }
                 }
 
@@ -3098,7 +3130,7 @@ public class BackupManagerService {
                 // Initiate the target's backup pass
                 addBackupTrace("setting timeout");
                 prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_BACKUP_INTERVAL, this,
-                        OP_TYPE_WAIT);
+                        OP_TYPE_BACKUP_WAIT);
                 addBackupTrace("calling agent doBackup()");
 
                 agent.doBackup(mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
@@ -3258,7 +3290,7 @@ public class BackupManagerService {
                                     addBackupTrace("illegal key " + key + " from " + pkgName);
                                     EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, pkgName,
                                             "bad key");
-                                    mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                    mBackupHandler.removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
                                     sendBackupOnPackageResult(mObserver, pkgName,
                                             BackupManager.ERROR_AGENT_FAILURE);
                                     errorCleanup();
@@ -3292,7 +3324,7 @@ public class BackupManagerService {
                 // Spin the data off to the transport and proceed with the next stage.
                 if (MORE_DEBUG) Slog.v(TAG, "operationComplete(): sending data to transport for "
                         + pkgName);
-                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                mBackupHandler.removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
                 clearAgentState();
                 addBackupTrace("operation complete");
 
@@ -3524,7 +3556,8 @@ public class BackupManagerService {
             try {
                 pipes = ParcelFileDescriptor.createPipe();
                 int token = generateToken();
-                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null, OP_TYPE_WAIT);
+                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL,
+                        null, OP_TYPE_BACKUP_WAIT);
                 mService.backupObbs(pkg.packageName, pipes[1], token, mBackupManagerBinder);
                 routeSocketDataToOutput(pipes[0], out);
                 success = waitUntilOperationComplete(token);
@@ -3717,7 +3750,7 @@ public class BackupManagerService {
 
                     if (DEBUG) Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
                     prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL,
-                            mTimeoutMonitor /* in parent class */, OP_TYPE_WAIT);
+                            mTimeoutMonitor /* in parent class */, OP_TYPE_BACKUP_WAIT);
                     mAgent.doFullBackup(mPipe, mQuota, mToken, mBackupManagerBinder);
                 } catch (IOException e) {
                     Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
@@ -4909,7 +4942,8 @@ public class BackupManagerService {
             public int preflightFullBackup(PackageInfo pkg, IBackupAgent agent) {
                 int result;
                 try {
-                    prepareOperationTimeout(mCurrentOpToken, TIMEOUT_FULL_BACKUP_INTERVAL, this, OP_TYPE_WAIT);
+                    prepareOperationTimeout(mCurrentOpToken, TIMEOUT_FULL_BACKUP_INTERVAL,
+                            this, OP_TYPE_BACKUP_WAIT);
                     addBackupTrace("preflighting");
                     if (MORE_DEBUG) {
                         Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
@@ -5016,7 +5050,7 @@ public class BackupManagerService {
             void registerTask() {
                 synchronized (mCurrentOpLock) {
                     mCurrentOperations.put(mCurrentOpToken, new Operation(OP_PENDING, this,
-                            OP_TYPE_WAIT));
+                            OP_TYPE_BACKUP_WAIT));
                 }
             }
 
@@ -5774,8 +5808,9 @@ public class BackupManagerService {
                             boolean agentSuccess = true;
                             long toCopy = info.size;
                             try {
-                                prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_FULL_BACKUP_INTERVAL,
-                                        mMonitorTask, OP_TYPE_WAIT);
+                                prepareOperationTimeout(mEphemeralOpToken,
+                                        TIMEOUT_FULL_BACKUP_INTERVAL, mMonitorTask,
+                                        OP_TYPE_RESTORE_WAIT);
 
                                 if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
                                     if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
@@ -5857,7 +5892,7 @@ public class BackupManagerService {
                             // it by ignoring the rest of the restore on it
                             if (!agentSuccess) {
                                 Slog.w(TAG, "Agent failure; ending restore");
-                                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                mBackupHandler.removeMessages(MSG_RESTORE_OPERATION_TIMEOUT);
                                 tearDownPipes();
                                 tearDownAgent(mTargetApp);
                                 mAgent = null;
@@ -7211,7 +7246,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             final int token = generateToken();
                             try {
                                 prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null,
-                                        OP_TYPE_WAIT);
+                                        OP_TYPE_RESTORE_WAIT);
                                 if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
                                     if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
                                             + " : " + info.path);
@@ -7289,7 +7324,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                                 if (DEBUG) {
                                     Slog.d(TAG, "Agent failure restoring " + pkg + "; now ignoring");
                                 }
-                                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                mBackupHandler.removeMessages(MSG_RESTORE_OPERATION_TIMEOUT);
                                 tearDownPipes();
                                 tearDownAgent(mTargetApp, false);
                                 mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
@@ -7348,7 +7383,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         final int token = generateToken();
                         final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(token);
                         prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, latch,
-                                OP_TYPE_WAIT);
+                                OP_TYPE_RESTORE_WAIT);
                         if (mTargetApp.processName.equals("system")) {
                             if (MORE_DEBUG) {
                                 Slog.d(TAG, "system agent - restoreFinished on thread");
@@ -8447,7 +8482,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // message and jump straight to the FINAL state.  Because this was
                 // synchronous we also know that we should cancel the pending timeout
                 // message.
-                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                mBackupHandler.removeMessages(MSG_RESTORE_OPERATION_TIMEOUT);
 
                 // Verify that the backup set includes metadata.  If not, we can't do
                 // signature/version verification etc, so we simply do not proceed with
@@ -8723,7 +8758,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // Kick off the restore, checking for hung agents.  The timeout or
                 // the operationComplete() callback will schedule the next step,
                 // so we do not do that here.
-                prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_RESTORE_INTERVAL, this, OP_TYPE_WAIT);
+                prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_RESTORE_INTERVAL,
+                        this, OP_TYPE_RESTORE_WAIT);
                 mAgent.doRestore(mBackupData, appVersionCode, mNewState,
                         mEphemeralOpToken, mBackupManagerBinder);
             } catch (Exception e) {
@@ -8773,7 +8809,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         private void restoreFinished() {
             try {
                 prepareOperationTimeout(mEphemeralOpToken, TIMEOUT_RESTORE_FINISHED_INTERVAL, this,
-                        OP_TYPE_WAIT);
+                        OP_TYPE_RESTORE_WAIT);
                 mAgent.doRestoreFinished(mEphemeralOpToken, mBackupManagerBinder);
                 // If we get this far, the callback or timeout will schedule the
                 // next restore state, so we're done
@@ -9031,7 +9067,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             // Clear any ongoing session timeout.
-            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+            mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
             // If we have a PM token, we must under all circumstances be sure to
             // handshake when we've finished.
@@ -9043,7 +9079,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             } else {
                 // We were invoked via an active restore session, not by the Package
                 // Manager, so start up the session timeout again.
-                mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
+                mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
                         TIMEOUT_RESTORE_INTERVAL);
             }
 
@@ -9134,7 +9170,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // The caller is responsible for reestablishing the state machine; our
             // responsibility here is to clear the decks for whatever comes next.
-            mBackupHandler.removeMessages(MSG_TIMEOUT, this);
+            mBackupHandler.removeMessages(MSG_RESTORE_OPERATION_TIMEOUT, this);
         }
 
         @Override
@@ -10283,7 +10319,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 return null;
             }
             mActiveRestoreSession = new ActiveRestoreSession(packageName, transport);
-            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
+            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
+                    TIMEOUT_RESTORE_INTERVAL);
         }
         return mActiveRestoreSession;
     }
@@ -10295,7 +10332,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             } else {
                 if (DEBUG) Slog.v(TAG, "Clearing restore session and halting timeout");
                 mActiveRestoreSession = null;
-                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
             }
         }
     }
@@ -10413,7 +10450,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // We know we're doing legit work now, so halt the timeout
                 // until we're done.  It gets started again when the result
                 // comes in.
-                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
                 // spin off the transport request to our service thread
                 mWakelock.acquire();
@@ -10470,7 +10507,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         // Real work, so stop the session timeout until we finalize the restore
-                        mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                        mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
@@ -10558,7 +10595,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         // Stop the session timeout until we finalize the restore
-                        mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                        mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
@@ -10647,7 +10684,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
 
                 // Stop the session timeout until we finalize the restore
-                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+                mBackupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
                 // Ready to go:  enqueue the restore request and claim success
                 mWakelock.acquire();
