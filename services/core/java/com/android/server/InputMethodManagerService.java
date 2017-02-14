@@ -536,7 +536,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private WeakHashMap<IBinder, StartInputInfo> mStartInputMap = new WeakHashMap<>();
+    @GuardedBy("mMethodMap")
+    private final WeakHashMap<IBinder, StartInputInfo> mStartInputMap = new WeakHashMap<>();
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
