@@ -211,16 +211,16 @@ public abstract class BroadcastReceiver {
                     // of the list to finish the broadcast, so we don't block this
                     // thread (which may be the main thread) to have it finished.
                     //
-                    // Note that we don't need to use QueuedWork.add() with the
+                    // Note that we don't need to use QueuedWork.addFinisher() with the
                     // runnable, since we know the AM is waiting for us until the
                     // executor gets to it.
-                    QueuedWork.singleThreadExecutor().execute( new Runnable() {
+                    QueuedWork.queue(new Runnable() {
                         @Override public void run() {
                             if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                                     "Finishing broadcast after work to component " + mToken);
                             sendFinished(mgr);
                         }
-                    });
+                    }, false);
                 } else {
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                             "Finishing broadcast to component " + mToken);
