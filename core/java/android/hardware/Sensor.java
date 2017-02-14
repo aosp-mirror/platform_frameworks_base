@@ -649,9 +649,22 @@ public final class Sensor {
      * to be in the same order as the HAL. Skipping this sensor
      */
 
-    /* TYPE_LOW_LATENCY_OFF_BODY_SENSOR - defined as type 34 in the HAL needs to
-     * be defined in this space.
+    /**
+     * A constant describing a low latency off-body detect sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
      */
+    public static final int TYPE_LOW_LATENCY_OFFBODY_DETECT = 34;
+
+
+    /**
+     * A constant string describing a low-latency offbody detector sensor.
+     *
+     * @see #TYPE_LOW_LATENCY_OFFBODY_DETECT
+     */
+    public static final String STRING_TYPE_LOW_LATENCY_OFFBODY_DETECT =
+            "android.sensor.low_latency_offbody";
 
     /**
      * A constant describing an uncalibrated accelerometer sensor.
@@ -669,6 +682,7 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_ACCELEROMETER_UNCALIBRATED =
             "android.sensor.accelerometer_uncalibrated";
+
     /**
      * A constant describing all sensor types.
      */
@@ -786,7 +800,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_HEART_BEAT
             2, // SENSOR_TYPE_DYNAMIC_SENSOR_META
             16,// skip over additional sensor info type
-            1, // reserving for LLOB sensor type
+            1, // SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT
             6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
     };
 
@@ -1194,6 +1208,9 @@ public final class Sensor {
                 return true;
             case TYPE_DYNAMIC_SENSOR_META:
                 mStringType = STRING_TYPE_DYNAMIC_SENSOR_META;
+                return true;
+            case TYPE_LOW_LATENCY_OFFBODY_DETECT:
+                mStringType = STRING_TYPE_LOW_LATENCY_OFFBODY_DETECT;
                 return true;
             case TYPE_ACCELEROMETER_UNCALIBRATED:
                 mStringType = STRING_TYPE_ACCELEROMETER_UNCALIBRATED;
