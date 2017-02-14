@@ -250,6 +250,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * application must then call {@link OutputConfiguration#addSurface} before finalizing the
      * configuration with this method.</p>
      *
+     * <p>If the provided OutputConfigurations are unchanged from session creation, this function
+     * call has no effect. This function must only be called once for a particular output
+     * configuration. </p>
+     *
      * <p>The output Surfaces included by this list of
      * {@link OutputConfiguration OutputConfigurations} can be used as {@link CaptureRequest}
      * targets as soon as this call returns.</p>
