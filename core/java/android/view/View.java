@@ -9491,7 +9491,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void addKeyboardNavigationClusters(
             @NonNull Collection<View> views,
             int direction) {
-        if (!(isKeyboardNavigationCluster())) {
+        if (!isKeyboardNavigationCluster()) {
+            return;
+        }
+        if (!hasFocusable()) {
             return;
         }
         views.add(this);
@@ -9698,17 +9701,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Public for testing. This will request focus for whichever View was last focused within this
+     * This will request focus for whichever View was last focused within this
      * cluster before a focus-jump out of it.
      *
      * @hide
      */
+    @TestApi
     public boolean restoreFocusInCluster(@FocusRealDirection int direction) {
         // Prioritize focusableByDefault over algorithmic focus selection.
         if (restoreDefaultFocus()) {
             return true;
         }
         return requestFocus(direction);
+    }
+
+    /**
+     * This will request focus for whichever View not in a cluster was last focused before a
+     * focus-jump to a cluster. If no non-cluster View has previously had focus, this will focus
+     * the "first" focusable view it finds.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean restoreFocusNotInCluster() {
+        return requestFocus(View.FOCUS_DOWN);
     }
 
     /**
