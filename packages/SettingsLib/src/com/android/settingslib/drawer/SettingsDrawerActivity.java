@@ -322,6 +322,7 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
+    @Deprecated
     public boolean openTile(Tile tile) {
         closeDrawer();
         if (tile == null) {
