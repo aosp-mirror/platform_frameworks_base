@@ -379,12 +379,12 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     }
                 };
 
-            QueuedWork.addFinisher(awaitCommit);
+            QueuedWork.add(awaitCommit);
 
             Runnable postWriteRunnable = new Runnable() {
                     public void run() {
                         awaitCommit.run();
-                        QueuedWork.removeFinisher(awaitCommit);
+                        QueuedWork.remove(awaitCommit);
                     }
                 };
 
@@ -557,10 +557,10 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         if (DEBUG) {
-            Log.d(TAG, "queued " + mcr.memoryStateGeneration + " -> " + mFile.getName());
+            Log.d(TAG, "added " + mcr.memoryStateGeneration + " -> " + mFile.getName());
         }
 
-        QueuedWork.queue(writeToDiskRunnable, !isFromSyncCommit);
+        QueuedWork.singleThreadExecutor().execute(writeToDiskRunnable);
     }
 
     private static FileOutputStream createFileOutputStream(File file) {
