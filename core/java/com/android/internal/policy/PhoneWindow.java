@@ -3016,10 +3016,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     @Override
                     public void onSwipeCancelled(SwipeDismissLayout layout) {
                         WindowManager.LayoutParams newParams = getAttributes();
-                        newParams.x = 0;
-                        newParams.alpha = 1;
-                        setAttributes(newParams);
-                        setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                        // Swipe changes only affect the x-translation and alpha, check to see if
+                        // those values have changed first before resetting them.
+                        if (newParams.x != 0 || newParams.alpha != 1) {
+                            newParams.x = 0;
+                            newParams.alpha = 1;
+                            setAttributes(newParams);
+                            setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN | FLAG_LAYOUT_NO_LIMITS);
+                        }
                     }
                 });
     }
