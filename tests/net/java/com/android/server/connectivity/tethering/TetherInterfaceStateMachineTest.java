@@ -294,6 +294,18 @@ public class TetherInterfaceStateMachineTest {
                 IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_ENABLE_NAT_ERROR);
     }
 
+    @Test
+    public void ignoresDuplicateUpstreamNotifications() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE);
+
+        verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
+
+        for (int i = 0; i < 5; i++) {
+            dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+            verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
+        }
+    }
+
     /**
      * Send a command to the state machine under test, and run the event loop to idle.
      *
