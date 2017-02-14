@@ -60,7 +60,7 @@ public class SettingsStringUtil {
             StringBuilder sb = new StringBuilder();
             Iterator<T> it = iterator();
             if (it.hasNext()) {
-                sb.append(it.next());
+                sb.append(itemToString(it.next()));
                 while (it.hasNext()) {
                     sb.append(DELIMITER);
                     sb.append(itemToString(it.next()));
