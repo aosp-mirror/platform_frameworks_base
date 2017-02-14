@@ -88,6 +88,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -1836,12 +1837,29 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return The first child which has visibility unequal to GONE which is currently below the
      *         given translationY or equal to it.
      */
-    private View getFirstChildBelowTranlsationY(float translationY) {
+    private View getFirstChildBelowTranlsationY(float translationY, boolean ignoreChildren) {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE && child.getTranslationY() >= translationY) {
+            if (child.getVisibility() == View.GONE) {
+                continue;
+            }
+            float rowTranslation = child.getTranslationY();
+            if (rowTranslation >= translationY) {
                 return child;
+            } else if (!ignoreChildren && child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
+                    List<ExpandableNotificationRow> notificationChildren =
+                            row.getNotificationChildren();
+                    for (int childIndex = 0; childIndex < notificationChildren.size();
+                            childIndex++) {
+                        ExpandableNotificationRow rowChild = notificationChildren.get(childIndex);
+                        if (rowChild.getTranslationY() + rowTranslation >= translationY) {
+                            return rowChild;
+                        }
+                    }
+                }
             }
         }
         return null;
@@ -2500,7 +2518,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     View groupParentWhenDismissed = row.getGroupParentWhenDismissed();
                     nextView = getFirstChildBelowTranlsationY(groupParentWhenDismissed != null
                             ? groupParentWhenDismissed.getTranslationY()
-                            : view.getTranslationY());
+                            : view.getTranslationY(), true /* ignoreChildren */);
                 }
                 if (nextView != null) {
                     nextView.requestAccessibilityFocus();
@@ -2940,7 +2958,17 @@ public class NotificationStackScrollLayout extends ViewGroup
             AnimationEvent event = new AnimationEvent(child, animationType);
 
             // we need to know the view after this one
-            event.viewAfterChangingView = getFirstChildBelowTranlsationY(child.getTranslationY());
+            float removedTranslation = child.getTranslationY();
+            boolean ignoreChildren = true;
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (row.isRemoved() && row.wasChildInGroupWhenRemoved()) {
+                    removedTranslation = row.getTranslationWhenRemoved();
+                    ignoreChildren = false;
+                }
+            }
+            event.viewAfterChangingView = getFirstChildBelowTranlsationY(removedTranslation,
+                    ignoreChildren);
             mAnimationEvents.add(event);
             mSwipedOutViews.remove(child);
         }

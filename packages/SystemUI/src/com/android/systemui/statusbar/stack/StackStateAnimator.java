@@ -389,10 +389,25 @@ public class StackStateAnimator {
                 // upwards by default
                 float translationDirection = -1.0f;
                 if (viewState != null) {
+                    float ownPosition = changingView.getTranslationY();
+                    if (changingView instanceof ExpandableNotificationRow
+                            && event.viewAfterChangingView instanceof ExpandableNotificationRow) {
+                        ExpandableNotificationRow changingRow =
+                                (ExpandableNotificationRow) changingView;
+                        ExpandableNotificationRow nextRow =
+                                (ExpandableNotificationRow) event.viewAfterChangingView;
+                        if (changingRow.isRemoved()
+                                && changingRow.wasChildInGroupWhenRemoved()
+                                && !nextRow.isChildInGroup()) {
+                            // the next row isn't actually a child from a group! Let's
+                            // compare absolute positions!
+                            ownPosition = changingRow.getTranslationWhenRemoved();
+                        }
+                    }
                     // there was a view after this one, Approximate the distance the next child
                     // travelled
                     translationDirection = ((viewState.yTranslation
-                            - (changingView.getTranslationY() + actualHeight / 2.0f)) * 2 /
+                            - (ownPosition + actualHeight / 2.0f)) * 2 /
                             actualHeight);
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
 
