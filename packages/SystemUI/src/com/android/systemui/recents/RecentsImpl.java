@@ -130,6 +130,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 launchOpts.numVisibleTaskThumbnails = 2;
                 launchOpts.onlyLoadForCache = true;
                 launchOpts.onlyLoadPausedActivities = true;
+                launchOpts.loadThumbnails = !ActivityManager.ENABLE_TASK_SNAPSHOTS;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
         }
