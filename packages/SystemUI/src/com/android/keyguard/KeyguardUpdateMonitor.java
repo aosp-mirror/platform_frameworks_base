@@ -595,6 +595,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    public boolean isScreenOn() {
+        return mScreenOn;
+    }
+
     static class DisplayClientState {
         public int clientGeneration;
         public boolean clearing;

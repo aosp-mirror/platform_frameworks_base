@@ -87,6 +87,7 @@ public class KeyguardIndicationController {
     private KeyguardUpdateMonitorCallback mUpdateMonitor;
 
     private final DevicePolicyManager mDevicePolicyManager;
+    private boolean mDozing;
 
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
             LockIcon lockIcon) {
@@ -139,7 +140,7 @@ public class KeyguardIndicationController {
             return;
         }
 
-        if (mDevicePolicyManager.isDeviceManaged()) {
+        if (!mDozing && mDevicePolicyManager.isDeviceManaged()) {
             final CharSequence organizationName =
                     mDevicePolicyManager.getDeviceOwnerOrganizationName();
             if (organizationName != null) {
@@ -224,6 +225,18 @@ public class KeyguardIndicationController {
         if (mVisible) {
             // Walk down a precedence-ordered list of what should indication
             // should be shown based on user or device state
+            if (mDozing) {
+                // If we're dozing, never show a persistent indication.
+                if (!TextUtils.isEmpty(mTransientIndication)) {
+                    mTextView.switchIndication(mTransientIndication);
+                    mTextView.setTextColor(mTransientTextColor);
+
+                } else {
+                    mTextView.switchIndication(null);
+                }
+                return;
+            }
+
             if (!mUserManager.isUserUnlocked(ActivityManager.getCurrentUser())) {
                 mTextView.switchIndication(com.android.internal.R.string.lockscreen_storage_locked);
                 mTextView.setTextColor(Color.WHITE);
@@ -319,6 +332,12 @@ public class KeyguardIndicationController {
         }
     };
 
+    public void setDozing(boolean dozing) {
+        mDozing = dozing;
+        updateIndication();
+        updateDisclosure();
+    }
+
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
         private int mLastSuccessiveErrorMessage = -1;
 
@@ -349,7 +368,8 @@ public class KeyguardIndicationController {
             int errorColor = mContext.getResources().getColor(R.color.system_warning_color, null);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString, errorColor);
-            } else if (updateMonitor.isDeviceInteractive()) {
+            } else if (updateMonitor.isDeviceInteractive()
+                    || mDozing && updateMonitor.isScreenOn()) {
                 mLockIcon.setTransientFpError(true);
                 showTransientIndication(helpString, errorColor);
                 mHandler.removeMessages(MSG_CLEAR_FP_MSG);

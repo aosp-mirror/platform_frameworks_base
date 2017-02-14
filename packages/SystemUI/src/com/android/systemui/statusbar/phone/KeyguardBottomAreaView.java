@@ -167,6 +167,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private IntentButton mLeftPlugin;
     private String mLeftButtonStr;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
+    private boolean mDozing;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -361,7 +362,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             // Things are not set up yet; reply hazy, ask again later
             return;
         }
-        mRightAffordanceView.setVisibility(mRightButton.getIcon().isVisible
+        mRightAffordanceView.setVisibility(!mDozing && mRightButton.getIcon().isVisible
                 ? View.VISIBLE : View.GONE);
     }
 
@@ -375,7 +376,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private void updateLeftAffordanceIcon() {
         IconState state = mLeftButton.getIcon();
-        mLeftAffordanceView.setVisibility(state.isVisible ? View.VISIBLE : View.GONE);
+        mLeftAffordanceView.setVisibility(!mDozing && state.isVisible ? View.VISIBLE : View.GONE);
         mLeftAffordanceView.setImageDrawable(state.drawable, state.tint);
         mLeftAffordanceView.setContentDescription(state.contentDescription);
     }
@@ -845,6 +846,22 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             setLeftButton(null);
         }
     };
+
+    public void setDozing(boolean dozing, boolean animate) {
+        mDozing = dozing;
+
+        updateCameraVisibility();
+        updateLeftAffordanceIcon();
+
+        if (dozing) {
+            mLockIcon.setVisibility(INVISIBLE);
+        } else {
+            mLockIcon.setVisibility(VISIBLE);
+            if (animate) {
+                startFinishDozeAnimation();
+            }
+        }
+    }
 
     private class DefaultLeftButton implements IntentButton {
 
