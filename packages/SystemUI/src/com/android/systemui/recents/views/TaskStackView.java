@@ -20,6 +20,8 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -1496,11 +1498,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Remove the task from the ignored set
         removeIgnoreTask(removedTask);
 
-        // Resize the grid layout task view focus frame
-        if (mTaskViewFocusFrame != null) {
-            mTaskViewFocusFrame.resize();
-        }
-
         // If requested, relayout with the given animation
         if (animation != null) {
             updateLayoutAlgorithm(true /* boundScroll */);
@@ -1837,6 +1834,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Announce for accessibility
         announceForAccessibility(getContext().getString(
                 R.string.accessibility_recents_item_dismissed, event.task.title));
+
+        if (useGridLayout() && event.animation != null) {
+            event.animation.setListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd(Animator animator) {
+                    if (mTaskViewFocusFrame != null) {
+                        // Resize the grid layout task view focus frame
+                        mTaskViewFocusFrame.resize();
+                    }
+                }
+            });
+        }
 
         // Remove the task from the stack
         mStack.removeTask(event.task, event.animation, false /* fromDockGesture */);

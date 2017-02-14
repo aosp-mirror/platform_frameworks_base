@@ -269,7 +269,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         return super.onInterceptTouchEvent(ev);
     }
 
-
     @Override
     protected void measureContents(int width, int height) {
         int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
