@@ -43,7 +43,10 @@ GlLayer::GlLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHe
 }
 
 GlLayer::~GlLayer() {
-    if (texture.mId) {
+    // There's a rare possibility that Caches could have been destroyed already
+    // since this method is queued up as a task.
+    // Since this is a reset method, treat this as non-fatal.
+    if (caches.isInitialized() && texture.mId) {
         texture.deleteTexture();
     }
 }
@@ -62,16 +65,6 @@ void GlLayer::generateTexture() {
     if (!texture.mId) {
         glGenTextures(1, &texture.mId);
     }
-}
-
-void GlLayer::clearTexture() {
-    // There's a rare possibility that Caches could have been destroyed already
-    // since this method is queued up as a task.
-    // Since this is a reset method, treat this as non-fatal.
-    if (caches.isInitialized()) {
-        caches.textureState().unbindTexture(texture.mId);
-    }
-    texture.mId = 0;
 }
 
 }; // namespace uirenderer

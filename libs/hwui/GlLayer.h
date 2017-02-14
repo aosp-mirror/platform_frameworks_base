@@ -88,13 +88,6 @@ public:
     void generateTexture();
 
     /**
-     * When the caller frees the texture itself, the caller
-     * must call this method to tell this layer that it lost
-     * the texture.
-     */
-    void clearTexture();
-
-    /**
      * Lost the GL context but the layer is still around, mark it invalid internally
      * so the dtor knows not to do any GL work
      */

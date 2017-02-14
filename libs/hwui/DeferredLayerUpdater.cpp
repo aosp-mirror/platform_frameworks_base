@@ -31,7 +31,7 @@ DeferredLayerUpdater::DeferredLayerUpdater(RenderState& renderState, CreateLayer
         , mBlend(false)
         , mSurfaceTexture(nullptr)
         , mTransform(nullptr)
-        , mNeedsGLContextAttach(false)
+        , mGLContextAttached(false)
         , mUpdateTexImage(false)
         , mLayer(nullptr)
         , mLayerApi(layerApi)
@@ -47,10 +47,21 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
 }
 
 void DeferredLayerUpdater::destroyLayer() {
-    if (mLayer) {
-        mLayer->postDecStrong();
-        mLayer = nullptr;
+    if (!mLayer) {
+        return;
     }
+
+    if (mSurfaceTexture.get() && mLayerApi == Layer::Api::OpenGL && mGLContextAttached) {
+        status_t err = mSurfaceTexture->detachFromContext();
+        mGLContextAttached = false;
+        if (err != 0) {
+            // TODO: Elevate to fatal exception
+            ALOGE("Failed to detach SurfaceTexture from context %d", err);
+        }
+    }
+
+    mLayer->postDecStrong();
+    mLayer = nullptr;
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
@@ -78,8 +89,9 @@ void DeferredLayerUpdater::apply() {
             LOG_ALWAYS_FATAL_IF(mLayer->getApi() != Layer::Api::OpenGL,
                                 "apply surfaceTexture with non GL backend %x, GL %x, VK %x",
                                 mLayer->getApi(), Layer::Api::OpenGL, Layer::Api::Vulkan);
-            if (mNeedsGLContextAttach) {
-                mNeedsGLContextAttach = false;
+            if (!mGLContextAttached) {
+                mGLContextAttached = true;
+                mUpdateTexImage = true;
                 mSurfaceTexture->attachToContext(static_cast<GlLayer*>(mLayer)->getTextureId());
             }
             if (mUpdateTexImage) {
@@ -169,16 +181,7 @@ void DeferredLayerUpdater::updateLayer(bool forceFilter, GLenum renderTarget,
 
 void DeferredLayerUpdater::detachSurfaceTexture() {
     if (mSurfaceTexture.get()) {
-        if (mLayerApi == Layer::Api::OpenGL) {
-            status_t err = mSurfaceTexture->detachFromContext();
-            if (err != 0) {
-                // TODO: Elevate to fatal exception
-                ALOGE("Failed to detach SurfaceTexture from context %d", err);
-            }
-            if (mLayer) {
-                static_cast<GlLayer*>(mLayer)->clearTexture();
-            }
-        }
+        destroyLayer();
         mSurfaceTexture = nullptr;
     }
 }
