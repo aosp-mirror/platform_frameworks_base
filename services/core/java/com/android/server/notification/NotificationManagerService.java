@@ -2078,12 +2078,14 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
                 return null;
             }
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try {
-                writePolicyXml(baos, true /*forBackup*/);
-                return baos.toByteArray();
-            } catch (IOException e) {
-                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            synchronized(mPolicyFile) {
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try {
+                    writePolicyXml(baos, true /*forBackup*/);
+                    return baos.toByteArray();
+                } catch (IOException e) {
+                    Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+                }
             }
             return null;
         }
@@ -2101,12 +2103,14 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
                 return;
             }
-            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-            try {
-                readPolicyXml(bais, true /*forRestore*/);
-                savePolicyFile();
-            } catch (NumberFormatException | XmlPullParserException | IOException e) {
-                Slog.w(TAG, "applyRestore: error reading payload", e);
+            synchronized(mPolicyFile) {
+                final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+                try {
+                    readPolicyXml(bais, true /*forRestore*/);
+                    savePolicyFile();
+                } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                    Slog.w(TAG, "applyRestore: error reading payload", e);
+                }
             }
         }
 
