@@ -79,6 +79,7 @@ public class AccessibilityShortcutControllerTest {
     private @Mock Toast mToast;
 
     private MockContentResolver mContentResolver;
+    private WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
 
     @Before
     public void setUp() throws Exception {
@@ -118,6 +119,9 @@ public class AccessibilityShortcutControllerTest {
                 .thenReturn(mAlertDialogBuilder);
         when(mAlertDialogBuilder.setOnCancelListener(anyObject())).thenReturn(mAlertDialogBuilder);
         when(mAlertDialogBuilder.create()).thenReturn(mAlertDialog);
+
+        mLayoutParams.privateFlags = 0;
+        when(mToast.getWindowParams()).thenReturn(mLayoutParams);
 
         Window window = mock(Window.class);
         Whitebox.setInternalState(window, "mWindowAttributes", new WindowManager.LayoutParams());
@@ -183,6 +187,9 @@ public class AccessibilityShortcutControllerTest {
         accessibilityShortcutController.performAccessibilityShortcut();
         accessibilityShortcutController.performAccessibilityShortcut();
         verify(mToast).show();
+        assertEquals(WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                mLayoutParams.privateFlags
+                        & WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
         verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut();
     }
 
