@@ -20,6 +20,7 @@ package com.android.systemui.util.leak;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.support.annotation.VisibleForTesting;
 
 import com.android.systemui.Dependency;
@@ -80,11 +81,15 @@ public class GarbageMonitor {
 
     public static class Service extends SystemUI {
 
+        // TODO(b/35345376): Turn this back on for debuggable builds after known leak fixed.
+        private static final boolean ENABLED = Build.IS_DEBUGGABLE
+                && SystemProperties.getBoolean("debug.enable_leak_reporting", false);
+
         private GarbageMonitor mGarbageMonitor;
 
         @Override
         public void start() {
-            if (!Build.IS_DEBUGGABLE) {
+            if (!ENABLED) {
                 return;
             }
             mGarbageMonitor = Dependency.get(GarbageMonitor.class);
