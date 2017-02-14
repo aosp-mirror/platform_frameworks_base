@@ -363,6 +363,14 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public void cancelBackups() throws RemoteException {
+        BackupManagerService svc = mService;
+        if (svc != null) {
+            svc.cancelBackups();
+        }
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 

@@ -127,6 +127,11 @@ public final class Bmgr {
             return;
         }
 
+        if ("cancel".equals(op)) {
+            doCancel();
+            return;
+        }
+
         if ("whitelist".equals(op)) {
             doPrintWhitelist();
             return;
@@ -270,6 +275,8 @@ public final class Bmgr {
                 return "Agent error";
             case BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED:
                 return "Size quota exceeded";
+            case BackupManager.ERROR_BACKUP_CANCELLED:
+                return "Backup Cancelled";
             default:
                 return "Unknown error";
         }
@@ -359,6 +366,21 @@ public final class Bmgr {
         } else {
             System.err.println("Provide '--all' flag or list of packages.");
         }
+    }
+
+    private void doCancel() {
+        String arg = nextArg();
+        if ("backups".equals(arg)) {
+            try {
+                mBmgr.cancelBackups();
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+            }
+            return;
+        }
+
+        System.err.println("Unknown command.");
     }
 
     private void doTransport() {
@@ -721,6 +743,7 @@ public final class Bmgr {
         System.err.println("       bmgr wipe TRANSPORT PACKAGE");
         System.err.println("       bmgr fullbackup PACKAGE...");
         System.err.println("       bmgr backupnow --all|PACKAGE...");
+        System.err.println("       bmgr cancel backups");
         System.err.println("");
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
         System.err.println("Note that the backup pass will effectively be a no-op if the package");
@@ -780,5 +803,6 @@ public final class Bmgr {
         System.err.println("For each package it will run key/value or full data backup ");
         System.err.println("depending on the package's manifest declarations.");
         System.err.println("The data is sent via the currently active transport.");
+        System.err.println("The 'cancel backups' command cancels all running backups.");
     }
 }

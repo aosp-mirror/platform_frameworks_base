@@ -386,4 +386,10 @@ interface IBackupManager {
      */
     int requestBackup(in String[] packages, IBackupObserver observer, IBackupManagerMonitor monitor,
         int flags);
+
+    /**
+     * Cancel all running backups. After this call returns, no currently running backups will
+     * interact with the selected transport.
+     */
+    void cancelBackups();
 }

@@ -89,6 +89,14 @@ public class BackupManager {
     public static final int ERROR_PACKAGE_NOT_FOUND = -2002;
 
     /**
+     * The backup operation was cancelled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_BACKUP_CANCELLED = -2003;
+
+    /**
      * The transport for some reason was not in a good state and
      * aborted the entire backup request. This is a transient
      * failure and should not be retried immediately.
@@ -624,6 +632,26 @@ public class BackupManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * Cancel all running backups. After this call returns, no currently running backups will
+     * interact with the selected transport.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void cancelBackups() {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.cancelBackups();
+            } catch (RemoteException e) {
+                Log.e(TAG, "cancelBackups() couldn't connect.");
+            }
+        }
     }
 
     /*
