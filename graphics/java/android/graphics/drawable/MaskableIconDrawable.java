@@ -427,7 +427,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
                 }
                 if (type != XmlPullParser.START_TAG) {
                     throw new XmlPullParserException(parser.getPositionDescription()
-                            + ": <foreground> or <background> tag requires a 'color' or 'drawable'"
+                            + ": <foreground> or <background> tag requires a 'drawable'"
                             + "attribute or child tag defining a drawable");
                 }
 
@@ -451,12 +451,6 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         layer.mThemeAttrs = a.extractThemeAttrs();
 
         Drawable dr = a.getDrawable(R.styleable.MaskableIconDrawableLayer_drawable);
-        if (dr == null) {
-             int color = a.getColor(R.styleable.MaskableIconDrawableLayer_color, Color.TRANSPARENT);
-             if (color != Color.TRANSPARENT) {
-                 dr = new ColorDrawable(color);
-             }
-        }
         if (dr != null) {
             if (layer.mDrawable != null) {
                 // It's possible that a drawable was already set, in which case
