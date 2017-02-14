@@ -305,6 +305,7 @@ class Layout extends RelativeLayout {
         return Bridge.getResourceId(ResourceType.ID, ID_PREFIX + name);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void requestFitSystemWindows() {
         // The framework call would usually bubble up to ViewRootImpl but, in layoutlib, Layout will
@@ -416,6 +417,7 @@ class Layout extends RelativeLayout {
             }
         }
 
+        @SuppressWarnings("SameParameterValue")
         private int getDimension(String attr, boolean isFramework, int defaultValue) {
             ResourceValue value = mResources.findItemInTheme(attr, isFramework);
             value = mResources.resolveResValue(value);

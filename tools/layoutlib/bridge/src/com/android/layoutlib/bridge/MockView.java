@@ -100,7 +100,7 @@ public class MockView extends FrameLayout {
         mView.setText(text);
     }
 
-    public void setGravity(int gravity) {
+    private void setGravity(int gravity) {
         mView.setGravity(gravity);
     }
 }

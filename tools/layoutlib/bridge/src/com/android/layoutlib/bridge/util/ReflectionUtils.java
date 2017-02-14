@@ -52,9 +52,7 @@ public class ReflectionUtils {
         Exception ex;
         try {
             return method.invoke(object, args);
-        } catch (IllegalAccessException e) {
-            ex = e;
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             ex = e;
         }
         throw new ReflectionException(ex);
