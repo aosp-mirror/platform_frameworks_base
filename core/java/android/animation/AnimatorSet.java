@@ -1865,7 +1865,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             if (mEvent == ANIMATION_START) {
                 return mNode.mStartTime;
             } else if (mEvent == ANIMATION_DELAY_ENDED) {
-                return mNode.mStartTime = mNode.mStartTime == DURATION_INFINITE
+                return mNode.mStartTime == DURATION_INFINITE
                         ? DURATION_INFINITE : mNode.mStartTime + mNode.mAnimation.getStartDelay();
             } else {
                 return mNode.mEndTime;
