@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -307,13 +308,13 @@ public final class SmsManager {
     public void sendTextMessage(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        sendTextMessageInternal(destinationAddress, scAddress, text,
-            sentIntent, deliveryIntent, true /* persistMessageForCarrierApp*/);
+        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
+                true /* persistMessage*/);
     }
 
     private void sendTextMessageInternal(String destinationAddress, String scAddress,
             String text, PendingIntent sentIntent, PendingIntent deliveryIntent,
-            boolean persistMessageForCarrierApp) {
+            boolean persistMessage) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -327,7 +328,7 @@ public final class SmsManager {
             iccISms.sendTextForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
                     destinationAddress,
                     scAddress, text, sentIntent, deliveryIntent,
-                    persistMessageForCarrierApp);
+                    persistMessage);
         } catch (RemoteException ex) {
             // ignore it
         }
@@ -336,16 +337,20 @@ public final class SmsManager {
     /**
      * Send a text based SMS without writing it into the SMS Provider.
      *
-     * <p>Only the carrier app can call this method.</p>
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
+     * privileges.
+     * </p>
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      * @hide
      */
+    @SystemApi
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        sendTextMessageInternal(destinationAddress, scAddress, text,
-            sentIntent, deliveryIntent, false /* persistMessageForCarrierApp*/);
+        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
+                false /* persistMessage */);
     }
 
     /**
@@ -474,14 +479,14 @@ public final class SmsManager {
     public void sendMultipartTextMessage(
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
-        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts,
-              sentIntents, deliveryIntents, true /* persistMessageForCarrierApp*/);
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, true /* persistMessage*/);
     }
 
     private void sendMultipartTextMessageInternal(
-            String destinationAddress, String scAddress, ArrayList<String> parts,
-            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
-            boolean persistMessageForCarrierApp) {
+            String destinationAddress, String scAddress, List<String> parts,
+            List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
+            boolean persistMessage) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -495,7 +500,7 @@ public final class SmsManager {
                 iccISms.sendMultipartTextForSubscriber(getSubscriptionId(),
                         ActivityThread.currentPackageName(),
                         destinationAddress, scAddress, parts,
-                        sentIntents, deliveryIntents, persistMessageForCarrierApp);
+                        sentIntents, deliveryIntents, persistMessage);
             } catch (RemoteException ex) {
                 // ignore it
             }
@@ -516,16 +521,20 @@ public final class SmsManager {
     /**
      * Send a multi-part text based SMS without writing it into the SMS Provider.
      *
-     * <p>Only the carrier app can call this method.</p>
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
+     * privileges.
+     * </p>
      *
      * @see #sendMultipartTextMessage(String, String, ArrayList, ArrayList, ArrayList)
      * @hide
      **/
+    @SystemApi
     public void sendMultipartTextMessageWithoutPersisting(
-            String destinationAddress, String scAddress, ArrayList<String> parts,
-            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
-        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts,
-            sentIntents, deliveryIntents, false /* persistMessageForCarrierApp*/);
+            String destinationAddress, String scAddress, List<String> parts,
+            List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, false /* persistMessage*/);
     }
 
     /**
