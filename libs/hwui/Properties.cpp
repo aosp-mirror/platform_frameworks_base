@@ -211,7 +211,7 @@ RenderPipelineType Properties::getRenderPipelineType() {
         return sRenderPipelineType;
     }
     char prop[PROPERTY_VALUE_MAX];
-    property_get(PROPERTY_DEFAULT_RENDERER, prop, "opengl");
+    property_get(PROPERTY_RENDERER, prop, "opengl");
     if (!strcmp(prop, "skiagl") ) {
         sRenderPipelineType = RenderPipelineType::SkiaGL;
     } else if (!strcmp(prop, "skiavk") ) {

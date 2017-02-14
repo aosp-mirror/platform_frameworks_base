@@ -156,7 +156,7 @@ enum DebugLevel {
  * Allows to set rendering pipeline mode to OpenGL (default), Skia OpenGL
  * or Vulkan.
  */
-#define PROPERTY_DEFAULT_RENDERER "debug.hwui.default_renderer"
+#define PROPERTY_RENDERER "debug.hwui.renderer"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
