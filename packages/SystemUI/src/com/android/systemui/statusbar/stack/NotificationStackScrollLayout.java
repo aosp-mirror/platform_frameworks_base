@@ -4004,6 +4004,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setPulsing(boolean pulsing) {
+        if (mPulsing == pulsing) {
+            return;
+        }
         mPulsing = pulsing;
         updateNotificationAnimationStates();
         updateContentHeight();
