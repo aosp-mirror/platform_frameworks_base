@@ -97,6 +97,8 @@ final class SynthesisPlaybackQueueItem extends PlaybackQueueItem
         }
 
         mAudioTrack.setPlaybackPositionUpdateListener(this);
+        // Ensure we set the first marker if there is one.
+        updateMarker();
 
         try {
             byte[] buffer = null;
