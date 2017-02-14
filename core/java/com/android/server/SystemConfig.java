@@ -109,6 +109,10 @@ public class SystemConfig {
     // background while in data-usage save mode, as read from the configuration files.
     final ArraySet<String> mAllowInDataUsageSave = new ArraySet<>();
 
+    // These are the packages that are white-listed to be able to run background location
+    // without throttling, as read from the configuration files.
+    final ArraySet<String> mAllowUnthrottledLocation = new ArraySet<>();
+
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
@@ -180,6 +184,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowInDataUsageSave() {
         return mAllowInDataUsageSave;
+    }
+
+    public ArraySet<String> getAllowUnthrottledLocation() {
+        return mAllowUnthrottledLocation;
     }
 
     public ArraySet<String> getLinkedApps() {
@@ -442,6 +450,17 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mAllowInDataUsageSave.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+
+                } else if ("allow-unthrottled-location".equals(name) && allowAll) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<allow-unthrottled-location> without package in "
+                            + permFile + " at " + parser.getPositionDescription());
+                    } else {
+                        mAllowUnthrottledLocation.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;

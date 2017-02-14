@@ -19,6 +19,7 @@ package com.android.server;
 import android.app.ActivityManager;
 import android.annotation.NonNull;
 import android.content.pm.PackageManagerInternal;
+import android.util.ArraySet;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -135,8 +136,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final String FUSED_LOCATION_SERVICE_ACTION =
             "com.android.location.service.FusedLocationProvider";
 
-    private static final String GMSCORE_PACKAGE = "com.android.google.gms";
-
     private static final int MSG_LOCATION_CHANGED = 1;
 
     private static final long NANOS_PER_MILLI = 1000000L;
@@ -224,7 +223,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final ArrayList<LocationProviderProxy> mProxyProviders =
             new ArrayList<>();
 
-    private String[] mBackgroundThrottlePackageWhitelist = new String[]{};
+    private final ArraySet<String> mBackgroundThrottlePackageWhitelist = new ArraySet<>();
 
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
@@ -345,6 +344,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             updateUserProfiles(mCurrentUserId);
 
+            updateThrottlingWhitelistLocked();
+
             // prepare providers
             loadProvidersLocked();
             updateProvidersLocked();
@@ -380,14 +381,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 @Override
                 public void onChange(boolean selfChange) {
                     synchronized (mLock) {
-                        String setting = Settings.Global.getString(
-                            mContext.getContentResolver(),
-                            Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
-                        if (setting == null) {
-                            setting = "";
-                        }
-
-                        mBackgroundThrottlePackageWhitelist = setting.split(",");
+                        updateThrottlingWhitelistLocked();
                         updateProvidersLocked();
                     }
                 }
@@ -1747,23 +1741,32 @@ public class LocationManagerService extends ILocationManager.Stub {
         p.setRequest(providerRequest, worksource);
     }
 
+    private void updateThrottlingWhitelistLocked() {
+        String setting = Settings.Global.getString(
+            mContext.getContentResolver(),
+            Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
+        if (setting == null) {
+            setting = "";
+        }
+
+        mBackgroundThrottlePackageWhitelist.clear();
+        mBackgroundThrottlePackageWhitelist.addAll(
+            SystemConfig.getInstance().getAllowUnthrottledLocation());
+        mBackgroundThrottlePackageWhitelist.addAll(
+            Arrays.asList(setting.split(",")));
+    }
+
     private boolean isThrottlingExemptLocked(Receiver receiver) {
         if (receiver.mUid == Process.SYSTEM_UID) {
             return true;
         }
 
-        if (receiver.mPackageName.equals(GMSCORE_PACKAGE)) {
+        if (mBackgroundThrottlePackageWhitelist.contains(receiver.mPackageName)) {
             return true;
         }
 
         for (LocationProviderProxy provider : mProxyProviders) {
             if (receiver.mPackageName.equals(provider.getConnectedPackageName())) {
-                return true;
-            }
-        }
-
-        for (String whitelistedPackage : mBackgroundThrottlePackageWhitelist) {
-            if (receiver.mPackageName.equals(whitelistedPackage)) {
                 return true;
             }
         }
@@ -2996,6 +2999,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 pw.println("  Mock Providers:");
                 for (Map.Entry<String, MockProvider> i : mMockProviders.entrySet()) {
                     i.getValue().dump(pw, "      ");
+                }
+            }
+
+            if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
+                pw.println("  Throttling Whitelisted Packages:");
+                for (String packageName : mBackgroundThrottlePackageWhitelist) {
+                    pw.println("    " + packageName);
                 }
             }
 
