@@ -1741,6 +1741,17 @@ public class AudioTrack extends PlayerBase
         return setStereoVolume(gain, gain);
     }
 
+    @Override
+    /* package */ int playerApplyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation) {
+        return native_applyVolumeShaper(configuration, operation);
+    }
+
+    @Override
+    /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
+        return native_getVolumeShaperState(id);
+    }
 
     /**
      * Sets the playback sample rate for this track. This sets the sampling rate at which
@@ -3092,6 +3103,12 @@ public class AudioTrack extends PlayerBase
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
     static private native int native_get_FCC_8();
+
+    private native int native_applyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation);
+
+    private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
 
     //---------------------------------------------------------
     // Utility methods

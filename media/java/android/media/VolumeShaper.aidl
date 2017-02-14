@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package android.media;
 
-import android.media.VolumeShaper;
-
-/**
- * @hide
- */
-interface IPlayer {
-    oneway void start();
-    oneway void pause();
-    oneway void stop();
-    oneway void setVolume(float vol);
-    oneway void setPan(float pan);
-    oneway void setStartDelayMs(int delayMs);
-    oneway void applyVolumeShaper(in VolumeShaper.Configuration configuration,
-                                  in VolumeShaper.Operation operation);
-}
+parcelable VolumeShaper.Configuration;
+parcelable VolumeShaper.Operation;
+parcelable VolumeShaper.State;

@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -388,6 +390,17 @@ public class SoundPool extends PlayerBase {
         _setVolume(streamID, leftVolume, rightVolume);
     }
 
+    @Override
+    /* package */ int playerApplyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @Nullable VolumeShaper.Operation operation) {
+        return -1;
+    }
+
+    @Override
+    /* package */ @Nullable VolumeShaper.State playerGetVolumeShaperState(int id) {
+        return null;
+    }
 
     @Override
     void playerSetVolume(boolean muting, float leftVolume, float rightVolume) {

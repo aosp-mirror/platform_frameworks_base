@@ -44,6 +44,7 @@
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_SyncParams.h"
+#include "android_media_VolumeShaper.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -160,6 +161,7 @@ static fields_t fields;
 static BufferingParams::fields_t gBufferingParamsFields;
 static PlaybackParams::fields_t gPlaybackParamsFields;
 static SyncParams::fields_t gSyncParamsFields;
+static VolumeShaperHelper::fields_t gVolumeShaperFields;
 
 static Mutex sLock;
 
@@ -1088,6 +1090,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
     gPlaybackParamsFields.init(env);
     gSyncParamsFields.init(env);
+    gVolumeShaperFields.init(env);
 }
 
 static void
@@ -1257,6 +1260,51 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
             "java/lang/IllegalArgumentException",
             "setNextMediaPlayer failed." );
     ;
+}
+
+// Pass through the arguments to the MediaServer player implementation.
+static jint android_media_MediaPlayer_applyVolumeShaper(JNIEnv *env, jobject thiz,
+        jobject jconfig, jobject joperation) {
+    // NOTE: hard code here to prevent platform issues. Must match VolumeShaper.java
+    const int VOLUME_SHAPER_INVALID_OPERATION = -38;
+
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == nullptr) {
+        return (jint)VOLUME_SHAPER_INVALID_OPERATION;
+    }
+
+    sp<VolumeShaper::Configuration> configuration;
+    sp<VolumeShaper::Operation> operation;
+    if (jconfig != nullptr) {
+        configuration = VolumeShaperHelper::convertJobjectToConfiguration(
+                env, gVolumeShaperFields, jconfig);
+        ALOGV("applyVolumeShaper configuration: %s", configuration->toString().c_str());
+    }
+    if (joperation != nullptr) {
+        operation = VolumeShaperHelper::convertJobjectToOperation(
+                env, gVolumeShaperFields, joperation);
+        ALOGV("applyVolumeShaper operation: %s", operation->toString().c_str());
+    }
+    VolumeShaper::Status status = mp->applyVolumeShaper(configuration, operation);
+    if (status == INVALID_OPERATION) {
+        status = VOLUME_SHAPER_INVALID_OPERATION;
+    }
+    return (jint)status; // if status < 0 an error, else a VolumeShaper id
+}
+
+// Pass through the arguments to the MediaServer player implementation.
+static jobject android_media_MediaPlayer_getVolumeShaperState(JNIEnv *env, jobject thiz,
+        jint id) {
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == nullptr) {
+        return (jobject)nullptr;
+    }
+
+    sp<VolumeShaper::State> state = mp->getVolumeShaperState((int)id);
+    if (state.get() == nullptr) {
+        return (jobject)nullptr;
+    }
+    return VolumeShaperHelper::convertStateToJobject(env, gVolumeShaperFields, state);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -1747,6 +1795,12 @@ static const JNINativeMethod gMethods[] = {
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
+    {"native_applyVolumeShaper",
+                            "(Landroid/media/VolumeShaper$Configuration;Landroid/media/VolumeShaper$Operation;)I",
+                                                                (void *)android_media_MediaPlayer_applyVolumeShaper},
+    {"native_getVolumeShaperState",
+                            "(I)Landroid/media/VolumeShaper$State;",
+                                                                (void *)android_media_MediaPlayer_getVolumeShaperState},
     // Modular DRM
     { "_prepareDrm", "([BI)V",                                  (void *)android_media_MediaPlayer_prepareDrm },
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer_releaseDrm },

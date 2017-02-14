@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.media.VolumeShaper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -132,4 +133,21 @@ public class PlayerProxy {
         }
     }
 
+    /**
+     * @hide
+     * @param configuration
+     * @param operation
+     * @return volume shaper id or error
+     */
+    public void applyVolumeShaper(
+            @NonNull VolumeShaper.Configuration configuration,
+            @NonNull VolumeShaper.Operation operation) {
+        try {
+            mConf.getIPlayer().applyVolumeShaper(configuration, operation);
+        } catch (NullPointerException|RemoteException e) {
+            throw new IllegalStateException(
+                    "No player to proxy for applyVolumeShaper operation,"
+                    + " player already released?", e);
+        }
+    }
 }
