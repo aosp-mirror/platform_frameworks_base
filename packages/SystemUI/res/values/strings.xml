@@ -1734,18 +1734,6 @@
     <!-- Label for PIP the drag to close zone [CHAR LIMIT=NONE]-->
     <string name="pip_phone_close">Close</string>
 
-    <!-- PIP section of the tuner. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="picture_in_picture" translatable="false">Picture-in-Picture</string>
-
-    <!-- PIP drag to dismiss title. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_drag_to_dismiss_title" translatable="false">Drag to dismiss</string>
-
-    <!-- PIP drag to dismiss description. Non-translatable since it should
-        not appear on production builds ever. -->
-    <string name="pip_drag_to_dismiss_summary" translatable="false">Drag to the dismiss target at the bottom of the screen to close the PIP</string>
-
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->

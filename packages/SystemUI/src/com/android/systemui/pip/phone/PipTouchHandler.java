@@ -37,9 +37,7 @@ import android.view.ViewConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
@@ -47,16 +45,17 @@ import java.io.PrintWriter;
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
  */
-public class PipTouchHandler implements TunerService.Tunable {
+public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
 
     // These values are used for metrics and should never change
     private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
     private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
-    private static final String TUNER_KEY_DRAG_TO_DISMISS = "pip_drag_to_dismiss";
-
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 200;
+
+    // Allow dragging the PIP to a location to close it
+    private static final boolean ENABLE_DRAG_TO_DISMISS = false;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -69,9 +68,6 @@ public class PipTouchHandler implements TunerService.Tunable {
     private final PipMenuActivityController mMenuController;
     private final PipDismissViewController mDismissViewController;
     private final PipSnapAlgorithm mSnapAlgorithm;
-
-    // Allow dragging the PIP to a location to close it
-    private boolean mEnableDragToDismiss = false;
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -86,7 +82,7 @@ public class PipTouchHandler implements TunerService.Tunable {
     private Runnable mShowDismissAffordance = new Runnable() {
         @Override
         public void run() {
-            if (mEnableDragToDismiss) {
+            if (ENABLE_DRAG_TO_DISMISS) {
                 mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
         }
@@ -183,23 +179,6 @@ public class PipTouchHandler implements TunerService.Tunable {
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mSnapAlgorithm,
                 mFlingAnimationUtils);
         registerInputConsumer();
-
-        // Register any tuner settings changes
-        Dependency.get(TunerService.class).addTunable(this, TUNER_KEY_DRAG_TO_DISMISS);
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (newValue == null) {
-            // Reset back to default
-            mEnableDragToDismiss = false;
-            return;
-        }
-        switch (key) {
-            case TUNER_KEY_DRAG_TO_DISMISS:
-                mEnableDragToDismiss = Integer.parseInt(newValue) != 0;
-                break;
-        }
     }
 
     public void onActivityPinned() {
@@ -439,7 +418,7 @@ public class PipTouchHandler implements TunerService.Tunable {
 
         @Override
         public void onDown(PipTouchState touchState) {
-            if (mEnableDragToDismiss) {
+            if (ENABLE_DRAG_TO_DISMISS) {
                 mDismissViewController.createDismissTarget();
                 mHandler.postDelayed(mShowDismissAffordance, SHOW_DISMISS_AFFORDANCE_DELAY);
             }
@@ -451,7 +430,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mSavedSnapFraction = -1f;
             }
 
-            if (touchState.startedDragging() && mEnableDragToDismiss) {
+            if (touchState.startedDragging() && ENABLE_DRAG_TO_DISMISS) {
                 mHandler.removeCallbacks(mShowDismissAffordance);
                 mDismissViewController.showDismissTarget(mMotionHelper.getBounds());
             }
@@ -469,7 +448,7 @@ public class PipTouchHandler implements TunerService.Tunable {
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds);
 
-                if (mEnableDragToDismiss) {
+                if (ENABLE_DRAG_TO_DISMISS) {
                     mDismissViewController.updateDismissTarget(mTmpBounds);
                 }
                 return true;
@@ -480,7 +459,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         @Override
         public boolean onUp(PipTouchState touchState) {
             try {
-                if (mEnableDragToDismiss) {
+                if (ENABLE_DRAG_TO_DISMISS) {
                     mHandler.removeCallbacks(mShowDismissAffordance);
                     PointF vel = mTouchState.getVelocity();
                     final float velocity = PointF.length(vel.x, vel.y);
@@ -583,7 +562,7 @@ public class PipTouchHandler implements TunerService.Tunable {
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
-        pw.println(innerPrefix + "mEnableDragToDismiss=" + mEnableDragToDismiss);
+        pw.println(innerPrefix + "mEnableDragToDismiss=" + ENABLE_DRAG_TO_DISMISS);
         mSnapAlgorithm.dump(pw, innerPrefix);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
