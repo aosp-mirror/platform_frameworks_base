@@ -289,4 +289,12 @@ public class DozeMachineTest {
 
         assertEquals(DOZE_PULSING, mMachine.getState());
     }
+
+    @Test
+    @UiThreadTest
+    public void testWakeUp_wakesUp() {
+        mMachine.wakeUp();
+
+        assertTrue(mServiceFake.requestedWakeup);
+    }
 }

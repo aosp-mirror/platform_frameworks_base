@@ -22,6 +22,7 @@ public class DozeServiceFake implements DozeMachine.Service {
 
     public boolean finished;
     public int screenState;
+    public boolean requestedWakeup;
 
     public DozeServiceFake() {
         reset();
@@ -40,5 +41,10 @@ public class DozeServiceFake implements DozeMachine.Service {
     public void reset() {
         finished = false;
         screenState = Display.STATE_UNKNOWN;
+    }
+
+    @Override
+    public void requestWakeUp() {
+        requestedWakeup = true;
     }
 }
