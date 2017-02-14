@@ -120,8 +120,7 @@ public class UsbResolverActivity extends ResolverActivity {
         }
 
         CharSequence title = getResources().getText(com.android.internal.R.string.chooseUsbActivity);
-        super.onCreate(savedInstanceState, target, title, null, rList,
-                true /* Set alwaysUseOption to true to enable "always use this app" checkbox. */ );
+        super.onCreate(savedInstanceState, target, title, null, rList, true);
 
         CheckBox alwaysUse = (CheckBox)findViewById(com.android.internal.R.id.alwaysUse);
         if (alwaysUse != null) {
