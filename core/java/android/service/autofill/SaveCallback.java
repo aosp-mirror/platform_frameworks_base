@@ -23,8 +23,6 @@ import android.os.RemoteException;
 /**
  * Handles save requests from the {@link AutoFillService} into the {@link Activity} being
  * auto-filled.
- *
- * <p>This class is thread safe.
  */
 public final class SaveCallback {
     private final ISaveCallback mCallback;

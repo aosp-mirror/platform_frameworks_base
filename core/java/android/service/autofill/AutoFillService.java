@@ -30,7 +30,6 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.util.Log;
-import android.view.autofill.FillResponse;
 
 import com.android.internal.os.SomeArgs;
 
@@ -70,7 +69,7 @@ public abstract class AutoFillService extends Service {
     // Internal extras
     /** @hide */
     public static final String EXTRA_ACTIVITY_TOKEN =
-            "android.service.autofill.EXTRA_ACTIVITY_TOKEN";
+            "android.service.autofill.extra.ACTIVITY_TOKEN";
 
     // Handler messages.
     private static final int MSG_CONNECT = 1;
@@ -180,15 +179,16 @@ public abstract class AutoFillService extends Service {
      * service.
      *
      * <p>Service must call one of the {@link FillCallback} methods (like
-     * {@link FillCallback#onSuccess(FillResponse)} or {@link FillCallback#onFailure(CharSequence)})
+     * {@link FillCallback#onSuccess(FillResponse)}
+     * or {@link FillCallback#onFailure(CharSequence)})
      * to notify the result of the request.
      *
      * @param structure {@link Activity}'s view structure.
      * @param data bundle containing data passed by the service on previous calls to fill.
      *     This bundle allows your service to keep state between fill and save requests
      *     as well as when filling different sections of the UI as the system will try to
-     *     aggressively unbind from the service to conserve resources. See {@link FillResponse}
-     *     Javadoc for examples of multiple-sections requests.
+     *     aggressively unbind from the service to conserve resources. See {@link
+     *     FillResponse} Javadoc for examples of multiple-sections requests.
      * @param cancellationSignal signal for observing cancellation requests. The system will use
      *     this to notify you that the fill result is no longer needed and you should stop
      *     handling this fill request in order to save resources.
@@ -208,8 +208,8 @@ public abstract class AutoFillService extends Service {
      * @param data bundle containing data passed by the service on previous calls to fill.
      *     This bundle allows your service to keep state between fill and save requests
      *     as well as when filling different sections of the UI as the system will try to
-     *     aggressively unbind from the service to conserve resources. See {@link FillResponse}
-     *     Javadoc for examples of multiple-sections requests.
+     *     aggressively unbind from the service to conserve resources. See {@link
+     *     FillResponse} Javadoc for examples of multiple-sections requests.
      * @param callback object used to notify the result of the request.
      */
     public abstract void onSaveRequest(@NonNull AssistStructure structure, @Nullable Bundle data,

@@ -30,15 +30,13 @@ import android.content.IntentSender;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.service.autofill.Dataset;
 import android.util.ArraySet;
 import android.os.Looper;
 import android.text.format.DateUtils;
 import android.util.Slog;
-import android.view.autofill.Dataset;
-import android.view.autofill.FillResponse;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
@@ -200,7 +198,8 @@ final class AutoFillUI {
     }
 
     /**
-     * Shows an UI affordance indicating that user action is required before a {@link FillResponse}
+     * Shows an UI affordance indicating that user action is required before a {@link
+     * android.service.autofill.FillResponse}
      * can be used.
      *
      * <p>It typically replaces the auto-fill bar with a message saying "Press fingerprint or tap to

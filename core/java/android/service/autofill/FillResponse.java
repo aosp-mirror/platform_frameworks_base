@@ -13,30 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.autofill;
-
-import static android.view.autofill.Helper.DEBUG;
+package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
-
-import com.android.internal.util.Preconditions;
+import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillManager;
 
 /**
  * Response for a {@link
- * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
- * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)} and
+ * AutoFillService#onFillRequest(android.app.assist.AssistStructure,
+ * Bundle, android.os.CancellationSignal, FillCallback)} and
  * authentication requests.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
  * fields that can be auto-filled together, and the Android system displays a dataset picker UI
- * affordance that the user must use before the {@link Activity} is filled with the dataset.
+ * affordance that the user must use before the {@link android.app.Activity} is filled with
+ * the dataset.
  *
  * <p>For example, for a login page with username/password where the user only has one account in
  * the response could be:
@@ -65,9 +63,9 @@ import com.android.internal.util.Preconditions;
  *      .build();
  * </pre>
  *
- * <p>If the user does not have any data associated with this {@link Activity} but the service wants
- * to offer the user the option to save the data that was entered, then the service could populate
- * the response with {@code savableIds} instead of {@link Dataset}s:
+ * <p>If the user does not have any data associated with this {@link android.app.Activity} but
+ * the service wants to offer the user the option to save the data that was entered, then the
+ * service could populate the response with {@code savableIds} instead of {@link Dataset}s:
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
@@ -142,7 +140,7 @@ import com.android.internal.util.Preconditions;
  * #setAuthentication(IntentSender)} and {@link Dataset.Builder#setAuthentication(IntentSender)}.
  * It is recommended that you encrypt only the sensitive data but leave the labels unencrypted
  * which would allow you to provide the dataset names to the user and if they choose one
- * them challenge the user to authenticate. For example, if the user has a home and a work
+ * them challenge the user to onAuthenticate. For example, if the user has a home and a work
  * address the Home and Work labels could be stored unencrypted as they don't have any sensitive
  * data while the address data is in an encrypted storage. If the user chooses Home, then the
  * platform will start your authentication flow. If you encrypt all data and require auth
@@ -152,29 +150,20 @@ import com.android.internal.util.Preconditions;
  * Work options where they can pick one. Hence, you have flexibility how to implement your
  * auth while storing labels non-encrypted and data encrypted provides a better user
  * experience.</p>
- *
- * <p>Finally, the service can use {@link Dataset.Builder#setExtras(Bundle)} methods
- * to pass {@link Bundle extras} provided to all future calls related to a dataset,
- * for example during authentication and saving.</p>
  */
 public final class FillResponse implements Parcelable {
-    private final String mId;
+    private static final boolean DEBUG = false;
+
     private final ArraySet<Dataset> mDatasets;
     private final ArraySet<AutoFillId> mSavableIds;
     private final Bundle mExtras;
     private final IntentSender mAuthentication;
 
     private FillResponse(@NonNull Builder builder) {
-        mId = builder.mId;
         mDatasets = builder.mDatasets;
         mSavableIds = builder.mSavableIds;
         mExtras = builder.mExtras;
         mAuthentication = builder.mAuthentication;
-    }
-
-    /** @hide */
-    public @NonNull String getId() {
-        return mId;
     }
 
     /** @hide */
@@ -202,71 +191,49 @@ public final class FillResponse implements Parcelable {
      * one dataset or set an authentication intent.
      */
     public static final class Builder {
-        private final String mId;
         private ArraySet<Dataset> mDatasets;
         private ArraySet<AutoFillId> mSavableIds;
         private Bundle mExtras;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
 
-        /** @hide */
-        // TODO(b/33197203): Remove once GCore migrates
-        public Builder() {
-            this(String.valueOf(System.currentTimeMillis()));
-        }
-
         /**
          * Creates a new {@link FillResponse} builder.
-         *
-         * @param id A required id to identify this dataset for future interactions related to it.
          */
-        public Builder(@NonNull String id) {
-            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty or null");
+        public Builder() {
+
         }
 
         /**
          * Requires a fill response authentication before auto-filling the activity with
-         * any dataset in this response. This is typically useful when a user interaction
-         * is required to unlock their data vault if you encrypt the dataset labels and
-         * dataset data. It is recommended to encrypt only the sensitive data and not the
-         * dataset labels which would allow auth on the dataset level leading to a better
-         * user experience. Note that if you use sensitive data as a label, for example an
-         * email address, then it should also be encrypted.
+         * any data set in this response.
          *
-         * <p>This method is called when you need to provide an authentication
-         * UI for the fill response. For example, when the user's data is stored
-         * encrypted and needs a user interaction to decrypt before offering fill
-         * suggestions.</p>
+         * <p>This is typically useful when a user interaction is required to unlock their
+         * data vault if you encrypt the data set labels and data set data. It is recommended
+         * to encrypt only the sensitive data and not the data set labels which would allow
+         * auth on the data set level leading to a better user experience. Note that if you
+         * use sensitive data as a label, for example an email address, then it should also
+         * be encrypted. The provided {@link android.app.PendingIntent intent} must be an
+         * activity which implements your authentication flow.</p>
          *
-         * <p>When a user initiates an auto fill, the system triggers the provided
-         * intent whose extras will have the {@link android.content.Intent
-         * #EXTRA_AUTO_FILL_ITEM_ID id} of the {@link android.view.autofill.FillResponse})
-         * to authenticate, the {@link android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras}
-         * associated with this response, and a {@link android.content.Intent
-         * #EXTRA_AUTO_FILL_CALLBACK callback} to dispatch the authentication result.</p>
+         * <p>When a user triggers auto-fill, the system launches the provided intent
+         * whose extras will have the {@link
+         * AutoFillManager#EXTRA_ASSIST_STRUCTURE screen
+         * content}. Once you complete your authentication flow you should set the activity
+         * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated {@link
+         * FillResponse response} by setting it to the {@link
+         * AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra.
+         * For example, if you provided an empty {@link FillResponse resppnse} because the
+         * user's data was locked and marked that the response needs an authentication then
+         * in the response returned if authentication succeeds you need to provide all
+         * available data sets some of which may need to be further authenticated, for
+         * example a credit card whose CVV needs to be entered.</p>
          *
-         * <p>Once you complete your authentication flow you should use the provided callback
-         * to notify for a failure or a success. In case of a success you need to provide
-         * the fully populated response that is being authenticated. For example, if you
-         * provided an empty {@link FillResponse} because the user's data was locked and
-         * marked that the response needs an authentication then in the response returned
-         * if authentication succeeds you need to provide all available datasets some of
-         * which may need to be further authenticated, for example a credit card whose
-         * CVV needs to be entered.</p>
-         *
-         * <p>The indent sender mechanism allows you to have your authentication UI
-         * implemented as an activity or a service or a receiver. However, the recommended
-         * way is to do this is with an activity which the system will start in the
-         * filled activity's task meaning it will properly work with back, recent apps, and
-         * free-form multi-window, while avoiding the need for the "draw on top of other"
-         * apps special permission. You can still theme your authentication activity's
-         * UI to look like a dialog if desired.</p>
-         *
-         * <p></><strong>Note:</strong> Do not make the provided intent sender
+         * <p></><strong>Note:</strong> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.</p>
          *
-         * @param authentication Intent to trigger your authentication flow.
+         * @param authentication Intent to an activity with your authentication flow.
          *
          * @see android.app.PendingIntent#getIntentSender()
          */
@@ -313,8 +280,8 @@ public final class FillResponse implements Parcelable {
 
         /**
          * Adds ids of additional fields that the service would be interested to save (through
-         * {@link android.service.autofill.AutoFillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle, android.service.autofill.SaveCallback)})
+         * {@link AutoFillService#onSaveRequest(
+         * android.app.assist.AssistStructure, Bundle, SaveCallback)})
          * but were not indirectly set through {@link #addDataset(Dataset)}.
          *
          * <p>See {@link FillResponse} for examples.
@@ -335,15 +302,13 @@ public final class FillResponse implements Parcelable {
 
         /**
          * Sets a {@link Bundle} that will be passed to subsequent APIs that
-         * manipulate this response. For example, they are passed in as {@link
-         * android.content.Intent#EXTRA_AUTO_FILL_EXTRAS extras} to your
-         * authentication flow and to subsequent calls to {@link
-         * android.service.autofill.AutoFillService#onFillRequest(
+         * manipulate this response. For example, they are passed to subsequent
+         * calls to {@link AutoFillService#onFillRequest(
          * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * android.service.autofill.FillCallback)} and {@link
-         * android.service.autofill.AutoFillService#onSaveRequest(
+         * FillCallback)} and {@link
+         * AutoFillService#onSaveRequest(
          * android.app.assist.AssistStructure, Bundle,
-         * android.service.autofill.SaveCallback)}.
+         * SaveCallback)}.
          */
         public Builder setExtras(Bundle extras) {
             throwIfDestroyed();
@@ -374,8 +339,7 @@ public final class FillResponse implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
         final StringBuilder builder = new StringBuilder(
-                "FillResponse: [id=").append(mId)
-                .append(", datasets=").append(mDatasets)
+                "FillResponse: [datasets=").append(mDatasets)
                 .append(", savableIds=").append(mSavableIds)
                 .append(", hasExtras=").append(mExtras != null)
                 .append(", hasAuthentication=").append(mAuthentication != null);
@@ -393,7 +357,6 @@ public final class FillResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mId);
         parcel.writeTypedArraySet(mDatasets, 0);
         parcel.writeTypedArraySet(mSavableIds, 0);
         parcel.writeParcelable(mExtras, 0);
@@ -407,7 +370,7 @@ public final class FillResponse implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readString());
+            final Builder builder = new Builder();
             final ArraySet<Dataset> datasets = parcel.readTypedArraySet(null);
             final int datasetCount = (datasets != null) ? datasets.size() : 0;
             for (int i = 0; i < datasetCount; i++) {

@@ -17,9 +17,9 @@ package com.android.server.autofill;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.service.autofill.Dataset;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.view.autofill.Dataset;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;

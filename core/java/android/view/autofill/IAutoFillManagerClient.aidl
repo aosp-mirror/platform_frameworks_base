@@ -14,34 +14,33 @@
  * limitations under the License.
  */
 
-package android.service.autofill;
+package android.view.autofill;
 
 import java.util.List;
 
 import android.content.Intent;
 import android.content.IntentSender;
-import android.view.autofill.Dataset;
+import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 
 /**
  * Object running in the application process and responsible for auto-filling it.
  *
  * @hide
  */
-// TODO(b/33197203): rename IAutoFillAppSession
-oneway interface IAutoFillAppCallback {
+oneway interface IAutoFillManagerClient {
+    /**
+     * Notifies the client when the auto-fill enabled state changed.
+     */
+    void setState(boolean enabled);
+
     /**
       * Auto-fills the activity with the contents of a dataset.
       */
-    void autoFill(in Dataset dataset);
+    void autoFill(in List<AutoFillId> ids, in List<AutoFillValue> values);
 
     /**
-      * Start an intent sender from the context of the filled app
+      * Authenticates a fill response or a data set.
       */
-    void startIntentSender(in IntentSender intent, in Intent fillInIntent);
-
-    /**
-      * Called by system_service to enable auto-fill in a session, after it was asynchronously
-      * started by the manager.
-      */
-    void enableSession();
+    void authenticate(in IntentSender intent, in Intent fillInIntent);
 }

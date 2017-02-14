@@ -89,8 +89,6 @@ import android.provider.Downloads;
 import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
-import android.service.autofill.AutoFillService;
-import android.service.autofill.IAutoFillAppCallback;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -3074,16 +3072,13 @@ public final class ActivityThread {
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL || forAutoFill) {
                 structure = new AssistStructure(r.activity, forAutoFill);
                 Intent activityIntent = r.activity.getIntent();
-                boolean attachToSession = false;
                 // TODO(b/33197203): re-evaluate conditions below for auto-fill. In particular,
                 // FLAG_SECURE might be allowed on AUTO_FILL but not on AUTO_FILL_SAVE)
                 boolean notSecure = r.window == null ||
                         (r.window.getAttributes().flags
                                 & WindowManager.LayoutParams.FLAG_SECURE) == 0;
                 if (activityIntent != null && notSecure) {
-                    if (forAutoFill) {
-                        attachToSession = true;
-                    } else {
+                    if (!forAutoFill) {
                         Intent intent = new Intent(activityIntent);
                         intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
@@ -3093,16 +3088,10 @@ public final class ActivityThread {
                 } else {
                     if (!forAutoFill) {
                         content.setDefaultIntent(new Intent());
-                    } else {
-                        // activityIntent is unlikely to be null, but if it is, we should still
-                        // set the auto-fill callback.
-                        attachToSession = notSecure;
                     }
                 }
                 if (!forAutoFill) {
                     r.activity.onProvideAssistContent(content);
-                } else if (attachToSession) {
-                    r.activity.attachToAutoFillSession();
                 }
             }
         }
