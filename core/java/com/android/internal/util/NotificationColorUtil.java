@@ -303,17 +303,17 @@ public class NotificationColorUtil {
             return color;
         }
 
-        double[] lab = new double[3];
-        ColorUtilsFromCompat.colorToLAB(findFg ? fg : bg, lab);
+        float[] hsl = new float[3];
+        ColorUtilsFromCompat.colorToHSL(findFg ? fg : bg, hsl);
 
-        double low = lab[0], high = 100;
-        final double a = lab[1], b = lab[2];
+        float low = hsl[2], high = 1;
         for (int i = 0; i < 15 && high - low > 0.00001; i++) {
-            final double l = (low + high) / 2;
+            final float l = (low + high) / 2;
+            hsl[2] = l;
             if (findFg) {
-                fg = ColorUtilsFromCompat.LABToColor(l, a, b);
+                fg = ColorUtilsFromCompat.HSLToColor(hsl);
             } else {
-                bg = ColorUtilsFromCompat.LABToColor(l, a, b);
+                bg = ColorUtilsFromCompat.HSLToColor(hsl);
             }
             if (ColorUtilsFromCompat.calculateContrast(fg, bg) > minRatio) {
                 high = l;
@@ -321,7 +321,7 @@ public class NotificationColorUtil {
                 low = l;
             }
         }
-        return ColorUtilsFromCompat.LABToColor(high, a, b);
+        return findFg ? fg : bg;
     }
 
     public static int ensureTextContrastOnBlack(int color) {
@@ -764,6 +764,10 @@ public class NotificationColorUtil {
             return amount < low ? low : (amount > high ? high : amount);
         }
 
+        private static float constrain(float amount, float low, float high) {
+            return amount < low ? low : (amount > high ? high : amount);
+        }
+
         private static double pivotXyzComponent(double component) {
             return component > XYZ_EPSILON
                     ? Math.pow(component, 1 / 3.0)
@@ -777,6 +781,140 @@ public class NotificationColorUtil {
                 TEMP_ARRAY.set(result);
             }
             return result;
+        }
+
+        /**
+         * Convert HSL (hue-saturation-lightness) components to a RGB color.
+         * <ul>
+         * <li>hsl[0] is Hue [0 .. 360)</li>
+         * <li>hsl[1] is Saturation [0...1]</li>
+         * <li>hsl[2] is Lightness [0...1]</li>
+         * </ul>
+         * If hsv values are out of range, they are pinned.
+         *
+         * @param hsl 3-element array which holds the input HSL components
+         * @return the resulting RGB color
+         */
+        @ColorInt
+        public static int HSLToColor(@NonNull float[] hsl) {
+            final float h = hsl[0];
+            final float s = hsl[1];
+            final float l = hsl[2];
+
+            final float c = (1f - Math.abs(2 * l - 1f)) * s;
+            final float m = l - 0.5f * c;
+            final float x = c * (1f - Math.abs((h / 60f % 2f) - 1f));
+
+            final int hueSegment = (int) h / 60;
+
+            int r = 0, g = 0, b = 0;
+
+            switch (hueSegment) {
+                case 0:
+                    r = Math.round(255 * (c + m));
+                    g = Math.round(255 * (x + m));
+                    b = Math.round(255 * m);
+                    break;
+                case 1:
+                    r = Math.round(255 * (x + m));
+                    g = Math.round(255 * (c + m));
+                    b = Math.round(255 * m);
+                    break;
+                case 2:
+                    r = Math.round(255 * m);
+                    g = Math.round(255 * (c + m));
+                    b = Math.round(255 * (x + m));
+                    break;
+                case 3:
+                    r = Math.round(255 * m);
+                    g = Math.round(255 * (x + m));
+                    b = Math.round(255 * (c + m));
+                    break;
+                case 4:
+                    r = Math.round(255 * (x + m));
+                    g = Math.round(255 * m);
+                    b = Math.round(255 * (c + m));
+                    break;
+                case 5:
+                case 6:
+                    r = Math.round(255 * (c + m));
+                    g = Math.round(255 * m);
+                    b = Math.round(255 * (x + m));
+                    break;
+            }
+
+            r = constrain(r, 0, 255);
+            g = constrain(g, 0, 255);
+            b = constrain(b, 0, 255);
+
+            return Color.rgb(r, g, b);
+        }
+
+        /**
+         * Convert the ARGB color to its HSL (hue-saturation-lightness) components.
+         * <ul>
+         * <li>outHsl[0] is Hue [0 .. 360)</li>
+         * <li>outHsl[1] is Saturation [0...1]</li>
+         * <li>outHsl[2] is Lightness [0...1]</li>
+         * </ul>
+         *
+         * @param color  the ARGB color to convert. The alpha component is ignored
+         * @param outHsl 3-element array which holds the resulting HSL components
+         */
+        public static void colorToHSL(@ColorInt int color, @NonNull float[] outHsl) {
+            RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), outHsl);
+        }
+
+        /**
+         * Convert RGB components to HSL (hue-saturation-lightness).
+         * <ul>
+         * <li>outHsl[0] is Hue [0 .. 360)</li>
+         * <li>outHsl[1] is Saturation [0...1]</li>
+         * <li>outHsl[2] is Lightness [0...1]</li>
+         * </ul>
+         *
+         * @param r      red component value [0..255]
+         * @param g      green component value [0..255]
+         * @param b      blue component value [0..255]
+         * @param outHsl 3-element array which holds the resulting HSL components
+         */
+        public static void RGBToHSL(@IntRange(from = 0x0, to = 0xFF) int r,
+                @IntRange(from = 0x0, to = 0xFF) int g, @IntRange(from = 0x0, to = 0xFF) int b,
+                @NonNull float[] outHsl) {
+            final float rf = r / 255f;
+            final float gf = g / 255f;
+            final float bf = b / 255f;
+
+            final float max = Math.max(rf, Math.max(gf, bf));
+            final float min = Math.min(rf, Math.min(gf, bf));
+            final float deltaMaxMin = max - min;
+
+            float h, s;
+            float l = (max + min) / 2f;
+
+            if (max == min) {
+                // Monochromatic
+                h = s = 0f;
+            } else {
+                if (max == rf) {
+                    h = ((gf - bf) / deltaMaxMin) % 6f;
+                } else if (max == gf) {
+                    h = ((bf - rf) / deltaMaxMin) + 2f;
+                } else {
+                    h = ((rf - gf) / deltaMaxMin) + 4f;
+                }
+
+                s = deltaMaxMin / (1f - Math.abs(2f * l - 1f));
+            }
+
+            h = (h * 60f) % 360f;
+            if (h < 0) {
+                h += 360f;
+            }
+
+            outHsl[0] = constrain(h, 0f, 360f);
+            outHsl[1] = constrain(s, 0f, 1f);
+            outHsl[2] = constrain(l, 0f, 1f);
         }
 
     }
