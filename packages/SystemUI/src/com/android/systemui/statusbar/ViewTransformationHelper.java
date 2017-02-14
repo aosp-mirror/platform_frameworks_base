@@ -224,9 +224,6 @@ public class ViewTransformationHelper implements TransformableView {
         stack.push(viewRoot);
         while (!stack.isEmpty()) {
             View child = stack.pop();
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
             Boolean containsView = (Boolean) child.getTag(TAG_CONTAINS_TRANSFORMED_VIEW);
             if (containsView == null) {
                 // This one is unhandled, let's add it to our list.
