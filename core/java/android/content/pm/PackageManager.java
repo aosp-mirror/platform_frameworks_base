@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -3851,6 +3852,17 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
+
+    /**
+     * Returns the names of the packages that have been changed
+     * [eg. added, removed or updated] since the given sequence
+     * number.
+     * <p>If no packages have been changed, returns <code>null</code>.
+     * <p>The sequence number starts at <code>0</code> and is
+     * reset every boot.
+     */
+    public abstract @Nullable ChangedPackages getChangedPackages(
+            @IntRange(from=0) int sequenceNumber);
 
     /**
      * Get a list of features that are available on the
