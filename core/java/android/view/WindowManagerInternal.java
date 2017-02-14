@@ -282,6 +282,25 @@ public abstract class WindowManagerInternal {
     public abstract void clearLastInputMethodWindowForTransition();
 
     /**
+     * Notifies WindowManagerService that the current IME window status is being changed.
+     *
+     * <p>Only {@link com.android.server.InputMethodManagerService} is the expected and tested
+     * caller of this method.</p>
+     *
+     * @param imeToken token to track the active input method. Corresponding IME windows can be
+     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
+     *                 Note that there is no guarantee that the corresponding window is already
+     *                 created
+     * @param imeWindowVisible whether the active IME thinks that its window should be visible or
+     *                         hidden, no matter how WindowManagerService will react / has reacted
+     *                         to corresponding API calls.  Note that this state is not guaranteed
+     *                         to be synchronized with state in WindowManagerService.
+     * @param targetWindowToken token to identify the target window that the IME is associated with.
+     */
+    public abstract void updateInputMethodWindowStatus(IBinder imeToken, boolean imeWindowVisible,
+            IBinder targetWindowToken);
+
+    /**
       * Returns true when the hardware keyboard is available.
       */
     public abstract boolean isHardKeyboardAvailable();

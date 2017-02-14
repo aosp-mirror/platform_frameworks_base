@@ -1863,8 +1863,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
 
+        final StartInputInfo info;
         synchronized (mMethodMap) {
-            final StartInputInfo info = mStartInputMap.get(startInputToken);
+            info = mStartInputMap.get(startInputToken);
             if (info == null) {
                 throw new InvalidParameterException("Unknown startInputToken=" + startInputToken);
             }
@@ -1872,6 +1873,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
         }
+        mWindowManagerInternal.updateInputMethodWindowStatus(info.mImeToken,
+                (vis & InputMethodService.IME_VISIBLE) != 0, info.mTargetWindow);
     }
 
     private void updateSystemUi(IBinder token, int vis, int backDisposition) {
