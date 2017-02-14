@@ -3410,6 +3410,9 @@ message MetricsEvent {
     // OS: O
     NOTIFICATION_SNOOZED_CRITERIA = 832;
 
+    // FIELD - The context (source) from which an action is performed
+    FIELD_CONTEXT = 833;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
