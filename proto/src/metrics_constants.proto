@@ -3391,6 +3391,12 @@ message MetricsEvent {
     // OPEN: Carrier demo mode password dialog
     CARRIER_DEMO_MODE_PASSWORD = 828;
 
+    // ACTION: Create a Settings shortcut item.
+    ACTION_SETTINGS_CREATE_SHORTCUT = 829;
+
+    // ACTION: A tile in Settings information architecture is clicked
+    ACTION_SETTINGS_TILE_CLICK = 830;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
