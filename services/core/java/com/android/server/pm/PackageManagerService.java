@@ -2157,6 +2157,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkgSetting.setInstalled(install, UserHandle.USER_SYSTEM);
                 }
             }
+            scheduleWritePackageRestrictionsLocked(UserHandle.USER_SYSTEM);
         }
     }
 
@@ -13313,6 +13314,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkgSetting.setHidden(false, userId);
                     pkgSetting.setInstallReason(installReason, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
+                    mSettings.writeKernelMappingLPr(pkgSetting);
                     installed = true;
                 }
             }
@@ -16410,6 +16412,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             //note that the new package setting would have already been
             //added to mPackages. It hasn't been persisted yet.
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_INCOMPLETE);
+            // TODO: Remove this write? It's also written at the end of this method
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "writeSettings");
             mSettings.writeLPr();
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -16483,6 +16486,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else if (!previousUserIds.contains(userId)) {
                     ps.setInstallReason(installReason, userId);
                 }
+                mSettings.writeKernelMappingLPr(ps);
             }
             res.name = pkgName;
             res.uid = newPackage.applicationInfo.uid;
@@ -17667,6 +17671,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // writer
         synchronized (mPackages) {
+            boolean installedStateChanged = false;
             if (deletedPs != null) {
                 if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
@@ -17714,6 +17719,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (DEBUG_REMOVE) {
                             Slog.d(TAG, "    user " + userId + " => " + installed);
                         }
+                        if (installed != ps.getInstalled(userId)) {
+                            installedStateChanged = true;
+                        }
                         ps.setInstalled(installed, userId);
                     }
                 }
@@ -17722,6 +17730,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (writeSettings) {
                 // Save settings now
                 mSettings.writeLPr();
+            }
+            if (installedStateChanged) {
+                mSettings.writeKernelMappingLPr(ps);
             }
         }
         if (removedAppId != -1) {
@@ -17865,6 +17876,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG);
 
             if (applyUserRestrictions) {
+                boolean installedStateChanged = false;
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Propagating install state across reinstall");
                 }
@@ -17873,6 +17885,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (DEBUG_REMOVE) {
                         Slog.d(TAG, "    user " + userId + " => " + installed);
                     }
+                    if (installed != ps.getInstalled(userId)) {
+                        installedStateChanged = true;
+                    }
                     ps.setInstalled(installed, userId);
 
                     mSettings.writeRuntimePermissionsForUserLPr(userId, false);
@@ -17880,6 +17895,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Regardless of writeSettings we need to ensure that this restriction
                 // state propagation is persisted
                 mSettings.writeAllUsersPackageRestrictionsLPr();
+                if (installedStateChanged) {
+                    mSettings.writeKernelMappingLPr(ps);
+                }
             }
             // can downgrade to reader here
             if (writeSettings) {
@@ -18083,6 +18101,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // broadcasts will be sent correctly.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
                     ps.setInstalled(true, user.getIdentifier());
+                    mSettings.writeKernelMappingLPr(ps);
                 }
             } else {
                 // This is a system app, so we assume that the
@@ -18192,6 +18211,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ps.readUserState(nextUserId).domainVerificationStatus, 0,
                     PackageManager.INSTALL_REASON_UNKNOWN);
         }
+        mSettings.writeKernelMappingLPr(ps);
     }
 
     private boolean clearPackageStateForUserLIF(PackageSetting ps, int userId,
