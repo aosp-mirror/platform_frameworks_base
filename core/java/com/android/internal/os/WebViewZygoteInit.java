@@ -55,8 +55,15 @@ class WebViewZygoteInit {
         }
 
         @Override
-        protected void maybePreload() {
-            // Do nothing, we don't need to call ZygoteInit.maybePreload() for the WebView zygote.
+        protected void preload() {
+            // Nothing to preload by default.
+        }
+
+        @Override
+        protected boolean isPreloadComplete() {
+            // Webview zygotes don't preload any classes or resources or defaults, all of their
+            // preloading is package specific.
+            return true;
         }
 
         @Override

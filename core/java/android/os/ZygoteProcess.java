@@ -506,4 +506,24 @@ public class ZygoteProcess {
             state.writer.flush();
         }
     }
+
+    /**
+     * Instructs the zygote to preload the default set of classes and resources. Returns
+     * {@code true} if a preload was performed as a result of this call, and {@code false}
+     * otherwise. The latter usually means that the zygote eagerly preloaded at startup
+     * or due to a previous call to {@code preloadDefault}. Note that this call is synchronous.
+     */
+    public boolean preloadDefault(String abi) throws ZygoteStartFailedEx, IOException {
+        synchronized (mLock) {
+            ZygoteState state = openZygoteSocketIfNeeded(abi);
+            // Each query starts with the argument count (1 in this case)
+            state.writer.write("1");
+            state.writer.newLine();
+            state.writer.write("--preload-default");
+            state.writer.newLine();
+            state.writer.flush();
+
+            return (state.inputStream.readInt() == 0);
+        }
+    }
 }

@@ -171,7 +171,9 @@ class ZygoteConnection {
                 return handleAbiListQuery();
             }
 
-            maybePreload();
+            if (parsedArgs.preloadDefault) {
+                return handlePreload();
+            }
 
             if (parsedArgs.preloadPackage != null) {
                 return handlePreloadPackage(parsedArgs.preloadPackage,
@@ -282,8 +284,34 @@ class ZygoteConnection {
         }
     }
 
-    protected void maybePreload() {
-        ZygoteInit.maybePreload();
+    /**
+     * Preloads resources if the zygote is in lazily preload mode. Writes the result of the
+     * preload operation; {@code 0} when a preload was initiated due to this request and {@code 1}
+     * if no preload was initiated. The latter implies that the zygote is not configured to load
+     * resources lazy or that the zygote has already handled a previous request to handlePreload.
+     */
+    private boolean handlePreload() {
+        try {
+            if (isPreloadComplete()) {
+                mSocketOutStream.writeInt(1);
+            } else {
+                preload();
+                mSocketOutStream.writeInt(0);
+            }
+
+            return false;
+        } catch (IOException ioe) {
+            Log.e(TAG, "Error writing to command socket", ioe);
+            return true;
+        }
+    }
+
+    protected void preload() {
+        ZygoteInit.lazyPreload();
+    }
+
+    protected boolean isPreloadComplete() {
+        return ZygoteInit.isPreloadComplete();
     }
 
     protected boolean handlePreloadPackage(String packagePath, String libsPath) {
@@ -400,6 +428,13 @@ class ZygoteConnection {
          */
         String preloadPackage;
         String preloadPackageLibs;
+
+        /**
+         * Whether this is a request to start preloading the default resources and classes.
+         * This argument only makes sense when the zygote is in lazy preload mode (i.e, when
+         * it's started with --enable-lazy-preload).
+         */
+        boolean preloadDefault;
 
         /**
          * Constructs instance and parses args
@@ -564,6 +599,8 @@ class ZygoteConnection {
                 } else if (arg.equals("--preload-package")) {
                     preloadPackage = args[++curArg];
                     preloadPackageLibs = args[++curArg];
+                } else if (arg.equals("--preload-default")) {
+                    preloadDefault = true;
                 } else {
                     break;
                 }
@@ -578,7 +615,7 @@ class ZygoteConnection {
                     throw new IllegalArgumentException(
                             "Unexpected arguments after --preload-package.");
                 }
-            } else {
+            } else if (!preloadDefault) {
                 if (!seenRuntimeArgs) {
                     throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
                 }
