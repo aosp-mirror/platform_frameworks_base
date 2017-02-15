@@ -1357,9 +1357,6 @@
             </intent-filter>
         </service>
 
-        <service android:name="android.content.CrossUserContentService"
-                android:exported="true" />
-
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
