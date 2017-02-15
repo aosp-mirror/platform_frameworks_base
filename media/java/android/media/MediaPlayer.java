@@ -73,6 +73,7 @@ import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -80,6 +81,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -998,7 +1000,7 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(@NonNull Context context, @NonNull Uri uri)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        setDataSource(context, uri, null);
+        setDataSource(context, uri, null, null);
     }
 
     /**
@@ -1011,11 +1013,13 @@ public class MediaPlayer extends PlayerBase
      *                changed with key/value pairs through the headers parameter with
      *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
      *                to disallow or allow cross domain redirection.
+     *                The headers must not include cookies. Instead, use the cookies param.
+     * @param cookies the cookies to be sent together with the request
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(@NonNull Context context, @NonNull Uri uri,
-            @Nullable Map<String, String> headers) throws IOException, IllegalArgumentException,
-                    SecurityException, IllegalStateException {
+            @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         // The context and URI usually belong to the calling user. Get a resolver for that user
         // and strip out the userId from the URI if present.
         final ContentResolver resolver = context.getContentResolver();
@@ -1036,16 +1040,34 @@ public class MediaPlayer extends PlayerBase
             } else if (attemptDataSource(resolver, actualUri)) {
                 return;
             } else {
-                setDataSource(uri.toString(), headers);
+                setDataSource(uri.toString(), headers, cookies);
             }
         } else {
             // Try requested Uri locally first, or fallback to media server
             if (attemptDataSource(resolver, uri)) {
                 return;
             } else {
-                setDataSource(uri.toString(), headers);
+                setDataSource(uri.toString(), headers, cookies);
             }
         }
+    }
+
+    /**
+     * Sets the data source as a content Uri.
+     *
+     * @param context the Context to use when resolving the Uri
+     * @param uri the Content URI of the data you want to play
+     * @param headers the headers to be sent together with the request for the data
+     *                Note that the cross domain redirection is allowed by default, but that can be
+     *                changed with key/value pairs through the headers parameter with
+     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+     *                to disallow or allow cross domain redirection.
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    public void setDataSource(@NonNull Context context, @NonNull Uri uri,
+            @Nullable Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        setDataSource(context, uri, headers, null);
     }
 
     private boolean attemptDataSource(ContentResolver resolver, Uri uri) {
@@ -1085,6 +1107,11 @@ public class MediaPlayer extends PlayerBase
      * @hide pending API council
      */
     public void setDataSource(String path, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        setDataSource(path, headers, null);
+    }
+
+    private void setDataSource(String path, Map<String, String> headers, List<HttpCookie> cookies)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException
     {
         String[] keys = null;
@@ -1101,10 +1128,11 @@ public class MediaPlayer extends PlayerBase
                 ++i;
             }
         }
-        setDataSource(path, keys, values);
+        setDataSource(path, keys, values, cookies);
     }
 
-    private void setDataSource(String path, String[] keys, String[] values)
+    private void setDataSource(String path, String[] keys, String[] values,
+            List<HttpCookie> cookies)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         final Uri uri = Uri.parse(path);
         final String scheme = uri.getScheme();
@@ -1113,7 +1141,7 @@ public class MediaPlayer extends PlayerBase
         } else if (scheme != null) {
             // handle non-file sources
             nativeSetDataSource(
-                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path, cookies),
                 path,
                 keys,
                 values);
