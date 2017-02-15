@@ -311,6 +311,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataAppEphemeralDirectory(String volumeUuid) {
+        return new File(getDataDirectory(volumeUuid), "app-ephemeral");
+    }
+
+    /** {@hide} */
     public static File getDataUserCeDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "user");
     }
