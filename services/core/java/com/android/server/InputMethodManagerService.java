@@ -707,7 +707,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     final class MyPackageMonitor extends PackageMonitor {
         /**
-         * Set of packages to be monitored.
+         * Package names that are known to contain {@link InputMethodService}.
          *
          * <p>No need to include packages because of direct-boot unaware IMEs since we always rescan
          * all the packages when the user is unlocked, and direct-boot awareness will not be changed
@@ -715,16 +715,36 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
          * rescanning.</p>
          */
         @GuardedBy("mMethodMap")
-        private ArraySet<String> mPackagesToMonitorComponentChange = new ArraySet<>();
+        final private ArraySet<String> mKnownImePackageNames = new ArraySet<>();
+
+        /**
+         * Packages that are appeared, disappeared, or modified for whatever reason.
+         *
+         * <p>Note: For now we intentionally use {@link ArrayList} instead of {@link ArraySet}
+         * because 1) the number of elements is almost always 1 or so, and 2) we do not care
+         * duplicate elements for our use case.</p>
+         *
+         * <p>This object must be accessed only from callback methods in {@link PackageMonitor},
+         * which should be bound to {@link #getRegisteredHandler()}.</p>
+         */
+        private final ArrayList<String> mChangedPackages = new ArrayList<>();
+
+        /**
+         * {@code true} if one or more packages that contain {@link InputMethodService} appeared.
+         *
+         * <p>This field must be accessed only from callback methods in {@link PackageMonitor},
+         * which should be bound to {@link #getRegisteredHandler()}.</p>
+         */
+        private boolean mImePackageAppeared = false;
 
         @GuardedBy("mMethodMap")
-        void clearPackagesToMonitorComponentChangeLocked() {
-            mPackagesToMonitorComponentChange.clear();
+        void clearKnownImePackageNamesLocked() {
+            mKnownImePackageNames.clear();
         }
 
         @GuardedBy("mMethodMap")
-        final void addPackageToMonitorComponentChangeLocked(@NonNull String packageName) {
-            mPackagesToMonitorComponentChange.add(packageName);
+        final void addKnownImePackageNameLocked(@NonNull String packageName) {
+            mKnownImePackageNames.add(packageName);
         }
 
         @GuardedBy("mMethodMap")
@@ -769,19 +789,97 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
-            // If this package is in the watch list, we want to check it.
-            synchronized (mMethodMap) {
-                return mPackagesToMonitorComponentChange.contains(packageName);
+        public void onBeginPackageChanges() {
+            clearPackageChangeState();
+        }
+
+        @Override
+        public void onPackageAppeared(String packageName, int reason) {
+            if (!mImePackageAppeared) {
+                final PackageManager pm = mContext.getPackageManager();
+                final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+                        new Intent(InputMethod.SERVICE_INTERFACE).setPackage(packageName),
+                        PackageManager.MATCH_DISABLED_COMPONENTS, getChangingUserId());
+                // No need to lock this because we access it only on getRegisteredHandler().
+                if (!services.isEmpty()) {
+                    mImePackageAppeared = true;
+                }
+            }
+            // No need to lock this because we access it only on getRegisteredHandler().
+            mChangedPackages.add(packageName);
+        }
+
+        @Override
+        public void onPackageDisappeared(String packageName, int reason) {
+            // No need to lock this because we access it only on getRegisteredHandler().
+            mChangedPackages.add(packageName);
+        }
+
+        @Override
+        public void onPackageModified(String packageName) {
+            // No need to lock this because we access it only on getRegisteredHandler().
+            mChangedPackages.add(packageName);
+        }
+
+        @Override
+        public void onPackagesSuspended(String[] packages) {
+            // No need to lock this because we access it only on getRegisteredHandler().
+            for (String packageName : packages) {
+                mChangedPackages.add(packageName);
             }
         }
 
         @Override
-        public void onSomePackagesChanged() {
+        public void onPackagesUnsuspended(String[] packages) {
+            // No need to lock this because we access it only on getRegisteredHandler().
+            for (String packageName : packages) {
+                mChangedPackages.add(packageName);
+            }
+        }
+
+        @Override
+        public void onFinishPackageChanges() {
+            onFinishPackageChangesInternal();
+            clearPackageChangeState();
+        }
+
+        private void clearPackageChangeState() {
+            // No need to lock them because we access these fields only on getRegisteredHandler().
+            mChangedPackages.clear();
+            mImePackageAppeared = false;
+        }
+
+        private boolean shouldRebuildInputMethodListLocked() {
+            // This method is guaranteed to be called only by getRegisteredHandler().
+
+            // If there is any new package that contains at least one IME, then rebuilt the list
+            // of IMEs.
+            if (mImePackageAppeared) {
+                return true;
+            }
+
+            // Otherwise, check if mKnownImePackageNames and mChangedPackages have any intersection.
+            // TODO: Consider to create a utility method to do the following test. List.retainAll()
+            // is an option, but it may still do some extra operations that we do not need here.
+            final int N = mChangedPackages.size();
+            for (int i = 0; i < N; ++i) {
+                final String packageName = mChangedPackages.get(i);
+                if (mKnownImePackageNames.contains(packageName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void onFinishPackageChangesInternal() {
             synchronized (mMethodMap) {
                 if (!isChangingPackagesOfCurrentUserLocked()) {
                     return;
                 }
+                if (!shouldRebuildInputMethodListLocked()) {
+                    return;
+                }
+
                 InputMethodInfo curIm = null;
                 String curInputMethodId = mSettings.getSelectedInputMethod();
                 final int N = mMethodList.size();
@@ -3112,7 +3210,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mMethodList.clear();
         mMethodMap.clear();
         mMethodMapUpdateCount++;
-        mMyPackageMonitor.clearPackagesToMonitorComponentChangeLocked();
+        mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         // Use for queryIntentServicesAsUser
         final PackageManager pm = mContext.getPackageManager();
@@ -3168,10 +3266,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final int N = allInputMethodServices.size();
             for (int i = 0; i < N; ++i) {
                 final ServiceInfo si = allInputMethodServices.get(i).serviceInfo;
-                if (!android.Manifest.permission.BIND_INPUT_METHOD.equals(si.permission)) {
-                    continue;
+                if (android.Manifest.permission.BIND_INPUT_METHOD.equals(si.permission)) {
+                    mMyPackageMonitor.addKnownImePackageNameLocked(si.packageName);
                 }
-                mMyPackageMonitor.addPackageToMonitorComponentChangeLocked(si.packageName);
             }
         }
 
