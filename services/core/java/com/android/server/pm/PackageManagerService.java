@@ -256,6 +256,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.BackgroundDexOptJobService;
+import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.IntentResolver;
@@ -833,6 +834,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
+
+    private DeviceIdleController.LocalService mDeviceIdleController;
 
     private File mCacheDir;
 
@@ -3839,6 +3842,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         }
         return mUserManagerInternal;
+    }
+
+    private DeviceIdleController.LocalService getDeviceIdleController() {
+        if (mDeviceIdleController == null) {
+            mDeviceIdleController =
+                    LocalServices.getService(DeviceIdleController.LocalService.class);
+        }
+        return mDeviceIdleController;
     }
 
     /**
@@ -14598,6 +14609,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final List<ComponentName> sufficientVerifiers = matchVerifiers(pkgLite,
                             receivers, verificationState);
 
+                    DeviceIdleController.LocalService idleController = getDeviceIdleController();
+                    final long idleDuration = getVerificationTimeout();
+
                     /*
                      * If any sufficient verifiers were listed in the package
                      * manifest, attempt to ask them.
@@ -14610,6 +14624,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         } else {
                             for (int i = 0; i < N; i++) {
                                 final ComponentName verifierComponent = sufficientVerifiers.get(i);
+                                idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
+                                        verifierComponent.getPackageName(), idleDuration,
+                                        verifierUser.getIdentifier(), false, "package verifier");
 
                                 final Intent sufficientIntent = new Intent(verification);
                                 sufficientIntent.setComponent(verifierComponent);
@@ -14630,6 +14647,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                          * target BroadcastReceivers have run.
                          */
                         verification.setComponent(requiredVerifierComponent);
+                        idleController.addPowerSaveTempWhitelistApp(Process.myUid(),
+                                requiredVerifierComponent.getPackageName(), idleDuration,
+                                verifierUser.getIdentifier(), false, "package verifier");
                         mContext.sendOrderedBroadcastAsUser(verification, verifierUser,
                                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
                                 new BroadcastReceiver() {
