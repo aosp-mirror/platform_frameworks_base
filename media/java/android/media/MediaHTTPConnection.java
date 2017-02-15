@@ -61,8 +61,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private final static int MAX_REDIRECTS = 20;
 
     public MediaHTTPConnection() {
-        if (CookieHandler.getDefault() == null) {
-            CookieHandler.setDefault(new CookieManager());
+        CookieManager cookieManager = (CookieManager)CookieHandler.getDefault();
+        if (cookieManager == null) {
+            Log.w(TAG, "MediaHTTPConnection: Unexpected. No CookieManager found.");
         }
 
         native_setup();
