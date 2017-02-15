@@ -498,11 +498,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_DIRECT_BOOT_AWARE = 1 << 6;
 
     /**
-     * Value for {@link #flags}: {@code true} if the application is blocked via restrictions
-     * and for most purposes is considered as not installed.
-     * {@hide}
+     * Value for {@link #privateFlags}: {@code true} if the application is installed
+     * as instant app.
+     *
+     * @hide
      */
-    public static final int PRIVATE_FLAG_EPHEMERAL = 1 << 7;
+    public static final int PRIVATE_FLAG_INSTANT = 1 << 7;
 
     /**
      * When set, at least one component inside this application is direct boot
@@ -681,7 +682,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public String seinfo = "default";
+    public String seInfo = "default";
+
+    /**
+     * The seinfo tag generated per-user. This value may change based upon the
+     * user's configuration. For example, when an instant app is installed for
+     * a user. It is an error if this field is ever {@code null} when trying to
+     * start a new process.
+     * <p>NOTE: We need to separate this out because we modify per-user values
+     * multiple times. This needs to be refactored since we're performing more
+     * work than necessary and these values should only be set once. When that
+     * happens, we can merge the per-user value with the seInfo state above.
+     *
+     * {@hide}
+     */
+    public String seInfoUser;
 
     /**
      * Paths to all shared libraries this application is linked against.  This
@@ -1009,8 +1024,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (resourceDirs != null) {
             pw.println(prefix + "resourceDirs=" + Arrays.toString(resourceDirs));
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0 && seinfo != null) {
-            pw.println(prefix + "seinfo=" + seinfo);
+        if ((flags&DUMP_FLAG_DETAILS) != 0 && seInfo != null) {
+            pw.println(prefix + "seinfo=" + seInfo);
+            pw.println(prefix + "seinfoUser=" + seInfoUser);
         }
         pw.println(prefix + "dataDir=" + dataDir);
         if ((flags&DUMP_FLAG_DETAILS) != 0) {
@@ -1120,7 +1136,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         primaryCpuAbi = orig.primaryCpuAbi;
         secondaryCpuAbi = orig.secondaryCpuAbi;
         resourceDirs = orig.resourceDirs;
-        seinfo = orig.seinfo;
+        seInfo = orig.seInfo;
+        seInfoUser = orig.seInfoUser;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
         deviceEncryptedDataDir = deviceProtectedDataDir = orig.deviceProtectedDataDir;
@@ -1181,7 +1198,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(primaryCpuAbi);
         dest.writeString(secondaryCpuAbi);
         dest.writeStringArray(resourceDirs);
-        dest.writeString(seinfo);
+        dest.writeString(seInfo);
+        dest.writeString(seInfoUser);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
         dest.writeString(deviceProtectedDataDir);
@@ -1242,7 +1260,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         primaryCpuAbi = source.readString();
         secondaryCpuAbi = source.readString();
         resourceDirs = source.readStringArray();
-        seinfo = source.readString();
+        seInfo = source.readString();
+        seInfoUser = source.readString();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();
         deviceEncryptedDataDir = deviceProtectedDataDir = source.readString();
@@ -1330,7 +1349,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         } else {
             dataDir = credentialProtectedDataDir;
         }
-        // TODO: modify per-user ephemerality
     }
 
     /**
@@ -1415,7 +1433,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public boolean isInstantApp() {
-        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_EPHEMERAL) != 0;
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
     }
 
     /**

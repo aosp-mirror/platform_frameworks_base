@@ -39,6 +39,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.AssetManager;
@@ -116,6 +117,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallRemove();
                 case "install-write":
                     return runInstallWrite();
+                case "install-existing":
+                    return runInstallExisting();
                 case "compile":
                     return runCompile();
                 case "reconcile-secondary-dex-files":
@@ -299,6 +302,51 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
         return doRemoveSplit(sessionId, splitName, true /*logSuccess*/);
+    }
+
+    private int runInstallExisting() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        int installFlags = 0;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--ephemeral":
+                case "--instant":
+                    installFlags |= PackageManager.INSTALL_INSTANT_APP;
+                    installFlags &= ~PackageManager.INSTALL_FULL_APP;
+                    break;
+                case "--full":
+                    installFlags &= ~PackageManager.INSTALL_INSTANT_APP;
+                    installFlags |= PackageManager.INSTALL_FULL_APP;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        final String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        try {
+            final int res = mInterface.installExistingPackageAsUser(packageName, userId,
+                    installFlags, PackageManager.INSTALL_REASON_UNKNOWN);
+            if (res == PackageManager.INSTALL_FAILED_INVALID_URI) {
+                throw new NameNotFoundException("Package " + packageName + " doesn't exist");
+            }
+            pw.println("Package " + packageName + " installed for user: " + userId);
+            return 0;
+        } catch (RemoteException | NameNotFoundException e) {
+            pw.println(e.toString());
+            return 1;
+        }
     }
 
     private int runCompile() throws RemoteException {
@@ -1145,7 +1193,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.abiOverride = checkAbiArgument(getNextArg());
                     break;
                 case "--ephemeral":
+                case "--instantapp":
                     sessionParams.setInstallAsInstantApp(true /*isInstantApp*/);
+                    break;
+                case "--full":
+                    sessionParams.setInstallAsInstantApp(false /*isInstantApp*/);
                     break;
                 case "--user":
                     params.userId = UserHandle.parseUserArg(getNextArgRequired());

@@ -1687,7 +1687,7 @@ public class ApplicationPackageManager extends PackageManager {
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
         try {
-            int res = mPM.installExistingPackageAsUser(packageName, userId,
+            int res = mPM.installExistingPackageAsUser(packageName, userId, 0 /*installFlags*/,
                     PackageManager.INSTALL_REASON_UNKNOWN);
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");

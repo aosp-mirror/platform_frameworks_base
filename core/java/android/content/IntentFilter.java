@@ -284,8 +284,6 @@ public class IntentFilter implements Parcelable {
 
     /** Whether or not the intent filter is visible to ephemeral apps. */
     private boolean mVisibleToEphemeral;
-    /** Whether or not the intent filter is part of an ephemeral app. */
-    private boolean mEphemeral;
     // These functions are the start of more optimized code for managing
     // the string sets...  not yet implemented.
 
@@ -656,17 +654,8 @@ public class IntentFilter implements Parcelable {
         mVisibleToEphemeral = visibleToEmphemeral;
     }
     /** @hide */
-    public boolean isVisibleToEphemeral() {
+    public boolean isVisibleToInstantApp() {
         return mVisibleToEphemeral;
-    }
-
-    /** @hide */
-    public void setEphemeral(boolean ephemeral) {
-        mEphemeral = ephemeral;
-    }
-    /** @hide */
-    public boolean isEphemeral() {
-        return mEphemeral;
     }
 
     /**
