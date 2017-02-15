@@ -1990,7 +1990,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mAboveShelf = aboveShelf;
     }
 
-    public class NotificationViewState extends ExpandableViewState {
+    public static class NotificationViewState extends ExpandableViewState {
 
         private final StackScrollState mOverallState;
 
@@ -2011,8 +2011,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         @Override
         protected void onYTranslationAnimationFinished(View view) {
             super.onYTranslationAnimationFinished(view);
-            if (mHeadsupDisappearRunning) {
-                setHeadsUpAnimatingAway(false);
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                if (row.isHeadsUpAnimatingAway()) {
+                    row.setHeadsUpAnimatingAway(false);
+                }
             }
         }
 
