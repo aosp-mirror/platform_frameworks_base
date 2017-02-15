@@ -787,9 +787,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     private File buildStagingDir(String volumeUuid, boolean isEphemeral) {
-        if (isEphemeral) {
-            return Environment.getDataAppEphemeralDirectory(volumeUuid);
-        }
         return Environment.getDataAppDirectory(volumeUuid);
     }
 
