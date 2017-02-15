@@ -121,7 +121,6 @@ import android.view.ActionMode;
 import android.view.Choreographer;
 import android.view.ContextMenu;
 import android.view.DragEvent;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
@@ -681,8 +680,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * See {@link #createEditorIfNeeded()}.
      */
     private Editor mEditor;
-
-    private GestureDetector mClickableSpanOnClickGestureDetector;
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
@@ -9319,24 +9316,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
 
-            // Lazily create the clickable span gesture detector only if it looks like it
-            // might be useful.
-            if (action == MotionEvent.ACTION_DOWN && mClickableSpanOnClickGestureDetector == null
-                    && shouldUseClickableSpanOnClickGestureDetector()) {
-                ClickableSpan[] links = ((Spannable) mText).getSpans(
-                        getSelectionStart(), getSelectionEnd(),
-                        ClickableSpan.class);
+            final boolean textIsSelectable = isTextSelectable();
+            if (touchIsFinished && mLinksClickable && mAutoLinkMask != 0 && textIsSelectable) {
+                // The LinkMovementMethod which should handle taps on links has not been installed
+                // on non editable text that support text selection.
+                // We reproduce its behavior here to open links for these.
+                ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
+                    getSelectionEnd(), ClickableSpan.class);
+
                 if (links.length > 0) {
-                    mClickableSpanOnClickGestureDetector =
-                            createClickableSpanOnClickGestureDetector();
+                    links[0].onClick(this);
+                    handled = true;
                 }
             }
 
-            if (mClickableSpanOnClickGestureDetector != null) {
-                handled |= mClickableSpanOnClickGestureDetector.onTouchEvent(event);
-            }
-
-            if (touchIsFinished && (isTextEditable() || isTextSelectable())) {
+            if (touchIsFinished && (isTextEditable() || textIsSelectable)) {
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
@@ -9752,31 +9746,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     void onLocaleChanged() {
         mEditor.onLocaleChanged();
-    }
-
-    private GestureDetector createClickableSpanOnClickGestureDetector() {
-        return new GestureDetector(mContext,
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        if (shouldUseClickableSpanOnClickGestureDetector()) {
-                            ClickableSpan[] links = ((Spannable) mText).getSpans(
-                                    getSelectionStart(), getSelectionEnd(),
-                                    ClickableSpan.class);
-                            if (links.length > 0) {
-                                links[0].onClick(TextView.this);
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                });
-    }
-
-    private boolean shouldUseClickableSpanOnClickGestureDetector() {
-        return mLinksClickable && (mMovement != null) &&
-                (mMovement instanceof LinkMovementMethod
-                        || (mAutoLinkMask != 0 && isTextSelectable()));
     }
 
     /**
