@@ -293,6 +293,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
 import android.telecom.TelecomManager;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.text.style.SuggestionSpan;
@@ -3776,6 +3777,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.requiredAbi = requiredAbi;
             app.instructionSet = instructionSet;
 
+            // the per-user SELinux context must be set
+            if (TextUtils.isEmpty(app.info.seInfoUser)) {
+                throw new IllegalStateException("SELinux tag not defined");
+            }
+            final String seInfo = app.info.seInfo + app.info.seInfoUser;
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             boolean isActivityProcess = (entryPoint == null);
@@ -3787,12 +3793,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (hostingType.equals("webview_service")) {
                 startResult = Process.startWebView(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
-                        app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, entryPointArgs);
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, debugFlags, mountExternal,
-                        app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, entryPointArgs);
             }
             checkTime(startTime, "startProcess: returned from zygote!");
@@ -3808,7 +3814,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             try {
                 AppGlobals.getPackageManager().logAppProcessStartIfNeeded(app.processName, app.uid,
-                        app.info.seinfo, app.info.sourceDir, startResult.pid);
+                        seInfo, app.info.sourceDir, startResult.pid);
             } catch (RemoteException ex) {
                 // Ignore
             }
@@ -18774,8 +18780,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     List<BroadcastFilter> registeredReceiversForUser =
                             mReceiverResolver.queryIntent(intent,
-                                    resolvedType, false, false /*visibleToEphemeral*/,
-                                    false /*isInstant*/, users[i]);
+                                    resolvedType, false /*defaultOnly*/, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
                     } else if (registeredReceiversForUser != null) {
@@ -18784,8 +18789,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(intent,
-                        resolvedType, false, false /*visibleToEphemeral*/,
-                        false /*isInstant*/, userId);
+                        resolvedType, false /*defaultOnly*/, userId);
             }
         }
 

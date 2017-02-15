@@ -452,17 +452,17 @@ public abstract class PackageManager {
 
     /**
      * Internal {@link PackageInfo} flag: include components that are part of an
-     * ephemeral app. By default, ephemeral components are not matched.
+     * instant app. By default, instant app components are not matched.
      * @hide
      */
-    public static final int MATCH_EPHEMERAL = 0x00800000;
+    public static final int MATCH_INSTANT = 0x00800000;
 
     /**
      * Internal {@link PackageInfo} flag: include only components that are exposed to
      * ephemeral apps.
      * @hide
      */
-    public static final int MATCH_VISIBLE_TO_EPHEMERAL_ONLY = 0x01000000;
+    public static final int MATCH_VISIBLE_TO_INSTANT_APP_ONLY = 0x01000000;
 
     /**
      * Internal flag used to indicate that a system component has done their
@@ -613,7 +613,7 @@ public abstract class PackageManager {
             INSTALL_GRANT_RUNTIME_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
-            INSTALL_EPHEMERAL,
+            INSTALL_INSTANT_APP,
             INSTALL_DONT_KILL_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -714,7 +714,16 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int INSTALL_EPHEMERAL = 0x00000800;
+    public static final int INSTALL_INSTANT_APP = 0x00000800;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package is
+     * to be installed as a heavy weight app. This is fundamentally the opposite of
+     * {@link #INSTALL_INSTANT_APP}.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FULL_APP = 0x00004000;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package contains
@@ -1185,12 +1194,12 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_ABORTED = -115;
 
     /**
-     * Installation failed return code: ephemeral app installs are incompatible with some
+     * Installation failed return code: instant app installs are incompatible with some
      * other installation flags supplied for the operation; or other circumstances such
-     * as trying to upgrade a system app via an ephemeral install.
+     * as trying to upgrade a system app via an instant app install.
      * @hide
      */
-    public static final int INSTALL_FAILED_EPHEMERAL_INVALID = -116;
+    public static final int INSTALL_FAILED_INSTANT_APP_INVALID = -116;
 
     /** @hide */
     @IntDef(flag = true, value = {

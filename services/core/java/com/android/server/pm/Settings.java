@@ -219,6 +219,7 @@ final class Settings {
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
     private static final String ATTR_APP_LINK_GENERATION = "app-link-generation";
     private static final String ATTR_INSTALL_REASON = "install-reason";
+    private static final String ATTR_INSTANT_APP = "instant-app";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
@@ -687,7 +688,7 @@ final class Settings {
             PackageSetting disabledPkg, String realPkgName, SharedUserSetting sharedUser,
             File codePath, File resourcePath, String legacyNativeLibraryPath, String primaryCpuAbi,
             String secondaryCpuAbi, int versionCode, int pkgFlags, int pkgPrivateFlags,
-            UserHandle installUser, boolean allowInstall, String parentPkgName,
+            UserHandle installUser, boolean allowInstall, boolean instantApp, String parentPkgName,
             List<String> childPkgNames, UserManagerService userManager,
             String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
         final PackageSetting pkgSetting;
@@ -745,14 +746,17 @@ final class Settings {
                                 || installUserId == user.id;
                         pkgSetting.setUserState(user.id, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                                 installed,
-                                true, // stopped,
-                                true, // notLaunched
-                                false, // hidden
-                                false, // suspended
-                                null, null, null,
-                                false, // blockUninstall
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0,
-                                PackageManager.INSTALL_REASON_UNKNOWN);
+                                true /*stopped*/,
+                                true /*notLaunched*/,
+                                false /*hidden*/,
+                                false /*suspended*/,
+                                instantApp,
+                                null /*lastDisableAppCaller*/,
+                                null /*enabledComponents*/,
+                                null /*disabledComponents*/,
+                                false /*blockUninstall*/,
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
+                                0, PackageManager.INSTALL_REASON_UNKNOWN);
                     }
                 }
             }
@@ -1643,15 +1647,18 @@ final class Settings {
                     // consider all applications to be installed.
                     for (PackageSetting pkg : mPackages.values()) {
                         pkg.setUserState(userId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
-                                true,   // installed
-                                false,  // stopped
-                                false,  // notLaunched
-                                false,  // hidden
-                                false,  // suspended
-                                null, null, null,
-                                false, // blockUninstall
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0,
-                                PackageManager.INSTALL_REASON_UNKNOWN);
+                                true  /*installed*/,
+                                false /*stopped*/,
+                                false /*notLaunched*/,
+                                false /*hidden*/,
+                                false /*suspended*/,
+                                false /*instantApp*/,
+                                null /*lastDisableAppCaller*/,
+                                null /*enabledComponents*/,
+                                null /*disabledComponents*/,
+                                false /*blockUninstall*/,
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
+                                0, PackageManager.INSTALL_REASON_UNKNOWN);
                     }
                     return;
                 }
@@ -1718,6 +1725,8 @@ final class Settings {
                             false);
                     final boolean blockUninstall = XmlUtils.readBooleanAttribute(parser,
                             ATTR_BLOCK_UNINSTALL, false);
+                    final boolean instantApp = XmlUtils.readBooleanAttribute(parser,
+                            ATTR_INSTANT_APP, false);
                     final int enabled = XmlUtils.readIntAttribute(parser, ATTR_ENABLED,
                             COMPONENT_ENABLED_STATE_DEFAULT);
                     final String enabledCaller = parser.getAttributeValue(null,
@@ -1754,8 +1763,9 @@ final class Settings {
                     }
 
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, enabledCaller, enabledComponents, disabledComponents,
-                            blockUninstall, verifState, linkGeneration, installReason);
+                            hidden, suspended, instantApp, enabledCaller, enabledComponents,
+                            disabledComponents, blockUninstall, verifState, linkGeneration,
+                            installReason);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2024,6 +2034,9 @@ final class Settings {
                 }
                 if (ustate.blockUninstall) {
                     serializer.attribute(null, ATTR_BLOCK_UNINSTALL, "true");
+                }
+                if (ustate.instantApp) {
+                    serializer.attribute(null, ATTR_INSTANT_APP, "true");
                 }
                 if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                     serializer.attribute(null, ATTR_ENABLED,
@@ -2682,7 +2695,7 @@ final class Settings {
                 sb.append(isDebug ? " 1 " : " 0 ");
                 sb.append(dataPath);
                 sb.append(" ");
-                sb.append(ai.seinfo);
+                sb.append(ai.seInfo);
                 sb.append(" ");
                 if (gids != null && gids.length > 0) {
                     sb.append(gids[0]);
@@ -4140,7 +4153,7 @@ final class Settings {
                 volumeUuids[i] = ps.volumeUuid;
                 names[i] = ps.name;
                 appIds[i] = ps.appId;
-                seinfos[i] = ps.pkg.applicationInfo.seinfo;
+                seinfos[i] = ps.pkg.applicationInfo.seInfo;
                 targetSdkVersions[i] = ps.pkg.applicationInfo.targetSdkVersion;
             }
         }
@@ -4429,7 +4442,7 @@ final class Settings {
         ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",
         ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE, "DIRECT_BOOT_AWARE",
         ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE, "PARTIALLY_DIRECT_BOOT_AWARE",
-        ApplicationInfo.PRIVATE_FLAG_EPHEMERAL, "EPHEMERAL",
+        ApplicationInfo.PRIVATE_FLAG_INSTANT, "EPHEMERAL",
         ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER, "REQUIRED_FOR_SYSTEM_USER",
         ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_EXPLICITLY_SET, "RESIZEABLE_ACTIVITIES_EXPLICITLY_SET",
         ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION, "RESIZEABLE_ACTIVITIES_VIA_SDK_VERSION",
@@ -4502,6 +4515,7 @@ final class Settings {
                 pw.print(ps.getSuspended(user.id) ? "SU" : "su");
                 pw.print(ps.getStopped(user.id) ? "S" : "s");
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
+                pw.print(ps.getInstantApp(user.id) ? "IA" : "ia");
                 pw.print(",");
                 pw.print(ps.getEnabled(user.id));
                 String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
@@ -4755,6 +4769,8 @@ final class Settings {
             pw.print(ps.getNotLaunched(user.id));
             pw.print(" enabled=");
             pw.println(ps.getEnabled(user.id));
+            pw.print(" instant=");
+            pw.println(ps.getInstantApp(user.id));
             String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
             if (lastDisabledAppCaller != null) {
                 pw.print(prefix); pw.print("    lastDisabledCaller: ");

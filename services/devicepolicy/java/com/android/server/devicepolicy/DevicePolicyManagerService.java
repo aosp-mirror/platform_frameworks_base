@@ -7863,7 +7863,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Install the profile owner if not present.
                 if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
                     mIPackageManager.installExistingPackageAsUser(adminPkg, userHandle,
-                            PackageManager.INSTALL_REASON_POLICY);
+                            0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
                 }
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "Failed to make remote calls for createAndManageUser, "
@@ -8182,7 +8182,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 // Install the app.
                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
-                        PackageManager.INSTALL_REASON_POLICY);
+                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
 
             } catch (RemoteException re) {
                 // shouldn't happen
@@ -8224,7 +8224,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             if (isSystemApp(mIPackageManager, packageName, parentUserId)) {
                                 numberOfAppsInstalled++;
                                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
-                                        PackageManager.INSTALL_REASON_POLICY);
+                                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
                             } else {
                                 Slog.d(LOG_TAG, "Not enabling " + packageName + " since is not a"
                                         + " system app");
