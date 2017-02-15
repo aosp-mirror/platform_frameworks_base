@@ -1057,9 +1057,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
             protected void chooseUpstreamType(boolean tryCell) {
+                final int upstreamType = findPreferredUpstreamType(tryCell);
+                setUpstreamByType(upstreamType);
+            }
+
+            protected int findPreferredUpstreamType(boolean tryCell) {
                 final ConnectivityManager cm = getConnectivityManager();
                 int upType = ConnectivityManager.TYPE_NONE;
-                String iface = null;
 
                 updateConfiguration(); // TODO - remove?
 
@@ -1117,7 +1121,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         break;
                 }
 
+                return upType;
+            }
+
+            protected void setUpstreamByType(int upType) {
+                final ConnectivityManager cm = getConnectivityManager();
                 Network network = null;
+                String iface = null;
                 if (upType != ConnectivityManager.TYPE_NONE) {
                     LinkProperties linkProperties = cm.getLinkProperties(upType);
                     if (linkProperties != null) {
