@@ -167,8 +167,10 @@ public final class WindowManagerGlobal {
                 sWindowManagerService = IWindowManager.Stub.asInterface(
                         ServiceManager.getService("window"));
                 try {
-                    sWindowManagerService = getWindowManagerService();
-                    ValueAnimator.setDurationScale(sWindowManagerService.getCurrentAnimatorScale());
+                    if (sWindowManagerService != null) {
+                        ValueAnimator.setDurationScale(
+                                sWindowManagerService.getCurrentAnimatorScale());
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

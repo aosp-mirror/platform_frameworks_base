@@ -5736,7 +5736,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mScreenshotChordVolumeDownKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             interceptScreenshotChord();
-                            if (!keyguardActive) {
+                            if (!isKeyguardLocked()) {
                                 interceptAccessibilityShortcutChord();
                             }
                         }
@@ -5754,7 +5754,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mA11yShortcutChordVolumeUpKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
-                            if (!keyguardActive) {
+                            if (!isKeyguardLocked()) {
                                 interceptAccessibilityShortcutChord();
                             }
                         }
