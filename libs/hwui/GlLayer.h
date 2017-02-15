@@ -68,23 +68,12 @@ public:
         return texture.target();
     }
 
-    inline void setRenderTarget(GLenum renderTarget) {
-        texture.mTarget = renderTarget;
-    }
-
     inline bool isRenderable() const {
         return texture.target() != GL_NONE;
     }
 
-    void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
-        texture.setWrap(wrap, bindTexture, force);
-    }
+    void setRenderTarget(GLenum renderTarget);
 
-    void setFilter(GLenum filter, bool bindTexture = false, bool force = false) {
-        texture.setFilter(filter, bindTexture, force);
-    }
-
-    void bindTexture() const;
     void generateTexture();
 
     /**

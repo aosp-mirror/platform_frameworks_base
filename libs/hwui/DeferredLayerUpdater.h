@@ -101,7 +101,7 @@ public:
 
     void detachSurfaceTexture();
 
-    void updateLayer(bool forceFilter, GLenum renderTarget, const float* textureTransform);
+    void updateLayer(bool forceFilter, const float* textureTransform);
 
     void destroyLayer();
 
