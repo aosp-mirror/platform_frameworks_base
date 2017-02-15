@@ -1432,8 +1432,9 @@ public class ConnectivityManager {
     private void sendExpireMsgForFeature(NetworkCapabilities netCap, int seqNum, int delay) {
         if (delay >= 0) {
             Log.d(TAG, "sending expire msg with seqNum " + seqNum + " and delay " + delay);
-            Message msg = sCallbackHandler.obtainMessage(EXPIRE_LEGACY_REQUEST, seqNum, 0, netCap);
-            sCallbackHandler.sendMessageDelayed(msg, delay);
+            CallbackHandler handler = getHandler();
+            Message msg = handler.obtainMessage(EXPIRE_LEGACY_REQUEST, seqNum, 0, netCap);
+            handler.sendMessageDelayed(msg, delay);
         }
     }
 
@@ -2868,19 +2869,19 @@ public class ConnectivityManager {
         }
     }
 
-    static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
-    static CallbackHandler sCallbackHandler;
+    private static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
+    private static CallbackHandler sCallbackHandler;
 
-    private final static int LISTEN  = 1;
-    private final static int REQUEST = 2;
+    private static final int LISTEN  = 1;
+    private static final int REQUEST = 2;
 
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
             NetworkCallback callback, int timeoutMs, int action, int legacyType) {
-        return sendRequestForNetwork(need, callback, getHandler(), timeoutMs, action, legacyType);
+        return sendRequestForNetwork(need, callback, timeoutMs, action, legacyType, getHandler());
     }
 
-    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need,
-            NetworkCallback callback, Handler handler, int timeoutMs, int action, int legacyType) {
+    private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
+            int timeoutMs, int action, int legacyType, CallbackHandler handler) {
         if (callback == null) {
             throw new IllegalArgumentException("null NetworkCallback");
         }
