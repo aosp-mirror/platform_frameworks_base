@@ -268,7 +268,6 @@ public final class InputDevice implements Parcelable {
      * those of a scroll wheel.
      *
      * @see #SOURCE_CLASS_NONE
-     * {@hide}
      */
     public static final int SOURCE_ROTARY_ENCODER = 0x00400000 | SOURCE_CLASS_NONE;
 
