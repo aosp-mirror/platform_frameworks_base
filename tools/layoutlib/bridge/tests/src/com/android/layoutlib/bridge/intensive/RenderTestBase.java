@@ -35,6 +35,7 @@ import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
 import com.android.layoutlib.bridge.intensive.util.ImageUtils;
 import com.android.layoutlib.bridge.intensive.util.ModuleClassLoader;
+import com.android.layoutlib.bridge.intensive.util.TestAssetRepository;
 import com.android.layoutlib.bridge.intensive.util.TestUtils;
 import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.utils.ILogger;
@@ -537,6 +538,7 @@ public class RenderTestBase {
                         configGenerator.getHardwareConfig(), resourceResolver, layoutLibCallback, 0,
                         targetSdk, getLayoutLog());
         sessionParams.setFlag(RenderParamsFlags.FLAG_DO_NOT_RENDER_ON_CREATE, true);
+        sessionParams.setAssetRepository(new TestAssetRepository());
         return sessionParams;
     }
 }

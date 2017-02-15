@@ -38,16 +38,20 @@ import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.ComplexColor;
 import android.content.res.ComplexColor_Accessor;
+import android.content.res.FontResourcesParser;
 import android.content.res.GradientColor;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.NinePatch_Delegate;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.Typeface_Accessor;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
+import android.text.FontConfig;
 import android.util.TypedValue;
 
 import java.io.File;
@@ -365,6 +369,89 @@ public final class ResourceHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Returns a {@link Typeface} given a font name. The font name, can be a system font family
+     * (like sans-serif) or a full path if the font is to be loaded from resources.
+     */
+    public static Typeface getFont(String fontName, BridgeContext context, Theme theme, boolean
+            isFramework) {
+        if (fontName == null) {
+            return null;
+        }
+
+        if (Typeface_Accessor.isSystemFont(fontName)) {
+            // Shortcut for the case where we are asking for a system font name. Those are not
+            // loaded using external resources.
+            return null;
+        }
+
+        // Check if this is an asset that we've already loaded dynamically
+        Typeface typeface = Typeface.findFromCache(context.getAssets(), fontName);
+        if (typeface != null) {
+            return typeface;
+        }
+
+        String lowerCaseValue = fontName.toLowerCase();
+        if (lowerCaseValue.endsWith(".xml")) {
+            // create a block parser for the file
+            Boolean psiParserSupport = context.getLayoutlibCallback().getFlag(
+                    RenderParamsFlags.FLAG_KEY_XML_FILE_PARSER_SUPPORT);
+            XmlPullParser parser = null;
+            if (psiParserSupport != null && psiParserSupport) {
+                parser = context.getLayoutlibCallback().getXmlFileParser(fontName);
+            }
+            else {
+                File f = new File(fontName);
+                if (f.isFile()) {
+                    try {
+                        parser = ParserFactory.create(f);
+                    } catch (XmlPullParserException | FileNotFoundException e) {
+                        // this is an error and not warning since the file existence is checked before
+                        // attempting to parse it.
+                        Bridge.getLog().error(null, "Failed to parse file " + fontName,
+                                e, null /*data*/);
+                    }
+                }
+            }
+
+            if (parser != null) {
+                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                        parser, context, isFramework);
+                try {
+                    FontConfig config = FontResourcesParser.parse(blockParser, context
+                            .getResources());
+                    typeface = Typeface.createFromResources(config, context.getAssets(),
+                            fontName);
+                } catch (XmlPullParserException | IOException e) {
+                    Bridge.getLog().error(null, "Failed to parse file " + fontName,
+                            e, null /*data*/);
+                } finally {
+                    blockParser.ensurePopped();
+                }
+            } else {
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                        String.format("File %s does not exist (or is not a file)", fontName),
+                        null /*data*/);
+            }
+        } else {
+            typeface = Typeface.createFromResources(context.getAssets(), fontName, 0);
+        }
+
+        return typeface;
+    }
+
+    /**
+     * Returns a {@link Typeface} given a font name. The font name, can be a system font family
+     * (like sans-serif) or a full path if the font is to be loaded from resources.
+     */
+    public static Typeface getFont(ResourceValue value, BridgeContext context, Theme theme) {
+        if (value == null) {
+            return null;
+        }
+
+        return getFont(value.getValue(), context, theme, value.isFramework());
     }
 
     private static Drawable getNinePatchDrawable(InputStream inputStream, Density density,
