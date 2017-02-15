@@ -629,6 +629,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** Directory where installed third-party apps stored */
     final File mAppInstallDir;
+    final File mEphemeralInstallDir;
 
     /**
      * Directory to which applications installed internally have their
@@ -2273,6 +2274,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             File dataDir = Environment.getDataDirectory();
             mAppInstallDir = new File(dataDir, "app");
             mAppLib32InstallDir = new File(dataDir, "app-lib");
+            mEphemeralInstallDir = new File(dataDir, "app-ephemeral");
             mAsecInternalPath = new File(dataDir, "app-asec").getPath();
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
             sUserManager = new UserManagerService(context, this,
@@ -2574,6 +2576,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 scanDirTracedLI(mDrmAppPrivateInstallDir, mDefParseFlags
                         | PackageParser.PARSE_FORWARD_LOCK,
+                        scanFlags | SCAN_REQUIRE_KNOWN, 0);
+
+                scanDirLI(mEphemeralInstallDir, mDefParseFlags
+                        | PackageParser.PARSE_IS_EPHEMERAL,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
                 /**
