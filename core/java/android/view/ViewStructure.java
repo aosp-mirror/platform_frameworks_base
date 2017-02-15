@@ -335,4 +335,17 @@ public abstract class ViewStructure {
 
     /** @hide */
     public abstract AutoFillId getAutoFillId();
+
+    /**
+     * Sets the URL represented by this node.
+     *
+     * <p>Typically used in the following situations:
+     *
+     * <ol>
+     * <li>In a {@link android.app.assist.AssistStructure.WindowNode#getRootViewNode()}, to set up
+     * the main URL of an HTML page.
+     * <li>On child nodes represening hyperlinks.
+     * </ol>
+     */
+    public abstract void setUrl(String url);
 }

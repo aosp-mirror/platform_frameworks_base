@@ -17,13 +17,13 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewStructure;
 import android.view.ViewRootImpl;
+import android.view.ViewStructure;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
-import android.view.autofill.AutoFillId;
 
 import java.util.ArrayList;
 
@@ -579,6 +579,7 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_EXTRAS = 0x00400000;
         static final int FLAGS_HAS_ID = 0x00200000;
         static final int FLAGS_HAS_CHILDREN = 0x00100000;
+        static final int FLAGS_HAS_URL = 0x00080000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
         int mFlags;
@@ -587,6 +588,7 @@ public class AssistStructure implements Parcelable {
         CharSequence mContentDescription;
 
         ViewNodeText mText;
+        String mUrl;
         Bundle mExtras;
 
         ViewNode[] mChildren;
@@ -651,6 +653,9 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_TEXT) != 0) {
                 mText = new ViewNodeText(in, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0);
             }
+            if ((flags&FLAGS_HAS_URL) != 0) {
+                mUrl = in.readString();
+            }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
@@ -703,6 +708,9 @@ public class AssistStructure implements Parcelable {
                 if (!mText.isSimple()) {
                     flags |= FLAGS_HAS_COMPLEX_TEXT;
                 }
+            }
+            if (mUrl != null) {
+                flags |= FLAGS_HAS_URL;
             }
             if (mExtras != null) {
                 flags |= FLAGS_HAS_EXTRAS;
@@ -759,6 +767,9 @@ public class AssistStructure implements Parcelable {
             }
             if ((flags&FLAGS_HAS_TEXT) != 0) {
                 mText.writeToParcel(out, (flags&FLAGS_HAS_COMPLEX_TEXT) == 0, writeSensitive);
+            }
+            if ((flags&FLAGS_HAS_URL) != 0) {
+                out.writeString(mUrl);
             }
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
@@ -1037,6 +1048,20 @@ public class AssistStructure implements Parcelable {
          */
         public CharSequence getContentDescription() {
             return mContentDescription;
+        }
+
+        /**
+         * Returns the URL represented by this node.
+         *
+         * <p>Typically used in 2 categories of nodes:
+         *
+         * <ol>
+         * <li>Root node (containing the URL of the HTML page)
+         * <li>Child nodes that represent hyperlinks (contains the hyperlink URL).
+         * </ol>
+         */
+        public String getUrl() {
+            return mUrl;
         }
 
         /**
@@ -1486,6 +1511,11 @@ public class AssistStructure implements Parcelable {
         public void setSanitized(boolean sanitized) {
             mNode.mSanitized = sanitized;
         }
+
+        @Override
+        public void setUrl(String url) {
+            mNode.mUrl = url;
+        }
     }
 
     /** @hide */
@@ -1582,6 +1612,10 @@ public class AssistStructure implements Parcelable {
                     + node.getTextStyle());
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
+        }
+        CharSequence url = node.getUrl();
+        if (url != null) {
+            Log.i(TAG, prefix + "  URL: " + url);
         }
         String hint = node.getHint();
         if (hint != null) {
