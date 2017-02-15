@@ -221,6 +221,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 new File(Environment.getDataSystemDirectory(), "install_sessions.xml"));
         mSessionsDir = new File(Environment.getDataSystemDirectory(), "install_sessions");
         mSessionsDir.mkdirs();
+    }
+
+    public void systemReady() {
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
 
         synchronized (mSessions) {
             readSessionsLocked();
@@ -243,10 +247,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 icon.delete();
             }
         }
-    }
-
-    public void systemReady() {
-        mAppOps = mContext.getSystemService(AppOpsManager.class);
     }
 
     private void reconcileStagesLocked(String volumeUuid, boolean isEphemeral) {
