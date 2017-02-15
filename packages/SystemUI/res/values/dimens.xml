@@ -219,8 +219,8 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
-    <dimen name="qs_tile_height">80dp</dimen>
-    <dimen name="qs_tile_margin">36dp</dimen>
+    <dimen name="qs_tile_height">88dp</dimen>
+    <dimen name="qs_tile_margin">28dp</dimen>
     <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>

@@ -17,7 +17,6 @@
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_height="48dp"
     android:layout_width="match_parent"
-    android:layout_marginBottom="24dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     style="@style/BrightnessDialogContainer">

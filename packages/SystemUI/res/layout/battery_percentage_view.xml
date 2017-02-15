@@ -25,5 +25,5 @@
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textColor="?android:attr/textColorPrimary"
         android:gravity="center_vertical|start"
-        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
         />

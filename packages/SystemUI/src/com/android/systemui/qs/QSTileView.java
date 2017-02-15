@@ -20,6 +20,7 @@ import static com.android.systemui.qs.QSTile.getColorForState;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.RippleDrawable;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -28,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -43,8 +45,7 @@ public class QSTileView extends QSTileBaseView {
     protected TextView mLabel;
     private ImageView mPadLock;
     private int mState;
-    private OnClickListener mClick;
-    private OnClickListener mSecondaryClick;
+    private ViewGroup mLabelContainer;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -76,13 +77,15 @@ public class QSTileView extends QSTileBaseView {
     }
 
     protected void createLabel() {
-        ViewGroup view = (ViewGroup) LayoutInflater.from(getContext())
-                .inflate(R.layout.qs_tile_label, null);
-        view.setClipChildren(false);
-        view.setClipToPadding(false);
-        mLabel = (TextView) view.findViewById(R.id.tile_label);
-        mPadLock = (ImageView) view.findViewById(R.id.restricted_padlock);
-        addView(view);
+        mLabelContainer = (ViewGroup) LayoutInflater.from(getContext())
+                .inflate(R.layout.qs_tile_label, this, false);
+        mLabelContainer.setClipChildren(false);
+        mLabelContainer.setClipToPadding(false);
+        mLabel = (TextView) mLabelContainer.findViewById(R.id.tile_label);
+        mPadLock = (ImageView) mLabelContainer.findViewById(R.id.restricted_padlock);
+
+        mLabelContainer.setBackground(newTileBackground());
+        addView(mLabelContainer);
     }
 
     @Override
@@ -104,17 +107,10 @@ public class QSTileView extends QSTileBaseView {
     }
 
     @Override
-    public void init(OnClickListener click, OnClickListener secondaryClick, OnLongClickListener longClick) {
-        mClick = click;
-        mSecondaryClick = secondaryClick;
+    public void init(OnClickListener click, OnClickListener secondaryClick,
+            OnLongClickListener longClick) {
         super.init(click, secondaryClick, longClick);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_UP)  {
-            setOnClickListener(event.getY() < (getMeasuredHeight() / 2) ? mClick : mSecondaryClick);
-        }
-        return super.onTouchEvent(event);
+        mLabelContainer.setClickable(true);
+        mLabelContainer.setOnClickListener(secondaryClick);
     }
 }

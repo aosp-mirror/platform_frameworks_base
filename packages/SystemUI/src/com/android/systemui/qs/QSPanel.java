@@ -86,6 +86,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
         setOrientation(VERTICAL);
 
+        mBrightnessView = LayoutInflater.from(context).inflate(
+                R.layout.quick_settings_brightness_dialog, this, false);
+        addView(mBrightnessView);
+
         setupTileLayout();
 
         mFooter = new QSFooter(this, context);
@@ -99,10 +103,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
 
         updateResources();
-
-        mBrightnessView = LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_brightness_dialog, this, false);
-        addView(mBrightnessView);
 
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
@@ -441,8 +441,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
         r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2
-                + getTop();
+        int y;
+        if (r.tileView instanceof QSTileView) {
+            View labelContainer = (View) ((QSTileView) r.tileView).getLabel().getParent();
+            y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + getTop()
+                    + labelContainer.getTop() + labelContainer.getHeight() / 2;
+        } else {
+            y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2
+                    + getTop();
+        }
         handleShowDetailImpl(r, show, x, y);
     }
 
