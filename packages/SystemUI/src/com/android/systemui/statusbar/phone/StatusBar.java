@@ -4322,6 +4322,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel.setDozing(mDozing, animate);
         mStackScroller.setDark(mDozing, animate, mWakeUpTouchLocation);
         mScrimController.setDozing(mDozing);
+        mKeyguardIndicationController.setDozing(mDozing);
 
         // Immediately abort the dozing from the doze scrim controller in case of wake-and-unlock
         // for pulsing so the Keyguard fade-out animation scrim can take over.

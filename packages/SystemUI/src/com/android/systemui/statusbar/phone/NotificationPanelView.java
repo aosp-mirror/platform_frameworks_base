@@ -1151,9 +1151,7 @@ public class NotificationPanelView extends PanelView implements
                     .start();
         } else if (statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
-            if (!mDozing) {
-                mKeyguardBottomArea.setVisibility(View.VISIBLE);
-            }
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardBottomArea.setAlpha(1f);
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
@@ -2103,13 +2101,12 @@ public class NotificationPanelView extends PanelView implements
     private void updateDozingVisibilities(boolean animate) {
         if (mDozing) {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
-            mKeyguardBottomArea.setVisibility(View.INVISIBLE);
+            mKeyguardBottomArea.setDozing(mDozing, animate);
         } else {
-            mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardStatusBar.setVisibility(View.VISIBLE);
+            mKeyguardBottomArea.setDozing(mDozing, animate);
             if (animate) {
                 animateKeyguardStatusBarIn(DOZE_ANIMATION_DURATION);
-                mKeyguardBottomArea.startFinishDozeAnimation();
             }
         }
     }
