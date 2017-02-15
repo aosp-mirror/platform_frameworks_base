@@ -129,11 +129,9 @@ public class NotificationManagerServiceTest {
         if (channel == null) {
             channel = new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
         }
-        Notification.Builder nb = new Notification.Builder(mContext)
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
                 .setContentTitle("foo")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setChannel(channel.getId())
-                .setPriority(Notification.PRIORITY_HIGH);
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
         if (extender != null) {
             nb.extend(extender);
         }

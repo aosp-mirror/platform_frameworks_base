@@ -47,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService;
 import com.android.server.EventLogTags;
@@ -330,18 +331,18 @@ public class LockdownVpnTracker {
     }
 
     private void showNotification(int titleRes, int iconRes) {
-        final Notification.Builder builder = new Notification.Builder(mContext)
-                .setWhen(0)
-                .setSmallIcon(iconRes)
-                .setContentTitle(mContext.getString(titleRes))
-                .setContentText(mContext.getString(R.string.vpn_lockdown_config))
-                .setContentIntent(mConfigIntent)
-                .setPriority(Notification.PRIORITY_LOW)
-                .setOngoing(true)
-                .addAction(R.drawable.ic_menu_refresh, mContext.getString(R.string.reset),
-                        mResetIntent)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
+        final Notification.Builder builder =
+                new Notification.Builder(mContext, SystemNotificationChannels.VPN)
+                        .setWhen(0)
+                        .setSmallIcon(iconRes)
+                        .setContentTitle(mContext.getString(titleRes))
+                        .setContentText(mContext.getString(R.string.vpn_lockdown_config))
+                        .setContentIntent(mConfigIntent)
+                        .setOngoing(true)
+                        .addAction(R.drawable.ic_menu_refresh, mContext.getString(R.string.reset),
+                                mResetIntent)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
 
         NotificationManager.from(mContext).notify(TAG, 0, builder.build());
     }

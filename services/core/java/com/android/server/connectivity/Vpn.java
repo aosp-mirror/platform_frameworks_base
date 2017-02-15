@@ -85,6 +85,7 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
@@ -1293,17 +1294,16 @@ public class Vpn {
                     mContext, /* request */ 0, intent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                     null, user);
-            final Notification.Builder builder = new Notification.Builder(mContext)
-                    .setDefaults(0)
-                    .setSmallIcon(R.drawable.vpn_connected)
-                    .setContentTitle(mContext.getString(R.string.vpn_lockdown_disconnected))
-                    .setContentText(mContext.getString(R.string.vpn_lockdown_config))
-                    .setContentIntent(configIntent)
-                    .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setOngoing(true)
-                    .setColor(mContext.getColor(R.color.system_notification_accent_color));
+            final Notification.Builder builder =
+                    new Notification.Builder(mContext, SystemNotificationChannels.VPN)
+                            .setSmallIcon(R.drawable.vpn_connected)
+                            .setContentTitle(mContext.getString(R.string.vpn_lockdown_disconnected))
+                            .setContentText(mContext.getString(R.string.vpn_lockdown_config))
+                            .setContentIntent(configIntent)
+                            .setCategory(Notification.CATEGORY_SYSTEM)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setOngoing(true)
+                            .setColor(mContext.getColor(R.color.system_notification_accent_color));
             notificationManager.notifyAsUser(TAG, 0, builder.build(), user);
         } finally {
             Binder.restoreCallingIdentity(token);

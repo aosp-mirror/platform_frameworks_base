@@ -81,6 +81,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal;
@@ -3250,7 +3251,8 @@ public class SyncManager {
                     R.string.contentServiceTooManyDeletesNotificationDesc);
 
             Context contextForUser = getContextForUser(user);
-            Notification notification = new Notification.Builder(contextForUser)
+            Notification notification =
+                    new Notification.Builder(contextForUser, SystemNotificationChannels.ACCOUNT)
                     .setSmallIcon(R.drawable.stat_notify_sync_error)
                     .setTicker(mContext.getString(R.string.contentServiceSync))
                     .setWhen(System.currentTimeMillis())

@@ -171,6 +171,7 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1069,7 +1070,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     private void enqueueNotification(NetworkPolicy policy, int type, long totalBytes) {
         final String tag = buildNotificationTag(policy, type);
-        final Notification.Builder builder = new Notification.Builder(mContext);
+        final Notification.Builder builder =
+                new Notification.Builder(mContext, SystemNotificationChannels.NETWORK_STATUS);
         builder.setOnlyAlertOnce(true);
         builder.setWhen(0L);
         builder.setColor(mContext.getColor(
@@ -1087,7 +1089,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setContentTitle(title);
                 builder.setContentText(body);
                 builder.setDefaults(Notification.DEFAULT_ALL);
-                builder.setPriority(Notification.PRIORITY_HIGH);
+                builder.setChannel(SystemNotificationChannels.NETWORK_ALERTS);
 
                 final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
                 builder.setDeleteIntent(PendingIntent.getBroadcast(

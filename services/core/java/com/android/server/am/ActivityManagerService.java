@@ -314,6 +314,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.internal.notification.SystemNotificationChannels;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -1972,7 +1973,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Context context = mContext.createPackageContext(process.info.packageName, 0);
                     String text = mContext.getString(R.string.heavy_weight_notification,
                             context.getApplicationInfo().loadLabel(context.getPackageManager()));
-                    Notification notification = new Notification.Builder(context)
+                    Notification notification =
+                            new Notification.Builder(context, SystemNotificationChannels.DEVELOPER)
                             .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                             .setWhen(0)
                             .setOngoing(true)
@@ -2222,7 +2224,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent.putExtra(DumpHeapActivity.KEY_DIRECT_LAUNCH, reportPackage);
                 }
                 int userId = UserHandle.getUserId(uid);
-                Notification notification = new Notification.Builder(mContext)
+                Notification notification =
+                        new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
                         .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                         .setWhen(0)
                         .setOngoing(true)

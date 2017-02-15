@@ -93,6 +93,7 @@ public class RankingHelperTest {
     private final int uid = 0;
     private final String pkg2 = "pkg2";
     private final int uid2 = 1111111;
+    private static final String TEST_CHANNEL_ID = "test_channel_id";
     private AudioAttributes mAudioAttributes;
 
     private Context getContext() {
@@ -107,7 +108,7 @@ public class RankingHelperTest {
         mHelper = new RankingHelper(getContext(), mPm, handler, mUsageStats,
                 new String[]{ImportanceExtractor.class.getName()});
 
-        mNotiGroupGSortA = new Notification.Builder(getContext())
+        mNotiGroupGSortA = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("A")
                 .setGroup("G")
                 .setSortKey("A")
@@ -117,7 +118,7 @@ public class RankingHelperTest {
                 "package", "package", 1, null, 0, 0, mNotiGroupGSortA, user,
                 null, System.currentTimeMillis()), getDefaultChannel());
 
-        mNotiGroupGSortB = new Notification.Builder(getContext())
+        mNotiGroupGSortB = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("B")
                 .setGroup("G")
                 .setSortKey("B")
@@ -127,7 +128,7 @@ public class RankingHelperTest {
                 "package", "package", 1, null, 0, 0, mNotiGroupGSortB, user,
                 null, System.currentTimeMillis()), getDefaultChannel());
 
-        mNotiNoGroup = new Notification.Builder(getContext())
+        mNotiNoGroup = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("C")
                 .setWhen(1201)
                 .build();
@@ -135,7 +136,7 @@ public class RankingHelperTest {
                 "package", "package", 1, null, 0, 0, mNotiNoGroup, user,
                 null, System.currentTimeMillis()), getDefaultChannel());
 
-        mNotiNoGroup2 = new Notification.Builder(getContext())
+        mNotiNoGroup2 = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("D")
                 .setWhen(1202)
                 .build();
@@ -143,7 +144,7 @@ public class RankingHelperTest {
                 "package", "package", 1, null, 0, 0, mNotiNoGroup2, user,
                 null, System.currentTimeMillis()), getDefaultChannel());
 
-        mNotiNoGroupSortA = new Notification.Builder(getContext())
+        mNotiNoGroupSortA = new Notification.Builder(getContext(), TEST_CHANNEL_ID)
                 .setContentTitle("E")
                 .setWhen(1201)
                 .setSortKey("A")

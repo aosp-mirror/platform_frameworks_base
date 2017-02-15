@@ -53,6 +53,7 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.app.NightDisplayController;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.policy.EmergencyAffordanceManager;
@@ -1118,6 +1119,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartNotificationManager");
             mSystemServiceManager.startService(NotificationManagerService.class);
+            SystemNotificationChannels.createAll(context);
             notification = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             networkPolicy.bindNotificationManager(notification);

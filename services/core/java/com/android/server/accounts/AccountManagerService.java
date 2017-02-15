@@ -92,6 +92,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -2780,16 +2781,17 @@ public class AccountManagerService
         }
         UserHandle user = UserHandle.of(userId);
         Context contextForUser = getContextForUser(user);
-        Notification n = new Notification.Builder(contextForUser)
-                .setSmallIcon(android.R.drawable.stat_sys_warning)
-                .setWhen(0)
-                .setColor(contextForUser.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(subtitle)
-                .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0, intent,
-                        PendingIntent.FLAG_CANCEL_CURRENT, null, user))
-                .build();
+        Notification n =
+                new Notification.Builder(contextForUser, SystemNotificationChannels.ACCOUNT)
+                    .setSmallIcon(android.R.drawable.stat_sys_warning)
+                    .setWhen(0)
+                    .setColor(contextForUser.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(subtitle)
+                    .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0, intent,
+                            PendingIntent.FLAG_CANCEL_CURRENT, null, user))
+                    .build();
         installNotification(getCredentialPermissionNotificationId(
                 account, authTokenType, uid), n, packageName, user.getIdentifier());
     }
@@ -4844,7 +4846,8 @@ public class AccountManagerService
 
                 final String notificationTitleFormat =
                         contextForUser.getText(R.string.notification_title).toString();
-                Notification n = new Notification.Builder(contextForUser)
+                Notification n =
+                        new Notification.Builder(contextForUser, SystemNotificationChannels.ACCOUNT)
                         .setWhen(0)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setColor(contextForUser.getColor(
@@ -4864,6 +4867,7 @@ public class AccountManagerService
 
     private void installNotification(int notificationId, final Notification notification,
             String packageName, int userId) {
+        SystemNotificationChannels.createAccountChannelForPackage(packageName, mContext);
         final long token = clearCallingIdentity();
         try {
             INotificationManager notificationManager = mInjector.getNotificationManager();

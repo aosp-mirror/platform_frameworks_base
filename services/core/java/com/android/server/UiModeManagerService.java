@@ -58,6 +58,7 @@ import java.util.Collections;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.server.power.ShutdownThread;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
@@ -739,7 +740,8 @@ final class UiModeManagerService extends SystemService {
             if (mCarModeEnabled) {
                 Intent carModeOffIntent = new Intent(context, DisableCarModeActivity.class);
 
-                Notification.Builder n = new Notification.Builder(context)
+                Notification.Builder n =
+                        new Notification.Builder(context, SystemNotificationChannels.CAR_MODE)
                         .setSmallIcon(R.drawable.stat_notify_car_mode)
                         .setDefaults(Notification.DEFAULT_LIGHTS)
                         .setOngoing(true)

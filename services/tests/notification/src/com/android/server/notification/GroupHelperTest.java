@@ -64,7 +64,7 @@ public class GroupHelperTest {
 
     private StatusBarNotification getSbn(String pkg, int id, String tag,
             UserHandle user, String groupKey) {
-        Notification.Builder nb = new Notification.Builder(getContext())
+        Notification.Builder nb = new Notification.Builder(getContext(), "test_channel_id")
                 .setContentTitle("A")
                 .setWhen(1205);
         if (groupKey != null) {

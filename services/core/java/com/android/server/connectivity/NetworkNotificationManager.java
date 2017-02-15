@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.notification.SystemNotificationChannels;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -187,7 +188,9 @@ public class NetworkNotificationManager {
             return;
         }
 
-        Notification.Builder builder = new Notification.Builder(mContext)
+        final String channelId = highPriority ? SystemNotificationChannels.NETWORK_ALERTS :
+                SystemNotificationChannels.NETWORK_STATUS;
+        Notification.Builder builder = new Notification.Builder(mContext, channelId)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)
                 .setSmallIcon(icon)
@@ -198,10 +201,6 @@ public class NetworkNotificationManager {
                 .setContentTitle(title)
                 .setContentIntent(intent)
                 .setLocalOnly(true)
-                .setPriority(highPriority ?
-                        Notification.PRIORITY_HIGH :
-                        Notification.PRIORITY_DEFAULT)
-                .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
                 .setOnlyAlertOnce(true);
 
         if (notifyType == NotificationType.NETWORK_SWITCH) {

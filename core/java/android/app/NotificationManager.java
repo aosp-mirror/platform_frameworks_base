@@ -447,6 +447,19 @@ public class NotificationManager
     }
 
     /**
+     * @hide
+     */
+    public void createNotificationChannelsForPackage(String pkg,
+            @NonNull List<NotificationChannel> channels) {
+        INotificationManager service = getService();
+        try {
+            service.createNotificationChannels(pkg, new ParceledListSlice(channels));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the notification channel settings for a given channel id.
      */
     public NotificationChannel getNotificationChannel(String channelId) {

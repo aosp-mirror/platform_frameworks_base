@@ -28,6 +28,7 @@ import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
@@ -1262,13 +1263,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
-        mImeSwitcherNotification = new Notification.Builder(mContext)
-            .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
-            .setWhen(0)
-            .setOngoing(true)
-            .addExtras(extras)
-            .setCategory(Notification.CATEGORY_SYSTEM)
-            .setColor(com.android.internal.R.color.system_notification_accent_color);
+        mImeSwitcherNotification =
+                new Notification.Builder(mContext, SystemNotificationChannels.VIRTUAL_KEYBOARD)
+                        .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .addExtras(extras)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setColor(com.android.internal.R.color.system_notification_accent_color);
 
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);

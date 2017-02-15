@@ -2736,9 +2736,10 @@ public class NotificationManagerService extends SystemService {
                                Notification.EXTRA_BUILDER_APPLICATION_INFO);
                 final Bundle extras = new Bundle();
                 extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
+                final String channelId = notificationRecord.getChannel().getId();
                 final Notification summaryNotification =
-                        new Notification.Builder(getContext()).setSmallIcon(
-                                adjustedSbn.getNotification().getSmallIcon())
+                        new Notification.Builder(getContext(), channelId)
+                                .setSmallIcon(adjustedSbn.getNotification().getSmallIcon())
                                 .setGroupSummary(true)
                                 .setGroup(GroupHelper.AUTOGROUP_KEY)
                                 .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)

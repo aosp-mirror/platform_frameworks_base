@@ -76,6 +76,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
@@ -442,21 +443,20 @@ public class LockSettingsService extends ILockSettings.Stub {
         // Suppress all notifications on non-FBE devices for now
         if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
 
-        Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
-                .setWhen(0)
-                .setOngoing(true)
-                .setTicker(title)
-                .setDefaults(0) // please be quiet
-                .setPriority(Notification.PRIORITY_MAX)
-                .setColor(mContext.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setContentTitle(title)
-                .setContentText(message)
-                .setSubText(detail)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentIntent(intent)
-                .build();
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.SECURITY)
+                        .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .setTicker(title)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setSubText(detail)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setContentIntent(intent)
+                        .build();
         mNotificationManager.notifyAsUser(null, FBE_ENCRYPTED_NOTIFICATION, notification, user);
     }
 

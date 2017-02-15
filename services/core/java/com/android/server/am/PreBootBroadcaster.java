@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ProgressReporter;
 import com.android.server.UiThread;
 
@@ -144,13 +145,13 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
                         contentIntent = null;
                     }
 
-                    final Notification notif = new Notification.Builder(mService.mContext)
+                    final Notification notif =
+                            new Notification.Builder(mService.mContext,
+                                    SystemNotificationChannels.UPDATES)
                             .setSmallIcon(R.drawable.stat_sys_adb)
                             .setWhen(0)
                             .setOngoing(true)
                             .setTicker(title)
-                            .setDefaults(0)
-                            .setPriority(Notification.PRIORITY_MAX)
                             .setColor(context.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .setContentTitle(title)

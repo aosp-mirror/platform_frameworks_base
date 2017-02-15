@@ -66,6 +66,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.IndentingPrintWriter;
@@ -668,7 +669,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 tethered_notification_message);
 
         if (mTetheredNotificationBuilder == null) {
-            mTetheredNotificationBuilder = new Notification.Builder(mContext);
+            mTetheredNotificationBuilder =
+                    new Notification.Builder(mContext, SystemNotificationChannels.NETWORK_STATUS);
             mTetheredNotificationBuilder.setWhen(0)
                     .setOngoing(true)
                     .setColor(mContext.getColor(
