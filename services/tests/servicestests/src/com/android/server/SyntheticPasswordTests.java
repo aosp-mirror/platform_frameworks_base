@@ -237,6 +237,89 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
+
+    public void testTokenBasedResetPassword() throws RemoteException {
+        final String PASSWORD = "password";
+        final String PATTERN = "123654";
+        final String TOKEN = "some-high-entropy-secure-token";
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+        final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
+
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, handle, TOKEN.getBytes(), PRIMARY_USER_ID);
+
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID).getResponseCode());
+        assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+    }
+
+    public void testTokenBasedClearPassword() throws RemoteException {
+        final String PASSWORD = "password";
+        final String PATTERN = "123654";
+        final String TOKEN = "some-high-entropy-secure-token";
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+        final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
+
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.setLockCredentialWithToken(null, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, TOKEN.getBytes(), PRIMARY_USER_ID);
+        mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, TOKEN.getBytes(), PRIMARY_USER_ID);
+
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID).getResponseCode());
+        assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+    }
+
+    public void testTokenBasedResetPasswordAfterCredentialChanges() throws RemoteException {
+        final String PASSWORD = "password";
+        final String PATTERN = "123654";
+        final String NEWPASSWORD = "password";
+        final String TOKEN = "some-high-entropy-secure-token";
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+        final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
+
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+
+        mService.setLockCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, PASSWORD, PRIMARY_USER_ID);
+
+        mService.setLockCredentialWithToken(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, TOKEN.getBytes(), PRIMARY_USER_ID);
+
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+    }
+
+    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNeedsMigration() throws RemoteException {
+        final String TOKEN = "some-high-entropy-secure-token";
+        enableSyntheticPassword(PRIMARY_USER_ID);
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
+    }
+
+    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNoMigration() throws RemoteException {
+        final String TOKEN = "some-high-entropy-secure-token";
+        initializeCredentialUnderSP(null, PRIMARY_USER_ID);
+        long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
+        assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
+    }
+
     // b/34600579
     //TODO: add non-migration work profile case, and unify/un-unify transition.
     //TODO: test token after user resets password

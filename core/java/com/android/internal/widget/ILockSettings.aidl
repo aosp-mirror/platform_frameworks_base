@@ -45,4 +45,10 @@ interface ILockSettings {
     void systemReady();
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
+
+    long addEscrowToken(in byte[] token, int userId);
+    boolean removeEscrowToken(long handle, int userId);
+    boolean isEscrowTokenActive(long handle, int userId);
+    boolean setLockCredentialWithToken(String credential, int type, long tokenHandle, in byte[] token, int userId);
+    void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
 }
