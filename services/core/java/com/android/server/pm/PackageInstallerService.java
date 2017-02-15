@@ -683,9 +683,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         File stageDir = null;
         String stageCid = null;
         if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-            final boolean isInstant =
-                    (params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
-            stageDir = buildStageDir(params.volumeUuid, sessionId, isInstant);
+            final boolean isEphemeral =
+                    (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+            stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
         } else {
             stageCid = buildExternalStageCid(sessionId);
         }

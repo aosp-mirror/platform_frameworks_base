@@ -4128,20 +4128,20 @@ public final class Settings {
         }
 
         /**
-         * System settings which can be accessed by instant apps.
+         * System settings which can be accessed by ephemeral apps.
          * @hide
          */
-        public static final Set<String> INSTANT_APP_SETTINGS = new ArraySet<>();
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
         static {
-            INSTANT_APP_SETTINGS.add(TEXT_AUTO_REPLACE);
-            INSTANT_APP_SETTINGS.add(TEXT_AUTO_CAPS);
-            INSTANT_APP_SETTINGS.add(TEXT_AUTO_PUNCTUATE);
-            INSTANT_APP_SETTINGS.add(TEXT_SHOW_PASSWORD);
-            INSTANT_APP_SETTINGS.add(DATE_FORMAT);
-            INSTANT_APP_SETTINGS.add(FONT_SCALE);
-            INSTANT_APP_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
-            INSTANT_APP_SETTINGS.add(TIME_12_24);
-            INSTANT_APP_SETTINGS.add(SOUND_EFFECTS_ENABLED);
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_REPLACE);
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_CAPS);
+            EPHEMERAL_SETTINGS.add(TEXT_AUTO_PUNCTUATE);
+            EPHEMERAL_SETTINGS.add(TEXT_SHOW_PASSWORD);
+            EPHEMERAL_SETTINGS.add(DATE_FORMAT);
+            EPHEMERAL_SETTINGS.add(FONT_SCALE);
+            EPHEMERAL_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
+            EPHEMERAL_SETTINGS.add(TIME_12_24);
+            EPHEMERAL_SETTINGS.add(SOUND_EFFECTS_ENABLED);
         }
 
         /**
@@ -6988,17 +6988,17 @@ public final class Settings {
         }
 
         /**
-         * Secure settings which can be accessed by instant apps.
+         * Secure settings which can be accessed by ephemeral apps.
          * @hide
          */
-        public static final Set<String> INSTANT_APP_SETTINGS = new ArraySet<>();
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
         static {
-            INSTANT_APP_SETTINGS.add(ENABLED_ACCESSIBILITY_SERVICES);
-            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_SPEAK_PASSWORD);
-            INSTANT_APP_SETTINGS.add(ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+            EPHEMERAL_SETTINGS.add(ENABLED_ACCESSIBILITY_SERVICES);
+            EPHEMERAL_SETTINGS.add(ACCESSIBILITY_SPEAK_PASSWORD);
+            EPHEMERAL_SETTINGS.add(ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
-            INSTANT_APP_SETTINGS.add(DEFAULT_INPUT_METHOD);
-            INSTANT_APP_SETTINGS.add(ENABLED_INPUT_METHODS);
+            EPHEMERAL_SETTINGS.add(DEFAULT_INPUT_METHOD);
+            EPHEMERAL_SETTINGS.add(ENABLED_INPUT_METHODS);
         }
 
         /**
@@ -10136,16 +10136,16 @@ public final class Settings {
         public static final String CELL_ON = "cell_on";
 
         /**
-         * Global settings which can be accessed by instant apps.
+         * Global settings which can be accessed by ephemeral apps.
          * @hide
          */
-        public static final Set<String> INSTANT_APP_SETTINGS = new ArraySet<>();
+        public static final Set<String> EPHEMERAL_SETTINGS = new ArraySet<>();
         static {
-            INSTANT_APP_SETTINGS.add(WAIT_FOR_DEBUGGER);
-            INSTANT_APP_SETTINGS.add(DEVICE_PROVISIONED);
-            INSTANT_APP_SETTINGS.add(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
-            INSTANT_APP_SETTINGS.add(DEVELOPMENT_FORCE_RTL);
-            INSTANT_APP_SETTINGS.add(EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+            EPHEMERAL_SETTINGS.add(WAIT_FOR_DEBUGGER);
+            EPHEMERAL_SETTINGS.add(DEVICE_PROVISIONED);
+            EPHEMERAL_SETTINGS.add(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
+            EPHEMERAL_SETTINGS.add(DEVELOPMENT_FORCE_RTL);
+            EPHEMERAL_SETTINGS.add(EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
         }
 
         /**

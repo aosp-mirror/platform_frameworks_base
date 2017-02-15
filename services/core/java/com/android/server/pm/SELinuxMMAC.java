@@ -17,8 +17,6 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.content.pm.PackageUserState;
-import android.content.pm.SELinuxUtil;
 import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
@@ -70,6 +68,9 @@ public final class SELinuxMMAC {
 
     // Append v2 to existing seinfo label
     private static final String SANDBOX_V2_STR = ":v2";
+
+    // Append ephemeral to existing seinfo label
+    private static final String EPHEMERAL_APP_STR = ":ephemeralapp";
 
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
@@ -278,28 +279,31 @@ public final class SELinuxMMAC {
      *
      * @param pkg object representing the package to be labeled.
      */
-    public static void assignSeInfoValue(PackageParser.Package pkg) {
+    public static void assignSeinfoValue(PackageParser.Package pkg) {
         synchronized (sPolicies) {
             for (Policy policy : sPolicies) {
-                String seInfo = policy.getMatchedSeInfo(pkg);
-                if (seInfo != null) {
-                    pkg.applicationInfo.seInfo = seInfo;
+                String seinfo = policy.getMatchedSeinfo(pkg);
+                if (seinfo != null) {
+                    pkg.applicationInfo.seinfo = seinfo;
                     break;
                 }
             }
         }
 
+        if (pkg.applicationInfo.isInstantApp())
+            pkg.applicationInfo.seinfo += EPHEMERAL_APP_STR;
+
         if (pkg.applicationInfo.targetSandboxVersion == 2)
-            pkg.applicationInfo.seInfo += SANDBOX_V2_STR;
+            pkg.applicationInfo.seinfo += SANDBOX_V2_STR;
 
         if (pkg.applicationInfo.isPrivilegedApp())
-            pkg.applicationInfo.seInfo += PRIVILEGED_APP_STR;
+            pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
 
-        pkg.applicationInfo.seInfo += TARGETSDKVERSION_STR + pkg.applicationInfo.targetSdkVersion;
+        pkg.applicationInfo.seinfo += TARGETSDKVERSION_STR + pkg.applicationInfo.targetSdkVersion;
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
-                    "seinfo=" + pkg.applicationInfo.seInfo);
+                    "seinfo=" + pkg.applicationInfo.seinfo);
         }
     }
 }
@@ -434,7 +438,7 @@ final class Policy {
      * @return A string representing the seinfo matched during policy lookup.
      *         A value of null can also be returned if no match occured.
      */
-    public String getMatchedSeInfo(PackageParser.Package pkg) {
+    public String getMatchedSeinfo(PackageParser.Package pkg) {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (!Signature.areExactMatch(certs, pkg.mSignatures)) {

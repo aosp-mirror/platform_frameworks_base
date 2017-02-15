@@ -380,7 +380,7 @@ public class PackageParserTest {
         assertTrue(Arrays.equals(a.splitSourceDirs, that.splitSourceDirs));
         assertTrue(Arrays.equals(a.splitPublicSourceDirs, that.splitPublicSourceDirs));
         assertTrue(Arrays.equals(a.resourceDirs, that.resourceDirs));
-        assertEquals(a.seInfo, that.seInfo);
+        assertEquals(a.seinfo, that.seinfo);
         assertTrue(Arrays.equals(a.sharedLibraryFiles, that.sharedLibraryFiles));
         assertEquals(a.dataDir, that.dataDir);
         assertEquals(a.deviceProtectedDataDir, that.deviceProtectedDataDir);
