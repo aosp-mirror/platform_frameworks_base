@@ -280,6 +280,21 @@ public class NotificationManagerServiceTest {
 
     @Test
     @UiThreadTest
+    public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
+        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+                generateNotificationRecord(null).getNotification(), new int[1], 0);
+        waitForIdle();
+        mBinderService.enqueueNotificationWithTag(mContext.getPackageName(), "opPkg", "tag", 0,
+                generateNotificationRecord(null).getNotification(), new int[1], 0);
+        mBinderService.cancelNotificationWithTag(mContext.getPackageName(), "tag", 0, 0);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(mContext.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    @UiThreadTest
     public void testCancelNotificationsFromListenerImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         mBinderService.enqueueNotificationWithTag(sbn.getPackageName(), "opPkg", "tag",

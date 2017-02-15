@@ -3863,14 +3863,18 @@ public class NotificationManagerService extends SystemService {
     private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason) {
         final String canceledKey = r.getKey();
 
-        // Remove from either list
-        boolean wasPosted;
-        if (mNotificationList.remove(r)) {
-            mNotificationsByKey.remove(r.sbn.getKey());
+        // Remove from both lists, either list could have a separate Record for what is effectively
+        // the same notification.
+        boolean wasPosted = false;
+        NotificationRecord recordInList = null;
+        if ((recordInList = findNotificationByListLocked(mNotificationList, r.getKey())) != null) {
+            mNotificationList.remove(recordInList);
+            mNotificationsByKey.remove(recordInList.sbn.getKey());
             wasPosted = true;
-        } else {
-            mEnqueuedNotifications.remove(r);
-            wasPosted = false;
+        }
+        if ((recordInList = findNotificationByListLocked(mEnqueuedNotifications, r.getKey()))
+                != null) {
+            mEnqueuedNotifications.remove(recordInList);
         }
 
         // Record caller.
@@ -4294,17 +4298,12 @@ public class NotificationManagerService extends SystemService {
     // TODO: need to combine a bunch of these getters with slightly different behavior.
     // TODO: Should enqueuing just add to mNotificationsByKey instead?
     private NotificationRecord findNotificationByKeyLocked(String key) {
-        final int N = mNotificationList.size();
-        for (int i = 0; i < N; i++) {
-            if (key.equals(mNotificationList.get(i).getKey())) {
-                return mNotificationList.get(i);
-            }
+        NotificationRecord r;
+        if ((r = findNotificationByListLocked(mNotificationList, key)) != null) {
+            return r;
         }
-        final int M = mEnqueuedNotifications.size();
-        for (int i = 0; i < M; i++) {
-            if (key.equals(mEnqueuedNotifications.get(i).getKey())) {
-                return mEnqueuedNotifications.get(i);
-            }
+        if ((r = findNotificationByListLocked(mEnqueuedNotifications, key)) != null) {
+            return r;
         }
         return null;
     }
@@ -4322,14 +4321,25 @@ public class NotificationManagerService extends SystemService {
     }
 
     private NotificationRecord findNotificationByListLocked(ArrayList<NotificationRecord> list,
-            String pkg, String tag, int id, int userId)
-    {
+            String pkg, String tag, int id, int userId) {
         final int len = list.size();
         for (int i = 0; i < len; i++) {
             NotificationRecord r = list.get(i);
             if (notificationMatchesUserId(r, userId) && r.sbn.getId() == id &&
                     TextUtils.equals(r.sbn.getTag(), tag) && r.sbn.getPackageName().equals(pkg)) {
                 return r;
+            }
+        }
+        return null;
+    }
+
+    private NotificationRecord findNotificationByListLocked(ArrayList<NotificationRecord> list,
+            String key)
+    {
+        final int N = list.size();
+        for (int i = 0; i < N; i++) {
+            if (key.equals(list.get(i).getKey())) {
+                return list.get(i);
             }
         }
         return null;
