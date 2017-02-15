@@ -26,6 +26,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -130,6 +132,7 @@ public class RecentsTaskLoadPlan {
             preloadRawTasks(includeFrontMostExcludedTask);
         }
 
+        SystemServicesProxy ssp = SystemServicesProxy.getInstance(mContext);
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         SparseBooleanArray lockedUsers = new SparseBooleanArray();
@@ -137,8 +140,10 @@ public class RecentsTaskLoadPlan {
                 R.string.accessibility_recents_item_will_be_dismissed);
         String appInfoDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_open_app_info);
-        long lastStackActiveTime = Prefs.getLong(mContext,
-                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
+        int currentUserId = ssp.getCurrentUser();
+        long legacyLastStackActiveTime = migrateLegacyLastStackActiveTime(currentUserId);
+        long lastStackActiveTime = Settings.Secure.getLongForUser(mContext.getContentResolver(),
+                Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, legacyLastStackActiveTime, currentUserId);
         if (RecentsDebugFlags.Static.EnableMockTasks) {
             lastStackActiveTime = 0;
         }
@@ -205,8 +210,8 @@ public class RecentsTaskLoadPlan {
             affiliatedTasks.put(taskKey.id, taskKey);
         }
         if (newLastStackActiveTime != -1) {
-            Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
-                    newLastStackActiveTime);
+            Settings.Secure.putLongForUser(mContext.getContentResolver(),
+                    Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, newLastStackActiveTime, currentUserId);
         }
 
         // Initialize the stacks
@@ -284,5 +289,37 @@ public class RecentsTaskLoadPlan {
      */
     private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
         return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
+    }
+
+
+    /**
+     * Migrate the last active time from the prefs to the secure settings.
+     *
+     * The first time this runs, it will:
+     * 1) fetch the last stack active time from the prefs
+     * 2) set the prefs to the last stack active time for all users
+     * 3) clear the pref
+     * 4) return the last stack active time
+     *
+     * Subsequent calls to this will return zero.
+     */
+    private long migrateLegacyLastStackActiveTime(int currentUserId) {
+        long legacyLastStackActiveTime = Prefs.getLong(mContext,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
+        if (legacyLastStackActiveTime != -1) {
+            Prefs.remove(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME);
+            UserManager userMgr = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            List<UserInfo> users = userMgr.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                int userId = users.get(i).id;
+                if (userId != currentUserId) {
+                    Settings.Secure.putLongForUser(mContext.getContentResolver(),
+                            Secure.OVERVIEW_LAST_STACK_ACTIVE_TIME, legacyLastStackActiveTime,
+                            userId);
+                }
+            }
+            return legacyLastStackActiveTime;
+        }
+        return 0;
     }
 }
