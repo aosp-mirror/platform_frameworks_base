@@ -121,6 +121,7 @@ import android.service.notification.NotificationServiceProto;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeProto;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -140,6 +141,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
@@ -2812,8 +2814,26 @@ public class NotificationManagerService extends SystemService {
                     proto.write(NotificationRecordProto.STATE, NotificationServiceProto.ENQUEUED);
                 }
             }
+            List<NotificationRecord> snoozed = mSnoozeHelper.getSnoozed();
+            N = snoozed.size();
+            if (N > 0) {
+                for (int i = 0; i < N; i++) {
+                    final NotificationRecord nr = snoozed.get(i);
+                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                    nr.dump(proto, filter.redact);
+                    proto.write(NotificationRecordProto.STATE, NotificationServiceProto.SNOOZED);
+                }
+            }
             proto.end(records);
         }
+
+        long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
+        mZenModeHelper.dump(proto);
+        for (ComponentName suppressor : mEffectsSuppressors) {
+            proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+        }
+        proto.end(zenLog);
+
         proto.flush();
     }
 
@@ -2899,21 +2919,9 @@ public class NotificationManagerService extends SystemService {
                         }
                         pw.println("  ");
                     }
+
+                    mSnoozeHelper.dump(pw, filter);
                 }
-            }
-
-            if (!zenOnly) {
-                pw.println("\n  Usage Stats:");
-                mUsageStats.dump(pw, "    ", filter);
-            }
-
-            if (!filter.filtered || zenOnly) {
-                pw.println("\n  Zen Mode:");
-                pw.print("    mInterruptionFilter="); pw.println(mInterruptionFilter);
-                mZenModeHelper.dump(pw, "    ");
-
-                pw.println("\n  Zen Log:");
-                ZenLog.dump(pw, "    ");
             }
 
             if (!zenOnly) {
@@ -2945,8 +2953,13 @@ public class NotificationManagerService extends SystemService {
                 mNotificationAssistants.dump(pw, filter);
             }
 
-            if (!zenOnly) {
-                mSnoozeHelper.dump(pw, filter);
+            if (!filter.filtered || zenOnly) {
+                pw.println("\n  Zen Mode:");
+                pw.print("    mInterruptionFilter="); pw.println(mInterruptionFilter);
+                mZenModeHelper.dump(pw, "    ");
+
+                pw.println("\n  Zen Log:");
+                ZenLog.dump(pw, "    ");
             }
 
             pw.println("\n  Policy access:");
@@ -2963,6 +2976,11 @@ public class NotificationManagerService extends SystemService {
                     pw.println("!!!!!!LEAK: Record not found in mNotificationsByKey.");
                     r.dump(pw, "      ", getContext(), filter.redact);
                 }
+            }
+
+            if (!zenOnly) {
+                pw.println("\n  Usage Stats:");
+                mUsageStats.dump(pw, "    ", filter);
             }
         }
     }
@@ -3131,7 +3149,9 @@ public class NotificationManagerService extends SystemService {
 
         // snoozed apps
         if (mSnoozeHelper.isSnoozed(userId, pkg, r.getKey())) {
-            // TODO: log to event log
+            MetricsLogger.action(r.getLogMaker()
+                    .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
+                    .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
             if (DBG) {
                 Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
             }
@@ -4159,7 +4179,7 @@ public class NotificationManagerService extends SystemService {
         if (until < System.currentTimeMillis() && snoozeCriterionId == null) {
             return;
         }
-        // TODO: write to event log
+
         if (DBG) {
             Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, until, snoozeCriterionId,
                     listenerName));
@@ -4171,6 +4191,11 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     final NotificationRecord r = findNotificationByKeyLocked(key);
                     if (r != null) {
+                        MetricsLogger.action(r.getLogMaker()
+                                .setCategory(MetricsEvent.NOTIFICATION_SNOOZED)
+                                .setType(MetricsEvent.TYPE_CLOSE)
+                                .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
+                                        snoozeCriterionId == null ? false : true));
                         cancelNotificationLocked(r, false, REASON_SNOOZED);
                         updateLightsLocked();
                         if (snoozeCriterionId != null) {
@@ -4189,7 +4214,6 @@ public class NotificationManagerService extends SystemService {
 
     void unsnoozeNotificationInt(String key, ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
-        // TODO: write to event log
         if (DBG) {
             Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
         }

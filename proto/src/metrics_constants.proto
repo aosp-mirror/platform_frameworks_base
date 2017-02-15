@@ -41,6 +41,9 @@ message MetricsEvent {
 
     // The view or control was dismissed.
     TYPE_DISMISS = 5;
+
+    // The view or control was updated.
+    TYPE_UPDATE = 6;
   }
 
   // Known visual elements: views or controls.
@@ -3396,6 +3399,16 @@ message MetricsEvent {
 
     // ACTION: A tile in Settings information architecture is clicked
     ACTION_SETTINGS_TILE_CLICK = 830;
+
+    // OPEN: Notification unsnoozed. CLOSE: Notification snoozed. UPDATE: snoozed notification
+    // updated
+    // CATEGORY: NOTIFICATION
+    // OS: O
+    NOTIFICATION_SNOOZED = 831;
+
+    // Tagged data for NOTIFICATION_SNOOZED. TRUE: snoozed until context, FALSE: snoozed for time.
+    // OS: O
+    NOTIFICATION_SNOOZED_CRITERIA = 832;
 
     // ---- End O Constants, all O constants go above this line ----
 

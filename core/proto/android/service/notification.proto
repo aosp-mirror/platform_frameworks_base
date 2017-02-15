@@ -23,6 +23,8 @@ option java_outer_classname = "NotificationServiceProto";
 
 message NotificationServiceDumpProto {
     repeated NotificationRecordProto records = 1;
+
+    ZenModeProto zen = 2;
 }
 
 message NotificationRecordProto {
@@ -42,4 +44,21 @@ enum State {
     ENQUEUED = 0;
 
     POSTED = 1;
+
+    SNOOZED = 2;
+}
+
+message ZenModeProto {
+    ZenMode zen_mode = 1;
+    repeated string enabled_active_conditions = 2;
+    int32 suppressed_effects = 3;
+    repeated string suppressors = 4;
+    string policy = 5;
+}
+
+enum ZenMode {
+    ZEN_MODE_OFF = 0;
+    ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+    ZEN_MODE_NO_INTERRUPTIONS = 2;
+    ZEN_MODE_ALARMS = 3;
 }
