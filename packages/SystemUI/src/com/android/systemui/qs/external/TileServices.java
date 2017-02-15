@@ -102,12 +102,7 @@ public class TileServices extends IQSService.Stub {
             mTokenMap.remove(service.getToken());
             mTiles.remove(tile.getComponent());
             final String slot = tile.getComponent().getClassName();
-            mMainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mHost.getIconController().removeIcon(slot);
-                }
-            });
+            mMainHandler.post(() -> mHost.getIconController().removeIcon(slot));
         }
     }
 

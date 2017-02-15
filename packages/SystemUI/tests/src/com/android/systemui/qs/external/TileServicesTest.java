@@ -18,26 +18,32 @@ package com.android.systemui.qs.external;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
+
 import android.content.ComponentName;
-import android.content.Context;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.systemui.SysUIRunner;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import java.util.ArrayList;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.utils.TestableLooper;
+import com.android.systemui.utils.TestableLooper.RunWithLooper;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(SysUIRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class TileServicesTest extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
@@ -46,16 +52,24 @@ public class TileServicesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        TestableLooper.get(this).setAsMainLooper();
         mManagers = new ArrayList<>();
-        QSTileHost host = new QSTileHost(mContext, null, null);
+        QSTileHost host = new QSTileHost(mContext, null,
+                mock(StatusBarIconController.class));
         mTileService = new TestTileServices(host, Looper.getMainLooper());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mTileService.getHost().destroy();
+        TestableLooper.get(this).processAllMessages();
     }
 
     @Test
     public void testRecalculateBindAllowance() {
         // Add some fake tiles.
         for (int i = 0; i < NUM_FAKES; i++) {
-            mTileService.getTileWrapper(Mockito.mock(CustomTile.class));
+            mTileService.getTileWrapper(mock(CustomTile.class));
         }
         assertEquals(NUM_FAKES, mManagers.size());
 
@@ -91,7 +105,7 @@ public class TileServicesTest extends SysuiTestCase {
     @Test
     public void testCalcFew() {
         for (int i = 0; i < TileServices.DEFAULT_MAX_BOUND - 1; i++) {
-            mTileService.getTileWrapper(Mockito.mock(CustomTile.class));
+            mTileService.getTileWrapper(mock(CustomTile.class));
         }
         mTileService.recalculateBindAllowance();
 
@@ -115,7 +129,7 @@ public class TileServicesTest extends SysuiTestCase {
 
         @Override
         protected TileServiceManager onCreateTileService(ComponentName component, Tile qsTile) {
-            TileServiceManager manager = Mockito.mock(TileServiceManager.class);
+            TileServiceManager manager = mock(TileServiceManager.class);
             mManagers.add(manager);
             return manager;
         }
