@@ -420,18 +420,17 @@ public class AssistStructure implements Parcelable {
             mRoot = new ViewNode();
 
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false, 0);
-            if ((root.getWindowFlags()& WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                // This is a secure window, so it doesn't want a screenshot, and that
-                // means we should also not copy out its view hierarchy.
-
+            if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
                     // NOTE: flags are currently not supported, hence 0
                     view.onProvideAutoFillStructure(builder, 0);
                 } else {
+                    // This is a secure window, so it doesn't want a screenshot, and that
+                    // means we should also not copy out its view hierarchy for Assist
                     view.onProvideStructure(builder);
+                    builder.setAssistBlocked(true);
+                    return;
                 }
-                builder.setAssistBlocked(true);
-                return;
             }
             if (forAutoFill) {
                 // NOTE: flags are currently not supported, hence 0
