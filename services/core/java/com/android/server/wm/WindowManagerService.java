@@ -6146,6 +6146,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Get an array with display ids ordered by focus priority - last items should be given
      * focus first. Sparse array just maps position to displayId.
      */
+    // TODO: Maintain display list in focus order in ActivityManager and remove this call.
     public void getDisplaysInFocusOrder(SparseIntArray displaysInFocusOrder) {
         synchronized(mWindowMap) {
             mRoot.getDisplaysInFocusOrder(displaysInFocusOrder);

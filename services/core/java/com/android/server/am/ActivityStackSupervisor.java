@@ -624,11 +624,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return stack == mFocusedStack;
     }
 
-    /** The top most stack. */
-    boolean isFrontStack(ActivityStack stack) {
-        return isFrontOfStackList(stack, mHomeStack.mStacks);
-    }
-
     /** The top most stack on its display. */
     boolean isFrontStackOnDisplay(ActivityStack stack) {
         return isFrontOfStackList(stack, stack.mActivityContainer.mActivityDisplay.mStacks);
@@ -1103,13 +1098,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Look in other non-focused and non-home stacks.
-        final ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
-        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = stacks.get(stackNdx);
-            if (stack != focusedStack && isFrontStack(stack) && stack.isFocusable()) {
-                r = stack.topRunningActivityLocked();
-                if (r != null) {
-                    return r;
+        mWindowManager.getDisplaysInFocusOrder(mTmpOrderedDisplayIds);
+
+        for (int i = mTmpOrderedDisplayIds.size() - 1; i >= 0; --i) {
+            final int displayId = mTmpOrderedDisplayIds.get(i);
+            final List<ActivityStack> stacks = mActivityDisplays.get(displayId).mStacks;
+            if (stacks == null) {
+                continue;
+            }
+            for (int j = stacks.size() - 1; j >= 0; --j) {
+                final ActivityStack stack = stacks.get(j);
+                if (stack != focusedStack && isFrontStackOnDisplay(stack) && stack.isFocusable()) {
+                    r = stack.topRunningActivityLocked();
+                    if (r != null) {
+                        return r;
+                    }
                 }
             }
         }
@@ -2676,7 +2679,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // In some cases the focused stack isn't the front stack. E.g. pinned stack.
         // Whenever we are moving the top activity from the front stack we want to make sure to move
         // the stack to the front.
-        final boolean wasFront = isFrontStack(prevStack)
+        final boolean wasFront = isFrontStackOnDisplay(prevStack)
                 && (prevStack.topRunningActivityLocked() == r);
 
         if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {

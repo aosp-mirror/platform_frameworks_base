@@ -2507,7 +2507,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
                 } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
-                        mStackSupervisor.isFrontStack(lastStack)) {
+                        mStackSupervisor.isFrontStackOnDisplay(lastStack)) {
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }
@@ -4354,7 +4354,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (mStackSupervisor.isFrontStack(this) && mService.mController != null) {
+        if (mStackSupervisor.isFrontStackOnDisplay(this) && mService.mController != null) {
             ActivityRecord next = topRunningActivityLocked(null, taskId);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
