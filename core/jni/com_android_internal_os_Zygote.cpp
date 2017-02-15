@@ -806,6 +806,10 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
     UnmountTree("/storage");
 }
 
+static void com_android_internal_os_Zygote_nativeResetNicePriority(JNIEnv* env, jclass) {
+    ResetNicePriority(env);
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
@@ -815,7 +819,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeAllowFileAcrossFork", "(Ljava/lang/String;)V",
       (void *) com_android_internal_os_Zygote_nativeAllowFileAcrossFork },
     { "nativeUnmountStorageOnInit", "()V",
-      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit }
+      (void *) com_android_internal_os_Zygote_nativeUnmountStorageOnInit },
+    { "nativeResetNicePriority", "()V",
+      (void *) com_android_internal_os_Zygote_nativeResetNicePriority }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
