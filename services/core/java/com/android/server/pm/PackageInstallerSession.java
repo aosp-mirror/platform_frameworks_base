@@ -704,7 +704,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final ApkLite apk;
             try {
                 int flags = PackageParser.PARSE_COLLECT_CERTIFICATES;
-                if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+                if ((params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
                     flags |= PackageParser.PARSE_IS_EPHEMERAL;
                 }
                 apk = PackageParser.parseApkLite(addedFile, flags);

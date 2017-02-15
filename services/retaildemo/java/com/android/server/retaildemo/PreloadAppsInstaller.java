@@ -104,7 +104,7 @@ class PreloadAppsInstaller {
         }
         try {
             mPackageManager.installExistingPackageAsUser(packageName, userId,
-                    0 /*installFlags*/, PackageManager.INSTALL_REASON_UNKNOWN);
+                    PackageManager.INSTALL_REASON_UNKNOWN);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } finally {

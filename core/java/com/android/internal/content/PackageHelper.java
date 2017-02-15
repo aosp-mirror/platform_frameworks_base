@@ -534,7 +534,7 @@ public class PackageHelper {
         final int prefer;
         final boolean checkBoth;
         boolean ephemeral = false;
-        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+        if ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             ephemeral = true;
             checkBoth = false;

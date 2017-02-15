@@ -394,19 +394,11 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).blockUninstall = blockUninstall;
     }
 
-    boolean getInstantApp(int userId) {
-        return readUserState(userId).instantApp;
-    }
-
-    void setInstantApp(boolean instantApp, int userId) {
-        modifyUserState(userId).instantApp = instantApp;
-    }
-
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden, boolean suspended, boolean instantApp,
+            boolean notLaunched, boolean hidden, boolean suspended,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
-            ArraySet<String> disabledComponents, boolean blockUninstall,
-            int domainVerifState, int linkGeneration, int installReason) {
+            ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
+            int linkGeneration, int installReason) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -422,7 +414,6 @@ abstract class PackageSettingBase extends SettingBase {
         state.domainVerificationStatus = domainVerifState;
         state.appLinkGeneration = linkGeneration;
         state.installReason = installReason;
-        state.instantApp = instantApp;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {

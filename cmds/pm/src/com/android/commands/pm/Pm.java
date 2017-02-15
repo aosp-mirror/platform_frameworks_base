@@ -553,11 +553,7 @@ public final class Pm {
                     sessionParams.abiOverride = checkAbiArgument(nextOptionData());
                     break;
                 case "--ephemeral":
-                case "--instant":
                     sessionParams.setInstallAsInstantApp(true /*isInstantApp*/);
-                    break;
-                case "--full":
-                    sessionParams.setInstallAsInstantApp(false /*isInstantApp*/);
                     break;
                 case "--user":
                     params.userId = UserHandle.parseUserArg(nextOptionData());
