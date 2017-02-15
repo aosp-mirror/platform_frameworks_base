@@ -80,10 +80,8 @@ public class LockscreenFragment extends PreferenceFragment {
         mTunerService = Dependency.get(TunerService.class);
         mHandler = new Handler();
         addPreferencesFromResource(R.xml.lockscreen_settings);
-        setupGroup((PreferenceGroup) findPreference(KEY_LEFT), LOCKSCREEN_LEFT_BUTTON,
-                LOCKSCREEN_LEFT_UNLOCK);
-        setupGroup((PreferenceGroup) findPreference(KEY_RIGHT), LOCKSCREEN_RIGHT_BUTTON,
-                LOCKSCREEN_RIGHT_UNLOCK);
+        setupGroup(LOCKSCREEN_LEFT_BUTTON, LOCKSCREEN_LEFT_UNLOCK);
+        setupGroup(LOCKSCREEN_RIGHT_BUTTON, LOCKSCREEN_RIGHT_UNLOCK);
     }
 
     @Override
@@ -92,30 +90,14 @@ public class LockscreenFragment extends PreferenceFragment {
         mTunables.forEach(t -> mTunerService.removeTunable(t));
     }
 
-    private void setupGroup(PreferenceGroup group, String buttonSetting, String unlockKey) {
-        SwitchPreference customize = (SwitchPreference) group.findPreference(KEY_CUSTOMIZE);
-        Preference shortcut = group.findPreference(KEY_SHORTCUT);
-        SwitchPreference unlock = (SwitchPreference) group.findPreference(unlockKey);
+    private void setupGroup(String buttonSetting, String unlockKey) {
+        Preference shortcut = findPreference(buttonSetting);
+        SwitchPreference unlock = (SwitchPreference) findPreference(unlockKey);
         addTunable((k, v) -> {
-            boolean visible = v != null;
-            customize.setChecked(visible);
-            shortcut.setVisible(visible);
+            boolean visible = !TextUtils.isEmpty(v);
             unlock.setVisible(visible);
-            if (visible) {
-                setSummary(shortcut, v);
-            }
+            setSummary(shortcut, v);
         }, buttonSetting);
-        customize.setOnPreferenceChangeListener((preference, newValue) -> {
-            boolean hasSetting = mTunerService.getValue(buttonSetting) != null;
-            if (hasSetting != (boolean) newValue) {
-                mHandler.post(() -> mTunerService.setValue(buttonSetting, hasSetting ? null : ""));
-            }
-            return true;
-        });
-        shortcut.setOnPreferenceClickListener(preference -> {
-            showSelectDialog(buttonSetting);
-            return true;
-        });
     }
 
     private void showSelectDialog(String buttonSetting) {
@@ -129,24 +111,15 @@ public class LockscreenFragment extends PreferenceFragment {
             mTunerService.setValue(buttonSetting, item.getSettingValue());
             dialog.dismiss();
         });
-        LauncherApps apps = getContext().getSystemService(LauncherApps.class);
-        List<LauncherActivityInfo> activities = apps.getActivityList(null,
-                Process.myUserHandle());
-
-        activities.forEach(info -> {
-            App app = new App(getContext(), info);
-            try {
-                new ShortcutParser(getContext(), info.getComponentName()).getShortcuts().forEach(
-                        shortcut -> app.addChild(new StaticShortcut(getContext(), shortcut)));
-            } catch (NameNotFoundException e) {
-            }
-            adapter.addItem(app);
-        });
 
         v.setAdapter(adapter);
     }
 
     private void setSummary(Preference shortcut, String value) {
+        if (value == null) {
+            shortcut.setSummary(R.string.lockscreen_none);
+            return;
+        }
         if (value.contains("::")) {
             Shortcut info = getShortcutInfo(getContext(), value);
             shortcut.setSummary(info != null ? info.label : null);
@@ -155,7 +128,7 @@ public class LockscreenFragment extends PreferenceFragment {
             shortcut.setSummary(info != null ? info.loadLabel(getContext().getPackageManager())
                     : null);
         } else {
-            shortcut.setSummary(null);
+            shortcut.setSummary(R.string.lockscreen_none);
         }
     }
 

@@ -1527,14 +1527,12 @@
     <!-- SysUI Tuner: Button that controls layout of navigation bar [CHAR LIMIT=60] -->
     <string name="nav_bar_layout">Layout</string>
 
-    <!-- SysUI Tuner: Label for section of settings about the left nav button [CHAR LIMIT=60] -->
-    <string name="nav_bar_left">Left</string>
-
-    <!-- SysUI Tuner: Label for section of settings about the right nav button [CHAR LIMIT=60] -->
-    <string name="nav_bar_right">Right</string>
+    <!-- SysUI Tuner: Setting for button type in nav bar [CHAR LIMIT=60] -->
+    <string name="left_nav_bar_button_type">Extra left button type</string>
 
     <!-- SysUI Tuner: Setting for button type in nav bar [CHAR LIMIT=60] -->
-    <string name="nav_bar_button_type">Button type</string>
+    <string name="right_nav_bar_button_type">Extra right button type</string>
+
 
     <!-- SysUI Tuner: Added to nav bar option to indicate it is the default [CHAR LIMIT=60] -->
     <string name="nav_bar_default"> (default)</string>
@@ -1543,7 +1541,7 @@
     <string-array name="nav_bar_buttons">
         <item>Clipboard</item>
         <item>Keycode</item>
-        <item>Menu / Keyboard Switcher</item>
+        <item>Keyboard switcher</item>
         <item>None</item>
     </string-array>
     <string-array name="nav_bar_button_values" translatable="false">
@@ -1555,10 +1553,10 @@
 
     <!-- SysUI Tuner: Labels for different types of navigation bar layouts [CHAR LIMIT=60] -->
     <string-array name="nav_bar_layouts">
-        <item>Divided (default)</item>
-        <item>Centered</item>
-        <item>Left-aligned</item>
-        <item>Right-aligned</item>
+        <item>Normal</item>
+        <item>Compact</item>
+        <item>Left-leaning</item>
+        <item>Right-leaning</item>
     </string-array>
 
     <string-array name="nav_bar_layouts_values" translatable="false">
@@ -1569,7 +1567,7 @@
     </string-array>
 
     <!-- SysUI Tuner: Name of Combination Menu / Keyboard Switcher button [CHAR LIMIT=30] -->
-    <string name="menu_ime">Menu / Keyboard Switcher</string>
+    <string name="menu_ime">Keyboard switcher</string>
     <!-- SysUI Tuner: Save the current settings [CHAR LIMIT=30] -->
     <string name="save">Save</string>
     <!-- SysUI Tuner: Reset to default settings [CHAR LIMIT=30] -->
@@ -1585,10 +1583,16 @@
     <string name="accessibility_key">Custom navigation button</string>
 
     <!-- SysUI Tuner: Nav bar button that emulates a keycode [CHAR LIMIT=30] -->
-    <string name="keycode">Keycode</string>
+    <string name="left_keycode">Left keycode</string>
+
+    <!-- SysUI Tuner: Nav bar button that emulates a keycode [CHAR LIMIT=30] -->
+    <string name="right_keycode">Right keycode</string>
 
     <!-- SysUI Tuner: Settings to change nav bar icon [CHAR LIMIT=30] -->
-    <string name="icon">Icon</string>
+    <string name="left_icon">Left icon</string>
+
+    <!-- SysUI Tuner: Settings to change nav bar icon [CHAR LIMIT=30] -->
+    <string name="right_icon">Right icon</string>
 
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
     <string name="drag_to_add_tiles">Drag to add tiles</string>
@@ -1725,6 +1729,9 @@
         not appear on production builds ever. -->
     <string name="tuner_doze_always_on" translatable="false">Always on</string>
 
+    <!-- SysUI Tuner: Section to customize lockscreen shortcuts [CHAR LIMIT=60] -->
+    <string name="tuner_lock_screen">Lock screen</string>
+
     <!-- Making the PIP fullscreen [CHAR LIMIT=25] -->
     <string name="pip_phone_expand">Expand</string>
 
@@ -1760,20 +1767,47 @@
     <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
     <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
 
-    <!-- SysUI Tuner: Group of settings for left lock screen affordance [CHAR LIMIT=60] -->
-    <string name="lockscreen_left">Left</string>
-
-    <!-- SysUI Tuner: Group of settings for right lock screen affordance [CHAR LIMIT=60] -->
-    <string name="lockscreen_right">Right</string>
-
-    <!-- SysUI Tuner: Switch controlling whether to customize lock screen button [CHAR LIMIT=60] -->
-    <string name="lockscreen_customize">Customize shortcut</string>
+    <!-- SysUI Tuner: Button to select lock screen shortcut [CHAR LIMIT=60] -->
+    <string name="lockscreen_shortcut_left">Left shortcut</string>
 
     <!-- SysUI Tuner: Button to select lock screen shortcut [CHAR LIMIT=60] -->
-    <string name="lockscreen_shortcut">Shortcut</string>
+    <string name="lockscreen_shortcut_right">Right shortcut</string>
 
-    <!-- SysUI Tuner: Switch to control if device gets unlocked [CHAR LIMIT=60] -->
-    <string name="lockscreen_unlock">Prompt for password</string>
+    <!-- SysUI Tuner: Switch to control if device gets unlocked by left shortcut [CHAR LIMIT=60] -->
+    <string name="lockscreen_unlock_left">Left shortcut also unlocks</string>
+
+    <!-- SysUI Tuner: Switch to control if device gets unlocked by right shortcut [CHAR LIMIT=60] -->
+    <string name="lockscreen_unlock_right">Right shortcut also unlocks</string>
+
+    <!-- SysUI Tuner: Summary of no shortcut being selected [CHAR LIMIT=60] -->
+    <string name="lockscreen_none">None</string>
+
+    <!-- SysUI Tuner: Format string for describing launching an app [CHAR LIMIT=60] -->
+    <string name="tuner_launch_app">Launch <xliff:g id="app" example="Settings">%1$s</xliff:g></string>
+
+    <!-- SysUI Tuner: Label for section of other apps that can be launched [CHAR LIMIT=60] -->
+    <string name="tuner_other_apps">Other apps</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a circle [CHAR LIMIT=60] -->
+    <string name="tuner_circle">Circle</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a plus [CHAR LIMIT=60] -->
+    <string name="tuner_plus">Plus</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a minus [CHAR LIMIT=60] -->
+    <string name="tuner_minus">Minus</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a left [CHAR LIMIT=60] -->
+    <string name="tuner_left">Left</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a right [CHAR LIMIT=60] -->
+    <string name="tuner_right">Right</string>
+
+    <!-- SysUI Tuner: Label for icon shaped like a menu [CHAR LIMIT=60] -->
+    <string name="tuner_menu">Menu</string>
+
+    <!-- SysUI Tuner: App subheading for shortcut selection [CHAR LIMIT=60] -->
+    <string name="tuner_app"><xliff:g id="app">%1$s</xliff:g> app</string>
 
     <!-- Title for the notification channel containing important alerts like low battery. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_alerts">Alerts</string>

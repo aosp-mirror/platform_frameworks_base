@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginManager;
@@ -171,6 +172,10 @@ public class FragmentHostManager {
         return mPlugins;
     }
 
+    void destroy() {
+        mFragments.dispatchDestroy();
+    }
+
     public interface FragmentListener {
         void onFragmentViewCreated(String tag, Fragment fragment);
 
@@ -182,8 +187,7 @@ public class FragmentHostManager {
 
     public static FragmentHostManager get(View view) {
         try {
-            return ((SystemUIApplication) view.getContext().getApplicationContext())
-                    .getComponent(FragmentService.class).getFragmentHostManager(view);
+            return Dependency.get(FragmentService.class).getFragmentHostManager(view);
         } catch (ClassCastException e) {
             // TODO: Some auto handling here?
             throw e;

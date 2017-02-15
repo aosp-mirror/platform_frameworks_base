@@ -33,6 +33,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -58,7 +61,7 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 
-public class NavBarTuner extends PreferenceFragment {
+public class NavBarTuner extends TunerPreferenceFragment {
 
     private static final String LAYOUT = "layout";
     private static final String LEFT = "left";
@@ -68,13 +71,13 @@ public class NavBarTuner extends PreferenceFragment {
     private static final String KEYCODE = "keycode";
     private static final String ICON = "icon";
 
-    private static final int[] ICONS = new int[]{
-            R.drawable.ic_qs_circle,
-            R.drawable.ic_add,
-            R.drawable.ic_remove,
-            R.drawable.ic_left,
-            R.drawable.ic_right,
-            R.drawable.ic_menu,
+    private static final int[][] ICONS = new int[][]{
+            {R.drawable.ic_qs_circle, R.string.tuner_circle},
+            {R.drawable.ic_add, R.string.tuner_plus},
+            {R.drawable.ic_remove, R.string.tuner_minus},
+            {R.drawable.ic_left, R.string.tuner_left},
+            {R.drawable.ic_right, R.string.tuner_right},
+            {R.drawable.ic_menu, R.string.tuner_menu},
     };
 
     private final ArrayList<Tunable> mTunables = new ArrayList<>();
@@ -96,10 +99,8 @@ public class NavBarTuner extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.nav_bar_tuner);
         bindLayout((ListPreference) findPreference(LAYOUT));
-        bindButton((PreferenceCategory) findPreference(LEFT),
-                NAV_BAR_LEFT, NAVSPACE);
-        bindButton((PreferenceCategory) findPreference(RIGHT),
-                NAV_BAR_RIGHT, MENU_IME);
+        bindButton(NAV_BAR_LEFT, NAVSPACE, LEFT);
+        bindButton(NAV_BAR_RIGHT, MENU_IME, RIGHT);
     }
 
     @Override
@@ -129,9 +130,8 @@ public class NavBarTuner extends PreferenceFragment {
         });
     }
 
-    private void bindButton(PreferenceCategory parent, String setting, String def) {
-        String k = parent.getKey();
-        DropDownPreference type = (DropDownPreference) findPreference(TYPE + "_" + k);
+    private void bindButton(String setting, String def, String k) {
+        ListPreference type = (ListPreference) findPreference(TYPE + "_" + k);
         Preference keycode = findPreference(KEYCODE + "_" + k);
         ListPreference icon = (ListPreference) findPreference(ICON + "_" + k);
         setupIcons(icon);
@@ -195,8 +195,14 @@ public class NavBarTuner extends PreferenceFragment {
                     .loadDrawable(getContext());
             d.setTint(Color.BLACK);
             d.setBounds(0, 0, size, size);
-            ImageSpan span = new ImageSpan(d);
+            ImageSpan span = new ImageSpan(d, ImageSpan.ALIGN_BASELINE);
             builder.append("  ", span, 0);
+            builder.append(" ");
+            for (int i = 0; i < ICONS.length; i++) {
+                if (ICONS[i][0] == id) {
+                    builder.append(getString(ICONS[i][1]));
+                }
+            }
             icon.setSummary(builder);
         } catch (Exception e) {
             Log.d("NavButton", "Problem with summary", e);
@@ -204,7 +210,7 @@ public class NavBarTuner extends PreferenceFragment {
         }
     }
 
-    private void setValue(String setting, DropDownPreference type, Preference keycode,
+    private void setValue(String setting, ListPreference type, Preference keycode,
             ListPreference icon) {
         String button = type.getValue();
         if (KEY.equals(button)) {
@@ -226,14 +232,16 @@ public class NavBarTuner extends PreferenceFragment {
                 getContext().getResources().getDisplayMetrics());
         for (int i = 0; i < ICONS.length; i++) {
             SpannableStringBuilder builder = new SpannableStringBuilder();
-            Drawable d = Icon.createWithResource(getContext().getPackageName(), ICONS[i])
+            Drawable d = Icon.createWithResource(getContext().getPackageName(), ICONS[i][0])
                     .loadDrawable(getContext());
             d.setTint(Color.BLACK);
             d.setBounds(0, 0, size, size);
-            ImageSpan span = new ImageSpan(d);
+            ImageSpan span = new ImageSpan(d, ImageSpan.ALIGN_BASELINE);
             builder.append("  ", span, 0);
+            builder.append(" ");
+            builder.append(getString(ICONS[i][1]));
             labels[i] = builder;
-            values[i] = getContext().getPackageName() + "/" + ICONS[i];
+            values[i] = getContext().getPackageName() + "/" + ICONS[i][0];
         }
         icon.setEntries(labels);
         icon.setEntryValues(values);

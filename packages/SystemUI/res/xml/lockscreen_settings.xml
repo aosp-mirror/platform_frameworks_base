@@ -18,42 +18,25 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/other">
 
-    <PreferenceCategory
-        android:key="left"
-        android:title="@string/lockscreen_left">
 
-        <SwitchPreference
-            android:key="customize"
-            android:title="@string/lockscreen_customize" />
+    <Preference
+        android:key="sysui_keyguard_left"
+        android:title="@string/lockscreen_shortcut_left"
+        android:fragment="com.android.systemui.tuner.ShortcutPicker" />
 
-        <Preference
-            android:key="shortcut"
-            android:title="@string/lockscreen_shortcut" />
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_left_unlock"
+        android:title="@string/lockscreen_unlock_left"
+        sysui:defValue="true" />
 
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_keyguard_left_unlock"
-            android:title="@string/lockscreen_unlock"
-            sysui:defValue="true" />
+    <Preference
+        android:key="sysui_keyguard_right"
+        android:title="@string/lockscreen_shortcut_right" 
+        android:fragment="com.android.systemui.tuner.ShortcutPicker" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="right"
-        android:title="@string/lockscreen_right">
-
-        <SwitchPreference
-            android:key="customize"
-            android:title="@string/lockscreen_customize" />
-
-        <Preference
-            android:key="shortcut"
-            android:title="@string/lockscreen_shortcut" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_keyguard_right_unlock"
-            android:title="@string/lockscreen_unlock"
-            sysui:defValue="true" />
-
-    </PreferenceCategory>
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_keyguard_right_unlock"
+        android:title="@string/lockscreen_unlock_right"
+        sysui:defValue="true" />
 
 </PreferenceScreen>
