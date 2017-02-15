@@ -13,12 +13,15 @@
  */
 package com.android.systemui.plugins;
 
+import com.android.systemui.plugins.annotations.ProvidesInterface;
+
 import android.view.View;
 
+@ProvidesInterface(action = OverlayPlugin.ACTION, version = OverlayPlugin.VERSION)
 public interface OverlayPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_OVERLAY";
-    int VERSION = 1;
+    int VERSION = 2;
 
     void setup(View statusBar, View navBar);
 

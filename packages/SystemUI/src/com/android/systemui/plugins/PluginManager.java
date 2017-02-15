@@ -33,6 +33,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -40,6 +41,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.PluginInstanceManager.PluginContextWrapper;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import dalvik.system.PathClassLoader;
 
@@ -93,7 +95,18 @@ public class PluginManager extends BroadcastReceiver {
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler);
     }
 
-    public <T extends Plugin> T getOneShotPlugin(String action, int version) {
+    public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
+        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
+        if (info == null) {
+            throw new RuntimeException(cls + " doesn't provide an interface");
+        }
+        if (TextUtils.isEmpty(info.action())) {
+            throw new RuntimeException(cls + " doesn't provide an action");
+        }
+        return getOneShotPlugin(info.action(), cls);
+    }
+
+    public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
         if (!isDebuggable) {
             // Never ever ever allow these on production builds, they are only for prototyping.
             return null;
@@ -102,7 +115,7 @@ public class PluginManager extends BroadcastReceiver {
             throw new RuntimeException("Must be called from UI thread");
         }
         PluginInstanceManager<T> p = mFactory.createPluginInstanceManager(mContext, action, null,
-                false, mBackgroundThread.getLooper(), version, this);
+                false, mBackgroundThread.getLooper(), cls, this);
         mPluginPrefs.addAction(action);
         PluginInfo<T> info = p.getPlugin();
         if (info != null) {
@@ -114,20 +127,36 @@ public class PluginManager extends BroadcastReceiver {
         return null;
     }
 
-    public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            int version) {
-        addPluginListener(action, listener, version, false);
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls) {
+        addPluginListener(listener, cls, false);
+    }
+
+    public <T extends Plugin> void addPluginListener(PluginListener<T> listener, Class<?> cls,
+            boolean allowMultiple) {
+        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
+        if (info == null) {
+            throw new RuntimeException(cls + " doesn't provide an interface");
+        }
+        if (TextUtils.isEmpty(info.action())) {
+            throw new RuntimeException(cls + " doesn't provide an action");
+        }
+        addPluginListener(info.action(), listener, cls, allowMultiple);
     }
 
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            int version, boolean allowMultiple) {
+            Class<?> cls) {
+        addPluginListener(action, listener, cls, false);
+    }
+
+    public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
+            Class cls, boolean allowMultiple) {
         if (!isDebuggable) {
             // Never ever ever allow these on production builds, they are only for prototyping.
             return;
         }
         mPluginPrefs.addAction(action);
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
-                allowMultiple, mBackgroundThread.getLooper(), version, this);
+                allowMultiple, mBackgroundThread.getLooper(), cls, this);
         p.loadAll();
         mPluginMap.put(listener, p);
         startListening();
@@ -282,9 +311,9 @@ public class PluginManager extends BroadcastReceiver {
     public static class PluginInstanceManagerFactory {
         public <T extends Plugin> PluginInstanceManager createPluginInstanceManager(Context context,
                 String action, PluginListener<T> listener, boolean allowMultiple, Looper looper,
-                int version, PluginManager manager) {
+                Class<?> cls, PluginManager manager) {
             return new PluginInstanceManager(context, action, listener, allowMultiple, looper,
-                    version, manager);
+                    new VersionInfo().addClass(cls), manager);
         }
     }
 

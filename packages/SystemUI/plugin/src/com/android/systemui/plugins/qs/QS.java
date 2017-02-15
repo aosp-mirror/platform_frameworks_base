@@ -14,29 +14,32 @@
 
 package com.android.systemui.plugins.qs;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.PendingIntent;
+import com.android.systemui.plugins.FragmentBase;
+import com.android.systemui.plugins.annotations.DependsOn;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.qs.QS.Callback;
+import com.android.systemui.plugins.qs.QS.DetailAdapter;
+import com.android.systemui.plugins.qs.QS.HeightListener;
+
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
-import com.android.systemui.plugins.FragmentBase;
 
 /**
  * Fragment that contains QS in the notification shade.  Most of the interface is for
  * handling the expand/collapsing of the view interaction.
  */
+@ProvidesInterface(action = QS.ACTION, version = QS.VERSION)
+@DependsOn(target = HeightListener.class)
+@DependsOn(target = Callback.class)
+@DependsOn(target = DetailAdapter.class)
 public interface QS extends FragmentBase {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    // This should be incremented any time this class or ActivityStarter or BaseStatusBarHeader
-    // change in incompatible ways.
     public static final int VERSION = 5;
 
     String TAG = "QS";
@@ -64,17 +67,23 @@ public interface QS extends FragmentBase {
 
     public abstract void setContainer(ViewGroup container);
 
+    @ProvidesInterface(version = HeightListener.VERSION)
     public interface HeightListener {
+        public static final int VERSION = 1;
         void onQsHeightChanged();
     }
 
+    @ProvidesInterface(version = Callback.VERSION)
     public interface Callback {
+        public static final int VERSION = 1;
         void onShowingDetail(DetailAdapter detail, int x, int y);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
     }
 
+    @ProvidesInterface(version = DetailAdapter.VERSION)
     public interface DetailAdapter {
+        public static final int VERSION = 1;
         CharSequence getTitle();
         Boolean getToggleState();
         default boolean getToggleEnabled() {
@@ -92,7 +101,9 @@ public interface QS extends FragmentBase {
         default boolean hasHeader() { return true; }
     }
 
+    @ProvidesInterface(version = BaseStatusBarHeader.VERSION)
     public abstract static class BaseStatusBarHeader extends RelativeLayout {
+        public static final int VERSION = 1;
 
         public BaseStatusBarHeader(Context context, AttributeSet attrs) {
             super(context, attrs);

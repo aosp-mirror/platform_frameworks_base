@@ -138,8 +138,8 @@ public class NavigationBarInflaterView extends FrameLayout
         super.onAttachedToWindow();
         Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS, NAV_BAR_LEFT,
                 NAV_BAR_RIGHT);
-        Dependency.get(PluginManager.class).addPluginListener(NavBarButtonProvider.ACTION, this,
-                NavBarButtonProvider.VERSION, true /* Allow multiple */);
+        Dependency.get(PluginManager.class).addPluginListener(this,
+                NavBarButtonProvider.class, true /* Allow multiple */);
     }
 
     @Override

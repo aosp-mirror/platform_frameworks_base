@@ -53,8 +53,7 @@ public class PluginInflateContainer extends AutoReinflateContainer
 
     private static final String TAG = "PluginInflateContainer";
 
-    private String mAction;
-    private int mVersion;
+    private Class<?> mClass;
     private View mPluginView;
 
     public PluginInflateContainer(Context context, @Nullable AttributeSet attrs) {
@@ -62,28 +61,25 @@ public class PluginInflateContainer extends AutoReinflateContainer
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PluginInflateContainer);
         String viewType = a.getString(R.styleable.PluginInflateContainer_viewType);
         try {
-            Class c = Class.forName(viewType);
-            mAction = (String) c.getDeclaredField("ACTION").get(null);
-            mVersion = (int) c.getDeclaredField("VERSION").get(null);
+            mClass = Class.forName(viewType);
         } catch (Exception e) {
             Log.d(TAG, "Problem getting class info " + viewType, e);
-            mAction = null;
-            mVersion = 0;
+            mClass = null;
         }
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mAction != null) {
-            Dependency.get(PluginManager.class).addPluginListener(mAction, this, mVersion);
+        if (mClass != null) {
+            Dependency.get(PluginManager.class).addPluginListener(this, mClass);
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mAction != null) {
+        if (mClass != null) {
             Dependency.get(PluginManager.class).removePluginListener(this);
         }
     }

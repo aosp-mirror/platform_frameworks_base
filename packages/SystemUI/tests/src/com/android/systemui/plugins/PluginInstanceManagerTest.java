@@ -17,13 +17,26 @@ package com.android.systemui.plugins;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
+import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
+import com.android.systemui.plugins.annotations.Requires;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -35,7 +48,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.HandlerThread;
@@ -43,17 +55,6 @@ import android.os.UserHandle;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,6 +73,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     private PluginListener mMockListener;
     private PluginInstanceManager mPluginInstanceManager;
     private PluginManager mMockManager;
+    private VersionInfo mMockVersionInfo;
 
     @Before
     public void setup() throws Exception {
@@ -83,8 +85,10 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockManager = mock(PluginManager.class);
         when(mMockManager.getClassLoader(any(), any()))
                 .thenReturn(getClass().getClassLoader());
+        mMockVersionInfo = mock(VersionInfo.class);
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, true);
+                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
+                mMockManager, true);
         sMockPlugin = mock(Plugin.class);
         when(sMockPlugin.getVersion()).thenReturn(1);
     }
@@ -145,7 +149,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         NotificationManager nm = mock(NotificationManager.class);
         mContext.addMockSystemService(Context.NOTIFICATION_SERVICE, nm);
         setupFakePmQuery();
-        when(sMockPlugin.getVersion()).thenReturn(2);
+        doThrow(new InvalidVersionException("", false)).when(mMockVersionInfo).checkVersion(any());
 
         mPluginInstanceManager.loadAll();
 
@@ -181,7 +185,8 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
     public void testNonDebuggable() throws Exception {
         // Create a version that thinks the build is not debuggable.
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
-                mMockListener, true, mHandlerThread.getLooper(), 1, mMockManager, false);
+                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
+                mMockManager, false);
         setupFakePmQuery();
 
         mPluginInstanceManager.loadAll();
@@ -270,6 +275,9 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         }
     }
 
+    // This target class doesn't matter, it just needs to have a Requires to hit the flow where
+    // the mock version info is called.
+    @Requires(target = PluginManagerTest.class, version = 1)
     public static class TestPlugin implements Plugin {
         @Override
         public int getVersion() {

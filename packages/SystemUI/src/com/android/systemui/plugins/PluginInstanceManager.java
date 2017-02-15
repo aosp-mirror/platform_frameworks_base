@@ -18,12 +18,10 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -40,6 +38,7 @@ import android.view.LayoutInflater;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.systemui.plugins.VersionInfo.InvalidVersionException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public class PluginInstanceManager<T extends Plugin> {
     private final PluginListener<T> mListener;
     private final String mAction;
     private final boolean mAllowMultiple;
-    private final int mVersion;
+    private final VersionInfo mVersion;
 
     @VisibleForTesting
     final MainHandler mMainHandler;
@@ -66,14 +65,14 @@ public class PluginInstanceManager<T extends Plugin> {
     private final PluginManager mManager;
 
     PluginInstanceManager(Context context, String action, PluginListener<T> listener,
-            boolean allowMultiple, Looper looper, int version, PluginManager manager) {
+            boolean allowMultiple, Looper looper, VersionInfo version, PluginManager manager) {
         this(context, context.getPackageManager(), action, listener, allowMultiple, looper, version,
                 manager, Build.IS_DEBUGGABLE);
     }
 
     @VisibleForTesting
     PluginInstanceManager(Context context, PackageManager pm, String action,
-            PluginListener<T> listener, boolean allowMultiple, Looper looper, int version,
+            PluginListener<T> listener, boolean allowMultiple, Looper looper, VersionInfo version,
             PluginManager manager, boolean debuggable) {
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mPluginHandler = new PluginHandler(looper);
@@ -301,8 +300,14 @@ public class PluginInstanceManager<T extends Plugin> {
                 Context pluginContext = new PluginContextWrapper(
                         mContext.createApplicationContext(info, 0), classLoader);
                 Class<?> pluginClass = Class.forName(cls, true, classLoader);
+                // TODO: Only create the plugin before version check if we need it for
+                // legacy version check.
                 T plugin = (T) pluginClass.newInstance();
-                if (plugin.getVersion() != mVersion) {
+                try {
+                    checkVersion(pluginClass, plugin, mVersion);
+                    if (DEBUG) Log.d(TAG, "createPlugin");
+                    return new PluginInfo(pkg, cls, plugin, pluginContext);
+                } catch (InvalidVersionException e) {
                     final int icon = mContext.getResources().getIdentifier("tuner", "drawable",
                             mContext.getPackageName());
                     final int color = Resources.getSystem().getIdentifier(
@@ -318,20 +323,18 @@ public class PluginInstanceManager<T extends Plugin> {
                     String label = cls;
                     try {
                         label = mPm.getServiceInfo(component, 0).loadLabel(mPm).toString();
-                    } catch (NameNotFoundException e) {
+                    } catch (NameNotFoundException e2) {
                     }
-                    if (plugin.getVersion() < mVersion) {
+                    if (!e.isTooNew()) {
                         // Localization not required as this will never ever appear in a user build.
                         nb.setContentTitle("Plugin \"" + label + "\" is too old")
                                 .setContentText("Contact plugin developer to get an updated"
-                                        + " version.\nPlugin version: " + plugin.getVersion()
-                                        + "\nSystem version: " + mVersion);
+                                        + " version.\n" + e.getMessage());
                     } else {
                         // Localization not required as this will never ever appear in a user build.
                         nb.setContentTitle("Plugin \"" + label + "\" is too new")
                                 .setContentText("Check to see if an OTA is available.\n"
-                                        + "Plugin version: " + plugin.getVersion()
-                                        + "\nSystem version: " + mVersion);
+                                        + e.getMessage());
                     }
                     Intent i = new Intent(PluginManager.DISABLE_PLUGIN).setData(
                             Uri.parse("package://" + component.flattenToString()));
@@ -345,11 +348,22 @@ public class PluginInstanceManager<T extends Plugin> {
                             + ", expected " + mVersion);
                     return null;
                 }
-                if (DEBUG) Log.d(TAG, "createPlugin");
-                return new PluginInfo(pkg, cls, plugin, pluginContext);
             } catch (Exception e) {
                 Log.w(TAG, "Couldn't load plugin: " + pkg, e);
                 return null;
+            }
+        }
+
+        private void checkVersion(Class<?> pluginClass, T plugin, VersionInfo version)
+                throws InvalidVersionException {
+            VersionInfo pv = new VersionInfo().addClass(pluginClass);
+            if (pv.hasVersionInfo()) {
+                version.checkVersion(pv);
+            } else {
+                int fallbackVersion = plugin.getVersion();
+                if (fallbackVersion != version.getDefaultVersion()) {
+                    throw new InvalidVersionException("Invalid legacy version", false);
+                }
             }
         }
     }

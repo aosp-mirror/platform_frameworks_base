@@ -32,6 +32,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.plugins.PluginManager.PluginInstanceManagerFactory;
 
@@ -63,7 +64,7 @@ public class PluginManagerTest extends SysuiTestCase {
         mMockFactory = mock(PluginInstanceManagerFactory.class);
         mMockPluginInstance = mock(PluginInstanceManager.class);
         when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.anyBoolean(), Mockito.any(), Mockito.anyInt(), Mockito.any()))
+                Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
         mPluginManager = new PluginManager(getContext(), mMockFactory, true, mMockExceptionHandler);
         resetExceptionHandler();
@@ -76,20 +77,20 @@ public class PluginManagerTest extends SysuiTestCase {
         Plugin mockPlugin = mock(Plugin.class);
         when(mMockPluginInstance.getPlugin()).thenReturn(new PluginInfo(null, null, mockPlugin,
                 null));
-        Plugin result = mPluginManager.getOneShotPlugin("myAction", 1);
+        Plugin result = mPluginManager.getOneShotPlugin("myAction", TestPlugin.class);
         assertTrue(result == mockPlugin);
     }
 
     @Test
     public void testAddListener() {
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
 
         verify(mMockPluginInstance).loadAll();
     }
 
     @Test
     public void testRemoveListener() {
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
 
         mPluginManager.removePluginListener(mMockListener);
         verify(mMockPluginInstance).destroy();
@@ -101,16 +102,16 @@ public class PluginManagerTest extends SysuiTestCase {
                 mMockExceptionHandler);
         resetExceptionHandler();
 
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
         verify(mMockPluginInstance, Mockito.never()).loadAll();
 
-        assertNull(mPluginManager.getOneShotPlugin("myPlugin", 1));
+        assertNull(mPluginManager.getOneShotPlugin("myPlugin", TestPlugin.class));
         verify(mMockPluginInstance, Mockito.never()).getPlugin();
     }
 
     @Test
     public void testExceptionHandler_foundPlugin() {
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
         when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(true);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
@@ -125,7 +126,7 @@ public class PluginManagerTest extends SysuiTestCase {
 
     @Test
     public void testExceptionHandler_noFoundPlugin() {
-        mPluginManager.addPluginListener("myAction", mMockListener, 1);
+        mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
         when(mMockPluginInstance.checkAndDisable(Mockito.any())).thenReturn(false);
 
         mPluginExceptionHandler.uncaughtException(Thread.currentThread(), new Throwable());
@@ -160,5 +161,11 @@ public class PluginManagerTest extends SysuiTestCase {
         mPluginExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         // Set back the real exception handler so the test can crash if it wants to.
         Thread.setDefaultUncaughtExceptionHandler(mRealExceptionHandler);
+    }
+
+    @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)
+    public static interface TestPlugin extends Plugin {
+        public static final String ACTION = "testAction";
+        public static final int VERSION = 1;
     }
 }

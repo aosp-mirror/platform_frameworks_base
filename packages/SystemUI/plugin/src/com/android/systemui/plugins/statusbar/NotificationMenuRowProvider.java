@@ -10,7 +10,10 @@ import android.view.View;
 import java.util.ArrayList;
 
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+@ProvidesInterface(action = NotificationMenuRowProvider.ACTION,
+        version = NotificationMenuRowProvider.VERSION)
 public interface NotificationMenuRowProvider extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW";

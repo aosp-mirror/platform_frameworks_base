@@ -13,6 +13,8 @@
  */
 package com.android.systemui.plugins;
 
+import com.android.systemui.plugins.annotations.Requires;
+
 import android.content.Context;
 
 /**
@@ -111,18 +113,13 @@ import android.content.Context;
 public interface Plugin {
 
     /**
-     * Should be implemented as the following directly referencing the version constant
-     * from the plugin interface being implemented, this will allow recompiles to automatically
-     * pick up the current version.
-     * <pre class="prettyprint">
-     * {@literal
-     * public int getVersion() {
-     *     return VERSION;
-     * }
-     * }
-     * @return
+     * @deprecated
+     * @see Requires
      */
-    int getVersion();
+    default int getVersion() {
+        // Default of -1 indicates the plugin supports the new Requires model.
+        return -1;
+    }
 
     default void onCreate(Context sysuiContext, Context pluginContext) {
     }

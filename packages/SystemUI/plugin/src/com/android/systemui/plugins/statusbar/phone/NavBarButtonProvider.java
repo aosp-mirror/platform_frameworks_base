@@ -14,14 +14,15 @@
 
 package com.android.systemui.plugins.statusbar.phone;
 
-import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+@ProvidesInterface(action = NavBarButtonProvider.ACTION, version = NavBarButtonProvider.VERSION)
 public interface NavBarButtonProvider extends Plugin {
 
     public static final String ACTION = "com.android.systemui.action.PLUGIN_NAV_BUTTON";

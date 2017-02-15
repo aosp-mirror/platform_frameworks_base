@@ -31,13 +31,7 @@ public class FakePluginManager extends PluginManager {
 
     @Override
     public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            int version) {
-        mLeakChecker.addCallback(listener);
-    }
-
-    @Override
-    public <T extends Plugin> void addPluginListener(String action, PluginListener<T> listener,
-            int version, boolean allowMultiple) {
+            Class cls, boolean allowMultiple) {
         mLeakChecker.addCallback(listener);
     }
 
@@ -47,7 +41,7 @@ public class FakePluginManager extends PluginManager {
     }
 
     @Override
-    public <T extends Plugin> T getOneShotPlugin(String action, int version) {
+    public <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls) {
         return null;
     }
 }
