@@ -6937,7 +6937,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             return false;
         }
 
-        if (mNotificationData.getImportance(sbn.getKey()) < NotificationManager.IMPORTANCE_HIGH) {
+        // Allow peeking for DEFAULT notifications only if we're on Ambient Display.
+        int importanceLevel = isDozing() ? NotificationManager.IMPORTANCE_DEFAULT
+                : NotificationManager.IMPORTANCE_HIGH;
+        if (mNotificationData.getImportance(sbn.getKey()) < importanceLevel) {
             if (DEBUG) Log.d(TAG, "No peeking: unimportant notification: " + sbn.getKey());
             return false;
         }
