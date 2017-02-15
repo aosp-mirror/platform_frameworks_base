@@ -510,7 +510,7 @@ public class WifiTracker {
                 }
 
                 NetworkKey key = NetworkKey.createFromScanResult(result);
-                if (!mRequestedScores.contains(key)) {
+                if (key != null && !mRequestedScores.contains(key)) {
                     scoresToRequest.add(key);
                 }
 
