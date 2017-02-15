@@ -66,6 +66,9 @@ public class PackageDexOptimizer {
     public static final int DEX_OPT_PERFORMED = 1;
     public static final int DEX_OPT_FAILED = -1;
 
+    /** Special library name that skips shared libraries check during compilation. */
+    public static final String SKIP_SHARED_LIBRARY_CHECK = "&";
+
     private final Installer mInstaller;
     private final Object mInstallLock;
 
@@ -274,7 +277,7 @@ public class PackageDexOptimizer {
                 // TODO(calin): maybe add a separate call.
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, /*sharedLibrariesPath*/ null);
+                        compilerFilter, info.volumeUuid, SKIP_SHARED_LIBRARY_CHECK);
             }
 
             return DEX_OPT_PERFORMED;
