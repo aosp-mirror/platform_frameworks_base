@@ -16,7 +16,7 @@
 
 package android.companion;
 
-import android.companion.IOnAssociateCallback;
+import android.companion.IFindDeviceCallback;
 import android.companion.AssociationRequest;
 
 /**
@@ -26,8 +26,8 @@ import android.companion.AssociationRequest;
  */
 interface ICompanionDeviceManager {
     void associate(in AssociationRequest request,
-        in IOnAssociateCallback callback,
-        in String callingPackage); //TODO int userId?
+        in IFindDeviceCallback callback,
+        in String callingPackage);
 
     //TODO add these
 //    boolean haveNotificationAccess(String packageName);

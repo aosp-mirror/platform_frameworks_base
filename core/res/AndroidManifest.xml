@@ -1813,6 +1813,22 @@
         android:description="@string/permdesc_systemAlertWindow"
         android:protectionLevel="signature|preinstalled|appop|pre23|development" />
 
+    <!-- Allows an app to run in the background.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.RUN_IN_BACKGROUND"
+        android:label="@string/permlab_runInBackground"
+        android:description="@string/permdesc_runInBackground"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an app to use data in the background.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.USE_DATA_IN_BACKGROUND"
+        android:label="@string/permlab_useDataInBackground"
+        android:description="@string/permdesc_useDataInBackground"
+        android:protectionLevel="signature" />
+
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
     <!-- ================================== -->
@@ -2996,7 +3012,7 @@
          any metadata and intents attached.
          @hide -->
     <permission android:name="android.permission.ACCESS_NOTIFICATIONS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|appop" />
 
     <!-- Marker permission for applications that wish to access notification policy.
          <p>Protection level: normal

@@ -33,7 +33,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class DeviceChooserActivity extends Activity {
 
@@ -129,12 +128,9 @@ public class DeviceChooserActivity extends Activity {
     }
 
     protected void onPairTapped(BluetoothDevice selectedDevice) {
+        getService().onDeviceSelected();
         setResult(RESULT_OK,
                 new Intent().putExtra(CompanionDeviceManager.EXTRA_DEVICE, selectedDevice));
         finish();
-    }
-
-    private void toast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

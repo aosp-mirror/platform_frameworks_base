@@ -32,16 +32,15 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationRequest;
-import android.companion.BluetoothDeviceFilterUtils;
 import android.companion.BluetoothLEDeviceFilter;
-import android.companion.ICompanionDeviceManagerService;
-import android.companion.IOnAssociateCallback;
+import android.companion.ICompanionDeviceDiscoveryService;
+import android.companion.ICompanionDeviceDiscoveryServiceCallback;
+import android.companion.IFindDeviceCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -70,21 +69,25 @@ public class DeviceDiscoveryService extends Service {
     List<BluetoothDevice> mDevicesFound;
     BluetoothDevice mSelectedDevice;
     DevicesAdapter mDevicesAdapter;
-    IOnAssociateCallback mCallback;
+    IFindDeviceCallback mFindCallback;
+    ICompanionDeviceDiscoveryServiceCallback mServiceCallback;
     String mCallingPackage;
 
-    private final ICompanionDeviceManagerService mBinder =
-            new ICompanionDeviceManagerService.Stub() {
+    private final ICompanionDeviceDiscoveryService mBinder =
+            new ICompanionDeviceDiscoveryService.Stub() {
         @Override
         public void startDiscovery(AssociationRequest request,
-                IOnAssociateCallback callback,
-                String callingPackage) throws RemoteException {
+                String callingPackage,
+                IFindDeviceCallback findCallback,
+                ICompanionDeviceDiscoveryServiceCallback serviceCallback) {
             if (DEBUG) {
                 Log.i(LOG_TAG,
-                        "startDiscovery() called with: filter = [" + request + "], callback = ["
-                                + callback + "]");
+                        "startDiscovery() called with: filter = [" + request
+                                + "], findCallback = [" + findCallback + "]"
+                                + "], serviceCallback = [" + serviceCallback + "]");
             }
-            mCallback = callback;
+            mFindCallback = findCallback;
+            mServiceCallback = serviceCallback;
             mCallingPackage = callingPackage;
             DeviceDiscoveryService.this.startDiscovery(request);
         }
@@ -171,6 +174,14 @@ public class DeviceDiscoveryService extends Service {
         return super.onUnbind(intent);
     }
 
+    public void onDeviceSelected() {
+        try {
+            mServiceCallback.onDeviceSelected(mCallingPackage, getUserId());
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error reporting selected device");
+        }
+    }
+
     private void stopScan() {
         if (DEBUG) Log.i(LOG_TAG, "stopScan() called");
         mBluetoothAdapter.cancelDiscovery();
@@ -205,7 +216,7 @@ public class DeviceDiscoveryService extends Service {
     //TODO also, on timeout -> call onFailure
     private void onReadyToShowUI() {
         try {
-            mCallback.onSuccess(PendingIntent.getActivity(
+            mFindCallback.onSuccess(PendingIntent.getActivity(
                     this, 0,
                     new Intent(this, DeviceChooserActivity.class),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT
