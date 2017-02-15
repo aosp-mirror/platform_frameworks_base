@@ -43,6 +43,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -72,6 +73,7 @@ import android.media.IVolumeController;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.media.VolumePolicy;
+import android.media.audiofx.AudioEffect;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.PlayerBase;
@@ -722,6 +724,9 @@ public class AudioService extends IAudioService.Stub
         if (mMonitorRotation) {
             RotationHelper.init(mContext, mAudioHandler);
         }
+
+        intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
+        intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
 
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
 
@@ -5462,6 +5467,9 @@ public class AudioService extends IAudioService.Stub
                         state == BluetoothAdapter.STATE_TURNING_OFF) {
                     disconnectAllBluetoothProfiles();
                 }
+            } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
+                    action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
+                handleAudioEffectBroadcast(context, intent);
             }
         }
     } // end class AudioServiceBroadcastReceiver
@@ -5496,6 +5504,27 @@ public class AudioService extends IAudioService.Stub
             }
         }
     } // end class AudioServiceUserRestrictionsListener
+
+    private void handleAudioEffectBroadcast(Context context, Intent intent) {
+        String target = intent.getPackage();
+        if (target != null) {
+            Log.w(TAG, "effect broadcast already targeted to " + target);
+            return;
+        }
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        // TODO this should target a user-selected panel
+        List<ResolveInfo> ril = context.getPackageManager().queryBroadcastReceivers(
+                intent, 0 /* flags */);
+        if (ril != null && ril.size() != 0) {
+            ResolveInfo ri = ril.get(0);
+            if (ri != null && ri.activityInfo != null && ri.activityInfo.packageName != null) {
+                intent.setPackage(ri.activityInfo.packageName);
+                context.sendBroadcastAsUser(intent, UserHandle.ALL);
+                return;
+            }
+        }
+        Log.w(TAG, "couldn't find receiver package for effect intent");
+    }
 
     private void killBackgroundUserProcessesWithRecordAudioPermission(UserInfo oldUser) {
         PackageManager pm = mContext.getPackageManager();
