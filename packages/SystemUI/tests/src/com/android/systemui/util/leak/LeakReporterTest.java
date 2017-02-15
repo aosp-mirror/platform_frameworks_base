@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,18 +72,21 @@ public class LeakReporterTest extends SysuiTestCase {
         mLeakDir.delete();
     }
 
+    @Ignore("slow")
     @Test
     public void testDump_postsNotification() {
         mLeakReporter.dumpLeak(5);
         verify(mNotificationManager).notify(any(), anyInt(), any());
     }
 
+    @Ignore("slow")
     @Test
     public void testDump_Repeated() {
         mLeakReporter.dumpLeak(1);
         mLeakReporter.dumpLeak(2);
     }
 
+    @Ignore("slow")
     @Test
     public void testDump_ProducesNonZeroFiles() {
         mLeakReporter.dumpLeak(5);
