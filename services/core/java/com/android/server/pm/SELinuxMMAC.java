@@ -75,9 +75,6 @@ public final class SELinuxMMAC {
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
 
-    // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
-    private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
-
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
      * label apps. The loaded mac_permissions.xml file is determined by the
