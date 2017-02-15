@@ -1061,6 +1061,8 @@ public class ConnectivityManager {
      * registerNetworkCallback() are not specific to any particular Network so
      * do not cause any updates.
      *
+     * TODO: Delete once callers are updated.
+     *
      * @hide
      */
     public void requestLinkProperties(NetworkCallback networkCallback) {
@@ -1097,6 +1099,8 @@ public class ConnectivityManager {
      * #registerDefaultNetworkCallback(); callbacks registered with
      * registerNetworkCallback() are not specific to any particular Network so
      * do not cause any updates.
+     *
+     * TODO: Delete once callers are updated.
      *
      * @hide
      */
