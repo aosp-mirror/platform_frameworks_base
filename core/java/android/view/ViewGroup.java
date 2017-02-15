@@ -1190,7 +1190,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int focusableCount = views.size();
 
         final int descendantFocusability = getDescendantFocusability();
-        final boolean focusSelf = (isFocusableInTouchMode() || !shouldBlockFocusForTouchscreen());
+        final boolean blockFocusForTouchscreen = shouldBlockFocusForTouchscreen();
+        final boolean focusSelf = (isFocusableInTouchMode() || !blockFocusForTouchscreen);
 
         if (descendantFocusability == FOCUS_BLOCK_DESCENDANTS) {
             if (focusSelf) {
@@ -1199,7 +1200,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return;
         }
 
-        if (shouldBlockFocusForTouchscreen()) {
+        if (blockFocusForTouchscreen) {
             focusableMode |= FOCUSABLES_TOUCH_MODE;
         }
 
@@ -1234,7 +1235,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void addKeyboardNavigationClusters(Collection<View> views, int direction) {
         final int focusableCount = views.size();
 
-        super.addKeyboardNavigationClusters(views, direction);
+        if (isKeyboardNavigationCluster()) {
+            // Cluster-navigation can enter a touchscreenBlocksFocus cluster, so temporarily
+            // disable touchscreenBlocksFocus to evaluate whether it contains focusables.
+            final boolean blockedFocus = getTouchscreenBlocksFocus();
+            try {
+                setTouchscreenBlocksFocusNoRefocus(false);
+                super.addKeyboardNavigationClusters(views, direction);
+            } finally {
+                setTouchscreenBlocksFocusNoRefocus(blockedFocus);
+            }
+        } else {
+            super.addKeyboardNavigationClusters(views, direction);
+        }
 
         if (focusableCount != views.size()) {
             // No need to look for groups inside a group.
@@ -1280,6 +1293,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    private void setTouchscreenBlocksFocusNoRefocus(boolean touchscreenBlocksFocus) {
+        if (touchscreenBlocksFocus) {
+            mGroupFlags |= FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
+        } else {
+            mGroupFlags &= ~FLAG_TOUCHSCREEN_BLOCKS_FOCUS;
+        }
+    }
+
     /**
      * Check whether this ViewGroup should ignore focus requests for itself and its children.
      */
@@ -1288,8 +1309,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     boolean shouldBlockFocusForTouchscreen() {
+        // There is a special case for keyboard-navigation clusters. We allow cluster navigation
+        // to jump into blockFocusForTouchscreen ViewGroups which are clusters. Once in the
+        // cluster, focus is free to move around within it.
         return getTouchscreenBlocksFocus() &&
-                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
+                && (!hasFocus() || !isKeyboardNavigationCluster());
     }
 
     @Override
@@ -3175,6 +3200,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @TestApi
     @Override
     public boolean restoreFocusInCluster(@FocusRealDirection int direction) {
+        // Allow cluster-navigation to enter touchscreenBlocksFocus ViewGroups.
+        if (isKeyboardNavigationCluster()) {
+            final boolean blockedFocus = getTouchscreenBlocksFocus();
+            try {
+                setTouchscreenBlocksFocusNoRefocus(false);
+                return restoreFocusInClusterInternal(direction);
+            } finally {
+                setTouchscreenBlocksFocusNoRefocus(blockedFocus);
+            }
+        } else {
+            return restoreFocusInClusterInternal(direction);
+        }
+    }
+
+    private boolean restoreFocusInClusterInternal(@FocusRealDirection int direction) {
         if (mFocusedInCluster != null && !mFocusedInCluster.isKeyboardNavigationCluster()
                 && getDescendantFocusability() != FOCUS_BLOCK_DESCENDANTS
                 && (mFocusedInCluster.mViewFlags & VISIBILITY_MASK) == VISIBLE

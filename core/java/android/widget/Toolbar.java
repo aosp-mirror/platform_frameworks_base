@@ -343,6 +343,9 @@ public class Toolbar extends ViewGroup {
             final ViewGroup vgParent = (ViewGroup) parent;
             if (vgParent.isKeyboardNavigationCluster()) {
                 setKeyboardNavigationCluster(false);
+                if (vgParent.getTouchscreenBlocksFocus()) {
+                    setTouchscreenBlocksFocus(false);
+                }
                 break;
             }
             parent = vgParent.getParent();
