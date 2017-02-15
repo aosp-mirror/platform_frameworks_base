@@ -105,6 +105,7 @@ class PinnedStackController {
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpRect = new Rect();
+    private final Point mTmpDisplaySize = new Point();
 
     /**
      * The callback object passed to listeners for them to notify the controller of state changes.
@@ -209,6 +210,9 @@ class PinnedStackController {
         final int top = (int) (stackBounds.centerY() - height / 2f);
         stackBounds.set(left, top, left + width, top + height);
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
+        if (mIsMinimized) {
+            applyMinimizedOffset(stackBounds, getMovementBounds(stackBounds));
+        }
         return stackBounds;
     }
 
@@ -269,11 +273,7 @@ class PinnedStackController {
             mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                     snapFraction);
             if (mIsMinimized) {
-                final Point displaySize = new Point(mDisplayInfo.logicalWidth,
-                        mDisplayInfo.logicalHeight);
-                mService.getStableInsetsLocked(displayContent.getDisplayId(), mStableInsets);
-                mSnapAlgorithm.applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds,
-                        displaySize, mStableInsets);
+                applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
             }
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
         }
@@ -384,6 +384,16 @@ class PinnedStackController {
         outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
                 mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
                 mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
+    }
+
+    /**
+     * Applies the minimized offsets to the given stack bounds.
+     */
+    private void applyMinimizedOffset(Rect stackBounds, Rect movementBounds) {
+        mTmpDisplaySize.set(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        mService.getStableInsetsLocked(mDisplayContent.getDisplayId(), mStableInsets);
+        mSnapAlgorithm.applyMinimizedOffset(stackBounds, movementBounds, mTmpDisplaySize,
+                mStableInsets);
     }
 
     /**
