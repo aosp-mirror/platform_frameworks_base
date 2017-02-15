@@ -467,10 +467,13 @@ public class StatusBarIconView extends AnimatedImageView {
         boolean runnableAdded = false;
         if (visibleState != mVisibleState) {
             mVisibleState = visibleState;
+            if (mIconAppearAnimator != null) {
+                mIconAppearAnimator.cancel();
+            }
+            if (mDotAnimator != null) {
+                mDotAnimator.cancel();
+            }
             if (animate) {
-                if (mIconAppearAnimator != null) {
-                    mIconAppearAnimator.cancel();
-                }
                 float targetAmount = 0.0f;
                 Interpolator interpolator = Interpolators.FAST_OUT_LINEAR_IN;
                 if (visibleState == STATE_ICON) {
@@ -494,9 +497,6 @@ public class StatusBarIconView extends AnimatedImageView {
                     runnableAdded = true;
                 }
 
-                if (mDotAnimator != null) {
-                    mDotAnimator.cancel();
-                }
                 targetAmount = visibleState == STATE_ICON ? 2.0f : 0.0f;
                 interpolator = Interpolators.FAST_OUT_LINEAR_IN;
                 if (visibleState == STATE_DOT) {
