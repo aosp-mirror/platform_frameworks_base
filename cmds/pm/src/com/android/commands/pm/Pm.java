@@ -53,6 +53,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
@@ -1004,7 +1005,8 @@ public final class Pm {
                 // In non-split user mode, userId can only be SYSTEM
                 int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
                 info = mUm.createRestrictedProfile(name, parentUserId);
-                mAm.addSharedAccountsFromParentUser(parentUserId, userId);
+                mAm.addSharedAccountsFromParentUser(parentUserId, userId,
+                        (Process.myUid() == Process.ROOT_UID) ? "root" : "com.android.shell");
             } else if (userId < 0) {
                 info = mUm.createUser(name, flags);
             } else {
