@@ -1456,10 +1456,11 @@ public class AudioManager {
     }
 
     /**
-     * Checks whether A2DP audio routing to the Bluetooth headset is on or off.
+     * Checks whether a Bluetooth A2DP audio peripheral is connected or not.
      *
-     * @return true if A2DP audio is being routed to/from Bluetooth headset;
+     * @return true if a Bluetooth A2DP peripheral is connected
      *         false if otherwise
+     * @deprecated Use {@link AudioManager#getDevices(int)} instead to list available audio devices.
      */
     public boolean isBluetoothA2dpOn() {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP,"")
@@ -1492,7 +1493,7 @@ public class AudioManager {
      *
      * @return true if a wired headset is connected.
      *         false if otherwise
-     * @deprecated Use only to check is a headset is connected or not.
+     * @deprecated Use {@link AudioManager#getDevices(int)} instead to list available audio devices.
      */
     public boolean isWiredHeadsetOn() {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_WIRED_HEADSET,"")
