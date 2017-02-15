@@ -694,10 +694,16 @@ public final class TvInputInfo implements Parcelable {
          *            {@link TvInputService}.
          */
         public Builder(Context context, ComponentName component) {
-            mContext = context;
+            if (context == null) {
+                throw new IllegalArgumentException("context cannot be null.");
+            }
             Intent intent = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(component);
             mResolveInfo = context.getPackageManager().resolveService(intent,
                     PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+            if (mResolveInfo == null) {
+                throw new IllegalArgumentException("Invalid component. Can't find the service.");
+            }
+            mContext = context;
         }
 
         /**
