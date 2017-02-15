@@ -46,12 +46,22 @@ import java.util.LinkedList;
  */
 public class QueuedWork {
     private static final String LOG_TAG = QueuedWork.class.getSimpleName();
+    private static final boolean DEBUG = true;
 
-    /** Delay for delayed runnables */
-    private static final long DELAY = 50;
+    /** Delay for delayed runnables, as big as possible but low enough to be barely perceivable */
+    private static final long DELAY = 100;
 
     /** Lock for this class */
     private static final Object sLock = new Object();
+
+    /**
+     * Used to make sure that only one thread is processing work items at a time. This means that
+     * they are processed in the order added.
+     *
+     * This is separate from {@link #sLock} as this is held the whole time while work is processed
+     * and we do not want to stall the whole class.
+     */
+    private static Object sProcessingWork = new Object();
 
     /** Finishers {@link #addFinisher added} and not yet {@link #removeFinisher removed} */
     @GuardedBy("sLock")
@@ -78,7 +88,7 @@ public class QueuedWork {
         synchronized (sLock) {
             if (sHandler == null) {
                 HandlerThread handlerThread = new HandlerThread("queued-work-looper",
-                        Process.THREAD_PRIORITY_BACKGROUND);
+                        Process.THREAD_PRIORITY_FOREGROUND);
                 handlerThread.start();
 
                 sHandler = new QueuedWorkHandler(handlerThread.getLooper());
@@ -125,18 +135,31 @@ public class QueuedWork {
      * after Service command handling, etc. (so async work is never lost)
      */
     public static void waitToFinish() {
+        long startTime = 0;
+        boolean hadMessages = false;
+
+        if (DEBUG) {
+            startTime = System.currentTimeMillis();
+        }
+
         Handler handler = getHandler();
 
         synchronized (sLock) {
             if (handler.hasMessages(QueuedWorkHandler.MSG_RUN)) {
-                // Force the delayed work to be processed now
+                // Delayed work will be processed at processPendingWork() below
                 handler.removeMessages(QueuedWorkHandler.MSG_RUN);
-                handler.sendEmptyMessage(QueuedWorkHandler.MSG_RUN);
+
+                if (DEBUG) {
+                    hadMessages = true;
+                    Log.d(LOG_TAG, "waiting");
+                }
             }
 
             // We should not delay any work as this might delay the finishers
             sCanDelay = false;
         }
+
+        processPendingWork();
 
         try {
             while (true) {
@@ -154,6 +177,14 @@ public class QueuedWork {
             }
         } finally {
             sCanDelay = true;
+        }
+
+        if (DEBUG) {
+            long waitTime = System.currentTimeMillis() - startTime;
+
+            if (waitTime > 0 || hadMessages) {
+                Log.d(LOG_TAG, "waited " + waitTime + " ms");
+            }
         }
     }
 
@@ -186,6 +217,37 @@ public class QueuedWork {
         }
     }
 
+    private static void processPendingWork() {
+        long startTime = 0;
+
+        if (DEBUG) {
+            startTime = System.currentTimeMillis();
+        }
+
+        synchronized (sProcessingWork) {
+            LinkedList<Runnable> work;
+
+            synchronized (sLock) {
+                work = (LinkedList<Runnable>) sWork.clone();
+                sWork.clear();
+
+                // Remove all msg-s as all work will be processed now
+                getHandler().removeMessages(QueuedWorkHandler.MSG_RUN);
+            }
+
+            if (work.size() > 0) {
+                for (Runnable w : work) {
+                    w.run();
+                }
+
+                if (DEBUG) {
+                    Log.d(LOG_TAG, "processing " + work.size() + " items took " +
+                            +(System.currentTimeMillis() - startTime) + " ms");
+                }
+            }
+        }
+    }
+
     private static class QueuedWorkHandler extends Handler {
         static final int MSG_RUN = 1;
 
@@ -195,17 +257,7 @@ public class QueuedWork {
 
         public void handleMessage(Message msg) {
             if (msg.what == MSG_RUN) {
-                LinkedList<Runnable> work;
-
-                synchronized (sWork) {
-                    work = (LinkedList<Runnable>) sWork.clone();
-                    sWork.clear();
-
-                    // Remove all msg-s as all work will be processed now
-                    removeMessages(MSG_RUN);
-                }
-
-                work.forEach(Runnable::run);
+                processPendingWork();
             }
         }
     }

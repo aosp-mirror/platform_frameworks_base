@@ -53,7 +53,7 @@ import libcore.io.IoUtils;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final Object CONTENT = new Object();
 
     // Lock ordering rules:
@@ -318,6 +318,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
         @GuardedBy("mWritingToDiskLock")
         volatile boolean writeToDiskResult = false;
+        boolean wasWritten = false;
 
         private MemoryCommitResult(long memoryStateGeneration, @Nullable List<String> keysModified,
                 @Nullable Set<OnSharedPreferenceChangeListener> listeners,
@@ -328,7 +329,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
             this.mapToWriteToDisk = mapToWriteToDisk;
         }
 
-        void setDiskWriteResult(boolean result) {
+        void setDiskWriteResult(boolean wasWritten, boolean result) {
+            this.wasWritten = wasWritten;
             writeToDiskResult = result;
             writtenToDiskLatch.countDown();
         }
@@ -396,12 +398,20 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         public void apply() {
+            final long startTime = System.currentTimeMillis();
+
             final MemoryCommitResult mcr = commitToMemory();
             final Runnable awaitCommit = new Runnable() {
                     public void run() {
                         try {
                             mcr.writtenToDiskLatch.await();
                         } catch (InterruptedException ignored) {
+                        }
+
+                        if (DEBUG && mcr.wasWritten) {
+                            Log.d(TAG, mFile.getName() + ":" + mcr.memoryStateGeneration
+                                    + " applied after " + (System.currentTimeMillis() - startTime)
+                                    + " ms");
                         }
                     }
                 };
@@ -503,13 +513,26 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         public boolean commit() {
+            long startTime = 0;
+
+            if (DEBUG) {
+                startTime = System.currentTimeMillis();
+            }
+
             MemoryCommitResult mcr = commitToMemory();
+
             SharedPreferencesImpl.this.enqueueDiskWrite(
                 mcr, null /* sync write on this thread okay */);
             try {
                 mcr.writtenToDiskLatch.await();
             } catch (InterruptedException e) {
                 return false;
+            } finally {
+                if (DEBUG) {
+                    Log.d(TAG, mFile.getName() + ":" + mcr.memoryStateGeneration
+                            + " committed after " + (System.currentTimeMillis() - startTime)
+                            + " ms");
+                }
             }
             notifyListeners(mcr);
             return mcr.writeToDiskResult;
@@ -587,10 +610,6 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
         }
 
-        if (DEBUG) {
-            Log.d(TAG, "queued " + mcr.memoryStateGeneration + " -> " + mFile.getName());
-        }
-
         QueuedWork.queue(writeToDiskRunnable, !isFromSyncCommit);
     }
 
@@ -619,8 +638,31 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     // Note: must hold mWritingToDiskLock
     private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {
+        long startTime = 0;
+        long existsTime = 0;
+        long backupExistsTime = 0;
+        long outputStreamCreateTime = 0;
+        long writeTime = 0;
+        long fsyncTime = 0;
+        long setPermTime = 0;
+        long fstatTime = 0;
+        long deleteTime = 0;
+
+        if (DEBUG) {
+            startTime = System.currentTimeMillis();
+        }
+
+        boolean fileExists = mFile.exists();
+
+        if (DEBUG) {
+            existsTime = System.currentTimeMillis();
+
+            // Might not be set, hence init them to a default value
+            backupExistsTime = existsTime;
+        }
+
         // Rename the current file so it may be used as a backup during the next read
-        if (mFile.exists()) {
+        if (fileExists) {
             boolean needsWrite = false;
 
             // Only need to write if the disk state is older than this commit
@@ -639,18 +681,21 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
 
             if (!needsWrite) {
-                if (DEBUG) {
-                    Log.d(TAG, "skipped " + mcr.memoryStateGeneration + " -> " + mFile.getName());
-                }
-                mcr.setDiskWriteResult(true);
+                mcr.setDiskWriteResult(false, true);
                 return;
             }
 
-            if (!mBackupFile.exists()) {
+            boolean backupFileExists = mBackupFile.exists();
+
+            if (DEBUG) {
+                backupExistsTime = System.currentTimeMillis();
+            }
+
+            if (!backupFileExists) {
                 if (!mFile.renameTo(mBackupFile)) {
                     Log.e(TAG, "Couldn't rename file " + mFile
                           + " to backup file " + mBackupFile);
-                    mcr.setDiskWriteResult(false);
+                    mcr.setDiskWriteResult(false, false);
                     return;
                 }
             } else {
@@ -663,19 +708,34 @@ final class SharedPreferencesImpl implements SharedPreferences {
         // from the backup.
         try {
             FileOutputStream str = createFileOutputStream(mFile);
+
+            if (DEBUG) {
+                outputStreamCreateTime = System.currentTimeMillis();
+            }
+
             if (str == null) {
-                mcr.setDiskWriteResult(false);
+                mcr.setDiskWriteResult(false, false);
                 return;
             }
             XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
+
+            if (DEBUG) {
+                writeTime = System.currentTimeMillis();
+            }
+
             FileUtils.sync(str);
 
             if (DEBUG) {
-                Log.d(TAG, "wrote " + mcr.memoryStateGeneration + " -> " + mFile.getName());
+                fsyncTime = System.currentTimeMillis();
             }
 
             str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
+
+            if (DEBUG) {
+                setPermTime = System.currentTimeMillis();
+            }
+
             try {
                 final StructStat stat = Os.stat(mFile.getPath());
                 synchronized (mLock) {
@@ -685,12 +745,30 @@ final class SharedPreferencesImpl implements SharedPreferences {
             } catch (ErrnoException e) {
                 // Do nothing
             }
+
+            if (DEBUG) {
+                fstatTime = System.currentTimeMillis();
+            }
+
             // Writing was successful, delete the backup file if there is one.
             mBackupFile.delete();
 
+            if (DEBUG) {
+                deleteTime = System.currentTimeMillis();
+            }
+
             mDiskStateGeneration = mcr.memoryStateGeneration;
 
-            mcr.setDiskWriteResult(true);
+            mcr.setDiskWriteResult(true, true);
+
+            Log.d(TAG, "write: " + (existsTime - startTime) + "/"
+                    + (backupExistsTime - startTime) + "/"
+                    + (outputStreamCreateTime - startTime) + "/"
+                    + (writeTime - startTime) + "/"
+                    + (fsyncTime - startTime) + "/"
+                    + (setPermTime - startTime) + "/"
+                    + (fstatTime - startTime) + "/"
+                    + (deleteTime - startTime));
 
             return;
         } catch (XmlPullParserException e) {
@@ -698,12 +776,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
         } catch (IOException e) {
             Log.w(TAG, "writeToFile: Got exception:", e);
         }
+
         // Clean up an unsuccessfully written file
         if (mFile.exists()) {
             if (!mFile.delete()) {
                 Log.e(TAG, "Couldn't clean up partially-written file " + mFile);
             }
         }
-        mcr.setDiskWriteResult(false);
+        mcr.setDiskWriteResult(false, false);
     }
 }
