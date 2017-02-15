@@ -20,6 +20,8 @@ import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
+import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -61,6 +63,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
@@ -79,6 +82,8 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LockSettingsStorage.CredentialHash;
+import com.android.server.SyntheticPasswordManager.AuthenticationResult;
+import com.android.server.SyntheticPasswordManager.AuthenticationToken;
 
 import libcore.util.HexEncoding;
 
@@ -86,6 +91,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -145,12 +151,14 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean mFirstCallToVold;
     protected IGateKeeperService mGateKeeperService;
+    private SyntheticPasswordManager mSpManager;
+
     /**
      * The UIDs that are used for system credential storage in keystore.
      */
     private static final int[] SYSTEM_CREDENTIAL_UIDS = {
             Process.WIFI_UID, Process.VPN_UID,
-            Process.ROOT_UID, Process.SYSTEM_UID };
+            Process.ROOT_UID };
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -335,6 +343,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             return null;
         }
+
+        public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
+            return new SyntheticPasswordManager(storage);
+        }
+
+        public int binderGetCallingUid() {
+            return Binder.getCallingUid();
+        }
     }
 
     public LockSettingsService(Context context) {
@@ -365,6 +381,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mUserManager = injector.getUserManager();
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
+
+        mSpManager = injector.getSyntheticPasswordManager(mStorage);
     }
 
     /**
@@ -801,17 +819,42 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean havePassword(int userId) throws RemoteException {
+        synchronized (mSpManager) {
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                long handle = getSyntheticPasswordHandleLocked(userId);
+                return mSpManager.getCredentialType(handle, userId) ==
+                        LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+            }
+        }
         // Do we need a permissions check here?
         return mStorage.hasPassword(userId);
     }
 
     @Override
     public boolean havePattern(int userId) throws RemoteException {
+        synchronized (mSpManager) {
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                long handle = getSyntheticPasswordHandleLocked(userId);
+                return mSpManager.getCredentialType(handle, userId) ==
+                        LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+            }
+        }
         // Do we need a permissions check here?
         return mStorage.hasPattern(userId);
     }
 
     private boolean isUserSecure(int userId) {
+        synchronized (mSpManager) {
+            try {
+                if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                    long handle = getSyntheticPasswordHandleLocked(userId);
+                    return mSpManager.getCredentialType(handle, userId) !=
+                            LockPatternUtils.CREDENTIAL_TYPE_NONE;
+                }
+            } catch (RemoteException e) {
+                // fall through
+            }
+        }
         return mStorage.hasCredential(userId);
     }
 
@@ -1021,6 +1064,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setLockCredentialInternal(String credential, int credentialType,
             String savedCredential, int userId) throws RemoteException {
+        synchronized (mSpManager) {
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
+                        userId);
+                return;
+            }
+        }
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             if (credential != null) {
                 Slog.wtf(TAG, "CredentialType is none, but credential is non-null.");
@@ -1061,7 +1111,16 @@ public class LockSettingsService extends ILockSettings.Stub {
                 savedCredential = null;
             }
         }
-
+        synchronized (mSpManager) {
+            if (shouldMigrateToSyntheticPasswordLocked(userId)) {
+                initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential,
+                        currentHandle.type, userId);
+                spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
+                        userId);
+                return;
+            }
+        }
+        if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
         byte[] enrolledHandle = enrollCredential(currentHandle.hash, savedCredential, credential,
                 userId);
         if (enrolledHandle != null) {
@@ -1187,6 +1246,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "Throttled while enrolling a password");
         }
         return hash;
+    }
+
+    private void setAuthlessUserKeyProtection(int userId, byte[] key) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "setAuthlessUserKeyProtectiond: user=" + userId);
+        addUserKeyAuth(userId, null, key);
     }
 
     private void setUserKeyProtection(int userId, String credential, VerifyCredentialResponse vcr)
@@ -1320,7 +1384,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (TextUtils.isEmpty(credential)) {
             throw new IllegalArgumentException("Credential can't be null or empty");
         }
-
+        synchronized (mSpManager) {
+            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+                VerifyCredentialResponse response = spBasedDoVerifyCredentialLocked(credential,
+                        credentialType, hasChallenge, challenge, userId, progressCallback);
+                if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                    mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
+                }
+                return response;
+            }
+        }
         CredentialHash storedHash = mStorage.readCredentialHash(userId);
         if (storedHash.type != credentialType) {
             Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
@@ -1456,8 +1529,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             notifyActivePasswordMetricsAvailable(credential, userId);
             unlockKeystore(credential, userId);
 
-            Slog.i(TAG, "Unlocking user " + userId +
-                    " with token length " + response.getPayload().length);
+            Slog.i(TAG, "Unlocking user " + userId + " with token length "
+                    + response.getPayload().length);
             unlockUser(userId, response.getPayload(), secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
@@ -1467,6 +1540,15 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             if (shouldReEnroll) {
                 setLockCredentialInternal(credential, storedHash.type, credential, userId);
+            } else {
+                // Now that we've cleared of all required GK migration, let's do the final
+                // migration to synthetic password.
+                synchronized (mSpManager) {
+                    if (shouldMigrateToSyntheticPasswordLocked(userId)) {
+                        initializeSyntheticPasswordLocked(storedHash.hash, credential,
+                                storedHash.type, userId);
+                    }
+                }
             }
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
@@ -1697,7 +1779,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private synchronized IGateKeeperService getGateKeeperService()
+    protected synchronized IGateKeeperService getGateKeeperService()
             throws RemoteException {
         if (mGateKeeperService != null) {
             return mGateKeeperService;
@@ -1713,4 +1795,267 @@ public class LockSettingsService extends ILockSettings.Stub {
         Slog.e(TAG, "Unable to acquire GateKeeperService");
         return null;
     }
+
+    /**
+     * Precondition: vold and keystore unlocked.
+     *
+     * Create new synthetic password, set up synthetic password blob protected by the supplied
+     * user credential, and make the newly-created SP blob active.
+     *
+     * The invariant under a synthetic password is:
+     * 1. If user credential exists, then both vold and keystore and protected with keys derived
+     *     from the synthetic password.
+     * 2. If user credential does not exist, vold and keystore protection are cleared. This is to
+     *     make it consistent with current behaviour. It also allows ActivityManager to call
+     *     unlockUser() with empty secret.
+     * 3. Once a user is migrated to have synthetic password, its value will never change, no matter
+     *     whether the user changes his lockscreen PIN or clear/reset it. When the user clears its
+     *     lockscreen PIN, we still maintain the existing synthetic password in a password blob
+     *     protected by a default PIN. The only exception is when the DPC performs an untrusted
+     *     credential change, in which case we have no way to derive the existing synthetic password
+     *     and has to create a new one.
+     * 4. The user SID is linked with synthetic password, but its cleared/re-created when the user
+     *     clears/re-creates his lockscreen PIN.
+     *
+     *
+     * Different cases of calling this method:
+     * 1. credentialHash != null
+     *     This implies credential != null, a new SP blob will be provisioned, and existing SID
+     *     migrated to associate with the new SP.
+     *     This happens during a normal migration case when the user currently has password.
+     *
+     * 2. credentialhash == null and credential == null
+     *     A new SP blob and a new SID will be created, while the user has no credentials.
+     *     This can happens when we are activating an escrow token on a unsecured device, during
+     *     which we want to create the SP structure with an empty user credential.
+     *
+     * 3. credentialhash == null and credential != null
+     *     This is the untrusted credential reset, OR the user sets a new lockscreen password
+     *     FOR THE FIRST TIME on a SP-enabled device. New credential and new SID will be created
+     */
+    private AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
+            String credential, int credentialType, int userId) throws RemoteException {
+        Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
+        AuthenticationToken auth = mSpManager.newSyntheticPasswordAndSid(getGateKeeperService(),
+                credentialHash, credential, userId);
+        if (auth == null) {
+            Slog.wtf(TAG, "initializeSyntheticPasswordLocked returns null auth token");
+            return null;
+        }
+        long handle = mSpManager.createPasswordBasedSyntheticPassword(getGateKeeperService(),
+                credential, credentialType, auth, userId);
+        if (credential != null) {
+            if (credentialHash == null) {
+                // Since when initializing SP, we didn't provide an existing password handle
+                // for it to migrate SID, we need to create a new SID for the user.
+                mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
+            }
+            mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
+            setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+            setKeystorePassword(auth.deriveKeyStorePassword(), userId);
+        } else {
+            clearUserKeyProtection(userId);
+            setKeystorePassword(null, userId);
+            getGateKeeperService().clearSecureUserId(userId);
+        }
+        fixateNewestUserKeyAuth(userId);
+        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, handle, userId);
+        return auth;
+    }
+
+    private long getSyntheticPasswordHandleLocked(int userId) {
+        try {
+            return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId);
+        } catch (RemoteException e) {
+            return SyntheticPasswordManager.DEFAULT_HANDLE;
+        }
+    }
+
+    private boolean isSyntheticPasswordBasedCredentialLocked(int userId) throws RemoteException {
+        long handle = getSyntheticPasswordHandleLocked(userId);
+        // This is a global setting
+        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM);
+      return enabled != 0 && handle != SyntheticPasswordManager.DEFAULT_HANDLE;
+    }
+
+    private boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
+        long handle = getSyntheticPasswordHandleLocked(userId);
+        // This is a global setting
+        long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM);
+        return enabled != 0 && handle == SyntheticPasswordManager.DEFAULT_HANDLE;
+    }
+
+    private void enableSyntheticPasswordLocked() throws RemoteException {
+        setLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 1, UserHandle.USER_SYSTEM);
+    }
+
+    private VerifyCredentialResponse spBasedDoVerifyCredentialLocked(String userCredential, int
+            credentialType, boolean hasChallenge, long challenge, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "spBasedDoVerifyCredentialLocked: user=" + userId);
+        if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            userCredential = null;
+        }
+        long handle = getSyntheticPasswordHandleLocked(userId);
+        AuthenticationResult authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                getGateKeeperService(), handle, userCredential, userId);
+
+        VerifyCredentialResponse response = authResult.gkResponse;
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            // credential has matched
+            // perform verifyChallenge with synthetic password which generates the real auth
+            // token for the current user
+            response = mSpManager.verifyChallenge(getGateKeeperService(), authResult.authToken,
+                    challenge, userId);
+            if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+                Slog.wtf(TAG, "verifyChallenge with SP failed.");
+                return VerifyCredentialResponse.ERROR;
+            }
+            if (progressCallback != null) {
+                progressCallback.onCredentialVerified();
+            }
+            notifyActivePasswordMetricsAvailable(userCredential, userId);
+            unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
+
+            final byte[] secret = authResult.authToken.deriveDiskEncryptionKey();
+            Slog.i(TAG, "Unlocking user " + userId + " with secret only, length " + secret.length);
+            unlockUser(userId, null, secret);
+
+            if (isManagedProfileWithSeparatedLock(userId)) {
+                TrustManager trustManager =
+                        (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+                trustManager.setDeviceLockedForUser(userId, false);
+            }
+        } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+            if (response.getTimeout() > 0) {
+                requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
+            }
+        }
+
+        return response;
+    }
+
+    /**
+     * Change the user's lockscreen password by creating a new SP blob and update the handle, based
+     * on an existing authentication token. Even though a new SP blob is created, the underlying
+     * synthetic password is never changed.
+     *
+     * When clearing credential, we keep the SP unchanged, but clear its password handle so its
+     * SID is gone. We also clear password from (software-based) keystore and vold, which will be
+     * added back when new password is set in future.
+     */
+    private long setLockCredentialWithAuthTokenLocked(String credential, int credentialType,
+            AuthenticationToken auth, int userId) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "setLockCredentialWithAuthTokenLocked: user=" + userId);
+        long newHandle = mSpManager.createPasswordBasedSyntheticPassword(getGateKeeperService(),
+                credential, credentialType, auth, userId);
+        final Map<Integer, String> profilePasswords;
+        if (credential != null) {
+            // // not needed by synchronizeUnifiedWorkChallengeForProfiles()
+            profilePasswords = null;
+
+            if (mSpManager.hasSidForUser(userId)) {
+                // We are changing password of a secured device, nothing more needed as
+                // createPasswordBasedSyntheticPassword has already taken care of maintaining
+                // the password handle and SID unchanged.
+
+                //refresh auth token
+                mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
+            } else {
+                // A new password is set on a previously-unsecured device, we need to generate
+                // a new SID, and re-add keys to vold and keystore.
+                mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
+                mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
+                setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+                fixateNewestUserKeyAuth(userId);
+                setKeystorePassword(auth.deriveKeyStorePassword(), userId);
+            }
+        } else {
+            // Cache all profile password if they use unified work challenge. This will later be
+            // used to clear the profile's password in synchronizeUnifiedWorkChallengeForProfiles()
+            profilePasswords = getDecryptedPasswordsForAllTiedProfiles(userId);
+
+            // we are clearing password of a secured device, so need to nuke SID as well.
+            mSpManager.clearSidForUser(userId);
+            getGateKeeperService().clearSecureUserId(userId);
+            // Clear key from vold so ActivityManager can just unlock the user with empty secret
+            // during boot.
+            clearUserKeyProtection(userId);
+            fixateNewestUserKeyAuth(userId);
+            setKeystorePassword(null, userId);
+        }
+        setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, newHandle, userId);
+        synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
+        return newHandle;
+    }
+
+    private void spBasedSetLockCredentialInternalLocked(String credential, int credentialType,
+            String savedCredential, int userId) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "spBasedSetLockCredentialInternalLocked: user=" + userId);
+        if (isManagedProfileWithUnifiedLock(userId)) {
+            // get credential from keystore when managed profile has unified lock
+            try {
+                savedCredential = getDecryptedPasswordForTiedProfile(userId);
+            } catch (FileNotFoundException e) {
+                Slog.i(TAG, "Child profile key not found");
+            } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
+                    | NoSuchAlgorithmException | NoSuchPaddingException
+                    | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                    | BadPaddingException | CertificateException | IOException e) {
+                Slog.e(TAG, "Failed to decrypt child profile key", e);
+            }
+        }
+        long handle = getSyntheticPasswordHandleLocked(userId);
+        AuthenticationToken auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                getGateKeeperService(), handle, savedCredential, userId).authToken;
+        if (auth != null) {
+            // We are performing a trusted credential change i.e. a correct existing credential
+            // is provided
+            setLockCredentialWithAuthTokenLocked(credential, credentialType, auth, userId);
+            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+        } else {
+            // We are performing an untrusted credential change i.e. by DevicePolicyManager.
+            // So provision a new SP and SID. This would invalidate existing escrow tokens.
+            // Still support this for now but this flow will be removed in the next release.
+
+            Slog.w(TAG, "Untrusted credential change invoked");
+            initializeSyntheticPasswordLocked(null, credential, credentialType, userId);
+            synchronizeUnifiedWorkChallengeForProfiles(userId, null);
+            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+        }
+        notifyActivePasswordMetricsAvailable(credential, userId);
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args){
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            pw.println("Permission Denial: can't dump LockSettingsService from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        synchronized (this) {
+            pw.println("Current lock settings service state:");
+            pw.println(String.format("SP Enabled = %b",
+                    mLockPatternUtils.isSyntheticPasswordEnabled()));
+
+            List<UserInfo> users = mUserManager.getUsers();
+            for (int user = 0; user < users.size(); user++) {
+                final int userId = users.get(user).id;
+                pw.println("    User " + userId);
+                pw.println(String.format("        SP Handle = %x",
+                        getSyntheticPasswordHandleLocked(userId)));
+                try {
+                    pw.println(String.format("        SID = %x",
+                            getGateKeeperService().getSecureUserId(userId)));
+                } catch (RemoteException e) {
+                    // ignore.
+                }
+            }
+        }
+    }
+
 }

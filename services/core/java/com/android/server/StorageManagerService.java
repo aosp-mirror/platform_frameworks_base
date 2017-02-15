@@ -2922,10 +2922,10 @@ class StorageManagerService extends IStorageManager.Stub
         waitForReady();
 
         if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-            // When a user has secure lock screen, require a challenge token to
-            // actually unlock. This check is mostly in place for emulation mode.
-            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(token)) {
-                throw new IllegalStateException("Token required to unlock secure user " + userId);
+            // When a user has secure lock screen, require secret to actually unlock.
+            // This check is mostly in place for emulation mode.
+            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
+                throw new IllegalStateException("Secret required to unlock secure user " + userId);
             }
 
             try {

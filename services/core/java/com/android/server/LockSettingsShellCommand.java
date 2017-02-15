@@ -22,12 +22,9 @@ import static com.android.internal.widget.LockPatternUtils.stringToPattern;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Binder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
 
@@ -37,6 +34,7 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_SET_PIN = "set-pin";
     private static final String COMMAND_SET_PASSWORD = "set-password";
     private static final String COMMAND_CLEAR = "clear";
+    private static final String COMMAND_SP = "sp";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
@@ -71,6 +69,9 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_CLEAR:
                     runClear();
                     break;
+                case COMMAND_SP:
+                    runEnableSp();
+                    break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
                     break;
@@ -92,12 +93,23 @@ class LockSettingsShellCommand extends ShellCommand {
         while ((opt = getNextOption()) != null) {
             if ("--old".equals(opt)) {
                 mOld = getNextArgRequired();
+            } else if ("--user".equals(opt)) {
+                mCurrentUserId = Integer.parseInt(getNextArgRequired());
             } else {
                 getErrPrintWriter().println("Unknown option: " + opt);
                 throw new IllegalArgumentException();
             }
         }
         mNew = getNextArg();
+    }
+
+    private void runEnableSp() {
+        if (mNew != null) {
+            mLockPatternUtils.enableSyntheticPassword();
+            getOutPrintWriter().println("Synthetic password enabled");
+        }
+        getOutPrintWriter().println(String.format("SP Enabled = %b",
+                mLockPatternUtils.isSyntheticPasswordEnabled()));
     }
 
     private void runSetPattern() throws RemoteException {

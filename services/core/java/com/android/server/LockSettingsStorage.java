@@ -66,6 +66,8 @@ class LockSettingsStorage {
     private static final String LEGACY_LOCK_PASSWORD_FILE = "password.key";
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
+    private static final String SYNTHETIC_PASSWORD_DIRECTORY = "spblob/";
+
     private static final Object DEFAULT = new Object();
 
     private final DatabaseHelper mOpenHelper;
@@ -412,8 +414,7 @@ class LockSettingsStorage {
     }
 
     private String getLockCredentialFilePathForUser(int userId, String basename) {
-        String dataSystemDirectory =
-                android.os.Environment.getDataDirectory().getAbsolutePath() +
+        String dataSystemDirectory = Environment.getDataDirectory().getAbsolutePath() +
                         SYSTEM_DIRECTORY;
         if (userId == 0) {
             // Leave it in the same place for user 0
@@ -421,6 +422,40 @@ class LockSettingsStorage {
         } else {
             return new File(Environment.getUserSystemDirectory(userId), basename).getAbsolutePath();
         }
+    }
+
+    public void writeSyntheticPasswordState(int userId, long handle, String name, byte[] data) {
+        writeFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name), data);
+    }
+
+    public byte[] readSyntheticPasswordState(int userId, long handle, String name) {
+        return readFile(getSynthenticPasswordStateFilePathForUser(userId, handle, name));
+    }
+
+    public void deleteSyntheticPasswordState(int userId, long handle, String name, boolean secure) {
+        String path = getSynthenticPasswordStateFilePathForUser(userId, handle, name);
+        File file = new File(path);
+        if (file.exists()) {
+            //TODO: (b/34600579) invoke secdiscardable
+            file.delete();
+            mCache.putFile(path, null);
+        }
+    }
+
+    @VisibleForTesting
+    protected File getSyntheticPasswordDirectoryForUser(int userId) {
+        return new File(Environment.getDataSystemDeDirectory(userId) ,SYNTHETIC_PASSWORD_DIRECTORY);
+    }
+
+    @VisibleForTesting
+    protected String getSynthenticPasswordStateFilePathForUser(int userId, long handle,
+            String name) {
+        File baseDir = getSyntheticPasswordDirectoryForUser(userId);
+        String baseName = String.format("%016x.%s", handle, name);
+        if (!baseDir.exists()) {
+            baseDir.mkdir();
+        }
+        return new File(baseDir, baseName).getAbsolutePath();
     }
 
     public void removeUser(int userId) {
@@ -446,15 +481,20 @@ class LockSettingsStorage {
                 }
             }
         } else {
-            // Manged profile
+            // Managed profile
             removeChildProfileLock(userId);
         }
 
+        File spStateDir = getSyntheticPasswordDirectoryForUser(userId);
         try {
             db.beginTransaction();
             db.delete(TABLE, COLUMN_USERID + "='" + userId + "'", null);
             db.setTransactionSuccessful();
             mCache.removeUser(userId);
+            // The directory itself will be deleted as part of user deletion operation by the
+            // framework, so only need to purge cache here.
+            //TODO: (b/34600579) invoke secdiscardable
+            mCache.purgePath(spStateDir.getAbsolutePath());
         } finally {
             db.endTransaction();
         }
@@ -616,6 +656,16 @@ class LockSettingsStorage {
             }
 
             // Make sure in-flight loads can't write to cache.
+            mVersion++;
+        }
+
+        synchronized void purgePath(String path) {
+            for (int i = mCache.size() - 1; i >= 0; i--) {
+                CacheKey entry = mCache.keyAt(i);
+                if (entry.type == CacheKey.TYPE_FILE && entry.key.startsWith(path)) {
+                    mCache.removeAt(i);
+                }
+            }
             mVersion++;
         }
 
