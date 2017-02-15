@@ -1286,6 +1286,16 @@
         <item>com.android.networkrecommendation</item>
     </string-array>
 
+    <!-- The package name of the default network recommendation app.
+         A network recommendation provider must:
+             * Be granted the SCORE_NETWORKS permission.
+             * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
+               protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
+
+         This must be set to a valid network recommendation app.
+     -->
+    <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false">com.android.networkrecommendation</string>
+
     <!-- Whether to enable Hardware FLP overlay which allows Hardware FLP to be
          replaced by an app at run-time. When disabled, only the
          config_hardwareFlpPackageName package will be searched for Hardware Flp,

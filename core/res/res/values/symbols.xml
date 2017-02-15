@@ -2790,6 +2790,7 @@
 
   <!-- Network Recommendation -->
   <java-symbol type="array" name="config_networkRecommendationPackageNames" />
+  <java-symbol type="string" name="config_defaultNetworkRecommendationProviderPackage" />
 
   <!-- Whether allow 3rd party apps on internal storage. -->
   <java-symbol type="bool" name="config_allow3rdPartyAppOnInternal" />
