@@ -22,7 +22,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -331,10 +330,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean isPreL = Boolean.TRUE.equals(expandedIcon.getTag(R.id.icon_is_pre_L));
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(expandedIcon,
                 NotificationColorUtil.getInstance(mContext));
+        int color = StatusBarIconView.NO_COLOR;
         if (colorize) {
-            int color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded());
-            expandedIcon.setImageTintList(ColorStateList.valueOf(color));
+            color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded());
         }
+        expandedIcon.setStaticDrawableColor(color);
     }
 
     private void updateLimits() {

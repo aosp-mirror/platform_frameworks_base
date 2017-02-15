@@ -456,7 +456,10 @@ public class NotificationColorUtil {
         }
     }
 
-    public static int resolveActionBarColor(int backgroundColor) {
+    public static int resolveActionBarColor(Context context, int backgroundColor) {
+        if (backgroundColor == Notification.COLOR_DEFAULT) {
+            return context.getColor(com.android.internal.R.color.notification_action_list);
+        }
         boolean useDark = shouldUseDark(backgroundColor);
         final double[] result = ColorUtilsFromCompat.getTempDouble3Array();
         ColorUtilsFromCompat.colorToLAB(backgroundColor, result);

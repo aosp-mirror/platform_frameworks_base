@@ -1,7 +1,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -226,12 +225,13 @@ public class NotificationIconAreaController implements DarkReceiver {
         for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) mNotificationIcons.getChildAt(i);
             boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
+            int color = StatusBarIconView.NO_COLOR;
             boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
             if (colorize) {
-                v.setImageTintList(ColorStateList.valueOf(
-                        DarkIconDispatcher.getTint(mTintArea, v, mIconTint)));
+                color = DarkIconDispatcher.getTint(mTintArea, v, mIconTint);
             }
-            v.setIconTint(mIconTint);
+            v.setStaticDrawableColor(color);
+            v.setDecorColor(mIconTint);
         }
     }
 }

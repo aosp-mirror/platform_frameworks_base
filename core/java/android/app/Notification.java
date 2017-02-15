@@ -3684,7 +3684,8 @@ public class Notification implements Parcelable
                         mContext, backgroundColor);
                 mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(
                         mContext, backgroundColor);
-                mActionBarColor = NotificationColorUtil.resolveActionBarColor(backgroundColor);
+                mActionBarColor = NotificationColorUtil.resolveActionBarColor(mContext,
+                        backgroundColor);
             }
         }
 
@@ -4166,11 +4167,20 @@ public class Notification implements Parcelable
                     mN.extras.putCharSequence(EXTRA_SUB_TEXT, newSummary);
                 }
             }
+            Boolean colorized = (Boolean) mN.extras.get(EXTRA_COLORIZED);
+            mN.extras.putBoolean(EXTRA_COLORIZED, false);
+
             RemoteViews header = makeNotificationHeader();
+
             if (summary != null) {
                 mN.extras.putCharSequence(EXTRA_SUB_TEXT, summary);
             } else {
                 mN.extras.remove(EXTRA_SUB_TEXT);
+            }
+            if (colorized != null) {
+                mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
+            } else {
+                mN.extras.remove(EXTRA_COLORIZED);
             }
             mN.color = color;
             return header;

@@ -446,6 +446,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public boolean useFullTransitionAmount;
         public boolean useLinearTransitionAmount;
         public boolean translateContent;
+        public int iconColor = StatusBarIconView.NO_COLOR;
 
         @Override
         public void applyToView(View view) {
@@ -505,6 +506,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     }
                 }
                 icon.setVisibleState(visibleState, animationsAllowed);
+                icon.setIconColor(iconColor, needsCannedAnimation && animationsAllowed);
                 if (animate) {
                     animateTo(icon, animationProperties);
                 } else {
@@ -513,6 +515,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             }
             justAdded = false;
             needsCannedAnimation = false;
+        }
+
+        @Override
+        public void initFrom(View view) {
+            super.initFrom(view);
+            if (view instanceof StatusBarIconView) {
+                iconColor = ((StatusBarIconView) view).getStaticDrawableColor();
+            }
         }
 
         protected void onYTranslationAnimationFinished(View view) {

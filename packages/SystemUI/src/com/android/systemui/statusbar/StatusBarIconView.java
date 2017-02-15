@@ -19,9 +19,11 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -37,7 +39,6 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -50,6 +51,9 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import java.text.NumberFormat;
 
 public class StatusBarIconView extends AnimatedImageView {
+    public static final int NO_COLOR = 0;
+    private final int ANIMATION_DURATION_FAST = 100;
+
     public static final int STATE_ICON = 0;
     public static final int STATE_DOT = 1;
     public static final int STATE_HIDDEN = 2;
@@ -104,6 +108,17 @@ public class StatusBarIconView extends AnimatedImageView {
     private ObjectAnimator mDotAnimator;
     private float mDotAppearAmount;
     private OnVisibilityChangedListener mOnVisibilityChangedListener;
+    private int mDrawableColor;
+    private int mIconColor;
+    private ValueAnimator mColorAnimator;
+    private int mCurrentSetColor = NO_COLOR;
+    private int mAnimationStartColor = NO_COLOR;
+    private final ValueAnimator.AnimatorUpdateListener mColorUpdater
+            = animation -> {
+        int newColor = NotificationUtils.interpolateColors(mAnimationStartColor, mIconColor,
+                animation.getAnimatedFraction());
+        setColorInternal(newColor);
+    };
 
     public StatusBarIconView(Context context, String slot, Notification notification) {
         this(context, slot, notification, false);
@@ -123,7 +138,7 @@ public class StatusBarIconView extends AnimatedImageView {
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         if (mNotification != null) {
-            setIconTint(getContext().getColor(
+            setDecorColor(getContext().getColor(
                     com.android.internal.R.color.notification_icon_default_color));
         }
         reloadDimens();
@@ -446,8 +461,64 @@ public class StatusBarIconView extends AnimatedImageView {
         return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
 
-    public void setIconTint(int iconTint) {
+    /**
+     * Set the color that is used to draw decoration like the overflow dot. This will not be applied
+     * to the drawable.
+     */
+    public void setDecorColor(int iconTint) {
         mDotPaint.setColor(iconTint);
+    }
+
+    /**
+     * Set the static color that should be used for the drawable of this icon if it's not
+     * transitioning this also immediately sets the color.
+     */
+    public void setStaticDrawableColor(int color) {
+        mDrawableColor = color;
+        setColorInternal(color);
+        mIconColor = color;
+    }
+
+    private void setColorInternal(int color) {
+        if (color != NO_COLOR) {
+            setImageTintList(ColorStateList.valueOf(color));
+        } else {
+            setImageTintList(null);
+        }
+        mCurrentSetColor = color;
+    }
+
+    public void setIconColor(int iconColor, boolean animate) {
+        if (mIconColor != iconColor) {
+            mIconColor = iconColor;
+            if (mColorAnimator != null) {
+                mColorAnimator.cancel();
+            }
+            if (mCurrentSetColor == iconColor) {
+                return;
+            }
+            if (animate && mCurrentSetColor != NO_COLOR) {
+                mAnimationStartColor = mCurrentSetColor;
+                mColorAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+                mColorAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+                mColorAnimator.setDuration(ANIMATION_DURATION_FAST);
+                mColorAnimator.addUpdateListener(mColorUpdater);
+                mColorAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mColorAnimator = null;
+                        mAnimationStartColor = NO_COLOR;
+                    }
+                });
+                mColorAnimator.start();
+            } else {
+                setColorInternal(iconColor);
+            }
+        }
+    }
+
+    public int getStaticDrawableColor() {
+        return mDrawableColor;
     }
 
     public void setVisibleState(int state) {
@@ -482,7 +553,7 @@ public class StatusBarIconView extends AnimatedImageView {
                     mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
                     mIconAppearAnimator.setInterpolator(interpolator);
-                    mIconAppearAnimator.setDuration(100);
+                    mIconAppearAnimator.setDuration(ANIMATION_DURATION_FAST);
                     mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -508,7 +579,7 @@ public class StatusBarIconView extends AnimatedImageView {
                     mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
                     mDotAnimator.setInterpolator(interpolator);
-                    mDotAnimator.setDuration(100);
+                    mDotAnimator.setDuration(ANIMATION_DURATION_FAST);
                     final boolean runRunnable = !runnableAdded;
                     mDotAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
