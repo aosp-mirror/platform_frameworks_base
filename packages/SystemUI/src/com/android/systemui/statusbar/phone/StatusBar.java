@@ -1683,6 +1683,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (entry != null && entry.row != null) {
             entry.row.setRemoved();
+            mStackScroller.cleanUpViewState(entry.row);
         }
         // Let's remove the children if this was a summary
         handleGroupSummaryRemoved(key, ranking);
@@ -1738,12 +1739,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
                 toRemove.get(i).setRemoved();
-            }
-            for (int i = 0; i < toRemove.size(); i++) {
-                removeNotification(toRemove.get(i).getStatusBarNotification().getKey(), ranking);
-                // we need to ensure that the view is actually properly removed from the viewstate
-                // as this won't happen anymore when kept in the parent.
-                mStackScroller.removeViewStateForView(toRemove.get(i));
             }
         }
     }
