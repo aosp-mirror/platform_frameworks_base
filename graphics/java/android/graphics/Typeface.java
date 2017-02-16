@@ -144,7 +144,8 @@ public class Typeface {
                 if (typeface != null) return typeface;
 
                 FontFamily fontFamily = new FontFamily();
-                if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */)) {
+                if (fontFamily.addFontFromAssetManager(mgr, path, cookie, false /* isAsset */,
+                        0 /* use OS/2 table to determine weight and italic */, false)) {
                     fontFamily.freeze();
                     FontFamily[] families = {fontFamily};
                     typeface = createFromFamiliesWithDefault(families);
@@ -199,7 +200,8 @@ public class Typeface {
                 FontConfig.Font font = fonts.get(i);
                 // TODO: Use style and weight info
                 if (!fontFamily.addFontFromAssetManager(mgr, font.getFontName(),
-                        0 /* resourceCookie */, false /* isAsset */)) {
+                        0 /* resourceCookie */, false /* isAsset */, font.getWeight(),
+                        font.isItalic())) {
                     return null;
                 }
             }
@@ -498,7 +500,8 @@ public class Typeface {
                 if (typeface != null) return typeface;
 
                 FontFamily fontFamily = new FontFamily();
-                if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */)) {
+                if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */,
+                        0 /* use OS/2 table to determine weight and italic */, false)) {
                     fontFamily.freeze();
                     FontFamily[] families = { fontFamily };
                     typeface = createFromFamiliesWithDefault(families);

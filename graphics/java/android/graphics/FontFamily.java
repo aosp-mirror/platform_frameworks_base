@@ -111,12 +111,24 @@ public class FontFamily {
         return nAddFontWeightStyle(mBuilderPtr, font, ttcIndex, axes, weight, style);
     }
 
+    /**
+     * @param mgr The AssetManager to use for this context.
+     * @param path The path to the font file to load.
+     * @param cookie If available, the resource cookie given by Resources.
+     * @param isAsset {@code true} if this is from the assets/ folder, {@code false} if from
+     *            resources
+     * @param weight The weight of the font. If 0 is given, the weight and italic will be resolved
+     *            using the OS/2 table in the font.
+     * @param isItalic Whether this font is italic. If the weight is set to 0, this will be resolved
+     *            using the OS/2 table in the font.
+     * @return
+     */
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
-            boolean isAsset) {
+            boolean isAsset, int weight, boolean isItalic) {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
         }
-        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset);
+        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, weight, isItalic);
     }
 
     private static native long nInitBuilder(String lang, int variant);
@@ -134,5 +146,5 @@ public class FontFamily {
             int ttcIndex, List<FontConfig.Axis> listOfAxis,
             int weight, boolean isItalic);
     private static native boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr,
-            String path, int cookie, boolean isAsset);
+            String path, int cookie, boolean isAsset, int weight, boolean isItalic);
 }
