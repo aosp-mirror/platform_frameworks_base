@@ -56,6 +56,7 @@ public class NotificationSnooze extends LinearLayout
     private TextView mUndoButton;
     private ViewGroup mSnoozeOptionView;
     private List<SnoozeOption> mSnoozeOptions;
+    private boolean mSnoozing;
 
     private SnoozeOption mSelectedOption;
 
@@ -175,6 +176,11 @@ public class NotificationSnooze extends LinearLayout
     }
 
     @Override
+    public boolean willBeRemoved() {
+        return mSnoozing;
+    }
+
+    @Override
     public View getContentView() {
         return this;
     }
@@ -199,6 +205,7 @@ public class NotificationSnooze extends LinearLayout
         // When snooze is closed (i.e. there was interaction outside of the notification)
         // then we commit the snooze action.
         if (mSnoozeListener != null && mSelectedOption != null) {
+            mSnoozing = true;
             mSnoozeListener.snoozeNotification(mSbn, mSelectedOption);
             return true;
         } else {

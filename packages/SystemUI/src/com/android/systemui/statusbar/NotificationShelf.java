@@ -380,11 +380,12 @@ public class NotificationShelf extends ActivatableNotificationView {
                 : 0.0f;
         row.setContentTransformationAmount(contentTransformationAmount, isLastChild);
         setIconTransformationAmount(row, transitionAmount, iconTransformDistance,
-                clampedAmount != transitionAmount);
+                clampedAmount != transitionAmount, isLastChild);
     }
 
     private void setIconTransformationAmount(ExpandableNotificationRow row,
-            float transitionAmount, float iconTransformDistance, boolean usingLinearInterpolation) {
+            float transitionAmount, float iconTransformDistance, boolean usingLinearInterpolation,
+            boolean isLastChild) {
         StatusBarIconView icon = row.getEntry().expandedIcon;
         NotificationIconContainer.IconState iconState = getIconState(icon);
 
@@ -437,7 +438,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
-            if (row.isAboveShelf()) {
+            if (row.isAboveShelf() || (!row.isInShelf() && isLastChild && row.areGutsExposed())) {
                 iconState.hidden = true;
             }
             int shelfColor = icon.getStaticDrawableColor();
