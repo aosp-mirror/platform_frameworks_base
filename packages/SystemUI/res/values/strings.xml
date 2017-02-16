@@ -1725,6 +1725,10 @@
         not appear on production builds ever. -->
     <string name="tuner_doze" translatable="false">Ambient Display</string>
 
+    <!-- Ambient display, Sensors wake up device of the tuner. Non-translatable since it should
+        not appear on production builds ever. -->
+    <string name="tuner_doze_sensors_wake_up_fully" translatable="false">Wake up device on double tap or lift</string>
+
     <!-- Ambient display always-on of the tuner. Non-translatable since it should
         not appear on production builds ever. -->
     <string name="tuner_doze_always_on" translatable="false">Always on</string>

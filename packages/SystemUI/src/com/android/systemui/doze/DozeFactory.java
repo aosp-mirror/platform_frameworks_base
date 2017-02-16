@@ -91,8 +91,7 @@ public class DozeFactory {
             @Override
             public void requestState(DozeProvider.DozeState state) {
                 if (state == DozeProvider.DozeState.WAKE_UP) {
-                    PowerManager pm = context.getSystemService(PowerManager.class);
-                    pm.wakeUp(SystemClock.uptimeMillis(), "com.android.systemui:NODOZE");
+                    machine.wakeUp();
                     return;
                 }
                 machine.requestState(implState(state));

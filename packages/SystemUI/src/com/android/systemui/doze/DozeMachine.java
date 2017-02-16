@@ -158,6 +158,11 @@ public class DozeMachine {
         return mState;
     }
 
+    /** Requests the PowerManager to wake up now. */
+    public void wakeUp() {
+        mDozeService.requestWakeUp();
+    }
+
     private boolean isExecutingTransition() {
         return !mQueuedRequests.isEmpty();
     }
@@ -300,5 +305,8 @@ public class DozeMachine {
 
         /** Request a display state. See {@link android.view.Display#STATE_DOZE}. */
         void setDozeScreenState(int state);
+
+        /** Request waking up. */
+        void requestWakeUp();
     }
 }
