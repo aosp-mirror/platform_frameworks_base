@@ -640,6 +640,8 @@ public class MediaPlayer extends PlayerBase
     private UUID mDrmUUID;
     private final Object mDrmLock = new Object();
     private DrmInfo mDrmInfo;
+    private MediaDrm mDrmObj;
+    private byte[] mDrmSessionId;
     private boolean mDrmInfoResolved;
     private boolean mActiveDrmScheme;
     private boolean mDrmConfigAllowed;
@@ -1960,6 +1962,7 @@ public class MediaPlayer extends PlayerBase
         mOnSubtitleDataListener = null;
 
         // Modular DRM clean up
+        mOnDrmConfigListener = null;
         mOnDrmInfoHandlerDelegate = null;
         mOnDrmPreparedHandlerDelegate = null;
         resetDrmState();
@@ -3171,7 +3174,7 @@ public class MediaPlayer extends PlayerBase
                         onDrmInfoHandlerDelegate.notifyClient(drmInfo);
                     }
                 } else {
-                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj NONE; UNEXPECTED" + msg.obj);
+                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
                 }
                 return;
 
@@ -3846,15 +3849,32 @@ public class MediaPlayer extends PlayerBase
      * and setDrmPropertyString.
      *
      */
-    public static abstract class OnDrmConfigCallback
+    public interface OnDrmConfigListener
     {
         /**
          * Called to give the app the opportunity to configure DRM before the session is created
          *
          * @param mp the {@code MediaPlayer} associated with this callback
          */
-        public void onDrmConfig(MediaPlayer mp) {}
+        public void onDrmConfig(MediaPlayer mp);
     }
+
+    /**
+     * Register a callback to be invoked for configuration of the DRM object before
+     * the session is created.
+     * The callback will be invoked synchronously half-way into the execution
+     * of {@link #prepareDrm(UUID uuid)}.
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnDrmConfigListener(OnDrmConfigListener listener)
+    {
+        synchronized (mDrmLock) {
+            mOnDrmConfigListener = listener;
+        } // synchronized
+    }
+
+    private OnDrmConfigListener mOnDrmConfigListener;
 
     /**
      * Interface definition of a callback to be invoked when the
@@ -4053,13 +4073,11 @@ public class MediaPlayer extends PlayerBase
         return drmInfo;
     }
 
-    private native void _prepareDrm(@NonNull byte[] uuid, int mode)
-            throws UnsupportedSchemeException, ResourceBusyException, NotProvisionedException;
 
     /**
      * Prepares the DRM for the current source
      * <p>
-     * If {@code OnDrmConfigCallback} is registered, it will be called half-way into
+     * If {@code OnDrmConfigListener} is registered, it will be called half-way into
      * preparation to allow configuration of the DRM properties before opening the
      * DRM session. Note that the callback is called synchronously in the thread that called
      * {@code prepareDrm}. It should be used only for a series of {@code getDrmPropertyString}
@@ -4087,10 +4105,12 @@ public class MediaPlayer extends PlayerBase
      * @throws ResourceBusyException       if required DRM resources are in use
      * @throws ProvisioningErrorException  if provisioning is required but an attempt failed
      */
-    public void prepareDrm(@NonNull UUID uuid, OnDrmConfigCallback configCallback)
+    public void prepareDrm(@NonNull UUID uuid)
             throws UnsupportedSchemeException,
                    ResourceBusyException, ProvisioningErrorException
     {
+        Log.v(TAG, "prepareDrm: uuid: " + uuid + " mOnDrmConfigListener: " + mOnDrmConfigListener);
+
         boolean allDoneWithoutProvisioning = false;
         // get a snapshot as we'll use them outside the lock
         OnDrmPreparedHandlerDelegate onDrmPreparedHandlerDelegate = null;
@@ -4099,58 +4119,46 @@ public class MediaPlayer extends PlayerBase
 
             // only allowing if tied to a protected source; might releax for releasing offline keys
             if (mDrmInfo == null) {
-                final String msg = String.format("prepareDrm(%s): Wrong usage: " +
-                                                 "The player must be prepared and DRM " +
-                                                 "info be retrieved before this call.", uuid);
+                final String msg = "prepareDrm(): Wrong usage: The player must be prepared and " +
+                        "DRM info be retrieved before this call.";
                 Log.e(TAG, msg);
                 throw new IllegalStateException(msg);
             }
 
             if (mActiveDrmScheme) {
-                final String msg = String.format("prepareDrm(%s): Wrong usage: There is already " +
-                                                 "an active DRM scheme with %s.", uuid, mDrmUUID);
+                final String msg = "prepareDrm(): Wrong usage: There is already " +
+                        "an active DRM scheme with " + mDrmUUID;
                 Log.e(TAG, msg);
                 throw new IllegalStateException(msg);
             }
 
             if (mPrepareDrmInProgress) {
-                final String msg = String.format("prepareDrm(%s): Wrong usage: There is already " +
-                                                 "a pending prepareDrm call.", uuid);
+                final String msg = "prepareDrm(): Wrong usage: There is already " +
+                        "a pending prepareDrm call.";
                 Log.e(TAG, msg);
                 throw new IllegalStateException(msg);
             }
 
             if (mDrmProvisioningInProgress) {
-                final String msg = String.format("prepareDrm(%s): Unexpectd: Provisioning is " +
-                                                 "already in progress.", uuid);
+                final String msg = "prepareDrm(): Unexpectd: Provisioning is already in progress.";
                 Log.e(TAG, msg);
                 throw new IllegalStateException(msg);
             }
+
+            // shouldn't need this; just for safeguard
+            cleanDrmObj();
 
             mPrepareDrmInProgress = true;
             // local copy while the lock is held
             onDrmPreparedHandlerDelegate = mOnDrmPreparedHandlerDelegate;
 
-            if (configCallback != null) {
-                try {
-                    boolean allowOpenSession = false;   // just pre-openSession
-                    _prepareDrm(getByteArrayFromUUID(uuid), allowOpenSession ? 1 : 0);
-                } catch (IllegalStateException e) {
-                    final String msg = String.format("prepareDrm(): Wrong usage: The player must " +
-                                                     "be in prepared state to call prepareDrm().");
-                    Log.e(TAG, msg);
-                    throw new IllegalStateException(msg);
-                } catch (NotProvisionedException e) {   // the pre-config step won't raise this
-                    final String msg = String.format("prepareDrm: Unexpected " +
-                                                     "NotProvisionedException here.");
-                    Log.e(TAG, msg);
-                    throw new ProvisioningErrorException(msg);
-                } catch (Exception e) {
-                    Log.w(TAG, String.format("prepareDrm: Exception %s", e));
-                    throw e;
-                } finally {
-                    mPrepareDrmInProgress = false;
-                }
+            try {
+                // only creating the DRM object to allow pre-openSession configuration
+                prepareDrm_createDrmStep(uuid);
+            } catch (Exception e) {
+                Log.w(TAG, "prepareDrm(): Exception ", e);
+                mPrepareDrmInProgress = false;
+                throw e;
             }
 
             mDrmConfigAllowed = true;
@@ -4158,51 +4166,55 @@ public class MediaPlayer extends PlayerBase
 
 
         // call the callback outside the lock
-        if (configCallback != null)  {
-            configCallback.onDrmConfig(this);
+        if (mOnDrmConfigListener != null)  {
+            mOnDrmConfigListener.onDrmConfig(this);
         }
 
         synchronized (mDrmLock) {
             mDrmConfigAllowed = false;
+            boolean earlyExit = false;
 
             try {
-                boolean allowOpenSession = true;    // all in
-                _prepareDrm(getByteArrayFromUUID(uuid), allowOpenSession ? 1 : 0);
+                prepareDrm_openSessionStep(uuid);
 
                 mDrmUUID = uuid;
                 mActiveDrmScheme = true;
 
-                mPrepareDrmInProgress = false;
-
                 allDoneWithoutProvisioning = true;
             } catch (IllegalStateException e) {
-                final String msg = String.format("prepareDrm(%s): Wrong usage: The player must be" +
-                                                 " in prepared state to call prepareDrm().", uuid);
+                final String msg = "prepareDrm(): Wrong usage: The player must be " +
+                        "in the prepared state to call prepareDrm().";
                 Log.e(TAG, msg);
+                earlyExit = true;
                 throw new IllegalStateException(msg);
             } catch (NotProvisionedException e) {
-                Log.w(TAG, String.format("prepareDrm: NotProvisionedException"));
+                Log.w(TAG, "prepareDrm: NotProvisionedException");
 
-                // handle provisioning internally
+                // handle provisioning internally; it'll reset mPrepareDrmInProgress
                 boolean result = HandleProvisioninig(uuid);
 
                 // if blocking mode, we're already done;
                 // if non-blocking mode, we attempted to launch background provisioning
                 if (result == false) {
-                    final String msg =
-                                String.format("prepareDrm: Provisioning was required but failed.");
+                    final String msg = "prepareDrm: Provisioning was required but failed.";
                     Log.e(TAG, msg);
+                    earlyExit = true;
                     throw new ProvisioningErrorException(msg);
                 }
-
                 // nothing else to do;
                 // if blocking or non-blocking, HandleProvisioninig does the re-attempt & cleanup
             } catch (Exception e) {
-                Log.w(TAG, String.format("prepareDrm: Exception %s", e));
+                Log.e(TAG, "prepareDrm: Exception " + e);
+                earlyExit = true;
                 throw e;
             } finally {
-                mPrepareDrmInProgress = false;
-            }
+                if (!mDrmProvisioningInProgress) {// if early exit other than provisioning exception
+                    mPrepareDrmInProgress = false;
+                }
+                if (earlyExit) {    // cleaning up object if didn't succeed
+                    cleanDrmObj();
+                }
+            } // finally
         }   // synchronized
 
 
@@ -4225,24 +4237,32 @@ public class MediaPlayer extends PlayerBase
     public void releaseDrm()
             throws NoDrmSchemeException
     {
+        Log.v(TAG, "releaseDrm:");
+
         synchronized (mDrmLock) {
             if (!mActiveDrmScheme) {
-                Log.e(TAG, String.format("releaseDrm(%s): No active DRM scheme to release."));
+                Log.e(TAG, "releaseDrm(): No active DRM scheme to release.");
                 throw new NoDrmSchemeException("releaseDrm: No active DRM scheme to release.");
-            } else {
+            }
+
+            try {
+                // we don't have the player's state in this layer. The below call raises
+                // exception if we're in a non-stopped/idle state.
+
+                // for cleaning native/mediaserver crypto object
                 _releaseDrm();
 
+                // for cleaning client-side MediaDrm object; only called if above has succeeded
+                cleanDrmObj();
+
                 mActiveDrmScheme = false;
+            } catch (Exception e) {
+                Log.w(TAG, "releaseDrm: Exception ", e);
+                throw e;
             }
         }   // synchronized
     }
 
-
-    @NonNull
-    private native MediaDrm.KeyRequest _getKeyRequest(@NonNull byte[] scope,
-            @Nullable String mimeType, @MediaDrm.KeyType int keyType,
-            @Nullable Map<String, String> optionalParameters)
-            throws NotProvisionedException;
 
     /**
      * A key request/response exchange occurs between the app and a license server
@@ -4284,30 +4304,48 @@ public class MediaPlayer extends PlayerBase
             @MediaDrm.KeyType int keyType, @Nullable Map<String, String> optionalParameters)
             throws NoDrmSchemeException
     {
+        Log.v(TAG, "getKeyRequest: " +
+                " scope: " + scope + " mimeType: " + mimeType +
+                " keyType: " + keyType + " optionalParameters: " + optionalParameters);
+
         synchronized (mDrmLock) {
             if (!mActiveDrmScheme) {
-                Log.e(TAG, String.format("getKeyRequest NoDrmSchemeException"));
+                Log.e(TAG, "getKeyRequest NoDrmSchemeException");
                 throw new NoDrmSchemeException("getKeyRequest: Has to set a DRM scheme first.");
             }
 
             try {
-                return _getKeyRequest(scope, mimeType, keyType, optionalParameters);
+                byte[] scopeOut = (keyType != MediaDrm.KEY_TYPE_RELEASE) ?
+                                  mDrmSessionId : // sessionId for KEY_TYPE_STREAMING/OFFLINE
+                                  scope;          // keySetId for KEY_TYPE_RELEASE
+
+                byte[] initData = (keyType != MediaDrm.KEY_TYPE_RELEASE) ?
+                                  scope :         // initData for KEY_TYPE_STREAMING/OFFLINE
+                                  null;           // not used for KEY_TYPE_RELEASE
+
+                HashMap<String, String> hmapOptionalParameters =
+                                                (optionalParameters != null) ?
+                                                new HashMap<String, String>(optionalParameters) :
+                                                null;
+
+                MediaDrm.KeyRequest request = mDrmObj.getKeyRequest(scopeOut, initData, mimeType,
+                                                              keyType, hmapOptionalParameters);
+                Log.v(TAG, "getKeyRequest:   --> request: " + request);
+
+                return request;
+
             } catch (NotProvisionedException e) {
-                Log.w(TAG, String.format("getKeyRequest NotProvisionedException: " +
-                                         "Unexpected. Shouldn't have reached here."));
+                Log.w(TAG, "getKeyRequest NotProvisionedException: " +
+                        "Unexpected. Shouldn't have reached here.");
                 throw new IllegalStateException("getKeyRequest: Unexpected provisioning error.");
             } catch (Exception e) {
-                Log.w(TAG, String.format("getKeyRequest Exception %s", e));
+                Log.w(TAG, "getKeyRequest Exception " + e);
                 throw e;
             }
 
         }   // synchronized
     }
 
-
-    @Nullable
-    private native byte[] _provideKeyResponse(@Nullable byte[] keySetId, @NonNull byte[] response)
-            throws DeniedByServerException;
 
     /**
      * A key response is received from the license server by the app, then it is
@@ -4331,24 +4369,40 @@ public class MediaPlayer extends PlayerBase
     public byte[] provideKeyResponse(@Nullable byte[] keySetId, @NonNull byte[] response)
             throws NoDrmSchemeException, DeniedByServerException
     {
+        Log.v(TAG, "provideKeyResponse: keySetId: " + keySetId + " response: " + response);
+
         synchronized (mDrmLock) {
 
             if (!mActiveDrmScheme) {
-                Log.e(TAG, String.format("getKeyRequest NoDrmSchemeException"));
+                Log.e(TAG, "getKeyRequest NoDrmSchemeException");
                 throw new NoDrmSchemeException("getKeyRequest: Has to set a DRM scheme first.");
             }
 
             try {
-                return _provideKeyResponse(keySetId, response);
+                byte[] scope = (keySetId == null) ?
+                                mDrmSessionId :     // sessionId for KEY_TYPE_STREAMING/OFFLINE
+                                keySetId;           // keySetId for KEY_TYPE_RELEASE
+
+                byte[] keySetResult = mDrmObj.provideKeyResponse(scope, response);
+
+                Log.v(TAG, "provideKeyResponse: keySetId: " + keySetId + " response: " + response +
+                        " --> " + keySetResult);
+
+
+                return keySetResult;
+
+            } catch (NotProvisionedException e) {
+                Log.w(TAG, "provideKeyResponse NotProvisionedException: " +
+                        "Unexpected. Shouldn't have reached here.");
+                throw new IllegalStateException("provideKeyResponse: " +
+                        "Unexpected provisioning error.");
             } catch (Exception e) {
-                Log.w(TAG, String.format("provideKeyResponse Exception %s", e));
+                Log.w(TAG, "provideKeyResponse Exception " + e);
                 throw e;
             }
         }   // synchronized
     }
 
-
-    private native void _restoreKeys(@NonNull byte[] keySetId);
 
     /**
      * Restore persisted offline keys into a new session.  keySetId identifies the
@@ -4359,26 +4413,25 @@ public class MediaPlayer extends PlayerBase
     public void restoreKeys(@NonNull byte[] keySetId)
             throws NoDrmSchemeException
     {
+        Log.v(TAG, "restoreKeys: keySetId: " + keySetId);
+
         synchronized (mDrmLock) {
 
             if (!mActiveDrmScheme) {
-                Log.w(TAG, String.format("restoreKeys NoDrmSchemeException"));
+                Log.w(TAG, "restoreKeys NoDrmSchemeException");
                 throw new NoDrmSchemeException("restoreKeys: Has to set a DRM scheme first.");
             }
 
             try {
-                _restoreKeys(keySetId);
+                mDrmObj.restoreKeys(mDrmSessionId, keySetId);
             } catch (Exception e) {
-                Log.w(TAG, String.format("restoreKeys Exception %s", e));
+                Log.w(TAG, "restoreKeys Exception " + e);
                 throw e;
             }
 
         }   // synchronized
     }
 
-
-    @NonNull
-    private native String _getDrmPropertyString(@NonNull String propertyName);
 
     /**
      * Read a DRM engine plugin String property value, given the property name string.
@@ -4393,26 +4446,29 @@ public class MediaPlayer extends PlayerBase
     public String getDrmPropertyString(@NonNull @MediaDrm.StringProperty String propertyName)
             throws NoDrmSchemeException
     {
+        Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName);
+
         String value;
         synchronized (mDrmLock) {
 
             if (!mActiveDrmScheme && !mDrmConfigAllowed) {
-                Log.w(TAG, String.format("getDrmPropertyString NoDrmSchemeException"));
+                Log.w(TAG, "getDrmPropertyString NoDrmSchemeException");
                 throw new NoDrmSchemeException("getDrmPropertyString: Has to prepareDrm() first.");
             }
 
             try {
-                value = _getDrmPropertyString(propertyName);
+                value = mDrmObj.getPropertyString(propertyName);
             } catch (Exception e) {
-                Log.w(TAG, String.format("getDrmPropertyString Exception %s", e));
+                Log.w(TAG, "getDrmPropertyString Exception " + e);
                 throw e;
             }
         }   // synchronized
 
+        Log.v(TAG, "getDrmPropertyString: propertyName: " + propertyName + " --> value: " + value);
+
         return value;
     }
 
-    private native void _setDrmPropertyString(@NonNull String propertyName, @NonNull String value);
 
     /**
      * Set a DRM engine plugin String property value.
@@ -4428,17 +4484,19 @@ public class MediaPlayer extends PlayerBase
                                      @NonNull String value)
             throws NoDrmSchemeException
     {
+        Log.v(TAG, "setDrmPropertyString: propertyName: " + propertyName + " value: " + value);
+
         synchronized (mDrmLock) {
 
             if ( !mActiveDrmScheme && !mDrmConfigAllowed ) {
-                Log.w(TAG, String.format("setDrmPropertyString NoDrmSchemeException"));
+                Log.w(TAG, "setDrmPropertyString NoDrmSchemeException");
                 throw new NoDrmSchemeException("setDrmPropertyString: Has to prepareDrm() first.");
             }
 
             try {
-                _setDrmPropertyString(propertyName, value);
+                mDrmObj.setPropertyString(propertyName, value);
             } catch ( Exception e ) {
-                Log.w(TAG, String.format("setDrmPropertyString Exception %s", e));
+                Log.w(TAG, "setDrmPropertyString Exception " + e);
                 throw e;
             }
         }   // synchronized
@@ -4605,7 +4663,46 @@ public class MediaPlayer extends PlayerBase
         }
     }
 
+
+    private native void _prepareDrm(@NonNull byte[] uuid, @NonNull byte[] drmSessionId);
+
         // Modular DRM helpers
+
+    private void prepareDrm_createDrmStep(@NonNull UUID uuid)
+            throws UnsupportedSchemeException {
+        Log.v(TAG, "prepareDrm_createDrmStep: UUID: " + uuid);
+
+        try {
+            mDrmObj = new MediaDrm(uuid);
+            Log.v(TAG, "prepareDrm_createDrmStep: Created mDrmObj=" + mDrmObj);
+        } catch (Exception e) { // UnsupportedSchemeException
+            Log.e(TAG, "prepareDrm_createDrmStep: MediaDrm failed with " + e);
+            throw e;
+        }
+    }
+
+    private void prepareDrm_openSessionStep(@NonNull UUID uuid)
+            throws NotProvisionedException, ResourceBusyException {
+        Log.v(TAG, "prepareDrm_openSessionStep: uuid: " + uuid);
+
+        // TODO: don't need an open session for a future specialKeyReleaseDrm mode but we should do
+        // it anyway so it raises provisioning error if needed. We'd rather handle provisioning
+        // at prepareDrm/openSession rather than getKeyRequest/provideKeyResponse
+        try {
+            mDrmSessionId = mDrmObj.openSession();
+            Log.v(TAG, "prepareDrm_openSessionStep: mDrmSessionId=" + mDrmSessionId);
+
+            // Sending it down to native/mediaserver to create the crypto object
+            // This call could simply fail due to bad player state, e.g., after start().
+            _prepareDrm(getByteArrayFromUUID(uuid), mDrmSessionId);
+            Log.v(TAG, "prepareDrm_openSessionStep: _prepareDrm/Crypto succeeded");
+
+        } catch (Exception e) { //ResourceBusyException, NotProvisionedException
+            Log.e(TAG, "prepareDrm_openSessionStep: open/crypto failed with " + e);
+            throw e;
+        }
+
+    }
 
     private class ProvisioningThread extends Thread
     {
@@ -4633,7 +4730,7 @@ public class MediaPlayer extends PlayerBase
             urlStr = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
             this.uuid = uuid;
 
-            Log.v(TAG, String.format("HandleProvisioninig: Thread is initialised url: %s", urlStr));
+            Log.v(TAG, "HandleProvisioninig: Thread is initialised url: " + urlStr);
             return this;
         }
 
@@ -4653,30 +4750,27 @@ public class MediaPlayer extends PlayerBase
                     connection.connect();
                     response = Streams.readFully(connection.getInputStream());
 
-                    Log.v(TAG, String.format("HandleProvisioninig: Thread run response %d %s",
-                                             response.length, response));
+                    Log.v(TAG, "HandleProvisioninig: Thread run: response " +
+                            response.length + " " + response);
                 } catch (Exception e) {
-                    Log.w(TAG, String.format("HandleProvisioninig: Thread run connect %s url: %s",
-                                             e, url));
+                    Log.w(TAG, "HandleProvisioninig: Thread run: connect " + e + " url: " + url);
                 } finally {
                     connection.disconnect();
                 }
             } catch (Exception e)   {
-                Log.w(TAG, String.format("HandleProvisioninig: Thread run openConnection %s", e));
+                Log.w(TAG, "HandleProvisioninig: Thread run: openConnection " + e);
             }
 
             if (response != null) {
                 try {
-                    MediaDrm drm = new MediaDrm(uuid);
-                    drm.provideProvisionResponse(response);
-                    drm.release();
-                    Log.v(TAG, String.format("HandleProvisioninig: Thread run " +
-                                             "newDrm+provideProvisionResponse SUCCEEDED!"));
+                    mDrmObj.provideProvisionResponse(response);
+                    Log.v(TAG, "HandleProvisioninig: Thread run: " +
+                            "provideProvisionResponse SUCCEEDED!");
 
                     provisioningSucceeded = true;
                 } catch (Exception e)   {
-                    Log.w(TAG, String.format("HandleProvisioninig: Thread run " +
-                                             "newDrm+provideProvisionResponse %s", e));
+                    Log.w(TAG, "HandleProvisioninig: Thread run: " +
+                            "provideProvisionResponse " + e);
                 }
             }
 
@@ -4690,7 +4784,10 @@ public class MediaPlayer extends PlayerBase
                     }
                     mediaPlayer.mDrmProvisioningInProgress = false;
                     mediaPlayer.mPrepareDrmInProgress = false;
-                }
+                    if (!succeeded) {
+                        cleanDrmObj();  // cleaning up if it hasn't gone through while in the lock
+                    }
+                } // synchronized
 
                 // calling the callback outside the lock
                 onDrmPreparedHandlerDelegate.notifyClient(succeeded);
@@ -4702,6 +4799,9 @@ public class MediaPlayer extends PlayerBase
                 }
                 mediaPlayer.mDrmProvisioningInProgress = false;
                 mediaPlayer.mPrepareDrmInProgress = false;
+                if (!succeeded) {
+                    cleanDrmObj();  // cleaning up if it hasn't gone through
+                }
             }
 
             finished = true;
@@ -4714,24 +4814,18 @@ public class MediaPlayer extends PlayerBase
         // the lock is already held by the caller
 
         if (mDrmProvisioningInProgress) {
-            Log.e(TAG, String.format("HandleProvisioninig: Unexpected mDrmProvisioningInProgress"));
+            Log.e(TAG, "HandleProvisioninig: Unexpected mDrmProvisioningInProgress");
             return false;
         }
 
-        MediaDrm.ProvisionRequest provReq = null;
-        try {
-            MediaDrm drm = new MediaDrm(uuid);
-            provReq = drm.getProvisionRequest();
-            drm.release();
-        } catch (Exception e) {
-            Log.e(TAG, String.format("HandleProvisioninig: getProvisionRequest failed with %s", e));
+        MediaDrm.ProvisionRequest provReq = mDrmObj.getProvisionRequest();
+        if (provReq == null) {
+            Log.e(TAG, "HandleProvisioninig: getProvisionRequest returned null.");
             return false;
         }
 
-        Log.v(TAG, String.format("HandleProvisioninig provReq: data %s  url %s",
-                                 (provReq != null) ? provReq.getData() : "-",
-                                 (provReq != null) ? provReq.getDefaultUrl() : "://")
-              );
+        Log.v(TAG, "HandleProvisioninig provReq " +
+                " data: " + provReq.getData() + " url: " + provReq.getDefaultUrl());
 
         // networking in a background thread
         mDrmProvisioningInProgress = true;
@@ -4749,7 +4843,7 @@ public class MediaPlayer extends PlayerBase
             try {
                 mDrmProvisioningThread.join();
             } catch (Exception e) {
-                Log.w(TAG, String.format("HandleProvisioninig: Thread.join Exception %s", e));
+                Log.w(TAG, "HandleProvisioninig: Thread.join Exception " + e);
             }
             result = mDrmProvisioningThread.succeeded();
             // no longer need the thread
@@ -4761,19 +4855,21 @@ public class MediaPlayer extends PlayerBase
 
     private boolean resumePrepareDrm(UUID uuid)
     {
+        Log.v(TAG, "resumePrepareDrm: uuid: " + uuid);
+
         // mDrmLock is guaranteed to be held
         boolean success = false;
         try {
-            boolean allowOpenSession = true;  // resuming
-            _prepareDrm(getByteArrayFromUUID(uuid),  allowOpenSession ? 1 : 0);
+            // resuming
+            prepareDrm_openSessionStep(uuid);
 
             mDrmUUID = uuid;
             mActiveDrmScheme = true;
 
             success = true;
         } catch (Exception e) {
-            Log.w(TAG, String.format("HandleProvisioninig: " +
-                                     "Thread run _prepareDrm resume failed with %s", e));
+            Log.w(TAG, "HandleProvisioninig: Thread run _prepareDrm resume failed with " + e);
+            // mDrmObj clean up is done by the caller
         }
 
         return success;
@@ -4782,6 +4878,12 @@ public class MediaPlayer extends PlayerBase
     private void resetDrmState()
     {
         synchronized (mDrmLock) {
+            Log.v(TAG, "resetDrmState: " +
+                    " mDrmInfo=" + mDrmInfo +
+                    " mDrmProvisioningThread=" + mDrmProvisioningThread +
+                    " mPrepareDrmInProgress=" + mPrepareDrmInProgress +
+                    " mActiveDrmScheme=" + mActiveDrmScheme);
+
             mDrmInfoResolved = false;
             mDrmInfo = null;
 
@@ -4791,13 +4893,31 @@ public class MediaPlayer extends PlayerBase
                     mDrmProvisioningThread.join();
                 }
                 catch (InterruptedException e) {
-                    Log.w(TAG, String.format("resetDrmState: ProvThread.join Exception %s", e));
+                    Log.w(TAG, "resetDrmState: ProvThread.join Exception " + e);
                 }
                 mDrmProvisioningThread = null;
             }
 
             mPrepareDrmInProgress = false;
+            mActiveDrmScheme = false;
+
+            cleanDrmObj();
         }   // synchronized
+    }
+
+    private void cleanDrmObj()
+    {
+        // the caller holds mDrmLock
+        Log.v(TAG, "cleanDrmObj: mDrmObj=" + mDrmObj + " mDrmSessionId=" + mDrmSessionId);
+
+        if (mDrmSessionId != null)    {
+            mDrmObj.closeSession(mDrmSessionId);
+            mDrmSessionId = null;
+        }
+        if (mDrmObj != null) {
+            mDrmObj.release();
+            mDrmObj = null;
+        }
     }
 
     private static final byte[] getByteArrayFromUUID(@NonNull UUID uuid) {
