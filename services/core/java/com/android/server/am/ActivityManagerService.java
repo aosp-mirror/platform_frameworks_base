@@ -556,7 +556,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Intent sent when remote bugreport collection has been completed
     private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
-            "android.intent.action.REMOTE_BUGREPORT_FINISHED";
+            "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
 
     // Used to indicate that an app transition should be animated.
     static final boolean ANIMATE = true;
