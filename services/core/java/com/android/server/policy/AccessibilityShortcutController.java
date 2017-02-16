@@ -140,8 +140,11 @@ public class AccessibilityShortcutController {
             String toastMessage = String.format(toastMessageFormatString,
                     serviceInfo.getResolveInfo()
                             .loadLabel(mContext.getPackageManager()).toString());
-            mFrameworkObjectProvider.makeToastFromText(mContext, toastMessage, Toast.LENGTH_LONG)
-                    .show();
+            Toast warningToast = mFrameworkObjectProvider.makeToastFromText(
+                    mContext, toastMessage, Toast.LENGTH_LONG);
+            warningToast.getWindowParams().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            warningToast.show();
 
             mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext)
                     .performAccessibilityShortcut();
