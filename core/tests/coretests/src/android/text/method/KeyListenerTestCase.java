@@ -17,41 +17,26 @@
 package android.text.method;
 
 import android.app.Instrumentation;
-import android.test.ActivityInstrumentationTestCase2;
-import android.text.format.DateUtils;
+import android.test.InstrumentationTestCase;
 import android.view.KeyEvent;
 import android.widget.EditText;
-import android.widget.TextViewActivity;
 
 import com.android.frameworks.coretests.R;
 
-public abstract class KeyListenerTestCase extends
-        ActivityInstrumentationTestCase2<TextViewActivity> {
+public abstract class KeyListenerTestCase extends InstrumentationTestCase {
 
-    protected TextViewActivity mActivity;
     protected Instrumentation mInstrumentation;
     protected EditText mTextView;
 
     public KeyListenerTestCase() {
-        super(TextViewActivity.class);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mActivity = getActivity();
         mInstrumentation = getInstrumentation();
-        mTextView = (EditText) mActivity.findViewById(R.id.textview);
-
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                // Ensure that the screen is on for this test.
-                mTextView.setKeepScreenOn(true);
-            }
-        });
-
-        assertTrue(mActivity.waitForWindowFocus(5 * DateUtils.SECOND_IN_MILLIS));
+        mTextView = new EditText(mInstrumentation.getContext());
     }
 
     protected static KeyEvent getKey(int keycode, int metaState) {

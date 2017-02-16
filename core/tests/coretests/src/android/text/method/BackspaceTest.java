@@ -37,23 +37,12 @@ public class BackspaceTest extends KeyListenerTestCase {
     // Sync the state to the TextView and call onKeyDown with KEYCODE_DEL key event.
     // Then update the state to the result of TextView.
     private void backspace(final EditorState state, int modifiers) {
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                mTextView.setText(state.mText, BufferType.EDITABLE);
-                mTextView.setKeyListener(mKeyListener);
-                mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
-            }
-        });
-        mInstrumentation.waitForIdleSync();
-        assertTrue(mTextView.hasWindowFocus());
+        mTextView.setText(state.mText, BufferType.EDITABLE);
+        mTextView.setKeyListener(mKeyListener);
+        mTextView.setSelection(state.mSelectionStart, state.mSelectionEnd);
 
         final KeyEvent keyEvent = getKey(KeyEvent.KEYCODE_DEL, modifiers);
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
-            }
-        });
-        mInstrumentation.waitForIdleSync();
+        mTextView.onKeyDown(keyEvent.getKeyCode(), keyEvent);
 
         state.mText = mTextView.getText();
         state.mSelectionStart = mTextView.getSelectionStart();
@@ -247,6 +236,51 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("U+1F1FA U+1F1F8 |");
         backspace(state, 0);
         state.assertEquals("|");
+
+        // Incomplete sequence. (no tag_term: U+E007E)
+        state.setByString("'a' U+1F3F4 U+E0067 'b' |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+1F3F4 U+E0067 |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+1F3F4 |");
+        backspace(state, 0);
+        state.assertEquals("'a' |");
+
+        // No tag_base
+        state.setByString("'a' U+E0067 U+E007F 'b' |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E0067 U+E007F |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E0067 |");
+        backspace(state, 0);
+        state.assertEquals("'a' |");
+
+        // Isolated tag chars
+        state.setByString("'a' U+E0067 U+E0067 'b' |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E0067 U+E0067 |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E0067 |");
+        backspace(state, 0);
+        state.assertEquals("'a' |");
+
+        // Isolated tab term.
+        state.setByString("'a' U+E007F U+E007F 'b' |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E007F U+E007F |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+E007F |");
+        backspace(state, 0);
+        state.assertEquals("'a' |");
+
+        // Immediate tag_term after tag_base
+        state.setByString("'a' U+1F3F4 U+E007F U+1F3F4 U+E007F 'b' |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+1F3F4 U+E007F U+1F3F4 U+E007F |");
+        backspace(state, 0);
+        state.assertEquals("'a' U+1F3F4 U+E007F |");
+        backspace(state, 0);
+        state.assertEquals("'a' |");
     }
 
     @SmallTest
