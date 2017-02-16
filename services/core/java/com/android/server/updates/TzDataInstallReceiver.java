@@ -20,7 +20,7 @@ import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
-import libcore.tzdata.update2.TimeZoneBundleInstaller;
+import libcore.tzdata.update2.TimeZoneDistroInstaller;
 
 /**
  * An install receiver responsible for installing timezone data updates.
@@ -34,14 +34,14 @@ public class TzDataInstallReceiver extends ConfigUpdateInstallReceiver {
     private static final String UPDATE_DIR_NAME = TZ_DATA_DIR.getPath() + "/updates/";
     private static final String UPDATE_METADATA_DIR_NAME = "metadata/";
     private static final String UPDATE_VERSION_FILE_NAME = "version";
-    private static final String UPDATE_CONTENT_FILE_NAME = "tzdata_bundle.zip";
+    private static final String UPDATE_CONTENT_FILE_NAME = "tzdata_distro.zip";
 
-    private final TimeZoneBundleInstaller installer;
+    private final TimeZoneDistroInstaller installer;
 
     public TzDataInstallReceiver() {
         super(UPDATE_DIR_NAME, UPDATE_CONTENT_FILE_NAME, UPDATE_METADATA_DIR_NAME,
                 UPDATE_VERSION_FILE_NAME);
-        installer = new TimeZoneBundleInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR);
+        installer = new TimeZoneDistroInstaller(TAG, SYSTEM_TZ_DATA_FILE, TZ_DATA_DIR);
     }
 
     @Override
