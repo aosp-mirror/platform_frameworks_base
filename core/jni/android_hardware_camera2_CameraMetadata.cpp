@@ -161,7 +161,6 @@ struct Helpers {
 
 extern "C" {
 
-static void CameraMetadata_classInit(JNIEnv *env, jobject thiz);
 static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType);
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName);
 static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag);
@@ -529,9 +528,6 @@ static void CameraMetadata_writeToParcel(JNIEnv *env, jobject thiz, jobject parc
 
 static const JNINativeMethod gCameraMetadataMethods[] = {
 // static methods
-  { "nativeClassInit",
-    "()V",
-    (void *)CameraMetadata_classInit },
   { "nativeGetAllVendorKeys",
     "(Ljava/lang/Class;)Ljava/util/ArrayList;",
     (void *)CameraMetadata_getAllVendorKeys},
@@ -581,35 +577,6 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
     (void *)CameraMetadata_writeToParcel },
 };
 
-struct field {
-    const char *class_name;
-    const char *field_name;
-    const char *field_type;
-    jfieldID   *jfield;
-};
-
-static int find_fields(JNIEnv *env, field *fields, int count)
-{
-    for (int i = 0; i < count; i++) {
-        field *f = &fields[i];
-        jclass clazz = env->FindClass(f->class_name);
-        if (clazz == NULL) {
-            ALOGE("Can't find %s", f->class_name);
-            return -1;
-        }
-
-        jfieldID field = env->GetFieldID(clazz, f->field_name, f->field_type);
-        if (field == NULL) {
-            ALOGE("Can't find %s.%s", f->class_name, f->field_name);
-            return -1;
-        }
-
-        *(f->jfield) = field;
-    }
-
-    return 0;
-}
-
 // Get all the required offsets in java class and register native functions
 int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
 {
@@ -651,6 +618,9 @@ int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
     gMetadataOffsets.mArrayListAdd = GetMethodIDOrDie(env, gMetadataOffsets.mArrayList,
             "add", "(Ljava/lang/Object;)Z");
 
+    jclass cameraMetadataClazz = FindClassOrDie(env, CAMERA_METADATA_CLASS_NAME);
+    fields.metadata_ptr = GetFieldIDOrDie(env, cameraMetadataClazz, "mMetadataPtr", "J");
+
     // Register native functions
     return RegisterMethodsOrDie(env,
             CAMERA_METADATA_CLASS_NAME,
@@ -659,22 +629,6 @@ int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
 }
 
 extern "C" {
-
-static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
-    // XX: Why do this separately instead of doing it in the register function?
-    ALOGV("%s", __FUNCTION__);
-
-    field fields_to_find[] = {
-        { CAMERA_METADATA_CLASS_NAME, "mMetadataPtr", "J", &fields.metadata_ptr },
-    };
-
-    // Do this here instead of in register_native_methods,
-    // since otherwise it will fail to find the fields.
-    if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
-        return;
-
-    env->FindClass(CAMERA_METADATA_CLASS_NAME);
-}
 
 static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType) {
 

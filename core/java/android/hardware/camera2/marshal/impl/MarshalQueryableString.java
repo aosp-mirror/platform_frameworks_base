@@ -33,7 +33,9 @@ public class MarshalQueryableString implements MarshalQueryable<String> {
     private static final String TAG = MarshalQueryableString.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+    private static class PreloadHolder {
+        public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+    }
     private static final byte NUL = (byte)'\0'; // used as string terminator
 
     private class MarshalerString extends Marshaler<String> {
@@ -44,7 +46,7 @@ public class MarshalQueryableString implements MarshalQueryable<String> {
 
         @Override
         public void marshal(String value, ByteBuffer buffer) {
-            byte[] arr = value.getBytes(UTF8_CHARSET);
+            byte[] arr = value.getBytes(PreloadHolder.UTF8_CHARSET);
 
             buffer.put(arr);
             buffer.put(NUL); // metadata strings are NUL-terminated
@@ -52,7 +54,7 @@ public class MarshalQueryableString implements MarshalQueryable<String> {
 
         @Override
         public int calculateMarshalSize(String value) {
-            byte[] arr = value.getBytes(UTF8_CHARSET);
+            byte[] arr = value.getBytes(PreloadHolder.UTF8_CHARSET);
 
             return arr.length + 1; // metadata strings are NUL-terminated
         }
@@ -88,7 +90,7 @@ public class MarshalQueryableString implements MarshalQueryable<String> {
             buffer.get(strBytes, /*dstOffset*/0, stringLength + 1); // including null character
 
             // not including null character
-            return new String(strBytes, /*offset*/0, stringLength, UTF8_CHARSET);
+            return new String(strBytes, /*offset*/0, stringLength, PreloadHolder.UTF8_CHARSET);
         }
 
         @Override
