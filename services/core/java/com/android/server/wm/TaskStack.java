@@ -1483,7 +1483,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return StackId.hasMovementAnimations(mStackId);
     }
 
-    public boolean getForceScaleToStack() {
+    public boolean isForceScaled() {
         return mBoundsAnimating;
     }
 

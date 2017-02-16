@@ -1581,7 +1581,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Anyway we don't need to synchronize position and content updates for these
             // windows since they aren't at the base layer and could be moved around anyway.
             if (!computeDragResizing() && mAttrs.type == TYPE_BASE_APPLICATION &&
-                    !getTask().mStack.getBoundsAnimating() && !isGoneForLayoutLw() &&
+                    !mWinAnimator.isForceScaled() && !isGoneForLayoutLw() &&
                     !getTask().inPinnedWorkspace()) {
                 setResizedWhileNotDragResizing(true);
             }
