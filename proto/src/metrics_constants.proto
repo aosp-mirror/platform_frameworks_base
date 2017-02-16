@@ -3449,6 +3449,9 @@ message MetricsEvent {
     // OS: O
     STORAGE_FILES = 841;
 
+    // FIELD - Rank of the clicked Settings search result
+    FIELD_SETTINGS_SERACH_RESULT_RANK = 842;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
