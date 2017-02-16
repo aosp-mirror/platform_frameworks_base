@@ -342,4 +342,9 @@ interface IDevicePolicyManager {
     long getLastSecurityLogRetrievalTime();
     long getLastBugReportRequestTime();
     long getLastNetworkLogRetrievalTime();
+
+    boolean setResetPasswordToken(in ComponentName admin, in byte[] token);
+    boolean clearResetPasswordToken(in ComponentName admin);
+    boolean isResetPasswordTokenActive(in ComponentName admin);
+    boolean resetPasswordWithToken(in ComponentName admin, String password, in byte[] token, int flags);
 }

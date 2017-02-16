@@ -244,6 +244,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_INITIALIZATION_BUNDLE = "initialization-bundle";
 
+    private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
+
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
@@ -505,6 +507,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Used for initialization of users created by createAndManageUsers.
         boolean mAdminBroadcastPending = false;
         PersistableBundle mInitBundle = null;
+
+        long mPasswordTokenHandle = 0;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -2557,6 +2561,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_INITIALIZATION_BUNDLE);
             }
 
+            if (policy.mPasswordTokenHandle != 0) {
+                out.startTag(null, TAG_PASSWORD_TOKEN_HANDLE);
+                out.attribute(null, ATTR_VALUE,
+                        Long.toString(policy.mPasswordTokenHandle));
+                out.endTag(null, TAG_PASSWORD_TOKEN_HANDLE);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -2763,6 +2774,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         m.symbols = Integer.parseInt(parser.getAttributeValue(null, "symbols"));
                         m.nonLetter = Integer.parseInt(parser.getAttributeValue(null, "nonletter"));
                     }
+                } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
+                    policy.mPasswordTokenHandle = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -4074,12 +4088,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mInjector.binderRestoreCallingIdentity(token);
         }
     }
-
     @Override
     public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
-        if (!mHasFeature) {
-            return false;
-        }
         final int callingUid = mInjector.binderGetCallingUid();
         final int userHandle = mInjector.userHandleGetCallingUserId();
 
@@ -4090,15 +4100,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceNotManagedProfile(userHandle, "clear the active password");
         }
 
-        int quality;
         synchronized (this) {
             // If caller has PO (or DO) it can change the password, so see if that's the case first.
             ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
             final boolean preN;
             if (admin != null) {
-                preN = getTargetSdk(admin.info.getPackageName(),
-                        userHandle) <= android.os.Build.VERSION_CODES.M;
+                final int targetSdk = getTargetSdk(admin.info.getPackageName(), userHandle);
+                if (targetSdk >= Build.VERSION_CODES.O) {
+                    throw new SecurityException("resetPassword() is deprecated for DPC targeting O"
+                            + " or later");
+                }
+                preN = targetSdk <= android.os.Build.VERSION_CODES.M;
             } else {
                 // Otherwise, make sure the caller has any active admin with the right policy.
                 admin = getActiveAdminForCallerLocked(null,
@@ -4149,7 +4162,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return false;
                 }
             }
+        }
 
+        return resetPasswordInternal(password, 0, null, flags, callingUid, userHandle);
+    }
+
+    private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
+            int flags, int callingUid, int userHandle) {
+        int quality;
+        synchronized (this) {
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
             if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
                 quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -4239,11 +4260,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
+        final boolean result;
         try {
-            if (!TextUtils.isEmpty(password)) {
-                mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
+            if (token == null) {
+                if (!TextUtils.isEmpty(password)) {
+                    mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
+                } else {
+                    mLockPatternUtils.clearLock(null, userHandle);
+                }
+                result = true;
             } else {
-                mLockPatternUtils.clearLock(null, userHandle);
+                result = mLockPatternUtils.setLockCredentialWithToken(password,
+                        TextUtils.isEmpty(password) ? LockPatternUtils.CREDENTIAL_TYPE_NONE
+                                : LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                        tokenHandle, token, userHandle);
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
@@ -4260,8 +4290,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-
-        return true;
+        return result;
     }
 
     private boolean isLockScreenSecureUnchecked(int userId) {
@@ -9092,13 +9121,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             final String deviceOwnerPackageName = mOwners.getDeviceOwnerComponent()
                     .getPackageName();
-            final String[] pkgs = mInjector.getPackageManager().getPackagesForUid(callerUid);
-
-            for (String pkg : pkgs) {
-                if (deviceOwnerPackageName.equals(pkg)) {
-                    return true;
+                try {
+                    String[] pkgs = mInjector.getIPackageManager().getPackagesForUid(callerUid);
+                    for (String pkg : pkgs) {
+                        if (deviceOwnerPackageName.equals(pkg)) {
+                            return true;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    return false;
                 }
-            }
         }
 
         return false;
@@ -10620,5 +10652,99 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public long getLastNetworkLogRetrievalTime() {
         enforceDeviceOwnerOrManageUsers();
         return getUserData(UserHandle.USER_SYSTEM).mLastNetworkLogsRetrievalTime;
+    }
+
+    @Override
+    public boolean setResetPasswordToken(ComponentName admin, byte[] token) {
+        if (!mHasFeature) {
+            return false;
+        }
+        if (token == null || token.length < 32) {
+            throw new IllegalArgumentException("token must be at least 32-byte long");
+        }
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            DevicePolicyData policy = getUserData(userHandle);
+            long ident = mInjector.binderClearCallingIdentity();
+            try {
+                if (policy.mPasswordTokenHandle != 0) {
+                    mLockPatternUtils.removeEscrowToken(policy.mPasswordTokenHandle, userHandle);
+                }
+
+                policy.mPasswordTokenHandle = mLockPatternUtils.addEscrowToken(token, userHandle);
+                saveSettingsLocked(userHandle);
+                return policy.mPasswordTokenHandle != 0;
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public boolean clearResetPasswordToken(ComponentName admin) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mPasswordTokenHandle != 0) {
+                long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    boolean result = mLockPatternUtils.removeEscrowToken(
+                            policy.mPasswordTokenHandle, userHandle);
+                    policy.mPasswordTokenHandle = 0;
+                    saveSettingsLocked(userHandle);
+                    return result;
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isResetPasswordTokenActive(ComponentName admin) {
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mPasswordTokenHandle != 0) {
+                long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    return mLockPatternUtils.isEscrowTokenActive(policy.mPasswordTokenHandle,
+                            userHandle);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean resetPasswordWithToken(ComponentName admin, String passwordOrNull, byte[] token,
+            int flags) {
+        Preconditions.checkNotNull(token);
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mPasswordTokenHandle != 0) {
+                final String password = passwordOrNull != null ? passwordOrNull : "";
+                return resetPasswordInternal(password, policy.mPasswordTokenHandle, token,
+                        flags, mInjector.binderGetCallingUid(), userHandle);
+            } else {
+                Slog.w(LOG_TAG, "No saved token handle");
+            }
+        }
+        return false;
     }
 }
