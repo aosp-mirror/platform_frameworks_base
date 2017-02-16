@@ -124,8 +124,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"ইঞ্জিন সেটিংস লঞ্চ করুন"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"পছন্দের ইঞ্জিন"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"সাধারণ"</string>
-    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ভাষ্য়ের শব্দ মাত্রাকে পুনরায় সেট করুন"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ডিফল্ট হিসাবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে পুনরায় সেট করুন৷"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"ভাষ্য়ের শব্দ মাত্রাকে আবার সেট করুন"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"ডিফল্ট হিসাবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে আবার সেট করুন৷"</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"অত্যন্ত ধীরে"</item>
     <item msgid="4795095314303559268">"ধীর"</item>
