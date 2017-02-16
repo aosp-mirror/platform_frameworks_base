@@ -242,7 +242,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 maxHeight = height;
             }
         }
-        setMeasuredDimension(getMeasuredWidth(), maxHeight);
+        setMeasuredDimension(getMeasuredWidth(), maxHeight + getPaddingBottom());
     }
 
     private final Runnable mDistribute = new Runnable() {

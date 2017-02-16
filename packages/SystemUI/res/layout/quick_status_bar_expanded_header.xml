@@ -85,16 +85,6 @@
 
                 <include layout="@layout/system_icons" />
             </FrameLayout>
-
-            <TextView
-                android:id="@+id/battery_level"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/header_battery_margin_expanded"
-                android:importantForAccessibility="noHideDescendants"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="@dimen/battery_level_text_size"/>
         </LinearLayout>
 
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout

@@ -26,7 +26,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
-import android.icu.text.NumberFormat;
 import android.os.UserManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -55,7 +54,6 @@ import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -68,7 +66,7 @@ import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
-        BatteryStateChangeCallback, SignalCallback {
+        SignalCallback {
     private static final float EXPAND_INDICATOR_THRESHOLD = .93f;
 
     private ActivityStarter mActivityStarter;
@@ -110,7 +108,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private boolean mShowFullAlarm;
     private float mDateTimeTranslation;
-    private TextView mBatteryLevel;
     private SparseBooleanArray mRoamingsBySubId = new SparseBooleanArray();
     private boolean mIsRoaming;
 
@@ -161,8 +158,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
 
-        mBatteryLevel = (TextView) findViewById(R.id.battery_level);
-
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
         mAlwaysShowMultiUserSwitch = res.getBoolean(R.bool.config_alwaysShowMultiUserSwitcher);
@@ -179,7 +174,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
         float intensity = colorForeground == Color.WHITE ? 0 : 1;
         cluster.onDarkChanged(new Rect(0, 0, 0, 0), intensity, colorForeground);
+
         BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
+        battery.forceShowPercent();
         int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
         battery.setRawColors(colorForeground, colorSecondary);
 
@@ -441,17 +438,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 updateEverything();
             }
         }
-    }
-
-    @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
-        mBatteryLevel.setText(percentage);
-    }
-
-    @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
-        // Don't care.
     }
 
     public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,

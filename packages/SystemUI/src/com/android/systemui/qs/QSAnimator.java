@@ -160,7 +160,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mAllViews.clear();
         mTopFiveQs.clear();
 
-        mAllViews.add((View) mQsPanel.getTileLayout());
+        QSTileLayout tileLayout = mQsPanel.getTileLayout();
+        mAllViews.add((View) tileLayout);
+        firstPageBuilder.addFloat(tileLayout, "translationY", mQsPanel.getHeight(), 0);
 
         for (QSTile<?> tile : tiles) {
             QSTileBaseView tileView = mQsPanel.getTileView(tile);
@@ -168,7 +170,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 Log.e(TAG, "tileView is null " + tile.getTileSpec());
                 continue;
             }
-            final TextView label = ((QSTileView) tileView).getLabel();
             final View tileIcon = tileView.getIcon().getIconView();
             View view = mQs.getView();
             if (count < mNumQuickTiles && mAllowFancy) {
@@ -187,12 +188,12 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                 // Counteract the parent translation on the tile. So we have a static base to
                 // animate the label position off from.
-                firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
+                //firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
 
-                // Move the real tile's label from the quick tile position to its final
+                // Move the real tile from the quick tile position to its final
                 // location.
-                translationXBuilder.addFloat(label, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
+                translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
+                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
 
                 mTopFiveQs.add(tileView.getIcon());
                 mAllViews.add(tileView.getIcon());
@@ -209,22 +210,22 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                 firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
                 translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
+                translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
                 translationYBuilder.addFloat(tileIcon, "translationY", -yDiff, 0);
 
                 mAllViews.add(tileIcon);
             } else {
                 firstPageBuilder.addFloat(tileView, "alpha", 0, 1);
+                firstPageBuilder.addFloat(tileView, "translationY", -mQsPanel.getHeight(), 0);
             }
             mAllViews.add(tileView);
-            mAllViews.add(label);
             count++;
         }
         if (mAllowFancy) {
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanel.getBrightnessView();
             if (brightness != null) {
-//                firstPageBuilder.addFloat(brightness, "translationY", mQsPanel.getHeight(), 0);
+                firstPageBuilder.addFloat(brightness, "translationY", mQsPanel.getHeight(), 0);
                 mBrightnessAnimator = new TouchAnimator.Builder()
                         .addFloat(brightness, "alpha", 0, 1)
                         .addFloat(mQsPanel.getPageIndicator(), "alpha", 0, 1)
@@ -240,7 +241,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             // Fade in the tiles/labels as we reach the final position.
             mFirstPageDelayedAnimator = new TouchAnimator.Builder()
                     .setStartDelay(EXPANDED_TILE_DELAY)
-                    .addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1)
+                    .addFloat(tileLayout, "alpha", 0, 1)
                     .addFloat(mQsPanel.getFooter().getView(), "alpha", 0, 1).build();
             mAllViews.add(mQsPanel.getFooter().getView());
             float px = 0;

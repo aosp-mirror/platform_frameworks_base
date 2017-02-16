@@ -15,31 +15,22 @@
  */
 package com.android.systemui.qs;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.Switch;
-
-import com.android.settingslib.Utils;
 
 import com.android.systemui.R;
 
@@ -47,6 +38,7 @@ public class QSTileBaseView extends LinearLayout {
 
     private static final String TAG = "QSTileBaseView";
     private final H mHandler = new H();
+    private final FrameLayout mIconFrame;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
     private Drawable mTileBackground;
@@ -63,15 +55,15 @@ public class QSTileBaseView extends LinearLayout {
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
 
-        FrameLayout frame = new FrameLayout(context);
-        frame.setForegroundGravity(Gravity.CENTER);
+        mIconFrame = new FrameLayout(context);
+        mIconFrame.setForegroundGravity(Gravity.CENTER);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-        addView(frame, new LayoutParams(size, size));
+        addView(mIconFrame, new LayoutParams(size, size));
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, padding, 0, padding);
-        frame.addView(mIcon, params);
+        mIconFrame.addView(mIcon, params);
 
         mTileBackground = newTileBackground();
         if (mTileBackground instanceof RippleDrawable) {
@@ -105,7 +97,7 @@ public class QSTileBaseView extends LinearLayout {
     private void updateRippleSize(int width, int height) {
         // center the touch feedback on the center of the icon, and dial it down a bit
         final int cx = width / 2;
-        final int cy = height / 2;
+        final int cy = mIconFrame.getMeasuredHeight() / 2;
         final int rad = (int) (mIcon.getHeight() * .85f);
         mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
     }

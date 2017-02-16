@@ -65,6 +65,7 @@ public class BatteryMeterView extends LinearLayout implements
     private SettingObserver mSettingObserver;
     private int mTextColor;
     private int mLevel;
+    private boolean mForceShowPercent;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -100,6 +101,11 @@ public class BatteryMeterView extends LinearLayout implements
                 getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
         addView(mBatteryIconView, mlp);
 
+        updateShowPercent();
+    }
+
+    public void forceShowPercent() {
+        mForceShowPercent = true;
         updateShowPercent();
     }
 
@@ -173,13 +179,12 @@ public class BatteryMeterView extends LinearLayout implements
     private void updateShowPercent() {
         final boolean showing = mBatteryPercentView != null;
         if (0 != Settings.System.getInt(getContext().getContentResolver(),
-                BatteryMeterView.SHOW_PERCENT_SETTING, 0)) {
+                BatteryMeterView.SHOW_PERCENT_SETTING, 0) || mForceShowPercent) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
                 updatePercentText();
                 addView(mBatteryPercentView,
-                        0,
                         new ViewGroup.LayoutParams(
                                 LayoutParams.WRAP_CONTENT,
                                 LayoutParams.MATCH_PARENT));
