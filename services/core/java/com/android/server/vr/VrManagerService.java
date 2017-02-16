@@ -383,7 +383,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
-                pw.println("permission denied: can't dump VrManagerService from pid="
+                pw.println("Permission Denial: can't dump VrManagerService from pid="
                         + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
                 return;
             }
