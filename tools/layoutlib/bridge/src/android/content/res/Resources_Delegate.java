@@ -50,6 +50,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.util.TypedValue;
+import android.view.DisplayAdjustments;
 import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
@@ -71,7 +72,8 @@ public class Resources_Delegate {
             DisplayMetrics metrics,
             Configuration config,
             LayoutlibCallback layoutlibCallback) {
-        Resources resources = new Resources(assets, metrics, config);
+        Resources resources = new Resources(Resources_Delegate.class.getClassLoader());
+        resources.setImpl(new ResourcesImpl(assets, metrics, config, new DisplayAdjustments()));
         resources.mContext = context;
         resources.mLayoutlibCallback = layoutlibCallback;
         return Resources.mSystem = resources;
