@@ -16,6 +16,7 @@
 
 package android.graphics.drawable.shapes;
 
+import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -24,40 +25,41 @@ import android.graphics.RectF;
 
 /**
  * Creates a rounded-corner rectangle. Optionally, an inset (rounded) rectangle
- * can be included (to make a sort of "O" shape). 
+ * can be included (to make a sort of "O" shape).
+ * <p>
  * The rounded rectangle can be drawn to a Canvas with its own draw() method,
  * but more graphical control is available if you instead pass
  * the RoundRectShape to a {@link android.graphics.drawable.ShapeDrawable}.
  */
 public class RoundRectShape extends RectShape {
     private float[] mOuterRadii;
-    private RectF   mInset;
+    private RectF mInset;
     private float[] mInnerRadii;
     
     private RectF mInnerRect;
-    private Path  mPath;    // this is what we actually draw
+    private Path mPath; // this is what we actually draw
     
     /**
      * RoundRectShape constructor.
+     * <p>
      * Specifies an outer (round)rect and an optional inner (round)rect.
      *
      * @param outerRadii An array of 8 radius values, for the outer roundrect. 
-     *                   The first two floats are for the 
-     *                   top-left corner (remaining pairs correspond clockwise). 
-     *                   For no rounded corners on the outer rectangle, 
-     *                   pass null.
-     * @param inset      A RectF that specifies the distance from the inner 
-     *                   rect to each side of the outer rect. 
-     *                   For no inner, pass null.
+     *                   The first two floats are for the top-left corner
+     *                   (remaining pairs correspond clockwise). For no rounded
+     *                   corners on the outer rectangle, pass {@code null}.
+     * @param inset A RectF that specifies the distance from the inner
+     *              rect to each side of the outer rect. For no inner, pass
+     *              {@code null}.
      * @param innerRadii An array of 8 radius values, for the inner roundrect.
-     *                   The first two floats are for the 
-     *                   top-left corner (remaining pairs correspond clockwise). 
-     *                   For no rounded corners on the inner rectangle, 
-     *                   pass null.
-     *                   If inset parameter is null, this parameter is ignored. 
+     *                   The first two floats are for the top-left corner
+     *                   (remaining pairs correspond clockwise). For no rounded
+     *                   corners on the inner rectangle, pass {@code null}. If
+     *                   inset parameter is {@code null}, this parameter is
+     *                   ignored.
      */
-    public RoundRectShape(float[] outerRadii, RectF inset,
-                          float[] innerRadii) {
+    public RoundRectShape(@Nullable float[] outerRadii, @Nullable RectF inset,
+            @Nullable float[] innerRadii) {
         if (outerRadii != null && outerRadii.length < 8) {
             throw new ArrayIndexOutOfBoundsException("outer radii must have >= 8 values");
         }
@@ -97,8 +99,7 @@ public class RoundRectShape extends RectShape {
 
         final RectF rect = rect();
         outline.setRoundRect((int) Math.ceil(rect.left), (int) Math.ceil(rect.top),
-                (int) Math.floor(rect.right), (int) Math.floor(rect.bottom),
-                radius);
+                (int) Math.floor(rect.right), (int) Math.floor(rect.bottom), radius);
     }
 
     @Override
@@ -128,7 +129,7 @@ public class RoundRectShape extends RectShape {
 
     @Override
     public RoundRectShape clone() throws CloneNotSupportedException {
-        RoundRectShape shape = (RoundRectShape) super.clone();
+        final RoundRectShape shape = (RoundRectShape) super.clone();
         shape.mOuterRadii = mOuterRadii != null ? mOuterRadii.clone() : null;
         shape.mInnerRadii = mInnerRadii != null ? mInnerRadii.clone() : null;
         shape.mInset = new RectF(mInset);
