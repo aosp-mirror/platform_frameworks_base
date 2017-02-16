@@ -149,13 +149,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     private void handleBinderDiedLocked(IBinder appToken) {
-        VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
-        if (device != null) {
-            Slog.i(TAG, "Virtual display device released because application token died: "
-                    + device.mOwnerPackageName);
-            device.destroyLocked(false);
-            sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
-        }
+        mVirtualDisplayDevices.remove(appToken);
     }
 
     private void handleMediaProjectionStoppedLocked(IBinder appToken) {
@@ -216,6 +210,10 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         public void binderDied() {
             synchronized (getSyncRoot()) {
                 handleBinderDiedLocked(mAppToken);
+                Slog.i(TAG, "Virtual display device released because application token died: "
+                    + mOwnerPackageName);
+                destroyLocked(false);
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_REMOVED);
             }
         }
 
