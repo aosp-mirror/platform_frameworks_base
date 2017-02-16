@@ -445,7 +445,10 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 mVerb = VERB_STARTING;
                 scheduleOpTimeOut();
                 service.startJob(mParams);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                // We catch 'Exception' because client-app malice or bugs might induce a wide
+                // range of possible exception-throw outcomes from startJob() and its handling
+                // of the client's ParcelableBundle extras.
                 Slog.e(TAG, "Error sending onStart message to '" +
                         mRunningJob.getServiceComponent().getShortClassName() + "' ", e);
             }
