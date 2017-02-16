@@ -2287,6 +2287,17 @@
             <enum name="auto" value="0x00000010" />
         </attr>
 
+        <!-- Controls the auto-fill behavior for this view -->
+        <attr name="autoFillMode">
+            <!-- Inherit the behavior from the parent. If there is no parent it is auto. -->
+            <enum name="inherit" value="0" />
+            <!-- Allows this view to automatically trigger an auto-fill request when it get focus.
+                 -->
+            <enum name="auto" value="1" />
+            <!-- The user has to manually force an auto-fill request for this view. -->
+            <enum name="manual" value="2" />
+        </attr>
+
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
              focus if another view is clicked on that doesn't have this attribute set to true. -->

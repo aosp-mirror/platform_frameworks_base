@@ -108,6 +108,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -941,6 +942,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int VISIBILITY_MASK = 0x0000000C;
 
     private static final int[] VISIBILITY_FLAGS = {VISIBLE, INVISIBLE, GONE};
+
+    /** @hide */
+    @IntDef({
+            AUTO_FILL_MODE_INHERIT,
+            AUTO_FILL_MODE_AUTO,
+            AUTO_FILL_MODE_MANUAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutoFillMode {}
+
+    /**
+     * This view inherits the autofill state from it's parent. If there is no parent it is
+     * {@link #AUTO_FILL_MODE_AUTO}.
+     * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">
+     * {@code android:autoFillMode}.
+     */
+    public static final int AUTO_FILL_MODE_INHERIT = 0;
+
+    /**
+     * Allows this view to automatically trigger an auto-fill request when it get focus.
+     * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">
+     * {@code android:autoFillMode}.
+     */
+    public static final int AUTO_FILL_MODE_AUTO = 1;
+
+    /**
+     * Require the user to manually force an auto-fill request.
+     * Use with {@link #setAutoFillMode(int)} and <a href="#attr_android:autoFillMode">{@code
+     * android:autoFillMode}.
+     */
+    public static final int AUTO_FILL_MODE_MANUAL = 2;
 
     /**
      * This view is enabled. Interpretation varies by subclass.
@@ -2512,7 +2544,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 x                 * NO LONGER NEEDED, SHOULD BE REUSED *
      *                1                  PFLAG3_FINGER_DOWN
      *               1                   PFLAG3_FOCUSED_BY_DEFAULT
-     *           xxxx                    * NO LONGER NEEDED, SHOULD BE REUSED *
+     *             11                    PFLAG3_AUTO_FILL_MODE_MASK
+     *           xx                      * NO LONGER NEEDED, SHOULD BE REUSED *
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2731,6 +2764,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setFocusedByDefault(boolean)
      */
     private static final int PFLAG3_FOCUSED_BY_DEFAULT = 0x40000;
+
+    /**
+     * Shift for the place where the auto-fill mode is stored in the pflags
+     *
+     * @see #getAutoFillMode()
+     * @see #setAutoFillMode(int)
+     */
+    private static final int PFLAG3_AUTO_FILL_MODE_SHIFT = 19;
+
+    /**
+     * Mask for auto-fill modes
+     *
+     * @see #getAutoFillMode()
+     * @see #setAutoFillMode(int)
+     */
+    private static final int PFLAG3_AUTO_FILL_MODE_MASK = (AUTO_FILL_MODE_INHERIT
+            | AUTO_FILL_MODE_AUTO | AUTO_FILL_MODE_MANUAL) << PFLAG3_AUTO_FILL_MODE_SHIFT;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
@@ -4745,6 +4795,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_focusedByDefault:
                     if (a.peekValue(attr) != null) {
                         setFocusedByDefault(a.getBoolean(attr, true));
+                    }
+                    break;
+                case com.android.internal.R.styleable.View_autoFillMode:
+                    if (a.peekValue(attr) != null) {
+                        setAutoFillMode(a.getInt(attr, AUTO_FILL_MODE_INHERIT));
                     }
                     break;
             }
@@ -8614,6 +8669,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Set auto-fill mode for the view.
+     *
+     * @param autoFillMode One of {@link #AUTO_FILL_MODE_INHERIT}, {@link #AUTO_FILL_MODE_AUTO},
+     *                     or {@link #AUTO_FILL_MODE_MANUAL}.
+     * @attr ref android.R.styleable#View_autoFillMode
+     */
+    public void setAutoFillMode(@AutoFillMode int autoFillMode) {
+        Preconditions.checkArgumentInRange(autoFillMode, AUTO_FILL_MODE_INHERIT,
+                AUTO_FILL_MODE_MANUAL, "autoFillMode");
+
+        mPrivateFlags3 &= ~PFLAG3_AUTO_FILL_MODE_MASK;
+        mPrivateFlags3 |= autoFillMode << PFLAG3_AUTO_FILL_MODE_SHIFT;
+    }
+
+    /**
      * Set whether this view should have sound effects enabled for events such as
      * clicking and touching.
      *
@@ -9214,6 +9284,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty
     public final boolean isFocusableInTouchMode() {
         return FOCUSABLE_IN_TOUCH_MODE == (mViewFlags & FOCUSABLE_IN_TOUCH_MODE);
+    }
+
+    /**
+     * Returns the auto-fill mode for this view.
+     *
+     * @return One of {@link #AUTO_FILL_MODE_INHERIT}, {@link #AUTO_FILL_MODE_AUTO}, or
+     * {@link #AUTO_FILL_MODE_MANUAL}.
+     * @attr ref android.R.styleable#View_autoFillMode
+     */
+    @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = AUTO_FILL_MODE_INHERIT, to = "AUTO_FILL_MODE_INHERIT"),
+            @ViewDebug.IntToString(from = AUTO_FILL_MODE_AUTO, to = "AUTO_FILL_MODE_AUTO"),
+            @ViewDebug.IntToString(from = AUTO_FILL_MODE_MANUAL, to = "AUTO_FILL_MODE_MANUAL")
+            })
+    @AutoFillMode
+    public int getAutoFillMode() {
+        return (mPrivateFlags3 & PFLAG3_AUTO_FILL_MODE_MASK) >> PFLAG3_AUTO_FILL_MODE_SHIFT;
     }
 
     /**

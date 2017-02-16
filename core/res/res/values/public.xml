@@ -2796,6 +2796,7 @@
         <public name="numericModifiers" />
         <public name="fontProviderAuthority" />
         <public name="fontProviderQuery" />
+        <public name="autoFillMode" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
