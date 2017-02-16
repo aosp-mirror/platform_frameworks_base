@@ -658,6 +658,11 @@ public final class ServerSession extends ObexSession implements Runnable {
          */
         byte[] sendData = new byte[totalLength];
         int maxRxLength = ObexHelper.getMaxRxPacketSize(mTransport);
+        if (maxRxLength > mMaxPacketLength) {
+            if(V) Log.v(TAG,"Set maxRxLength to min of maxRxServrLen:" + maxRxLength +
+                    " and MaxNegotiated from Client: " + mMaxPacketLength);
+            maxRxLength = mMaxPacketLength;
+        }
         sendData[0] = (byte)code;
         sendData[1] = length[2];
         sendData[2] = length[3];
