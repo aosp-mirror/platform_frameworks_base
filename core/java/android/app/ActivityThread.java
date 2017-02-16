@@ -975,6 +975,10 @@ public final class ActivityThread {
             sendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0, 0, true /*async*/);
         }
 
+        public void attachAgent(String agent) {
+            sendMessage(H.ATTACH_AGENT, agent);
+        }
+
         public void setSchedulingGroup(int group) {
             // Note: do this immediately, since going into the foreground
             // should happen regardless of what pending work we have to do
@@ -1409,6 +1413,7 @@ public final class ActivityThread {
         public static final int MULTI_WINDOW_MODE_CHANGED = 152;
         public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
+        public static final int ATTACH_AGENT = 155;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1465,6 +1470,7 @@ public final class ActivityThread {
                     case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
                     case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
+                    case ATTACH_AGENT: return "ATTACH_AGENT";
                 }
             }
             return Integer.toString(code);
@@ -1719,6 +1725,8 @@ public final class ActivityThread {
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
                             (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
+                case ATTACH_AGENT:
+                    handleAttachAgent((String) msg.obj);
                     break;
             }
             Object obj = msg.obj;
@@ -2985,6 +2993,14 @@ public final class ActivityThread {
             } else {
                 r.activity.onLocalVoiceInteractionStarted();
             }
+        }
+    }
+
+    static final void handleAttachAgent(String agent) {
+        try {
+            VMDebug.attachAgent(agent);
+        } catch (IOException e) {
+            Slog.e(TAG, "Attaching agent failed: " + agent);
         }
     }
 
