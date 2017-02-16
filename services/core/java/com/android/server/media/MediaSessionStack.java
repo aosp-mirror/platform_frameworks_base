@@ -30,6 +30,7 @@ import java.util.List;
 /**
  * Keeps track of media sessions and their priority for notifications, media
  * button dispatch, etc.
+ * <p>This class isn't thread-safe. The caller should take care of the synchronization.
  */
 class MediaSessionStack {
     /**
@@ -51,8 +52,6 @@ class MediaSessionStack {
             PlaybackState.STATE_PLAYING };
 
     private final ArrayList<MediaSessionRecord> mSessions = new ArrayList<MediaSessionRecord>();
-
-    private MediaSessionRecord mGlobalPrioritySession;
 
     // The last record that either entered one of the playing states or was
     // added.
@@ -112,10 +111,14 @@ class MediaSessionStack {
      */
     public void removeSession(MediaSessionRecord record) {
         mSessions.remove(record);
-        if (record == mGlobalPrioritySession) {
-            mGlobalPrioritySession = null;
-        }
         clearCache();
+    }
+
+    /**
+     * Return if the record exists in the priority tracker.
+     */
+    public boolean contains(MediaSessionRecord record) {
+        return mSessions.contains(record);
     }
 
     /**
@@ -149,9 +152,6 @@ class MediaSessionStack {
      * @param record The record that changed.
      */
     public void onSessionStateChange(MediaSessionRecord record) {
-        if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-            mGlobalPrioritySession = record;
-        }
         // For now just clear the cache. Eventually we'll selectively clear
         // depending on what changed.
         clearCache();
@@ -166,63 +166,24 @@ class MediaSessionStack {
      */
     public ArrayList<MediaSessionRecord> getActiveSessions(int userId) {
         if (mCachedActiveList == null) {
-            mCachedActiveList = getPriorityListLocked(true, 0, userId);
+            mCachedActiveList = getPriorityList(true, 0, userId);
         }
         return mCachedActiveList;
     }
 
     /**
-     * Get the current priority sorted list of active sessions that use
-     * transport controls. The most important session is at index 0 and the
-     * least important at size -1.
-     *
-     * @param userId The user to check.
-     * @return All the active sessions that handle transport controls in
-     *         priority order.
-     */
-    public ArrayList<MediaSessionRecord> getTransportControlSessions(int userId) {
-        if (mCachedTransportControlList == null) {
-            mCachedTransportControlList = getPriorityListLocked(true,
-                    MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS, userId);
-        }
-        return mCachedTransportControlList;
-    }
-
-    /**
-     * Get the highest priority active session.
-     *
-     * @param userId The user to check.
-     * @return The current highest priority session or null.
-     */
-    public MediaSessionRecord getDefaultSession(int userId) {
-        if (mCachedDefault != null) {
-            return mCachedDefault;
-        }
-        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userId);
-        if (records.size() > 0) {
-            return records.get(0);
-        }
-        return null;
-    }
-
-    /**
      * Get the highest priority session that can handle media buttons.
      *
-     * @param userIdList The user lists to check.
      * @param includeNotPlaying Return a non-playing session if nothing else is
      *            available
      * @return The default media button session or null.
      */
-    public MediaSessionRecord getDefaultMediaButtonSession(
-            List<Integer> userIdList, boolean includeNotPlaying) {
-        if (mGlobalPrioritySession != null && mGlobalPrioritySession.isActive()) {
-            return mGlobalPrioritySession;
-        }
+    public MediaSessionRecord getDefaultMediaButtonSession(boolean includeNotPlaying) {
         if (mCachedButtonReceiver != null) {
             return mCachedButtonReceiver;
         }
-        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true,
-                MediaSession.FLAG_HANDLES_MEDIA_BUTTONS, userIdList);
+        ArrayList<MediaSessionRecord> records = getPriorityList(true,
+                MediaSession.FLAG_HANDLES_MEDIA_BUTTONS, UserHandle.USER_ALL);
         if (records.size() > 0) {
             MediaSessionRecord record = records.get(0);
             if (record.isPlaybackActive(false)) {
@@ -247,14 +208,11 @@ class MediaSessionStack {
         return mCachedButtonReceiver;
     }
 
-    public MediaSessionRecord getDefaultVolumeSession(List<Integer> userIdList) {
-        if (mGlobalPrioritySession != null && mGlobalPrioritySession.isActive()) {
-            return mGlobalPrioritySession;
-        }
+    public MediaSessionRecord getDefaultVolumeSession() {
         if (mCachedVolumeDefault != null) {
             return mCachedVolumeDefault;
         }
-        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userIdList);
+        ArrayList<MediaSessionRecord> records = getPriorityList(true, 0, UserHandle.USER_ALL);
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
@@ -267,7 +225,7 @@ class MediaSessionStack {
     }
 
     public MediaSessionRecord getDefaultRemoteSession(int userId) {
-        ArrayList<MediaSessionRecord> records = getPriorityListLocked(true, 0, userId);
+        ArrayList<MediaSessionRecord> records = getPriorityList(true, 0, userId);
 
         int size = records.size();
         for (int i = 0; i < size; i++) {
@@ -279,15 +237,10 @@ class MediaSessionStack {
         return null;
     }
 
-    public boolean isGlobalPriorityActive() {
-        return mGlobalPrioritySession == null ? false : mGlobalPrioritySession.isActive();
-    }
-
     public void dump(PrintWriter pw, String prefix) {
-        ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
+        ArrayList<MediaSessionRecord> sortedSessions = getPriorityList(false, 0,
                 UserHandle.USER_ALL);
         int count = sortedSessions.size();
-        pw.println(prefix + "Global priority session is " + mGlobalPrioritySession);
         pw.println(prefix + "Sessions Stack - have " + count + " sessions:");
         String indent = prefix + "  ";
         for (int i = 0; i < count; i++) {
@@ -295,13 +248,6 @@ class MediaSessionStack {
             record.dump(pw, indent);
             pw.println();
         }
-    }
-
-    private ArrayList<MediaSessionRecord> getPriorityListLocked(boolean activeOnly, int withFlags,
-            int userId) {
-        List<Integer> userIdList = new ArrayList<>();
-        userIdList.add(userId);
-        return getPriorityListLocked(activeOnly, withFlags, userIdList);
     }
 
     /**
@@ -312,23 +258,22 @@ class MediaSessionStack {
      *            all sessions.
      * @param withFlags Only return sessions with all the specified flags set. 0
      *            returns all sessions.
-     * @param userIdList The user to get sessions for. {@link UserHandle#USER_ALL}
+     * @param userId The user to get sessions for. {@link UserHandle#USER_ALL}
      *            will return sessions for all users.
      * @return The priority sorted list of sessions.
      */
-    private ArrayList<MediaSessionRecord> getPriorityListLocked(boolean activeOnly, int withFlags,
-            List<Integer> userIdList) {
+    public ArrayList<MediaSessionRecord> getPriorityList(boolean activeOnly, int withFlags,
+            int userId) {
         ArrayList<MediaSessionRecord> result = new ArrayList<MediaSessionRecord>();
         int lastLocalIndex = 0;
         int lastActiveIndex = 0;
         int lastPublishedIndex = 0;
 
-        boolean filterUser = !userIdList.contains(UserHandle.USER_ALL);
         int size = mSessions.size();
         for (int i = 0; i < size; i++) {
             final MediaSessionRecord session = mSessions.get(i);
 
-            if (filterUser && !userIdList.contains(session.getUserId())) {
+            if (userId != UserHandle.USER_ALL && userId != session.getUserId()) {
                 // Filter out sessions for the wrong user
                 continue;
             }
