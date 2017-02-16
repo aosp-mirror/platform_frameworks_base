@@ -148,7 +148,7 @@ public abstract class NotificationListenerService extends Service {
 
     // Notification cancellation reasons
 
-    /** Notification was canceled by the status bar reporting a click. */
+    /** Notification was canceled by the status bar reporting a notification click. */
     public static final int REASON_DELEGATE_CLICK = 1;
     /** Notification was canceled by the status bar reporting a user dismissal. */
     public static final int REASON_DELEGATE_CANCEL = 2;
@@ -636,7 +636,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>The service should wait for the {@link #onListenerConnected()} event
      * before performing this operation.
      *
-     * @return An array of active notifications, sorted in natural order.
+     * @return An array of snoozed notifications, sorted in natural order.
      */
     public final StatusBarNotification[] getSnoozedNotifications() {
         try {

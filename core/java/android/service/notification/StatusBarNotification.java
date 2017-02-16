@@ -67,6 +67,9 @@ public class StatusBarNotification implements Parcelable {
         this.groupKey = groupKey();
     }
 
+    /**
+     * @deprecated Non-system apps should not need to create StatusBarNotifications.
+     */
     @Deprecated
     public StatusBarNotification(String pkg, String opPkg, int id, String tag, int uid,
             int initialPid, int score, Notification notification, UserHandle user,
