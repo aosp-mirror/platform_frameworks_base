@@ -133,10 +133,12 @@ public class BugreportProgressService extends Service {
     private static final String AUTHORITY = "com.android.shell";
 
     // External intents sent by dumpstate.
-    static final String INTENT_BUGREPORT_STARTED = "android.intent.action.BUGREPORT_STARTED";
-    static final String INTENT_BUGREPORT_FINISHED = "android.intent.action.BUGREPORT_FINISHED";
+    static final String INTENT_BUGREPORT_STARTED =
+            "com.android.internal.intent.action.BUGREPORT_STARTED";
+    static final String INTENT_BUGREPORT_FINISHED =
+            "com.android.internal.intent.action.BUGREPORT_FINISHED";
     static final String INTENT_REMOTE_BUGREPORT_FINISHED =
-            "android.intent.action.REMOTE_BUGREPORT_FINISHED";
+            "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
 
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
