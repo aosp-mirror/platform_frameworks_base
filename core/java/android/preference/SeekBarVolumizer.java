@@ -348,8 +348,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (msg.what == UPDATE_SLIDER) {
                 if (mSeekBar != null) {
                     mLastProgress = msg.arg1;
-                    mLastAudibleStreamVolume = Math.abs(msg.arg2);
-                    final boolean muted = msg.arg2 < 0;
+                    mLastAudibleStreamVolume = msg.arg2;
+                    final boolean muted = ((Boolean)msg.obj).booleanValue();
                     if (muted != mMuted) {
                         mMuted = muted;
                         if (mCallback != null) {
@@ -362,8 +362,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
 
         public void postUpdateSlider(int volume, int lastAudibleVolume, boolean mute) {
-            final int arg2 = lastAudibleVolume * (mute ? -1 : 1);
-            obtainMessage(UPDATE_SLIDER, volume, arg2).sendToTarget();
+            obtainMessage(UPDATE_SLIDER, volume, lastAudibleVolume, new Boolean(mute)).sendToTarget();
         }
     }
 
