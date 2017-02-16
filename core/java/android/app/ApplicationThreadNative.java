@@ -502,6 +502,14 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
+        case ATTACH_AGENT_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            String agent = data.readString();
+            attachAgent(agent);
+            return true;
+        }
+
         case DUMP_ACTIVITY_TRANSACTION: {
             data.enforceInterface(IApplicationThread.descriptor);
             ParcelFileDescriptor fd = data.readFileDescriptor();
@@ -1302,6 +1310,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeString(prefix);
         data.writeStringArray(args);
         mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public void attachAgent(String agent) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeString(agent);
+        mRemote.transact(ATTACH_AGENT_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
