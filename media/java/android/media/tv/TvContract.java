@@ -2474,7 +2474,7 @@ public final class TvContract {
          *
          * <p>This indicates the number of times interaction has happened.
          *
-         * <p>Type: INTEGER
+         * <p>Type: INTEGER (long)
          * @see #COLUMN_INTERACTION_TYPE
          */
         public static final String COLUMN_INTERACTION_COUNT = "interaction_count";
