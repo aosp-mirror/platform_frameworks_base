@@ -1984,7 +1984,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (viewVisibility == View.VISIBLE &&
                     (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
                             || !win.mAppToken.clientHidden)) {
-                result = relayoutVisibleWindow(outConfig, result, win, winAnimator, attrChanges,
+                result = win.relayoutVisibleWindow(outConfig, result, attrChanges,
                         oldVisibility);
                 try {
                     result = createSurfaceControl(outSurface, result, win, winAnimator);
@@ -2198,69 +2198,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // caller's object so they see the same state.
             Slog.w(TAG_WM, "Failed to create surface control for " + win);
             outSurface.release();
-        }
-        return result;
-    }
-
-    private int relayoutVisibleWindow(Configuration outConfig, int result, WindowState win,
-            WindowStateAnimator winAnimator, int attrChanges, int oldVisibility) {
-        result |= !win.isVisibleLw() ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0;
-        if (win.mAnimatingExit) {
-            Slog.d(TAG, "relayoutVisibleWindow: " + win + " mAnimatingExit=true, mRemoveOnExit="
-                    + win.mRemoveOnExit + ", mDestroying=" + win.mDestroying);
-
-            winAnimator.cancelExitAnimationForNextAnimationLocked();
-            win.mAnimatingExit = false;
-        }
-        if (win.mDestroying) {
-            win.mDestroying = false;
-            mDestroySurface.remove(win);
-        }
-        if (oldVisibility == View.GONE) {
-            winAnimator.mEnterAnimationPending = true;
-        }
-
-        win.mLastVisibleLayoutRotation = mRotation;
-
-        winAnimator.mEnteringAnimation = true;
-        if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
-            win.prepareWindowToDisplayDuringRelayout(outConfig);
-        }
-        if ((attrChanges & LayoutParams.FORMAT_CHANGED) != 0) {
-            // If the format can't be changed in place, preserve the old surface until the app draws
-            // on the new one. This prevents blinking when we change elevation of freeform and
-            // pinned windows.
-            if (!winAnimator.tryChangeFormatInPlaceLocked()) {
-                winAnimator.preserveSurfaceLocked();
-                result |= RELAYOUT_RES_SURFACE_CHANGED
-                        | WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
-            }
-        }
-
-        // If we're starting a drag-resize, we'll be changing the surface size as well as
-        // notifying the client to render to with an offset from the surface's top-left.
-        if (win.isDragResizeChanged() || win.isResizedWhileNotDragResizing()) {
-            win.setDragResizing();
-            win.setResizedWhileNotDragResizing(false);
-            // We can only change top level windows to the full-screen surface when
-            // resizing (as we only have one full-screen surface). So there is no need
-            // to preserve and destroy windows which are attached to another, they
-            // will keep their surface and its size may change over time.
-            if (win.mHasSurface && !win.isChildWindow()) {
-                winAnimator.preserveSurfaceLocked();
-                result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
-            }
-        }
-        final boolean freeformResizing = win.isDragResizing()
-                && win.getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
-        final boolean dockedResizing = win.isDragResizing()
-                && win.getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-        result |= freeformResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
-        result |= dockedResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
-        if (win.isAnimatingWithSavedSurface()) {
-            // If we're animating with a saved surface now, request client to report draw.
-            // We still need to know when the real thing is drawn.
-            result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
         }
         return result;
     }
