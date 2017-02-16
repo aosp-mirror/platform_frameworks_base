@@ -6167,6 +6167,14 @@ public final class Settings {
                 "lock_screen_show_notifications";
 
         /**
+         * This preference stores the last stack active task time for each user, which affects what
+         * tasks will be visible in Overview.
+         * @hide
+         */
+        public static final String OVERVIEW_LAST_STACK_ACTIVE_TIME =
+                "overview_last_stack_active_time";
+
+        /**
          * List of TV inputs that are currently hidden. This is a string
          * containing the IDs of all hidden TV inputs. Each ID is encoded by
          * {@link android.net.Uri#encode(String)} and separated by ':'.
