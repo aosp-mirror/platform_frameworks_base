@@ -2607,6 +2607,7 @@ public class BackupManagerService {
                 boolean userInitiated, boolean nonIncremental) {
             mTransport = transport;
             mOriginalQueue = queue;
+            mQueue = new ArrayList<>();
             mJournal = journal;
             mObserver = observer;
             mMonitor = monitor;
