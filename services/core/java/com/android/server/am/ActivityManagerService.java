@@ -241,6 +241,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.location.LocationManager;
+import android.media.audiofx.AudioEffect;
 import android.metrics.LogMaker;
 import android.net.Proxy;
 import android.net.ProxyInfo;
@@ -18257,7 +18258,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
                 || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
                 || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
-                || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)) {
+                || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)
+                || AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION.equals(action)
+                || AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION.equals(action)) {
             // Broadcast is either protected, or it's a public action that
             // we've relaxed, so it's fine for system internals to send.
             return;
