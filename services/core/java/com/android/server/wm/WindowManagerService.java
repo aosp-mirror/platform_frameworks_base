@@ -1111,8 +1111,6 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId;
         final int callingUid = Binder.getCallingUid();
         final int type = attrs.type;
-        final boolean ownerCanAddInternalSystemWindow =
-                mContext.checkCallingPermission(INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
 
         synchronized(mWindowMap) {
             if (!mDisplayReady) {
@@ -1215,7 +1213,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 token = new WindowToken(this, attrs.token, type, false, displayContent,
-                        ownerCanAddInternalSystemWindow);
+                        session.mCanAddInternalSystemWindow);
             } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
                 if (atoken == null) {
@@ -1286,12 +1284,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
                 token = new WindowToken(this, null, type, false, displayContent,
-                        ownerCanAddInternalSystemWindow);
+                        session.mCanAddInternalSystemWindow);
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], seq, attrs, viewVisibility, session.mUid,
-                    ownerCanAddInternalSystemWindow);
+                    session.mCanAddInternalSystemWindow);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
