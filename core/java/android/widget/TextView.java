@@ -598,6 +598,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Layout mLayout;
     private boolean mLocalesChanged = false;
 
+    // True if setKeyListener() has been explicitly called
+    private boolean mListenerChanged = false;
+    // True if internationalized input should be used for numbers and date and time.
+    private final boolean mUseInternationalizedInput;
+
     @ViewDebug.ExportedProperty(category = "text")
     private int mGravity = Gravity.TOP | Gravity.START;
     private boolean mHorizontallyScrolling;
@@ -1356,6 +1361,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean numberPasswordInputType = variation
                 == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
 
+        mUseInternationalizedInput =
+                context.getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O;
+
         if (inputMethod != null) {
             Class<?> c;
 
@@ -1398,15 +1406,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEditor.mInputType = inputType = EditorInfo.TYPE_CLASS_PHONE;
         } else if (numeric != 0) {
             createEditorIfNeeded();
-            mEditor.mKeyListener = DigitsKeyListener.getInstance((numeric & SIGNED) != 0,
-                                                   (numeric & DECIMAL) != 0);
-            inputType = EditorInfo.TYPE_CLASS_NUMBER;
-            if ((numeric & SIGNED) != 0) {
-                inputType |= EditorInfo.TYPE_NUMBER_FLAG_SIGNED;
-            }
-            if ((numeric & DECIMAL) != 0) {
-                inputType |= EditorInfo.TYPE_NUMBER_FLAG_DECIMAL;
-            }
+            mEditor.mKeyListener = DigitsKeyListener.getInstance(
+                    mUseInternationalizedInput ? getTextLocale() : null,
+                    (numeric & SIGNED) != 0,
+                    (numeric & DECIMAL) != 0);
+            inputType = mEditor.mKeyListener.getInputType();
             mEditor.mInputType = inputType;
         } else if (autotext || autocap != -1) {
             TextKeyListener.Capitalize cap;
@@ -2308,25 +2312,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_autoText
      */
     public void setKeyListener(KeyListener input) {
+        mListenerChanged = true;
         setKeyListenerOnly(input);
         fixFocusableAndClickableSettings();
 
         if (input != null) {
             createEditorIfNeeded();
-            try {
-                mEditor.mInputType = mEditor.mKeyListener.getInputType();
-            } catch (IncompatibleClassChangeError e) {
-                mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
-            }
-            // Change inputType, without affecting transformation.
-            // No need to applySingleLine since mSingleLine is unchanged.
-            setInputTypeSingleLine(mSingleLine);
+            setInputTypeFromEditor();
         } else {
             if (mEditor != null) mEditor.mInputType = EditorInfo.TYPE_NULL;
         }
 
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null) imm.restartInput(this);
+    }
+
+    private void setInputTypeFromEditor() {
+        try {
+            mEditor.mInputType = mEditor.mKeyListener.getInputType();
+        } catch (IncompatibleClassChangeError e) {
+            mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
+        }
+        // Change inputType, without affecting transformation.
+        // No need to applySingleLine since mSingleLine is unchanged.
+        setInputTypeSingleLine(mSingleLine);
     }
 
     private void setKeyListenerOnly(KeyListener input) {
@@ -3390,6 +3399,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTextPaint.getTextLocales();
     }
 
+    private void changeListenerLocaleTo(@NonNull Locale locale) {
+        if (mListenerChanged) {
+            // If a listener has been explicitly set, don't change it. We may break something.
+            return;
+        }
+        if (mEditor != null) {
+            KeyListener listener = mEditor.mKeyListener;
+            if (listener instanceof DigitsKeyListener) {
+                listener = DigitsKeyListener.getInstance(locale, (DigitsKeyListener) listener);
+            } else if (listener instanceof DateKeyListener) {
+                listener = DateKeyListener.getInstance(locale);
+            } else if (listener instanceof TimeKeyListener) {
+                listener = TimeKeyListener.getInstance(locale);
+            } else if (listener instanceof DateTimeKeyListener) {
+                listener = DateTimeKeyListener.getInstance(locale);
+            } else {
+                return;
+            }
+            setKeyListenerOnly(listener);
+            setInputTypeFromEditor();
+        }
+    }
+
     /**
      * Set the default {@link LocaleList} of the text in this TextView to a one-member list
      * containing just the given value.
@@ -3401,6 +3433,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocale(@NonNull Locale locale) {
         mLocalesChanged = true;
         mTextPaint.setTextLocale(locale);
+        changeListenerLocaleTo(locale);
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -3422,6 +3455,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setTextLocales(@NonNull @Size(min = 1) LocaleList locales) {
         mLocalesChanged = true;
         mTextPaint.setTextLocales(locales);
+        changeListenerLocaleTo(locales.get(0));
         if (mLayout != null) {
             nullLayouts();
             requestLayout();
@@ -3433,7 +3467,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (!mLocalesChanged) {
-            mTextPaint.setTextLocales(LocaleList.getDefault());
+            final LocaleList locales = LocaleList.getDefault();
+            mTextPaint.setTextLocales(locales);
+            changeListenerLocaleTo(locales.get(0));
             if (mLayout != null) {
                 nullLayouts();
                 requestLayout();
@@ -5566,19 +5602,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             input = TextKeyListener.getInstance(autotext, cap);
         } else if (cls == EditorInfo.TYPE_CLASS_NUMBER) {
             input = DigitsKeyListener.getInstance(
+                    mUseInternationalizedInput ? getTextLocale() : null,
                     (type & EditorInfo.TYPE_NUMBER_FLAG_SIGNED) != 0,
                     (type & EditorInfo.TYPE_NUMBER_FLAG_DECIMAL) != 0);
+            if (mUseInternationalizedInput) {
+                type = input.getInputType(); // Override type, if necessary for i18n.
+            }
         } else if (cls == EditorInfo.TYPE_CLASS_DATETIME) {
+            final Locale locale = mUseInternationalizedInput ? getTextLocale() : null;
             switch (type & EditorInfo.TYPE_MASK_VARIATION) {
                 case EditorInfo.TYPE_DATETIME_VARIATION_DATE:
-                    input = DateKeyListener.getInstance();
+                    input = DateKeyListener.getInstance(locale);
                     break;
                 case EditorInfo.TYPE_DATETIME_VARIATION_TIME:
-                    input = TimeKeyListener.getInstance();
+                    input = TimeKeyListener.getInstance(locale);
                     break;
                 default:
-                    input = DateTimeKeyListener.getInstance();
+                    input = DateTimeKeyListener.getInstance(locale);
                     break;
+            }
+            if (mUseInternationalizedInput) {
+                type = input.getInputType(); // Override type, if necessary for i18n.
             }
         } else if (cls == EditorInfo.TYPE_CLASS_PHONE) {
             input = DialerKeyListener.getInstance();
@@ -5586,6 +5630,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             input = TextKeyListener.getInstance();
         }
         setRawInputType(type);
+        mListenerChanged = false;
         if (direct) {
             createEditorIfNeeded();
             mEditor.mKeyListener = input;
