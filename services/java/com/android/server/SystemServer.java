@@ -35,6 +35,7 @@ import android.os.FileUtils;
 import android.os.IIncidentManager;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -236,6 +237,8 @@ public final class SystemServer {
 
     private static final String START_SENSOR_SERVICE = "StartSensorService";
     private Future<?> mSensorServiceStart;
+    private Future<?> mZygotePreload;
+
 
     /**
      * Start the sensor service. This is a blocking call and can take time.
@@ -688,6 +691,26 @@ public final class SystemServer {
         }
 
         try {
+            final String SECONDARY_ZYGOTE_PRELOAD = "SecondaryZygotePreload";
+            // We start the preload ~1s before the webview factory preparation, to
+            // ensure that it completes before the 32 bit relro process is forked
+            // from the zygote. In the event that it takes too long, the webview
+            // RELRO process will block, but it will do so without holding any locks.
+            mZygotePreload = SystemServerInitThreadPool.get().submit(() -> {
+                try {
+                    Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
+                    BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+                            SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                    traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
+                    if (!Process.zygoteProcess.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
+                        Slog.e(TAG, "Unable to preload default resources");
+                    }
+                    traceLog.traceEnd();
+                } catch (Exception ex) {
+                    Slog.e(TAG, "Exception preloading default resources", ex);
+                }
+            }, SECONDARY_ZYGOTE_PRELOAD);
+
             traceBeginAndSlog("StartKeyAttestationApplicationIdProviderService");
             ServiceManager.addService("sec_key_att_app_id_provider",
                     new KeyAttestationApplicationIdProviderService(context));
@@ -1615,6 +1638,8 @@ public final class SystemServer {
                     BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
                             SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(WEBVIEW_PREPARATION);
+                    ConcurrentUtils.waitForFutureNoInterrupt(mZygotePreload, "Zygote preload");
+                    mZygotePreload = null;
                     mWebViewUpdateService.prepareWebViewInSystemServer();
                     traceLog.traceEnd();
                 }, WEBVIEW_PREPARATION);
