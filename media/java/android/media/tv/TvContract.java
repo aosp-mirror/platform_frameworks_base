@@ -1300,6 +1300,18 @@ public final class TvContract {
         public static final String COLUMN_APP_LINK_INTENT_URI = "app_link_intent_uri";
 
         /**
+         * The internal ID used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_ID = "internal_provider_id";
+
+        /**
          * Internal data used by individual TV input services.
          *
          * <p>This is internal to the provider that inserted it, and should not be decoded by other
