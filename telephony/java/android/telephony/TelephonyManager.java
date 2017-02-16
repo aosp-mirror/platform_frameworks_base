@@ -5333,6 +5333,44 @@ public class TelephonyManager {
     }
 
     /**
+     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     *
+     * @param powerUp True if powering up the SIM, otherwise powering down
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     **/
+    public void setSimPowerState(boolean powerUp) {
+        setSimPowerStateForSlot(getDefaultSim(), powerUp);
+    }
+
+    /**
+     * Set SIM card power state. Request is equivalent to inserting or removing the card.
+     *
+     * @param slotId SIM slot id
+     * @param powerUp True if powering up the SIM, otherwise powering down
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     **/
+    public void setSimPowerStateForSlot(int slotId, boolean powerUp) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setSimPowerStateForSlot(slotId, powerUp);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setSimPowerStateForSlot", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#setSimPowerStateForSlot", e);
+        }
+    }
+
+    /**
      * Set baseband version for the default phone.
      *
      * @param version baseband version
