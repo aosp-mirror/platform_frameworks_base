@@ -89,10 +89,10 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Siz telefonni qulfdan chiqarish uchun <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri urinish qildingiz. Endi, ishchi profil o‘chirib tashlanadi va undagi barcha ma’lumotlar ham o‘chib ketadi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz grafik kalitni  <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM karta PIN kodi noto‘g‘ri. Qurilma qulfini ochish uchun aloqa operatoringiz bilan bog‘laning."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun aloqa operatoringizga murojaat qiling."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="other">SIM kartaning PIN kodi noto‘g‘ri. Sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
-      <item quantity="one">SIM kartaning PIN kodi noto‘g‘ri. Qurilmani qulfdan chiqarish uchun sizda yana <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="other">SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="one">SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun sizda yana <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish qoldi.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM kartadan foydalanib bo‘lmaydi. Aloqa operatoringiz bilan bog‘laning."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
