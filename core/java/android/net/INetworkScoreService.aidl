@@ -18,7 +18,7 @@ package android.net;
 
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
-import android.net.NetworkScorerAppManager;
+import android.net.NetworkScorerAppData;
 import android.net.RecommendationRequest;
 import android.net.RecommendationResult;
 import android.net.ScoredNetwork;
@@ -135,11 +135,11 @@ interface INetworkScoreService
     /**
      * Returns metadata about the active scorer or <code>null</code> if there is no active scorer.
      */
-    NetworkScorerAppManager.NetworkScorerAppData getActiveScorer();
+    NetworkScorerAppData getActiveScorer();
 
     /**
      * Returns the list of available scorer apps. The list will be empty if there are
      * no valid scorers.
      */
-    List<NetworkScorerAppManager.NetworkScorerAppData> getAllValidScorers();
+    List<NetworkScorerAppData> getAllValidScorers();
 }

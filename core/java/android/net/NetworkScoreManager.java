@@ -18,7 +18,6 @@ package android.net;
 
 import static android.net.NetworkRecommendationProvider.EXTRA_RECOMMENDATION_RESULT;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,7 +25,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteCallback;

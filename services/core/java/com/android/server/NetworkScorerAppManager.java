@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package android.net;
+package com.android.server;
 
 import android.Manifest.permission;
 import android.annotation.Nullable;
@@ -24,9 +24,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.content.pm.ServiceInfo;
+import android.net.NetworkScoreManager;
+import android.net.NetworkScorerAppData;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -37,7 +37,6 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Internal class for discovering and managing the network scorer/recommendation application.
@@ -52,94 +51,6 @@ public class NetworkScorerAppManager {
 
     public NetworkScorerAppManager(Context context) {
       mContext = context;
-    }
-
-    /**
-     * Holds metadata about a discovered network scorer/recommendation application.
-     */
-    public static final class NetworkScorerAppData implements Parcelable {
-        /** UID of the scorer app. */
-        public final int packageUid;
-        private final ComponentName mRecommendationService;
-        /**
-         * The {@link ComponentName} of the Activity to start before enabling the "connect to open
-         * wifi networks automatically" feature.
-         */
-        private final ComponentName mEnableUseOpenWifiActivity;
-
-        public NetworkScorerAppData(int packageUid, ComponentName recommendationServiceComp,
-                ComponentName enableUseOpenWifiActivity) {
-            this.packageUid = packageUid;
-            this.mRecommendationService = recommendationServiceComp;
-            this.mEnableUseOpenWifiActivity = enableUseOpenWifiActivity;
-        }
-
-        protected NetworkScorerAppData(Parcel in) {
-            packageUid = in.readInt();
-            mRecommendationService = ComponentName.readFromParcel(in);
-            mEnableUseOpenWifiActivity = ComponentName.readFromParcel(in);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(packageUid);
-            ComponentName.writeToParcel(mRecommendationService, dest);
-            ComponentName.writeToParcel(mEnableUseOpenWifiActivity, dest);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<NetworkScorerAppData> CREATOR =
-                new Creator<NetworkScorerAppData>() {
-                    @Override
-                    public NetworkScorerAppData createFromParcel(Parcel in) {
-                        return new NetworkScorerAppData(in);
-                    }
-
-                    @Override
-                    public NetworkScorerAppData[] newArray(int size) {
-                        return new NetworkScorerAppData[size];
-                    }
-                };
-
-        public String getRecommendationServicePackageName() {
-            return mRecommendationService.getPackageName();
-        }
-
-        public ComponentName getRecommendationServiceComponent() {
-            return mRecommendationService;
-        }
-
-        @Nullable public ComponentName getEnableUseOpenWifiActivity() {
-            return mEnableUseOpenWifiActivity;
-        }
-
-        @Override
-        public String toString() {
-            return "NetworkScorerAppData{" +
-                    "packageUid=" + packageUid +
-                    ", mRecommendationService=" + mRecommendationService +
-                    ", mEnableUseOpenWifiActivity=" + mEnableUseOpenWifiActivity +
-                    '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NetworkScorerAppData that = (NetworkScorerAppData) o;
-            return packageUid == that.packageUid &&
-                    Objects.equals(mRecommendationService, that.mRecommendationService) &&
-                    Objects.equals(mEnableUseOpenWifiActivity, that.mEnableUseOpenWifiActivity);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(packageUid, mRecommendationService, mEnableUseOpenWifiActivity);
-        }
     }
 
     /**
@@ -158,11 +69,11 @@ public class NetworkScorerAppManager {
      * <p>A network recommendation provider is any application which:
      * <ul>
      * <li>Is listed in the <code>config_networkRecommendationPackageNames</code> config.
-     * <li>Declares the {@link android.Manifest.permission#SCORE_NETWORKS} permission.
+     * <li>Declares the {@link permission#SCORE_NETWORKS} permission.
      * <li>Includes a Service for {@link NetworkScoreManager#ACTION_RECOMMEND_NETWORKS}.
      * </ul>
      */
-    public NetworkScorerAppData getNetworkRecommendationProviderData() {
+    @Nullable public NetworkScorerAppData getNetworkRecommendationProviderData() {
         // Network recommendation apps can only run as the primary user right now.
         // http://b/23422763
         if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {

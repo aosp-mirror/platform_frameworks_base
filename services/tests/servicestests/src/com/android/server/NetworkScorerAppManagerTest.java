@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package android.net;
+package com.android.server;
 
 import static org.mockito.Mockito.when;
 
@@ -29,7 +29,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.net.NetworkScoreManager;
+import android.net.NetworkScorerAppData;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.test.InstrumentationTestCase;
