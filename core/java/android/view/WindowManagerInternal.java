@@ -296,9 +296,12 @@ public abstract class WindowManagerInternal {
      *                         to corresponding API calls.  Note that this state is not guaranteed
      *                         to be synchronized with state in WindowManagerService.
      * @param targetWindowToken token to identify the target window that the IME is associated with.
+     *                          {@code null} when application, system, or the IME itself decided to
+     *                          change its window visibility before being associated with any target
+     *                          window.
      */
-    public abstract void updateInputMethodWindowStatus(IBinder imeToken, boolean imeWindowVisible,
-            IBinder targetWindowToken);
+    public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
+            boolean imeWindowVisible, @Nullable IBinder targetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.

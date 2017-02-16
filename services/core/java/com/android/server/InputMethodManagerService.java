@@ -2033,10 +2033,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void setImeWindowStatus(IBinder token, IBinder startInputToken, int vis,
             int backDisposition) {
-        if (startInputToken == null) {
-            throw new InvalidParameterException("startInputToken cannot be null");
-        }
-
         if (!calledWithValidToken(token)) {
             return;
         }
@@ -2044,15 +2040,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final StartInputInfo info;
         synchronized (mMethodMap) {
             info = mStartInputMap.get(startInputToken);
-            if (info == null) {
-                throw new InvalidParameterException("Unknown startInputToken=" + startInputToken);
-            }
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
         }
-        mWindowManagerInternal.updateInputMethodWindowStatus(info.mImeToken,
-                (vis & InputMethodService.IME_VISIBLE) != 0, info.mTargetWindow);
+        mWindowManagerInternal.updateInputMethodWindowStatus(token,
+                (vis & InputMethodService.IME_VISIBLE) != 0,
+                token != null ? info.mTargetWindow : null);
     }
 
     private void updateSystemUi(IBinder token, int vis, int backDisposition) {
