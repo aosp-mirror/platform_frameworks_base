@@ -669,13 +669,14 @@ public class Intent implements Parcelable, Cloneable {
      * preview. {@link #getClipData} contains an optional list of content URIs
      * if there is more than one item to preview. {@link #EXTRA_INDEX} is an
      * optional index of the URI in the clip data to show first.
-     * If {@link #EXTRA_QUICK_VIEW_PLAIN} is true, then the quick viewer should show
-     * basic UI without any extra features other than quick viewing the passed items.
-     * Especially, the quick viewer should not let users open the passed files
-     * in other apps, which includes sharing, opening, editing, printing, etc in the
-     * plain mode.
+     * <p>By default quick viewers are supposed to be lightweight and focus on
+     * previewing the content only. They should not expose features such as printing,
+     * opening in an external app, deleting, rotating, casting, etc.
+     * However, if {@link #EXTRA_QUICK_VIEW_ADVANCED} is true, then the quick viewer
+     * may show advanced UI which includes convenience actions suitable for the passed
+     * Uris.
      * <p>Output: nothing.
-     * @see #EXTRA_QUICK_VIEW_HIDE_DEFAULT_ACTIONS
+     * @see #EXTRA_QUICK_VIEW_ADVANCED
      * @see #EXTRA_INDEX
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -4413,19 +4414,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
 
     /**
-     * Shows a plain quick viewer UI which doesn't provide any extra features other than
-     * quick viewing the items.
-     *
-     * <p>Especially, the quick viewer should not let users open the quick viewed files
-     * in other apps, which includes sharing, opening, editing, printing, etc.
-     *
-     * <p>This feature is optional, and may not be handled by all quick viewers.
+     * Tells the quick viewer to show additional UI actions suitable for the passed Uris,
+     * such as opening in other apps, sharing, opening, editing, printing, deleting,
+     * casting, etc.
      *
      * <p>The value is boolean. By default false.
      * @see ACTION_QUICK_VIEW
      */
-    public static final String EXTRA_QUICK_VIEW_PLAIN =
-            "android.intent.extra.QUICK_VIEW_PLAIN";
+    public static final String EXTRA_QUICK_VIEW_ADVANCED =
+            "android.intent.extra.QUICK_VIEW_ADVANCED";
 
     /**
      * Optional boolean extra indicating whether quiet mode has been switched on or off.
