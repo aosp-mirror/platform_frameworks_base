@@ -918,6 +918,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
+        when(mContext.userManager.hasUserRestriction(eq(UserManager.DISALLOW_ADD_USER),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM))).thenReturn(true);
 
         assertTrue(dpm.isAdminActive(admin1));
         assertFalse(dpm.isRemovingAdmin(admin1, UserHandle.USER_SYSTEM));
@@ -946,6 +948,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Now DO shouldn't be set.
         assertNull(dpm.getDeviceOwnerComponentOnAnyUser());
+
+        verify(mContext.userManager).setUserRestriction(eq(UserManager.DISALLOW_ADD_USER),
+                eq(false),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
 
         verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(UserHandle.USER_SYSTEM),
