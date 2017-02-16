@@ -477,12 +477,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         public void onLost(Network network) {
             releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
         }
-
-        @Override
-        public void onUnavailable() {
-            // timeout, it was not possible to establish the required connection
-            releaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
-        }
     };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -902,8 +896,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         NetworkRequest request = requestBuilder.build();
         mConnMgr.requestNetwork(
                 request,
-                mSuplConnectivityCallback,
-                ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS);
+                mSuplConnectivityCallback);
     }
 
     private void handleReleaseSuplConnection(int agpsDataConnStatus) {
