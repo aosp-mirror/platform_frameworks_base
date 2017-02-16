@@ -462,6 +462,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateBackgroundForGroupState();
         updateClickAndFocus();
         if (mNotificationParent != null) {
+            setOverrideTintColor(NO_COLOR, 0.0f);
             mNotificationParent.updateBackgroundForGroupState();
         }
         updateIconVisibilities();
