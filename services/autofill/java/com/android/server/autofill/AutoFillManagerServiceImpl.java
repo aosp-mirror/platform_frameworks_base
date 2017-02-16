@@ -737,29 +737,7 @@ final class AutoFillManagerServiceImpl {
         private void callSaveLocked() {
             if (DEBUG) Slog.d(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
 
-            // TODO(b/33197203): hookup extras and make sure they're tested by CTS
-            final Bundle extras = null;
-//            // TODO(b/33197203): make sure the extras are tested by CTS
-//            final Bundle responseExtras = mCurrentResponse == null ? null
-//                    : mCurrentResponse.getExtras();
-//            final Bundle datasetExtras = mAutoFilledDataset == null ? null
-//                    : mAutoFilledDataset.getExtras();
-//            final Bundle extras = (responseExtras == null && datasetExtras == null)
-//                    ? null : new Bundle();
-//            if (responseExtras != null) {
-//                if (DEBUG) {
-//                    Slog.d(TAG, "response extras on save extras: "
-//                            + bundleToString(responseExtras));
-//                }
-//                extras.putBundle(AutoFillService.EXTRA_RESPONSE_EXTRAS, responseExtras);
-//            }
-//            if (datasetExtras != null) {
-//                if (DEBUG) {
-//                    Slog.d(TAG, "dataset extras on save extras: " + bundleToString(datasetExtras));
-//                }
-//                extras.putBundle(AutoFillService.EXTRA_DATASET_EXTRAS, datasetExtras);
-//            }
-
+            final Bundle extras = this.mCurrentResponse.getExtras();
 
             for (Entry<AutoFillId, ViewState> entry : mViewStates.entrySet()) {
                 final AutoFillValue value = entry.getValue().mAutoFillValue;

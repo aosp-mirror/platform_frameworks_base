@@ -191,7 +191,7 @@ final class RemoteFillService implements DeathRecipient {
             ensureBound();
         } else {
             if (DEBUG) {
-                Slog.d(LOG_TAG, "[user: " + mUserId + "] handleOnFillRequest()");
+                Slog.d(LOG_TAG, "[user: " + mUserId + "] handlePendingRequest()");
             }
             pendingRequest.run();
         }
