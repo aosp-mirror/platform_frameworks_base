@@ -1810,4 +1810,13 @@
     <!-- Title for the notification channel for problems with storage (i.e. low disk). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_storage">Storage</string>
 
+    <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
+    <string name="instant_apps">Instant Apps</string>
+
+    <!-- Message of the instant apps notification indicating they don't need install [CHAR LIMIT=NONE] -->
+    <string name="instant_apps_message">Instant apps don\'t require installation.</string>
+
+    <!-- Action label for launching app info on the specified app [CHAR LIMIT=20] -->
+    <string name="app_info">App info</string>
+
 </resources>
