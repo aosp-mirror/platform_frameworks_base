@@ -353,6 +353,9 @@ public class ClipData implements Parcelable {
                     }
                     return builder.toString();
 
+                } catch (SecurityException e) {
+                    Log.w("ClipData", "Failure opening stream", e);
+
                 } catch (FileNotFoundException e) {
                     // Unable to open content URI as text...  not really an
                     // error, just something to ignore.
@@ -535,6 +538,9 @@ public class ClipData implements Parcelable {
                             // text, escape it for HTML.
                             return Html.escapeHtml(text);
                         }
+
+                    } catch (SecurityException e) {
+                        Log.w("ClipData", "Failure opening stream", e);
 
                     } catch (FileNotFoundException e) {
                         // Unable to open content URI as text...  not really an
