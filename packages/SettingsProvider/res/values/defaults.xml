@@ -227,7 +227,4 @@
 
     <!--  default setting for Settings.System.END_BUTTON_BEHAVIOR : END_BUTTON_BEHAVIOR_SLEEP -->
     <integer name="def_end_button_behavior">0x2</integer>
-
-    <!--Default settings for network recommendations. -->
-    <string name="def_network_recommendations_package" translatable="false">com.android.networkrecommendation</string>
 </resources>
