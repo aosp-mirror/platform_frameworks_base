@@ -32,9 +32,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
- * MediaMuxer facilitates muxing elementary streams. Currently supports mp4 or
- * webm file as the output and at most one audio and/or one video elementary
- * stream. MediaMuxer does not support muxing B-frames.
+ * MediaMuxer facilitates muxing elementary streams. Currently MediaMuxer supports MP4, Webm
+ * and 3GP file as the output. It also supports muxing B-frames in MP4 since Android Nougat.
  * <p>
  * It is generally used like this:
  *
@@ -65,6 +64,182 @@ import java.util.Map;
  * muxer.stop();
  * muxer.release();
  * </pre>
+ *
+
+ <h4>Metadata Track</h4>
+ <p>
+  Metadata is usefule in carrying extra information that correlated with video or audio to
+  facilate offline processing, e.g. gyro signals from the sensor. Meatadata track is only
+  supported in MP4 format. When adding a metadata track, track's mime format must start with
+  prefix "application/", e.g. "applicaton/gyro". Metadata's format/layout will be defined by
+  the application. The generated MP4 file uses TextMetaDataSampleEntry defined in section 12.3.3.2
+  of the ISOBMFF to signal the metadata's mime format. When using {@link android.media.MediaExtractor}
+  to extract the file with metadata track, the mime format of the metadata will be extracted into
+  {@link android.media.MediaFormat}.
+
+ <pre class=prettyprint>
+   MediaMuxer muxer = new MediaMuxer("temp.mp4", OutputFormat.MUXER_OUTPUT_MPEG_4);
+   // More often, the MediaFormat will be retrieved from MediaCodec.getOutputFormat()
+   // or MediaExtractor.getTrackFormat().
+   MediaFormat audioFormat = new MediaFormat(...);
+   MediaFormat videoFormat = new MediaFormat(...);
+
+   // Setup Metadata Track
+   MediaFormat metadataFormat = new MediaFormat(...);
+   metadataFormat.setString(KEY_MIME, "application/gyro");
+
+   int audioTrackIndex = muxer.addTrack(audioFormat);
+   int videoTrackIndex = muxer.addTrack(videoFormat);
+   int metadataTrackIndex = muxer.addTrack(metadataFormat);
+   ByteBuffer inputBuffer = ByteBuffer.allocate(bufferSize);
+   boolean finished = false;
+   BufferInfo bufferInfo = new BufferInfo();
+
+   muxer.start();
+   while(!finished) {
+     // getInputBuffer() will fill the inputBuffer with one frame of encoded
+     // sample from either MediaCodec or MediaExtractor, set isAudioSample to
+     // true when the sample is audio data, set up all the fields of bufferInfo,
+     // and return true if there are no more samples.
+     finished = getInputBuffer(inputBuffer, sampleType, bufferInfo);
+     if (!finished) {
+       int currentTrackIndex = getTrackIndex(sampleType);
+       muxer.writeSampleData(currentTrackIndex, inputBuffer, bufferInfo);
+     }
+   };
+   muxer.stop();
+   muxer.release();
+ }</pre>
+
+ <h2 id=History><a name="History"></a>Features and API History</h2>
+ <p>
+ The following table summarizes the feature support in different API version and containers.
+ For API version numbers, see {@link android.os.Build.VERSION_CODES}.
+
+ <style>
+ .api > tr > th, .api > tr > td { text-align: center; padding: 4px 4px; }
+ .api > tr > th     { vertical-align: bottom; }
+ .api > tr > td     { vertical-align: middle; }
+ .sml > tr > th, .sml > tr > td { text-align: center; padding: 2px 4px; }
+ .fn { text-align: center; }
+ </style>
+
+ <table align="right" style="width: 0%">
+  <thead>
+   <tbody class=api>
+    <tr><th>Symbol</th>
+    <th>Meaning</th></tr>
+   </tbody>
+  </thead>
+  <tbody class=sml>
+   <tr><td>&#9679;</td><td>Supported</td></tr>
+   <tr><td>&#9675;</td><td>Not supported</td></tr>
+   <tr><td>&#9639;</td><td>Supported in MP4/WebM/3GP</td></tr>
+   <tr><td>&#8277;</td><td>Only Supported in MP4</td></tr>
+  </tbody>
+ </table>
+<table align="center" style="width: 100%;">
+  <thead class=api>
+   <tr>
+    <th rowspan=2>Feature</th>
+    <th colspan="24">SDK Version</th>
+   </tr>
+   <tr>
+    <th>18</th>
+    <th>19</th>
+    <th>20</th>
+    <th>21</th>
+    <th>22</th>
+    <th>23</th>
+    <th>24</th>
+    <th>25</th>
+    <th>26+</th>
+   </tr>
+  </thead>
+ <tbody class=api>
+   <tr>
+    <td align="center">MP4 container</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+   </tr>
+    <td align="center">WebM container</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+    <td>&#9679;</td>
+   </tr>
+    <td align="center">3GP container</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9679;</td>
+   </tr>
+    <td align="center">Muxing B-Frames(bi-directional predicted frames)</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#8277;</td>
+    <td>&#8277;</td>
+    <td>&#8277;</td>
+   </tr>
+   </tr>
+    <td align="center">Muxing Single Video/Audio Track</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+    <td>&#9639;</td>
+   </tr>
+   </tr>
+    <td align="center">Muxing Multiple Video/Audio Tracks</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#8277;</td>
+   </tr>
+   </tr>
+    <td align="center">Muxing Metadata Tracks</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#9675;</td>
+    <td>&#8277;</td>
+   </tr>
+   </tbody>
+ </table>
  */
 
 final public class MediaMuxer {
