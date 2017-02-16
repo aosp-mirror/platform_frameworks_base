@@ -23,6 +23,7 @@
 #include <tuple>
 
 #include "android-base/logging.h"
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "NameMangler.h"
@@ -35,6 +36,7 @@
 #include "process/SymbolTable.h"
 
 using android::StringPiece;
+using android::base::StringPrintf;
 
 namespace aapt {
 
@@ -55,11 +57,9 @@ static bool IsValidSymbol(const StringPiece& symbol) {
   return sJavaIdentifiers.find(symbol) == sJavaIdentifiers.end();
 }
 
-/*
- * Java symbols can not contain . or -, but those are valid in a resource name.
- * Replace those with '_'.
- */
-static std::string Transform(const StringPiece& symbol) {
+// Java symbols can not contain . or -, but those are valid in a resource name.
+// Replace those with '_'.
+static std::string TransformToFieldName(const StringPiece& symbol) {
   std::string output = symbol.to_string();
   for (char& c : output) {
     if (c == '.' || c == '-') {
@@ -69,34 +69,31 @@ static std::string Transform(const StringPiece& symbol) {
   return output;
 }
 
-/**
- * Transforms an attribute in a styleable to the Java field name:
- *
- * <declare-styleable name="Foo">
- *   <attr name="android:bar" />
- *   <attr name="bar" />
- * </declare-styleable>
- *
- * Foo_android_bar
- * Foo_bar
- */
-static std::string TransformNestedAttr(
-    const ResourceNameRef& attr_name, const std::string& styleable_class_name,
-    const StringPiece& package_name_to_generate) {
+// Transforms an attribute in a styleable to the Java field name:
+//
+// <declare-styleable name="Foo">
+//   <attr name="android:bar" />
+//   <attr name="bar" />
+// </declare-styleable>
+//
+// Foo_android_bar
+// Foo_bar
+static std::string TransformNestedAttr(const ResourceNameRef& attr_name,
+                                       const std::string& styleable_class_name,
+                                       const StringPiece& package_name_to_generate) {
   std::string output = styleable_class_name;
 
   // We may reference IDs from other packages, so prefix the entry name with
   // the package.
   if (!attr_name.package.empty() &&
       package_name_to_generate != attr_name.package) {
-    output += "_" + Transform(attr_name.package);
+    output += "_" + TransformToFieldName(attr_name.package);
   }
-  output += "_" + Transform(attr_name.entry);
+  output += "_" + TransformToFieldName(attr_name.entry);
   return output;
 }
 
-static void AddAttributeFormatDoc(AnnotationProcessor* processor,
-                                  Attribute* attr) {
+static void AddAttributeFormatDoc(AnnotationProcessor* processor, Attribute* attr) {
   const uint32_t type_mask = attr->type_mask;
   if (type_mask & android::ResTable_map::TYPE_REFERENCE) {
     processor->AppendComment(
@@ -128,7 +125,7 @@ static void AddAttributeFormatDoc(AnnotationProcessor* processor,
     processor->AppendComment(
         "<p>May be a color value, in the form of "
         "\"<code>#<i>rgb</i></code>\",\n"
-        "\"<code>#<i>argb</i></code>\", \"<code>#<i>rrggbb</i></code\", or \n"
+        "\"<code>#<i>argb</i></code>\", \"<code>#<i>rrggbb</i></code>\", or \n"
         "\"<code>#<i>aarrggbb</i></code>\".");
   }
 
@@ -202,18 +199,21 @@ bool JavaClassGenerator::SkipSymbol(SymbolState state) {
   return true;
 }
 
+// Whether or not to skip writing this symbol.
+bool JavaClassGenerator::SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol) {
+  return !symbol || (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
+                     !symbol.value().is_public);
+}
+
 struct StyleableAttr {
-  const Reference* attr_ref;
+  const Reference* attr_ref = nullptr;
   std::string field_name;
-  std::unique_ptr<SymbolTable::Symbol> symbol;
+  Maybe<SymbolTable::Symbol> symbol;
 };
 
-static bool less_styleable_attr(const StyleableAttr& lhs,
-                                const StyleableAttr& rhs) {
-  const ResourceId lhs_id =
-      lhs.attr_ref->id ? lhs.attr_ref->id.value() : ResourceId(0);
-  const ResourceId rhs_id =
-      rhs.attr_ref->id ? rhs.attr_ref->id.value() : ResourceId(0);
+static bool operator<(const StyleableAttr& lhs, const StyleableAttr& rhs) {
+  const ResourceId lhs_id = lhs.attr_ref->id.value_or_default(ResourceId(0));
+  const ResourceId rhs_id = rhs.attr_ref->id.value_or_default(ResourceId(0));
   if (lhs_id < rhs_id) {
     return true;
   } else if (lhs_id > rhs_id) {
@@ -223,72 +223,57 @@ static bool less_styleable_attr(const StyleableAttr& lhs,
   }
 }
 
-void JavaClassGenerator::AddMembersToStyleableClass(
-    const StringPiece& package_name_to_generate, const std::string& entry_name,
-    const Styleable* styleable, ClassDefinition* out_styleable_class_def) {
-  const std::string class_name = Transform(entry_name);
+void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
+                                          const Styleable& styleable,
+                                          const StringPiece& package_name_to_generate,
+                                          ClassDefinition* out_class_def,
+                                          MethodDefinition* out_rewrite_method) {
+  const std::string array_field_name = TransformToFieldName(name.entry);
+  std::unique_ptr<ResourceArrayMember> array_def =
+      util::make_unique<ResourceArrayMember>(array_field_name);
 
-  std::unique_ptr<ResourceArrayMember> styleable_array_def =
-      util::make_unique<ResourceArrayMember>(class_name);
-
-  // This must be sorted by resource ID.
+  // The array must be sorted by resource ID.
   std::vector<StyleableAttr> sorted_attributes;
-  sorted_attributes.reserve(styleable->entries.size());
-  for (const auto& attr : styleable->entries) {
+  sorted_attributes.reserve(styleable.entries.size());
+  for (const auto& attr : styleable.entries) {
     // If we are not encoding final attributes, the styleable entry may have no
     // ID if we are building a static library.
     CHECK(!options_.use_final || attr.id) << "no ID set for Styleable entry";
     CHECK(bool(attr.name)) << "no name set for Styleable entry";
 
-    // We will need the unmangled, transformed name in the comments and the
-    // field,
+    // We will need the unmangled, transformed name in the comments and the field,
     // so create it once and cache it in this StyleableAttr data structure.
-    StyleableAttr styleable_attr = {};
+    StyleableAttr styleable_attr;
     styleable_attr.attr_ref = &attr;
-    styleable_attr.field_name = TransformNestedAttr(
-        attr.name.value(), class_name, package_name_to_generate);
 
-    Reference mangled_reference;
-    mangled_reference.id = attr.id;
-    mangled_reference.name = attr.name;
-    if (mangled_reference.name.value().package.empty()) {
-      mangled_reference.name.value().package =
-          context_->GetCompilationPackage();
-    }
+    // The field name for this attribute is prefixed by the name of this styleable and
+    // the package it comes from.
+    styleable_attr.field_name =
+        TransformNestedAttr(attr.name.value(), array_field_name, package_name_to_generate);
 
-    if (Maybe<ResourceName> mangled_name =
-            context_->GetNameMangler()->MangleName(
-                mangled_reference.name.value())) {
-      mangled_reference.name = mangled_name;
-    }
-
-    // Look up the symbol so that we can write out in the comments what are
-    // possible
-    // legal values for this attribute.
-    const SymbolTable::Symbol* symbol =
-        context_->GetExternalSymbols()->FindByReference(mangled_reference);
+    // Look up the symbol so that we can write out in the comments what are possible legal values
+    // for this attribute.
+    const SymbolTable::Symbol* symbol = context_->GetExternalSymbols()->FindByReference(attr);
     if (symbol && symbol->attribute) {
-      // Copy the symbol data structure because the returned instance can be
-      // destroyed.
-      styleable_attr.symbol = util::make_unique<SymbolTable::Symbol>(*symbol);
+      // Copy the symbol data structure because the returned instance can be destroyed.
+      styleable_attr.symbol = *symbol;
     }
     sorted_attributes.push_back(std::move(styleable_attr));
   }
 
   // Sort the attributes by ID.
-  std::sort(sorted_attributes.begin(), sorted_attributes.end(),
-            less_styleable_attr);
+  std::sort(sorted_attributes.begin(), sorted_attributes.end());
 
+  // Build the JavaDoc comment for the Styleable array. This has references to child attributes
+  // and what possible values can be used for them.
   const size_t attr_count = sorted_attributes.size();
   if (attr_count > 0) {
-    // Build the comment string for the Styleable. It includes details about the
-    // child attributes.
     std::stringstream styleable_comment;
-    if (!styleable->GetComment().empty()) {
-      styleable_comment << styleable->GetComment() << "\n";
+    if (!styleable.GetComment().empty()) {
+      styleable_comment << styleable.GetComment() << "\n";
     } else {
-      styleable_comment << "Attributes that can be used with a " << class_name
-                        << ".\n";
+      // Apply a default intro comment if the styleable has no comments of its own.
+      styleable_comment << "Attributes that can be used with a " << array_field_name << ".\n";
     }
 
     styleable_comment << "<p>Includes the following attributes:</p>\n"
@@ -297,22 +282,16 @@ void JavaClassGenerator::AddMembersToStyleableClass(
                          "<colgroup align=\"left\" />\n"
                          "<tr><th>Attribute</th><th>Description</th></tr>\n";
 
+    // Build the table of attributes with their links and names.
     for (const StyleableAttr& entry : sorted_attributes) {
-      if (!entry.symbol) {
+      if (SkipSymbol(entry.symbol)) {
         continue;
       }
 
-      if (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
-          !entry.symbol->is_public) {
-        // Don't write entries for non-public attributes.
-        continue;
-      }
-
-      StringPiece attr_comment_line = entry.symbol->attribute->GetComment();
+      StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
       if (attr_comment_line.contains("@removed")) {
         // Removed attributes are public but hidden from the documentation, so
-        // don't emit
-        // them as part of the class documentation.
+        // don't emit them as part of the class documentation.
         continue;
       }
 
@@ -327,71 +306,52 @@ void JavaClassGenerator::AddMembersToStyleableClass(
 
       styleable_comment << "<td>";
 
-      // Only use the comment up until the first '.'. This is to stay compatible
-      // with
-      // the way old AAPT did it (presumably to keep it short and to avoid
-      // including
+      // Only use the comment up until the first '.'. This is to stay compatible with
+      // the way old AAPT did it (presumably to keep it short and to avoid including
       // annotations like @hide which would affect this Styleable).
-      auto iter =
-          std::find(attr_comment_line.begin(), attr_comment_line.end(), u'.');
+      auto iter = std::find(attr_comment_line.begin(), attr_comment_line.end(), '.');
       if (iter != attr_comment_line.end()) {
-        attr_comment_line =
-            attr_comment_line.substr(0, (iter - attr_comment_line.begin()) + 1);
+        attr_comment_line = attr_comment_line.substr(0, (iter - attr_comment_line.begin()) + 1);
       }
       styleable_comment << attr_comment_line << "</td></tr>\n";
     }
     styleable_comment << "</table>\n";
 
+    // Generate the @see lines for each attribute.
     for (const StyleableAttr& entry : sorted_attributes) {
-      if (!entry.symbol) {
-        continue;
-      }
-
-      if (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
-          !entry.symbol->is_public) {
-        // Don't write entries for non-public attributes.
+      if (SkipSymbol(entry.symbol)) {
         continue;
       }
       styleable_comment << "@see #" << entry.field_name << "\n";
     }
 
-    styleable_array_def->GetCommentBuilder()->AppendComment(
-        styleable_comment.str());
+    array_def->GetCommentBuilder()->AppendComment(styleable_comment.str());
   }
 
   // Add the ResourceIds to the array member.
   for (const StyleableAttr& styleable_attr : sorted_attributes) {
-    styleable_array_def->AddElement(styleable_attr.attr_ref->id
-                                        ? styleable_attr.attr_ref->id.value()
-                                        : ResourceId(0));
+    const ResourceId id = styleable_attr.attr_ref->id.value_or_default(ResourceId(0));
+    array_def->AddElement(id);
   }
 
   // Add the Styleable array to the Styleable class.
-  out_styleable_class_def->AddMember(std::move(styleable_array_def));
+  out_class_def->AddMember(std::move(array_def));
 
   // Now we emit the indices into the array.
   for (size_t i = 0; i < attr_count; i++) {
     const StyleableAttr& styleable_attr = sorted_attributes[i];
-
-    if (!styleable_attr.symbol) {
-      continue;
-    }
-
-    if (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic &&
-        !styleable_attr.symbol->is_public) {
-      // Don't write entries for non-public attributes.
+    if (SkipSymbol(styleable_attr.symbol)) {
       continue;
     }
 
     StringPiece comment = styleable_attr.attr_ref->GetComment();
-    if (styleable_attr.symbol->attribute && comment.empty()) {
-      comment = styleable_attr.symbol->attribute->GetComment();
+    if (styleable_attr.symbol.value().attribute && comment.empty()) {
+      comment = styleable_attr.symbol.value().attribute->GetComment();
     }
 
     if (comment.contains("@removed")) {
       // Removed attributes are public but hidden from the documentation, so
-      // don't emit them
-      // as part of the class documentation.
+      // don't emit them as part of the class documentation.
       continue;
     }
 
@@ -414,114 +374,151 @@ void JavaClassGenerator::AddMembersToStyleableClass(
       std::stringstream default_comment;
       default_comment << "<p>This symbol is the offset where the "
                       << "{@link " << package_name << ".R.attr#"
-                      << Transform(attr_name.entry) << "}\n"
+                      << TransformToFieldName(attr_name.entry) << "}\n"
                       << "attribute's value can be found in the "
-                      << "{@link #" << class_name << "} array.";
+                      << "{@link #" << array_field_name << "} array.";
       attr_processor->AppendComment(default_comment.str());
     }
 
     attr_processor->AppendNewLine();
-
-    AddAttributeFormatDoc(attr_processor,
-                          styleable_attr.symbol->attribute.get());
+    AddAttributeFormatDoc(attr_processor, styleable_attr.symbol.value().attribute.get());
     attr_processor->AppendNewLine();
+    attr_processor->AppendComment(
+        StringPrintf("@attr name %s:%s", package_name.data(), attr_name.entry.data()));
 
-    std::stringstream doclava_name;
-    doclava_name << "@attr name " << package_name << ":" << attr_name.entry;
+    out_class_def->AddMember(std::move(index_member));
+  }
 
-    attr_processor->AppendComment(doclava_name.str());
-
-    out_styleable_class_def->AddMember(std::move(index_member));
+  // If there is a rewrite method to generate, add the statements that rewrite package IDs
+  // for this styleable.
+  if (out_rewrite_method != nullptr) {
+    out_rewrite_method->AppendStatement(
+        StringPrintf("for (int i = 0; i < styleable.%s.length; i++) {", array_field_name.data()));
+    out_rewrite_method->AppendStatement(
+        StringPrintf("  if ((styleable.%s[i] & 0xff000000) == 0) {", array_field_name.data()));
+    out_rewrite_method->AppendStatement(
+        StringPrintf("    styleable.%s[i] = (styleable.%s[i] & 0x00ffffff) | (p << 24);",
+                     array_field_name.data(), array_field_name.data()));
+    out_rewrite_method->AppendStatement("  }");
+    out_rewrite_method->AppendStatement("}");
   }
 }
 
-bool JavaClassGenerator::AddMembersToTypeClass(
-    const StringPiece& package_name_to_generate,
-    const ResourceTablePackage* package, const ResourceTableType* type,
-    ClassDefinition* out_type_class_def) {
-  for (const auto& entry : type->entries) {
-    if (SkipSymbol(entry->symbol_status.state)) {
+void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const ResourceId& id,
+                                         const ResourceEntry& entry, ClassDefinition* out_class_def,
+                                         MethodDefinition* out_rewrite_method) {
+  const std::string field_name = TransformToFieldName(name.entry);
+  std::unique_ptr<ResourceMember> resource_member =
+      util::make_unique<ResourceMember>(field_name, id);
+
+  // Build the comments and annotations for this entry.
+  AnnotationProcessor* processor = resource_member->GetCommentBuilder();
+
+  // Add the comments from any <public> tags.
+  if (entry.symbol_status.state != SymbolState::kUndefined) {
+    processor->AppendComment(entry.symbol_status.comment);
+  }
+
+  // Add the comments from all configurations of this entry.
+  for (const auto& config_value : entry.values) {
+    processor->AppendComment(config_value->value->GetComment());
+  }
+
+  // If this is an Attribute, append the format Javadoc.
+  if (!entry.values.empty()) {
+    if (Attribute* attr = ValueCast<Attribute>(entry.values.front()->value.get())) {
+      // We list out the available values for the given attribute.
+      AddAttributeFormatDoc(processor, attr);
+    }
+  }
+
+  out_class_def->AddMember(std::move(resource_member));
+
+  if (out_rewrite_method != nullptr) {
+    const StringPiece& type_str = ToString(name.type);
+    out_rewrite_method->AppendStatement(StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | (p << 24);",
+                                                     type_str.data(), field_name.data(),
+                                                     type_str.data(), field_name.data()));
+  }
+}
+
+Maybe<std::string> JavaClassGenerator::UnmangleResource(const StringPiece& package_name,
+                                                        const StringPiece& package_name_to_generate,
+                                                        const ResourceEntry& entry) {
+  if (SkipSymbol(entry.symbol_status.state)) {
+    return {};
+  }
+
+  std::string unmangled_package;
+  std::string unmangled_name = entry.name;
+  if (NameMangler::Unmangle(&unmangled_name, &unmangled_package)) {
+    // The entry name was mangled, and we successfully unmangled it.
+    // Check that we want to emit this symbol.
+    if (package_name != unmangled_package) {
+      // Skip the entry if it doesn't belong to the package we're writing.
+      return {};
+    }
+  } else if (package_name_to_generate != package_name) {
+    // We are processing a mangled package name,
+    // but this is a non-mangled resource.
+    return {};
+  }
+  return {std::move(unmangled_name)};
+}
+
+bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate,
+                                     const ResourceTablePackage& package,
+                                     const ResourceTableType& type,
+                                     ClassDefinition* out_type_class_def,
+                                     MethodDefinition* out_rewrite_method_def) {
+  for (const auto& entry : type.entries) {
+    const Maybe<std::string> unmangled_name =
+        UnmangleResource(package.name, package_name_to_generate, *entry);
+    if (!unmangled_name) {
       continue;
     }
 
+    // Create an ID if there is one (static libraries don't need one).
     ResourceId id;
-    if (package->id && type->id && entry->id) {
-      id = ResourceId(package->id.value(), type->id.value(), entry->id.value());
+    if (package.id && type.id && entry->id) {
+      id = ResourceId(package.id.value(), type.id.value(), entry->id.value());
     }
 
-    std::string unmangled_package;
-    std::string unmangled_name = entry->name;
-    if (NameMangler::Unmangle(&unmangled_name, &unmangled_package)) {
-      // The entry name was mangled, and we successfully unmangled it.
-      // Check that we want to emit this symbol.
-      if (package->name != unmangled_package) {
-        // Skip the entry if it doesn't belong to the package we're writing.
-        continue;
-      }
-    } else if (package_name_to_generate != package->name) {
-      // We are processing a mangled package name,
-      // but this is a non-mangled resource.
-      continue;
-    }
+    // We need to make sure we hide the fact that we are generating kAttrPrivate attributes.
+    const ResourceNameRef resource_name(
+        package_name_to_generate,
+        type.type == ResourceType::kAttrPrivate ? ResourceType::kAttr : type.type,
+        unmangled_name.value());
 
-    if (!IsValidSymbol(unmangled_name)) {
-      ResourceNameRef resource_name(package_name_to_generate, type->type,
-                                    unmangled_name);
+    // Check to see if the unmangled name is a valid Java name (not a keyword).
+    if (!IsValidSymbol(unmangled_name.value())) {
       std::stringstream err;
       err << "invalid symbol name '" << resource_name << "'";
       error_ = err.str();
       return false;
     }
 
-    if (type->type == ResourceType::kStyleable) {
+    if (resource_name.type == ResourceType::kStyleable) {
       CHECK(!entry->values.empty());
 
       const Styleable* styleable =
           static_cast<const Styleable*>(entry->values.front()->value.get());
 
-      // Comments are handled within this method.
-      AddMembersToStyleableClass(package_name_to_generate, unmangled_name,
-                                 styleable, out_type_class_def);
+      ProcessStyleable(resource_name, id, *styleable, package_name_to_generate, out_type_class_def,
+                       out_rewrite_method_def);
     } else {
-      std::unique_ptr<ResourceMember> resource_member =
-          util::make_unique<ResourceMember>(Transform(unmangled_name), id);
-
-      // Build the comments and annotations for this entry.
-      AnnotationProcessor* processor = resource_member->GetCommentBuilder();
-
-      // Add the comments from any <public> tags.
-      if (entry->symbol_status.state != SymbolState::kUndefined) {
-        processor->AppendComment(entry->symbol_status.comment);
-      }
-
-      // Add the comments from all configurations of this entry.
-      for (const auto& config_value : entry->values) {
-        processor->AppendComment(config_value->value->GetComment());
-      }
-
-      // If this is an Attribute, append the format Javadoc.
-      if (!entry->values.empty()) {
-        if (Attribute* attr =
-                ValueCast<Attribute>(entry->values.front()->value.get())) {
-          // We list out the available values for the given attribute.
-          AddAttributeFormatDoc(processor, attr);
-        }
-      }
-
-      out_type_class_def->AddMember(std::move(resource_member));
+      ProcessResource(resource_name, id, *entry, out_type_class_def, out_rewrite_method_def);
     }
   }
   return true;
 }
 
-bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
-                                  std::ostream* out) {
+bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate, std::ostream* out) {
   return Generate(package_name_to_generate, package_name_to_generate, out);
 }
 
-static void AppendJavaDocAnnotations(
-    const std::vector<std::string>& annotations,
-    AnnotationProcessor* processor) {
+static void AppendJavaDocAnnotations(const std::vector<std::string>& annotations,
+                                     AnnotationProcessor* processor) {
   for (const std::string& annotation : annotations) {
     std::string proper_annotation = "@";
     proper_annotation += annotation;
@@ -532,37 +529,40 @@ static void AppendJavaDocAnnotations(
 bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
                                   const StringPiece& out_package_name,
                                   std::ostream* out) {
-  ClassDefinition r_class("R", ClassQualifier::None, true);
+  ClassDefinition r_class("R", ClassQualifier::kNone, true);
+  std::unique_ptr<MethodDefinition> rewrite_method;
+
+  // Generate an onResourcesLoaded() callback if requested.
+  if (options_.generate_rewrite_callback) {
+    rewrite_method =
+        util::make_unique<MethodDefinition>("public static void onResourcesLoaded(int p)");
+  }
 
   for (const auto& package : table_->packages) {
     for (const auto& type : package->types) {
       if (type->type == ResourceType::kAttrPrivate) {
+        // We generate these as part of the kAttr type, so skip them here.
         continue;
       }
 
+      // Stay consistent with AAPT and generate an empty type class if the R class
+      // is public.
       const bool force_creation_if_empty =
           (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
 
-      std::unique_ptr<ClassDefinition> class_def =
-          util::make_unique<ClassDefinition>(ToString(type->type),
-                                             ClassQualifier::Static,
-                                             force_creation_if_empty);
-
-      bool result = AddMembersToTypeClass(
-          package_name_to_generate, package.get(), type.get(), class_def.get());
-      if (!result) {
+      std::unique_ptr<ClassDefinition> class_def = util::make_unique<ClassDefinition>(
+          ToString(type->type), ClassQualifier::kStatic, force_creation_if_empty);
+      if (!ProcessType(package_name_to_generate, *package, *type, class_def.get(),
+                       rewrite_method.get())) {
         return false;
       }
 
       if (type->type == ResourceType::kAttr) {
         // Also include private attributes in this same class.
-        ResourceTableType* priv_type =
-            package->FindType(ResourceType::kAttrPrivate);
+        const ResourceTableType* priv_type = package->FindType(ResourceType::kAttrPrivate);
         if (priv_type) {
-          result =
-              AddMembersToTypeClass(package_name_to_generate, package.get(),
-                                    priv_type, class_def.get());
-          if (!result) {
+          if (!ProcessType(package_name_to_generate, *package, *priv_type, class_def.get(),
+                           rewrite_method.get())) {
             return false;
           }
         }
@@ -571,23 +571,23 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
       if (type->type == ResourceType::kStyleable &&
           options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic) {
         // When generating a public R class, we don't want Styleable to be part
-        // of the API.
-        // It is only emitted for documentation purposes.
+        // of the API. It is only emitted for documentation purposes.
         class_def->GetCommentBuilder()->AppendComment("@doconly");
       }
 
-      AppendJavaDocAnnotations(options_.javadoc_annotations,
-                               class_def->GetCommentBuilder());
+      AppendJavaDocAnnotations(options_.javadoc_annotations, class_def->GetCommentBuilder());
 
       r_class.AddMember(std::move(class_def));
     }
   }
 
-  AppendJavaDocAnnotations(options_.javadoc_annotations,
-                           r_class.GetCommentBuilder());
+  if (rewrite_method != nullptr) {
+    r_class.AddMember(std::move(rewrite_method));
+  }
 
-  if (!ClassDefinition::WriteJavaFile(&r_class, out_package_name,
-                                      options_.use_final, out)) {
+  AppendJavaDocAnnotations(options_.javadoc_annotations, r_class.GetCommentBuilder());
+
+  if (!ClassDefinition::WriteJavaFile(&r_class, out_package_name, options_.use_final, out)) {
     return false;
   }
 

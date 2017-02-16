@@ -701,14 +701,11 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
 
   out_resource->name.type = *parsed_type;
 
-  if (Maybe<StringPiece> maybe_id_str =
-          xml::FindNonEmptyAttribute(parser, "id")) {
-    Maybe<ResourceId> maybe_id =
-        ResourceUtils::ParseResourceId(maybe_id_str.value());
+  if (Maybe<StringPiece> maybe_id_str = xml::FindNonEmptyAttribute(parser, "id")) {
+    Maybe<ResourceId> maybe_id = ResourceUtils::ParseResourceId(maybe_id_str.value());
     if (!maybe_id) {
-      diag_->Error(DiagMessage(out_resource->source) << "invalid resource ID '"
-                                                     << maybe_id.value()
-                                                     << "' in <public>");
+      diag_->Error(DiagMessage(out_resource->source)
+                   << "invalid resource ID '" << maybe_id_str.value() << "' in <public>");
       return false;
     }
     out_resource->id = maybe_id.value();

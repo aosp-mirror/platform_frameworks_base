@@ -62,6 +62,8 @@ class NameMangler {
     return policy_.packages_to_mangle.count(package) != 0;
   }
 
+  const std::string& GetTargetPackageName() const { return policy_.target_package_name; }
+
   /**
    * Returns a mangled name that is a combination of `name` and `package`.
    * The mangled name should contain symbols that are illegal to define in XML,

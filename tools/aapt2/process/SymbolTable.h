@@ -47,6 +47,7 @@ inline android::hash_t hash_type(const ResourceId& id) {
 }
 
 class ISymbolSource;
+class NameMangler;
 
 class SymbolTable {
  public:
@@ -72,25 +73,32 @@ class SymbolTable {
     bool is_public = false;
   };
 
-  SymbolTable() : cache_(200), id_cache_(200) {}
+  SymbolTable(NameMangler* mangler) : mangler_(mangler), cache_(200), id_cache_(200) {}
 
+  // Appends a symbol source. The cache is not cleared since entries that
+  // have already been found would take precedence due to ordering.
   void AppendSource(std::unique_ptr<ISymbolSource> source);
+
+  // Prepends a symbol source so that its symbols take precedence. This will
+  // cause the existing cache to be cleared.
   void PrependSource(std::unique_ptr<ISymbolSource> source);
 
-  /**
-   * Never hold on to the result between calls to FindByName or FindById. The
-   * results stored in a cache which may evict entries.
-   */
+  // NOTE: Never hold on to the result between calls to FindByXXX. The
+  // results are stored in a cache which may evict entries on subsequent calls.
   const Symbol* FindByName(const ResourceName& name);
+
+  // NOTE: Never hold on to the result between calls to FindByXXX. The
+  // results are stored in a cache which may evict entries on subsequent calls.
   const Symbol* FindById(const ResourceId& id);
 
-  /**
-   * Let's the ISymbolSource decide whether looking up by name or ID is faster,
-   * if both are available.
-   */
+  // Let's the ISymbolSource decide whether looking up by name or ID is faster,
+  // if both are available.
+  // NOTE: Never hold on to the result between calls to FindByXXX. The
+  // results are stored in a cache which may evict entries on subsequent calls.
   const Symbol* FindByReference(const Reference& ref);
 
  private:
+  NameMangler* mangler_;
   std::vector<std::unique_ptr<ISymbolSource>> sources_;
 
   // We use shared_ptr because unique_ptr is not supported and
@@ -155,6 +163,7 @@ class AssetManagerSymbolSource : public ISymbolSource {
   AssetManagerSymbolSource() = default;
 
   bool AddAssetPath(const android::StringPiece& path);
+  std::map<size_t, std::string> GetAssignedPackageIds() const;
 
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;

@@ -29,7 +29,8 @@ namespace aapt {
 struct RawValueVisitor {
   virtual ~RawValueVisitor() = default;
 
-  virtual void VisitItem(Item* value) {}
+  virtual void VisitAny(Value* value) {}
+  virtual void VisitItem(Item* value) { VisitAny(value); }
   virtual void Visit(Reference* value) { VisitItem(value); }
   virtual void Visit(RawString* value) { VisitItem(value); }
   virtual void Visit(String* value) { VisitItem(value); }
@@ -38,11 +39,11 @@ struct RawValueVisitor {
   virtual void Visit(Id* value) { VisitItem(value); }
   virtual void Visit(BinaryPrimitive* value) { VisitItem(value); }
 
-  virtual void Visit(Attribute* value) {}
-  virtual void Visit(Style* value) {}
-  virtual void Visit(Array* value) {}
-  virtual void Visit(Plural* value) {}
-  virtual void Visit(Styleable* value) {}
+  virtual void Visit(Attribute* value) { VisitAny(value); }
+  virtual void Visit(Style* value) { VisitAny(value); }
+  virtual void Visit(Array* value) { VisitAny(value); }
+  virtual void Visit(Plural* value) { VisitAny(value); }
+  virtual void Visit(Styleable* value) { VisitAny(value); }
 };
 
 // NOLINT, do not add parentheses around T.

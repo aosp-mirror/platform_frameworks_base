@@ -56,13 +56,13 @@ class TableFlattenerTest : public ::testing::Test {
       return result;
     }
 
-    if (out_table->add(content.data(), content.size(), -1, true) != NO_ERROR) {
+    if (out_table->add(content.data(), content.size(), 1, true) != NO_ERROR) {
       return ::testing::AssertionFailure() << "flattened ResTable is corrupt";
     }
     return ::testing::AssertionSuccess();
   }
 
-  ::testing::AssertionResult Flatten(IAaptContext* context, const TableFlattenerOptions options,
+  ::testing::AssertionResult Flatten(IAaptContext* context, const TableFlattenerOptions& options,
                                      ResourceTable* table, ResourceTable* out_table) {
     std::string content;
     auto result = Flatten(context, options, table, &content);
@@ -357,6 +357,58 @@ TEST_F(TableFlattenerTest, DoNotUseSparseEntryForDenseConfig) {
   ASSERT_TRUE(Flatten(context.get(), options, table_in.get(), &sparse_contents));
 
   EXPECT_EQ(no_sparse_contents.size(), sparse_contents.size());
+}
+
+TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("lib").SetPackageId(0x00).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("lib", 0x00)
+          .AddValue("lib:id/foo", ResourceId(0x00010000), util::make_unique<Id>())
+          .Build();
+  ResourceTable result;
+  ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      result.FindResource(test::ParseNameOrDie("lib:id/foo"));
+  AAPT_ASSERT_TRUE(search_result);
+  EXPECT_EQ(0x00u, search_result.value().package->id.value());
+
+  auto iter = result.included_packages_.find(0x00);
+  ASSERT_NE(result.included_packages_.end(), iter);
+  EXPECT_EQ("lib", iter->second);
+}
+
+TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x7f).Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("app", 0x7f)
+          .AddValue("app:id/foo", ResourceId(0x7f010000),
+                    test::BuildReference("lib_one:id/foo", ResourceId(0x02010000)))
+          .AddValue("app:id/bar", ResourceId(0x7f010001),
+                    test::BuildReference("lib_two:id/bar", ResourceId(0x03010000)))
+          .Build();
+  table->included_packages_[0x02] = "lib_one";
+  table->included_packages_[0x03] = "lib_two";
+
+  ResTable result;
+  ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
+
+  const DynamicRefTable* dynamic_ref_table = result.getDynamicRefTableForCookie(1);
+  ASSERT_NE(nullptr, dynamic_ref_table);
+
+  const KeyedVector<String16, uint8_t> entries = dynamic_ref_table->entries();
+
+  ssize_t idx = entries.indexOfKey(android::String16("lib_one"));
+  ASSERT_GE(idx, 0);
+  EXPECT_EQ(0x02u, entries.valueAt(idx));
+
+  idx = entries.indexOfKey(android::String16("lib_two"));
+  ASSERT_GE(idx, 0);
+  EXPECT_EQ(0x03u, entries.valueAt(idx));
 }
 
 }  // namespace aapt

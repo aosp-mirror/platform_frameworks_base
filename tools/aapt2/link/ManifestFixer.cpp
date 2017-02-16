@@ -54,18 +54,25 @@ static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
   return true;
 }
 
-static bool OptionalNameIsJavaClassName(xml::Element* el,
-                                        SourcePathDiagnostics* diag) {
+static bool OptionalNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
   if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
     return NameIsJavaClassName(el, attr, diag);
   }
   return true;
 }
 
-static bool RequiredNameIsJavaClassName(xml::Element* el,
-                                        SourcePathDiagnostics* diag) {
+static bool RequiredNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
   if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
     return NameIsJavaClassName(el, attr, diag);
+  }
+  diag->Error(DiagMessage(el->line_number)
+              << "<" << el->name << "> is missing attribute 'android:name'");
+  return false;
+}
+
+static bool RequiredNameIsJavaPackage(xml::Element* el, SourcePathDiagnostics* diag) {
+  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
+    return util::IsJavaPackageName(attr->value);
   }
   diag->Error(DiagMessage(el->line_number)
               << "<" << el->name << "> is missing attribute 'android:name'");
@@ -263,7 +270,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   xml::XmlNodeAction& application_action = manifest_action["application"];
   application_action.Action(OptionalNameIsJavaClassName);
 
-  application_action["uses-library"];
+  application_action["uses-library"].Action(RequiredNameIsJavaPackage);
+  application_action["library"].Action(RequiredNameIsJavaPackage);
   application_action["meta-data"] = meta_data_action;
   application_action["activity"] = component_action;
   application_action["activity-alias"] = component_action;

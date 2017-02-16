@@ -387,8 +387,7 @@ bool ResourceTable::AddResourceImpl(
   }
 
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid() && package->id &&
-      package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(value->GetSource())
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but package '" << package->name << "' already has ID "
@@ -397,7 +396,7 @@ bool ResourceTable::AddResourceImpl(
   }
 
   ResourceTableType* type = package->FindOrCreateType(name.type);
-  if (res_id.is_valid() && type->id && type->id.value() != res_id.type_id()) {
+  if (res_id.is_valid_dynamic() && type->id && type->id.value() != res_id.type_id()) {
     diag->Error(DiagMessage(value->GetSource())
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but type '" << type->type << "' already has ID "
@@ -406,8 +405,7 @@ bool ResourceTable::AddResourceImpl(
   }
 
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
-  if (res_id.is_valid() && entry->id &&
-      entry->id.value() != res_id.entry_id()) {
+  if (res_id.is_valid_dynamic() && entry->id && entry->id.value() != res_id.entry_id()) {
     diag->Error(DiagMessage(value->GetSource())
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
@@ -441,7 +439,7 @@ bool ResourceTable::AddResourceImpl(
     }
   }
 
-  if (res_id.is_valid()) {
+  if (res_id.is_valid_dynamic()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();
@@ -480,8 +478,7 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name,
   }
 
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
-  if (res_id.is_valid() && package->id &&
-      package->id.value() != res_id.package_id()) {
+  if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
     diag->Error(DiagMessage(symbol.source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but package '" << package->name << "' already has ID "
@@ -490,7 +487,7 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name,
   }
 
   ResourceTableType* type = package->FindOrCreateType(name.type);
-  if (res_id.is_valid() && type->id && type->id.value() != res_id.type_id()) {
+  if (res_id.is_valid_dynamic() && type->id && type->id.value() != res_id.type_id()) {
     diag->Error(DiagMessage(symbol.source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but type '" << type->type << "' already has ID "
@@ -499,8 +496,7 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name,
   }
 
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
-  if (res_id.is_valid() && entry->id &&
-      entry->id.value() != res_id.entry_id()) {
+  if (res_id.is_valid_dynamic() && entry->id && entry->id.value() != res_id.entry_id()) {
     diag->Error(DiagMessage(symbol.source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
@@ -509,7 +505,7 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name,
     return false;
   }
 
-  if (res_id.is_valid()) {
+  if (res_id.is_valid_dynamic()) {
     package->id = res_id.package_id();
     type->id = res_id.type_id();
     entry->id = res_id.entry_id();

@@ -1,7 +1,12 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.8
+### `aapt2 link ...`
+- Adds shared library support. Build a shared library with the `--shared-lib` flag.
+  Build a client of a shared library by simply including it via `-I`.
+
 ## Version 2.7
-### `aapt2 compile`
+### `aapt2 compile ...`
 - Fixes bug where psuedolocalization auto-translated strings marked 'translateable="false"'.
 
 ## Version 2.6

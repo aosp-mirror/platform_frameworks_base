@@ -28,6 +28,8 @@ namespace aapt {
 
 class DiffContext : public IAaptContext {
  public:
+  DiffContext() : name_mangler_({}), symbol_table_(&name_mangler_) {}
+
   const std::string& GetCompilationPackage() override { return empty_; }
 
   uint8_t GetPackageId() override { return 0x0; }
@@ -45,7 +47,7 @@ class DiffContext : public IAaptContext {
  private:
   std::string empty_;
   StdErrDiagnostics diagnostics_;
-  NameMangler name_mangler_ = NameMangler(NameManglerPolicy{});
+  NameMangler name_mangler_;
   SymbolTable symbol_table_;
 };
 

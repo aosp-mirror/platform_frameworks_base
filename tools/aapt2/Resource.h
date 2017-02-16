@@ -138,6 +138,10 @@ struct ResourceId {
   ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
   bool is_valid() const;
+
+  // Returns true if the ID is a valid ID or dynamic ID (package ID can be 0).
+  bool is_valid_dynamic() const;
+
   uint8_t package_id() const;
   uint8_t type_id() const;
   uint16_t entry_id() const;
@@ -210,6 +214,8 @@ inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e)
 inline bool ResourceId::is_valid() const {
   return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
 }
+
+inline bool ResourceId::is_valid_dynamic() const { return (id & 0x00ff0000u) != 0; }
 
 inline uint8_t ResourceId::package_id() const {
   return static_cast<uint8_t>(id >> 24);

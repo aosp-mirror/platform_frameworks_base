@@ -26,11 +26,8 @@
 
 namespace aapt {
 
-/**
- * Assigns IDs to each resource in the table, respecting existing IDs and
- * filling in gaps
- * in between fixed ID assignments.
- */
+// Assigns IDs to each resource in the table, respecting existing IDs and
+// filling in gaps in between fixed ID assignments.
 class IdAssigner : public IResourceTableConsumer {
  public:
   IdAssigner() = default;

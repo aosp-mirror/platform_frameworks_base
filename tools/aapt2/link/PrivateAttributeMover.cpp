@@ -26,11 +26,9 @@
 namespace aapt {
 
 template <typename InputContainer, typename OutputIterator, typename Predicate>
-OutputIterator move_if(InputContainer& input_container, OutputIterator result,
-                       Predicate pred) {
+OutputIterator move_if(InputContainer& input_container, OutputIterator result, Predicate pred) {
   const auto last = input_container.end();
-  auto new_end =
-      std::find_if(input_container.begin(), input_container.end(), pred);
+  auto new_end = std::find_if(input_container.begin(), input_container.end(), pred);
   if (new_end == last) {
     return result;
   }
@@ -57,8 +55,7 @@ OutputIterator move_if(InputContainer& input_container, OutputIterator result,
   return result;
 }
 
-bool PrivateAttributeMover::Consume(IAaptContext* context,
-                                    ResourceTable* table) {
+bool PrivateAttributeMover::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     ResourceTableType* type = package->FindType(ResourceType::kAttr);
     if (!type) {
@@ -68,18 +65,24 @@ bool PrivateAttributeMover::Consume(IAaptContext* context,
     if (type->symbol_status.state != SymbolState::kPublic) {
       // No public attributes, so we can safely leave these private attributes
       // where they are.
-      return true;
+      continue;
     }
 
-    ResourceTableType* priv_attr_type =
-        package->FindOrCreateType(ResourceType::kAttrPrivate);
-    CHECK(priv_attr_type->entries.empty());
+    std::vector<std::unique_ptr<ResourceEntry>> private_attr_entries;
 
-    move_if(type->entries, std::back_inserter(priv_attr_type->entries),
+    move_if(type->entries, std::back_inserter(private_attr_entries),
             [](const std::unique_ptr<ResourceEntry>& entry) -> bool {
               return entry->symbol_status.state != SymbolState::kPublic;
             });
-    break;
+
+    if (private_attr_entries.empty()) {
+      // No private attributes.
+      continue;
+    }
+
+    ResourceTableType* priv_attr_type = package->FindOrCreateType(ResourceType::kAttrPrivate);
+    CHECK(priv_attr_type->entries.empty());
+    priv_attr_type->entries = std::move(private_attr_entries);
   }
   return true;
 }

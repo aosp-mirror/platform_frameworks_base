@@ -293,8 +293,7 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
 
 TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {}
 
-TEST(JavaClassGeneratorTest,
-     CommentsForStyleablesAndNestedAttributesArePresent) {
+TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
   Attribute attr(false);
   attr.SetComment(StringPiece("This is an attribute"));
 
@@ -362,6 +361,35 @@ TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
   const size_t pos = actual.find("removed");
   EXPECT_NE(std::string::npos, pos);
   EXPECT_EQ(std::string::npos, actual.find("removed", pos + 1));
+}
+
+TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x00)
+          .AddValue("android:attr/foo", ResourceId(0x00010000), util::make_unique<Attribute>(false))
+          .AddValue("android:id/foo", ResourceId(0x00020000), util::make_unique<Id>())
+          .AddValue(
+              "android:style/foo", ResourceId(0x00030000),
+              test::StyleBuilder()
+                  .AddItem("android:attr/foo", ResourceId(0x00010000), util::make_unique<Id>())
+                  .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetPackageId(0x00).SetCompilationPackage("android").Build();
+
+  JavaClassGeneratorOptions options;
+  options.use_final = false;
+  options.generate_rewrite_callback = true;
+  JavaClassGenerator generator(context.get(), table.get(), options);
+
+  std::stringstream out;
+  ASSERT_TRUE(generator.Generate("android", &out));
+
+  std::string actual = out.str();
+
+  EXPECT_NE(std::string::npos, actual.find("onResourcesLoaded"));
 }
 
 }  // namespace aapt

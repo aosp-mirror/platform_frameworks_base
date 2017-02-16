@@ -59,7 +59,16 @@ using ::google::protobuf::io::CopyingOutputStreamAdaptor;
 
 namespace aapt {
 
+// The type of package to build.
+enum class PackageType {
+  kApp,
+  kSharedLib,
+  kStaticLib,
+};
+
 struct LinkOptions {
+  PackageType package_type = PackageType::kApp;
+
   std::string output_path;
   std::string manifest_path;
   std::vector<std::string> include_paths;
@@ -87,7 +96,6 @@ struct LinkOptions {
   std::unordered_set<std::string> extensions_to_not_compress;
 
   // Static lib options.
-  bool static_lib = false;
   bool no_static_lib_packages = false;
 
   // AndroidManifest.xml massaging options.
@@ -111,7 +119,7 @@ struct LinkOptions {
 
 class LinkContext : public IAaptContext {
  public:
-  LinkContext() : name_mangler_({}) {}
+  LinkContext() : name_mangler_({}), symbols_(&name_mangler_) {}
 
   IDiagnostics* GetDiagnostics() override { return &diagnostics_; }
 
@@ -684,14 +692,13 @@ class LinkCommand {
 
       // First try to load the file as a static lib.
       std::string error_str;
-      std::unique_ptr<ResourceTable> static_include =
-          LoadStaticLibrary(path, &error_str);
-      if (static_include) {
-        if (!options_.static_lib) {
-          // Can't include static libraries when not building a static library.
+      std::unique_ptr<ResourceTable> include_static = LoadStaticLibrary(path, &error_str);
+      if (include_static) {
+        if (options_.package_type != PackageType::kStaticLib) {
+          // Can't include static libraries when not building a static library (they have no IDs
+          // assigned).
           context_->GetDiagnostics()->Error(
-              DiagMessage(path)
-              << "can't include static library when building app");
+              DiagMessage(path) << "can't include static library when not building a static lib");
           return false;
         }
 
@@ -699,16 +706,15 @@ class LinkCommand {
         // package of this
         // table to our compilation package.
         if (options_.no_static_lib_packages) {
-          if (ResourceTablePackage* pkg =
-                  static_include->FindPackageById(0x7f)) {
+          if (ResourceTablePackage* pkg = include_static->FindPackageById(0x7f)) {
             pkg->name = context_->GetCompilationPackage();
           }
         }
 
         context_->GetExternalSymbols()->AppendSource(
-            util::make_unique<ResourceTableSymbolSource>(static_include.get()));
+            util::make_unique<ResourceTableSymbolSource>(include_static.get()));
 
-        static_table_includes_.push_back(std::move(static_include));
+        static_table_includes_.push_back(std::move(include_static));
 
       } else if (!error_str.empty()) {
         // We had an error with reading, so fail.
@@ -717,9 +723,16 @@ class LinkCommand {
       }
 
       if (!asset_source->AddAssetPath(path)) {
-        context_->GetDiagnostics()->Error(DiagMessage(path)
-                                          << "failed to load include path");
+        context_->GetDiagnostics()->Error(DiagMessage(path) << "failed to load include path");
         return false;
+      }
+    }
+
+    // Capture the shared libraries so that the final resource table can be properly flattened
+    // with support for shared libraries.
+    for (auto& entry : asset_source->GetAssignedPackageIds()) {
+      if (entry.first > 0x01 && entry.first < 0x7f) {
+        final_table_.included_packages_[entry.first] = entry.second;
       }
     }
 
@@ -1402,7 +1415,7 @@ class LinkCommand {
    */
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set,
                 xml::XmlResource* manifest, ResourceTable* table) {
-    const bool keep_raw_values = options_.static_lib;
+    const bool keep_raw_values = options_.package_type == PackageType::kStaticLib;
     bool result = FlattenXml(manifest, "AndroidManifest.xml", {},
                              keep_raw_values, writer, context_);
     if (!result) {
@@ -1422,25 +1435,21 @@ class LinkCommand {
     file_flattener_options.update_proguard_spec =
         static_cast<bool>(options_.generate_proguard_rules_path);
 
-    ResourceFileFlattener file_flattener(file_flattener_options, context_,
-                                         keep_set);
+    ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
 
     if (!file_flattener.Flatten(table, writer)) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed linking file resources");
+      context_->GetDiagnostics()->Error(DiagMessage() << "failed linking file resources");
       return false;
     }
 
-    if (options_.static_lib) {
+    if (options_.package_type == PackageType::kStaticLib) {
       if (!FlattenTableToPb(table, writer)) {
-        context_->GetDiagnostics()->Error(
-            DiagMessage() << "failed to write resources.arsc.flat");
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc.flat");
         return false;
       }
     } else {
       if (!FlattenTable(table, writer)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
-                                          << "failed to write resources.arsc");
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resources.arsc");
         return false;
       }
     }
@@ -1484,7 +1493,9 @@ class LinkCommand {
 
     context_->SetNameManglerPolicy(
         NameManglerPolicy{context_->GetCompilationPackage()});
-    if (context_->GetCompilationPackage() == "android") {
+    if (options_.package_type == PackageType::kSharedLib) {
+      context_->SetPackageId(0x00);
+    } else if (context_->GetCompilationPackage() == "android") {
       context_->SetPackageId(0x01);
     } else {
       context_->SetPackageId(0x7f);
@@ -1527,7 +1538,7 @@ class LinkCommand {
       return 1;
     }
 
-    if (!options_.static_lib) {
+    if (options_.package_type != PackageType::kStaticLib) {
       PrivateAttributeMover mover;
       if (!mover.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(
@@ -1538,8 +1549,7 @@ class LinkCommand {
       // Assign IDs if we are building a regular app.
       IdAssigner id_assigner(&options_.stable_id_map);
       if (!id_assigner.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
-                                          << "failed assigning IDs");
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed assigning IDs");
         return 1;
       }
 
@@ -1586,17 +1596,15 @@ class LinkCommand {
       return 1;
     }
 
-    if (options_.static_lib) {
+    if (options_.package_type == PackageType::kStaticLib) {
       if (!options_.products.empty()) {
-        context_->GetDiagnostics()
-            ->Warn(DiagMessage()
-                   << "can't select products when building static library");
+        context_->GetDiagnostics()->Warn(DiagMessage()
+                                         << "can't select products when building static library");
       }
     } else {
       ProductFilter product_filter(options_.products);
       if (!product_filter.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
-                                          << "failed stripping products");
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed stripping products");
         return 1;
       }
     }
@@ -1610,7 +1618,7 @@ class LinkCommand {
       }
     }
 
-    if (!options_.static_lib && context_->GetMinSdkVersion() > 0) {
+    if (options_.package_type != PackageType::kStaticLib && context_->GetMinSdkVersion() > 0) {
       if (context_->IsVerbose()) {
         context_->GetDiagnostics()->Note(
             DiagMessage() << "collapsing resource versions for minimum SDK "
@@ -1626,8 +1634,7 @@ class LinkCommand {
     if (!options_.no_resource_deduping) {
       ResourceDeduper deduper;
       if (!deduper.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
-                                          << "failed deduping resources");
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed deduping resources");
         return 1;
       }
     }
@@ -1635,12 +1642,11 @@ class LinkCommand {
     proguard::KeepSet proguard_keep_set;
     proguard::KeepSet proguard_main_dex_keep_set;
 
-    if (options_.static_lib) {
+    if (options_.package_type == PackageType::kStaticLib) {
       if (options_.table_splitter_options.config_filter != nullptr ||
           !options_.table_splitter_options.preferred_densities.empty()) {
-        context_->GetDiagnostics()
-            ->Warn(DiagMessage()
-                   << "can't strip resources when building static library");
+        context_->GetDiagnostics()->Warn(DiagMessage()
+                                         << "can't strip resources when building static library");
       }
     } else {
       // Adjust the SplitConstraints so that their SDK version is stripped if it
@@ -1778,8 +1784,13 @@ class LinkCommand {
       options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
       options.javadoc_annotations = options_.javadoc_annotations;
 
-      if (options_.static_lib || options_.generate_non_final_ids) {
+      if (options_.package_type == PackageType::kStaticLib || options_.generate_non_final_ids) {
         options.use_final = false;
+      }
+
+      if (options_.package_type == PackageType::kSharedLib) {
+        options.use_final = false;
+        options.generate_rewrite_callback = true;
       }
 
       const StringPiece actual_package = context_->GetCompilationPackage();
@@ -1850,9 +1861,11 @@ class LinkCommand {
   std::vector<std::unique_ptr<io::IFileCollection>> collections_;
 
   // A vector of ResourceTables. This is here to retain ownership, so that the
-  // SymbolTable
-  // can use these.
+  // SymbolTable can use these.
   std::vector<std::unique_ptr<ResourceTable>> static_table_includes_;
+
+  // The set of shared libraries being used, mapping their assigned package ID to package name.
+  std::map<size_t, std::string> shared_libs_;
 };
 
 int Link(const std::vector<StringPiece>& args) {
@@ -1866,6 +1879,8 @@ int Link(const std::vector<StringPiece>& args) {
   bool legacy_x_flag = false;
   bool require_localization = false;
   bool verbose = false;
+  bool shared_lib = false;
+  bool static_lib = false;
   Maybe<std::string> stable_id_file_path;
   std::vector<std::string> split_args;
   Flags flags =
@@ -1942,7 +1957,8 @@ int Link(const std::vector<StringPiece>& args) {
                         "Version name to inject into the AndroidManifest.xml "
                         "if none is present",
                         &options.manifest_fixer_options.version_name_default)
-          .OptionalSwitch("--static-lib", "Generate a static Android library", &options.static_lib)
+          .OptionalSwitch("--shared-lib", "Generates a shared Android runtime library", &shared_lib)
+          .OptionalSwitch("--static-lib", "Generate a static Android library", &static_lib)
           .OptionalSwitch("--no-static-lib-packages",
                           "Merge all library resources under the app's package",
                           &options.no_static_lib_packages)
@@ -2096,7 +2112,19 @@ int Link(const std::vector<StringPiece>& args) {
     options.table_splitter_options.preferred_densities.push_back(preferred_density_config.density);
   }
 
-  if (!options.static_lib && stable_id_file_path) {
+  if (shared_lib && static_lib) {
+    context.GetDiagnostics()->Error(DiagMessage()
+                                    << "only one of --shared-lib and --static-lib can be defined");
+    return 1;
+  }
+
+  if (shared_lib) {
+    options.package_type = PackageType::kSharedLib;
+  } else if (static_lib) {
+    options.package_type = PackageType::kStaticLib;
+  }
+
+  if (options.package_type != PackageType::kStaticLib && stable_id_file_path) {
     if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path.value(),
                          &options.stable_id_map)) {
       return 1;
@@ -2122,7 +2150,7 @@ int Link(const std::vector<StringPiece>& args) {
   }
 
   // Turn off auto versioning for static-libs.
-  if (options.static_lib) {
+  if (options.package_type == PackageType::kStaticLib) {
     options.no_auto_version = true;
     options.no_version_vectors = true;
     options.no_version_transitions = true;
