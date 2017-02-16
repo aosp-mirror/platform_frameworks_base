@@ -4932,21 +4932,20 @@ public class AccountManagerService
     }
 
     private boolean isPrivileged(int callingUid) {
-        final int callingUserId = UserHandle.getUserId(callingUid);
-
-        final PackageManager userPackageManager;
+        String[] packages;
+        long identityToken = Binder.clearCallingIdentity();
         try {
-            userPackageManager = mContext.createPackageContextAsUser(
-                    "android", 0, new UserHandle(callingUserId)).getPackageManager();
-        } catch (NameNotFoundException e) {
-            Log.d(TAG, "Package not found " + e.getMessage());
+            packages = mPackageManager.getPackagesForUid(callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+        if (packages == null) {
+            Log.d(TAG, "No packages for callingUid " + callingUid);
             return false;
         }
-
-        String[] packages = userPackageManager.getPackagesForUid(callingUid);
         for (String name : packages) {
             try {
-                PackageInfo packageInfo = userPackageManager.getPackageInfo(name, 0 /* flags */);
+                PackageInfo packageInfo = mPackageManager.getPackageInfo(name, 0 /* flags */);
                 if (packageInfo != null
                         && (packageInfo.applicationInfo.privateFlags
                                 & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
@@ -5392,6 +5391,9 @@ public class AccountManagerService
         if (user != null && user.isRestricted()) {
             String[] packages =
                     mPackageManager.getPackagesForUid(callingUid);
+            if (packages == null) {
+                packages = new String[] {};
+            }
             // If any of the packages is a visible listed package, return the full set,
             // otherwise return non-shared accounts only.
             // This might be a temporary way to specify a visible list
