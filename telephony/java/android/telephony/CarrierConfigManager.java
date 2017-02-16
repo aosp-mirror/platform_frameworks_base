@@ -417,6 +417,21 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
 
+    /**
+     * Flag specifying if WFC provisioning depends on VoLTE provisioning.
+     *
+     * {@code false}: default value; honor actual WFC provisioning state.
+     * {@code true}: when VoLTE is not provisioned, treat WFC as not provisioned; when VoLTE is
+     *               provisioned, honor actual WFC provisioning state.
+     *
+     * As of now, Verizon is the only carrier enforcing this dependency in their
+     * WFC awareness and activation requirements.
+     *
+     * @hide
+     *  */
+    public static final String KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL
+            = "carrier_volte_override_wfc_provisioning_bool";
+
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
             = "carrier_volte_tty_supported_bool";
@@ -1316,6 +1331,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
