@@ -901,7 +901,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mPackagesToMonitorComponentChange.add(packageName);
         }
 
-        private boolean isChangingPackagesOfCurrentUser() {
+        @GuardedBy("mMethodMap")
+        private boolean isChangingPackagesOfCurrentUserLocked() {
             final int userId = getChangingUserId();
             final boolean retval = userId == mSettings.getCurrentUserId();
             if (DEBUG) {
@@ -914,10 +915,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
-            if (!isChangingPackagesOfCurrentUser()) {
-                return false;
-            }
             synchronized (mMethodMap) {
+                if (!isChangingPackagesOfCurrentUserLocked()) {
+                    return false;
+                }
                 String curInputMethodId = mSettings.getSelectedInputMethod();
                 final int N = mMethodList.size();
                 if (curInputMethodId != null) {
@@ -951,10 +952,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onSomePackagesChanged() {
-            if (!isChangingPackagesOfCurrentUser()) {
-                return;
-            }
             synchronized (mMethodMap) {
+                if (!isChangingPackagesOfCurrentUserLocked()) {
+                    return;
+                }
                 InputMethodInfo curIm = null;
                 String curInputMethodId = mSettings.getSelectedInputMethod();
                 final int N = mMethodList.size();
