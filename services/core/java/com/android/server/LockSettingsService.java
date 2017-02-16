@@ -1064,6 +1064,14 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setLockCredentialInternal(String credential, int credentialType,
             String savedCredential, int userId) throws RemoteException {
+        // Normalize savedCredential and credential such that empty string is always represented
+        // as null.
+        if (TextUtils.isEmpty(savedCredential)) {
+            savedCredential = null;
+        }
+        if (TextUtils.isEmpty(credential)) {
+            credential = null;
+        }
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 spBasedSetLockCredentialInternalLocked(credential, credentialType, savedCredential,
