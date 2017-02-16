@@ -75,7 +75,9 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.MaskableIconDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -244,6 +246,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.icon1);
         final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.icon2));
+        final Icon icon3 = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
+            getTestContext().getResources(), R.drawable.icon2));
 
         final ShortcutInfo si1 = makeShortcut(
                 "shortcut1",
@@ -261,12 +265,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 icon2,
                 makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
                 /* weight */ 12);
-        final ShortcutInfo si3 = makeShortcut("shortcut3");
+        final ShortcutInfo si3 = makeShortcut(
+                "shortcut3",
+                "Title 3",
+                /* activity */ null,
+                icon3,
+                makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                /* weight */ 13);
 
-        assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
+        assertTrue(mManager.setDynamicShortcuts(list(si1, si2, si3)));
         assertShortcutIds(assertAllNotKeyFieldsOnly(
                 mManager.getDynamicShortcuts()),
-                "shortcut1", "shortcut2");
+                "shortcut1", "shortcut2", "shortcut3");
         assertEquals(2, mManager.getRemainingCallCount());
 
         // TODO: Check fields
@@ -550,7 +560,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
-        final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+        final Icon bmp64x64_maskable = Icon.createWithMaskableBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_64x64));
         final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_512x512));
@@ -561,7 +571,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 makeShortcutWithIcon("res32x32", res32x32),
                 makeShortcutWithIcon("res64x64", res64x64),
                 makeShortcutWithIcon("bmp32x32", bmp32x32),
-                makeShortcutWithIcon("bmp64x64", bmp64x64),
+                makeShortcutWithIcon("bmp64x64", bmp64x64_maskable),
                 makeShortcutWithIcon("bmp512x512", bmp512x512),
                 makeShortcut("none")
         )));
@@ -691,6 +701,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         bmp = pfdToBitmap(
                 mLauncherApps.getShortcutIconFd(CALLING_PACKAGE_1, "bmp32x32", HANDLE_USER_P0));
         assertBitmapSize(128, 128, bmp);
+
+        Drawable dr = mLauncherApps.getShortcutIconDrawable(
+            makeShortcutWithIcon("bmp64x64", bmp64x64_maskable), 0);
+        assertTrue(dr instanceof MaskableIconDrawable);
+        float viewportPercentage = 1 / (1 + 2 * MaskableIconDrawable.getExtraInsetPercentage());
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getWidth() * viewportPercentage),
+            dr.getIntrinsicWidth());
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getHeight() * viewportPercentage),
+            dr.getIntrinsicHeight());
     }
 
     public void testCleanupDanglingBitmaps() throws Exception {
