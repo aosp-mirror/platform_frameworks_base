@@ -7544,61 +7544,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void getNonDecorInsetsLocked(Rect outInsets) {
-        final DisplayInfo di = getDefaultDisplayInfoLocked();
-        mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
-    }
-
-    /**
-     * Intersects the specified {@code inOutBounds} with the display frame that excludes the stable
-     * inset areas.
-     *
-     * @param inOutBounds The inOutBounds to subtract the stable inset areas from.
-     */
-    public void subtractStableInsets(Rect inOutBounds) {
-        synchronized (mWindowMap) {
-            getStableInsetsLocked(DEFAULT_DISPLAY, mTmpRect2);
-            final DisplayInfo di = getDefaultDisplayInfoLocked();
-            mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
-            subtractInsets(mTmpRect, mTmpRect2, inOutBounds);
-        }
-    }
-
-    /**
-     * Intersects the specified {@code inOutBounds} with the display frame that excludes
-     * areas that could never be removed in Honeycomb. See
-     * {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-     *
-     * @param inOutBounds The inOutBounds to subtract the inset areas from.
-     */
-    public void subtractNonDecorInsets(Rect inOutBounds) {
-        synchronized (mWindowMap) {
-            getNonDecorInsetsLocked(mTmpRect2);
-            final DisplayInfo di = getDefaultDisplayInfoLocked();
-            mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
-            subtractInsets(mTmpRect, mTmpRect2, inOutBounds);
-        }
-    }
-
-    void subtractInsets(Rect display, Rect insets, Rect inOutBounds) {
+    void intersectDisplayInsetBounds(Rect display, Rect insets, Rect inOutBounds) {
         mTmpRect3.set(display);
         mTmpRect3.inset(insets);
         inOutBounds.intersect(mTmpRect3);
-    }
-
-    /**
-     * Calculates the smallest width for a task given the {@param bounds}. It does that by iterating
-     * across all screen orientations, and returns the minimum of the task width taking into account
-     * that the bounds might change because the snap algorithm snaps to a different value.
-     *
-     * @return the smallest width to be used in the Configuration, in dips
-     */
-    public int getSmallestWidthForTaskBounds(Rect bounds) {
-        synchronized (mWindowMap) {
-            // TODO(multi-display): Use correct display content here
-            return getDefaultDisplayContentLocked().getDockedDividerController()
-                    .getSmallestWidthDpForBounds(bounds);
-        }
     }
 
     MousePositionTracker mMousePositionTracker = new MousePositionTracker();

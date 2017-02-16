@@ -22,7 +22,6 @@ import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -47,7 +46,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
@@ -85,7 +83,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -290,8 +287,8 @@ final class ActivityRecord implements AppWindowContainerListener {
     /**
      * Temp configs used in {@link #ensureActivityConfigurationLocked(int, boolean)}
      */
-    private final Configuration mTmpGlobalConfig = new Configuration();
-    private final Configuration mTmpTaskConfig = new Configuration();
+    private final Configuration mTmpConfig1 = new Configuration();
+    private final Configuration mTmpConfig2 = new Configuration();
 
     private static String startingWindowStateToString(int state) {
         switch (state) {
@@ -1975,13 +1972,13 @@ final class ActivityRecord implements AppWindowContainerListener {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Ensuring correct configuration: " + this);
 
-        // Short circuit: if the two configurations are equal (the common case), then there is
-        // nothing to do.
-        final Configuration newGlobalConfig = service.getGlobalConfiguration();
-        final Configuration newTaskMergedOverrideConfig = task.getMergedOverrideConfiguration();
-        if (mLastReportedConfiguration.equals(newGlobalConfig)
-                && mLastReportedOverrideConfiguration.equals(newTaskMergedOverrideConfig)
-                && !forceNewConfig) {
+        // Short circuit: if the two full configurations are equal (the common case), then there is
+        // nothing to do.  We test the full configuration instead of the global and merged override
+        // configurations because there are cases (like moving a task to the pinned stack) where
+        // the combine configurations are equal, but would otherwise differ in the override config
+        mTmpConfig1.setTo(mLastReportedConfiguration);
+        mTmpConfig1.updateFrom(mLastReportedOverrideConfiguration);
+        if (task.getConfiguration().equals(mTmpConfig1) && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration unchanged in " + this);
             return true;
@@ -1997,14 +1994,16 @@ final class ActivityRecord implements AppWindowContainerListener {
 
         // Okay we now are going to make this activity have the new config.
         // But then we need to figure out how it needs to deal with that.
-        mTmpGlobalConfig.setTo(mLastReportedConfiguration);
-        mTmpTaskConfig.setTo(mLastReportedOverrideConfiguration);
+        final Configuration newGlobalConfig = service.getGlobalConfiguration();
+        final Configuration newTaskMergedOverrideConfig = task.getMergedOverrideConfiguration();
+        mTmpConfig1.setTo(mLastReportedConfiguration);
+        mTmpConfig2.setTo(mLastReportedOverrideConfiguration);
         mLastReportedConfiguration.setTo(newGlobalConfig);
         mLastReportedOverrideConfiguration.setTo(newTaskMergedOverrideConfig);
 
         int taskChanges = getTaskConfigurationChanges(this, newTaskMergedOverrideConfig,
-                mTmpTaskConfig);
-        final int changes = mTmpGlobalConfig.diff(newGlobalConfig) | taskChanges;
+                mTmpConfig2);
+        final int changes = mTmpConfig1.diff(newGlobalConfig) | taskChanges;
         if (changes == 0 && !forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + this);

@@ -152,11 +152,6 @@ public class DockedStackDividerController implements DimLayerUser {
     int getSmallestWidthDpForBounds(Rect bounds) {
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
 
-        // If the bounds are fullscreen, return the value of the fullscreen configuration
-        if (bounds == null || (bounds.left == 0 && bounds.top == 0
-                && bounds.right == di.logicalWidth && bounds.bottom == di.logicalHeight)) {
-            return mDisplayContent.getConfiguration().smallestScreenWidthDp;
-        }
         final int baseDisplayWidth = mDisplayContent.mBaseDisplayWidth;
         final int baseDisplayHeight = mDisplayContent.mBaseDisplayHeight;
         int minWidth = Integer.MAX_VALUE;
@@ -185,7 +180,7 @@ public class DockedStackDividerController implements DimLayerUser {
                     mTmpRect2.width(), mTmpRect2.height(), getContentWidth());
             mService.mPolicy.getStableInsetsLw(rotation, mTmpRect2.width(), mTmpRect2.height(),
                     mTmpRect3);
-            mService.subtractInsets(mTmpRect2, mTmpRect3, mTmpRect);
+            mService.intersectDisplayInsetBounds(mTmpRect2, mTmpRect3, mTmpRect);
             minWidth = Math.min(mTmpRect.width(), minWidth);
         }
         return (int) (minWidth / mDisplayContent.getDisplayMetrics().density);

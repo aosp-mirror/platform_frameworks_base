@@ -1476,7 +1476,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     @Override
     public void getFullScreenBounds(Rect bounds) {
-        getDisplayContent().getContentRect(bounds);
+        // This is currently only used for the pinned stack animation when leaving PiP
+        // (see {@link BoundsAnimationController}), and in that case we need to animate this back
+        // to the full bounds to match the fullscreen stack
+        getDisplayContent().getLogicalDisplayRect(bounds);
     }
 
     public boolean hasMovementAnimations() {
