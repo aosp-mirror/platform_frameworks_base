@@ -636,7 +636,7 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Övre 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Övre 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Helskärm på nedre skärm"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Position <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tryck snabbt två gånger om du vill redigera positionen."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Position <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Tryck snabbt två gånger för att redigera positionen."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Lägg till genom att trycka snabbt två gånger."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Position <xliff:g id="POSITION">%1$d</xliff:g>. Välj den genom att trycka snabbt två gånger."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Flytta <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>

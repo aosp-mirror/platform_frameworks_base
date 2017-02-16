@@ -241,7 +241,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Prijenos podataka je pauziran"</string>
     <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"Dostigli ste ograničenje za prijenos podataka koje ste postavili. Više ne koristite mobilne podatke.\n\nUkoliko nastavite koristiti mobilne podatke, mogući su troškovi za prijenos podataka."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nastavi"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internet veze"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Niste povezani na internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi veza aktivna"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Traženje GPS signala"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija utvrđena GPS signalom"</string>
