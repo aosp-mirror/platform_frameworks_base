@@ -132,7 +132,11 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @Override
     public Integer getResourceId(ResourceType type, String name) {
-        return mResources.get(type).get(name);
+        Map<String, Integer> resName2Id = mResources.get(type);
+        if (resName2Id == null) {
+            return null;
+        }
+        return resName2Id.get(name);
     }
 
     @Override
