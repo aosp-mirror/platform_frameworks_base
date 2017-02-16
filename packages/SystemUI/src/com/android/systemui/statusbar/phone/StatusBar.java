@@ -18,7 +18,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -196,8 +195,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
-
-
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -5719,11 +5716,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // The (i) button in the guts that links to the system notification settings for that app
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
-            final String channelId) {
+            final NotificationChannel channel) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
-        intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channelId);
+        if (channel != null) {
+            intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
+        }
         startNotificationGutsIntent(intent, appUid);
     }
 
@@ -5776,23 +5775,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (item.gutsContent instanceof NotificationInfo) {
-            final NotificationChannel channel = row.getEntry().channel;
+            final UserHandle userHandle = sbn.getUser();
             PackageManager pmUser = getPackageManagerForUser(mContext,
-                    sbn.getUser().getIdentifier());
+                    userHandle.getIdentifier());
             final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             final String pkg = sbn.getPackageName();
             NotificationInfo info = (NotificationInfo) item.gutsContent;
             final NotificationInfo.OnSettingsClickListener onSettingsClick = (View v,
-                    int appUid) -> {
+                    NotificationChannel channel, int appUid) -> {
                 mMetricsLogger.action(MetricsEvent.ACTION_NOTE_INFO);
                 guts.resetFalsingCheck();
-                startAppNotificationSettingsActivity(pkg, appUid, channel.getId());
+                startAppNotificationSettingsActivity(pkg, appUid, channel);
             };
             final View.OnClickListener onDoneClick = (View v) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
                 if (info.hasImportanceChanged()
-                        && isLockscreenPublicMode(sbn.getUser().getIdentifier())
+                        && isLockscreenPublicMode(userHandle.getIdentifier())
                         && (mState == StatusBarState.KEYGUARD
                                 || mState == StatusBarState.SHADE_LOCKED)) {
                     OnDismissAction dismissAction = new OnDismissAction() {
@@ -5807,9 +5806,30 @@ public class StatusBar extends SystemUI implements DemoMode,
                     saveAndCloseNotificationMenu(info, row, guts, v);
                 }
             };
-            info.bindNotification(pmUser, iNotificationManager, sbn, channel, onSettingsClick,
-                    onDoneClick,
-                    mNonBlockablePkgs);
+
+            ArraySet<NotificationChannel> channels = new ArraySet<NotificationChannel>();
+            channels.add(row.getEntry().channel);
+            if (row.isSummaryWithChildren()) {
+                // If this is a summary, then add in the children notification channels for the
+                // same user and pkg.
+                final List<ExpandableNotificationRow> childrenRows = row.getNotificationChildren();
+                final int numChildren = childrenRows.size();
+                for (int i = 0; i < numChildren; i++) {
+                    final ExpandableNotificationRow childRow = childrenRows.get(i);
+                    final NotificationChannel childChannel = childRow.getEntry().channel;
+                    final StatusBarNotification childSbn = childRow.getStatusBarNotification();
+                    if (childSbn.getUser().equals(userHandle) &&
+                            childSbn.getPackageName().equals(pkg)) {
+                        channels.add(childChannel);
+                    }
+                }
+            }
+            try {
+                info.bindNotification(pmUser, iNotificationManager, pkg, new ArrayList(channels),
+                        onSettingsClick, onDoneClick, mNonBlockablePkgs);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
         }
     }
 
