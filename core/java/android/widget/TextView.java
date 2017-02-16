@@ -730,6 +730,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Watcher used to notify changes to auto-fill manager.
     private AutoFillChangeWatcher mAutoFillChangeWatcher;
 
+    // Indicates whether the text was set from resources or dynamically, so it can be used to
+    // sanitize auto-fill request.
+    private boolean mTextFromResource = false;
+
     /**
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -948,6 +952,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     attrs, com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
 
         int n = a.getIndexCount();
+
+        boolean fromResourceId = false;
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
@@ -1089,6 +1095,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_text:
+                    fromResourceId = true;
                     text = a.getText(attr);
                     break;
 
@@ -1567,6 +1574,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setText(text, bufferType);
+        if (fromResourceId) {
+            mTextFromResource = true;
+        }
+
         if (hint != null) setHint(hint);
 
         /*
@@ -5067,6 +5078,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void setText(CharSequence text, BufferType type,
                          boolean notifyBefore, int oldlen) {
+        mTextFromResource = false;
         if (text == null) {
             text = "";
         }
@@ -5301,6 +5313,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public final void setText(@StringRes int resid) {
         setText(getContext().getResources().getText(resid));
+        mTextFromResource = true;
     }
 
     /**
@@ -5327,6 +5340,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public final void setText(@StringRes int resid, BufferType type) {
         setText(getContext().getResources().getText(resid), type);
+        mTextFromResource = true;
     }
 
     /**
@@ -9872,9 +9886,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
         if (forAutoFill) {
-            // TODO(b/33197203, b/33269702): temporary set it as not sanitized until
-            // AssistStructure automaticaly sets sanitization based on text coming from resources
-            structure.setSanitized(!isPassword);
+            structure.setSanitized(mTextFromResource);
             if (mAutoFillChangeWatcher == null && isTextEditable()) {
                 mAutoFillChangeWatcher = new AutoFillChangeWatcher();
                 addTextChangedListener(mAutoFillChangeWatcher);

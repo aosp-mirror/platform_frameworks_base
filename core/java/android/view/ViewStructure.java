@@ -31,16 +31,6 @@ import android.view.autofill.AutoFillValue;
 public abstract class ViewStructure {
 
     /**
-     * Flag used when adding virtual views for auto-fill, it indicates the contents of the view
-     * (such as * {@link android.app.assist.AssistStructure.ViewNode#getText()} and
-     * {@link android.app.assist.AssistStructure.ViewNode#getAutoFillValue()})
-     * can be passed to the {@link
-     * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
-     * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)} call.
-     */
-    public static final int AUTO_FILL_FLAG_SANITIZED = 0x1;
-
-    /**
      * Set the identifier for this view.
      *
      * @param id The view's identifier, as per {@link View#getId View.getId()}.
@@ -278,7 +268,7 @@ public abstract class ViewStructure {
      *
      * @param index child index
      * @param virtualId id identifying the virtual child inside the custom view.
-     * @param flags currently {@code 0} or {@link #AUTO_FILL_FLAG_SANITIZED}.
+     * @param flags currently {@code 0}.
      */
     // TODO(b/33197203, b/33802548): add CTS/unit test
     public abstract ViewStructure newChild(int index, int virtualId, int flags);
@@ -299,7 +289,7 @@ public abstract class ViewStructure {
      *
      * @param index child index
      * @param virtualId id identifying the virtual child inside the custom view.
-     * @param flags currently {@code 0} or {@link #AUTO_FILL_FLAG_SANITIZED}.
+     * @param flags currently {@code 0}.
      */
     // TODO(b/33197203, b/33802548): add CTS/unit test
     public abstract ViewStructure asyncNewChild(int index, int virtualId, int flags);
@@ -317,12 +307,19 @@ public abstract class ViewStructure {
     public abstract void setAutoFillValue(AutoFillValue value);
 
     /**
-     * @hide
+     * Marks this node as sanitized so its content are sent on {@link
+     * android.service.autofill.AutoFillService#onFillRequest(android.app.assist.AssistStructure,
+     * Bundle, android.os.CancellationSignal, android.service.autofill.FillCallback)}.
      *
-     * TODO(b/33197203, b/33269702): temporary set it as not sanitized until
-     * AssistStructure automaticaly sets sanitization based on text coming from resources
+     * <p>Only nodes that does not have PII (Personally Identifiable Information - sensitive data
+     * such as email addresses, credit card numbers, passwords, etc...) should be marked
+     * as sanitized; a good rule of thumb is to mark as sanitized nodes whose value were statically
+     * set from resources.
+     *
+     * <p>Should only be set when the node is used for AutoFill purposes - it will be ignored
+     * when used for Assist.
      */
-    public abstract void setSanitized(boolean sensitive);
+    public abstract void setSanitized(boolean sanitized);
 
     /**
      * Call when done populating a {@link ViewStructure} returned by
