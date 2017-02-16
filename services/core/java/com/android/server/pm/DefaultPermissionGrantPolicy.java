@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
+import android.companion.CompanionDeviceManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -673,6 +674,16 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(storageManagerPckg)) {
                 grantRuntimePermissionsLPw(storageManagerPckg, STORAGE_PERMISSIONS, true, userId);
             }
+
+            // Companion devices
+            PackageParser.Package companionDeviceDiscoveryPackage = getSystemPackageLPr(
+                    CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME);
+            if (companionDeviceDiscoveryPackage != null
+                    && doesPackageSupportRuntimePermissions(companionDeviceDiscoveryPackage)) {
+                grantRuntimePermissionsLPw(companionDeviceDiscoveryPackage,
+                        LOCATION_PERMISSIONS, true, userId);
+            }
+
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }

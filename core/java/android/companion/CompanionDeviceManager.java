@@ -29,12 +29,10 @@ import android.os.RemoteException;
 /**
  * System level service for managing companion devices
  *
- * Usage:
- * To obtain an instance call
- * {@link Context#getSystemService}({@link Context#COMPANION_DEVICE_SERVICE})
- *
- * Then, call {@link #associate} to initiate the flow of associating current package
- * with a device selected by user
+ * <p>To obtain an instance call {@link Context#getSystemService}({@link
+ * Context#COMPANION_DEVICE_SERVICE}) Then, call {@link #associate(AssociationRequest,
+ * Callback, Handler)} to initiate the flow of associating current package with a
+ * device selected by user.</p>
  *
  * @see AssociationRequest
  */
@@ -45,6 +43,14 @@ public final class CompanionDeviceManager {
      * {@link Callback#onDeviceFound}
      */
     public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+
+    /**
+     * The package name of the companion device discovery component.
+     *
+     * @hide
+     */
+    public static final String COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME =
+            "com.android.companiondevicemanager";
 
     /**
      * A callback to receive once at least one suitable device is found, or the search failed
@@ -81,13 +87,20 @@ public final class CompanionDeviceManager {
     /**
      * Associate this app with a companion device, selected by user
      *
-     * Once at least one appropriate device is found, {@code callback} will be called with a
+     * <p>Once at least one appropriate device is found, {@code callback} will be called with a
      * {@link PendingIntent} that can be used to show the list of available devices for the user
      * to select.
      * It should be started for result (i.e. using
      * {@link android.app.Activity#startIntentSenderForResult}), as the resulting
      * {@link android.content.Intent} will contain extra {@link #EXTRA_DEVICE}, with the selected
-     * device. (e.g. {@link android.bluetooth.BluetoothDevice})
+     * device. (e.g. {@link android.bluetooth.BluetoothDevice})</p>
+     *
+     * <p>If your app needs to be excluded from battery optimizations (run in the background)
+     * or to have unrestricted data access (use data in the background) you can declare that
+     * you use the {@link android.Manifest.permission#RUN_IN_BACKGROUND} and {@link
+     * android.Manifest.permission#USE_DATA_IN_BACKGROUND} respectively. Note that these
+     * special capabilities have a negative effect on the device's battery and user's data
+     * usage, therefore you should requested them when absolutely necessary.</p>
      *
      * @param request specific details about this request
      * @param callback will be called once there's at least one device found for user to choose from
@@ -106,17 +119,16 @@ public final class CompanionDeviceManager {
         try {
             mService.associate(
                     request,
-                    new IOnAssociateCallback.Stub() {
-
+                    new IFindDeviceCallback.Stub() {
                         @Override
-                        public void onSuccess(PendingIntent launcher) throws RemoteException {
+                        public void onSuccess(PendingIntent launcher) {
                             finalHandler.post(() -> {
                                 callback.onDeviceFound(launcher.getIntentSender());
                             });
                         }
 
                         @Override
-                        public void onFailure(CharSequence reason) throws RemoteException {
+                        public void onFailure(CharSequence reason) {
                             finalHandler.post(() -> callback.onFailure(reason));
                         }
                     },

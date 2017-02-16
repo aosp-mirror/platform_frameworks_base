@@ -357,7 +357,8 @@ public class AppOpsManager {
     public static final String OPSTR_INSTANT_APP_START_FOREGROUND
             = "android:instant_app_start_foreground";
 
-    private static final int[] RUNTIME_PERMISSIONS_OPS = {
+    private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
+            // RUNTIME PERMISSIONS
             // Contacts
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -392,7 +393,13 @@ public class AppOpsManager {
             // Camera
             OP_CAMERA,
             // Body sensors
-            OP_BODY_SENSORS
+            OP_BODY_SENSORS,
+
+            // APPOP PERMISSIONS
+            OP_ACCESS_NOTIFICATIONS,
+            OP_SYSTEM_ALERT_WINDOW,
+            OP_WRITE_SETTINGS,
+            OP_REQUEST_INSTALL_PACKAGES,
     };
 
     /**
@@ -926,9 +933,9 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
             AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
             AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_DEFAULT, // OP_REQUEST_INSTALL_PACKAGES
+            AppOpsManager.MODE_DEFAULT,  // OP_REQUEST_INSTALL_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_ENTER_PICTURE_IN_PICTURE_ON_HIDE
-            AppOpsManager.MODE_DEFAULT, // OP_INSTANT_APP_START_FOREGROUND
+            AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
     };
 
     /**
@@ -1018,7 +1025,7 @@ public class AppOpsManager {
     /**
      * Mapping from a permission to the corresponding app op.
      */
-    private static HashMap<String, Integer> sRuntimePermToOp = new HashMap<>();
+    private static HashMap<String, Integer> sPermToOp = new HashMap<>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
@@ -1058,9 +1065,9 @@ public class AppOpsManager {
                 sOpStrToOp.put(sOpToString[i], i);
             }
         }
-        for (int op : RUNTIME_PERMISSIONS_OPS) {
+        for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
             if (sOpPerms[op] != null) {
-                sRuntimePermToOp.put(sOpPerms[op], op);
+                sPermToOp.put(sOpPerms[op], op);
             }
         }
     }
@@ -1112,12 +1119,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve the app op code for a permission, or null if there is not one.
-     * This API is intended to be used for mapping runtime permissions to the
-     * corresponding app op.
+     * This API is intended to be used for mapping runtime or appop permissions
+     * to the corresponding app op.
      * @hide
      */
     public static int permissionToOpCode(String permission) {
-        Integer boxedOpCode = sRuntimePermToOp.get(permission);
+        Integer boxedOpCode = sPermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
     }
 
@@ -1462,7 +1469,7 @@ public class AppOpsManager {
      * @return The app op associated with the permission or null.
      */
     public static String permissionToOp(String permission) {
-        final Integer opCode = sRuntimePermToOp.get(permission);
+        final Integer opCode = sPermToOp.get(permission);
         if (opCode == null) {
             return null;
         }

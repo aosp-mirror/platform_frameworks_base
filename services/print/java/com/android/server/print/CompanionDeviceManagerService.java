@@ -19,20 +19,28 @@ package com.android.server.print;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.app.PendingIntent;
+import android.Manifest;
 import android.companion.AssociationRequest;
+import android.companion.CompanionDeviceManager;
+import android.companion.ICompanionDeviceDiscoveryService;
+import android.companion.ICompanionDeviceDiscoveryServiceCallback;
 import android.companion.ICompanionDeviceManager;
-import android.companion.ICompanionDeviceManagerService;
-import android.companion.IOnAssociateCallback;
+import android.companion.IFindDeviceCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.NetworkPolicyManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.RemoteException;
-import android.util.Log;
+import android.os.ServiceManager;
+import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
 
 //TODO move to own package!
@@ -40,7 +48,8 @@ import com.android.server.SystemService;
 public class CompanionDeviceManagerService extends SystemService {
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
-            "com.android.companiondevicemanager", ".DeviceDiscoveryService");
+            CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
+            ".DeviceDiscoveryService");
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "CompanionDeviceManagerService";
@@ -58,14 +67,13 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     class CompanionDeviceManagerImpl extends ICompanionDeviceManager.Stub {
-
         @Override
         public void associate(
                 AssociationRequest request,
-                IOnAssociateCallback callback,
-                String callingPackage) throws RemoteException {
+                IFindDeviceCallback callback,
+                String callingPackage) {
             if (DEBUG) {
-                Log.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
+                Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
                         + ", callingPackage = " + callingPackage + ")");
             }
             checkNotNull(request);
@@ -85,23 +93,24 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private ServiceConnection getServiceConnection(
             final AssociationRequest<?> request,
-            final IOnAssociateCallback callback,
+            final IFindDeviceCallback findDeviceCallback,
             final String callingPackage) {
         return new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG,
+                    Slog.i(LOG_TAG,
                             "onServiceConnected(name = " + name + ", service = "
                                     + service + ")");
                 }
                 try {
-                    ICompanionDeviceManagerService.Stub
+                    ICompanionDeviceDiscoveryService.Stub
                             .asInterface(service)
                             .startDiscovery(
                                     request,
-                                    getCallback(callingPackage, callback),
-                                    callingPackage);
+                                    callingPackage,
+                                    findDeviceCallback,
+                                    getServiceCallback());
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -109,39 +118,50 @@ public class CompanionDeviceManagerService extends SystemService {
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                if (DEBUG) Log.i(LOG_TAG, "onServiceDisconnected(name = " + name + ")");
+                if (DEBUG) Slog.i(LOG_TAG, "onServiceDisconnected(name = " + name + ")");
             }
         };
     }
 
-    private IOnAssociateCallback.Stub getCallback(
-            String callingPackage,
-            IOnAssociateCallback propagateTo) {
-        return new IOnAssociateCallback.Stub() {
-
+    private ICompanionDeviceDiscoveryServiceCallback.Stub getServiceCallback() {
+        return new ICompanionDeviceDiscoveryServiceCallback.Stub() {
             @Override
-            public void onSuccess(PendingIntent launcher)
-                    throws RemoteException {
-                if (DEBUG) Log.i(LOG_TAG, "onSuccess(launcher = " + launcher + ")");
-                recordSpecialPriviledgesForPackage(callingPackage);
-                propagateTo.onSuccess(launcher);
-            }
-
-            @Override
-            public void onFailure(CharSequence reason) throws RemoteException {
-                if (DEBUG) Log.i(LOG_TAG, "onFailure()");
-                propagateTo.onFailure(reason);
+            public void onDeviceSelected(String packageName, int userId) {
+                grantSpecialAccessPermissionsIfNeeded(packageName, userId);
             }
         };
     }
 
-    void recordSpecialPriviledgesForPackage(String priviledgedPackage) {
-        //TODO Show dialog before recording notification access
-//        final SettingStringHelper setting =
-//                new SettingStringHelper(
-//                        getContext().getContentResolver(),
-//                        Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-//                        Binder.getCallingUid());
-//        setting.write(ColonDelimitedSet.OfStrings.add(setting.read(), priviledgedPackage));
+    private void grantSpecialAccessPermissionsIfNeeded(String packageName, int userId) {
+        final long identity = Binder.clearCallingIdentity();
+        final PackageInfo packageInfo;
+        try {
+            packageInfo = getContext().getPackageManager().getPackageInfoAsUser(
+                    packageName, PackageManager.GET_PERMISSIONS, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(LOG_TAG, "Error granting special access permissions to package:"
+                    + packageName, e);
+            return;
+        }
+        try {
+            if (ArrayUtils.contains(packageInfo.requestedPermissions,
+                    Manifest.permission.RUN_IN_BACKGROUND)) {
+                IDeviceIdleController idleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+                try {
+                    idleController.addPowerSaveWhitelistApp(packageName);
+                } catch (RemoteException e) {
+                    /* ignore - local call */
+                }
+            }
+            if (ArrayUtils.contains(packageInfo.requestedPermissions,
+                    Manifest.permission.USE_DATA_IN_BACKGROUND)) {
+                NetworkPolicyManager.from(getContext()).addUidPolicy(
+                        packageInfo.applicationInfo.uid,
+                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }

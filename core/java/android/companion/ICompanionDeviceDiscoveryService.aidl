@@ -10,16 +10,21 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing per  missions and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 package android.companion;
 
-import android.app.PendingIntent;
+import android.companion.AssociationRequest;
+import android.companion.ICompanionDeviceDiscoveryServiceCallback;
+import android.companion.IFindDeviceCallback;
 
 /** @hide */
-interface IOnAssociateCallback {
-    void onSuccess(in PendingIntent launcher);
-    void onFailure(in CharSequence reason);
+interface ICompanionDeviceDiscoveryService {
+    void startDiscovery(
+        in AssociationRequest request,
+        in String callingPackage,
+        in IFindDeviceCallback findCallback,
+        in ICompanionDeviceDiscoveryServiceCallback serviceCallback);
 }

@@ -16,9 +16,7 @@
 
 package android.companion;
 
-import android.bluetooth.BluetoothDevice;
-
 /** @hide */
-interface ICompanionDeviceManagerServiceCallback {
-    void onDeviceSelected(in BluetoothDevice device);
+interface ICompanionDeviceDiscoveryServiceCallback {
+    void onDeviceSelected(String packageName, int userId);
 }
