@@ -435,7 +435,7 @@
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permite que o app veja a configuração do Bluetooth na TV, faça e aceite conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar a comunicação a curta distância"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (Comunicação a curta distância)."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desativar o bloqueio de tela"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gerenciar hardware de impressão digital"</string>

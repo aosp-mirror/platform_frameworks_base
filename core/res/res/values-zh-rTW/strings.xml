@@ -1233,7 +1233,7 @@
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出\n權限要求。"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"您目前並非透過工作設定檔使用這個應用程式"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"您目前並非透過 Work 設定檔使用這個應用程式"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"您目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>

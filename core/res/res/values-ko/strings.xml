@@ -316,8 +316,8 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"앱이 운전모드를 사용할 수 있도록 허용합니다."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"다른 앱 종료"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 다른 앱이 실행 중지될 수 있습니다."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"다른 앱 위에 그리기"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"앱이 다른 애플리케이션이나 사용자 인터페이스 부분 위에 그림을 그릴 수 있도록 합니다. 이 경우 애플리케이션에서 인터페이스 사용에 방해가 되거나 다른 애플리케이션에서 표시되는 콘텐츠가 변경될 수 있습니다."</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"다른 앱 위에 표시"</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"앱에서 다른 애플리케이션이나 사용자 인터페이스 부분 위에 표시되도록 설정할 수 있습니다. 이 경우 애플리케이션에서 인터페이스 사용에 방해가 되거나 다른 애플리케이션에서 표시되는 콘텐츠가 변경될 수 있습니다."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"앱이 항상 실행되도록 설정"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 태블릿의 속도를 저하시킬 수 있습니다."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"앱이 메모리를 지속적으로 사용할 수 있도록 허용합니다. 이는 TV의 속도를 늦춰 다른 앱에서 사용할 수 있는 메모리를 제한할 수 있습니다."</string>
@@ -345,17 +345,17 @@
     <string name="permlab_readCallLog" msgid="3478133184624102739">"통화 기록 읽기"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 읽을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 통화 기록 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 통화 기록 데이터를 공유할 수도 있습니다."</string>
     <string name="permdesc_readCallLog" product="tv" msgid="5611770887047387926">"앱이 발신 및 수신 통화에 대한 데이터를 포함해 TV의 통화 기록을 읽을 수 있도록 허용합니다. 이 경우 앱이 통화 기록 데이터를 저장할 수 있으며 악성 앱이 사용자 몰래 통화 기록 데이터를 공유할 수도 있습니다."</string>
-    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 읽을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 통화 기록 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 통화 기록 데이터를 공유할 수도 있습니다."</string>
+    <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"앱에서 통화 기록을 읽을 수 있도록 허용합니다. 앱이 통화 기록 데이터를 저장할 수 있으며, 악성 앱이 사용자 모르게 통화 기록 데이터를 공유할 수도 있습니다."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"통화 기록 쓰기"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"앱에서 수신 및 발신 통화 데이터를 포함하여 태블릿의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"앱에서 수신 및 발신 통화 데이터를 포함하여 TV의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 삭제하거나 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"앱에서 수신 및 발신 통화 데이터를 포함하여 휴대전화의 통화 기록을 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 통화 기록을 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"신체 센서(예: 심박수 모니터)에 액세스"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"앱이 심박수와 같은 신체 상태를 확인하는 센서의 데이터에 접근하도록 허용합니다."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 및 기밀정보 읽기"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"앱이 친구나 동료의 일정을 포함하여 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성을 무시하고 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"앱이 친구 및 동료들의 일정을 포함하여 TV에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 데이터의 민감성 또는 기밀성과 상관없이 캘린더 데이터를 공유하거나 저장할 수 있게 됩니다."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"앱이 친구나 동료의 일정을 포함하여 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 허용합니다. 이 경우 앱이 비밀유지 또는 기밀성과 관계 없이 캘린더 데이터를 공유 또는 저장할 수도 있습니다."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"앱이 모든 캘린더 일정을 읽고 캘린더 데이터를 공유 또는 저장할 수도 있습니다"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"소유자에게 알리지 않고 캘린더 일정을 추가 또는 수정하고 참석자에게 이메일 전송"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"앱이 친구나 동료의 일정을 포함하여 태블릿에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 캘린더 소유자가 보내는 것처럼 메시지를 전송하거나 소유자 모르게 일정을 수정할 수도 있습니다."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"앱이 친구나 동료의 일정을 비롯하여 TV에서 수정할 수 있는 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 이 경우 앱이 발신자가 캘린더 소유자인 메시지를 전송하거나 소유자가 모르는 사이에 일정을 수정할 수 있습니다."</string>
@@ -363,17 +363,17 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 접근"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"앱이 추가 위치 정보 제공 기능의 명령에 접근하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"정확한 위치(GPS 및 네트워크 기반)에 액세스"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"앱에서 GPS 또는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 내 정확한 위치를 알 수 있도록 합니다. 앱에서 이를 사용하도록 하려면 기기에서 이러한 위치 서비스는 사용하도록 설정해야 합니다. 앱에서 위치 서비스를 사용하여 내 위치를 파악할 수 있으며 배터리 소모량이 증가할 수 있습니다."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"앱에서 GPS 또는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 내 정확한 위치를 알 수 있도록 합니다. 앱에서 이를 사용하도록 하려면 기기에서 이러한 위치 서비스는 사용하도록 설정해야 합니다. 이것은 배터리 소모량이 증가할 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"대략적인 위치(네트워크 기반)에 액세스"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"앱에서 나의 대략적인 위치를 알 수 있게 합니다. 이 위치는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 알 수 있습니다. 앱에서 이를 사용하도록 하려면 기기에서 이러한 위치 서비스를 사용하도록 설정해야 합니다. 앱에서 이를 사용하여 나의 대략적인 위치를 파악할 수 있습니다."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"앱에서 나의 대략적인 위치정보를 알 수 있게 합니다. 이 위치는 기지국 및 Wi-Fi와 같은 네트워크 위치 제공자를 사용하는 위치 서비스를 통해 알 수 있습니다. 앱에서 이 서비스를 사용할 수 있도록 디바이스에서 이 위치 서비스를 사용하도록 설정해야 합니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"앱이 마이크로 오디오를 녹음할 수 있도록 허용합니다. 이 권한을 사용하면 앱이 사용자의 확인 없이 언제든지 오디오를 녹음할 수 있습니다."</string>
-    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM에 명령어 보내기"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 위험합니다."</string>
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"앱이 언제든지 마이크로 오디오를 녹음할 수 있도록 허용합니다."</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM 카드로 명령 전송"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 신중히 허용해야 합니다."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"앱이 카메라로 사진과 동영상을 찍을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 언제든지 사용자의 확인 없이 카메라를 사용할 수 있습니다."</string>
+    <string name="permdesc_camera" msgid="8497216524735535009">"앱이 언제든지 카메라로 사진과 동영상을 찍을 수 있도록 허용합니다."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
@@ -484,7 +484,7 @@
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"통화 화면과 상호작용"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"전화 서비스와 상호 작용"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱을 전화 서비스와 상호 작용하도록 허용하여 전화를 송수신하세요."</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱에서 전화 서비스와 상호 작용하여 전화를 받거나 걸 수 있습니다."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"통화 사용자 경험 제공"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"앱에서 통화 사용자 경험을 제공하도록 허용합니다."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"이전 네트워크 사용량 읽기"</string>
