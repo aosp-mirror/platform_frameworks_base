@@ -4163,7 +4163,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         ensureRequestableCapabilities(networkCapabilities);
 
-        if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
+        if (timeoutMs < 0) {
             throw new IllegalArgumentException("Bad timeout specified");
         }
 
