@@ -1578,10 +1578,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_readAsset },
     { "seekAsset",      "(JJI)J",
         (void*) android_content_AssetManager_seekAsset },
-    // @FastNative
     { "getAssetLength", "(J)J",
         (void*) android_content_AssetManager_getAssetLength },
-    // @FastNative
     { "getAssetRemainingLength", "(J)J",
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;Z)I",
@@ -1598,34 +1596,24 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getNonSystemLocales },
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
         (void*) android_content_AssetManager_getSizeConfigurations },
-    // @FastNative
     { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
-    // @FastNative
     { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*) android_content_AssetManager_getResourceIdentifier },
-    // @FastNative
     { "getResourceName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceName },
-    // @FastNative
     { "getResourcePackageName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourcePackageName },
-    // @FastNative
     { "getResourceTypeName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceTypeName },
-    // @FastNative
     { "getResourceEntryName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceEntryName },
-    // @FastNative
     { "loadResourceValue","(ISLandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceValue },
-    // @FastNative
     { "loadResourceBagValue","(IILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceBagValue },
-    // @FastNative
     { "getStringBlockCount","()I",
         (void*) android_content_AssetManager_getStringBlockCount },
-    // @FastNative
     { "getNativeStringBlock","(I)J",
         (void*) android_content_AssetManager_getNativeStringBlock },
     { "getCookieName","(I)Ljava/lang/String;",
@@ -1644,27 +1632,20 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_copyTheme },
     { "clearTheme", "(J)V",
         (void*) android_content_AssetManager_clearTheme },
-    // @FastNative
     { "loadThemeAttributeValue", "(JILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadThemeAttributeValue },
-    // @FastNative
     { "getThemeChangingConfigurations", "(J)I",
         (void*) android_content_AssetManager_getThemeChangingConfigurations },
     { "dumpTheme", "(JILjava/lang/String;Ljava/lang/String;)V",
         (void*) android_content_AssetManager_dumpTheme },
-    // @FastNative
     { "applyStyle","(JIIJ[IIJJ)V",
         (void*) android_content_AssetManager_applyStyle },
-    // @FastNative
     { "resolveAttrs","(JII[I[I[I[I)Z",
         (void*) android_content_AssetManager_resolveAttrs },
-    // @FastNative
     { "retrieveAttributes","(J[I[I[I)Z",
         (void*) android_content_AssetManager_retrieveAttributes },
-    // @FastNative
     { "getArraySize","(I)I",
         (void*) android_content_AssetManager_getArraySize },
-    // @FastNative
     { "retrieveArray","(I[I)I",
         (void*) android_content_AssetManager_retrieveArray },
 
@@ -1675,13 +1656,10 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     // Arrays.
     { "getArrayStringResource","(I)[Ljava/lang/String;",
         (void*) android_content_AssetManager_getArrayStringResource },
-    // @FastNative
     { "getArrayStringInfo","(I)[I",
         (void*) android_content_AssetManager_getArrayStringInfo },
-    // @FastNative
     { "getArrayIntResource","(I)[I",
         (void*) android_content_AssetManager_getArrayIntResource },
-    // @FastNative
     { "getStyleAttributes","(I)[I",
         (void*) android_content_AssetManager_getStyleAttributes },
 

@@ -776,7 +776,6 @@ public final class AssetManager implements AutoCloseable {
      * applications.
      * {@hide}
      */
-    @FastNative
     public native final void setConfiguration(int mcc, int mnc, String locale,
             int orientation, int touchscreen, int density, int keyboard,
             int keyboardHidden, int navigation, int screenWidth, int screenHeight,
@@ -786,18 +785,13 @@ public final class AssetManager implements AutoCloseable {
     /**
      * Retrieve the resource identifier for the given resource name.
      */
-    @FastNative
     /*package*/ native final int getResourceIdentifier(String type,
                                                        String name,
                                                        String defPackage);
 
-    @FastNative
     /*package*/ native final String getResourceName(int resid);
-    @FastNative
     /*package*/ native final String getResourcePackageName(int resid);
-    @FastNative
     /*package*/ native final String getResourceTypeName(int resid);
-    @FastNative
     /*package*/ native final String getResourceEntryName(int resid);
     
     private native final long openAsset(String fileName, int accessMode);
@@ -811,19 +805,15 @@ public final class AssetManager implements AutoCloseable {
     private native final int readAssetChar(long asset);
     private native final int readAsset(long asset, byte[] b, int off, int len);
     private native final long seekAsset(long asset, long offset, int whence);
-    @FastNative
     private native final long getAssetLength(long asset);
-    @FastNative
     private native final long getAssetRemainingLength(long asset);
 
     /** Returns true if the resource was found, filling in mRetStringBlock and
      *  mRetData. */
-    @FastNative
     private native final int loadResourceValue(int ident, short density, TypedValue outValue,
             boolean resolve);
     /** Returns true if the resource was found, filling in mRetStringBlock and
      *  mRetData. */
-    @FastNative
     private native final int loadResourceBagValue(int ident, int bagEntryId, TypedValue outValue,
                                                boolean resolve);
     /*package*/ static final int STYLE_NUM_ENTRIES = 6;
@@ -836,24 +826,17 @@ public final class AssetManager implements AutoCloseable {
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
 
     /*package*/ static final int STYLE_DENSITY = 5;
-    @FastNative
     /*package*/ native static final void applyStyle(long theme,
             int defStyleAttr, int defStyleRes, long xmlParser,
             int[] inAttrs, int length, long outValuesAddress, long outIndicesAddress);
-    @FastNative
     /*package*/ native static final boolean resolveAttrs(long theme,
             int defStyleAttr, int defStyleRes, int[] inValues,
             int[] inAttrs, int[] outValues, int[] outIndices);
-    @FastNative
     /*package*/ native final boolean retrieveAttributes(
             long xmlParser, int[] inAttrs, int[] outValues, int[] outIndices);
-    @FastNative
     /*package*/ native final int getArraySize(int resource);
-    @FastNative
     /*package*/ native final int retrieveArray(int resource, int[] outValues);
-    @FastNative
     private native final int getStringBlockCount();
-    @FastNative
     private native final long getNativeStringBlock(int block);
 
     /**
@@ -886,22 +869,17 @@ public final class AssetManager implements AutoCloseable {
     /*package*/ native static final void applyThemeStyle(long theme, int styleRes, boolean force);
     /*package*/ native static final void copyTheme(long dest, long source);
     /*package*/ native static final void clearTheme(long theme);
-    @FastNative
     /*package*/ native static final int loadThemeAttributeValue(long theme, int ident,
                                                                 TypedValue outValue,
                                                                 boolean resolve);
     /*package*/ native static final void dumpTheme(long theme, int priority, String tag, String prefix);
-    @FastNative
     /*package*/ native static final @NativeConfig int getThemeChangingConfigurations(long theme);
 
     private native final long openXmlAssetNative(int cookie, String fileName);
 
     private native final String[] getArrayStringResource(int arrayRes);
-    @FastNative
     private native final int[] getArrayStringInfo(int arrayRes);
-    @FastNative
     /*package*/ native final int[] getArrayIntResource(int arrayRes);
-    @FastNative
     /*package*/ native final int[] getStyleAttributes(int themeRes);
 
     private native final void init(boolean isSystem);
