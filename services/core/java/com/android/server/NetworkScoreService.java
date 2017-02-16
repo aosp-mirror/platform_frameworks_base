@@ -603,7 +603,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             mScanResultKeys = new ArraySet<>(size);
             for (int i = 0; i < size; i++) {
                 ScanResult scanResult = scanResults.get(i);
-                mScanResultKeys.add(NetworkKey.createFromScanResult(scanResult));
+                NetworkKey key = NetworkKey.createFromScanResult(scanResult);
+                if (key != null) {
+                    mScanResultKeys.add(key);
+                }
             }
         }
 
