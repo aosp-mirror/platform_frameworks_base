@@ -235,8 +235,19 @@ final class RemoteFillService implements DeathRecipient {
         }
         mBinding = false;
         if (isBound()) {
-            mAutoFillService.asBinder().unlinkToDeath(this, 0);
-            mAutoFillService = null;
+            // TODO(b/33197203, b/35395043): synchronize access instead
+            // Need to double check if it's null, since it could be set on onServiceDisconnected()
+            if (mAutoFillService != null) {
+                try {
+                    mAutoFillService.onDisconnected();
+                } catch (Exception e) {
+                    Slog.w(LOG_TAG, "Exception calling onDisconnected(): " + e);
+                }
+            }
+            if (mAutoFillService != null) {
+                mAutoFillService.asBinder().unlinkToDeath(this, 0);
+                mAutoFillService = null;
+            }
         }
         mContext.unbindService(mServiceConnection);
     }
@@ -304,6 +315,18 @@ final class RemoteFillService implements DeathRecipient {
                 handleBinderDied();
                 return;
             }
+
+            try {
+                // TODO(b/33197203, b/35395043): synchronize access instead
+                // Need to double check if it's null, since it could be set on
+                // onServiceDisconnected()
+                if (mAutoFillService != null) {
+                    mAutoFillService.onConnected();
+                }
+            } catch (RemoteException e) {
+                Slog.w(LOG_TAG, "Exception calling onConnected(): " + e);
+            }
+
 
             if (mPendingRequest != null) {
                 handlePendingRequest(mPendingRequest);
