@@ -366,11 +366,18 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @param pw
      */
     public void dump(PrintWriter pw) {
-        pw.println("  ID:" + mPlayerIId
-                + " -- type:" + toLogFriendlyPlayerType(mPlayerType)
-                + " -- u/pid:" + mClientUid +"/" + mClientPid
-                + " -- state:" + toLogFriendlyPlayerState(mPlayerState)
-                + " -- attr:" + mPlayerAttr);
+        pw.println("  " + toLogFriendlyString(this));
+    }
+
+    /**
+     * @hide
+     */
+    public static String toLogFriendlyString(AudioPlaybackConfiguration apc) {
+        return new String("ID:" + apc.mPlayerIId
+                + " -- type:" + toLogFriendlyPlayerType(apc.mPlayerType)
+                + " -- u/pid:" + apc.mClientUid +"/" + apc.mClientPid
+                + " -- state:" + toLogFriendlyPlayerState(apc.mPlayerState)
+                + " -- attr:" + apc.mPlayerAttr);
     }
 
     public static final Parcelable.Creator<AudioPlaybackConfiguration> CREATOR

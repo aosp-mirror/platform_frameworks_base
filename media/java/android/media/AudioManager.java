@@ -1981,8 +1981,7 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * Used to indicate no audio focus has been gained or lost.
+     * Used to indicate no audio focus has been gained or lost, or requested.
      */
     public static final int AUDIOFOCUS_NONE = 0;
 
