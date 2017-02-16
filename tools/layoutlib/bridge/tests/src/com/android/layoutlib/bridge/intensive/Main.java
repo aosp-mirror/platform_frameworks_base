@@ -25,13 +25,15 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import android.graphics.Matrix_DelegateTest;
+import android.util.BridgeXmlPullAttributesTest;
 
 /**
  * Suite used by the layoutlib build system
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-        RenderTests.class, LayoutParserWrapperTest.class, BridgeXmlBlockParserTest.class,
+        RenderTests.class, LayoutParserWrapperTest.class,
+        BridgeXmlBlockParserTest.class, BridgeXmlPullAttributesTest.class,
         Matrix_DelegateTest.class, TestDelegates.class
 })
 public class Main {
