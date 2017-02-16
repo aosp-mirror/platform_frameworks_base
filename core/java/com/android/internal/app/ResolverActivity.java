@@ -123,6 +123,13 @@ public class ResolverActivity extends Activity {
                 bindProfileView();
             }
         }
+
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            // We care about all package changes, not just the whole package itself which is
+            // default behavior.
+            return true;
+        }
     };
 
     /**
@@ -1555,7 +1562,15 @@ public class ResolverActivity extends Activity {
         }
 
         public void onListRebuilt() {
-            // This space for rent
+            int count = getUnfilteredCount();
+            if (count == 1 && getOtherProfile() == null) {
+                // Only one target, so we're a candidate to auto-launch!
+                final TargetInfo target = targetInfoForPosition(0, false);
+                if (shouldAutoLaunchSingleChoice(target)) {
+                    safelyStartActivity(target);
+                    finish();
+                }
+            }
         }
 
         public boolean shouldGetResolvedFilter() {
