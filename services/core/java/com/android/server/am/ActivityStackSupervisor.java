@@ -2394,7 +2394,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mWindowManager.deferSurfaceLayout();
         try {
             ActivityRecord r = stack.topRunningActivityLocked();
-            stack.resize(pinnedBounds, tempPinnedTaskBounds, null);
+            Rect insetBounds = null;
+            if (tempPinnedTaskBounds != null) {
+                // We always use 0,0 as the position for the inset rect because
+                // if we are getting insets at all in the pinned stack it must mean
+                // we are headed for fullscreen.
+                insetBounds = tempRect;
+                insetBounds.top = 0;
+                insetBounds.left = 0;
+                insetBounds.right = tempPinnedTaskBounds.width();
+                insetBounds.bottom = tempPinnedTaskBounds.height();
+            }
+            stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds);
             stack.ensureVisibleActivitiesConfigurationLocked(r, false);
         } finally {
             mWindowManager.continueSurfaceLayout();

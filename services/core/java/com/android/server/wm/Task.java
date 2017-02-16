@@ -592,8 +592,15 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         return mStack != null && mStack.mStackId == PINNED_STACK_ID;
     }
 
+    /**
+     * When we are in a floating stack (Freeform, Pinned, ...) we calculate
+     * insets differently. However if we are animating to the fullscreen stack
+     * we need to begin calculating insets as if we were fullscreen, otherwise
+     * we will have a jump at the end.
+     */
     boolean isFloating() {
-        return StackId.tasksAreFloating(mStack.mStackId);
+        return StackId.tasksAreFloating(mStack.mStackId)
+            && !mStack.isBoundsAnimatingToFullscreen();
     }
 
     WindowState getTopVisibleAppMainWindow() {

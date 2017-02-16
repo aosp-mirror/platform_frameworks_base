@@ -176,7 +176,7 @@ public class BoundsAnimationController {
             // we trigger any size changes, so it can swap surfaces
             // in to appropriate modes, or do as it wishes otherwise.
             if (!mReplacement) {
-                mTarget.onAnimationStart();
+                mTarget.onAnimationStart(mMoveToFullScreen);
             }
 
             // Immediately update the task bounds if they have to become larger, but preserve
@@ -263,7 +263,7 @@ public class BoundsAnimationController {
          */
         boolean setPinnedStackSize(Rect bounds, Rect taskBounds);
 
-        void onAnimationStart();
+        void onAnimationStart(boolean toFullscreen);
 
         /**
          * Callback for the target to inform it that the animation has ended, so it can do some
