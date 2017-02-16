@@ -54,6 +54,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -4399,6 +4400,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         return super.onInterceptHoverEvent(event);
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (mFastScroll != null) {
+            PointerIcon pointerIcon = mFastScroll.onResolvePointerIcon(event, pointerIndex);
+            if (pointerIcon != null) {
+                return pointerIcon;
+            }
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 
     @Override
