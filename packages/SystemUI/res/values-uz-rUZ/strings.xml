@@ -523,7 +523,7 @@
     <string name="high_importance" msgid="3441537905162782568">"Muhimligi: 4-daraja"</string>
     <string name="max_importance" msgid="4880179829869865275">"Muhimligi: 5-daraja"</string>
     <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Ilova har bir bildirishnomaning muhimligini o‘zi aniqlaydi."</string>
-    <string name="notification_importance_blocked" msgid="4237497046867398057">"Bu ilovadan keladigan bildirishnomalarni hech qachon ko‘rsatilmaslik."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Bu ilovadan keladigan bildirishnomalarni ko‘rsatmaslik"</string>
     <string name="notification_importance_min" msgid="7844224511187027155">"Qalqib chiquvchi va to‘liq ekranli bildirishnomalarni ko‘rsatilmaslik. Ovoz va tebranishdan foydalanmaslik. Ekran qulfi va holat qatorida ko‘rsatmaslik."</string>
     <string name="notification_importance_low" msgid="7950291702044409847">"Qalqib chiquvchi va to‘liq ekranli bildirishnomalar ko‘rsatmaslik. Ovoz va tebranishdan foydalanmaslik."</string>
     <string name="notification_importance_default" msgid="5924405820269074915">"Qalqib chiquvchi va to‘liq ekranli bildirishnomalarni ko‘rsatmaslik."</string>
