@@ -1802,7 +1802,7 @@ public class AccountManager {
     public void addSharedAccountsFromParentUser(UserHandle parentUser, UserHandle user) {
         try {
             mService.addSharedAccountsFromParentUser(parentUser.getIdentifier(),
-                    user.getIdentifier());
+                    user.getIdentifier(), mContext.getOpPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

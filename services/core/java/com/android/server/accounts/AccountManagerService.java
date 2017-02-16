@@ -4087,9 +4087,10 @@ public class AccountManagerService
     }
 
     @Override
-    public void addSharedAccountsFromParentUser(int parentUserId, int userId) {
+    public void addSharedAccountsFromParentUser(int parentUserId, int userId,
+            String opPackageName) {
         checkManageOrCreateUsersPermission("addSharedAccountsFromParentUser");
-        Account[] accounts = getAccountsAsUser(null, parentUserId, mContext.getOpPackageName());
+        Account[] accounts = getAccountsAsUser(null, parentUserId, opPackageName);
         for (Account account : accounts) {
             addSharedAccountAsUser(account, userId);
         }
