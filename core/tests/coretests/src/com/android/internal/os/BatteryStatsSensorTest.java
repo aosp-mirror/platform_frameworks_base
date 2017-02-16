@@ -48,8 +48,10 @@ public class BatteryStatsSensorTest extends TestCase {
 
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_RECEIVER);
         bi.noteStartSensorLocked(UID, SENSOR_ID);
+        bi.noteStartSensorLocked(UID, SENSOR_ID);
         clocks.realtime = 400;
         clocks.uptime = 400;
+        bi.noteStopSensorLocked(UID, SENSOR_ID);
         bi.noteStopSensorLocked(UID, SENSOR_ID);
 
         BatteryStats.Timer sensorTimer = bi.getUidStats().get(UID).getSensorStats()
