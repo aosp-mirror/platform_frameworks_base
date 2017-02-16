@@ -2400,13 +2400,18 @@ public class BackupManagerService {
         }
         final long oldToken = Binder.clearCallingIdentity();
         try {
+            List<Integer> operationsToCancel = new ArrayList<>();
             synchronized (mCurrentOpLock) {
                 for (int i = 0; i < mCurrentOperations.size(); i++) {
                     Operation op = mCurrentOperations.valueAt(i);
                     int token = mCurrentOperations.keyAt(i);
                     if (op.type == OP_TYPE_BACKUP) {
-                        handleCancel(token, true /* cancelAll */);
+                        operationsToCancel.add(token);
                     }
+                }
+
+                for (Integer token : operationsToCancel) {
+                    handleCancel(token, true /* cancelAll */);
                 }
             }
 
