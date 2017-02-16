@@ -93,7 +93,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final SessionManagerImpl mSessionManagerImpl;
     private final MediaSessionStack mPriorityStack;
 
-    private final ArrayList<MediaSessionRecord> mAllSessions = new ArrayList<MediaSessionRecord>();
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<UserRecord>();
     private final ArrayList<SessionsListenerRecord> mSessionsListeners
             = new ArrayList<SessionsListenerRecord>();
@@ -145,7 +144,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     public void updateSession(MediaSessionRecord record) {
         synchronized (mLock) {
-            if (!mAllSessions.contains(record)) {
+            UserRecord user = mUserRecords.get(record.getUserId());
+            if (user == null || !user.mSessions.contains(record)) {
                 Log.d(TAG, "Unknown session updated. Ignoring.");
                 return;
             }
@@ -171,7 +171,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
         boolean updateSessions = false;
         synchronized (mLock) {
-            if (!mAllSessions.contains(record)) {
+            UserRecord user = mUserRecords.get(record.getUserId());
+            if (user == null || !user.mSessions.contains(record)) {
                 Log.d(TAG, "Unknown session changed playback state. Ignoring.");
                 return;
             }
@@ -184,7 +185,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     public void onSessionPlaybackTypeChanged(MediaSessionRecord record) {
         synchronized (mLock) {
-            if (!mAllSessions.contains(record)) {
+            UserRecord user = mUserRecords.get(record.getUserId());
+            if (user == null || !user.mSessions.contains(record)) {
                 Log.d(TAG, "Unknown session changed playback type. Ignoring.");
                 return;
             }
@@ -318,7 +320,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         mPriorityStack.removeSession(session);
-        mAllSessions.remove(session);
 
         try {
             session.getCallback().asBinder().unlinkToDeath(session, 0);
@@ -455,7 +456,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
 
-        mAllSessions.add(session);
         mPriorityStack.addSession(session, mCurrentUserIdList.contains(userId));
         user.addSessionLocked(session);
 
@@ -1087,16 +1087,10 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             synchronized (mLock) {
                 pw.println(mSessionsListeners.size() + " sessions listeners.");
-                int count = mAllSessions.size();
-                pw.println(count + " Sessions:");
-                for (int i = 0; i < count; i++) {
-                    mAllSessions.get(i).dump(pw, "");
-                    pw.println();
-                }
                 mPriorityStack.dump(pw, "");
 
                 pw.println("User Records:");
-                count = mUserRecords.size();
+                int count = mUserRecords.size();
                 for (int i = 0; i < count; i++) {
                     UserRecord user = mUserRecords.get(mUserRecords.keyAt(i));
                     user.dumpLocked(pw, "");
