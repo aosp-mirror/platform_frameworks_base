@@ -233,7 +233,7 @@ class PinnedStackController {
      * @return the movement bounds for the given {@param stackBounds} and the current state of the
      *         controller.
      */
-    Rect getMovementBounds(Rect stackBounds) {
+    private Rect getMovementBounds(Rect stackBounds) {
         return getMovementBounds(stackBounds, true /* adjustForIme */);
     }
 
@@ -241,7 +241,7 @@ class PinnedStackController {
      * @return the movement bounds for the given {@param stackBounds} and the current state of the
      *         controller.
      */
-    Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
+    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
         final Rect movementBounds = new Rect();
         getInsetBounds(movementBounds);
 

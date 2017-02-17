@@ -695,7 +695,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) {
+        public void onPinnedActivityRestartAttempt(String launchedFromPackage) {
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
             if (!checkCurrentUserId(DEBUG)) {
                 return;
