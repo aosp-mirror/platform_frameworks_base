@@ -515,6 +515,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := framework-protos
 
 LOCAL_MODULE := framework
 
+LOCAL_DX_FLAGS := --core-library --multi-dex
 LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_RMTYPEDEFS := true
@@ -1353,6 +1354,8 @@ LOCAL_JAVA_LIBRARIES := core-oj core-libart
 LOCAL_STATIC_JAVA_LIBRARIES := libphonenumber-platform
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
+
+LOCAL_DX_FLAGS := --core-library
 
 ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
