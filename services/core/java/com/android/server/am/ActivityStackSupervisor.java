@@ -181,6 +181,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener {
@@ -2772,7 +2773,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             stack.prepareFreezingTaskBounds();
 
             // Make sure the task has the appropriate bounds/size for the stack it is in.
-            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
+            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                    && !Objects.equals(task.mBounds, stack.mBounds)) {
                 kept = task.resize(stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow,
                         deferResume);
             } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -2895,6 +2897,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mService.mTaskChangeNotificationController.notifyActivityPinned();
     }
 
+    /** Move activity with its stack to front and make the stack focused. */
     boolean moveFocusableActivityStackToFrontLocked(ActivityRecord r, String reason) {
         if (r == null || !r.isFocusable()) {
             if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
@@ -4905,24 +4908,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @return a list of activities which are the top ones in each visible stack. The first
      * entry will be the focused activity.
      */
-    public List<IBinder> getTopVisibleActivities() {
-        // TODO(multi-display): Get rid of DEFAULT_DISPLAY here. Used in
-        // VoiceInteractionManagerServiceImpl#showSessionLocked.
-        final ActivityDisplay display = mActivityDisplays.get(DEFAULT_DISPLAY);
-        if (display == null) {
-            return Collections.EMPTY_LIST;
-        }
-        ArrayList<IBinder> topActivityTokens = new ArrayList<>();
-        final ArrayList<ActivityStack> stacks = display.mStacks;
-        for (int i = stacks.size() - 1; i >= 0; i--) {
-            ActivityStack stack = stacks.get(i);
-            if (stack.getStackVisibilityLocked(null) == ActivityStack.STACK_VISIBLE) {
-                ActivityRecord top = stack.topActivity();
-                if (top != null) {
-                    if (stack == mFocusedStack) {
-                        topActivityTokens.add(0, top.appToken);
-                    } else {
-                        topActivityTokens.add(top.appToken);
+    List<IBinder> getTopVisibleActivities() {
+        final ArrayList<IBinder> topActivityTokens = new ArrayList<>();
+        // Traverse all displays.
+        for (int i = mActivityDisplays.size(); i >= 0; i--) {
+            final ActivityDisplay display = mActivityDisplays.valueAt(i);
+            // Traverse all stacks on a display.
+            for (int j = display.mStacks.size() - 1; j >= 0; j--) {
+                final ActivityStack stack = display.mStacks.get(j);
+                // Get top activity from a visible stack and add it to the list.
+                if (stack.getStackVisibilityLocked(null /* starting */)
+                        == ActivityStack.STACK_VISIBLE) {
+                    final ActivityRecord top = stack.topActivity();
+                    if (top != null) {
+                        if (stack == mFocusedStack) {
+                            topActivityTokens.add(0, top.appToken);
+                        } else {
+                            topActivityTokens.add(top.appToken);
+                        }
                     }
                 }
             }
