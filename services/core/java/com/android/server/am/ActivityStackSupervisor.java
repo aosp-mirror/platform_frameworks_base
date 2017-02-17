@@ -3776,18 +3776,27 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private void handleDisplayRemoved(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can't remove the primary display.");
+        }
+
         synchronized (mService) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             if (activityDisplay != null) {
                 final boolean destroyContentOnRemoval
                         = activityDisplay.shouldDestroyContentOnRemove();
-                ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
-                for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                    final ActivityStack stack = stacks.get(stackNdx);
-                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
-                            !destroyContentOnRemoval /* onTop */);
+                final ArrayList<ActivityStack> stacks = activityDisplay.mStacks;
+                while (!stacks.isEmpty()) {
+                    final ActivityStack stack = stacks.get(0);
                     if (destroyContentOnRemoval) {
+                        moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY,
+                                false /* onTop */);
                         stack.finishAllActivitiesLocked(true /* immediately */);
+                    } else {
+                        // Moving all tasks to fullscreen stack, because it's guaranteed to be
+                        // a valid launch stack for all activities. This way the task history from
+                        // external display will be preserved on primary after move.
+                        moveTasksToFullscreenStackLocked(stack.getStackId(), true /* onTop */);
                     }
                 }
                 mActivityDisplays.remove(displayId);
