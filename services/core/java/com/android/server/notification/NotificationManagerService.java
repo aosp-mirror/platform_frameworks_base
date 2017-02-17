@@ -4195,7 +4195,7 @@ public class NotificationManagerService extends SystemService {
                                 .setCategory(MetricsEvent.NOTIFICATION_SNOOZED)
                                 .setType(MetricsEvent.TYPE_CLOSE)
                                 .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
-                                        snoozeCriterionId == null ? false : true));
+                                        snoozeCriterionId == null ? 0 : 1));
                         cancelNotificationLocked(r, false, REASON_SNOOZED);
                         updateLightsLocked();
                         if (snoozeCriterionId != null) {
