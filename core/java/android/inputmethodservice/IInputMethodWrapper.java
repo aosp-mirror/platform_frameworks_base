@@ -172,12 +172,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
                 info.makeCompatible(mTargetSdkVersion);
-                if (restarting) {
-                    inputMethod.restartInput(ic, info);
-                } else {
-                    inputMethod.startInput(ic, info);
-                }
-                inputMethod.dispatchStartInputWithToken(ic, info, true /* initial */,
+                inputMethod.dispatchStartInputWithToken(ic, info, restarting /* restarting */,
                         startInputToken);
                 args.recycle();
                 return;
