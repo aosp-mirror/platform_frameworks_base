@@ -15,6 +15,8 @@
  */
 package android.service.notification;
 
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.NotificationChannel;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -22,7 +24,10 @@ import android.os.Parcelable;
 
 /**
  * Ranking updates from the Assistant.
+ * @hide
  */
+@SystemApi
+@TestApi
 public final class Adjustment implements Parcelable {
     private final String mPackage;
     private final String mKey;

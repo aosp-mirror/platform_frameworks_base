@@ -19,6 +19,8 @@ package android.service.notification;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +37,10 @@ import java.util.List;
 
 /**
  * A service that helps the user manage notifications.
+ * @hide
  */
+@SystemApi
+@TestApi
 public abstract class NotificationAssistantService extends NotificationListenerService {
     private static final String TAG = "NotificationAssistants";
 
