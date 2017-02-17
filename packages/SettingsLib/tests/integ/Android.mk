@@ -31,6 +31,12 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     legacy-android-test \
     truth-prebuilt
 
+# Code coverage puts us over the dex limit, so enable multi-dex for coverage-enabled builds
+ifeq (true,$(EMMA_INSTRUMENT))
+LOCAL_JACK_FLAGS := --multi-dex native
+LOCAL_DX_FLAGS := --multi-dex
+endif # EMMA_INSTRUMENT
+
 include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
