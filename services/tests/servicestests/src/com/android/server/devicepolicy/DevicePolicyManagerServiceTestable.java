@@ -313,6 +313,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        String settingsSecureGetStringForUser(String name, int userHandle) {
+            return context.settings.settingsSecureGetStringForUser(name, userHandle);
+        }
+
+        @Override
         void settingsSecurePutIntForUser(String name, int value, int userHandle) {
             context.settings.settingsSecurePutIntForUser(name, value, userHandle);
         }

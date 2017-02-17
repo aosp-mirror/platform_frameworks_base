@@ -7871,4 +7871,27 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Called by the system to find out whether the user's IME was set by the device/profile owner
+     * or the user.
+     *
+     * @param user The user for whom to retrieve information.
+     * @return {@code true} if the user's IME was set by the device or profile owner, {@code false}
+     *         otherwise.
+     * @throws SecurityException if the caller does not have permission to retrieve information
+     *         about the given user's default IME. Device Owner and Profile Owner can retrieve
+     *         information about the user they run on; the System can retrieve information about any
+     *         user.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isDefaultInputMethodSetByOwner(@NonNull UserHandle user) {
+        try {
+            return mService.isDefaultInputMethodSetByOwner(user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }
