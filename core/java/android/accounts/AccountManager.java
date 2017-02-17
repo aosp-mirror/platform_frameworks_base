@@ -288,7 +288,8 @@ public class AccountManager {
     }
 
     /**
-     * Account visibility was not set.
+     * Account visibility was not set. Default visibility value will be used.
+     * See {@link #PACKAGE_NAME_KEY_LEGACY_VISIBLE}, {@link #PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE}
      */
     public static final int VISIBILITY_UNDEFINED = 0;
 
@@ -919,7 +920,14 @@ public class AccountManager {
      * Package name must match installed application, or be equal to
      * {@link #PACKAGE_NAME_KEY_LEGACY_VISIBLE} or {@link #PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE}.
      * <p>
-     * See {@link #getAccountVisibility} for possible values.
+     * Possible visibility values:
+     * <ul>
+     * <li>{@link #VISIBILITY_UNDEFINED}</li>
+     * <li>{@link #VISIBILITY_VISIBLE}</li>
+     * <li>{@link #VISIBILITY_USER_MANAGED_VISIBLE}</li>
+     * <li>{@link #VISIBILITY_NOT_VISIBLE}
+     * <li>{@link #VISIBILITY_USER_MANAGED_NOT_VISIBLE}</li>
+     * </ul>
      * <p>
      * This method requires the caller to have a signature match with the authenticator that owns
      * the specified account.
@@ -944,7 +952,6 @@ public class AccountManager {
     /**
      * Get visibility of certain account for given application. Possible returned values are:
      * <ul>
-     * <li>{@link #VISIBILITY_UNDEFINED}</li>
      * <li>{@link #VISIBILITY_VISIBLE}</li>
      * <li>{@link #VISIBILITY_USER_MANAGED_VISIBLE}</li>
      * <li>{@link #VISIBILITY_NOT_VISIBLE}
