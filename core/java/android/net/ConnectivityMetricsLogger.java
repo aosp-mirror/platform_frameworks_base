@@ -46,32 +46,7 @@ public class ConnectivityMetricsLogger {
 
     public static final String DATA_KEY_EVENTS_COUNT = "count";
 
-    /** {@hide} */ protected IConnectivityMetricsLogger mService;
-    /** {@hide} */ protected volatile long mServiceUnblockedTimestampMillis;
-    private int mNumSkippedEvents;
-
     public ConnectivityMetricsLogger() {
-        // TODO: consider not initializing mService in constructor
-        this(IConnectivityMetricsLogger.Stub.asInterface(
-                ServiceManager.getService(CONNECTIVITY_METRICS_LOGGER_SERVICE)));
-    }
-
-    /** {@hide} */
-    @VisibleForTesting
-    public ConnectivityMetricsLogger(IConnectivityMetricsLogger service) {
-        mService = service;
-    }
-
-    /** {@hide} */
-    protected boolean checkLoggerService() {
-        if (mService != null) {
-            return true;
-        }
-        // Two threads racing here will write the same pointer because getService
-        // is idempotent once MetricsLoggerService is initialized.
-        mService = IConnectivityMetricsLogger.Stub.asInterface(
-                ServiceManager.getService(CONNECTIVITY_METRICS_LOGGER_SERVICE));
-        return mService != null;
     }
 
     /**
@@ -88,62 +63,6 @@ public class ConnectivityMetricsLogger {
      * @param data is a Parcelable instance representing the event.
      */
     public void logEvent(long timestamp, int componentTag, int eventTag, Parcelable data) {
-        if (mService == null) {
-            if (DBG) {
-                Log.d(TAG, "logEvent(" + componentTag + "," + eventTag + ") Service not ready");
-            }
-            return;
-        }
-
-        if (mServiceUnblockedTimestampMillis > 0) {
-            if (System.currentTimeMillis() < mServiceUnblockedTimestampMillis) {
-                // Service is throttling events.
-                // Don't send new events because they will be dropped.
-                mNumSkippedEvents++;
-                return;
-            }
-        }
-
-        ConnectivityMetricsEvent skippedEventsEvent = null;
-        if (mNumSkippedEvents > 0) {
-            // Log number of skipped events
-            Bundle b = new Bundle();
-            b.putInt(DATA_KEY_EVENTS_COUNT, mNumSkippedEvents);
-
-            // Log the skipped event.
-            // TODO: Note that some of the clients push all states events into the server,
-            // If we lose some states logged here, we might mess up the statistics happened at the
-            // backend. One of the options is to introduce a non-skippable flag for important events
-            // that are logged.
-            skippedEventsEvent = new ConnectivityMetricsEvent(mServiceUnblockedTimestampMillis,
-                    componentTag, TAG_SKIPPED_EVENTS, b);
-
-            mServiceUnblockedTimestampMillis = 0;
-        }
-
-        ConnectivityMetricsEvent event = new ConnectivityMetricsEvent(timestamp, componentTag,
-                eventTag, data);
-
-        try {
-            long result;
-            if (skippedEventsEvent == null) {
-                result = mService.logEvent(event);
-            } else {
-                result = mService.logEvents(new ConnectivityMetricsEvent[]
-                        {skippedEventsEvent, event});
-            }
-
-            if (result == 0) {
-                mNumSkippedEvents = 0;
-            } else {
-                mNumSkippedEvents++;
-                if (result > 0) { // events are throttled
-                    mServiceUnblockedTimestampMillis = result;
-                }
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error logging event", e);
-        }
     }
 
     /**
@@ -157,33 +76,17 @@ public class ConnectivityMetricsLogger {
      * @return events
      */
     public ConnectivityMetricsEvent[] getEvents(ConnectivityMetricsEvent.Reference reference) {
-        try {
-            return mService.getEvents(reference);
-        } catch (RemoteException e) {
-            Log.e(TAG, "IConnectivityMetricsLogger.getEvents", e);
-            return null;
-        }
+        return new ConnectivityMetricsEvent[0];
     }
 
     /**
      * Register PendingIntent which will be sent when new events are ready to be retrieved.
      */
     public boolean register(PendingIntent newEventsIntent) {
-        try {
-            return mService.register(newEventsIntent);
-        } catch (RemoteException e) {
-            Log.e(TAG, "IConnectivityMetricsLogger.register", e);
-            return false;
-        }
+        return false;
     }
 
     public boolean unregister(PendingIntent newEventsIntent) {
-        try {
-            mService.unregister(newEventsIntent);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "IConnectivityMetricsLogger.unregister", e);
-            return false;
-        }
+        return false;
     }
 }

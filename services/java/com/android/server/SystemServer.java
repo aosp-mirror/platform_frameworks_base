@@ -61,7 +61,6 @@ import com.android.server.audio.AudioService;
 import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.IpConnectivityMetrics;
-import com.android.server.connectivity.MetricsLoggerService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.NightDisplayService;
@@ -661,10 +660,6 @@ public final class SystemServer {
             } else {
                 mSystemServiceManager.startService(BluetoothService.class);
             }
-
-            traceBeginAndSlog("ConnectivityMetricsLoggerService");
-            mSystemServiceManager.startService(MetricsLoggerService.class);
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
             traceBeginAndSlog("IpConnectivityMetrics");
             mSystemServiceManager.startService(IpConnectivityMetrics.class);
