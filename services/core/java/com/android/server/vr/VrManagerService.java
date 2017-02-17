@@ -130,7 +130,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private final ArrayDeque<VrState> mLoggingDeque = new ArrayDeque<>(EVENT_LOG_SIZE);
     private final NotificationAccessManager mNotifAccessManager = new NotificationAccessManager();
     /** Tracks the state of the screen and keyguard UI.*/
-    private int mSystemSleepFlags = FLAG_NONE;
+    private int mSystemSleepFlags = FLAG_AWAKE;
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
