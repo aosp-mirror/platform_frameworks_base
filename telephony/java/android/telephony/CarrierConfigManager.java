@@ -1127,6 +1127,14 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL =
             "support_3gpp_call_forwarding_while_roaming_bool";
 
+    /**
+     * When {@code true}, the user will be notified when they attempt to place an international call
+     * when the call is placed using wifi calling.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL =
+            "notify_international_call_on_wfc_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1332,6 +1340,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_3GPP_CALL_FORWARDING_WHILE_ROAMING_BOOL, true);
+        sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
     }
 
     /**
