@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#include <memory>
+
 #include <utils/Compat.h>
 #include <utils/Errors.h>
 #include <utils/String8.h>
@@ -150,6 +152,7 @@ private:
 
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
+    friend class ApkAssets;
 
     /*
      * Create the asset from a named file on disk.
@@ -194,6 +197,9 @@ private:
      */
     static Asset* createFromUncompressedMap(FileMap* dataMap, AccessMode mode);
 
+    static std::unique_ptr<Asset> createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
+        AccessMode mode);
+
     /*
      * Create the asset from a memory-mapped file segment with compressed
      * data.
@@ -201,6 +207,9 @@ private:
      * The asset takes ownership of the FileMap.
      */
     static Asset* createFromCompressedMap(FileMap* dataMap,
+        size_t uncompressedLen, AccessMode mode);
+
+    static std::unique_ptr<Asset> createFromCompressedMap(std::unique_ptr<FileMap> dataMap,
         size_t uncompressedLen, AccessMode mode);
 
 

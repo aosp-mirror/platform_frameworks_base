@@ -70,6 +70,7 @@ private:
     const AssetDir& operator=(const AssetDir& src);
 
     friend class AssetManager;
+    friend class AssetManager2;
 
     /*
      * This holds information about files in the asset hierarchy.

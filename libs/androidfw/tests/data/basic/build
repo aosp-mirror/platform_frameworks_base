@@ -19,4 +19,11 @@ set -e
 
 PATH_TO_FRAMEWORK_RES=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/android.jar
 
-aapt package -M AndroidManifest.xml -S res -I $PATH_TO_FRAMEWORK_RES --split hdpi --split xhdpi --split xxhdpi --split fr,de -F basic.apk -f
+aapt package \
+    -M AndroidManifest.xml \
+    -S res \
+    -A assets \
+    -I $PATH_TO_FRAMEWORK_RES \
+    --split hdpi --split xhdpi --split xxhdpi --split fr,de \
+    -F basic.apk \
+    -f

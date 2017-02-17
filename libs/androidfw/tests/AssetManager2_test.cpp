@@ -312,12 +312,12 @@ TEST_F(AssetManager2Test, ResolveReferenceToResource) {
   EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
   EXPECT_EQ(basic::R::integer::ref2, value.data);
 
-  ResTable_ref last_ref;
+  uint32_t last_ref;
   cookie = assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_ref);
   ASSERT_NE(kInvalidCookie, cookie);
   EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
   EXPECT_EQ(12000u, value.data);
-  EXPECT_EQ(basic::R::integer::ref2, last_ref.ident);
+  EXPECT_EQ(basic::R::integer::ref2, last_ref);
 }
 
 TEST_F(AssetManager2Test, ResolveReferenceToBag) {
@@ -335,12 +335,12 @@ TEST_F(AssetManager2Test, ResolveReferenceToBag) {
   EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
   EXPECT_EQ(basic::R::array::integerArray1, value.data);
 
-  ResTable_ref last_ref;
+  uint32_t last_ref;
   cookie = assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_ref);
   ASSERT_NE(kInvalidCookie, cookie);
   EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
   EXPECT_EQ(basic::R::array::integerArray1, value.data);
-  EXPECT_EQ(basic::R::array::integerArray1, last_ref.ident);
+  EXPECT_EQ(basic::R::array::integerArray1, last_ref);
 }
 
 static bool IsConfigurationPresent(const std::set<ResTable_config>& configurations,

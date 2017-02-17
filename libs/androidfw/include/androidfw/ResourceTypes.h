@@ -1554,7 +1554,7 @@ class DynamicRefTable
 {
     friend class AssetManager2;
 public:
-    DynamicRefTable() = default;
+    DynamicRefTable();
     DynamicRefTable(uint8_t packageId, bool appAsLib);
 
     // Loads an unmapped reference table from the package.
@@ -1577,10 +1577,10 @@ public:
     }
 
 private:
-    uint8_t                         mAssignedPackageId = 0;
+    uint8_t                         mAssignedPackageId;
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
-    bool                            mAppAsLib = false;
+    bool                            mAppAsLib;
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);

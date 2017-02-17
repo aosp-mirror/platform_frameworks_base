@@ -25,6 +25,7 @@
 
 #include "androidfw/Asset.h"
 #include "androidfw/LoadedArsc.h"
+#include "androidfw/misc.h"
 
 namespace android {
 
@@ -37,6 +38,9 @@ class ApkAssets {
 
   std::unique_ptr<Asset> Open(const std::string& path,
                               Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
+
+  bool ForEachFile(const std::string& path,
+                   const std::function<void(const StringPiece&, FileType)>& f) const;
 
   inline const std::string& GetPath() const { return path_; }
 
@@ -56,6 +60,7 @@ class ApkAssets {
 
   using ZipArchivePtr =
       std::unique_ptr<typename std::remove_pointer<::ZipArchiveHandle>::type, ZipArchivePtrCloser>;
+
   ZipArchivePtr zip_handle_;
   std::string path_;
   std::unique_ptr<Asset> resources_asset_;

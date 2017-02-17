@@ -22,6 +22,8 @@
 
 #include "android-base/macros.h"
 
+#include "androidfw/StringPiece.h"
+
 namespace android {
 namespace util {
 
@@ -107,6 +109,12 @@ class unique_cptr {
 };
 
 void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out);
+
+// Converts a UTF-8 string to a UTF-16 string.
+std::u16string Utf8ToUtf16(const StringPiece& utf8);
+
+// Converts a UTF-16 string to a UTF-8 string.
+std::string Utf16ToUtf8(const StringPiece16& utf16);
 
 }  // namespace util
 }  // namespace android

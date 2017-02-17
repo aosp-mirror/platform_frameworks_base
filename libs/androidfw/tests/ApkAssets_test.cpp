@@ -16,6 +16,9 @@
 
 #include "androidfw/ApkAssets.h"
 
+#include "android-base/file.h"
+#include "android-base/unique_fd.h"
+
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 
@@ -49,6 +52,43 @@ TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
   ASSERT_NE(nullptr, loaded_arsc);
   ASSERT_EQ(1u, loaded_arsc->GetPackages().size());
   EXPECT_TRUE(loaded_arsc->GetPackages()[0]->IsDynamic());
+}
+
+TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {
+  std::unique_ptr<const ApkAssets> loaded_apk =
+      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  ASSERT_NE(nullptr, loaded_apk);
+
+  {
+    std::unique_ptr<Asset> assets = loaded_apk->Open("res/layout/main.xml", Asset::ACCESS_BUFFER);
+    ASSERT_NE(nullptr, assets);
+  }
+
+  {
+    std::unique_ptr<Asset> assets = loaded_apk->Open("res/layout/main.xml", Asset::ACCESS_BUFFER);
+    ASSERT_NE(nullptr, assets);
+  }
+}
+
+TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
+  std::unique_ptr<const ApkAssets> loaded_apk =
+      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  ASSERT_NE(nullptr, loaded_apk);
+
+  auto asset = loaded_apk->Open("assets/uncompressed.txt", Asset::ACCESS_UNKNOWN);
+  ASSERT_NE(nullptr, asset);
+
+  off64_t start, length;
+  base::unique_fd fd(asset->openFileDescriptor(&start, &length));
+  EXPECT_GE(fd.get(), 0);
+
+  lseek64(fd.get(), start, SEEK_SET);
+
+  std::string buffer;
+  buffer.resize(length);
+  ASSERT_TRUE(base::ReadFully(fd.get(), &*buffer.begin(), length));
+
+  EXPECT_EQ("This should be uncompressed.\n\n", buffer);
 }
 
 }  // namespace android
