@@ -1097,7 +1097,6 @@ public class CameraMetadataNative implements Parcelable {
             throws IllegalArgumentException;
     private static native int nativeGetTypeFromTag(int tag)
             throws IllegalArgumentException;
-    private static native void nativeClassInit();
 
     /**
      * <p>Perform a 0-copy swap of the internal metadata with another object.</p>
@@ -1289,10 +1288,6 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     static {
-        /*
-         * We use a class initializer to allow the native code to cache some field offsets
-         */
-        nativeClassInit();
         registerAllMarshalers();
     }
 }
