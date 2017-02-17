@@ -34,6 +34,7 @@ import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.autofill.AutoFillManager;
 import android.view.autofill.AutoFillType;
 import android.view.autofill.AutoFillValue;
 
@@ -163,6 +164,10 @@ public abstract class CompoundButton extends Button implements Checkable {
             }
             if (mOnCheckedChangeWidgetListener != null) {
                 mOnCheckedChangeWidgetListener.onCheckedChanged(this, mChecked);
+            }
+            final AutoFillManager afm = mContext.getSystemService(AutoFillManager.class);
+            if (afm != null) {
+                afm.valueChanged(this);
             }
 
             mBroadcasting = false;
@@ -563,8 +568,6 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     // TODO(b/33197203): add unit/CTS tests for auto-fill methods (and make sure they handle enable)
 
-    // TODO(b/33197203): override onProvideAutoFillStructure and add a change listener
-
     @Override
     public void autoFill(AutoFillValue value) {
         if (!isEnabled()) return;
@@ -579,6 +582,6 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     @Override
     public AutoFillValue getAutoFillValue() {
-        return isEnabled() ? null : AutoFillValue.forToggle(isChecked());
+        return isEnabled() ? AutoFillValue.forToggle(isChecked()) : null;
     }
 }

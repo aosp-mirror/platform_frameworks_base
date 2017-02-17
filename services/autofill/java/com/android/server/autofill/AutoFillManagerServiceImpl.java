@@ -792,25 +792,26 @@ final class AutoFillManagerServiceImpl {
                 return;
             }
 
-            if ((flags & FLAG_VALUE_CHANGED) != 0 && value != null &&
-                    !value.equals(viewState.mAutoFillValue)) {
-                viewState.mValueUpdated = true;
+            if ((flags & FLAG_VALUE_CHANGED) != 0) {
+                if (value != null && !value.equals(viewState.mAutoFillValue)) {
+                    viewState.mValueUpdated = true;
 
-                // Must check if this update was caused by auto-filling the view, in which
-                // case we just update the value, but not the UI.
-                if (mAutoFilledDataset != null) {
-                    final AutoFillValue filledValue = findValue(mAutoFilledDataset, id);
-                    if (value.equals(filledValue)) {
-                        viewState.mAutoFillValue = value;
-                        return;
+                    // Must check if this update was caused by auto-filling the view, in which
+                    // case we just update the value, but not the UI.
+                    if (mAutoFilledDataset != null) {
+                        final AutoFillValue filledValue = findValue(mAutoFilledDataset, id);
+                        if (value.equals(filledValue)) {
+                            viewState.mAutoFillValue = value;
+                            return;
+                        }
                     }
+
+                    // Change value
+                    viewState.mAutoFillValue = value;
+
+                    // Update the chooser UI
+                    mUi.updateFillUi(value.coerceToString());
                 }
-
-                // Change value
-                viewState.mAutoFillValue = value;
-
-                // Update the chooser UI
-                mUi.updateFillUi(value.coerceToString());
                 return;
             }
 
