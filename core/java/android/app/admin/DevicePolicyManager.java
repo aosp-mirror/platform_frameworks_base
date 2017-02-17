@@ -7643,6 +7643,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setBackupServiceEnabled");
         try {
             mService.setBackupServiceEnabled(admin, enabled);
         } catch (RemoteException re) {
@@ -7659,6 +7660,7 @@ public class DevicePolicyManager {
      * @see #setBackupServiceEnabled
      */
     public boolean isBackupServiceEnabled(@NonNull ComponentName admin) {
+        throwIfParentInstance("isBackupServiceEnabled");
         try {
             return mService.isBackupServiceEnabled(admin);
         } catch (RemoteException re) {
