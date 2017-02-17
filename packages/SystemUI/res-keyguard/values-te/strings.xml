@@ -20,186 +20,113 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (3171996292755059205) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_code (3420548423949593123) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_puk_code (670683628782925409) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_puk_prompt (3747778500166059332) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_prompt (8188243197504453830) -->
-    <skip />
-    <!-- no translation found for keyguard_password_entry_touch_hint (5790410752696806482) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_password_code (595980919238127672) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_password_code (7504123374204446086) -->
-    <skip />
-    <!-- no translation found for keyguard_password_wrong_pin_code (6535018036285012028) -->
-    <skip />
-    <!-- no translation found for keyguard_charged (2222329688813033109) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in (89308975354638682) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_fast (8869226755413795173) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_slowly (6637043106038550407) -->
-    <skip />
-    <!-- no translation found for keyguard_low_battery (9218432555787624490) -->
-    <skip />
-    <!-- no translation found for keyguard_instructions_when_pattern_disabled (8566679946700751371) -->
-    <skip />
-    <!-- no translation found for keyguard_network_locked_message (6743537524631420759) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message_short (6327533369959764518) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (4550152848200783542) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (6585414237800161146) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7350295932015220392) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (589889372883904477) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (654102080186420706) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (4683178224791318347) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (953766009432168127) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (1772789643694942073) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (3586601150825821675) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_pin_area (703175752097279029) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_pin_area (912702510825058921) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_puk_area (136979425761438705) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_next_alarm (5835196989158584991) -->
-    <skip />
-    <!-- no translation found for keyboardview_keycode_delete (6883116827512721630) -->
-    <skip />
-    <!-- no translation found for keyboardview_keycode_enter (4505833604411016668) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (534245177645252620) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (7620081431514773802) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (4580683060277329277) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (4785660766909463466) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (527455490371878356) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (5547646893001491340) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (1795013002231184046) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions_multi (1586316574649150223) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (4069609316644030034) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (136952397352976538) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (2288964170039899277) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (1373131883510840794) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (3137789674920391087) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (3089485999116759671) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (4471738151810900114) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (3057533256729513335) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (6003602401368264144) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5399287873762592502) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (5672736555427444330) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6604574268387867255) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8637788033282252027) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_password_attempts_dialog_message (7724148763268377734) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pattern_attempts_dialog_message (4820967667848302092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1629351522209932316) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (3921998703529189931) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (4694232971224663735) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (2365964340830006961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (1365418870560228936) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (2151286957817486128) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (5464020754932560928) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (6171564974118059) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (9154513795928824239) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (2162434417489128282) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (8966727588974691544) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (8476407539834855) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (956706236554092172) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (8364140853305528449) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code_pukked (3389829202093674267) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (4314341367727055967) -->
-    <!-- no translation found for kg_password_wrong_puk_code_dead (3329017604125179374) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_puk_code (2287504898931957513) -->
-    <!-- no translation found for kg_password_pin_failed (8769990811451236223) -->
-    <skip />
-    <!-- no translation found for kg_password_puk_failed (1331621440873439974) -->
-    <skip />
-    <!-- no translation found for kg_pin_accepted (7637293533973802143) -->
-    <skip />
-    <!-- no translation found for keyguard_carrier_default (4274828292998453695) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
-    <!-- no translation found for airplane_mode (3807209033737676010) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pattern (7246972020562621506) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (6303592361322290145) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (6984641181515902406) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5304487696073914063) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (8851462864335757813) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (6563904839641583441) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3398054847288438444) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (7426368139226961699) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_password (8383831046318421845) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_device_admin (2438626748767361010) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (8236951765212462286) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_time_pattern (71299470072448533) -->
-    <!-- no translation found for kg_prompt_reason_time_pin (34586942088144385) -->
-    <!-- no translation found for kg_prompt_reason_time_password (257297696215346527) -->
-    <!-- no translation found for fingerprint_not_recognized (348813995267914625) -->
-    <skip />
+    <string name="app_name" msgid="3171996292755059205">"కీగార్డ్"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"PIN కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"SIM PUK మరియు కొత్త PIN కోడ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"SIM PUK కోడ్"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"కొత్త SIM PIN కోడ్"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"పాస్‌వర్డ్‌ను టైప్ చేయడానికి తాకండి"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"అన్‌లాక్ చేయడానికి PINని టైప్ చేయండి"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN కోడ్ తప్పు."</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"ఛార్జ్ చేయబడింది"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"వేగంగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"మీ ఛార్జర్‌ను కనెక్ట్ చేయండి."</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"అన్‌లాక్ చేయడానికి మెనుని నొక్కండి."</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM కార్డ్ లేదు"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"టాబ్లెట్‌లో SIM కార్డ్ లేదు."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ఫోన్‌లో SIM కార్డ్ లేదు."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM కార్డ్‌ని చొప్పించండి."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"SIM కార్డ్ లేదు లేదా ఆమోదయోగ్యంగా లేదు. SIM కార్డ్‌ని చొప్పించండి."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"SIM కార్డ్ నిరుపయోగకరంగా మారింది."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"మీ SIM కార్డ్ శాశ్వతంగా నిలిపివేయబడింది.\n మరో SIM కార్డ్‌ని పొందడం కోసం మీ వైర్‌లెస్ సేవా ప్రదాతను సంప్రదించండి."</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"SIM కార్డ్ లాక్ చేయబడింది."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM కార్డ్ PUK-లాక్ చేయబడింది."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM కార్డ్‌ని అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN ప్రాంతం"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN ప్రాంతం"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK ప్రాంతం"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"తదుపరి అలారం <xliff:g id="ALARM">%1$s</xliff:g>కి సెట్ చేయబడింది"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"తొలగించు"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"నమోదు చేయండి"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"నమూనాను మర్చిపోయాను"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"నమూనా తప్పు"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"పాస్‌వర్డ్ తప్పు"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN తప్పు"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"మీ నమూనాను గీయండి"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"SIM PINను నమోదు చేయండి"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" కోసం SIM PINను నమోదు చేయండి"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN‌ను నమోదు చేయండి"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"పాస్‌వర్డ్‌ని నమోదు చేయండి"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ఇప్పుడు SIM నిలిపివేయబడింది. కొనసాగించాలంటే, PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"ఇప్పుడు SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"ని నిలిపివేయడం జరిగింది. కొనసాగించాలంటే, PUK కోడ్‌ను నమోదు చేయండి. వివరాల కోసం క్యారియర్‌ను సంప్రదించండి."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"కావల్సిన PIN కోడ్‌ను నమోదు చేయండి"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"కావల్సిన PIN కోడ్‌ను నిర్ధారించండి"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM కార్డ్‌ని అన్‌లాక్ చేస్తోంది…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 నుండి 8 సంఖ్యలు ఉండే PINని టైప్ చేయండి."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK కోడ్ అనేది 8 లేదా అంతకంటే ఎక్కువ సంఖ్యలు ఉండాలి."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"సరైన PUK కోడ్‌ను మళ్లీ నమోదు చేయండి. ఎక్కువసార్లు ప్రయత్నించడం వలన SIM శాశ్వతంగా నిలిపివేయబడుతుంది."</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN కోడ్‌లు సరిపోలలేదు"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"నమూనాని చాలా ఎక్కువసార్లు గీసారు"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"మీరు మీ PINను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈ టాబ్లెట్ రీసెట్ చేయబడుతుంది, తద్వారా ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈ ఫోన్ రీసెట్ చేయబడుతుంది, తద్వారా ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. ఈ టాబ్లెట్ రీసెట్ చేయబడుతుంది, తద్వారా ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. ఈ ఫోన్ రీసెట్ చేయబడుతుంది, తద్వారా ఇందులోని మొత్తం డేటా తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈ వినియోగదారు తీసివేయబడతారు, తద్వారా వినియోగదారు డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"మీరు ఫోన్‌ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈ వినియోగదారు తీసివేయబడతారు, తద్వారా వినియోగదారు డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. ఈ వినియోగదారు తీసివేయబడతారు, తద్వారా వినియోగదారు డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. ఈ వినియోగదారు తీసివేయబడతారు, తద్వారా వినియోగదారు డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, తద్వారా ప్రొఫైల్ డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"మీరు ఫోన్‌ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, తద్వారా ప్రొఫైల్ డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, తద్వారా ప్రొఫైల్ డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"మీరు ఫోన్‌ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు చెల్లని ప్రయత్నాలు చేసారు. కార్యాలయ ప్రొఫైల్ తీసివేయబడుతుంది, తద్వారా ప్రొఫైల్ డేటా మొత్తం తొలగించబడుతుంది."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సి వస్తుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సి వస్తుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM PIN కోడ్ తప్పు, ఇప్పుడు మీ పరికరాన్ని అన్‌లాక్ చేయాలంటే, మీరు తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించాలి."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="other">SIM PIN కోడ్ తప్పు, మీకు మరో <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM PIN కోడ్ తప్పు, మీకు మరో <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది, ఆ తర్వాత మీ పరికరాన్ని అన్‌లాక్ చేయాలంటే, మీరు తప్పనిసరిగా మీ క్యారియర్‌ని సంప్రదించాలి.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM నిరుపయోగకరంగా మారింది. మీ క్యారియర్‌ను సంప్రదించండి."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="other">SIM PUK కోడ్ తప్పు, మీకు మరో <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి, ఆ తర్వాత SIM శాశ్వతంగా నిరుపయోగకరంగా మారుతుంది.</item>
+      <item quantity="one">SIM PUK కోడ్ తప్పు, మీకు మరో <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది, ఆ తర్వాత SIM శాశ్వతంగా నిరుపయోగకరంగా మారుతుంది.</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"SIM PIN చర్య విఫలమైంది!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"SIM PUK చర్య విఫలమైంది!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"కోడ్ ఆమోదించబడింది!"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"సేవ లేదు."</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ఇన్‌పుట్ పద్ధతిని మార్చు"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"విమానం మోడ్"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనాను గీయాలి"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత PINని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్‌ను నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"అదనపు భద్రత కోసం నమూనాని గీయాలి"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"అదనపు భద్రత కోసం PINని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"అదనపు భద్రత కోసం పాస్‌వర్డ్‌ని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు నమూనాని గీయాలి"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు PINని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు పాస్‌వర్డ్‌ని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"పరికర నిర్వాహకులు పరికరాన్ని లాక్ చేసారు"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. నమూనాను గీయండి.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. నమూనాను గీయండి.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. PINను నమోదు చేయండి.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. PINను నమోదు చేయండి.</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"గుర్తించలేదు"</string>
 </resources>

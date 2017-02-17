@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Қуат хабарландыруының басқару элементтерімен қолданбаның хабарландырулары үшін 0-ден бастап 5-ке дейін маңыздылық деңгейін орнатуға болады. \n\n"<b>"5-деңгей"</b>" \n- Хабарландыру тізімінің ең басында көрсету \n- Толық экранға ашылуын рұқсат ету \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"4-деңгей"</b>" \n- Толық экранға шығармау \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"3-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n\n"<b>"2-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс және діріл шығармау \n\n"<b>"1-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс немесе діріл шығармау \n- Құлыпталған экраннан және күйін көрсету жолағынан жасыру \n- Хабарландыру тізімінің ең астында көрсету \n\n"<b>"0-деңгей"</b>" \n- Қолданбадағы барлық хабарландыруларға тыйым салу"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Хабарландырулар"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Сізге енді бұл хабарландырулар жіберілмейді."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> хабарландырулары"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Төмен"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Орташа"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Жоғары"</string>
-    <string name="high_importance" msgid="730741630855788381">"Шұғыл"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Дыбыссыз және визуалдық кедергісіз"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Дыбыссыз көрсету"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Дыбыстық сигнал беру"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Дыбыстық сигнал беру және экранға шығару"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">Осы қолданбадағы <xliff:g id="NUMBER_1">%d</xliff:g> санаттың 1-і</item>
+      <item quantity="one">Осы қолданбадағы <xliff:g id="NUMBER_0">%d</xliff:g> санаттың 1-і</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Барлық санаттар"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Өшірулі"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Шарлау тақтасы"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Формат"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Сол жақ"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Оң жақ"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Түйме түрі"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Қосымша сол жақ түйме түрі"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Қосымша оң жақ түйме түрі"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(әдепкі)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Буфер"</item>
     <item msgid="5742013440802239414">"Перне коды"</item>
-    <item msgid="8748101184830239843">"Мәзір/пернетақта ауыстырғышы"</item>
+    <item msgid="8802889973626281575">"Пернетақта ауыстырғышы"</item>
     <item msgid="8175437057325747277">"Ешқандай"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Бөлінген (әдепкі)"</item>
-    <item msgid="6210279084134579668">"Ортасына тураланған"</item>
-    <item msgid="89143234390889289">"Сол жағына тураланған"</item>
-    <item msgid="7715533883382410603">"Оң жағына тураланған"</item>
+    <item msgid="8077901629964902399">"Орташа"</item>
+    <item msgid="8256205964297588988">"Жинақы"</item>
+    <item msgid="8719936228094005878">"Сол жақтан"</item>
+    <item msgid="586019486955594690">"Оң жақтан"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Мәзір/пернетақта ауыстырғышы"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Пернетақта ауыстырғышы"</string>
     <string name="save" msgid="2311877285724540644">"Сақтау"</string>
     <string name="reset" msgid="2448168080964209908">"Қайта реттеу"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Түйме енін реттеу"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Арнаулы шарлау түймесі"</string>
-    <string name="keycode" msgid="7335281375728356499">"Кілт коды"</string>
-    <string name="icon" msgid="8732339849035837289">"Белгіше"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Сол жақ кілт коды"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Оң жақ кілт коды"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Сол жақ белгіше"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Оң жақ белгіше"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Қажеттерін сүйреп қойыңыз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Керексіздерін осы жерге сүйреңіз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> параметрлерін ашу."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Параметрлер тәртібін өзгерту."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Құлыпталған экран"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Жаю"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кішірейту"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Жабу"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон қызуда"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Сол жақ"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Оң жақ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Таңбашаны реттеу"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Таңбаша"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Құпия сөзді сұрау"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Сол жақ таңбаша"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Оң жақ таңбаша"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Сол жақ таңбаша құлыпты ашады"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Оң жақ таңбаша құлыпты ашады"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Ешқандай"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> қолданбасын іске қосу"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Басқа қолданбалар"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Шеңбер"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Плюс"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Минус"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Сол жақ"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Оң жақ"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Mәзір"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Дабылдар"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоттар"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Жалпы хабарлар"</string>

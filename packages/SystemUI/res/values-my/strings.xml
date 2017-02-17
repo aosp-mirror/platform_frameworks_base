@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"အကြောင်းကြားချက်များ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"သင်သည် ဤအကြောင်းကြားချက်များကို လက်ခံရရှိတော့မည် မဟုတ်ပါ။"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"ဤအရာအတွက် <xliff:g id="APP">%s</xliff:g> အကြောင်းကြားချက်များ"</string>
-    <string name="min_importance" msgid="7559703098688382595">"အရေးသိပ်မကြီးပါ"</string>
-    <string name="low_importance" msgid="6891335321576225228">"အတော်အသင့်"</string>
-    <string name="default_importance" msgid="6400766013567512061">"အရေးကြီးသည်"</string>
-    <string name="high_importance" msgid="730741630855788381">"အရေးပေါ်"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"မည်သည့်အသံ သို့မဟုတ် ရုပ်ပုံ ကြားဝင်နှောင့်ယှက်ခြင်း မရှိပါ"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"တိတ်တဆိတ်ပြပါ"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"အသံဖွင့်ပါ"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"အသံဖွင့်၍ မျက်နှာပြင်ပေါ်တွင် ပြပါ"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">ဤအက်ပ်ရှိ အုပ်စု <xliff:g id="NUMBER_1">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
+      <item quantity="one">ဤအက်ပ်ရှိ အုပ်စု <xliff:g id="NUMBER_0">%d</xliff:g> ခုအနက်မှ ၁ ခု</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"အုပ်စုအားလုံး"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ပြီးပါပြီ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"ပိတ်ပါ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ရွှေ့လျားရန်ဘားတန်း"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"အပြင်အဆင်"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"ဘယ်"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"ညာ"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"ခလုတ်အမျိုးအစား"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"လက်ဝဲခလုတ် အမျိုးအစားအပို"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"လက်ယာခလုတ် အမျိုးအစားအပို"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(မူရင်း)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ကလစ်ဘုတ်"</item>
     <item msgid="5742013440802239414">"ကီးကုဒ်"</item>
-    <item msgid="8748101184830239843">"မီနူး / ကီးဘုတ်ပြောင်းစနစ်"</item>
+    <item msgid="8802889973626281575">"ကီးဘုတ် ပြောင်းလဲပေးသည့်စနစ်"</item>
     <item msgid="8175437057325747277">"တစ်ခုမျှမရှိ"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"ခွဲခြားထားသော (မူရင်း)"</item>
-    <item msgid="6210279084134579668">"အလယ်ဗဟိုပြုထားသော"</item>
-    <item msgid="89143234390889289">"ဘယ်ဘက်ကပ်ထားသော"</item>
-    <item msgid="7715533883382410603">"ညာဘက်ကပ်ထားသော"</item>
+    <item msgid="8077901629964902399">"ပုံမှန်"</item>
+    <item msgid="8256205964297588988">"ကျစ်ကျစ်လစ်လစ်"</item>
+    <item msgid="8719936228094005878">"လက်ဝဲယိမ်း"</item>
+    <item msgid="586019486955594690">"လက်ယာယိမ်း"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"မီနူး / ကီးဘုတ်ပြောင်းစနစ်"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"ကီးဘုတ် ပြောင်းလဲပေးသည့်စနစ်"</string>
     <string name="save" msgid="2311877285724540644">"သိမ်းရန်"</string>
     <string name="reset" msgid="2448168080964209908">"ပြန်လည်သတ်မှတ်ရန်"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ခလုတ်အလျားကို ချိန်ညှိပါ"</string>
     <string name="clipboard" msgid="1313879395099896312">"ကလစ်ဘုတ်"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"စိတ်ကြိုက်ရွှေ့လျားရန် ခလုတ်"</string>
-    <string name="keycode" msgid="7335281375728356499">"ကီးကုဒ်"</string>
-    <string name="icon" msgid="8732339849035837289">"သင်္ကေတ"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"လက်ဝဲကီးကုဒ်"</string>
+    <string name="right_keycode" msgid="708447961000848163">"လက်ယာကီးကုဒ်"</string>
+    <string name="left_icon" msgid="3096287125959387541">"လက်ဝဲသင်္ကေတ"</string>
+    <string name="right_icon" msgid="3952104823293824311">"လက်ယာသင်္ကေတ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"အချပ်များကိုထည့်ရန် ဖိဆွဲပါ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ဖယ်ရှားရန် ဤနေရာသို့ဖိဆွဲပါ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"တည်းဖြတ်ပါ"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ဆက်တင်များကို ဖွင့်ပါ။"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ချဲ့ရန်"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ချုံ့ရန်"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ပိတ်ရန်"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ဖုန်း ပူနွေးလာပါပြီ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"ဘယ်"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"ညာ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"ဖြတ်လမ်းလင့်ခ်ကို စိတ်ကြိုက်ပြင်ဆင်ရန်"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"ဖြတ်လမ်းလင့်ခ်"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"စကားဝှက်ကို မေးရန်"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"လက်ဝဲ ဖြတ်လမ်းလင့်ခ်"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"လက်ယာ ဖြတ်လမ်းလင့်ခ်"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"လက်ဝဲ ဖြတ်လမ်းလင့်ခ်ဖြင့်လည်း လော့ခ်ဖွင့်ရန်"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"လက်ယာ ဖြတ်လမ်းလင့်ခ်ဖြင့်လည်း လော့ခ်ဖွင့်ရန်"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"တစ်ခုမျှမရှိ"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> ကို ဖွင့်ပါ"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"အခြားအက်ပ်များ"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"စက်ဝိုင်း"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"အပေါင်း"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"အနုတ်"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"လက်ဝဲ"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"လက်ယာ"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"မီနူး"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> အက်ပ်"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"သတိပေးချက်များ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"မျက်နှာပြင်ဓာတ်ပုံများ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"အထွေထွေ မက်ဆေ့ဂျ်များ"</string>

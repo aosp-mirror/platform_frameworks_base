@@ -518,15 +518,12 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Pomoću naprednih kontrola za obaveštenja možete da podesite nivo važnosti od 0. do 5. za obaveštenja aplikacije. \n\n"<b>"5. nivo"</b>" \n– Prikazuju se u vrhu liste obaveštenja \n- Dozvoli prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"4. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Uvek zaviruj \n\n"<b>"3. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n\n"<b>"2. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n\n"<b>"1. nivo"</b>" \n– Spreči prekid režima celog ekrana \n– Nikada ne zaviruj \n– Nikada ne proizvodi zvuk ili vibraciju \n– Sakrij na zaključanom ekranu i statusnoj traci \n– Prikazuju se u dnu liste obaveštenja \n\n"<b>"0. nivo"</b>" \n– Blokiraj sva obaveštenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obaveštenja"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Više nećete da dobijate ova obaveštenja."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Obaveštenja aplikacije <xliff:g id="APP">%s</xliff:g> za"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Nisko"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Srednje"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Visoko"</string>
-    <string name="high_importance" msgid="730741630855788381">"Hitno"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Bez zvučnog signala ili vizuelnog obaveštenja"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Prikazuje se bez zvučnog signala"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Emituje se zvučni signal"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Emituje se zvučni signal i prikazuje se na ekranu"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">1 od <xliff:g id="NUMBER_1">%d</xliff:g> kategorije iz ove aplikacije</item>
+      <item quantity="few">1 od <xliff:g id="NUMBER_1">%d</xliff:g> kategorije iz ove aplikacije</item>
+      <item quantity="other">1 od <xliff:g id="NUMBER_1">%d</xliff:g> kategorija iz ove aplikacije</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Sve kategorije"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Još podešavanja"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -600,30 +597,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Isključeno"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Traka za navigaciju"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Raspored"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Levo"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Desno"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tip dugmeta"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Dodatni tip levog dugmeta"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Dodatni tip desnog dugmeta"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(podrazumevano)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Memorija"</item>
     <item msgid="5742013440802239414">"Kôd tastera"</item>
-    <item msgid="8748101184830239843">"Prebacivač meni/tastatura"</item>
+    <item msgid="8802889973626281575">"Prebacivač za tastaturu"</item>
     <item msgid="8175437057325747277">"Ništa"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Podeljeno (podrazumevano)"</item>
-    <item msgid="6210279084134579668">"Centrirano"</item>
-    <item msgid="89143234390889289">"Poravnato ulevo"</item>
-    <item msgid="7715533883382410603">"Poravnato udesno"</item>
+    <item msgid="8077901629964902399">"Normalni"</item>
+    <item msgid="8256205964297588988">"Kompaktni"</item>
+    <item msgid="8719936228094005878">"Uz levu stranu"</item>
+    <item msgid="586019486955594690">"Uz desnu stranu"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Meni/Tastatura prebacivač"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Prebacivač za tastaturu"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
     <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Prilagodi širinu dugmeta"</string>
     <string name="clipboard" msgid="1313879395099896312">"Privremena memorija"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeno dugme za navigaciju"</string>
-    <string name="keycode" msgid="7335281375728356499">"Kôd tastera"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikona"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Levo dugme za kôd tastera"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Desno dugme za kôd tastera"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Leva ikona"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Desna ikona"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Prevucite da biste dodali pločice"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Prevucite ovde da biste uklonili"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Izmeni"</string>
@@ -672,17 +670,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otvori podešavanja za <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Izmeni redosled podešavanja."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. strana od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Zaključani ekran"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Proširi"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Umanji"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zatvori"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon se zagrejao"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Neke funkcije su ograničene dok se telefon ne ohladi"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Levo"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Desno"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Prilagodi prečicu"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Prečica"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Upit za lozinku"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Leva prečica"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Desna prečica"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"I leva prečica otključava"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"I desna prečica otključava"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Ništa"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Pokretanje <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Druge aplikacije"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Krug"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Strelica ulevo"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Strelica udesno"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Meni"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Obaveštenja"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snimci ekrana"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Opšte poruke"</string>

@@ -520,15 +520,13 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dzięki zaawansowanym ustawieniom możesz określić poziom ważności powiadomień z aplikacji w skali od 0 do 5. \n\n"<b>"Poziom 5"</b>" \n– Pokazuj u góry listy powiadomień \n– Zezwalaj na powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 4"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 3"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n\n"<b>"Poziom 2"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n\n"<b>"Poziom 1"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n– Ukrywaj na ekranie blokady i pasku stanu \n– Pokazuj u dołu listy powiadomień \n\n"<b>"Poziom 0"</b>" \n– Blokuj wszystkie powiadomienia aplikacji"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Powiadomienia"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Nie będziesz już otrzymywać tych powiadomień."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Powiadomienia aplikacji <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Niska"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Średnia"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Wysoka"</string>
-    <string name="high_importance" msgid="730741630855788381">"Pilna"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Brak dźwięku i komunikatów wizualnych"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Pokazuj dyskretnie"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Sygnalizacja dźwiękiem"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Sygnalizacja dźwiękiem i wyświetlenie komunikatu"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="few">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii z tej aplikacji</item>
+      <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii z tej aplikacji</item>
+      <item quantity="other">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii z tej aplikacji</item>
+      <item quantity="one">1 z <xliff:g id="NUMBER_0">%d</xliff:g> kategorii z tej aplikacji</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Wszystkie kategorie"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Więcej ustawień"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotowe"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -602,30 +600,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Wył."</string>
     <string name="nav_bar" msgid="1993221402773877607">"Pasek nawigacji"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Układ"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Po lewej"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Po prawej"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Typ przycisku"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Typ dodatkowego lewego przycisku"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Typ dodatkowego prawego przycisku"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(wartość domyślna)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Schowek"</item>
     <item msgid="5742013440802239414">"Klawisz"</item>
-    <item msgid="8748101184830239843">"Menu / przełączanie klawiatury"</item>
+    <item msgid="8802889973626281575">"Przełączanie klawiatury"</item>
     <item msgid="8175437057325747277">"Brak"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Podzielony (wartość domyślna)"</item>
-    <item msgid="6210279084134579668">"Wyśrodkowany"</item>
-    <item msgid="89143234390889289">"Wyrównany do lewej"</item>
-    <item msgid="7715533883382410603">"Wyrównany do prawej"</item>
+    <item msgid="8077901629964902399">"Normalny"</item>
+    <item msgid="8256205964297588988">"Kompaktowy"</item>
+    <item msgid="8719936228094005878">"Pochylony w lewo"</item>
+    <item msgid="586019486955594690">"Pochylony w prawo"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Menu / przełączanie klawiatury"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Przełączanie klawiatury"</string>
     <string name="save" msgid="2311877285724540644">"Zapisz"</string>
     <string name="reset" msgid="2448168080964209908">"Resetuj"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Regulacja szerokości przycisku"</string>
     <string name="clipboard" msgid="1313879395099896312">"Schowek"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Niestandardowy przycisk nawigacji"</string>
-    <string name="keycode" msgid="7335281375728356499">"Klawisz"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikona"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Lewy klawisz"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Prawy klawisz"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Lewa ikona"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Prawa ikona"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Przeciągnij, aby dodać kafelki"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Przeciągnij tutaj, by usunąć"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edytuj"</string>
@@ -674,17 +673,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otwórz ustawienia: <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edytuj kolejność ustawień."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Strona <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Ekran blokady"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozwiń"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizuj"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zamknij"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon się nagrzewa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Podczas obniżania temperatury telefonu niektóre funkcje są ograniczone"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon automatycznie podejmie próbę obniżenia temperatury. Możesz go wciąż używać, ale telefon może działać wolniej.\n\nGdy temperatura się obniży, telefon będzie działał normalnie."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Po lewej"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Po prawej"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Dostosuj skrót"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Skrót"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Pytaj o hasło"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Lewy skrót"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Prawy skrót"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Lewy skrót również odblokowuje"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Prawy skrót również odblokowuje"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Brak"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Uruchom aplikację <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Inne aplikacje"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Okrąg"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Strzałka w lewo"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Strzałka w prawo"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Aplikacja <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Zrzuty ekranu"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Wiadomości"</string>

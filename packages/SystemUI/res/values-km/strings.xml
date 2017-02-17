@@ -516,15 +516,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ការ​ជូនដំណឹង"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"អ្នក​នឹង​មិន​ទទួល​បាន​ការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ។"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"ការ​ជូន​ដំណឹង​របស់ <xliff:g id="APP">%s</xliff:g> សម្រាប់"</string>
-    <string name="min_importance" msgid="7559703098688382595">"ទាប"</string>
-    <string name="low_importance" msgid="6891335321576225228">"មធ្យម"</string>
-    <string name="default_importance" msgid="6400766013567512061">"ខ្ពស់"</string>
-    <string name="high_importance" msgid="730741630855788381">"បន្ទាន់"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"គ្មាន​សំឡេង ឬ​ការរំខាន​ដល់​ការ​មើល​ឡើយ"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"បង្ហាញ​ស្ងាត់ៗ"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"បន្លឺ​សំឡេង"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"បន្លឺ​សំឡេង និង​លេច​ឡើង​នៅ​លើ​អេក្រង់"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
     <string name="notification_done" msgid="5279426047273930175">"រួចរាល់"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +592,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"បិទ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"របាររុករក"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"ប្លង់"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"ឆ្វេង"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"ស្ដាំ"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"ប្រភេទ​ប៊ូតុង"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(លំនាំដើម)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"អង្គចងចាំ"</item>
-    <item msgid="5742013440802239414">"លេខកូដ​គ្រាប់ចុច"</item>
-    <item msgid="8748101184830239843">"ម៉ឺនុយ / កម្មវិធី​ប្តូរក្តារ​ចុច"</item>
-    <item msgid="8175437057325747277">"គ្មាន"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"បំបែក (លំនាំដើម)"</item>
-    <item msgid="6210279084134579668">"ដាក់​នៅ​កណ្តាល"</item>
-    <item msgid="89143234390889289">"តម្រឹម​ឆ្វេង"</item>
-    <item msgid="7715533883382410603">"តម្រឹមស្ដាំ"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"កម្មវិធីប្តូរក្តារចុច / ម៉ឺនុយ"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"រក្សាទុក"</string>
     <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"កែសម្រួលទទឹងប៊ូតុង"</string>
     <string name="clipboard" msgid="1313879395099896312">"ក្ដារ​តម្បៀត​ខ្ទាស់"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ប៊ូតុងរុករកផ្ទាល់ខ្លួន"</string>
-    <string name="keycode" msgid="7335281375728356499">"លេខកូដគ្រាប់ចុច"</string>
-    <string name="icon" msgid="8732339849035837289">"រូប​តំណាង"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"អូសដើម្បីបន្ថែមប្រអប់"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"កែសម្រួល"</string>
@@ -670,17 +665,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"បើការកំណត់ <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"កែលំដាប់ការកំណត់"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"ទំព័រ <xliff:g id="ID_1">%1$d</xliff:g> នៃ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"ពង្រីក"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"បង្រួម"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"បិទ"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ទូរសព្ទ​នេះ​កំពុង​កើន​កម្តៅ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"មុខងារ​មួយ​ចំនួន​នឹង​មិន​អាច​ប្រើ​បាន​ពេញលេញ​នោះ​ទេ ខណៈពេល​ដែល​ទូរសព្ទ​កំពុង​បញ្ចុះ​កម្តៅ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ទូរសព្ទ​របស់អ្នក​នឹង​ព្យាយាម​បញ្ចុះ​កម្តៅ​ដោយ​ស្វ័យប្រវត្តិ។ អ្នក​នៅតែ​អាច​ប្រើ​ទូរសព្ទ​របស់អ្នក​បាន​ដដែល​ ប៉ុន្តែ​វា​នឹង​ដំណើរ​ការ​យឺត​ជាង​មុន។\n\nបន្ទាប់​ពី​ទូរសព្ទ​របស់អ្នក​ត្រជាក់​ជាង​មុន​ហើយ វា​នឹង​ដំណើរការ​ដូច​ធម្មតា។"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"ឆ្វេង"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"ស្ដាំ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"ប្ដូរ​ផ្លូវកាត់​តាម​បំណង"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"ផ្លូវកាត់"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"ជំរុញ​ឲ្យ​បញ្ចូល​ពាក្យ​សម្ងាត់"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ការ​ជូនដំណឹង"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"រូបថត​អេក្រង់"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"សារ​ទូទៅ"</string>

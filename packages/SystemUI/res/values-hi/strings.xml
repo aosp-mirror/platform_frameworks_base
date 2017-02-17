@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर नोटिफ़िकेशन नियंत्रण के द्वारा, आप किसी ऐप्लिकेशन के नोटिफ़िकेशन के लिए 0 से 5 तक महत्व का लेवल सेट कर सकते हैं. \n\n"<b>"लेवल 5"</b>" \n- नोटिफ़िकेशन सूची के शीर्ष पर दिखाएं \n- पूर्ण स्क्रीन बाधा की अनुमति दें \n- हमेशा तांक-झांक करें \n\n"<b>"लेवल 4"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- हमेशा तांक-झांक करें \n\n"<b>"लेवल 3"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n\n"<b>"लेवल 2"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n- कभी भी ध्वनि या कंपन ना करें \n\n"<b>"लेवल 1"</b>" \n- पूर्ण स्क्रीन बाधा को रोकें \n- कभी भी तांक-झांक ना करें \n- कभी भी ध्वनि या कंपन ना करें \n- लॉक स्क्रीन और स्थिति बार से छिपाएं \n- नोटिफ़िकेशन सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन के सभी नोटिफ़िकेशन अवरुद्ध कर दें"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"नोटिफ़िकेशन"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"अब आपको ये नोटिफ़िकेशन नहीं मिलेंगे."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"इसके लिए <xliff:g id="APP">%s</xliff:g> नोटिफ़िकेशन"</string>
-    <string name="min_importance" msgid="7559703098688382595">"निम्न"</string>
-    <string name="low_importance" msgid="6891335321576225228">"मध्यम"</string>
-    <string name="default_importance" msgid="6400766013567512061">"उच्च"</string>
-    <string name="high_importance" msgid="730741630855788381">"अति आवश्यक"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"ध्वनि या दृश्य संबंधी कोई रुकावट नहीं"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"मौन रूप से दिखाएं"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"ध्वनि करें"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"ध्वनि करें और स्क्रीन पर दिखाएं"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">इस ऐप की <xliff:g id="NUMBER_1">%d</xliff:g> श्रेणियों में से 1</item>
+      <item quantity="other">इस ऐप की <xliff:g id="NUMBER_1">%d</xliff:g> श्रेणियों में से 1</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"सभी श्रेणियां"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"और सेटिंग"</string>
     <string name="notification_done" msgid="5279426047273930175">"हो गया"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नेविगेशन बार"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"बाएं"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"दाएं"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"बटन प्रकार"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"अतिरिक्त बायां बटन प्रकार"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"अतिरिक्त दायां बटन प्रकार"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(डिफ़ॉल्ट)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
     <item msgid="5742013440802239414">"कुंजी कोड"</item>
-    <item msgid="8748101184830239843">"मेनू / कीबोर्ड स्‍विचर"</item>
+    <item msgid="8802889973626281575">"कीबोर्ड स्विचर"</item>
     <item msgid="8175437057325747277">"कोई नहीं"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"विभाजित (डिफ़ॉल्ट)"</item>
-    <item msgid="6210279084134579668">"केंद्रित"</item>
-    <item msgid="89143234390889289">"बायां-संरेखित"</item>
-    <item msgid="7715533883382410603">"दायां-संरेखित"</item>
+    <item msgid="8077901629964902399">"सामान्य"</item>
+    <item msgid="8256205964297588988">"संक्षिप्त"</item>
+    <item msgid="8719936228094005878">"बाएं झुका हुआ"</item>
+    <item msgid="586019486955594690">"दाएं झुका हुआ"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"मेनू / कीबोर्ड स्‍विचर"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"कीबोर्ड स्विचर"</string>
     <string name="save" msgid="2311877285724540644">"सहेजें"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करें"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"बटन की चौड़ाई समायोजित करें"</string>
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"कस्‍टम मार्गदर्शक बटन"</string>
-    <string name="keycode" msgid="7335281375728356499">"कुंजी कोड"</string>
-    <string name="icon" msgid="8732339849035837289">"आइकन"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"बायां कुंजी कोड"</string>
+    <string name="right_keycode" msgid="708447961000848163">"दायां कुंजी कोड"</string>
+    <string name="left_icon" msgid="3096287125959387541">"बायां आइकन"</string>
+    <string name="right_icon" msgid="3952104823293824311">"दायां आइकन"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइलों को जोड़ने के लिए खींचें"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"निकालने के लिए यहां खींचें"</string>
     <string name="qs_edit" msgid="2232596095725105230">"संपादित करें"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग खोलें."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"सेटिंग का क्रम संपादित करें."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"लॉक स्‍क्रीन"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत करें"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"छोटा करें"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"बंद करें"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फ़ोन गर्म हो रहा है"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फ़ोन के ठंडा होने के दौरान कुछ सुविधाएं सीमित होती हैं"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अभी भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"बाएं"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"दाएं"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"शॉर्टकट कस्टमाइज़ करें"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"शॉर्टकट"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"पासवर्ड के लिए संकेत दें"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"बायां शॉर्टकट"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"दायां शॉर्टकट"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"बाएं शॉर्टकट से भी अनलॉक होता है"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"दाएं शॉर्टकट से भी अनलॉक होता है"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"कोई नहीं"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> लॉन्च करें"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"दूसरे ऐप"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"मंडली"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"धन का चिह्न"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"ऋण का चिह्न"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"बायां"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"दायां"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"मेनू"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ऐप"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचनाएं"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य संदेश"</string>

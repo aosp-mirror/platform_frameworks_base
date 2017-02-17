@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ngezilawuli zesaziso zamandla, ungasetha ileveli ebalulekile kusuka ku-0 kuya ku-5 kusuka kuzaziso zohlelo lokusebenza. \n\n"<b>"Ileveli 5"</b>" \n- Ibonisa phezulu kuhlu lwesaziso \n- Vumela ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 4"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 3"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n\n"<b>"Ileveli 2"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo nokudlidliza \n\n"<b>"Ileveli 1"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo noma ukudlidliza \n- Fihla kusuka kusikrini sokukhiya nebha yesimo \n- Bonisa phansi kohlu lwesaziso \n\n"<b>"Ileveli 0"</b>" \n- Vimbela zonke izaziso kusuka kuhlelo lokusebenza"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Izaziso"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ngeke usathola lezi zaziso."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> izaziso ze-"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Phansi"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Okulingene"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Okuphezulu"</string>
-    <string name="high_importance" msgid="730741630855788381">"Okuphuthumayo"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Awukho umsindo noma ukuphazamiseka okubukwayo"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Bonisa ngokuthulile"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Yenza umsindo"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Yenza umsindo ne-pop kusikrini"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">isigaba esingu-1 kwezingu-<xliff:g id="NUMBER_1">%d</xliff:g> kusukela kulolu hlelo lokusebenza</item>
+      <item quantity="other">isigaba esingu-1 kwezingu-<xliff:g id="NUMBER_1">%d</xliff:g> kusukela kulolu hlelo lokusebenza</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Zonke izigaba"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Izilungiselelo eziningi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Kwenziwe"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Valiwe"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Ibha yokuzula"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Isakhiwo"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Kwesobunxele"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Kwesokudla"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Uhlobo lwenkinobho"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Uhlobo lwenkinobho engakwesokunxele engeziwe"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Uhlobo lwenkinobho engakwesokudla engeziwe"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(okuzenzakalelayo)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Ibhodi lokumanathisela"</item>
     <item msgid="5742013440802239414">"Ikhodi yokhiye"</item>
-    <item msgid="8748101184830239843">"Isishintshi semenyu / sekhibhodi"</item>
+    <item msgid="8802889973626281575">"Isishintshi sekhibhodi"</item>
     <item msgid="8175437057325747277">"Akunalutho"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Kwehlukanisiwe (okuzenzakalelayo)"</item>
-    <item msgid="6210279084134579668">"Maphakathi"</item>
-    <item msgid="89143234390889289">"Kuqondaniswe kwesokunxele"</item>
-    <item msgid="7715533883382410603">"Kuqondaniswe kwesokudla"</item>
+    <item msgid="8077901629964902399">"Okujwayelekile"</item>
+    <item msgid="8256205964297588988">"Xinene"</item>
+    <item msgid="8719936228094005878">"Ukuncika ngakwesokunxele"</item>
+    <item msgid="586019486955594690">"Ukuncika ngakwesokudla"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Isishintshi semenyu / sekhibhodi"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Isishintshi sekhibhodi"</string>
     <string name="save" msgid="2311877285724540644">"Londoloza"</string>
     <string name="reset" msgid="2448168080964209908">"Setha kabusha"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Lungisa ububanzi benkinobho"</string>
     <string name="clipboard" msgid="1313879395099896312">"Ibhodi lokunamathisela"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Inkinobho yokuzula yangokwezifiso"</string>
-    <string name="keycode" msgid="7335281375728356499">"Ikhodi yokhiye"</string>
-    <string name="icon" msgid="8732339849035837289">"Isithonjana"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Ikhodi yokhiye engakwesokunxele"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Ikhodi yokhiye yangakwesokudla"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Isithonjana esingakwesokunxele"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Isithonjana sangakwesokudla"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Hudula ukuze ungeze amathayili"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Hudulela lapha ukuze ususe"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Hlela"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Vula izilungiselelo ze-<xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Hlela uhlelo lwezilungiselelo."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Ikhasi <xliff:g id="ID_1">%1$d</xliff:g> kwangu-<xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Khiya isikrini"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Nweba"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Nciphisa"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Vala"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Ifoni iyafudumala"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Ezinye izici zikhawulelwe ngenkathi ifoni iphola"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ifoni yakho izozama ngokuzenzakalela ukuphola. Ungasasebenzisa ifoni yakho, kodwa ingasebenza ngokungasheshi.\n\nUma ifoni yakho isipholile, izosebenza ngokuvamile."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Kwesobunxele"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Kwesokudla"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Yenza ngezifiso isinqamuleli"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Isinqamulelo"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Yalela iphasiwedi"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Isinqamuleli sangakwesokunxele"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Isinqamuleli sangakwesokudla"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Isinqamuleli sangakwesokunxele naso siyavula"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Isinqamuleli sangakwesokudla naso siyavula"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Lutho"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Qalisa i-<xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Ezinye izinhlelo zokusebenza"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Indingiliza"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Isengezo"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Ukususa"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Kwesokunxele"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Kwesokudla"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Imenyu"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> uhlelo lokusebenza"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Izexwayiso"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Izithombe-skrini"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Imilayezo ejwayelekile"</string>

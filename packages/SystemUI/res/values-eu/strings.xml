@@ -518,15 +518,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Jakinarazpenak"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Aurrerantzean ez duzu jasoko horrelako jakinarazpenik."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> aplikazioaren jakinarazpenak"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Txikia"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Ertaina"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Handia"</string>
-    <string name="high_importance" msgid="730741630855788381">"Premiazkoa"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Ez egin soinurik eta ez erakutsi"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Erakutsi soinurik egin gabe"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Egin soinua"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Egin soinua eta erakutsi pantailan"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">Aplikazio honetako 1/<xliff:g id="NUMBER_1">%d</xliff:g> kategoria</item>
+      <item quantity="one">Aplikazio honetako 1/<xliff:g id="NUMBER_0">%d</xliff:g> kategoria</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Kategoria guztiak"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -600,30 +596,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Desaktibatuta"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Nabigazio-barra"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Diseinua"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Ezkerrera botoia"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Eskuinera botoia"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Botoi mota"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Ezkerreko botoi gehigarriaren mota"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Eskuineko botoi gehigarriaren mota"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(lehenetsia)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Arbela"</item>
     <item msgid="5742013440802239414">"Tekla-kodea"</item>
-    <item msgid="8748101184830239843">"Menu- edo teklatu-aldatzailea"</item>
+    <item msgid="8802889973626281575">"Teklatu-aldatzailea"</item>
     <item msgid="8175437057325747277">"Bat ere ez"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Zatitua (lehenetsia)"</item>
-    <item msgid="6210279084134579668">"Erdiratua"</item>
-    <item msgid="89143234390889289">"Ezkerrean lerrokatua"</item>
-    <item msgid="7715533883382410603">"Eskuinean lerrokatua"</item>
+    <item msgid="8077901629964902399">"Normala"</item>
+    <item msgid="8256205964297588988">"Trinkoa"</item>
+    <item msgid="8719936228094005878">"Ezkerraldekoa"</item>
+    <item msgid="586019486955594690">"Eskuinaldekoa"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Menu- edo teklatu-aldatzailea"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Teklatu-aldatzailea"</string>
     <string name="save" msgid="2311877285724540644">"Gorde"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Doitu botoiaren zabalera"</string>
     <string name="clipboard" msgid="1313879395099896312">"Arbela"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Nabigazio-botoi pertsonalizatua"</string>
-    <string name="keycode" msgid="7335281375728356499">"Tekla-kodea"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikonoa"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Ezkerreko teklaren kodea"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Eskuineko teklaren kodea"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Ezkerreko ikonoa"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Ezkerreko ikonoa"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastatu lauzak hemen gehitzeko"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kentzeko, arrastatu hona"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>
@@ -672,17 +669,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Ireki <xliff:g id="ID_1">%s</xliff:g> ezarpenak."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editatu ezarpenen ordena."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantaila blokeatua"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Zabaldu"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizatu"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Itxi"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Berotzen ari da telefonoa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Eginbide batzuk ezingo dira erabili telefonoa hoztu arte"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonoa automatikoki saiatuko da hozten. Hoztu bitartean, telefonoa erabiltzen jarrai dezakezu, baina mantsoago funtziona lezake.\n\nTelefonoaren tenperatura jaitsi bezain laster, ohi bezala funtzionatzen jarraituko du."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Ezkerraldea"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Eskuinaldea"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Pertsonalizatu lasterbidea"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Lasterbidea"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Eskatu pasahitza"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ezkerreko lasterbidea"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Eskuineko lasterbidea"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ezkerreko lasterbideak desblokeatzeko ere balio du"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Eskuineko lasterbideak desblokeatzeko ere balio du"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Bat ere ez"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Abiarazi <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Beste aplikazio batzuk"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Zirkulua"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Ezkerrera"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Eskuinera"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menua"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> aplikazioa"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pantaila-argazkiak"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mezu orokorrak"</string>

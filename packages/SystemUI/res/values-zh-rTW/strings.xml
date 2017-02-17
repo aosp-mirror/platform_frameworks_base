@@ -516,15 +516,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"只要使用電源通知控制項，您就能為應用程式通知設定從 0 到 5 的重要性等級。\n\n"<b>"等級 5"</b>" \n- 顯示在通知清單頂端 \n- 允許全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 4"</b>" \n- 禁止全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 3"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n\n"<b>"等級 2"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n\n"<b>"等級 1"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n- 在鎖定畫面和狀態列中隱藏 \n- 顯示在通知清單底端 \n\n"<b>"等級 0"</b>" \n- 封鎖應用程式的所有通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"你不會再收到這類通知。"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"以下頻道的「<xliff:g id="APP">%s</xliff:g>」通知："</string>
-    <string name="min_importance" msgid="7559703098688382595">"低"</string>
-    <string name="low_importance" msgid="6891335321576225228">"中"</string>
-    <string name="default_importance" msgid="6400766013567512061">"高"</string>
-    <string name="high_importance" msgid="730741630855788381">"緊急"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"不發出音效或顯示通知"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"顯示通知但不發出音效"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"發出音效"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"發出音效並在畫面上彈出通知"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +592,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"關閉"</string>
     <string name="nav_bar" msgid="1993221402773877607">"導覽列"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"配置"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"左側"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"右側"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"按鈕類型"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(預設)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"剪貼簿"</item>
-    <item msgid="5742013440802239414">"按鍵碼"</item>
-    <item msgid="8748101184830239843">"選單/鍵盤切換工具"</item>
-    <item msgid="8175437057325747277">"無"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"分割 (預設)"</item>
-    <item msgid="6210279084134579668">"置中"</item>
-    <item msgid="89143234390889289">"靠左對齊"</item>
-    <item msgid="7715533883382410603">"靠右對齊"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"選單/鍵盤切換工具"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"儲存"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"調整按鈕寬度"</string>
     <string name="clipboard" msgid="1313879395099896312">"剪貼簿"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"自訂導覽按鈕"</string>
-    <string name="keycode" msgid="7335281375728356499">"按鍵碼"</string>
-    <string name="icon" msgid="8732339849035837289">"圖示"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖曳即可新增圖塊"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖曳到這裡即可移除"</string>
     <string name="qs_edit" msgid="2232596095725105230">"編輯"</string>
@@ -670,17 +665,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"開啟「<xliff:g id="ID_1">%s</xliff:g>」設定。"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"編輯設定順序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"展開"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"關閉"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"左側"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"右側"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"自訂捷徑"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"捷徑"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"提示輸入密碼"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕擷取畫面"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>

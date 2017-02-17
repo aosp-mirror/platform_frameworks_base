@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Meldingen"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Je ontvangt deze meldingen niet meer."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g>-meldingen voor"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Laag"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Gemiddeld"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Hoog"</string>
-    <string name="high_importance" msgid="730741630855788381">"Urgent"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Geen geluid of visuele onderbreking"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Zonder geluid weergeven"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Geluid laten horen"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Geluid laten horen en op het scherm weergeven"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">Eén van <xliff:g id="NUMBER_1">%d</xliff:g> categorieën van deze app</item>
+      <item quantity="one">Eén van <xliff:g id="NUMBER_0">%d</xliff:g> categorie van deze app</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Alle categorieën"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellingen"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gereed"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Uit"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatiebalk"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Lay-out"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Links"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Rechts"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Knoptype"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Extra knoptype links"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Extra knoptype rechts"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(standaard)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Klembord"</item>
     <item msgid="5742013440802239414">"Toetscode"</item>
-    <item msgid="8748101184830239843">"Menu/toetsenbord-schakelaar"</item>
+    <item msgid="8802889973626281575">"Toetsenbordschakelaar"</item>
     <item msgid="8175437057325747277">"Geen"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Verdeeld (standaard)"</item>
-    <item msgid="6210279084134579668">"Gecentreerd"</item>
-    <item msgid="89143234390889289">"Links uitgelijnd"</item>
-    <item msgid="7715533883382410603">"Rechts uitgelijnd"</item>
+    <item msgid="8077901629964902399">"Normaal"</item>
+    <item msgid="8256205964297588988">"Compact"</item>
+    <item msgid="8719936228094005878">"Schuin naar links"</item>
+    <item msgid="586019486955594690">"Schuin naar rechts"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Menu/toetsenbord-schakelaar"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Toetsenbordschakelaar"</string>
     <string name="save" msgid="2311877285724540644">"Opslaan"</string>
     <string name="reset" msgid="2448168080964209908">"Resetten"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Breedte van knop aanpassen"</string>
     <string name="clipboard" msgid="1313879395099896312">"Klembord"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Aangepaste navigatieknop"</string>
-    <string name="keycode" msgid="7335281375728356499">"Toetscode"</string>
-    <string name="icon" msgid="8732339849035837289">"Pictogram"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Toetscode links"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Toetscode rechts"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Pictogram links"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Pictogram rechts"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Sleep om tegels toe te voegen"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Sleep hier naartoe om te verwijderen"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Bewerken"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Scherm vergrendelen"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"De telefoon wordt warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Je telefoon probeert automatisch af te koelen. Je kunt je telefoon nog steeds gebruiken, maar deze kan langzamer werken.\n\nZodra de telefoon is afgekoeld, werkt deze weer normaal."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Links"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Rechts"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Snelkoppeling aanpassen"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Snelkoppeling"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Wachtwoordprompt"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Snelkoppeling links"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Snelkoppeling rechts"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Snelkoppeling links ontgrendelt ook"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Snelkoppeling rechts ontgrendelt ook"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Geen"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"<xliff:g id="APP">%1$s</xliff:g> starten"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Andere apps"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Cirkel"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Min"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Links"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Rechts"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Apps <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Algemene berichten"</string>

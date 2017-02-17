@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dengan kontrol notifikasi daya, Anda dapt menyetel level kepentingan notifikasi aplikasi dari 0 sampai 5. \n\n"<b>"Level 5"</b>" \n- Muncul di atas daftar notifikasi \n- Izinkan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 4"</b>" \n- Jangan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 3"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n\n"<b>"Level 2"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara dan getaran \n\n"<b>"Level 1"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara atau getaran \n- Sembunyikan dari layar kunci dan bilah status \n- Muncul di bawah daftar notifikasi \n\n"<b>"Level 0"</b>" \n- Blokir semua notifikasi dari aplikasi"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifikasi"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Anda tidak akan mendapatkan notifikasi ini lagi."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Notifikasi <xliff:g id="APP">%s</xliff:g> untuk"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Rendah"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Sedang"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Tinggi"</string>
-    <string name="high_importance" msgid="730741630855788381">"Penting"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Tidak ada gangguan suara atau visual"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Tampilkan secara diam-diam"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Buat suara"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Buat suara dan munculkan di layar"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">1 dari <xliff:g id="NUMBER_1">%d</xliff:g> kategori dari aplikasi ini</item>
+      <item quantity="one">1 dari <xliff:g id="NUMBER_0">%d</xliff:g> kategori dari aplikasi ini</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Semua Kategori"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Setelan lainnya"</string>
     <string name="notification_done" msgid="5279426047273930175">"Selesai"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Nonaktif"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Bilah navigasi"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Tata Letak"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Kiri"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Kanan"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Jenis tombol"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Jenis tombol ekstra kiri"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Jenis tombol ekstra kanan"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(default)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Papan klip"</item>
     <item msgid="5742013440802239414">"Kode tombol"</item>
-    <item msgid="8748101184830239843">"Pengalih Menu / Keyboard"</item>
+    <item msgid="8802889973626281575">"Pengalih keyboard"</item>
     <item msgid="8175437057325747277">"Tidak Ada"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Terbagi (default)"</item>
-    <item msgid="6210279084134579668">"Tengah"</item>
-    <item msgid="89143234390889289">"Rata-kiri"</item>
-    <item msgid="7715533883382410603">"Rata-kanan"</item>
+    <item msgid="8077901629964902399">"Biasa"</item>
+    <item msgid="8256205964297588988">"Rapat"</item>
+    <item msgid="8719936228094005878">"Condong ke kiri"</item>
+    <item msgid="586019486955594690">"Condong ke kanan"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Pengalih Menu / Keyboard"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Pengalih keyboard"</string>
     <string name="save" msgid="2311877285724540644">"Simpan"</string>
     <string name="reset" msgid="2448168080964209908">"Setel ulang"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Sesuaikan lebar tombol"</string>
     <string name="clipboard" msgid="1313879395099896312">"Papan klip"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Tombol navigasi khusus"</string>
-    <string name="keycode" msgid="7335281375728356499">"Kode tombol"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikon"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Kode tombol kiri"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Kode tombol kanan"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Ikon kiri"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Ikon kanan"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Seret untuk menambahkan ubin"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Seret ke sini untuk menghapus"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Buka setelan <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edit urutan setelan."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> dari <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Layar kunci"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Luaskan"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalkan"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Tutup"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Ponsel menjadi hangat"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Beberapa fitur dibatasi saat ponsel mendingin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Kiri"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Kanan"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Sesuaikan pintasan"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Pintasan"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Minta sandi"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Pintasan kiri"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Pintasan kanan"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Pintasan kiri juga membuka kunci"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Pintasan kanan juga membuka kunci"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Tidak Ada"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Luncurkan <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Aplikasi lainnya"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Lingkaran"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Kiri"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Kanan"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Aplikasi <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikasi"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshot"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Pesan Umum"</string>
