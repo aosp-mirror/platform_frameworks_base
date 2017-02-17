@@ -602,7 +602,8 @@ class UsbProfileGroupSettingsManager {
                 new MtpNotificationManager.OnOpenInAppListener() {
                     @Override
                     public void onOpenInApp(UsbDevice device) {
-                        resolveActivity(createDeviceAttachedIntent(device), device);
+                        resolveActivity(createDeviceAttachedIntent(device),
+                                device, false /* showMtpNotification */);
                     }
                 });
     }
@@ -958,31 +959,27 @@ class UsbProfileGroupSettingsManager {
         // Send broadcast to running activities with registered intent
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
-        if (MtpNotificationManager.shouldShowNotification(mPackageManager, device)) {
-            // Show notification if the device is MTP storage.
-            mMtpNotificationManager.showNotification(device);
-        } else {
-            resolveActivity(intent, device);
-        }
+        resolveActivity(intent, device, true /* showMtpNotification */);
     }
 
-    private void resolveActivity(Intent intent, UsbDevice device) {
-        ArrayList<ResolveInfo> matches;
-        String defaultPackage = null;
-        UserHandle user = null;
+    private void resolveActivity(Intent intent, UsbDevice device, boolean showMtpNotification) {
+        final ArrayList<ResolveInfo> matches;
+        final ActivityInfo defaultActivity;
         synchronized (mLock) {
             matches = getDeviceMatchesLocked(device, intent);
-            // Launch our default activity directly, if we have one.
-            // Otherwise we will start the UsbResolverActivity to allow the user to choose.
-            UserPackage userPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
-            if (userPackage != null) {
-                defaultPackage = userPackage.packageName;
-                user = userPackage.user;
-            }
+            defaultActivity = getDefaultActivityLocked(
+                    matches, mDevicePreferenceMap.get(new DeviceFilter(device)));
+        }
+
+        if (showMtpNotification && MtpNotificationManager.shouldShowNotification(
+                mPackageManager, device) && defaultActivity == null) {
+            // Show notification if the device is MTP storage.
+            mMtpNotificationManager.showNotification(device);
+            return;
         }
 
         // Start activity with registered intent
-        resolveActivity(intent, matches, defaultPackage, user, device, null);
+        resolveActivity(intent, matches, defaultActivity, device, null);
     }
 
     public void deviceAttachedForFixedHandler(UsbDevice device, ComponentName component) {
@@ -1027,21 +1024,15 @@ class UsbProfileGroupSettingsManager {
                 Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
-        ArrayList<ResolveInfo> matches;
-        String defaultPackage = null;
-        UserHandle user = null;
+        final ArrayList<ResolveInfo> matches;
+        final ActivityInfo defaultActivity;
         synchronized (mLock) {
             matches = getAccessoryMatchesLocked(accessory, intent);
-            // Launch our default activity directly, if we have one.
-            // Otherwise we will start the UsbResolverActivity to allow the user to choose.
-            UserPackage userPackage = mAccessoryPreferenceMap.get(new AccessoryFilter(accessory));
-            if (userPackage != null) {
-                defaultPackage = userPackage.packageName;
-                user = userPackage.user;
-            }
+            defaultActivity = getDefaultActivityLocked(
+                    matches, mAccessoryPreferenceMap.get(new AccessoryFilter(accessory)));
         }
 
-        resolveActivity(intent, matches, defaultPackage, user, null, accessory);
+        resolveActivity(intent, matches, defaultActivity, null, accessory);
     }
 
     /**
@@ -1049,14 +1040,13 @@ class UsbProfileGroupSettingsManager {
      *
      * @param intent The intent to start the package
      * @param matches The available resolutions of the intent
-     * @param defaultPackage The default package for the device (if set)
-     * @param defaultUser The user of the default package (if package is set)
+     * @param defaultActivity The default activity for the device (if set)
      * @param device The device if a device was attached
      * @param accessory The accessory if a device was attached
      */
     private void resolveActivity(@NonNull Intent intent, @NonNull ArrayList<ResolveInfo> matches,
-            @Nullable String defaultPackage, @Nullable UserHandle defaultUser,
-            @Nullable UsbDevice device, @Nullable UsbAccessory accessory) {
+            @Nullable ActivityInfo defaultActivity, @Nullable UsbDevice device,
+            @Nullable UsbAccessory accessory) {
         int count = matches.size();
 
         // don't show the resolver activity if there are no choices available
@@ -1083,62 +1073,25 @@ class UsbProfileGroupSettingsManager {
             return;
         }
 
-        ResolveInfo defaultRI = null;
-        if (count == 1 && defaultPackage == null) {
-            // Check to see if our single choice is on the system partition.
-            // If so, treat it as our default without calling UsbResolverActivity
-            ResolveInfo rInfo = matches.get(0);
-            if (rInfo.activityInfo != null &&
-                    rInfo.activityInfo.applicationInfo != null &&
-                    (rInfo.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                defaultRI = rInfo;
-            }
-
-            if (mDisablePermissionDialogs) {
-                // bypass dialog and launch the only matching activity
-                rInfo = matches.get(0);
-                if (rInfo.activityInfo != null) {
-                    defaultPackage = rInfo.activityInfo.packageName;
-                    defaultUser = UserHandle.getUserHandleForUid(
-                            rInfo.activityInfo.applicationInfo.uid);
-                }
-            }
-        }
-
-        if (defaultRI == null && defaultPackage != null) {
-            // look for default activity
-            for (int i = 0; i < count; i++) {
-                ResolveInfo rInfo = matches.get(i);
-                if (rInfo.activityInfo != null &&
-                        defaultPackage.equals(rInfo.activityInfo.packageName) &&
-                        defaultUser.getIdentifier() ==
-                                UserHandle.getUserId(rInfo.activityInfo.applicationInfo.uid)) {
-                    defaultRI = rInfo;
-                    break;
-                }
-            }
-        }
-
-        if (defaultRI != null) {
+        if (defaultActivity != null) {
             UsbUserSettingsManager defaultRIUserSettings = mSettingsManager.getSettingsForUser(
-                    UserHandle.getUserId(defaultRI.activityInfo.applicationInfo.uid));
+                    UserHandle.getUserId(defaultActivity.applicationInfo.uid));
             // grant permission for default activity
             if (device != null) {
                 defaultRIUserSettings.
-                        grantDevicePermission(device, defaultRI.activityInfo.applicationInfo.uid);
+                        grantDevicePermission(device, defaultActivity.applicationInfo.uid);
             } else if (accessory != null) {
                 defaultRIUserSettings.grantAccessoryPermission(accessory,
-                                defaultRI.activityInfo.applicationInfo.uid);
+                        defaultActivity.applicationInfo.uid);
             }
 
             // start default activity directly
             try {
                 intent.setComponent(
-                        new ComponentName(defaultRI.activityInfo.packageName,
-                                defaultRI.activityInfo.name));
+                        new ComponentName(defaultActivity.packageName, defaultActivity.name));
 
                 UserHandle user = UserHandle.getUserHandleForUid(
-                        defaultRI.activityInfo.applicationInfo.uid);
+                        defaultActivity.applicationInfo.uid);
                 mContext.startActivityAsUser(intent, user);
             } catch (ActivityNotFoundException e) {
                 Slog.e(TAG, "startActivity failed", e);
@@ -1177,6 +1130,46 @@ class UsbProfileGroupSettingsManager {
                 Slog.e(TAG, "unable to start activity " + resolverIntent, e);
             }
         }
+    }
+
+    /**
+     * Returns a default activity for matched ResolveInfo.
+     * @param matches Resolved activities matched with connected device/accesary.
+     * @param userPackage Default activity choosed by a user before. Should be null if no activity
+     *     is choosed by a user.
+     * @return Default activity
+     */
+    private @Nullable ActivityInfo getDefaultActivityLocked(
+            @NonNull ArrayList<ResolveInfo> matches,
+            @Nullable UserPackage userPackage) {
+        if (userPackage != null) {
+            // look for default activity
+            for (final ResolveInfo info : matches) {
+                if (info.activityInfo != null
+                        && userPackage.packageName.equals(info.activityInfo.packageName)
+                        && userPackage.user.getIdentifier()
+                                == UserHandle.getUserId(info.activityInfo.applicationInfo.uid)) {
+                    return info.activityInfo;
+                }
+            }
+        }
+
+        if (matches.size() == 1) {
+            final ActivityInfo activityInfo = matches.get(0).activityInfo;
+            if (activityInfo != null) {
+                // bypass dialog and launch the only matching activity
+                if (mDisablePermissionDialogs) {
+                    return activityInfo;
+                }
+                if (activityInfo.applicationInfo != null
+                        && (activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                                != 0) {
+                    return activityInfo;
+                }
+            }
+        }
+
+        return null;
     }
 
     private boolean clearCompatibleMatchesLocked(String packageName, DeviceFilter filter) {
