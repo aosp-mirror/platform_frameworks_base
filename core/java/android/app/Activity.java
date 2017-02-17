@@ -2727,6 +2727,10 @@ public class Activity extends ContextThemeWrapper
                 return true;
             }
             return false;
+        } else if (keyCode == KeyEvent.KEYCODE_TAB) {
+            // Don't consume TAB here since it's used for navigation. Arrow keys
+            // aren't considered "typing keys" so they already won't get consumed.
+            return false;
         } else {
             // Common code for DEFAULT_KEYS_DIALER & DEFAULT_KEYS_SEARCH_*
             boolean clearSpannable = false;
