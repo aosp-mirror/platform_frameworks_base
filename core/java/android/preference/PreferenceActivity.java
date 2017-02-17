@@ -200,6 +200,10 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private ViewGroup mPrefsContainer;
 
+    // Backup of the original activity title. This is used when navigating back to the headers list
+    // in onBackPress to restore the title.
+    private CharSequence mActivityTitle;
+
     // Null if in legacy mode.
     private ViewGroup mHeadersContainer;
 
@@ -569,6 +573,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
         int initialTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_TITLE, 0);
         int initialShortTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, 0);
+        mActivityTitle = getTitle();
 
         if (savedInstanceState != null) {
             // We are restarting from a previous saved state; used that to
@@ -704,6 +709,9 @@ public abstract class PreferenceActivity extends ListActivity implements
 
             mPrefsContainer.setVisibility(View.GONE);
             mHeadersContainer.setVisibility(View.VISIBLE);
+            if (mActivityTitle != null) {
+                showBreadCrumbs(mActivityTitle, null);
+            }
             getListView().clearChoices();
         } else {
             super.onBackPressed();
