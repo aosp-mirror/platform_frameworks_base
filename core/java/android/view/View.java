@@ -15869,6 +15869,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @see #onMovedToDisplay(int)
+     */
+    void dispatchMovedToDisplay(Display display) {
+        mAttachInfo.mDisplay = display;
+        mAttachInfo.mDisplayState = display.getState();
+        onMovedToDisplay(display.getDisplayId());
+    }
+
+    /**
+     * Called by the system when the hosting activity is moved from one display to another without
+     * recreation. This means that the activity is declared to handle all changes to configuration
+     * that happened when it was switched to another display, so it wasn't destroyed and created
+     * again. This call will be followed by {@link #onConfigurationChanged(Configuration)} if the
+     * applied configuration actually changed.
+     *
+     * <p>Use this callback to track changes to the displays if some functionality relies on an
+     * association with some display properties.
+     *
+     * @param displayId The id of the display to which the view was moved.
+     *
+     * @see #onConfigurationChanged(Configuration)
+     */
+    public void onMovedToDisplay(int displayId) {
+    }
+
+    /**
      * Return true if the application tag in the AndroidManifest has set "supportRtl" to true
      */
     private boolean hasRtlSupport() {
@@ -23756,7 +23782,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final IBinder mWindowToken;
 
-        final Display mDisplay;
+        Display mDisplay;
 
         final Callbacks mRootCallbacks;
 

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistContent;
@@ -1017,9 +1019,16 @@ public final class ActivityThread {
 
         @Override
         public void scheduleActivityConfigurationChanged(
-                IBinder token, Configuration overrideConfig, boolean reportToActivity) {
+                IBinder token, Configuration overrideConfig) {
             sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED,
-                    new ActivityConfigChangeData(token, overrideConfig), reportToActivity ? 1 : 0);
+                    new ActivityConfigChangeData(token, overrideConfig));
+        }
+
+        @Override
+        public void scheduleActivityMovedToDisplay(IBinder token, int displayId,
+                Configuration overrideConfig) {
+            sendMessage(H.ACTIVITY_MOVED_TO_DISPLAY,
+                    new ActivityConfigChangeData(token, overrideConfig), displayId);
         }
 
         @Override
@@ -1521,6 +1530,7 @@ public final class ActivityThread {
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
         public static final int ATTACH_AGENT = 155;
         public static final int APPLICATION_INFO_CHANGED = 156;
+        public static final int ACTIVITY_MOVED_TO_DISPLAY = 157;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1550,6 +1560,7 @@ public final class ActivityThread {
                     case DUMP_SERVICE: return "DUMP_SERVICE";
                     case LOW_MEMORY: return "LOW_MEMORY";
                     case ACTIVITY_CONFIGURATION_CHANGED: return "ACTIVITY_CONFIGURATION_CHANGED";
+                    case ACTIVITY_MOVED_TO_DISPLAY: return "ACTIVITY_MOVED_TO_DISPLAY";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PROFILER_CONTROL: return "PROFILER_CONTROL";
                     case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
@@ -1735,7 +1746,13 @@ public final class ActivityThread {
                 case ACTIVITY_CONFIGURATION_CHANGED:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
                     handleActivityConfigurationChanged((ActivityConfigChangeData) msg.obj,
-                            msg.arg1 == 1 ? REPORT_TO_ACTIVITY : !REPORT_TO_ACTIVITY);
+                            INVALID_DISPLAY);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case ACTIVITY_MOVED_TO_DISPLAY:
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
+                    handleActivityConfigurationChanged((ActivityConfigChangeData) msg.obj,
+                            msg.arg1 /* displayId */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case PROFILER_CONTROL:
@@ -3775,7 +3792,7 @@ public final class ActivityThread {
             if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
-                    performConfigurationChangedForActivity(r, r.newConfig, REPORT_TO_ACTIVITY);
+                    performConfigurationChangedForActivity(r, r.newConfig);
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
                             + r.activityInfo.name + " with newConfig " + r.activity.mCurrentConfig);
                     r.newConfig = null;
@@ -4129,7 +4146,7 @@ public final class ActivityThread {
                     }
                 }
                 if (r.newConfig != null) {
-                    performConfigurationChangedForActivity(r, r.newConfig, REPORT_TO_ACTIVITY);
+                    performConfigurationChangedForActivity(r, r.newConfig);
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
                             + r.activityInfo.name + " with new config "
                             + r.activity.mCurrentConfig);
@@ -4842,17 +4859,32 @@ public final class ActivityThread {
      * @param r ActivityClientRecord representing the Activity.
      * @param newBaseConfig The new configuration to use. This may be augmented with
      *                      {@link ActivityClientRecord#overrideConfig}.
-     * @param reportToActivity true if the change should be reported to the Activity's callback.
      */
     private void performConfigurationChangedForActivity(ActivityClientRecord r,
-                                                        Configuration newBaseConfig,
-                                                        boolean reportToActivity) {
+            Configuration newBaseConfig) {
+        performConfigurationChangedForActivity(r, newBaseConfig,
+                r.activity.getDisplay().getDisplayId(), false /* movedToDifferentDisplay */);
+    }
+
+    /**
+     * Updates the configuration for an Activity. The ActivityClientRecord's
+     * {@link ActivityClientRecord#overrideConfig} is used to compute the final Configuration for
+     * that Activity. {@link ActivityClientRecord#tmpConfig} is used as a temporary for delivering
+     * the updated Configuration.
+     * @param r ActivityClientRecord representing the Activity.
+     * @param newBaseConfig The new configuration to use. This may be augmented with
+     *                      {@link ActivityClientRecord#overrideConfig}.
+     * @param displayId The id of the display where the Activity currently resides.
+     * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
+     */
+    private void performConfigurationChangedForActivity(ActivityClientRecord r,
+            Configuration newBaseConfig, int displayId, boolean movedToDifferentDisplay) {
         r.tmpConfig.setTo(newBaseConfig);
         if (r.overrideConfig != null) {
             r.tmpConfig.updateFrom(r.overrideConfig);
         }
-        performConfigurationChanged(r.activity, r.token, r.tmpConfig, r.overrideConfig,
-                reportToActivity);
+        performActivityConfigurationChanged(r.activity, r.tmpConfig, r.overrideConfig, displayId,
+                movedToDifferentDisplay);
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
     }
 
@@ -4873,37 +4905,58 @@ public final class ActivityThread {
     }
 
     /**
-     * Decides whether to update an Activity's configuration and whether to tell the
-     * Activity/Component about it.
+     * Decides whether to update a component's configuration and whether to inform it.
      * @param cb The component callback to notify of configuration change.
-     * @param activityToken The Activity binder token for which this configuration change happened.
-     *                      If the change is global, this is null.
+     * @param newConfig The new configuration.
+     */
+    private void performConfigurationChanged(ComponentCallbacks2 cb, Configuration newConfig) {
+        if (!REPORT_TO_ACTIVITY) {
+            return;
+        }
+
+        // ContextThemeWrappers may override the configuration for that context. We must check and
+        // apply any overrides defined.
+        Configuration contextThemeWrapperOverrideConfig = null;
+        if (cb instanceof ContextThemeWrapper) {
+            final ContextThemeWrapper contextThemeWrapper = (ContextThemeWrapper) cb;
+            contextThemeWrapperOverrideConfig = contextThemeWrapper.getOverrideConfiguration();
+        }
+
+        // Apply the ContextThemeWrapper override if necessary.
+        // NOTE: Make sure the configurations are not modified, as they are treated as immutable
+        // in many places.
+        final Configuration configToReport = createNewConfigAndUpdateIfNotNull(
+                newConfig, contextThemeWrapperOverrideConfig);
+        cb.onConfigurationChanged(configToReport);
+    }
+
+    /**
+     * Decides whether to update an Activity's configuration and whether to inform it.
+     * @param activity The activity to notify of configuration change.
      * @param newConfig The new configuration.
      * @param amOverrideConfig The override config that differentiates the Activity's configuration
-     *                       from the base global configuration.
-     *                       This is supplied by ActivityManager.
-     * @param reportToActivity Notify the Activity of the change.
+     *                         from the base global configuration. This is supplied by
+     *                         ActivityManager.
+     * @param displayId Id of the display where activity currently resides.
+     * @param movedToDifferentDisplay Indicates if the activity was moved to different display.
      */
-    private void performConfigurationChanged(ComponentCallbacks2 cb,
-                                             IBinder activityToken,
-                                             Configuration newConfig,
-                                             Configuration amOverrideConfig,
-                                             boolean reportToActivity) {
-        // Only for Activity objects, check that they actually call up to their
-        // superclass implementation.  ComponentCallbacks2 is an interface, so
-        // we check the runtime type and act accordingly.
-        Activity activity = (cb instanceof Activity) ? (Activity) cb : null;
-        if (activity != null) {
-            activity.mCalled = false;
+    private void performActivityConfigurationChanged(Activity activity, Configuration newConfig,
+            Configuration amOverrideConfig, int displayId, boolean movedToDifferentDisplay) {
+        if (activity == null) {
+            throw new IllegalArgumentException("No activity provided.");
+        }
+        final IBinder activityToken = activity.getActivityToken();
+        if (activityToken == null) {
+            throw new IllegalArgumentException("Activity token not set. Is the activity attached?");
         }
 
         boolean shouldChangeConfig = false;
-        if ((activity == null) || (activity.mCurrentConfig == null)) {
+        if (activity.mCurrentConfig == null) {
             shouldChangeConfig = true;
         } else {
-            // If the new config is the same as the config this Activity is already
-            // running with and the override config also didn't change, then don't
-            // bother calling onConfigurationChanged.
+            // If the new config is the same as the config this Activity is already running with and
+            // the override config also didn't change, then don't bother calling
+            // onConfigurationChanged.
             int diff = activity.mCurrentConfig.diff(newConfig);
             if (diff != 0 || !mResourcesManager.isSameResourcesOverrideConfig(activityToken,
                     amOverrideConfig)) {
@@ -4912,53 +4965,57 @@ public final class ActivityThread {
                 // calling onConfigurationChanged as we're going to destroy it.
                 if (!mUpdatingSystemConfig
                         || (~activity.mActivityInfo.getRealConfigChanged() & diff) == 0
-                        || !reportToActivity) {
+                        || !REPORT_TO_ACTIVITY) {
                     shouldChangeConfig = true;
                 }
             }
         }
+        if (!shouldChangeConfig && !movedToDifferentDisplay) {
+            // Nothing significant, don't proceed with updating and reporting.
+            return;
+        }
+
+        // Propagate the configuration change to ResourcesManager and Activity.
+
+        // ContextThemeWrappers may override the configuration for that context. We must check and
+        // apply any overrides defined.
+        Configuration contextThemeWrapperOverrideConfig = activity.getOverrideConfiguration();
+
+        // We only update an Activity's configuration if this is not a global configuration change.
+        // This must also be done before the callback, or else we violate the contract that the new
+        // resources are available in ComponentCallbacks2#onConfigurationChanged(Configuration).
+        // Also apply the ContextThemeWrapper override if necessary.
+        // NOTE: Make sure the configurations are not modified, as they are treated as immutable in
+        // many places.
+        final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
+                amOverrideConfig, contextThemeWrapperOverrideConfig);
+        mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig,
+                displayId, movedToDifferentDisplay);
+
+        activity.mConfigChangeFlags = 0;
+        activity.mCurrentConfig = new Configuration(newConfig);
+
+        if (!REPORT_TO_ACTIVITY) {
+            // Not configured to report to activity.
+            return;
+        }
+
+        if (movedToDifferentDisplay) {
+            activity.dispatchMovedToDisplay(displayId);
+        }
 
         if (shouldChangeConfig) {
-            // Propagate the configuration change to the Activity and ResourcesManager.
+            // Apply the ContextThemeWrapper override if necessary.
+            // NOTE: Make sure the configurations are not modified, as they are treated as immutable
+            // in many places.
+            final Configuration configToReport = createNewConfigAndUpdateIfNotNull(
+                    newConfig, contextThemeWrapperOverrideConfig);
 
-            // ContextThemeWrappers may override the configuration for that context.
-            // We must check and apply any overrides defined.
-            Configuration contextThemeWrapperOverrideConfig = null;
-            if (cb instanceof ContextThemeWrapper) {
-                final ContextThemeWrapper contextThemeWrapper = (ContextThemeWrapper) cb;
-                contextThemeWrapperOverrideConfig = contextThemeWrapper.getOverrideConfiguration();
-            }
-
-            // We only update an Activity's configuration if this is not a global
-            // configuration change. This must also be done before the callback,
-            // or else we violate the contract that the new resources are available
-            // in {@link ComponentCallbacks2#onConfigurationChanged(Configuration)}.
-            if (activityToken != null) {
-                // Apply the ContextThemeWrapper override if necessary.
-                // NOTE: Make sure the configurations are not modified, as they are treated
-                // as immutable in many places.
-                final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
-                        amOverrideConfig, contextThemeWrapperOverrideConfig);
-                mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig);
-            }
-
-            if (reportToActivity) {
-                // Apply the ContextThemeWrapper override if necessary.
-                // NOTE: Make sure the configurations are not modified, as they are treated
-                // as immutable in many places.
-                final Configuration configToReport = createNewConfigAndUpdateIfNotNull(
-                        newConfig, contextThemeWrapperOverrideConfig);
-                cb.onConfigurationChanged(configToReport);
-            }
-
-            if (activity != null) {
-                if (reportToActivity && !activity.mCalled) {
-                    throw new SuperNotCalledException(
-                            "Activity " + activity.getLocalClassName() +
-                            " did not call through to super.onConfigurationChanged()");
-                }
-                activity.mConfigChangeFlags = 0;
-                activity.mCurrentConfig = new Configuration(newConfig);
+            activity.mCalled = false;
+            activity.onConfigurationChanged(configToReport);
+            if (!activity.mCalled) {
+                throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
+                                " did not call through to super.onConfigurationChanged()");
             }
         }
     }
@@ -5036,9 +5093,9 @@ public final class ActivityThread {
                     // config and avoid onConfigurationChanged if it hasn't changed.
                     Activity a = (Activity) cb;
                     performConfigurationChangedForActivity(mActivities.get(a.getActivityToken()),
-                            config, REPORT_TO_ACTIVITY);
+                            config);
                 } else {
-                    performConfigurationChanged(cb, null, config, null, REPORT_TO_ACTIVITY);
+                    performConfigurationChanged(cb, config);
                 }
             }
         }
@@ -5102,18 +5159,43 @@ public final class ActivityThread {
         }
     }
 
-    final void handleActivityConfigurationChanged(ActivityConfigChangeData data,
-            boolean reportToActivity) {
+    /**
+     * Handle new activity configuration and/or move to a different display.
+     * @param data Configuration update data.
+     * @param displayId Id of the display where activity was moved to, -1 if there was no move and
+     *                  value didn't change.
+     */
+    private void handleActivityConfigurationChanged(ActivityConfigChangeData data, int displayId) {
         ActivityClientRecord r = mActivities.get(data.activityToken);
+        // Check input params.
         if (r == null || r.activity == null) {
+            if (DEBUG_CONFIGURATION) Slog.w(TAG, "Not found target activity to report to: " + r);
             return;
         }
+        final boolean movedToDifferentDisplay = displayId != INVALID_DISPLAY;
+        if (movedToDifferentDisplay) {
+            if (r.activity.getDisplay().getDisplayId() == displayId) {
+                throw new IllegalArgumentException("Activity is already on the target display: "
+                        + displayId);
+            }
+        }
 
-        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
-                + r.activityInfo.name + ", with callback=" + reportToActivity);
-
+        // Perform updates.
         r.overrideConfig = data.overrideConfig;
-        performConfigurationChangedForActivity(r, mCompatConfiguration, reportToActivity);
+        if (movedToDifferentDisplay) {
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity moved to display, activity:"
+                    + r.activityInfo.name + ", displayId=" + displayId
+                    + ", config=" + data.overrideConfig);
+
+            performConfigurationChangedForActivity(r, mCompatConfiguration, displayId,
+                    true /* movedToDifferentDisplay */);
+            final ViewRootImpl viewRoot = r.activity.mDecor.getViewRootImpl();
+            viewRoot.onMovedToDisplay(displayId);
+        } else {
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
+                    + r.activityInfo.name + ", config=" + data.overrideConfig);
+            performConfigurationChangedForActivity(r, mCompatConfiguration);
+        }
         mSomeActivitiesChanged = true;
     }
 

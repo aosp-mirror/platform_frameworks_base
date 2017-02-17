@@ -818,7 +818,7 @@ public class SurfaceView extends View {
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
                 Configuration newConfig, Rect backDropRect, boolean forceLayout,
-                boolean alwaysConsumeNavBar) {
+                boolean alwaysConsumeNavBar, int displayId) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (DEBUG) Log.v(TAG, surfaceView + " got resized: w=" + frame.width()

@@ -50,7 +50,7 @@ oneway interface IWindow {
     void resized(in Rect frame, in Rect overscanInsets, in Rect contentInsets,
             in Rect visibleInsets, in Rect stableInsets, in Rect outsets, boolean reportDraw,
             in Configuration newConfig, in Rect backDropFrame, boolean forceLayout,
-            boolean alwaysConsumeNavBar);
+            boolean alwaysConsumeNavBar, int displayId);
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
