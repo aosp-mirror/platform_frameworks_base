@@ -135,40 +135,40 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     }
 
     @Override
-    public boolean isConnected(int sessionId, int callServiceType, int callType)
+    public boolean isConnected(int callServiceType, int callType)
             throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            return getServiceInterface(mBinder).isConnected(mSlotId, mSupportedFeature, sessionId,
+            return getServiceInterface(mBinder).isConnected(mSlotId, mSupportedFeature,
                     callServiceType, callType);
         }
     }
 
     @Override
-    public boolean isOpened(int sessionId) throws RemoteException {
+    public boolean isOpened() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            return getServiceInterface(mBinder).isOpened(mSlotId, mSupportedFeature, sessionId);
+            return getServiceInterface(mBinder).isOpened(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public void addRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    public void addRegistrationListener(IImsRegistrationListener listener)
     throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
             getServiceInterface(mBinder).addRegistrationListener(mSlotId, mSupportedFeature,
-                    sessionId, listener);
+                    listener);
         }
     }
 
     @Override
-    public void removeRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    public void removeRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
             getServiceInterface(mBinder).removeRegistrationListener(mSlotId, mSupportedFeature,
-                    sessionId, listener);
+                    listener);
         }
     }
 
@@ -203,64 +203,61 @@ public class ImsServiceProxy extends ImsServiceProxyCompat implements IRcsFeatur
     }
 
     @Override
-    public IImsUt getUtInterface(int sessionId) throws RemoteException {
+    public IImsUt getUtInterface() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            return getServiceInterface(mBinder).getUtInterface(mSlotId, mSupportedFeature,
-                    sessionId);
+            return getServiceInterface(mBinder).getUtInterface(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public IImsConfig getConfigInterface(int sessionId) throws RemoteException {
+    public IImsConfig getConfigInterface() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            return getServiceInterface(mBinder).getConfigInterface(mSlotId, mSupportedFeature,
-                    sessionId);
+            return getServiceInterface(mBinder).getConfigInterface(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public void turnOnIms(int sessionId) throws RemoteException {
+    public void turnOnIms() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            getServiceInterface(mBinder).turnOnIms(mSlotId, mSupportedFeature, sessionId);
+            getServiceInterface(mBinder).turnOnIms(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public void turnOffIms(int sessionId) throws RemoteException {
+    public void turnOffIms() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            getServiceInterface(mBinder).turnOffIms(mSlotId, mSupportedFeature, sessionId);
+            getServiceInterface(mBinder).turnOffIms(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public IImsEcbm getEcbmInterface(int sessionId) throws RemoteException {
+    public IImsEcbm getEcbmInterface() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            return getServiceInterface(mBinder).getEcbmInterface(mSlotId, mSupportedFeature,
-                    sessionId);
+            return getServiceInterface(mBinder).getEcbmInterface(mSlotId, mSupportedFeature);
         }
     }
 
     @Override
-    public void setUiTTYMode(int sessionId, int uiTtyMode, Message onComplete)
+    public void setUiTTYMode(int uiTtyMode, Message onComplete)
             throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
-            getServiceInterface(mBinder).setUiTTYMode(mSlotId, mSupportedFeature, sessionId,
-                    uiTtyMode, onComplete);
+            getServiceInterface(mBinder).setUiTTYMode(mSlotId, mSupportedFeature, uiTtyMode,
+                    onComplete);
         }
     }
 
     @Override
-    public IImsMultiEndpoint getMultiEndpointInterface(int sessionId) throws RemoteException {
+    public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
         synchronized (mLock) {
             checkBinderConnection();
             return getServiceInterface(mBinder).getMultiEndpointInterface(mSlotId,
-                    mSupportedFeature, sessionId);
+                    mSupportedFeature);
         }
     }
 

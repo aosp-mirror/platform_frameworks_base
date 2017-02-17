@@ -50,21 +50,21 @@ public class MMTelFeature extends ImsFeature implements IMMTelFeature {
     }
 
     @Override
-    public boolean isConnected(int sessionId, int callSessionType, int callType) {
+    public boolean isConnected(int callSessionType, int callType) {
         return false;
     }
 
     @Override
-    public boolean isOpened(int sessionId) {
+    public boolean isOpened() {
         return false;
     }
 
     @Override
-    public void addRegistrationListener(int sessionId, IImsRegistrationListener listener) {
+    public void addRegistrationListener(IImsRegistrationListener listener) {
     }
 
     @Override
-    public void removeRegistrationListener(int sessionId, IImsRegistrationListener listener) {
+    public void removeRegistrationListener(IImsRegistrationListener listener) {
     }
 
     @Override
@@ -84,34 +84,34 @@ public class MMTelFeature extends ImsFeature implements IMMTelFeature {
     }
 
     @Override
-    public IImsUt getUtInterface(int sessionId) {
+    public IImsUt getUtInterface() {
         return null;
     }
 
     @Override
-    public IImsConfig getConfigInterface(int sessionId) {
+    public IImsConfig getConfigInterface() {
         return null;
     }
 
     @Override
-    public void turnOnIms(int sessionId) {
+    public void turnOnIms() {
     }
 
     @Override
-    public void turnOffIms(int sessionId) {
+    public void turnOffIms() {
     }
 
     @Override
-    public IImsEcbm getEcbmInterface(int sessionId) {
+    public IImsEcbm getEcbmInterface() {
         return null;
     }
 
     @Override
-    public void setUiTTYMode(int sessionId, int uiTtyMode, Message onComplete) {
+    public void setUiTTYMode(int uiTtyMode, Message onComplete) {
     }
 
     @Override
-    public IImsMultiEndpoint getMultiEndpointInterface(int sessionId) {
+    public IImsMultiEndpoint getMultiEndpointInterface() {
         return null;
     }
 

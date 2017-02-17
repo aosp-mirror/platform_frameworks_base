@@ -42,6 +42,8 @@ import com.android.ims.internal.IImsUt;
 
 public class ImsServiceProxyCompat implements IMMTelFeature {
 
+    private static final int SERVICE_ID = ImsFeature.MMTEL;
+
     protected final int mSlotId;
     protected IBinder mBinder;
 
@@ -65,29 +67,28 @@ public class ImsServiceProxyCompat implements IMMTelFeature {
     }
 
     @Override
-    public boolean isConnected(int sessionId, int callServiceType, int callType)
+    public boolean isConnected(int callServiceType, int callType)
             throws RemoteException {
         checkBinderConnection();
-        return getServiceInterface(mBinder).isConnected(sessionId,  callServiceType, callType);
+        return getServiceInterface(mBinder).isConnected(SERVICE_ID,  callServiceType, callType);
     }
 
     @Override
-    public boolean isOpened(int sessionId) throws RemoteException {
+    public boolean isOpened() throws RemoteException {
         checkBinderConnection();
-        return getServiceInterface(mBinder).isOpened(sessionId);
+        return getServiceInterface(mBinder).isOpened(SERVICE_ID);
     }
 
     @Override
-    public void addRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    public void addRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException {
         checkBinderConnection();
         getServiceInterface(mBinder).addRegistrationListener(mSlotId, ImsFeature.MMTEL, listener);
     }
 
     @Override
-    public void removeRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    public void removeRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException {
-        checkBinderConnection();
         // Not Implemented in old ImsService. If the registration listener becomes invalid, the
         // ImsService will remove.
     }
@@ -114,46 +115,46 @@ public class ImsServiceProxyCompat implements IMMTelFeature {
     }
 
     @Override
-    public IImsUt getUtInterface(int sessionId) throws RemoteException {
+    public IImsUt getUtInterface() throws RemoteException {
         checkBinderConnection();
-        return getServiceInterface(mBinder).getUtInterface(sessionId);
+        return getServiceInterface(mBinder).getUtInterface(SERVICE_ID);
     }
 
     @Override
-    public IImsConfig getConfigInterface(int sessionId) throws RemoteException {
+    public IImsConfig getConfigInterface() throws RemoteException {
         checkBinderConnection();
         return getServiceInterface(mBinder).getConfigInterface(mSlotId);
     }
 
     @Override
-    public void turnOnIms(int sessionId) throws RemoteException {
+    public void turnOnIms() throws RemoteException {
         checkBinderConnection();
         getServiceInterface(mBinder).turnOnIms(mSlotId);
     }
 
     @Override
-    public void turnOffIms(int sessionId) throws RemoteException {
+    public void turnOffIms() throws RemoteException {
         checkBinderConnection();
         getServiceInterface(mBinder).turnOffIms(mSlotId);
     }
 
     @Override
-    public IImsEcbm getEcbmInterface(int sessionId) throws RemoteException {
+    public IImsEcbm getEcbmInterface() throws RemoteException {
         checkBinderConnection();
-        return getServiceInterface(mBinder).getEcbmInterface(sessionId);
+        return getServiceInterface(mBinder).getEcbmInterface(SERVICE_ID);
     }
 
     @Override
-    public void setUiTTYMode(int sessionId, int uiTtyMode, Message onComplete)
+    public void setUiTTYMode(int uiTtyMode, Message onComplete)
             throws RemoteException {
         checkBinderConnection();
-        getServiceInterface(mBinder).setUiTTYMode(sessionId, uiTtyMode, onComplete);
+        getServiceInterface(mBinder).setUiTTYMode(SERVICE_ID, uiTtyMode, onComplete);
     }
 
     @Override
-    public IImsMultiEndpoint getMultiEndpointInterface(int sessionId) throws RemoteException {
+    public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
         checkBinderConnection();
-        return getServiceInterface(mBinder).getMultiEndpointInterface(sessionId);
+        return getServiceInterface(mBinder).getMultiEndpointInterface(SERVICE_ID);
     }
 
     /**
