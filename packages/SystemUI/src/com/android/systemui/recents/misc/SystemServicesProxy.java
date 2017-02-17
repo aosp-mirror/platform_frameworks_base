@@ -153,7 +153,7 @@ public class SystemServicesProxy {
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
         public void onActivityPinned() { }
-        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) { }
+        public void onPinnedActivityRestartAttempt(String launchedFromPackage) { }
         public void onPinnedStackAnimationEnded() { }
         public void onActivityForcedResizable(String packageName, int taskId) { }
         public void onActivityDismissingDockedStack() { }
@@ -198,10 +198,10 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent)
+        public void onPinnedActivityRestartAttempt(String launchedFromPackage)
                 throws RemoteException{
             mHandler.removeMessages(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT);
-            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, sourceComponent)
+            mHandler.obtainMessage(H.ON_PINNED_ACTIVITY_RESTART_ATTEMPT, launchedFromPackage)
                     .sendToTarget();
         }
 
@@ -1244,8 +1244,7 @@ public class SystemServicesProxy {
                 }
                 case ON_PINNED_ACTIVITY_RESTART_ATTEMPT: {
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt(
-                                (ComponentName) msg.obj);
+                        mTaskStackListeners.get(i).onPinnedActivityRestartAttempt((String) msg.obj);
                     }
                     break;
                 }

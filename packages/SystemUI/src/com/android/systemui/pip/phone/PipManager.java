@@ -76,7 +76,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(ComponentName sourceComponent) {
+        public void onPinnedActivityRestartAttempt(String launchedFromPackage) {
             if (!checkCurrentUserId(false /* debug */)) {
                 return;
             }
@@ -84,11 +84,11 @@ public class PipManager implements BasePipManager {
             // Expand the activity back to fullscreen only if it was attempted to be restarted from
             // another package than the top activity in the stack
             boolean expandPipToFullscreen = true;
-            if (sourceComponent != null) {
+            if (launchedFromPackage != null) {
                 ComponentName topActivity = PipUtils.getTopPinnedActivity(mContext,
                         mActivityManager);
-                if (topActivity != null && topActivity.getPackageName().equals(
-                        sourceComponent.getPackageName())) {
+                if (topActivity != null
+                        && topActivity.getPackageName().equals(launchedFromPackage)) {
                     expandPipToFullscreen = false;
                 }
             }
