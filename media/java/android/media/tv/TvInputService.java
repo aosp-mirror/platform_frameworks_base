@@ -284,8 +284,8 @@ public abstract class TvInputService extends Service {
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
-        private long mStartPositionMs;
-        private long mCurrentPositionMs;
+        private long mStartPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
+        private long mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         private final TimeShiftPositionTrackingRunnable
                 mTimeShiftPositionTrackingRunnable = new TimeShiftPositionTrackingRunnable();
 
@@ -304,7 +304,6 @@ public abstract class TvInputService extends Service {
             mContext = context;
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             mHandler = new Handler(context.getMainLooper());
-            mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         }
 
         /**
@@ -631,6 +630,8 @@ public abstract class TvInputService extends Service {
                 @MainThread
                 @Override
                 public void run() {
+                    timeShiftEnablePositionTracking(
+                            status == TvInputManager.TIME_SHIFT_STATUS_AVAILABLE);
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTimeShiftStatusChanged");
                         if (mSessionCallback != null) {
@@ -1465,7 +1466,8 @@ public abstract class TvInputService extends Service {
             @Override
             public void run() {
                 long startPositionMs = onTimeShiftGetStartPosition();
-                if (mStartPositionMs != startPositionMs) {
+                if (mStartPositionMs == TvInputManager.TIME_SHIFT_INVALID_TIME
+                        || mStartPositionMs != startPositionMs) {
                     mStartPositionMs = startPositionMs;
                     notifyTimeShiftStartPositionChanged(startPositionMs);
                 }
@@ -1476,7 +1478,8 @@ public abstract class TvInputService extends Service {
                             + "position.");
                     currentPositionMs = mStartPositionMs;
                 }
-                if (mCurrentPositionMs != currentPositionMs) {
+                if (mCurrentPositionMs == TvInputManager.TIME_SHIFT_INVALID_TIME
+                        || mCurrentPositionMs != currentPositionMs) {
                     mCurrentPositionMs = currentPositionMs;
                     notifyTimeShiftCurrentPositionChanged(currentPositionMs);
                 }
