@@ -264,6 +264,7 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_ACTIVITY_STACKS"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
+        <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.MOUNT_FORMAT_FILESYSTEMS"/>
