@@ -2473,6 +2473,17 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    /**
+     * Called when a notification is removed from the shade. This cleans up the state for a given
+     * view.
+     */
+    public void cleanUpViewState(View child) {
+        if (child == mTranslatingParentView) {
+            mTranslatingParentView = null;
+        }
+        mCurrentStackScrollState.removeViewStateForView(child);
+    }
+
     @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
@@ -4068,15 +4079,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setAlpha(@FloatRange(from = 0.0, to = 1.0) float alpha) {
         super.setAlpha(alpha);
         setFadingOut(alpha != 1.0f);
-    }
-
-    /**
-     * Remove the a given view from the viewstate. This is currently used when the children are
-     * kept in the parent artificially to have a nicer animation.
-     * @param view the view to remove
-     */
-    public void removeViewStateForView(View view) {
-        mCurrentStackScrollState.removeViewStateForView(view);
     }
 
     public void setQsExpanded(boolean qsExpanded) {
