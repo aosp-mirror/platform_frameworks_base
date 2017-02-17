@@ -1991,23 +1991,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void updateFingerprintGestureHandling(UserState userState) {
         final List<Service> services;
         synchronized (mLock) {
-            // Only create the controller when a service wants to use the feature
             services = userState.mBoundServices;
-            int numServices = services.size();
-            for (int i = 0; i < numServices; i++) {
-                if (services.get(i).isCapturingFingerprintGestures()) {
-                    final long identity = Binder.clearCallingIdentity();
-                    IFingerprintService service = null;
-                    try {
-                        service = IFingerprintService.Stub.asInterface(
-                                ServiceManager.getService(Context.FINGERPRINT_SERVICE));
-                    } finally {
-                        Binder.restoreCallingIdentity(identity);
-                    }
-                    if (service != null) {
-                        mFingerprintGestureDispatcher = new FingerprintGestureDispatcher(
-                                service, mLock);
-                        break;
+            if ((mFingerprintGestureDispatcher == null)
+                    &&  mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                // Only create the controller when a service wants to use the feature
+                int numServices = services.size();
+                for (int i = 0; i < numServices; i++) {
+                    if (services.get(i).isCapturingFingerprintGestures()) {
+                        final long identity = Binder.clearCallingIdentity();
+                        IFingerprintService service = null;
+                        try {
+                            service = IFingerprintService.Stub.asInterface(
+                                    ServiceManager.getService(Context.FINGERPRINT_SERVICE));
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                        if (service != null) {
+                            mFingerprintGestureDispatcher = new FingerprintGestureDispatcher(
+                                    service, mLock);
+                            break;
+                        }
                     }
                 }
             }
