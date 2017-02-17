@@ -102,7 +102,7 @@
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ফাইলে লেখা যায়নি"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"দুঃখিত, এটি কাজ করেনি৷ আবার চেষ্টা করুন৷"</string>
-    <string name="print_error_retry" msgid="1426421728784259538">"পুনরায় চেষ্টা করুন"</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"আবার চেষ্টা করুন"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"এই মূহুর্তে প্রিন্টার উপলব্ধ নয়।"</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"পূর্বরূপ প্রদর্শন করা যাবে না"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"পূর্বরূপ প্রস্তুত করছে..."</string>
