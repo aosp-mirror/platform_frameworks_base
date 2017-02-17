@@ -138,6 +138,24 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+
+        // If another task is starting on top of the menu, then finish it so that it can be
+        // recreated on the top next time it starts
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Fallback, if we are destroyed for any other reason (like when the task is being reset),
+        // also reset the callback.
+        notifyActivityCallback(null);
+    }
+
+    @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         if (!isInPictureInPictureMode) {
             finish();

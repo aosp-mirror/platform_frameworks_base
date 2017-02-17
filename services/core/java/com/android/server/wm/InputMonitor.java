@@ -631,14 +631,26 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 return;
             }
 
-            if (mAddPipInputConsumerHandle
-                    && w.getStackId() == PINNED_STACK_ID
-                    && inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer) {
-                // Update the bounds of the Pip input consumer to match the Pinned stack
-                w.getStack().getBounds(pipTouchableBounds);
-                pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
-                addInputWindowHandle(pipInputConsumer.mWindowHandle);
-                mAddPipInputConsumerHandle = false;
+            final int flags = w.mAttrs.flags;
+            final int privateFlags = w.mAttrs.privateFlags;
+            final int type = w.mAttrs.type;
+            final boolean hasFocus = w == mInputFocus;
+            final boolean isVisible = w.isVisibleLw();
+
+            if (w.getStackId() == PINNED_STACK_ID) {
+                if (mAddPipInputConsumerHandle
+                        && (inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer)) {
+                    // Update the bounds of the Pip input consumer to match the Pinned stack
+                    w.getStack().getBounds(pipTouchableBounds);
+                    pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
+                    addInputWindowHandle(pipInputConsumer.mWindowHandle);
+                    mAddPipInputConsumerHandle = false;
+                }
+                // TODO: Fix w.canReceiveTouchInput() to handle this case
+                if (!hasFocus) {
+                    // Skip this pinned stack window if it does not have focus
+                    return;
+                }
             }
 
             if (mAddInputConsumerHandle
@@ -655,12 +667,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 }
             }
 
-            final int flags = w.mAttrs.flags;
-            final int privateFlags = w.mAttrs.privateFlags;
-            final int type = w.mAttrs.type;
-
-            final boolean hasFocus = w == mInputFocus;
-            final boolean isVisible = w.isVisibleLw();
             if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
                 mDisableWallpaperTouchEvents = true;
             }
