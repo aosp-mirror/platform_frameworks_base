@@ -2529,7 +2529,6 @@ public class NotificationManagerService extends SystemService {
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
         final UserHandle user = new UserHandle(userId);
-
         // Fix the notification as best we can.
         try {
             final ApplicationInfo ai = getContext().getPackageManager().getApplicationInfoAsUser(
@@ -2543,13 +2542,16 @@ public class NotificationManagerService extends SystemService {
 
         mUsageStats.registerEnqueuedByApp(pkg);
 
-
         if (pkg == null || notification == null) {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
         }
+
+        // The system can post notifications for any package, let us resolve that.
+        final int notificationUid = resolveNotificationUid(opPkg, callingUid, userId);
+
         final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, id, tag, callingUid, callingPid, 0, notification,
+                pkg, opPkg, id, tag, notificationUid, callingPid, 0, notification,
                 user);
 
         // Limit the number of notifications that any given package except the android
@@ -2617,6 +2619,19 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
+    }
+
+    private int resolveNotificationUid(String opPackageName, int callingUid, int userId) {
+        // The system can post notifications on behalf of any package it wants
+        if (isCallerSystem() && opPackageName != null && !"android".equals(opPackageName)) {
+            try {
+                return getContext().getPackageManager()
+                        .getPackageUidAsUser(opPackageName, userId);
+            } catch (NameNotFoundException e) {
+                /* ignore */
+            }
+        }
+        return callingUid;
     }
 
     private class EnqueueNotificationRunnable implements Runnable {
