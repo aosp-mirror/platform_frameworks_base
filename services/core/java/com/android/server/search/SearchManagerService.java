@@ -18,6 +18,7 @@ package com.android.server.search;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ISearchManager;
 import android.app.SearchManager;
@@ -28,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
@@ -37,6 +39,8 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.speech.RecognitionService;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -271,6 +275,52 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
     }
 
+    private boolean isDefaultRecognizerPackage(String packageName) {
+        ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(
+                new Intent(RecognitionService.SERVICE_INTERFACE),
+                PackageManager.GET_META_DATA);
+        if (resolveInfo == null || resolveInfo.serviceInfo == null) {
+            Log.w(TAG, "Unable to resolve default voice recognition service.");
+            return false;
+        }
+        if (!TextUtils.isEmpty(packageName) && TextUtils.equals(packageName,
+                resolveInfo.serviceInfo.packageName)) {
+            return true;
+        }
+        return false;
+    }
+
+    private ComponentName getLegacyAssistReceiverComponent(int userHandle) {
+        try {
+            userHandle = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userHandle, true, false,
+                    "getLegacyAssistReceiverComponent", null);
+            IPackageManager pm = AppGlobals.getPackageManager();
+            Intent assistIntent = new Intent(Intent.ACTION_ASSIST);
+            ParceledListSlice<ResolveInfo> infoParceledList =
+                    pm.queryIntentReceivers(assistIntent,
+                            assistIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                            PackageManager.MATCH_DEFAULT_ONLY, userHandle);
+            if (infoParceledList != null) {
+                List<ResolveInfo> infoList = infoParceledList.getList();
+                if (infoList != null && infoList.size() > 0) {
+                    if (isDefaultRecognizerPackage(
+                            infoList.get(0).activityInfo.applicationInfo.packageName)) {
+                        return new ComponentName(
+                                infoList.get(0).activityInfo.applicationInfo.packageName,
+                                infoList.get(0).activityInfo.name);
+                    }
+                }
+            }
+        } catch (RemoteException re) {
+            // Local call
+            Log.e(TAG, "RemoteException in getLegacyAssistReceiverComponent: " + re);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in getLegacyAssistReceiverComponent: " + e);
+        }
+        return null;
+    }
+
     private ComponentName getLegacyAssistComponent(int userHandle) {
         try {
             userHandle = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -297,7 +347,7 @@ public class SearchManagerService extends ISearchManager.Stub {
 
     @Override
     public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
-        ComponentName comp = getLegacyAssistComponent(userHandle);
+        ComponentName comp = getLegacyAssistReceiverComponent(userHandle);
         if (comp == null) {
             return false;
         }
@@ -305,9 +355,13 @@ public class SearchManagerService extends ISearchManager.Stub {
         try {
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             intent.setComponent(comp);
+            if (args != null) {
+                intent.putExtras(args);
+            }
             IActivityManager am = ActivityManager.getService();
-            return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
-                    userHandle, args);
+            return am.broadcastIntent(null, intent, null, null, 0, null, null, null,
+                    AppOpsManager.OP_NONE, null, false, false,
+                    userHandle) == ActivityManager.BROADCAST_SUCCESS;
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
