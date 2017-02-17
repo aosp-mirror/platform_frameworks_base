@@ -112,6 +112,12 @@ public class Utils {
                 UserIcons.getDefaultUserIcon(user.id, /* light= */ false)).bake();
     }
 
+    /** Formats a double from 0.0..100.0 with an option to round **/
+    public static String formatPercentage(double percentage, boolean round) {
+        final int localPercentage = round ? Math.round((float) percentage) : (int) percentage;
+        return formatPercentage(localPercentage);
+    }
+
     /** Formats the ratio of amount/total as a percentage. */
     public static String formatPercentage(long amount, long total) {
         return formatPercentage(((double) amount) / total);
@@ -124,7 +130,7 @@ public class Utils {
 
     /** Formats a double from 0.0..1.0 as a percentage. */
     private static String formatPercentage(double percentage) {
-      return NumberFormat.getPercentInstance().format(percentage);
+        return NumberFormat.getPercentInstance().format(percentage);
     }
 
     public static int getBatteryLevel(Intent batteryChangedIntent) {
