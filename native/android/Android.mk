@@ -37,13 +37,16 @@ LOCAL_SHARED_LIBRARIES := \
     libnetd_client \
 
 LOCAL_STATIC_LIBRARIES := \
-    libstorage
+    libstorage \
+    libarect
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
     frameworks/base/core/jni/android \
     bionic/libc/dns/include \
     system/netd/include \
+
+LOCAL_EXPORT_STATIC_LIBRARY_HEADERS := libarect
 
 LOCAL_MODULE := libandroid
 

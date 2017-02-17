@@ -25,6 +25,7 @@
 
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
+#include <gui/BufferQueue.h>
 
 #include "core_jni_helpers.h"
 

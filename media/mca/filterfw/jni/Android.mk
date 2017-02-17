@@ -43,6 +43,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-unused-parameter
 
-LOCAL_SHARED_LIBRARIES := libmedia
+LOCAL_SHARED_LIBRARIES := libmedia libgui libandroid
 
 include $(BUILD_STATIC_LIBRARY)
