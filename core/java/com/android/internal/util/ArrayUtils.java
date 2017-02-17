@@ -260,10 +260,19 @@ public class ArrayUtils {
      */
     @SuppressWarnings("unchecked")
     public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
+        return appendElement(kind, array, element, false);
+    }
+
+    /**
+     * Adds value to given array.
+     */
+    @SuppressWarnings("unchecked")
+    public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element,
+            boolean allowDuplicates) {
         final T[] result;
         final int end;
         if (array != null) {
-            if (contains(array, element)) return array;
+            if (!allowDuplicates && contains(array, element)) return array;
             end = array.length;
             result = (T[])Array.newInstance(kind, end + 1);
             System.arraycopy(array, 0, result, 0, end);
@@ -299,23 +308,33 @@ public class ArrayUtils {
     }
 
     /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
+     * Adds value to given array.
      */
-    public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
+    public static @NonNull int[] appendInt(@Nullable int[] cur, int val,
+            boolean allowDuplicates) {
         if (cur == null) {
             return new int[] { val };
         }
         final int N = cur.length;
-        for (int i = 0; i < N; i++) {
-            if (cur[i] == val) {
-                return cur;
+        if (!allowDuplicates) {
+            for (int i = 0; i < N; i++) {
+                if (cur[i] == val) {
+                    return cur;
+                }
             }
         }
         int[] ret = new int[N + 1];
         System.arraycopy(cur, 0, ret, 0, N);
         ret[N] = val;
         return ret;
+    }
+
+    /**
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
+     */
+    public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
+        return appendInt(cur, val, false);
     }
 
     /**
