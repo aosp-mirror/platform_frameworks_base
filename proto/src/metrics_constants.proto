@@ -3429,6 +3429,26 @@ message MetricsEvent {
     // VALUE: true if the connection was successful, false if the connection failed
     WIFI_NETWORK_RECOMMENDATION_CONNECTION_SUCCESS = 837;
 
+    // OPEN: Settings > Storage > Games
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_GAMES = 838;
+
+    // OPEN: Settings > Storage > Audio and Music
+    // CATEGORY: SETTINGS
+    // OS: O
+    APPLICATIONS_STORAGE_MUSIC = 839;
+
+    // ACTION: Settings > Storage > Free Up Space to launch Deletion Helper
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FREE_UP_SPACE_NOW = 840;
+
+    // ACTION: Settings > Storage > Files to open the File Manager
+    // CATEGORY: SETTINGS
+    // OS: O
+    STORAGE_FILES = 841;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
