@@ -599,7 +599,7 @@
     <string name="select_button" msgid="1597989540662710653">"যোগ করার জন্য বোতাম নির্বাচন করুন"</string>
     <string name="add_button" msgid="4134946063432258161">"বোতাম যোগ করুন"</string>
     <string name="save" msgid="2311877285724540644">"সংরক্ষণ করুন"</string>
-    <string name="reset" msgid="2448168080964209908">"পুনরায় সেট করুন"</string>
+    <string name="reset" msgid="2448168080964209908">"আবার সেট করুন"</string>
     <string name="no_home_title" msgid="1563808595146071549">"কোনো হোম বোতাম পাওয়া যায় নি"</string>
     <string name="no_home_message" msgid="5408485011659260911">"এই ডিভাইসটিকে নেভিগেট করার জন্য একটি হোম বোতামের প্রয়োজন। সংরক্ষণ করার আগে অনুগ্রহ করে একটি হোম বোতাম যোগ করুন।"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"বোতামের প্রস্থ সমন্বয় করুন"</string>
