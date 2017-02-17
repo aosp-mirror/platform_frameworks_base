@@ -68,6 +68,7 @@ public final class TvContract {
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
     private static final String PATH_RECORDED_PROGRAM = "recorded_program";
+    private static final String PATH_PREVIEW_PROGRAM = "preview_program";
     private static final String PATH_PASSTHROUGH = "passthrough";
 
     /**
@@ -293,6 +294,37 @@ public final class TvContract {
      */
     public static final Uri buildRecordedProgramUri(long recordedProgramId) {
         return ContentUris.withAppendedId(RecordedPrograms.CONTENT_URI, recordedProgramId);
+    }
+
+    /**
+     * Builds a URI that points to a specific preview program.
+     *
+     * @param previewProgramId The ID of the preview program to point to.
+     */
+    public static final Uri buildPreviewProgramUri(long previewProgramId) {
+        return ContentUris.withAppendedId(PreviewPrograms.CONTENT_URI, previewProgramId);
+    }
+
+    /**
+     * Builds a URI that points to all preview programs on a given channel.
+     *
+     * @param channelId The ID of the channel to return preview programs for.
+     */
+    public static final Uri buildPreviewProgramsUriForChannel(long channelId) {
+        return PreviewPrograms.CONTENT_URI.buildUpon()
+                .appendQueryParameter(PARAM_CHANNEL, String.valueOf(channelId)).build();
+    }
+
+    /**
+     * Builds a URI that points to all preview programs on a given channel.
+     *
+     * @param channelUri The URI of the channel to return preview programs for.
+     */
+    public static final Uri buildPreviewProgramsUriForChannel(Uri channelUri) {
+        if (!isChannelUriForTunerInput(channelUri)) {
+            throw new IllegalArgumentException("Not a channel: " + channelUri);
+        }
+        return buildPreviewProgramsUriForChannel(ContentUris.parseId(channelUri));
     }
 
     /**
@@ -1461,6 +1493,420 @@ public final class TvContract {
         /** The MIME type of a single TV program. */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
 
+        /**
+         * The season number of this TV program for episodic TV shows.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         *
+         * @deprecated Use {@link #COLUMN_SEASON_DISPLAY_NUMBER} instead.
+         */
+        @Deprecated
+        public static final String COLUMN_SEASON_NUMBER = "season_number";
+
+        /**
+         * The episode number of this TV program for episodic TV shows.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         *
+         * @deprecated Use {@link #COLUMN_EPISODE_DISPLAY_NUMBER} instead.
+         */
+        @Deprecated
+        public static final String COLUMN_EPISODE_NUMBER = "episode_number";
+
+        /**
+         * The start time of this TV program, in milliseconds since the epoch.
+         *
+         * <p>The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
+         * previous program in the same channel. In practice, start time will usually be the end
+         * time of the previous program.
+         *
+         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
+         *
+         * <p>Type: INTEGER (long)
+         */
+        public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
+
+        /**
+         * The end time of this TV program, in milliseconds since the epoch.
+         *
+         * <p>The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
+         * next program in the same channel. In practice, end time will usually be the start time of
+         * the next program.
+         *
+         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
+         *
+         * <p>Type: INTEGER (long)
+         */
+        public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
+
+        /**
+         * The comma-separated genre string of this TV program.
+         *
+         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
+         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
+         * {@link Genres#encode} to create a text that can be stored in this column. Use
+         * {@link Genres#decode} to get the broadcast genre strings from the text stored in the
+         * column.
+         *
+         * <p>Type: TEXT
+         * @see Genres#encode
+         * @see Genres#decode
+         */
+        public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
+
+        /**
+         * The flag indicating whether recording of this program is prohibited.
+         *
+         * <p>A value of 1 indicates that recording of this program is prohibited and application
+         * will not schedule any recording for this program. A value of 0 indicates that the
+         * recording is not prohibited. If not specified, this value is set to 0 (not prohibited) by
+         * default.
+         *
+         * <p>Type: INTEGER (boolean)
+         */
+        public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
+
+        private Programs() {}
+
+        /** Canonical genres for TV programs. */
+        public static final class Genres {
+            /** @hide */
+            @StringDef({
+                    FAMILY_KIDS,
+                    SPORTS,
+                    SHOPPING,
+                    MOVIES,
+                    COMEDY,
+                    TRAVEL,
+                    DRAMA,
+                    EDUCATION,
+                    ANIMAL_WILDLIFE,
+                    NEWS,
+                    GAMING,
+                    ARTS,
+                    ENTERTAINMENT,
+                    LIFE_STYLE,
+                    MUSIC,
+                    PREMIER,
+                    TECH_SCIENCE,
+            })
+            @Retention(RetentionPolicy.SOURCE)
+            public @interface Genre {}
+
+            /** The genre for Family/Kids. */
+            public static final String FAMILY_KIDS = "FAMILY_KIDS";
+
+            /** The genre for Sports. */
+            public static final String SPORTS = "SPORTS";
+
+            /** The genre for Shopping. */
+            public static final String SHOPPING = "SHOPPING";
+
+            /** The genre for Movies. */
+            public static final String MOVIES = "MOVIES";
+
+            /** The genre for Comedy. */
+            public static final String COMEDY = "COMEDY";
+
+            /** The genre for Travel. */
+            public static final String TRAVEL = "TRAVEL";
+
+            /** The genre for Drama. */
+            public static final String DRAMA = "DRAMA";
+
+            /** The genre for Education. */
+            public static final String EDUCATION = "EDUCATION";
+
+            /** The genre for Animal/Wildlife. */
+            public static final String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
+
+            /** The genre for News. */
+            public static final String NEWS = "NEWS";
+
+            /** The genre for Gaming. */
+            public static final String GAMING = "GAMING";
+
+            /** The genre for Arts. */
+            public static final String ARTS = "ARTS";
+
+            /** The genre for Entertainment. */
+            public static final String ENTERTAINMENT = "ENTERTAINMENT";
+
+            /** The genre for Life Style. */
+            public static final String LIFE_STYLE = "LIFE_STYLE";
+
+            /** The genre for Music. */
+            public static final String MUSIC = "MUSIC";
+
+            /** The genre for Premier. */
+            public static final String PREMIER = "PREMIER";
+
+            /** The genre for Tech/Science. */
+            public static final String TECH_SCIENCE = "TECH_SCIENCE";
+
+            private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<>();
+            static {
+                CANONICAL_GENRES.add(FAMILY_KIDS);
+                CANONICAL_GENRES.add(SPORTS);
+                CANONICAL_GENRES.add(SHOPPING);
+                CANONICAL_GENRES.add(MOVIES);
+                CANONICAL_GENRES.add(COMEDY);
+                CANONICAL_GENRES.add(TRAVEL);
+                CANONICAL_GENRES.add(DRAMA);
+                CANONICAL_GENRES.add(EDUCATION);
+                CANONICAL_GENRES.add(ANIMAL_WILDLIFE);
+                CANONICAL_GENRES.add(NEWS);
+                CANONICAL_GENRES.add(GAMING);
+                CANONICAL_GENRES.add(ARTS);
+                CANONICAL_GENRES.add(ENTERTAINMENT);
+                CANONICAL_GENRES.add(LIFE_STYLE);
+                CANONICAL_GENRES.add(MUSIC);
+                CANONICAL_GENRES.add(PREMIER);
+                CANONICAL_GENRES.add(TECH_SCIENCE);
+            }
+
+            private static final char DOUBLE_QUOTE = '"';
+            private static final char COMMA = ',';
+            private static final String DELIMITER = ",";
+
+            private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+            private Genres() {}
+
+            /**
+             * Encodes genre strings to a text that can be put into the database.
+             *
+             * @param genres Genre strings.
+             * @return an encoded genre string that can be inserted into the
+             *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
+             */
+            public static String encode(@NonNull @Genre String... genres) {
+                if (genres == null) {
+                    // MNC and before will throw a NPE.
+                    return null;
+                }
+                StringBuilder sb = new StringBuilder();
+                String separator = "";
+                for (String genre : genres) {
+                    sb.append(separator).append(encodeToCsv(genre));
+                    separator = DELIMITER;
+                }
+                return sb.toString();
+            }
+
+            private static String encodeToCsv(String genre) {
+                StringBuilder sb = new StringBuilder();
+                int length = genre.length();
+                for (int i = 0; i < length; ++i) {
+                    char c = genre.charAt(i);
+                    switch (c) {
+                        case DOUBLE_QUOTE:
+                            sb.append(DOUBLE_QUOTE);
+                            break;
+                        case COMMA:
+                            sb.append(DOUBLE_QUOTE);
+                            break;
+                    }
+                    sb.append(c);
+                }
+                return sb.toString();
+            }
+
+            /**
+             * Decodes the genre strings from the text stored in the database.
+             *
+             * @param genres The encoded genre string retrieved from the
+             *            {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
+             * @return genre strings.
+             */
+            public static @Genre String[] decode(@NonNull String genres) {
+                if (TextUtils.isEmpty(genres)) {
+                    // MNC and before will throw a NPE for {@code null} genres.
+                    return EMPTY_STRING_ARRAY;
+                }
+                if (genres.indexOf(COMMA) == -1 && genres.indexOf(DOUBLE_QUOTE) == -1) {
+                    return new String[] {genres.trim()};
+                }
+                StringBuilder sb = new StringBuilder();
+                List<String> results = new ArrayList<>();
+                int length = genres.length();
+                boolean escape = false;
+                for (int i = 0; i < length; ++i) {
+                    char c = genres.charAt(i);
+                    switch (c) {
+                        case DOUBLE_QUOTE:
+                            if (!escape) {
+                                escape = true;
+                                continue;
+                            }
+                            break;
+                        case COMMA:
+                            if (!escape) {
+                                String string = sb.toString().trim();
+                                if (string.length() > 0) {
+                                    results.add(string);
+                                }
+                                sb = new StringBuilder();
+                                continue;
+                            }
+                            break;
+                    }
+                    sb.append(c);
+                    escape = false;
+                }
+                String string = sb.toString().trim();
+                if (string.length() > 0) {
+                    results.add(string);
+                }
+                return results.toArray(new String[results.size()]);
+            }
+
+            /**
+             * Returns whether a given text is a canonical genre defined in {@link Genres}.
+             *
+             * @param genre The name of genre to be checked.
+             * @return {@code true} if the genre is canonical, otherwise {@code false}.
+             */
+            public static boolean isCanonical(String genre) {
+                return CANONICAL_GENRES.contains(genre);
+            }
+        }
+    }
+
+    /**
+     * Column definitions for the recorded TV programs table.
+     *
+     * <p>By default, the query results will be sorted by {@link #COLUMN_START_TIME_UTC_MILLIS} in
+     * ascending order.
+     */
+    public static final class RecordedPrograms implements BaseProgramColumns {
+
+        /** The content:// style URI for this table. */
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
+                + PATH_RECORDED_PROGRAM);
+
+        /** The MIME type of a directory of recorded TV programs. */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/recorded_program";
+
+        /** The MIME type of a single recorded TV program. */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/recorded_program";
+
+        /**
+         * The ID of the TV input service that is associated with this recorded program.
+         *
+         * <p>Use {@link #buildInputId} to build the ID.
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INPUT_ID = "input_id";
+
+        /**
+         * The start time of the original TV program, in milliseconds since the epoch.
+         *
+         * <p>Type: INTEGER (long)
+         * @see Programs#COLUMN_START_TIME_UTC_MILLIS
+         */
+        public static final String COLUMN_START_TIME_UTC_MILLIS =
+                Programs.COLUMN_START_TIME_UTC_MILLIS;
+
+        /**
+         * The end time of the original TV program, in milliseconds since the epoch.
+         *
+         * <p>Type: INTEGER (long)
+         * @see Programs#COLUMN_END_TIME_UTC_MILLIS
+         */
+        public static final String COLUMN_END_TIME_UTC_MILLIS = Programs.COLUMN_END_TIME_UTC_MILLIS;
+
+        /**
+         * The comma-separated genre string of this recorded TV program.
+         *
+         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
+         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
+         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
+         * Use {@link Genres#decode Genres.decode()} to get the broadcast genre strings from the
+         * text stored in the column.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_BROADCAST_GENRE
+         */
+        public static final String COLUMN_BROADCAST_GENRE = Programs.COLUMN_BROADCAST_GENRE;
+
+        /**
+         * The URI of the recording data for this recorded program.
+         *
+         * <p>Together with {@link #COLUMN_RECORDING_DATA_BYTES}, applications can use this
+         * information to manage recording storage. The URI should indicate a file or directory with
+         * the scheme {@link android.content.ContentResolver#SCHEME_FILE}.
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_RECORDING_DATA_BYTES
+         */
+        public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
+
+        /**
+         * The data size (in bytes) for this recorded program.
+         *
+         * <p>Together with {@link #COLUMN_RECORDING_DATA_URI}, applications can use this
+         * information to manage recording storage.
+         *
+         * <p>Type: INTEGER (long)
+         * @see #COLUMN_RECORDING_DATA_URI
+         */
+        public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
+
+        /**
+         * The duration (in milliseconds) of this recorded program.
+         *
+         * <p>The actual duration of the recorded program can differ from the one calculated by
+         * {@link #COLUMN_END_TIME_UTC_MILLIS} - {@link #COLUMN_START_TIME_UTC_MILLIS} as program
+         * recording can be interrupted in the middle for some reason, resulting in a partially
+         * recorded program, which is still playable.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_RECORDING_DURATION_MILLIS = "recording_duration_millis";
+
+        /**
+         * The expiration time for this recorded program, in milliseconds since the epoch.
+         *
+         * <p>Recorded TV programs do not expire by default unless explicitly requested by the user
+         * or the user allows applications to delete them in order to free up disk space for future
+         * recording. However, some TV content can have expiration date set by the content provider
+         * when recorded. This field is used to indicate such a restriction.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER (long)
+         */
+        public static final String COLUMN_RECORDING_EXPIRE_TIME_UTC_MILLIS =
+                "recording_expire_time_utc_millis";
+
+        private RecordedPrograms() {}
+    }
+
+    /**
+     * Column definitions for the preview TV programs table.
+     */
+    public static final class PreviewPrograms implements BaseProgramColumns {
+
+        /** The content:// style URI for this table. */
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
+                + PATH_PREVIEW_PROGRAM);
+
+        /** The MIME type of a directory of preview TV programs. */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/preview_program";
+
+        /** The MIME type of a single preview TV program. */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/preview_program";
+
         /** @hide */
         @StringDef({
                 TYPE_MOVIE,
@@ -1800,72 +2246,6 @@ public final class TvContract {
         public static final String COLUMN_WATCH_NEXT_TYPE = "watch_next_type";
 
         /**
-         * The season number of this TV program for episodic TV shows.
-         *
-         * <p>Can be empty.
-         *
-         * <p>Type: INTEGER
-         *
-         * @deprecated Use {@link #COLUMN_SEASON_DISPLAY_NUMBER} instead.
-         */
-        @Deprecated
-        public static final String COLUMN_SEASON_NUMBER = "season_number";
-
-        /**
-         * The episode number of this TV program for episodic TV shows.
-         *
-         * <p>Can be empty.
-         *
-         * <p>Type: INTEGER
-         *
-         * @deprecated Use {@link #COLUMN_EPISODE_DISPLAY_NUMBER} instead.
-         */
-        @Deprecated
-        public static final String COLUMN_EPISODE_NUMBER = "episode_number";
-
-            /**
-         * The start time of this TV program, in milliseconds since the epoch.
-         *
-         * <p>The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
-         * previous program in the same channel. In practice, start time will usually be the end
-         * time of the previous program.
-         *
-         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
-         *
-         * <p>Type: INTEGER (long)
-         */
-        public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
-
-        /**
-         * The end time of this TV program, in milliseconds since the epoch.
-         *
-         * <p>The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
-         * next program in the same channel. In practice, end time will usually be the start time of
-         * the next program.
-         *
-         * <p>Can be empty if this program belongs to a {@link Channels#TYPE_PREVIEW} channel.
-         *
-         * <p>Type: INTEGER (long)
-         */
-        public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
-
-        /**
-         * The comma-separated genre string of this TV program.
-         *
-         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
-         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
-         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
-         * {@link Genres#encode} to create a text that can be stored in this column. Use
-         * {@link Genres#decode} to get the broadcast genre strings from the text stored in the
-         * column.
-         *
-         * <p>Type: TEXT
-         * @see Genres#encode
-         * @see Genres#decode
-         */
-        public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
-
-        /**
          * The aspect ratio of the poster art for this TV program.
          *
          * <p>The value should match one of the followings:
@@ -1975,36 +2355,6 @@ public final class TvContract {
          * <p>Type: INTEGER (boolean)
          */
         public static final String COLUMN_LIVE = "live";
-
-        /**
-         * The flag indicating whether recording of this program is prohibited.
-         *
-         * <p>A value of 1 indicates that recording of this program is prohibited and application
-         * will not schedule any recording for this program. A value of 0 indicates that the
-         * recording is not prohibited. If not specified, this value is set to 0 (not prohibited) by
-         * default.
-         *
-         * <p>Type: INTEGER (boolean)
-         */
-        public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
-
-        /**
-         * The flag indicating whether this TV program is browsable or not.
-         *
-         * <p>This column can only be set by system apps. For other applications, it is a read-only
-         * column. Trying to modify it may cause {@link SecurityException}.
-         *
-         * <p>A value of 1 indicates that the program is browsable and can be shown to users in
-         * the UI. A value of 0 indicates that the program should be hidden from users and the
-         * application who changes this value to 0 should send
-         * {@link TvInputManager#ACTION_PROGRAM_BROWSABLE_DISABLED} to the owner of the program
-         * to notify this change.
-         *
-         * <p>This value is set to 1 (browsable) by default.
-         *
-         * <p>Type: INTEGER (boolean)
-         */
-        public static final String COLUMN_BROWSABLE = "browsable";
 
         /**
          * The internal ID used by individual TV input services.
@@ -2163,325 +2513,25 @@ public final class TvContract {
          */
         public static final String COLUMN_REVIEW_RATING = "review_rating";
 
-        private Programs() {}
-
-        /** Canonical genres for TV programs. */
-        public static final class Genres {
-            /** @hide */
-            @StringDef({
-                    FAMILY_KIDS,
-                    SPORTS,
-                    SHOPPING,
-                    MOVIES,
-                    COMEDY,
-                    TRAVEL,
-                    DRAMA,
-                    EDUCATION,
-                    ANIMAL_WILDLIFE,
-                    NEWS,
-                    GAMING,
-                    ARTS,
-                    ENTERTAINMENT,
-                    LIFE_STYLE,
-                    MUSIC,
-                    PREMIER,
-                    TECH_SCIENCE,
-            })
-            @Retention(RetentionPolicy.SOURCE)
-            public @interface Genre {}
-
-            /** The genre for Family/Kids. */
-            public static final String FAMILY_KIDS = "FAMILY_KIDS";
-
-            /** The genre for Sports. */
-            public static final String SPORTS = "SPORTS";
-
-            /** The genre for Shopping. */
-            public static final String SHOPPING = "SHOPPING";
-
-            /** The genre for Movies. */
-            public static final String MOVIES = "MOVIES";
-
-            /** The genre for Comedy. */
-            public static final String COMEDY = "COMEDY";
-
-            /** The genre for Travel. */
-            public static final String TRAVEL = "TRAVEL";
-
-            /** The genre for Drama. */
-            public static final String DRAMA = "DRAMA";
-
-            /** The genre for Education. */
-            public static final String EDUCATION = "EDUCATION";
-
-            /** The genre for Animal/Wildlife. */
-            public static final String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
-
-            /** The genre for News. */
-            public static final String NEWS = "NEWS";
-
-            /** The genre for Gaming. */
-            public static final String GAMING = "GAMING";
-
-            /** The genre for Arts. */
-            public static final String ARTS = "ARTS";
-
-            /** The genre for Entertainment. */
-            public static final String ENTERTAINMENT = "ENTERTAINMENT";
-
-            /** The genre for Life Style. */
-            public static final String LIFE_STYLE = "LIFE_STYLE";
-
-            /** The genre for Music. */
-            public static final String MUSIC = "MUSIC";
-
-            /** The genre for Premier. */
-            public static final String PREMIER = "PREMIER";
-
-            /** The genre for Tech/Science. */
-            public static final String TECH_SCIENCE = "TECH_SCIENCE";
-
-            private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<>();
-            static {
-                CANONICAL_GENRES.add(FAMILY_KIDS);
-                CANONICAL_GENRES.add(SPORTS);
-                CANONICAL_GENRES.add(SHOPPING);
-                CANONICAL_GENRES.add(MOVIES);
-                CANONICAL_GENRES.add(COMEDY);
-                CANONICAL_GENRES.add(TRAVEL);
-                CANONICAL_GENRES.add(DRAMA);
-                CANONICAL_GENRES.add(EDUCATION);
-                CANONICAL_GENRES.add(ANIMAL_WILDLIFE);
-                CANONICAL_GENRES.add(NEWS);
-                CANONICAL_GENRES.add(GAMING);
-                CANONICAL_GENRES.add(ARTS);
-                CANONICAL_GENRES.add(ENTERTAINMENT);
-                CANONICAL_GENRES.add(LIFE_STYLE);
-                CANONICAL_GENRES.add(MUSIC);
-                CANONICAL_GENRES.add(PREMIER);
-                CANONICAL_GENRES.add(TECH_SCIENCE);
-            }
-
-            private static final char DOUBLE_QUOTE = '"';
-            private static final char COMMA = ',';
-            private static final String DELIMITER = ",";
-
-            private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-            private Genres() {}
-
-            /**
-             * Encodes genre strings to a text that can be put into the database.
-             *
-             * @param genres Genre strings.
-             * @return an encoded genre string that can be inserted into the
-             *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
-             */
-            public static String encode(@NonNull @Genre String... genres) {
-                if (genres == null) {
-                    // MNC and before will throw a NPE.
-                    return null;
-                }
-                StringBuilder sb = new StringBuilder();
-                String separator = "";
-                for (String genre : genres) {
-                    sb.append(separator).append(encodeToCsv(genre));
-                    separator = DELIMITER;
-                }
-                return sb.toString();
-            }
-
-            private static String encodeToCsv(String genre) {
-                StringBuilder sb = new StringBuilder();
-                int length = genre.length();
-                for (int i = 0; i < length; ++i) {
-                    char c = genre.charAt(i);
-                    switch (c) {
-                        case DOUBLE_QUOTE:
-                            sb.append(DOUBLE_QUOTE);
-                            break;
-                        case COMMA:
-                            sb.append(DOUBLE_QUOTE);
-                            break;
-                    }
-                    sb.append(c);
-                }
-                return sb.toString();
-            }
-
-            /**
-             * Decodes the genre strings from the text stored in the database.
-             *
-             * @param genres The encoded genre string retrieved from the
-             *            {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
-             * @return genre strings.
-             */
-            public static @Genre String[] decode(@NonNull String genres) {
-                if (TextUtils.isEmpty(genres)) {
-                    // MNC and before will throw a NPE for {@code null} genres.
-                    return EMPTY_STRING_ARRAY;
-                }
-                if (genres.indexOf(COMMA) == -1 && genres.indexOf(DOUBLE_QUOTE) == -1) {
-                    return new String[] {genres.trim()};
-                }
-                StringBuilder sb = new StringBuilder();
-                List<String> results = new ArrayList<>();
-                int length = genres.length();
-                boolean escape = false;
-                for (int i = 0; i < length; ++i) {
-                    char c = genres.charAt(i);
-                    switch (c) {
-                        case DOUBLE_QUOTE:
-                            if (!escape) {
-                                escape = true;
-                                continue;
-                            }
-                            break;
-                        case COMMA:
-                            if (!escape) {
-                                String string = sb.toString().trim();
-                                if (string.length() > 0) {
-                                    results.add(string);
-                                }
-                                sb = new StringBuilder();
-                                continue;
-                            }
-                            break;
-                    }
-                    sb.append(c);
-                    escape = false;
-                }
-                String string = sb.toString().trim();
-                if (string.length() > 0) {
-                    results.add(string);
-                }
-                return results.toArray(new String[results.size()]);
-            }
-
-            /**
-             * Returns whether a given text is a canonical genre defined in {@link Genres}.
-             *
-             * @param genre The name of genre to be checked.
-             * @return {@code true} if the genre is canonical, otherwise {@code false}.
-             */
-            public static boolean isCanonical(String genre) {
-                return CANONICAL_GENRES.contains(genre);
-            }
-        }
-    }
-
-    /**
-     * Column definitions for the recorded TV programs table.
-     *
-     * <p>By default, the query results will be sorted by {@link #COLUMN_START_TIME_UTC_MILLIS} in
-     * ascending order.
-     */
-    public static final class RecordedPrograms implements BaseProgramColumns {
-
-        /** The content:// style URI for this table. */
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
-                + PATH_RECORDED_PROGRAM);
-
-        /** The MIME type of a directory of recorded TV programs. */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/recorded_program";
-
-        /** The MIME type of a single recorded TV program. */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/recorded_program";
-
         /**
-         * The ID of the TV input service that is associated with this recorded program.
+         * The flag indicating whether this TV program is browsable or not.
          *
-         * <p>Use {@link #buildInputId} to build the ID.
+         * <p>This column can only be set by system apps. For other applications, it is a read-only
+         * column. Trying to modify it may cause {@link SecurityException}.
          *
-         * <p>This is a required field.
+         * <p>A value of 1 indicates that the program is browsable and can be shown to users in
+         * the UI. A value of 0 indicates that the program should be hidden from users and the
+         * application who changes this value to 0 should send
+         * {@link TvInputManager#ACTION_PROGRAM_BROWSABLE_DISABLED} to the owner of the program
+         * to notify this change.
          *
-         * <p>Type: TEXT
+         * <p>This value is set to 1 (browsable) by default.
+         *
+         * <p>Type: INTEGER (boolean)
          */
-        public static final String COLUMN_INPUT_ID = "input_id";
+        public static final String COLUMN_BROWSABLE = "browsable";
 
-        /**
-         * The start time of the original TV program, in milliseconds since the epoch.
-         *
-         * <p>Type: INTEGER (long)
-         * @see Programs#COLUMN_START_TIME_UTC_MILLIS
-         */
-        public static final String COLUMN_START_TIME_UTC_MILLIS =
-                Programs.COLUMN_START_TIME_UTC_MILLIS;
-
-        /**
-         * The end time of the original TV program, in milliseconds since the epoch.
-         *
-         * <p>Type: INTEGER (long)
-         * @see Programs#COLUMN_END_TIME_UTC_MILLIS
-         */
-        public static final String COLUMN_END_TIME_UTC_MILLIS = Programs.COLUMN_END_TIME_UTC_MILLIS;
-
-        /**
-         * The comma-separated genre string of this recorded TV program.
-         *
-         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
-         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
-         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
-         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
-         * Use {@link Genres#decode Genres.decode()} to get the broadcast genre strings from the
-         * text stored in the column.
-         *
-         * <p>Type: TEXT
-         * @see Programs#COLUMN_BROADCAST_GENRE
-         */
-        public static final String COLUMN_BROADCAST_GENRE = Programs.COLUMN_BROADCAST_GENRE;
-
-        /**
-         * The URI of the recording data for this recorded program.
-         *
-         * <p>Together with {@link #COLUMN_RECORDING_DATA_BYTES}, applications can use this
-         * information to manage recording storage. The URI should indicate a file or directory with
-         * the scheme {@link android.content.ContentResolver#SCHEME_FILE}.
-         *
-         * <p>Type: TEXT
-         * @see #COLUMN_RECORDING_DATA_BYTES
-         */
-        public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
-
-        /**
-         * The data size (in bytes) for this recorded program.
-         *
-         * <p>Together with {@link #COLUMN_RECORDING_DATA_URI}, applications can use this
-         * information to manage recording storage.
-         *
-         * <p>Type: INTEGER (long)
-         * @see #COLUMN_RECORDING_DATA_URI
-         */
-        public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
-
-        /**
-         * The duration (in milliseconds) of this recorded program.
-         *
-         * <p>The actual duration of the recorded program can differ from the one calculated by
-         * {@link #COLUMN_END_TIME_UTC_MILLIS} - {@link #COLUMN_START_TIME_UTC_MILLIS} as program
-         * recording can be interrupted in the middle for some reason, resulting in a partially
-         * recorded program, which is still playable.
-         *
-         * <p>Type: INTEGER
-         */
-        public static final String COLUMN_RECORDING_DURATION_MILLIS = "recording_duration_millis";
-
-        /**
-         * The expiration time for this recorded program, in milliseconds since the epoch.
-         *
-         * <p>Recorded TV programs do not expire by default unless explicitly requested by the user
-         * or the user allows applications to delete them in order to free up disk space for future
-         * recording. However, some TV content can have expiration date set by the content provider
-         * when recorded. This field is used to indicate such a restriction.
-         *
-         * <p>Can be empty.
-         *
-         * <p>Type: INTEGER (long)
-         */
-        public static final String COLUMN_RECORDING_EXPIRE_TIME_UTC_MILLIS =
-                "recording_expire_time_utc_millis";
-
-        private RecordedPrograms() {}
+        private PreviewPrograms() {}
     }
 
     /**
