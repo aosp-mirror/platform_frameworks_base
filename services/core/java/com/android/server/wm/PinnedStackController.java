@@ -230,32 +230,37 @@ class PinnedStackController {
     }
 
     /**
-     * @param preChangeTargetBounds The final bounds of the stack if it is currently animating
-     * @return the repositioned PIP bounds given it's pre-change bounds, and the new display
-     *         content.
+     * Updates the display info, calculating and returning the new stack and movement bounds in the
+     * new orientation of the device if necessary.
      */
-    Rect onDisplayChanged(Rect preChangeStackBounds, Rect preChangeTargetBounds,
-            DisplayContent displayContent) {
-        final Rect postChangeStackBounds = new Rect(preChangeTargetBounds);
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        if (!mDisplayInfo.equals(displayInfo)) {
-            // Calculate the snap fraction of the current stack along the old movement bounds, and
-            // then update the stack bounds to the same fraction along the rotated movement bounds.
-            final Rect preChangeMovementBounds = getMovementBounds(preChangeStackBounds);
-            final float snapFraction = mSnapAlgorithm.getSnapFraction(preChangeStackBounds,
-                    preChangeMovementBounds);
-            mDisplayInfo.copyFrom(displayInfo);
-
-            final Rect postChangeMovementBounds = getMovementBounds(preChangeStackBounds,
-                    false /* adjustForIme */);
-            mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
-                    snapFraction);
-            if (mIsMinimized) {
-                applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
-            }
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+    void onTaskStackBoundsChanged(Rect targetBounds, Rect outBounds) {
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+        if (mDisplayInfo.equals(displayInfo)) {
+            return;
         }
-        return postChangeStackBounds;
+
+        mTmpRect.set(targetBounds);
+        final Rect postChangeStackBounds = mTmpRect;
+
+        // Calculate the snap fraction of the current stack along the old movement bounds
+        final Rect preChangeMovementBounds = getMovementBounds(postChangeStackBounds);
+        final float snapFraction = mSnapAlgorithm.getSnapFraction(postChangeStackBounds,
+                preChangeMovementBounds);
+        mDisplayInfo.copyFrom(displayInfo);
+
+        // Calculate the stack bounds in the new orientation to the same same fraction along the
+        // rotated movement bounds.
+        final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
+                false /* adjustForIme */);
+        mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                snapFraction);
+        if (mIsMinimized) {
+            applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
+        }
+
+        notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+
+        outBounds.set(postChangeStackBounds);
     }
 
     /**
