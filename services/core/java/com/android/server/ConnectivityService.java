@@ -3664,7 +3664,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Tear down existing lockdown if profile was removed
         mLockdownEnabled = LockdownVpnTracker.isEnabled();
         if (mLockdownEnabled) {
-            final String profileName = new String(mKeyStore.get(Credentials.LOCKDOWN_VPN));
+            byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
+            if (profileTag == null) {
+                Slog.e(TAG, "Lockdown VPN configured but cannot be read from keystore");
+                return false;
+            }
+            String profileName = new String(profileTag);
             final VpnProfile profile = VpnProfile.decode(
                     profileName, mKeyStore.get(Credentials.VPN + profileName));
             if (profile == null) {
