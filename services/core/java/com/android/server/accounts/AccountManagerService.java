@@ -481,8 +481,13 @@ public class AccountManagerService
             managedTypes.add(accountType);
         }
 
-        return getAccountsAndVisibilityForPackage(packageName, managedTypes, callingUid,
-                getUserAccounts(UserHandle.getUserId(callingUid)));
+        long identityToken = clearCallingIdentity();
+        try {
+            return getAccountsAndVisibilityForPackage(packageName, managedTypes, callingUid,
+                    getUserAccounts(UserHandle.getUserId(callingUid)));
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
     }
 
     /*
@@ -560,7 +565,7 @@ public class AccountManagerService
                     a.type);
             throw new SecurityException(msg);
         }
-        return getAccountVisibility(a, packageName,
+        return resolveAccountVisibility(a, packageName,
                 getUserAccounts(UserHandle.getUserId(callingUid)));
     }
 
