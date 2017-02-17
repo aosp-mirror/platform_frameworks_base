@@ -18,6 +18,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_JACK_FLAGS := --multi-dex native
+LOCAL_DX_FLAGS := --multi-dex
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := -I$(LOCAL_PATH)/..

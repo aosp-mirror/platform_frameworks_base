@@ -5,7 +5,10 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-documents-archive
+LOCAL_STATIC_JAVA_LIBRARIES :=  \
+    android-support-documents-archive \
+    android-support-annotations
+
 LOCAL_PACKAGE_NAME := ExternalStorageProvider
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
