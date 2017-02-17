@@ -566,6 +566,12 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMasterPreference", 0,
                 equalTo(configRequest.mMasterPreference));
         collector.checkThat("mSupport5gBand", false, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mDiscoveryWindowInterval.length", 2,
+                equalTo(configRequest.mDiscoveryWindowInterval.length));
+        collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_24GHZ]));
+        collector.checkThat("mDiscoveryWindowInterval[5Hz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ]));
     }
 
     @Test
@@ -574,10 +580,12 @@ public class WifiAwareManagerTest {
         final int clusterLow = 5;
         final int masterPreference = 55;
         final boolean supportBand5g = true;
+        final int dwWindow5GHz = 3;
 
         ConfigRequest configRequest = new ConfigRequest.Builder().setClusterHigh(clusterHigh)
                 .setClusterLow(clusterLow).setMasterPreference(masterPreference)
                 .setSupport5gBand(supportBand5g)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ, dwWindow5GHz)
                 .build();
 
         collector.checkThat("mClusterHigh", clusterHigh, equalTo(configRequest.mClusterHigh));
@@ -585,6 +593,12 @@ public class WifiAwareManagerTest {
         collector.checkThat("mMasterPreference", masterPreference,
                 equalTo(configRequest.mMasterPreference));
         collector.checkThat("mSupport5gBand", supportBand5g, equalTo(configRequest.mSupport5gBand));
+        collector.checkThat("mDiscoveryWindowInterval.length", 2,
+                equalTo(configRequest.mDiscoveryWindowInterval.length));
+        collector.checkThat("mDiscoveryWindowInterval[2.4GHz]", ConfigRequest.DW_INTERVAL_NOT_INIT,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_24GHZ]));
+        collector.checkThat("mDiscoveryWindowInterval[5GHz]", dwWindow5GHz,
+                equalTo(configRequest.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ]));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -633,16 +647,44 @@ public class WifiAwareManagerTest {
         new ConfigRequest.Builder().setClusterLow(100).setClusterHigh(5).build();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidBand() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(5, 1).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueZero() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_24GHZ,
+                0).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueLarge() {
+        new ConfigRequest.Builder().setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ,
+                6).build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigRequestBuilderDwIntervalInvalidValueLargeValidate() {
+        ConfigRequest cr = new ConfigRequest.Builder().build();
+        cr.mDiscoveryWindowInterval[ConfigRequest.NAN_BAND_5GHZ] = 6;
+        cr.validate();
+    }
+
     @Test
     public void testConfigRequestParcel() {
         final int clusterHigh = 189;
         final int clusterLow = 25;
         final int masterPreference = 177;
         final boolean supportBand5g = true;
+        final int dwWindow24GHz = 1;
+        final int dwWindow5GHz = 5;
 
         ConfigRequest configRequest = new ConfigRequest.Builder().setClusterHigh(clusterHigh)
                 .setClusterLow(clusterLow).setMasterPreference(masterPreference)
                 .setSupport5gBand(supportBand5g)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_24GHZ, dwWindow24GHz)
+                .setDiscoveryWindowInterval(ConfigRequest.NAN_BAND_5GHZ, dwWindow5GHz)
                 .build();
 
         Parcel parcelW = Parcel.obtain();
