@@ -1230,6 +1230,16 @@ public abstract class Context {
     public abstract File getExternalCacheDir();
 
     /**
+     * Returns absolute path to application-specific directory in the preloaded cache.
+     * <p>Files stored in the cache directory can be deleted when the device runs low on storage.
+     * There is no guarantee when these files will be deleted.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public abstract File getPreloadsFileCache();
+
+    /**
      * Returns absolute paths to application-specific directories on all
      * shared/external storage devices where the application can place cache
      * files it owns. These files are internal to the application, and not

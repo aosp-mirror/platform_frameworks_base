@@ -281,6 +281,13 @@ public class ContextWrapper extends Context {
         return mBase.getDir(name, mode);
     }
 
+
+    /** @hide **/
+    @Override
+    public File getPreloadsFileCache() {
+        return mBase.getPreloadsFileCache();
+    }
+
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
         return mBase.openOrCreateDatabase(name, mode, factory);
