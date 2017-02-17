@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"앱이 다른 앱의 백그라운드 프로세스를 종료할 수 있도록 허용합니다. 이 경우 다른 앱이 실행 중지될 수 있습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"이 앱은 다른 앱 위에 표시될 수 있음"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"이 앱은 다른 앱이나 화면의 다른 부분 위에 표시될 수 있습니다. 이로 인해 일반적인 앱 사용이 방해받을 수 있으며 다른 앱이 표시되는 방식이 변경될 수 있습니다."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"앱이 항상 실행되도록 설정"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 태블릿의 속도를 저하시킬 수 있습니다."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"앱이 메모리를 지속적으로 사용할 수 있도록 허용합니다. 이는 TV의 속도를 늦춰 다른 앱에서 사용할 수 있는 메모리를 제한할 수 있습니다."</string>
@@ -372,8 +380,8 @@
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"이 앱은 언제든지 마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
-    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM에 명령어 보내기"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 위험합니다."</string>
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM 카드로 명령 전송"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 신중히 허용해야 합니다."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"진동 제어"</string>
@@ -490,7 +498,7 @@
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"통화 화면과 상호작용"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"전화 서비스와 상호 작용"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱을 전화 서비스와 상호 작용하도록 허용하여 전화를 송수신하세요."</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱에서 전화 서비스와 상호 작용하여 전화를 받거나 걸 수 있습니다."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"통화 사용자 경험 제공"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"앱에서 통화 사용자 경험을 제공하도록 허용합니다."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"이전 네트워크 사용량 읽기"</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"텍스트 작업"</string>
     <string name="email" msgid="4560673117055050403">"이메일"</string>
-    <string name="dial" msgid="2275093056198652749">"전화걸기"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"지도"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>

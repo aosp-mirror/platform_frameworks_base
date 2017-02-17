@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ऐप्स  को अन्‍य ऐप्स की पृष्ठभूमि प्रक्रियाओं को समाप्त करने देता है. यह अन्य ऐप्स  का चलना रोक सकता है."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"यह ऐप्लिकेशन दूसरे ऐप्लिकेशन के ऊपर दिखाई दे सकता है"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"यह ऐप्लिकेशन, दूसरे ऐप्लिकेशन के ऊपर या स्क्रीन के अन्य भागों पर दिखाई दे सकता है. इससे ऐप्लिकेशन के सामान्य उपयोग में बाधा आ सकती है और दूसरे ऐप्लिकेशन के दिखाई देने के तरीकों में बदलाव हो सकता है."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ऐप्स को हमेशा चलने वाला बनाएं"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ऐप्स को मेमोरी में स्‍वयं के कुछ हिस्सों को लगातार बनाने की अनुमति देता है. यह अन्‍य ऐप्स  के लिए उपलब्‍ध स्‍मृति को सीमित कर टेबलेट को धीमा कर सकता है."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ऐप को मेमोरी में स्‍वयं के दीर्घस्थायी भाग बनाने देती है. इससे अन्‍य ऐप्‍स के लिए उपलब्‍ध मेमोरी सीमित हो सकती है जिससे टीवी धीमा हो सकता है."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"लेख क्रियाएं"</string>
     <string name="email" msgid="4560673117055050403">"ईमेल करें"</string>
-    <string name="dial" msgid="2275093056198652749">"डायल करें"</string>
+    <string name="dial" msgid="4204975095406423102">"फ़ोन"</string>
     <string name="map" msgid="5441053548030107189">"मानचित्र"</string>
+    <string name="browse" msgid="6079864138582486027">"ब्राउज़ करें"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"मेमोरी स्‍थान समाप्‍त हो रहा है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए पर्याप्त मेमोरी नहीं है. सुनिश्चित करें कि आपके पास 250MB का खाली स्थान है और फिर से प्रारंभ करें."</string>

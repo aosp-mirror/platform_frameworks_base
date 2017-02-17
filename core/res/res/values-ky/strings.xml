@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Колдонмого башка колдонмолордун фондо иштеп жаткан процесстерин токтотуу уруксатын берет. Бул башка колдонмолордун иштебей калышына алып келиши мүмкүн."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Бул колдонмо башка колдонмолордун үстүнөн көрүнүшү мүмкүн"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Бул колдонмо башка колдонмолордун же экрандын башка бөлүгүнүн үстүндө көрүнүшү мүмкүн. Ал колдонмолорду пайдаланууга же алардын көрсөтүлүшүнө тоскоолдук жаратышы мүмкүн."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"колдонмону үзгүлтүксүз иштетүү"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Колдонмого өзүнүн бөлүктөрүн эстутумда туруктуу кармоого уруксат берет.Бул эстутумдун башка колдонмолорго жетиштүүлүгүн чектеши жана телефондун иштешин жайлатышы мүмкүн."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Колдонмого эстутумдагы өз бөлүктөрүн туруктуу кылуу мүмкүнчүлүгүн берет. Ушуну менен сыналгы жай иштеп, башка колдонмолорго жеткиликтүү эстутум чектелиши мүмкүн."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст боюнча иштер"</string>
     <string name="email" msgid="4560673117055050403">"Электрондук почта"</string>
-    <string name="dial" msgid="2275093056198652749">"Терүү"</string>
+    <string name="dial" msgid="4204975095406423102">"Телефон"</string>
     <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="browse" msgid="6079864138582486027">"Карап чыгуу"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Системанын кээ бир функциялары иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>

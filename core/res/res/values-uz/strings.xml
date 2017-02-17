@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Ilovaga boshqa ilovalarning orqa fonda amalga oshirilayotgan jarayonlarini to‘xtatish uchun ruxsat beradi. Bu boshqa ilovalarning to‘xtatilishiga sabab bo‘lishi mumkin."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Bu ilova boshqa oynalar ustidan ko‘rsatilishi mumkin"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Bu ilova ilovalar yoki ekranning boshqa qismlaridan yuqorida ko‘rinishi mumkin. Bu ilovadan odatiy foydalanishga halaqit berishi va boshqa ilovalar ko‘rinishining usullarini o‘zgartirib yuborishi mumkin."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ilovani doim ishlab turadigan qilish"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va planshetni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ilovaga o‘zining muayyan qismlarining xotiraning turg‘un qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, televizorning ishlashi sekinlashishi mumkin."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Matn yozish"</string>
     <string name="email" msgid="4560673117055050403">"E-pochta"</string>
-    <string name="dial" msgid="2275093056198652749">"Chaqiruv"</string>
+    <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="5441053548030107189">"Xarita"</string>
+    <string name="browse" msgid="6079864138582486027">"Tanlash"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>

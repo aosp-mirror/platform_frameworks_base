@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ឲ្យ​កម្មវិធី​បញ្ឈប់​ដំណើរការ​​ផ្ទៃ​ខាង​ក្រោយ​នៃ​កម្មវិធី​ផ្សេងៗ​។ វា​អាច​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ឈប់​ដំណើរការ។"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"កម្មវិធី​នេះ​អាច​បង្ហាញ​នៅ​ខាងលើ​កម្មវិធី​នានា"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"កម្មវិធី​នេះ​អាច​បង្ហាញ​​នៅ​ខាងលើ​កម្មវិធី​នានា​ ឬ​ខាងលើ​ផ្នែក​ផ្សេង​នៃ​អេក្រង់​។ វា​អាច​នឹង​មាន​ការ​រំខាន​ដល់​ការ​ប្រើប្រាស់​កម្មវិធី​ធម្មតា​ និង​ផ្លាស់ប្តូរ​របៀប​នៃ​ការ​បង្ហាញ​កម្មវិធី​ផ្សេងៗ​។"</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ធ្វើ​ឲ្យ​កម្មវិធី​ដំណើរការ​ជា​និច្ច"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ឲ្យ​កម្មវិធី​ធ្វើជា​ផ្នែក​​ស្ថិតស្ថេរ​ដោយ​ខ្លួន​ឯង​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កំណត់​អង្គ​ចងចាំ​ដែល​អាច​ប្រើ​បាន​ចំពោះ​កម្មវិធី​ផ្សេងៗ​ ដោយ​ធ្វើឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត។"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"អនុញ្ញាតឲ្យកម្មវិធីធ្វើឲ្យផ្នែកមួយចំនួនរបស់វាបន្តនៅក្នុងមេម៉ូរី។ វាអាចកម្រិតមេម៉ូរីដែលមានសម្រាប់កម្មវិធីផ្សេងទៀត ដែលធ្វើឲ្យទូរទស្សន៍ដើរយឺត។"</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"សកម្មភាព​អត្ថបទ"</string>
     <string name="email" msgid="4560673117055050403">"អ៊ីមែល"</string>
-    <string name="dial" msgid="2275093056198652749">"ហៅ​ទូរសព្ទ"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"ផែនទី"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"មិន​មាន​ទំហំ​ផ្ទុក​​គ្រប់​គ្រាន់​សម្រាប់​ប្រព័ន្ធ​។ សូម​ប្រាកដ​ថា​អ្នក​មាន​ទំហំ​ទំនេរ​ 250MB ហើយ​ចាប់ផ្ដើម​ឡើង​វិញ។"</string>

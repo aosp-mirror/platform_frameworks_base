@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite que o app encerre processos em segundo plano de outros apps. Pode ser que outros apps parem de funcionar."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Este app pode se sobrepor visualmente a outros apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Este app pode se sobrepor visualmente a outros apps ou a outras partes da tela. Isso pode interferir no uso normal do app e alterar a forma como os outros apps são exibidos."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sempre executar o app"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite que o app torne partes de si mesmo persistentes na memória. Pode limitar a memória disponível para outros apps, deixando o tablet mais lento."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite que o app torne partes de si mesmo persistentes na memória. Isso pode limitar a memória disponível para outros apps, deixando a TV mais lenta."</string>
@@ -441,7 +449,7 @@
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permite que o app veja a configuração do Bluetooth na TV, faça e aceite conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar a comunicação a curta distância"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (Comunicação a curta distância)."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desativar o bloqueio de tela"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gerenciar hardware de impressão digital"</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Ações de texto"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="dial" msgid="2275093056198652749">"Discar"</string>
+    <string name="dial" msgid="4204975095406423102">"Telefone"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="browse" msgid="6079864138582486027">"Procurar"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Pouco espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Algumas funções do sistema podem não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Não há armazenamento suficiente para o sistema. Certifique-se de ter 250 MB de espaço livre e reinicie."</string>

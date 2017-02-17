@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite que a aplicação termine processos em segundo plano de outras aplicações. Isto pode fazer com que outras aplicações deixem de funcionar."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Esta aplicação pode aparecer por cima de outras aplicações"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Esta aplicação pode aparecer por cima de outras aplicações ou de outras partes do ecrã. Tal pode interferir com a utilização normal das aplicações e alterar a forma como as outras aplicações aparecem."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"fazer com que a aplicação seja sempre executada"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite que a aplicação torne partes de si mesma persistentes na memória. Isto pode limitar a disponibilidade da memória para outras aplicações, tornando o tablet mais lento."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite à aplicação tornar partes de si própria persistentes na memória. Isto pode limitar a memória disponível para outras aplicações, o que torna a TV mais lenta."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acções de texto"</string>
     <string name="email" msgid="4560673117055050403">"Email"</string>
-    <string name="dial" msgid="2275093056198652749">"Marcar"</string>
+    <string name="dial" msgid="4204975095406423102">"Telemóvel"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="browse" msgid="6079864138582486027">"Procurar"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Está quase sem espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Algumas funções do sistema poderão não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Não existe armazenamento suficiente para o sistema. Certifique-se de que tem 250 MB de espaço livre e reinicie."</string>

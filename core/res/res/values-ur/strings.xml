@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ایپ کو دوسرے ایپس کے پس منظر کی کارروائیوں کو ختم کرنے کی اجازت دیتا ہے۔ اس کی وجہ سے دوسرے ایپس کا چلنا بند ہوسکتا ہے۔"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"یہ ایپ دیگر ایپس کے اوپر ظاہر ہوسکتی ہے"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"یہ ایپ دیگر ایپس کے اوپر یا سکرین کے دیگر حصوں پر ظاہر ہو سکتی ہے۔ یہ عام ایپ کے استعمال کے ساتھ مداخلت کر سکتی ہے اور دیگر ایپس کے ظاہر ہونے کا طریقہ بدل سکتی ہے۔"</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ایپ کو ہمیشہ چلاتے رہیں"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ایپ کو خود اپنے ہی حصوں کو میموری میں استقلال پذیر بنانے کی اجازت دیتا ہے۔ یہ ٹیبلٹ کو سست بناکر دوسری ایپس کیلئے دستیاب میموری کو محدود کرسکتا ہے۔"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"‏ایپ کو خود اپنے ہی حصوں کو میموری میں استقلال پذیر بنانے کی اجازت دیتا ہے۔ یہ TV کو سُست بناکر دوسری ایپس کیلئے دستیاب میموری کو محدود کرسکتا ہے۔"</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"اندراج کا طریقہ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"متن کی کارروائیاں"</string>
     <string name="email" msgid="4560673117055050403">"ای میل"</string>
-    <string name="dial" msgid="2275093056198652749">"ڈائل کریں"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"نقشہ"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>

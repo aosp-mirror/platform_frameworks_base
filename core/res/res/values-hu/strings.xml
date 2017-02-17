@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Lehetővé teszi az alkalmazás számára, hogy megszüntesse más alkalmazások háttérben zajló folyamatait. Így előfordulhat, hogy egyes alkalmazások bezárulnak."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Az alkalmazás megjelenhet más alkalmazások fölött"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Az alkalmazás megjelenhet más alkalmazások fölött vagy a képernyő más részein. Ez befolyásolhatja a megszokott alkalmazáshasználatot, és módosíthatja más alkalmazások megjelenésének módját."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"az alkalmazás állandó futtatása"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lehetővé teszi az alkalmazás számára, hogy egyes részeit állandó jelleggel eltárolja a memóriában. Ez korlátozhatja a többi alkalmazás számára rendelkezésre álló memóriát, és lelassíthatja a táblagépet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Lehetővé teszi az alkalmazás számára azt, hogy egyes részeit állandóan a memóriában tartsa. Ez korlátozhatja a többi alkalmazás számára elérhető memóriát, ezáltal lelassulhat a tévé."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="dial" msgid="2275093056198652749">"Tárcsázás"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Térkép"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Kevés a szabad terület"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Előfordulhat, hogy néhány rendszerfunkció nem működik."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nincs elegendő tárhely a rendszerhez. Győződjön meg arról, hogy rendelkezik 250 MB szabad területtel, majd kezdje elölről."</string>

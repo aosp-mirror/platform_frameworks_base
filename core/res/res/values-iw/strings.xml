@@ -326,6 +326,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"מאפשר לאפליקציה להפסיק תהליכים ברקע המבוצעים על ידי אפליקציות אחרות. הדבר עשוי לגרום להפסקת פעולתם של אפליקציות אחרות."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"אפליקציה זו יכולה להופיע מעל אפליקציות אחרות."</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"אפליקציה זו יכולה להופיע מעל אפליקציות אחרות או בחלקים אחרים של המסך. ייתכן שהדבר יפריע לך להשתמש באפליקציות וישנה את הופעתן."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"הגדרת האפליקציה לפעול תמיד"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"מאפשר לאפליקציה להפוך חלקים ממנו לקבועים בזיכרון. פעולה זו עשויה להגביל את הזיכרון הזמין לאפליקציות אחרים ולהאט את פעולת הטאבלט."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"מאפשרת לאפליקציה ליצור חלקים ממנה השמורים בזיכרון באופן עקבי. הדבר עלול להגביל את הזיכרון הזמין לאפליקציות אחרות וכתוצאה מכך להאט את פעולת הטלוויזיה."</string>
@@ -992,8 +1000,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"שיטת קלט"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
     <string name="email" msgid="4560673117055050403">"אימייל"</string>
-    <string name="dial" msgid="2275093056198652749">"חייג"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"מפה"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏אין מספיק שטח אחסון עבור המערכת. ודא שיש לך שטח פנוי בגודל 250MB התחל שוב."</string>

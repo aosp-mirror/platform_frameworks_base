@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Lar appen avslutte andre appers bakgrunnsprosesser. Dette kan føre til at andre apper slutter å kjøre."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Denne appen kan ligge over andre apper"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Denne appen kan vises over andre apper eller andre deler av skjermen. Dette kan påvirke normal bruk av apper og endre måten andre apper vises på."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"angi at appen alltid skal kjøre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lar appen gjøre deler av seg selv vedvarende i minnet. Dette kan begrense minnet for andre apper og gjøre nettbrettet tregt."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Gjør at deler av appen kan legge seg vedvarende i minnet. Dette kan begrense minnets tilgjengelighet for andre apper, noe som gjør at TV-en går langsommere."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
     <string name="email" msgid="4560673117055050403">"E-post"</string>
-    <string name="dial" msgid="2275093056198652749">"Ring"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Kart"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lite ledig lagringsplass"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Enkelte systemfunksjoner fungerer muligens ikke slik de skal"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det er ikke nok lagringsplass for systemet. Kontrollér at du har 250 MB ledig plass, og start på nytt."</string>

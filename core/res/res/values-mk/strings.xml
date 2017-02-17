@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Овозможува апликацијата да заврши заднински процеси на други апликации. Ова може да предизвика други апликации да престанат да работат."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Апликацијава може да се појави врз други апликации"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Апликацијава може да се појави врз други апликации или делови од екранот. Тоа може да го попречи нормалното користење на апликацијата и да го смени начинот на кој се појавуваат другите апликации."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"направи апликацијата постојано да биде активна"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Овозможува апликацијата да прави трајни делови од себеси во меморијата. Ова може да ја ограничи расположливата меморија на други апликации што го забавува таблетот."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Дозволува апликацијата да направи нејзини делови да бидат постојани во меморијата. Ова може да ја ограничи меморијата достапна на другите апликации и да го забави телевизорот."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
     <string name="email" msgid="4560673117055050403">"E-пошта"</string>
-    <string name="dial" msgid="2275093056198652749">"Бирај"</string>
+    <string name="dial" msgid="4204975095406423102">"Телефон"</string>
     <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="browse" msgid="6079864138582486027">"Прелистувајте"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Меморијата е речиси полна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>

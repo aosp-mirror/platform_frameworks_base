@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permet à l\'application de mettre fin aux processus d\'autres applications exécutés en arrière-plan. Cette autorisation peut interrompre l\'exécution d\'autres applications."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Cette application peut se superposer à d\'autres applications"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Cette application peut se superposer à d\'autres applications ou à d\'autres parties de l\'écran. Cela peut altérer l\'utilisation normale des applications et modifier l\'apparence des autres applications."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"exécuter l\'application en continu"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permet à l\'application de rendre certains de ces composants persistants dans la mémoire. Cette autorisation peut limiter la mémoire disponible pour d\'autres applications et ralentir la tablette."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permet à l\'application d\'activer la persistance de certains de ces composants dans la mémoire. Cette fonctionnalité peut limiter l\'espace mémoire disponible pour les autres applications et ralentir ainsi le téléviseur."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Mode de saisie"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Actions sur le texte"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="dial" msgid="2275093056198652749">"Composer"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Carte"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>

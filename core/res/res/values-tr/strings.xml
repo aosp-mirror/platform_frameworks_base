@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Uygulamaya diğer uygulamalara ait arka plan işlemleri sonlandırma izni verir. Bu izin, diğer uygulamaların çalışmayı durdurmasına neden olabilir."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Bu uygulama, diğer uygulamaların üzerinde görünebilir"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Bu uygulama, uygulamaların üzerinde veya ekranın diğer kısımlarında görünebilir. Bu durum, normal uygulama kullanımını etkileyebilir ve diğer uygulamaların görünümünü değiştirebilir."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"uygulamayı her zaman çalıştırma"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Uygulamaya kendisinin bir bölümünü bellekte kalıcı yapma izni verir. Bu izin, diğer uygulamaların kullanabileceği belleği sınırlandırarak tabletin yavaş çalışmasına neden olabilir."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Uygulamaya, kendi parçalarını bellekte kalıcı hale getirme izni verir. Bu, TV\'yi yavaşlatan diğer uygulamaların kullanabileceği bellek alanını sınırlayabilir."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
     <string name="email" msgid="4560673117055050403">"E-posta"</string>
-    <string name="dial" msgid="2275093056198652749">"Çevir"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Harita"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Depolama alanı bitiyor"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bazı sistem işlevleri çalışmayabilir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistem için yeterli depolama alanı yok. 250 MB boş alanınızın bulunduğundan emin olun ve yeniden başlatın."</string>

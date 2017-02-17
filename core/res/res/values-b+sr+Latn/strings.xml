@@ -323,6 +323,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Dozvoljava aplikaciji da zaustavi pozadinske procese drugih aplikacija. Ovo može da zaustavi druge aplikacije."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Ova aplikacija može da se prikazuje preko drugih aplikacija"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Ova aplikacija može da se prikazuje preko drugih aplikacija ili drugih delova delova ekrana. To može da ometa standardno korišćenje aplikacija i način na koji se druge aplikacije prikazuju."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"omogućavanje neprekidne aktivnosti aplikacije"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Dozvoljava aplikaciji da učini sopstvene komponente trajnim u memoriji. Ovo može da ograniči memoriju dostupnu drugim aplikacijama i uspori tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Dozvoljava aplikaciji da neke svoje delove trajno zadrži u memoriji. To može da ograniči memoriju dostupnu drugim aplikacijama i uspori TV."</string>
@@ -972,8 +980,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metod unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Radnje u vezi sa tekstom"</string>
     <string name="email" msgid="4560673117055050403">"Pošalji imejl"</string>
-    <string name="dial" msgid="2275093056198652749">"Pozovi"</string>
+    <string name="dial" msgid="4204975095406423102">"Pozovi"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="browse" msgid="6079864138582486027">"Pregledaj"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memorijski prostor je na izmaku"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke sistemske funkcije možda ne funkcionišu"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno memorijskog prostora za sistem. Uverite se da imate 250 MB slobodnog prostora i ponovo pokrenite."</string>

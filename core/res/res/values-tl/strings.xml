@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Pinapayagan ang app na tapusin ang mga proseso sa background ng iba pang apps. Maaari itong maging sanhi ng paghinto sa paggana ng iba pang apps."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Maaaring lumabas ang app na ito sa ibabaw ng iba pang mga app"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Maaaring lumabas ang app na ito sa ibabaw ng iba pang mga app o iba pang mga bahagi ng screen. Maaaring makasagabal ito sa normal na paggamit ng app at mabago nito ang paraan kung paano lumalabas ang iba pang mga app."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"palaging patakbuhin ang app"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Nagbibigay-daan sa app na iimbak sa memory ang mga bahagi nito. Maaari nitong malimitahan ang memory na available sa iba pang mga app na nagpapabagal sa TV."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="email" msgid="4560673117055050403">"Mag-email"</string>
-    <string name="dial" msgid="2275093056198652749">"Mag-dial"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
