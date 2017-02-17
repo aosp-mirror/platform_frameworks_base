@@ -40,21 +40,24 @@ import libcore.util.NativeAllocationRegistry;
 public final class HardwareBuffer implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RGBA_8888, RGBA_FP16, RGBX_8888, RGB_888, RGB_565, BLOB})
-    public @interface Format {};
+    @IntDef({RGBA_8888, RGBA_FP16, RGBA_1010102, RGBX_8888, RGB_888, RGB_565, BLOB})
+    public @interface Format {
+    }
 
     /** Format: 8 bits each red, green, blue, alpha */
-    public static final int RGBA_8888   = 1;
+    public static final int RGBA_8888    = 1;
     /** Format: 8 bits each red, green, blue, alpha, alpha is always 0xFF */
-    public static final int RGBX_8888   = 2;
+    public static final int RGBX_8888    = 2;
     /** Format: 8 bits each red, green, blue, no alpha */
-    public static final int RGB_888     = 3;
+    public static final int RGB_888      = 3;
     /** Format: 5 bits each red and blue, 6 bits green, no alpha */
-    public static final int RGB_565     = 4;
+    public static final int RGB_565      = 4;
     /** Format: 16 bits each red, green, blue, alpha */
-    public static final int RGBA_FP16   = 0x16;
+    public static final int RGBA_FP16    = 0x16;
+    /** Format: 10 bits each red, green, blue, 2 bits alpha */
+    public static final int RGBA_1010102 = 0x2b;
     /** Format: opaque format used for raw data transfer; must have a height of 1 */
-    public static final int BLOB        = 0x21;
+    public static final int BLOB         = 0x21;
 
     // Note: do not rename, this field is used by native code
     private long mNativeObject;
@@ -107,7 +110,7 @@ public final class HardwareBuffer implements Parcelable {
      * @param width The width in pixels of the buffer
      * @param height The height in pixels of the buffer
      * @param format The format of each pixel, one of {@link #RGBA_8888}, {@link #RGBA_FP16},
-     * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}
+     * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}, {@link #RGBA_1010102}, {@link #BLOB}
      * @param layers The number of layers in the buffer
      * @param usage Flags describing how the buffer will be used, one of
      *     {@link #USAGE0_CPU_READ}, {@link #USAGE0_CPU_READ_OFTEN}, {@link #USAGE0_CPU_WRITE},
@@ -150,15 +153,15 @@ public final class HardwareBuffer implements Parcelable {
     }
 
     /**
-     * Private use only. See {@link #create(int, int, int, int, int, long, long)}. May also be
+     * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
 
-        long nativeSize = NATIVE_HARDWARE_BUFFER_SIZE;
+        ClassLoader loader = HardwareBuffer.class.getClassLoader();
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
-            HardwareBuffer.class.getClassLoader(), nGetNativeFinalizer(), nativeSize);
+                loader, nGetNativeFinalizer(), NATIVE_HARDWARE_BUFFER_SIZE);
         mCleaner = registry.registerNativeAllocation(this, mNativeObject);
     }
 
@@ -186,8 +189,9 @@ public final class HardwareBuffer implements Parcelable {
 
     /**
      * Returns the format of this buffer, one of {@link #RGBA_8888}, {@link #RGBA_FP16},
-     * {@link #RGBX_8888}, {@link #RGB_565}, or {@link #RGB_888}.
+     * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}, {@link #RGBA_1010102}, {@link #BLOB}.
      */
+    @Format
     public int getFormat() {
         if (mNativeObject == 0) {
             throw new IllegalStateException("This HardwareBuffer has been destroyed and its format "
@@ -291,12 +295,13 @@ public final class HardwareBuffer implements Parcelable {
      * @param format The format to validate.
      *
      * @return True if <code>format</code> is a supported format. false otherwise.
-     * See {@link #create(int, int, int, int, int, long, long)}.a
+     * See {@link #create(int, int, int, int, long)}.
      */
     private static boolean isSupportedFormat(@Format int format) {
         switch(format) {
             case RGBA_8888:
             case RGBA_FP16:
+            case RGBA_1010102:
             case RGBX_8888:
             case RGB_565:
             case RGB_888:
