@@ -522,15 +522,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Pomocou ovládacích prvkov zobrazovania upozornení môžete nastaviť pre upozornenia aplikácie úroveň dôležitosti od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazovať v hornej časti zoznamu upozornení. \n– Povoliť prerušenia na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 4"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 3"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n\n"<b>"Úroveň 2"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n\n"<b>"Úroveň 1"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n– Skryť na uzamknutej obrazovke a v stavovom riadku. \n– Zobraziť v dolnej časti zoznamu upozornení. \n\n"<b>"Úroveň 0"</b>" \n– Blokovať všetky upozornenia z aplikácie."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Upozornenia"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Takéto upozornenia už nebudete dostávať."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Upozornenia aplikácie <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Nízka"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Stredná"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Vysoká"</string>
-    <string name="high_importance" msgid="730741630855788381">"Neodkladná"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Bez zvuku a vizuálneho vyrušenia"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Zobraziť bez zvukov"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Vydať zvukový signál"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Vydať zvukový signál a vyskočiť na obrazovku"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Ďalšie nastavenia"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -604,30 +598,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Vypnuté"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigačný panel"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Rozloženie"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Doľava"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Doprava"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Typ tlačidla"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(predvolené)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"Schránka"</item>
-    <item msgid="5742013440802239414">"Kód klávesnice"</item>
-    <item msgid="8748101184830239843">"Prepínač – ponuka/klávesnica"</item>
-    <item msgid="8175437057325747277">"Žiadne"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Rozdelené (predvolené)"</item>
-    <item msgid="6210279084134579668">"V strede"</item>
-    <item msgid="89143234390889289">"Zarovnané doľava"</item>
-    <item msgid="7715533883382410603">"Zarovnané doprava"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Prepínač – ponuka/klávesnica"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"Uložiť"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Upraviť šírku tlačidla"</string>
     <string name="clipboard" msgid="1313879395099896312">"Schránka"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Vlastné tlačidlo navigácie"</string>
-    <string name="keycode" msgid="7335281375728356499">"Kód klávesnice"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikona"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dlaždice pridáte presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Presunutím sem odstránite"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Upraviť"</string>
@@ -676,17 +671,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otvoriť nastavenia <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Upraviť poradie nastavení"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Strana <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozbaliť"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovať"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavrieť"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Teplota telefónu stúpa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Niektoré funkcie budú obmedzené, dokým neklesne teplota telefónu"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Váš telefón sa automaticky pokúsi schladiť. Môžete ho naďalej používať, ale môže fungovať pomalšie.\n\nPo poklese teploty bude telefón fungovať ako normálne."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Vľavo"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Vpravo"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Prispôsobiť skratku"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Skratka"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Požadovať heslo"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovky"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné správy"</string>

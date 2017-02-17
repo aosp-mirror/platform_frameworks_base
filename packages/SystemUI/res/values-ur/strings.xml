@@ -516,15 +516,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"اطلاعات"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"آپ کو یہ اطلاعات مزید نہیں ملیں گی۔"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> کیلئے اطلاعات"</string>
-    <string name="min_importance" msgid="7559703098688382595">"کم"</string>
-    <string name="low_importance" msgid="6891335321576225228">"متوسط"</string>
-    <string name="default_importance" msgid="6400766013567512061">"زیادہ"</string>
-    <string name="high_importance" msgid="730741630855788381">"ارجنٹ"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"آواز یا بصری مداخلت نہیں ہے"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"خاموشی سے دکھائیں"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"آواز نکالیں"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"آواز نکالیں اور اسکرین پر پاپ کریں"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"مزید ترتیبات"</string>
     <string name="notification_done" msgid="5279426047273930175">"ہوگیا"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +592,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"آف"</string>
     <string name="nav_bar" msgid="1993221402773877607">"نیویگیشن بار"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"لے آؤٹ"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"بائیں"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"دائیں"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"بٹن کی قسم"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(ڈیفالٹ)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"کلپ بورڈ"</item>
-    <item msgid="5742013440802239414">"کی کوڈ"</item>
-    <item msgid="8748101184830239843">"مینو/ کی بورڈ سوئچر"</item>
-    <item msgid="8175437057325747277">"کوئی نہیں"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"تقسیم شدہ (ڈیفالٹ)"</item>
-    <item msgid="6210279084134579668">"بیچوں بیچ"</item>
-    <item msgid="89143234390889289">"بائیں جانب موافق کردہ"</item>
-    <item msgid="7715533883382410603">"دائیں جانب موافق کردہ"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"مینو/ کی بورڈ سوئچر"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"محفوظ کریں"</string>
     <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"بٹن کی چوڑائی ایڈجسٹ کریں"</string>
     <string name="clipboard" msgid="1313879395099896312">"کلپ بورڈ"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"حسب ضرورت نیویگیشن بٹن"</string>
-    <string name="keycode" msgid="7335281375728356499">"کی کوڈ"</string>
-    <string name="icon" msgid="8732339849035837289">"آئیکن"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ٹائٹلز شامل کرنے کیلئے گھسیٹیں"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ہٹانے کیلئے یہاں گھسیٹیں؟"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ترمیم کریں"</string>
@@ -670,17 +665,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"پھیلائیں"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"چھوٹی کریں"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"بند کریں"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"فون گرم ہو رہا ہے"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"آپ کا فون خودکار طور پر ٹھنڈا ہونے کی کوشش کرے گا۔ آپ ابھی بھی اپنا فون استعمال کر سکتے ہیں، مگر ہو سکتا ہے یہ سست چلے۔\n\nایک بار آپ کا فون ٹھنڈا ہوجائے تو یہ معمول کے مطابق چلے گا۔"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"بائیں"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"دائیں"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"شارٹ کٹ کو حسب ضرورت بنائیں"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"شارٹ کٹ"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"پاسورڈ کا اشارہ"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"الرٹس"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"اسکرین شاٹس"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"عمومی پیغامات"</string>

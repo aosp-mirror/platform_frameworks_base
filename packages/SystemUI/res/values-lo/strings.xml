@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ດ້ວຍການຄວບຄຸມການແຈ້ງເຕືອນ, ທ່ານສາມາດຕັ້ງລະດັບຄວາມສຳຄັນຈາກ 0 ຮອດ 5 ໃຫ້ກັບການແຈ້ງເຕືອນແອັບໃດໜຶ່ງໄດ້. \n\n"<b>"ລະດັບ 5"</b>" \n- ສະແດງຢູ່ເທິງສຸດຂອງລາຍການແຈ້ງເຕືອນ \n- ອະນຸຍາດໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 4"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 3"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n\n"<b>"ລະດັບ 2"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n\n"<b>"ລະດັບ 1"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n- ເຊື່ອງຈາກໜ້າຈໍລັອກ ແລະ ແຖບສະຖານະ \n- ສະແດງຢູ່ລຸ່ມສຸດຂອງລາຍການແຈ້ງເຕືອນ \n\n"<b>"ລະດັບ 0"</b>" \n- ປິດກັ້ນການແຈ້ງເຕືອນທັງໝົດຈາກແອັບ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"ການແຈ້ງເຕືອນ <xliff:g id="APP">%s</xliff:g> ສຳລັບ"</string>
-    <string name="min_importance" msgid="7559703098688382595">"ຕໍ່າ"</string>
-    <string name="low_importance" msgid="6891335321576225228">"ປານກາງ"</string>
-    <string name="default_importance" msgid="6400766013567512061">"ສູງ"</string>
-    <string name="high_importance" msgid="730741630855788381">"ດ່ວນ"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"ບໍ່ມີສຽງ ຫຼື ການລົບກວນໃນໜ້າຈໍ"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"ສະແດງແບບງຽບໆ"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"ເຮັດສຽງ"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"ເຮັດສຽງດັງ ແລະ ສະແດງຂຶ້ນໃນໜ້າຈໍ"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_1">%d</xliff:g> ໝວດໝູ່ຈາກແອັບນີ້</item>
+      <item quantity="one">1 ຈາກທັງໝົດ <xliff:g id="NUMBER_0">%d</xliff:g> ໝວດໝູ່ຈາກແອັບນີ້</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"ທຸກໝວດໝູ່"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"ປິດ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"ຮູບແບບ"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"ຊ້າຍ"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"ຂວາ"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"ປະເພດປຸ່ມ"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"ປະເພດປຸ່ມຊ້າຍພິເສດ"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"ປະເພດປຸ່ມຂວາພິເສດ"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(ຄ່າເລີ່ມຕົ້ນ)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"ຄລິບບອດ"</item>
     <item msgid="5742013440802239414">"ລະຫັດກະແຈ"</item>
-    <item msgid="8748101184830239843">"ຕົວປ່ຽນເມນູ / ແປ້ນພິມ"</item>
+    <item msgid="8802889973626281575">"ຕົວສະຫຼັບແປ້ນພິມ"</item>
     <item msgid="8175437057325747277">"ບໍ່ໃຊ້"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"ແຍກກັນ (ຄ່າເລີ່ມຕົ້ນ)"</item>
-    <item msgid="6210279084134579668">"ທາງກາງ"</item>
-    <item msgid="89143234390889289">"ຮຽງຊ້າຍ"</item>
-    <item msgid="7715533883382410603">"ຮຽງຂວາ"</item>
+    <item msgid="8077901629964902399">"ປົກກະຕິ"</item>
+    <item msgid="8256205964297588988">"ນ້ອຍ"</item>
+    <item msgid="8719936228094005878">"ອຽງຊ້າຍ"</item>
+    <item msgid="586019486955594690">"ອຽງຂວາ"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"ຕົວປ່ຽນເມນູ / ແປ້ນພິມ"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"ຕົວສະຫຼັບແປ້ນພິມ"</string>
     <string name="save" msgid="2311877285724540644">"ບັນທຶກ"</string>
     <string name="reset" msgid="2448168080964209908">"ຣີເຊັດ"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ປັບຄວາມກວ້າງຂອງປຸ່ມ"</string>
     <string name="clipboard" msgid="1313879395099896312">"​ຄລິບບອດ"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"ປຸ່ມນຳທາງແບບກຳນົດເອງ"</string>
-    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="icon" msgid="8732339849035837289">"ໄອຄອນ"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"ລະຫັດປຸ່ມຊ້າຍ"</string>
+    <string name="right_keycode" msgid="708447961000848163">"ລະຫັດປຸ່ມຂວາ"</string>
+    <string name="left_icon" msgid="3096287125959387541">"ໄອຄອນຊ້າຍ"</string>
+    <string name="right_icon" msgid="3952104823293824311">"ໄອຄອນຂວາ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄອຄອນ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ລາກມາບ່ອນນີ້ເພື່ອລຶບອອກ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"ເປີດການຕັ້ງຄ່າ <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ແກ້ໄຂລຳດັບການຕັ້ງຄ່າ."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g> ຈາກທັງໝົດ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"ໜ້າຈໍລັອກ"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"ຂະຫຍາຍ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ຫຍໍ້"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ປິດ"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ໂທລະສັບກຳລັງຮ້ອນຂຶ້ນ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ເນື່ອງໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ໂທລະສັບຂອງທ່ານຈະພະຍາຍາມລົດອຸນຫະພູມລົງ. ທ່ານຍັງຄົງສາມາດໃຊ້ໂທລະສັບຂອງທ່ານໄດ້ຢູ່, ແຕ່ມັນຈະເຮັດວຽກຊ້າລົງ.\n\nເມື່ອໂທລະສັບຂອງທ່ານບໍ່ຮ້ອນຫຼາຍແລ້ວ, ມັນຈະກັບມາເຮັດວຽກຕາມປົກກະຕິ."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"ຊ້າຍ"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"ຂວາ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"ປັບແຕ່ງທາງລັດ"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"ທາງລັດ"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"ຖາມຫາລະຫັດຜ່ານ"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ປຸ່ມລັດຊ້າຍ"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ປຸ່ມລັດຂວາ"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ປຸ່ມລັດຊ້າຍປົດລັອກນຳ"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"ປຸ່ມລັດຂວາປົດລັອກນຳ"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"ບໍ່ໃຊ້"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"ເປິດແອັບ <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"ແອັບອື່ນໆ"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"ວົງມົນ"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"ບວກ"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"ລົບ"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"ຊ້າຍ"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"ຂວາ"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"ເມນູ"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"ແອັບ <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ການເຕືອນ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ຮູບຖ່າຍໜ້າຈໍ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ຂໍ້ຄວາມທົ່ວໄປ"</string>

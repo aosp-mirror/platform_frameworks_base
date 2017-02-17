@@ -516,15 +516,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"බල දැනුම්දීම් පාලන සමගින්, ඔබට යෙදුමක දැනුම්දීම් සඳහා වැදගත්කම 0 සිට 5 දක්වා සැකසිය හැකිය. \n\n"<b>"5 මට්ටම"</b>" \n- දැනුම්දීම් ලැයිස්තුවේ ඉහළින්ම පෙන්වන්න \n- පූර්ණ තිර බාධාවට ඉඩ දෙන්න \n- සැම විට එබී බලන්න \n\n"<b>"4 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- සැම විට එබී බලන්න \n\n"<b>"3 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n\n"<b>"2 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n\n"<b>"1 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n- අගුලු තිරය සහ තත්ත්ව තීරුව වෙතින් සඟවන්න \n- දැනුම්දීම් ලැයිස්තුවේ පහළින්ම පෙන්වන්න \n\n"<b>"0 මට්ටම"</b>" \n- යෙදුම වෙතින් වන සියලු දැනුම් දීම් සඟවන්න."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"දැනුම් දීම්"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"ඔබ තවදුරටත් මෙම දැනුම්දීම් නොලැබෙනු ඇත."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> දැනුම්දීම්"</string>
-    <string name="min_importance" msgid="7559703098688382595">"පහළ"</string>
-    <string name="low_importance" msgid="6891335321576225228">"මධ්‍යම"</string>
-    <string name="default_importance" msgid="6400766013567512061">"ඉහළ"</string>
-    <string name="high_importance" msgid="730741630855788381">"හදිසි"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"ශබ්ද හෝ දෘශ්‍ය බාධා නැත"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"නිහඬව පෙන්වන්න"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"ශබ්ද කරන්න"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"ශබ්ද කර තිරය මත උත්පතනය කරන්න"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"තව සැකසීම්"</string>
     <string name="notification_done" msgid="5279426047273930175">"නිමයි"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +592,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"ක්‍රියාවිරහිතයි"</string>
     <string name="nav_bar" msgid="1993221402773877607">"සංචලන තීරුව"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"පිරිසැලසුම"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"වම්"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"දකුණු"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"බොත්තම් වර්ගය"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(පෙරනිමි)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"පසුරු පුවරුව"</item>
-    <item msgid="5742013440802239414">"යතුරු කේතය"</item>
-    <item msgid="8748101184830239843">"මෙනු / යතුරු පුවරු මාරුව"</item>
-    <item msgid="8175437057325747277">"කිසිවක් නැත"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"බෙදූ (පෙරනිමි)"</item>
-    <item msgid="6210279084134579668">"මැදට ගත්"</item>
-    <item msgid="89143234390889289">"වමට පෙළගැස්වූ"</item>
-    <item msgid="7715533883382410603">"දකුණට පෙළගැස්වූ"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"මෙනු / යතුරු පුවරු මාරුව"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"සුරකින්න"</string>
     <string name="reset" msgid="2448168080964209908">"යළි පිහිටුවන්න"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"බොත්තම් පළල සීරුමාරු කරන්න"</string>
     <string name="clipboard" msgid="1313879395099896312">"පසුරු පුවරුව"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"අභිරුචි සංචලන බොත්තම"</string>
-    <string name="keycode" msgid="7335281375728356499">"යතුරු කේතය"</string>
-    <string name="icon" msgid="8732339849035837289">"නිරූපකය"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ටයිල් එක් කිරීමට අදින්න"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ඉවත් කිරීමට මෙතැනට අදින්න"</string>
     <string name="qs_edit" msgid="2232596095725105230">"සංස්කරණය"</string>
@@ -670,17 +665,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> සැකසීම් විවෘත කරන්න."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"සැකසීම්වල අනුපිළිවෙළ සංංස්කරණය කරන්න."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> න් <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"දිග හරින්න"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"කුඩා කරන්න"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"වසන්න"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"දුරකථනය උණුසුම් වෙමින්"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"දුරකථනය සිසිල් වන අතරතුර සමහර විශේෂාංග සීමිත විය හැකිය"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ඔබගේ දුරකථනය ස්වයංක්‍රියව සිසිල් වීමට උත්සාහ කරනු ඇත. ඔබට තවම ඔබේ දුරකථනය භාවිත කළ හැකිය, නමුත් එය සෙමින් ධාවනය විය හැකිය.\n\nඔබේ දුරකථනය සිසිල් වූ පසු, එය සාමාන්‍ය ලෙස ධාවනය වනු ඇත."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"වම්"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"දකුණු"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"කෙටි මග අභිරුචිකරණය කරන්න"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"කෙටි මග"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"මුරපදය සඳහා ප්‍රේරණය කරන්න"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"තිර රු"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"පොදු පණිවිඩ"</string>

@@ -518,15 +518,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Los controles de energía de las notificaciones permiten establecer un nivel de importancia de 0 a 5 para las notificaciones de las aplicaciones. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones \n- Permitir interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 4"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- Mostrar siempre \n\n"<b>"Nivel 3"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n\n"<b>"Nivel 2"</b>" \n- Evitar interrumpir en el modo de pantalla completa\n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n\n"<b>"Nivel 1"</b>" \n- Evitar interrumpir en el modo de pantalla completa \n- No mostrar nunca \n- No emitir sonido ni vibrar nunca \n- Ocultar de la pantalla de bloqueo y de la barra de estado \n- Mostrar en la parte inferior de la lista de notificaciones \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la aplicación"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ya no recibirás estas notificaciones."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Notificaciones de <xliff:g id="APP">%s</xliff:g>:"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Baja"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Media"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Alta"</string>
-    <string name="high_importance" msgid="730741630855788381">"Urgente"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Sin sonido ni interrupción visual"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Mostrar de forma silenciosa"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Emitir sonido"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Emitir sonido y mostrar en pantalla"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">Categoría 1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorías de esta aplicación</item>
+      <item quantity="one">Categoría 1 de <xliff:g id="NUMBER_0">%d</xliff:g> de esta aplicación</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Todas las categorías"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más ajustes"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -600,30 +596,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Diseño"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Izquierda"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Derecha"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Tipo de botón"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Tipo de botón a la izquierda extra"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Tipo de botón a la derecha extra"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(predeterminada)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Portapapeles"</item>
     <item msgid="5742013440802239414">"Código de teclado"</item>
-    <item msgid="8748101184830239843">"Menú/Cambio de teclado"</item>
+    <item msgid="8802889973626281575">"Cambio de teclado"</item>
     <item msgid="8175437057325747277">"Ninguno"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Dividida (predeterminada)"</item>
-    <item msgid="6210279084134579668">"Centrada"</item>
-    <item msgid="89143234390889289">"Alineada a la izquierda"</item>
-    <item msgid="7715533883382410603">"Alineada a la derecha"</item>
+    <item msgid="8077901629964902399">"Normal"</item>
+    <item msgid="8256205964297588988">"Compacto"</item>
+    <item msgid="8719936228094005878">"Para zurdos"</item>
+    <item msgid="586019486955594690">"Para diestros"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Menú/Cambio de teclado"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Cambio de teclado"</string>
     <string name="save" msgid="2311877285724540644">"Guardar"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Ajustar el ancho del botón"</string>
     <string name="clipboard" msgid="1313879395099896312">"Portapapeles"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Botón de navegación personalizada"</string>
-    <string name="keycode" msgid="7335281375728356499">"Código de teclado"</string>
-    <string name="icon" msgid="8732339849035837289">"Icono"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Código de teclado a la izq."</string>
+    <string name="right_keycode" msgid="708447961000848163">"Código de teclado a la derecha"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Icono a la izquierda"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Icono a la derecha"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastra para añadir funciones"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar una función"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
@@ -672,17 +669,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir ajustes de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Cambiar el orden de los ajustes."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla de bloqueo"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Mostrar"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Cerrar"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"El teléfono se está calentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Izquierda"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Derecha"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Personalizar el acceso directo"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Acceso directo"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Solicitar contraseña"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Acceso directo a la izquierda"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Acceso directo a la derecha"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Desbloquear también con el acceso directo a la izquierda"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Desbloquear también con el acceso directo a la derecha"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Ninguno"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Abrir <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Otras aplicaciones"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Círculo"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Más"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Menos"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Izquierda"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Derecha"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Menú"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Aplicación <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de pantalla"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensajes generales"</string>

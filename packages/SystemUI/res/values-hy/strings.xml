@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Ծանուցումներ"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Այս ծանուցումներն այլևս չեք ստանա։"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g> ծանուցումներ հետևյալ ալիքի համար"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Ցածր"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Միջին"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Բարձր"</string>
-    <string name="high_importance" msgid="730741630855788381">"Շտապ"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Առանց ձայնի և տեսողական ընդհատումների"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Ցույց տալ անձայն"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Ձայն հանել"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Ձայն հանել և ցուցադրել էկրանին"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">1 out of <xliff:g id="NUMBER_1">%d</xliff:g> categories from this app</item>
+      <item quantity="other">1 ալիք` այս հավելվածի <xliff:g id="NUMBER_1">%d</xliff:g> կատեգորիաներից</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Բոլոր կատեգորիաները"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Այլ կարգավորումներ"</string>
     <string name="notification_done" msgid="5279426047273930175">"Պատրաստ է"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Անջատել"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Նավարկման գոտի"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Դասավորություն"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Ձախ"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Աջ"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Կոճակի տեսակը"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Լրացուցիչ ձախ կոճակի տեսակ"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Լրացուցիչ աջ կոճակի տեսակ"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(կանխադրված)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Սեղմատախտակ"</item>
     <item msgid="5742013440802239414">"Ստեղնային կոդ"</item>
-    <item msgid="8748101184830239843">"Ընտրացանկ/Ստեղնաշարի փոխարկիչ"</item>
+    <item msgid="8802889973626281575">"Ստեղնաշարի փոխարկիչ"</item>
     <item msgid="8175437057325747277">"Չկան"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Բաժանված (կանխադրված)"</item>
-    <item msgid="6210279084134579668">"Կենտրոնում"</item>
-    <item msgid="89143234390889289">"Հավասարեցված ձախ"</item>
-    <item msgid="7715533883382410603">"Հավասարեցված աջ"</item>
+    <item msgid="8077901629964902399">"Սովորական"</item>
+    <item msgid="8256205964297588988">"Սեղմ"</item>
+    <item msgid="8719936228094005878">"Ձախակողմյան"</item>
+    <item msgid="586019486955594690">"Աջակողմյան"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Ընտրացանկ/Ստեղնաշարի փոխարկիչ"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Ստեղնաշարի փոխարկիչ"</string>
     <string name="save" msgid="2311877285724540644">"Պահել"</string>
     <string name="reset" msgid="2448168080964209908">"Վերակայել"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Կարգավորել կոճակի լայնությունը"</string>
     <string name="clipboard" msgid="1313879395099896312">"Սեղմատախտակ"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Հատուկ նավարկման կոճակ"</string>
-    <string name="keycode" msgid="7335281375728356499">"Ստեղնային կոդ"</string>
-    <string name="icon" msgid="8732339849035837289">"Պատկերակ"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Ձախ ստեղնային կոդ"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Աջ ստեղնային կոդ"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Ձախ պատկերակ"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Աջ պատկերակ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Քաշեք՝ սալիկներ ավելացնելու համար"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Քաշեք այստեղ՝ հեռացնելու համար"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Փոփոխել"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Բացել <xliff:g id="ID_1">%s</xliff:g> կարգավորումները:"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Խմբագրել կարգավորումների հերթականությունը:"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Կողպէկրան"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Ընդարձակել"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Ծալել"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Փակել"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Հեռախոսը տաքանում է"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Ձախ"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Աջ"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Հարմարեցնել դյուրանցումը"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Դյուրանցում"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Պահանջել գաղտնաբառ"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ձախ դյուրանցում"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Աջ դյուրանցում"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ձախ դյուրանցումը նաև ապակողպում է"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Աջ դյուրանցումը նաև ապակողպում է"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Ոչ մի"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Գործարկել <xliff:g id="APP">%1$s</xliff:g> հավելվածը"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Այլ հավելվածներ"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Օղակ"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Պլյուս"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Մինուս"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Ձախ"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Աջ"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Ընտրացանկ"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> հավելված"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ծանուցումներ"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Էկրանի պատկերներ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Ընդհանուր հաղորդագրություններ"</string>

@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Með orkutilkynningastýringum geturðu stillt mikilvægi frá 0 upp í 5 fyrir tilkynningar forrita. \n\n"<b>"Stig 5"</b>" \n- Sýna efst á tilkynningalista \n- Leyfa truflun þegar birt er á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 4"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 3"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n\n"<b>"Stig 2"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n\n"<b>"Stig 1"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n- Fela á lásskjá og stöðustiku \n- Sýna neðst á tilkynningalista \n\n"<b>"Stig 0"</b>" \n- Setja allar tilkynningar frá forriti á bannlista"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Tilkynningar"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Þú færð þessar tilkynningar ekki framar."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Tilkynningar frá <xliff:g id="APP">%s</xliff:g> fyrir"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Ekki mikilvægt"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Í meðallagi"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Mikilvægt"</string>
-    <string name="high_importance" msgid="730741630855788381">"Áríðandi"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Ekkert hljóð eða sjónræn truflun"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Sýna án hljóðs"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Spila hljóð"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Spila hljóð og birta sprettitilkynningu"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">Einn af <xliff:g id="NUMBER_1">%d</xliff:g> flokki í þessu forriti</item>
+      <item quantity="other">Einn af <xliff:g id="NUMBER_1">%d</xliff:g> flokkum í þessu forriti</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Allir flokkar"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Fleiri stillingar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Lokið"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Slökkt"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Yfirlitsstika"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Útlit"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Vinstri"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Hægri"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Gerð hnapps"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Gerð aukahnapps til vinstri"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Gerð aukahnapps til hægri"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(sjálfgefið)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Klippiborð"</item>
     <item msgid="5742013440802239414">"Lykilkóði"</item>
-    <item msgid="8748101184830239843">"Valmynd / lyklaborðsval"</item>
+    <item msgid="8802889973626281575">"Lyklaborðsval"</item>
     <item msgid="8175437057325747277">"Ekkert"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Skipt (sjálfgefið)"</item>
-    <item msgid="6210279084134579668">"Miðjað"</item>
-    <item msgid="89143234390889289">"Vinstrijafnað"</item>
-    <item msgid="7715533883382410603">"Hægrijafnað"</item>
+    <item msgid="8077901629964902399">"Venjulegt"</item>
+    <item msgid="8256205964297588988">"Þjappað"</item>
+    <item msgid="8719936228094005878">"Hallar til vinstri"</item>
+    <item msgid="586019486955594690">"Hallar til hægri"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Valmynd / lyklaborðsval"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Lyklaborðsval"</string>
     <string name="save" msgid="2311877285724540644">"Vista"</string>
     <string name="reset" msgid="2448168080964209908">"Endurstilla"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Breyta breidd hnapps"</string>
     <string name="clipboard" msgid="1313879395099896312">"Klippiborð"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Sérsniðinn flettingahnappur"</string>
-    <string name="keycode" msgid="7335281375728356499">"Lykilkóði"</string>
-    <string name="icon" msgid="8732339849035837289">"Tákn"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Lykilkóði til vinstri"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Lykiltákn til hægri"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Tákn til vinstri"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Tákn til hægri"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dragðu til að bæta við reitum"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Dragðu hingað til að fjarlægja"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Breyta"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Opna <xliff:g id="ID_1">%s</xliff:g> stillingar."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Breyta röð stillinga."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Blaðsíða <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Lásskjár"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Stækka"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minnka"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Loka"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Síminn er að hitna"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Sumir eiginleikar eru takmarkaðir þegar síminn kælir sig"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Síminn reynir sjálfkrafa að kæla sig. Þú getur enn notað símann en hann gæti verið hægvirkari.\n\nEftir að síminn hefur kælt sig niður virkar hann eðlilega."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Vinstri"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Hægri"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Sérstilla flýtilykil"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Flýtilykill"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Beiðni um aðgangsorð"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Flýtilykill til vinstri"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Flýtilykill til hægri"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Flýtilykill til vinstri opnar einnig"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Flýtilykill til hægri opnar einnig"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Ekkert"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Ræsa <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Önnur forrit"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Hringur"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plúsmerki"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Mínus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Vinstri"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Hægri"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Valmynd"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Forritið <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Tilkynningar"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skjámyndir"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Almenn skilaboð"</string>

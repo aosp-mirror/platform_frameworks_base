@@ -522,15 +522,13 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"За допомогою елементів керування сповіщеннями ви можете налаштувати пріоритет сповіщень додатка – від 0 до 5 рівня. \n\n"<b>"Рівень 5"</b>\n"- Показувати сповіщення вгорі списку \n- Виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 4"</b>\n"- Не виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 3"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n\n"<b>"Рівень 2"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n\n"<b>"Рівень 1"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n- Не показувати на заблокованому екрані та в рядку стану \n- Показувати сповіщення внизу списку \n\n"<b>"Рівень 0"</b>\n"- Блокувати всі сповіщення з додатка"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Сповіщення"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Ви більше не отримуватимете ці сповіщення."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Сповіщення з додатка <xliff:g id="APP">%s</xliff:g>:"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Низький"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Середній"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Високий"</string>
-    <string name="high_importance" msgid="730741630855788381">"Терміново"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Без звуку та візуальних сповіщень"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Показувати без звукового сигналу"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Зі звуком"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Зі звуком і спливаючими вікнами"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="one">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії з цього додатка</item>
+      <item quantity="few">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій із цього додатка</item>
+      <item quantity="many">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій із цього додатка</item>
+      <item quantity="other">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії з цього додатка</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Усі категорії"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Більше налаштувань"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -604,30 +602,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Вимкнути"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Панель навігації"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Макет"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Ліворуч"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Праворуч"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Тип кнопки"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Додатковий тип кнопки ліворуч"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Додатковий тип кнопки праворуч"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(за умовчанням)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Буфер обміну"</item>
     <item msgid="5742013440802239414">"Код клавіші"</item>
-    <item msgid="8748101184830239843">"Вибір меню або клавіатури"</item>
+    <item msgid="8802889973626281575">"Вибір клавіатури"</item>
     <item msgid="8175437057325747277">"Немає"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Розділений (за умовчанням)"</item>
-    <item msgid="6210279084134579668">"Вирівнювання по центру"</item>
-    <item msgid="89143234390889289">"Вирівнювання за лівим краєм"</item>
-    <item msgid="7715533883382410603">"Вирівнювання за правим краєм"</item>
+    <item msgid="8077901629964902399">"Звичайна панель"</item>
+    <item msgid="8256205964297588988">"Компактна панель"</item>
+    <item msgid="8719936228094005878">"Панель ліворуч"</item>
+    <item msgid="586019486955594690">"Панель праворуч"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Вибір меню або клавіатури"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Вибір клавіатури"</string>
     <string name="save" msgid="2311877285724540644">"Зберегти"</string>
     <string name="reset" msgid="2448168080964209908">"Віднов."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Змінити ширину кнопки"</string>
     <string name="clipboard" msgid="1313879395099896312">"Буфер обміну"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Спеціальна кнопка навігації"</string>
-    <string name="keycode" msgid="7335281375728356499">"Код клавіші"</string>
-    <string name="icon" msgid="8732339849035837289">"Значок"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Код клавіші ліворуч"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Код клавіші праворуч"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Значок ліворуч"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Значок праворуч"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Перетягуйте фрагменти, щоб додавати їх"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перетягніть сюди, щоб видалити"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редагувати"</string>
@@ -676,17 +675,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Відкрити налаштування <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Змінити порядок налаштувань."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Заблокований екран"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Розгорнути"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Згорнути"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрити"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагрівається"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Під час охолодження деякі функції обмежуються"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон охолоджуватиметься автоматично. Ви можете далі користуватися телефоном, але він може працювати повільніше.\n\nКоли телефон охолоне, він працюватиме належним чином."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Ліворуч"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Праворуч"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Налаштувати ярлик"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Комбінація клавіш"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Запит пароля"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Комбінація клавіш ліворуч"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Комбінація клавіш праворуч"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Комбінація клавіш ліворуч також розблоковує"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Комбінація клавіш праворуч також розблоковує"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Немає"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Випуск додатка <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Інші додатки"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Коло"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Плюс"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Мінус"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Ліворуч"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Праворуч"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Додаток <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сповіщення"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Знімки екрана"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Загальні повідомлення"</string>

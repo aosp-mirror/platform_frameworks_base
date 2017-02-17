@@ -516,15 +516,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"পাওয়ার বিজ্ঞপ্তির নিয়ন্ত্রণগুলি ব্যহবার করে, আপনি কোনো অ্যাপ্লিকেশানের বিজ্ঞপ্তির জন্য ০ থেকে ৫ পর্যন্ত একটি গুরুত্বের লেভেলকে সেট করতে পারবেন৷ \n\n"<b>"লেভেল ৫"</b>" \n- বিজ্ঞপ্তি তালিকার শীর্ষে দেখায় \n- পূর্ণ স্ক্রীনের বাধাকে অনুমতি দেয় \n- সর্বদা স্ক্রীনে উপস্থিত হয় \n\n"<b>"লেভেল ৪"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- সর্বদা স্ক্রীনে উপস্থিত হয় \n\n"<b>"লেভেল ৩"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n\n"<b>"লেভেল ২"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n- কখনই শব্দ এবং কম্পন করে না \n\n"<b>"লেভেল ১"</b>" \n- পূর্ণ স্ক্রীনের বাধাকে আটকায় \n- কখনই স্ক্রীনে উপস্থিত হয় না \n- কখনই শব্দ এবং কম্পন করে না \n- লক স্ক্রীন এবং স্থিতি দন্ড থেকে লুকায় \n- বিজ্ঞপ্তি তালিকার নীচের দিকে দেখায় \n\n"<b>"লেভেল ০"</b>" \n- অ্যাপ্লিকেশান থেকে সমস্ত বিজ্ঞপ্তিকে অবরূদ্ধ করে"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"বিজ্ঞপ্তি"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"আপনি আর এই বিজ্ঞপ্তিগুলি পাবেন না।"</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"এর জন্য <xliff:g id="APP">%s</xliff:g> বিজ্ঞপ্তি"</string>
-    <string name="min_importance" msgid="7559703098688382595">"নিম্ন"</string>
-    <string name="low_importance" msgid="6891335321576225228">"মাঝারি"</string>
-    <string name="default_importance" msgid="6400766013567512061">"উচ্চ"</string>
-    <string name="high_importance" msgid="730741630855788381">"জরুরি"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"কোনো শব্দ বা ভিজ্যুয়াল বাধা নেই"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"নিঃশব্দে দেখান"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"শব্দ করে"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"শব্দ করে ও স্ক্রীনে ভেসে ওঠে"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +592,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"বন্ধ আছে"</string>
     <string name="nav_bar" msgid="1993221402773877607">"নেভিগেশন দন্ড"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"লেআউট"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"বাঁ"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"ডান"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"বোতামের ধরণ"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(ডিফল্ট)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"ক্লিপবোর্ড"</item>
-    <item msgid="5742013440802239414">"কীকোড"</item>
-    <item msgid="8748101184830239843">"মেনু / কীবোর্ড স্যুইচার"</item>
-    <item msgid="8175437057325747277">"কোনো কিছুই নয়"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"ভাগ করা (ডিফল্ট)"</item>
-    <item msgid="6210279084134579668">"কেন্দ্রস্থ"</item>
-    <item msgid="89143234390889289">"বাঁ দিকে সারিবদ্ধ"</item>
-    <item msgid="7715533883382410603">"ডান দিকে সারিবদ্ধ"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"মেনু / কীবোর্ড স্যুইচার"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"সংরক্ষণ করুন"</string>
-    <string name="reset" msgid="2448168080964209908">"পুনরায় সেট করুন"</string>
+    <string name="reset" msgid="2448168080964209908">"আবার সেট করুন"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"বোতামের প্রস্থ সমন্বয় করুন"</string>
     <string name="clipboard" msgid="1313879395099896312">"ক্লিপবোর্ড"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"কাস্টম নেভিগেশান বোতাম"</string>
-    <string name="keycode" msgid="7335281375728356499">"কীকোড"</string>
-    <string name="icon" msgid="8732339849035837289">"আইকন"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"টাইলগুলি যোগ করার জন্য টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>
@@ -670,17 +665,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> সেটিংস খুলুন৷"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ক্রম বা সেটিংস সম্পাদনা করুন৷"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"প্রসারিত করুন"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ছোটো করুন"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"বন্ধ করুন"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ফোনটি গরম হচ্ছে"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ফোনটি ঠান্ডা হওয়ার সময় কিছু বৈশিষ্ট্য সীমিত হতে পারে"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"আপনার ফোনটি নিজে থেকেই ঠান্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠান্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"বাঁ"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"ডান"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"কাস্টমাইজ করার শর্টকাট"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"শর্টকাট"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"পাসওয়ার্ড জানতে চান"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"সতর্কতাগুলি"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"স্ক্রীনশটস"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"সাধারণ বার্তাগুলি"</string>

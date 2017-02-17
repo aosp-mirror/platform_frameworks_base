@@ -522,15 +522,13 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Tato oznámení již nebudete dostávat."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"Oznámení aplikace <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Nízká"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Střední"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Vysoká"</string>
-    <string name="high_importance" msgid="730741630855788381">"Naléhavá"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Bez zvukového a vizuálního vyrušení"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Zobrazovat tiše"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Vydat zvukový signál"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Vydat zvukový signál a vyskočit na obrazovku"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="few">1 ze <xliff:g id="NUMBER_1">%d</xliff:g> kategorií z této aplikace</item>
+      <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorie z této aplikace</item>
+      <item quantity="other">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorií z této aplikace</item>
+      <item quantity="one">1 z <xliff:g id="NUMBER_0">%d</xliff:g> kategorie z této aplikace</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Všechny kategorie"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Další nastavení"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -604,30 +602,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Vypnuto"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigační panel"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Rozvržení"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Vlevo"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Vpravo"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Typ tlačítka"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Zvláštní typ tlačítka vlevo"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Zvláštní typ tlačítka vpravo"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(výchozí)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Schránka"</item>
     <item msgid="5742013440802239414">"Klávesa"</item>
-    <item msgid="8748101184830239843">"Přepínač nabídky/klávesnice"</item>
+    <item msgid="8802889973626281575">"Přepínač klávesnice"</item>
     <item msgid="8175437057325747277">"Žádné"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Rozděleno (výchozí)"</item>
-    <item msgid="6210279084134579668">"Zarovnáno na střed"</item>
-    <item msgid="89143234390889289">"Zarovnáno doleva"</item>
-    <item msgid="7715533883382410603">"Zarovnáno doprava"</item>
+    <item msgid="8077901629964902399">"Normální"</item>
+    <item msgid="8256205964297588988">"Kompaktní"</item>
+    <item msgid="8719936228094005878">"Přichyceno vlevo"</item>
+    <item msgid="586019486955594690">"Přichyceno vpravo"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Přepínač nabídky/klávesnice"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Přepínač klávesnice"</string>
     <string name="save" msgid="2311877285724540644">"Uložit"</string>
     <string name="reset" msgid="2448168080964209908">"Resetovat"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Upravit šířku tlačítka"</string>
     <string name="clipboard" msgid="1313879395099896312">"Schránka"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Vlastní navigační tlačítko"</string>
-    <string name="keycode" msgid="7335281375728356499">"Klávesa"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikona"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Klávesa vlevo"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Klávesa vpravo"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Ikona vlevo"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Ikona vpravo"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dlaždice přidáte přetažením"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Přetažením sem dlaždice odstraníte"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Upravit"</string>
@@ -676,17 +675,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otevřít nastavení aplikace <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Upravit pořadí nastavení."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Stránka <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Obrazovka uzamčení"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozbalit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon se zahřívá"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Některé funkce jsou při chladnutí omezeny"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon se automaticky pokusí vychladnout. Lze jej nadále používat, ale může být pomalejší.\n\nAž telefon vychladne, bude fungovat normálně."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Vlevo"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Vpravo"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Přizpůsobit zkratku"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Zkratka"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Výzva k zadání hesla"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Zkratka vlevo"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Zkratka vpravo"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Zkratka vlevo také odemyká"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Zkratka vpravo také odemyká"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Žádné"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Spustit aplikaci <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Další aplikace"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Kruh"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Vlevo"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Vpravo"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Nabídka"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"Aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornění"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovek"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné zprávy"</string>

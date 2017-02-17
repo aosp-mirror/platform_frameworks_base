@@ -520,15 +520,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של הודעות הפעלה, תוכל להגדיר רמת חשיבות מ-0 עד 5 להודעות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצג בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתר ממסך הנעילה ומשורת הסטטוס \n- הצג בתחתית רשימת ההודעות \n\n"<b>"רמה 0"</b>" \n- חסום את כל ההודעות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"הודעות"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"לא תקבל את ההודעות האלה יותר."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"הודעות <xliff:g id="APP">%s</xliff:g> עבור"</string>
-    <string name="min_importance" msgid="7559703098688382595">"נמוכה"</string>
-    <string name="low_importance" msgid="6891335321576225228">"בינונית"</string>
-    <string name="default_importance" msgid="6400766013567512061">"גבוהה"</string>
-    <string name="high_importance" msgid="730741630855788381">"דחופה"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"ללא צליל וללא הפרעה ויזואלית"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"הצג ללא צליל"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"השמע צליל"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"השמע צליל והצג במסך"</string>
+    <!-- no translation found for notification_num_channels_desc (8808748716499517938) -->
+    <!-- no translation found for notification_all_categories (5407190218055113282) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"הגדרות נוספות"</string>
     <string name="notification_done" msgid="5279426047273930175">"סיום"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -602,30 +596,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"כבוי"</string>
     <string name="nav_bar" msgid="1993221402773877607">"סרגל ניווט"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"פריסה"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"צד שמאל"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"צד ימין"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"סוג לחצן"</string>
+    <!-- no translation found for left_nav_bar_button_type (8555981238887546528) -->
+    <skip />
+    <!-- no translation found for right_nav_bar_button_type (2481056627065649656) -->
+    <skip />
     <string name="nav_bar_default" msgid="8587114043070993007">"(ברירת מחדל)"</string>
-  <string-array name="nav_bar_buttons">
-    <item msgid="1545641631806817203">"לוח"</item>
-    <item msgid="5742013440802239414">"קוד מפתח"</item>
-    <item msgid="8748101184830239843">"מחליף תפריט / מקלדת"</item>
-    <item msgid="8175437057325747277">"ללא"</item>
-  </string-array>
-  <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"מחולק (ברירת מחדל)"</item>
-    <item msgid="6210279084134579668">"ממורכז"</item>
-    <item msgid="89143234390889289">"מיושר לשמאל"</item>
-    <item msgid="7715533883382410603">"מיושר לימין"</item>
-  </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"מחליף תפריט / מקלדת"</string>
+    <!-- no translation found for nav_bar_buttons:2 (8802889973626281575) -->
+    <!-- no translation found for nav_bar_layouts:0 (8077901629964902399) -->
+    <!-- no translation found for nav_bar_layouts:1 (8256205964297588988) -->
+    <!-- no translation found for nav_bar_layouts:2 (8719936228094005878) -->
+    <!-- no translation found for nav_bar_layouts:3 (586019486955594690) -->
+    <!-- no translation found for menu_ime (4998010205321292416) -->
+    <skip />
     <string name="save" msgid="2311877285724540644">"שמור"</string>
     <string name="reset" msgid="2448168080964209908">"איפוס"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"שינוי של רוחב לחצן"</string>
     <string name="clipboard" msgid="1313879395099896312">"לוח"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"לחצן לניווט מותאם אישית"</string>
-    <string name="keycode" msgid="7335281375728356499">"קוד מפתח"</string>
-    <string name="icon" msgid="8732339849035837289">"סמל"</string>
+    <!-- no translation found for left_keycode (2010948862498918135) -->
+    <skip />
+    <!-- no translation found for right_keycode (708447961000848163) -->
+    <skip />
+    <!-- no translation found for left_icon (3096287125959387541) -->
+    <skip />
+    <!-- no translation found for right_icon (3952104823293824311) -->
+    <skip />
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"גרור כדי להוסיף משבצות"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"גרור לכאן כדי להסיר"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ערוך"</string>
@@ -674,17 +669,42 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"פתיחת הגדרות של <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"עריכת סדר ההגדרות."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"דף <xliff:g id="ID_1">%1$d</xliff:g> מתוך <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <!-- no translation found for tuner_lock_screen (5755818559638850294) -->
+    <skip />
     <string name="pip_phone_expand" msgid="5889780005575693909">"הרחב"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"מזער"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"סגור"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"הטלפון מתחמם"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"צד שמאל"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"צד ימין"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"התאם אישית את קיצור הדרך"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"קיצור דרך"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"בקש סיסמה"</string>
+    <!-- no translation found for lockscreen_shortcut_left (2182769107618938629) -->
+    <skip />
+    <!-- no translation found for lockscreen_shortcut_right (3328683699505226536) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_left (2043092136246951985) -->
+    <skip />
+    <!-- no translation found for lockscreen_unlock_right (1529992940510318775) -->
+    <skip />
+    <!-- no translation found for lockscreen_none (4783896034844841821) -->
+    <skip />
+    <!-- no translation found for tuner_launch_app (1527264114781925348) -->
+    <skip />
+    <!-- no translation found for tuner_other_apps (4726596850501162493) -->
+    <skip />
+    <!-- no translation found for tuner_circle (2340998864056901350) -->
+    <skip />
+    <!-- no translation found for tuner_plus (6792960658533229675) -->
+    <skip />
+    <!-- no translation found for tuner_minus (4806116839519226809) -->
+    <skip />
+    <!-- no translation found for tuner_left (8404287986475034806) -->
+    <skip />
+    <!-- no translation found for tuner_right (6222734772467850156) -->
+    <skip />
+    <!-- no translation found for tuner_menu (191640047241552081) -->
+    <skip />
+    <!-- no translation found for tuner_app (3507057938640108777) -->
+    <skip />
     <string name="notification_channel_alerts" msgid="4496839309318519037">"התראות"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"צילומי מסך"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"הודעות כלליות"</string>

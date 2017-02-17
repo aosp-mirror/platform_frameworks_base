@@ -516,15 +516,11 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met kragkennisgewingkontroles kan jy \'n belangrikheidvlak van 0 tot 5 vir \'n program se kennisgewings stel. \n\n"<b>"Vlak 5"</b>" \n- Wys aan die bokant van die kennisgewinglys \n- Laat volskermonderbreking toe \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 4"</b>" \n- Verhoed volskermonderbreking \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 3"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n\n"<b>"Vlak 2"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n\n"<b>"Vlak 1"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n- Versteek van sluitskerm en statusbalk \n- Wys aan die onderkant van die kennisgewinglys \n\n"<b>"Vlak 0"</b>" \n- Blokkeer alle kennisgewings van die program af"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Kennisgewings"</string>
     <string name="notification_channel_disabled" msgid="5805874247999578073">"Jy sal nie meer hierdie kennisgewings kry nie."</string>
-    <string name="notification_importance_header_app" msgid="3572576545406258751">"<xliff:g id="APP">%s</xliff:g>-kennisgewings vir"</string>
-    <string name="min_importance" msgid="7559703098688382595">"Laag"</string>
-    <string name="low_importance" msgid="6891335321576225228">"Middelmatig"</string>
-    <string name="default_importance" msgid="6400766013567512061">"Hoog"</string>
-    <string name="high_importance" msgid="730741630855788381">"Dringend"</string>
-    <string name="notification_importance_min" msgid="3237794091374404537">"Geen klank of visuele onderbreking nie"</string>
-    <string name="notification_importance_low" msgid="8929105501798019743">"Wys sonder klank"</string>
-    <string name="notification_importance_default" msgid="9025125660733917469">"Maak geluid"</string>
-    <string name="notification_importance_high" msgid="3316555356062640222">"Maak geluid en spring op op skerm"</string>
+    <plurals name="notification_num_channels_desc" formatted="false" msgid="8808748716499517938">
+      <item quantity="other">1 uit <xliff:g id="NUMBER_1">%d</xliff:g> kategorieë in hierdie program</item>
+      <item quantity="one">1 uit <xliff:g id="NUMBER_0">%d</xliff:g> kategorie in hierdie program</item>
+    </plurals>
+    <string name="notification_all_categories" msgid="5407190218055113282">"Alle kategorieë"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellings"</string>
     <string name="notification_done" msgid="5279426047273930175">"Klaar"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -598,30 +594,31 @@
     <string name="switch_bar_off" msgid="8803270596930432874">"Af"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigasiebalk"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"Uitleg"</string>
-    <string name="nav_bar_left" msgid="731491280511316123">"Links"</string>
-    <string name="nav_bar_right" msgid="2523774879720231974">"Regs"</string>
-    <string name="nav_bar_button_type" msgid="6947806619897153791">"Soort knoppie"</string>
+    <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Ekstra linksknoppie-tipe"</string>
+    <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Ekstra regsknoppie-tipe"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(verstek)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Knipbord"</item>
     <item msgid="5742013440802239414">"Sleutelkode"</item>
-    <item msgid="8748101184830239843">"Kieslys / Sleutelbordwisselaar"</item>
+    <item msgid="8802889973626281575">"Sleutelbordwisselaar"</item>
     <item msgid="8175437057325747277">"Geen"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
-    <item msgid="4967898371682516967">"Verdeel (verstek)"</item>
-    <item msgid="6210279084134579668">"Gesentreer"</item>
-    <item msgid="89143234390889289">"Linksbelyn"</item>
-    <item msgid="7715533883382410603">"Regsbelyn"</item>
+    <item msgid="8077901629964902399">"Normaal"</item>
+    <item msgid="8256205964297588988">"Kompak"</item>
+    <item msgid="8719936228094005878">"Na links"</item>
+    <item msgid="586019486955594690">"Na regs"</item>
   </string-array>
-    <string name="menu_ime" msgid="4943221416525250684">"Kieslys / Sleutelbordwisselaar"</string>
+    <string name="menu_ime" msgid="4998010205321292416">"Sleutelbordwisselaar"</string>
     <string name="save" msgid="2311877285724540644">"Stoor"</string>
     <string name="reset" msgid="2448168080964209908">"Stel terug"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Verstel knoppiebreedte"</string>
     <string name="clipboard" msgid="1313879395099896312">"Knipbord"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Gepasmaakte navigasieknoppie"</string>
-    <string name="keycode" msgid="7335281375728356499">"Sleutelkode"</string>
-    <string name="icon" msgid="8732339849035837289">"Ikoon"</string>
+    <string name="left_keycode" msgid="2010948862498918135">"Links-sleutelkode"</string>
+    <string name="right_keycode" msgid="708447961000848163">"Regs-sleutelkode"</string>
+    <string name="left_icon" msgid="3096287125959387541">"Links-ikoon"</string>
+    <string name="right_icon" msgid="3952104823293824311">"Regs-ikoon"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Sleep om teëls by te voeg"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Sleep hierheen om te verwyder"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Wysig"</string>
@@ -670,17 +667,27 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Maak <xliff:g id="ID_1">%s</xliff:g>-instellings oop."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Wysig volgorde van instellings."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Bladsy <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Sluitskerm"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Vou uit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimeer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Maak toe"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"Foon raak warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Sommige kenmerke is beperk terwyl foon afkoel"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
-    <string name="lockscreen_left" msgid="6806490081187499505">"Links"</string>
-    <string name="lockscreen_right" msgid="6093496261656102989">"Regs"</string>
-    <string name="lockscreen_customize" msgid="1288691376862981950">"Pasmaak kortpad"</string>
-    <string name="lockscreen_shortcut" msgid="3734369277470360642">"Kortpad"</string>
-    <string name="lockscreen_unlock" msgid="4934466194763269051">"Aanporboodskap vir wagwoord"</string>
+    <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Links-kortpad"</string>
+    <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Regs-kortpad"</string>
+    <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Links-kortpad ontsluit ook"</string>
+    <string name="lockscreen_unlock_right" msgid="1529992940510318775">"Regs-kortpad ontsluit ook"</string>
+    <string name="lockscreen_none" msgid="4783896034844841821">"Geen"</string>
+    <string name="tuner_launch_app" msgid="1527264114781925348">"Begin <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="tuner_other_apps" msgid="4726596850501162493">"Ander programme"</string>
+    <string name="tuner_circle" msgid="2340998864056901350">"Sirkel"</string>
+    <string name="tuner_plus" msgid="6792960658533229675">"Plus"</string>
+    <string name="tuner_minus" msgid="4806116839519226809">"Minus"</string>
+    <string name="tuner_left" msgid="8404287986475034806">"Links"</string>
+    <string name="tuner_right" msgid="6222734772467850156">"Regs"</string>
+    <string name="tuner_menu" msgid="191640047241552081">"Kieslys"</string>
+    <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>-program"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Opletberigte"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skermkiekies"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Algemene boodskappe"</string>

@@ -20,186 +20,113 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (3171996292755059205) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_code (3420548423949593123) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_puk_code (670683628782925409) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_puk_prompt (3747778500166059332) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_prompt (8188243197504453830) -->
-    <skip />
-    <!-- no translation found for keyguard_password_entry_touch_hint (5790410752696806482) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_password_code (595980919238127672) -->
-    <skip />
-    <!-- no translation found for keyguard_password_enter_pin_password_code (7504123374204446086) -->
-    <skip />
-    <!-- no translation found for keyguard_password_wrong_pin_code (6535018036285012028) -->
-    <skip />
-    <!-- no translation found for keyguard_charged (2222329688813033109) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in (89308975354638682) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_fast (8869226755413795173) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_slowly (6637043106038550407) -->
-    <skip />
-    <!-- no translation found for keyguard_low_battery (9218432555787624490) -->
-    <skip />
-    <!-- no translation found for keyguard_instructions_when_pattern_disabled (8566679946700751371) -->
-    <skip />
-    <!-- no translation found for keyguard_network_locked_message (6743537524631420759) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message_short (6327533369959764518) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (4550152848200783542) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (6585414237800161146) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7350295932015220392) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (589889372883904477) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (654102080186420706) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (4683178224791318347) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (953766009432168127) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (1772789643694942073) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (3586601150825821675) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_pin_area (703175752097279029) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_pin_area (912702510825058921) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_puk_area (136979425761438705) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_next_alarm (5835196989158584991) -->
-    <skip />
-    <!-- no translation found for keyboardview_keycode_delete (6883116827512721630) -->
-    <skip />
-    <!-- no translation found for keyboardview_keycode_enter (4505833604411016668) -->
-    <skip />
-    <!-- no translation found for kg_forgot_pattern_button_text (534245177645252620) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pattern (7620081431514773802) -->
-    <skip />
-    <!-- no translation found for kg_wrong_password (4580683060277329277) -->
-    <skip />
-    <!-- no translation found for kg_wrong_pin (4785660766909463466) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_attempts_countdown (527455490371878356) -->
-    <skip />
-    <!-- no translation found for kg_pattern_instructions (5547646893001491340) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions (1795013002231184046) -->
-    <skip />
-    <!-- no translation found for kg_sim_pin_instructions_multi (1586316574649150223) -->
-    <skip />
-    <!-- no translation found for kg_pin_instructions (4069609316644030034) -->
-    <skip />
-    <!-- no translation found for kg_password_instructions (136952397352976538) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint (2288964170039899277) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (1373131883510840794) -->
-    <skip />
-    <!-- no translation found for kg_puk_enter_pin_hint (3137789674920391087) -->
-    <skip />
-    <!-- no translation found for kg_enter_confirm_pin_hint (3089485999116759671) -->
-    <skip />
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (4471738151810900114) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_pin_hint (3057533256729513335) -->
-    <skip />
-    <!-- no translation found for kg_invalid_sim_puk_hint (6003602401368264144) -->
-    <skip />
-    <!-- no translation found for kg_invalid_puk (5399287873762592502) -->
-    <skip />
-    <!-- no translation found for kg_invalid_confirm_pin_hint (5672736555427444330) -->
-    <skip />
-    <!-- no translation found for kg_login_too_many_attempts (6604574268387867255) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pin_attempts_dialog_message (8637788033282252027) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_password_attempts_dialog_message (7724148763268377734) -->
-    <skip />
-    <!-- no translation found for kg_too_many_failed_pattern_attempts_dialog_message (4820967667848302092) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1629351522209932316) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (3921998703529189931) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (4694232971224663735) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (2365964340830006961) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (1365418870560228936) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (2151286957817486128) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (5464020754932560928) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (6171564974118059) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (9154513795928824239) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (2162434417489128282) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (8966727588974691544) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (8476407539834855) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (956706236554092172) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_login (8364140853305528449) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code_pukked (3389829202093674267) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_pin_code (4314341367727055967) -->
-    <!-- no translation found for kg_password_wrong_puk_code_dead (3329017604125179374) -->
-    <skip />
-    <!-- no translation found for kg_password_wrong_puk_code (2287504898931957513) -->
-    <!-- no translation found for kg_password_pin_failed (8769990811451236223) -->
-    <skip />
-    <!-- no translation found for kg_password_puk_failed (1331621440873439974) -->
-    <skip />
-    <!-- no translation found for kg_pin_accepted (7637293533973802143) -->
-    <skip />
-    <!-- no translation found for keyguard_carrier_default (4274828292998453695) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ထည့်သွင်းခြင်းခလုတ်အား ပြောင်းခြင်း"</string>
-    <!-- no translation found for airplane_mode (3807209033737676010) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pattern (7246972020562621506) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (6303592361322290145) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (6984641181515902406) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5304487696073914063) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (8851462864335757813) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (6563904839641583441) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pattern (3398054847288438444) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_pin (7426368139226961699) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_switch_profiles_password (8383831046318421845) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_device_admin (2438626748767361010) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (8236951765212462286) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_time_pattern (71299470072448533) -->
-    <!-- no translation found for kg_prompt_reason_time_pin (34586942088144385) -->
-    <!-- no translation found for kg_prompt_reason_time_password (257297696215346527) -->
-    <!-- no translation found for fingerprint_not_recognized (348813995267914625) -->
-    <skip />
+    <string name="app_name" msgid="3171996292755059205">"လုံခြုံရေးကီး"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"ပင်နံပါတ်ထည့်ပါ"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်နှင့် ပင်နံပါတ်အသစ် ထည့်ပါ"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"ဆင်းမ် ပင်နံပါတ်အသစ်"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"စကားဝှက် ရိုက်ရန် ထိပါ"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"လော့ခ်ဖွင့်ရန် စကားဝှက်ကို ထည့်ပါ"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"လော့ခ်ဖွင့်ရန် ပင်နံပါတ်ထည့်ပါ"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ပင်နံပါတ် မှားနေသည်။"</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"အားသွင်းပြီးပါပြီ"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"အားသွင်းနေပါသည်"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"လျှင်မြန်စွာ အားသွင်းနေသည်"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"နှေးကွေးစွာ အားသွင်းနေသည်"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"အားသွင်းကိရိယာကို ချိတ်ဆက်ပါ။"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"ဆင်းမ်ကဒ် မရှိပါ"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"တက်ဘလက်ထဲတွင် ဆင်းမ်ကဒ် မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ဖုန်းထဲတွင် ဆင်းမ်ကဒ် မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"ဆင်းမ်ကဒ် ထည့်ပါ။"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"ဆင်းမ်ကဒ်မရှိပါ သို့မဟုတ် အသုံးပြု၍မရပါ။ ဆင်းမ်ကဒ်တစ်ခု ထည့်ပါ။"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"အသုံးပြု၍ မရတော့သော ဆင်းမ်ကဒ်။"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"သင့်ဆင်းမ်ကဒ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါပြီ။\n နောက်ထပ်ဆင်းမ်ကဒ်တစ်ခု ရယူရန်အတွက် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"ဆင်းမ်ကဒ် လော့ခ်ကျနေပါသည်။"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ဆင်းမ်ကဒ်သည် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လော့ခ်ကျနေပါသည်။"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ဆင်းမ်ကဒ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ပင်နံပါတ်နေရာ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ဆင်းမ်ပင်နံပါတ်နေရာ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် နေရာ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"နောက်နှိုးစက်အချိန်ကို <xliff:g id="ALARM">%1$s</xliff:g> တွင် သတ်မှတ်ထားပါသည်"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"ဖျက်ရန်"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter ခလုတ်"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ပုံစံအား မေ့သွားပါသည်"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ပုံစံ မမှန်ကန်ပါ"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"စကားဝှက် မမှန်ကန်ပါ"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"ပင်နံပါတ် မမှန်ကန်ပါ"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> စက္ကန့်အကြာတွင် ထပ်လုပ်ကြည့်ပါ။"</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"ပုံစံကို ဆွဲပါ"</string>
+    <string name="kg_sim_pin_instructions" msgid="1795013002231184046">"ဆင်းမ်ကဒ် ပင်နံပါတ်ကို ထည့်ပါ"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="1586316574649150223">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" အတွက် ဆင်းမ်ပင်နံပါတ်ကို ထည့်ပါ"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"ပင်နံပါတ်ကို ထည့်ပါ"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"စကားဝှက်ကို ထည့်ပါ"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ်ကို ထည့်ပါ။ ပိုမိုလေ့လာရန် မိုဘိုင်းဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်နိုင်ပါသည်။"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ဆင်းမ်ကို ယခု ပိတ်လိုက်ပါပြီ။ ရှေ့ဆက်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်ကို ထည့်ပါ။ အသေးစိတ် အချက်အလက်များအတွက် မိုဘိုင်းဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"မိမိလိုလားသော ပင်နံပါတ်ကို ထည့်ပါ"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"မိမိလိုလားသော ပင်နံပါတ်ကို အတည်ပြုပါ"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"ဆင်းမ်ကဒ်ကို လော့ခ်ဖွင့်နေပါသည်…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"ဂဏန်း ၄ လုံးမှ ၈ လုံးအထိ ရှိသော ပင်နံပါတ်ကို ထည့်ပါ။"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်သည် ဂဏန်း ၈ လုံးနှင့် အထက် ဖြစ်ရပါမည်။"</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"မှန်ကန်သည့် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ်ကို ပြန်ထည့်ပါ။ ထပ်ခါထပ်ခါမှားယွင်းနေလျှင် ဆင်းမ်ကဒ်ကို အပြီးအပိုင် ပိတ်လိုက်ပါမည်။"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"ပင်နံပါတ် ကိုက်ညီမှုမရှိပါ"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"ပုံစံထည့်သွင်းရန် ကြိုးစားသည့် အကြိမ်အရေအတွက် အလွန်များနေပါပြီ"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"သင်သည် ပင်နံပါတ်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ထည့်ခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"သင်သည် စကားဝှက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ထည့်ခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"သင်သည် ပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာများအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာများအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာများအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာများအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းသွားလျှင် ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ဤအသုံးပြုသူကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး အသုံးပြုသူဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ထပ်မံ မှားယွင်းသွားလျှင် အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းသွားလျှင် အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"တက်ဘလက်ကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"ဖုန်းကို <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ အလုပ်ပရိုဖိုင်ကို ဖယ်ရှားလိုက်မည်ဖြစ်ပြီး ပရိုဖိုင်ဒေတာများ အားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ တက်ဘလက်ကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"သင်သည် သင်၏ လော့ခ်ဖွင့်ခြင်းပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းပြီးသည့်နောက်တွင် သင့်အီးမေးလ်အကောင့်အား အသုံးပြု၍ ဖုန်းကို လော့ခ်ဖွင့်ရန် တောင်းဆိုသွားပါမည်။\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"ဆင်းမ်ကဒ်ပင်နံပါတ် မှားယွင်းနေသောကြောင့် ယခုအခါ သင့်စက်ပစ္စည်းအား လော့ခ်ဖွင့်ရန် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ရပါမည်။"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="other">ဆင်းမ်ပင်နံပါတ် မှန်ကန်မှုမရှိပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ်ပင်နံပါတ် မှန်ကန်မှုမရှိပါ။ သင့်စက်ပစ္စည်းအား လော့ခ်ဖွင့်ပေးရန်အတွက် မိုဘိုင်းဝန်ဆောင်မှုပေးသူကို မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"ဆင်းမ်ကဒ်ကို အသုံးပြု၍ မရတော့ပါ။ ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="other">ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် မှန်ကန်မှုမရှိပါ။ ဆင်းမ်ကဒ်ကို အပြီးအပိုင်မပိတ်ခင် <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ်စမ်းသပ်ခွင့် ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် မှန်ကန်မှုမရှိပါ။ ဆင်းမ်ကဒ်ကို အပြီးအပိုင်မပိတ်ခင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ်စမ်းသပ်ခွင့် ရှိပါသေးသည်။</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"ဆင်းမ်ကဒ်ပင်နံပါတ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"ဆင်းမ်ကဒ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"ကုဒ်ကို လက်ခံလိုက်ပါပြီ။"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"ဝန်ဆောင်မှု မရှိပါ။"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"စာရိုက်စနစ်ပြောင်းရန်"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"လေယာဉ်ပျံမုဒ်"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် ပုံစံ လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် ပင်နံပါတ် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"စက်ပစ္စည်းကို ပိတ်ပြီးပြန်ဖွင့်လိုက်သည့်အခါတွင် စကားဝှက် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"ပိုမို၍ လုံခြုံမှု ရှိစေရန် ပုံစံ လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"ပိုမို၍ လုံခြုံမှု ရှိစေရန် ပင်နံပါတ် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"ပိုမို၍ လုံခြုံမှု ရှိစေရန် စကားဝှက် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ ပုံစံ လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ ပင်နံပါတ် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"ပရိုဖိုင်များကို ပြောင်းသည့်အခါ စကားဝှက် လိုအပ်ပါသည်"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="2438626748767361010">"စက်ပစ္စည်းစီမံခန့်ခွဲသူသည် စက်ပစ္စည်းကို လော့ခ်ချထားသည်"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ ပုံစံအား အတည်ပြုပါ။</item>
+      <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ ပုံစံအား အတည်ပြုပါ။</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ ပင်နံပါတ်အား အတည်ပြုပါ။</item>
+      <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ ပင်နံပါတ်အား အတည်ပြုပါ။</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
+      <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"မသိပါ"</string>
 </resources>
