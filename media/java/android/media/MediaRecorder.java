@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.hardware.Camera;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -1256,6 +1257,93 @@ public class MediaRecorder
     private native final void native_finalize();
 
     private native void setParameter(String nameValuePair);
+
+    /**
+     * Returns Metrics data about the current media container.
+     *
+     * @return the set of keys and values available for the media being
+     * handled by this instance of MediaExtractor. The keys, data types,
+     * and meaning are described in the following table.
+     *
+     *  <table style="width: 0%">
+     *   <thead>
+     *    <tr>
+     *     <th>Key</th>
+     *     <th>Type</th>
+     *     <th>Description</th>
+     *    </tr>
+     *   </thead>
+     *   <tbody>
+     *    <tr>
+     *     <td>{@code "ht"}</td>
+     *     <td>Integer</td>
+     *     <td>Height of the recorded video (pixels)</td>
+     *    </tr><tr>
+     *     <td>{@code "wid"}</td>
+     *     <td>Integer</td>
+     *     <td>Width of the recorded video (pixels)</td>
+     *    </tr><tr>
+     *     <td>{@code "frame-rate"}</td>
+     *     <td>Integer</td>
+     *     <td>Framerate of captured Video (frames per second)</td>
+     *    </tr><tr>
+     *     <td>{@code "video-bitrate"}</td>
+     *     <td>Integer</td>
+     *     <td>Bit rate of encoded video (bits per second)</td>
+     *    </tr><tr>
+     *     <td>{@code "video-iframe-interval"}</td>
+     *     <td>Integer</td>
+     *     <td>Interval between encoded IFrames (seconds)</td>
+     *    </tr><tr>
+     *     <td>{@code "video-timescale"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "video-encoder-profile"}</td>
+     *     <td>Integer</td>
+     *     <td>Video Encoder Profile, as defined in OpenMAX IL</td>
+     *    </tr><tr>
+     *     <td>{@code "video-encoder-level"}</td>
+     *     <td>Integer</td>
+     *     <td>Video Encoder Level, as defined in OpenMAX IL</td>
+     *    </tr><tr>
+     *     <td>{@code "audio-bitrate"}</td>
+     *     <td>Integer</td>
+     *     <td>Bitrate of encoded audio (bits per second)</td>
+     *    </tr><tr>
+     *     <td>{@code "audio-samplerate"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "audio-channels"}</td>
+     *     <td>Integer</td>
+     *     <td>Number of Audio Channels Captured</td>
+     *    </tr><tr>
+     *     <td>{@code "audio-timescale"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "movie-timescale"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "movie-timescale"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "capture-fps"}</td>
+     *     <td>Integer</td>
+     *     <td></td>
+     *    </tr><tr>
+     *     <td>{@code "rotation"}</td>
+     *     <td>Integer</td>
+     *     <td>Orientation of the Video (degrees)</td>
+     *    </tr>
+     *   </tbody>
+     *  </table>
+     */
+
+    public native Bundle getMetrics();
 
     @Override
     protected void finalize() { native_finalize(); }
