@@ -100,26 +100,6 @@ public class WifiAwareManagerTest {
      */
 
     /**
-     * Validate pass-through of enableUsage() API.
-     */
-    @Test
-    public void testEnableUsage() throws Exception {
-        mDut.enableUsage();
-
-        verify(mockAwareService).enableUsage();
-    }
-
-    /**
-     * Validate pass-through of disableUsage() API.
-     */
-    @Test
-    public void testDisableUsage() throws Exception {
-        mDut.disableUsage();
-
-        verify(mockAwareService).disableUsage();
-    }
-
-    /**
      * Validate pass-through of isUsageEnabled() API.
      */
     @Test
