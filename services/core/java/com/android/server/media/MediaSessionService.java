@@ -64,6 +64,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyEvent;
+import android.view.ViewConfiguration;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -99,6 +100,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final Object mLock = new Object();
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
+    private final int mLongPressTimeout;
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
@@ -120,6 +122,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mPriorityStack = new MediaSessionStack();
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
+        mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
     }
 
     @Override
@@ -536,6 +539,16 @@ public class MediaSessionService extends SystemService implements Monitor {
         return "";
     }
 
+    private void dispatchVolumeKeyLongPressLocked(KeyEvent keyEvent) {
+        // Only consider full user.
+        UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
+        try {
+            user.mOnVolumeKeyLongPressListener.onVolumeKeyLongPress(keyEvent);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to send " + keyEvent + " to volume key long-press listener");
+        }
+    }
+
     /**
      * Information about a particular user. The contents of this object is
      * guarded by mLock.
@@ -944,7 +957,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 synchronized (mLock) {
                     // Only consider full user.
-                    UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
+                    int userId = mCurrentUserIdList.get(0);
+                    UserRecord user = mUserRecords.get(userId);
 
                     if (mPriorityStack.isGlobalPriorityActive()
                             || user.mOnVolumeKeyLongPressListener == null) {
@@ -954,11 +968,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                         //       at the same time.
                         if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
                             if (keyEvent.getRepeatCount() == 0) {
-                                user.mInitialDownVolumeKeyEvent = keyEvent;
+                                // Keeps the copy of the KeyEvent because it can be reused.
+                                user.mInitialDownVolumeKeyEvent = KeyEvent.obtain(keyEvent);
                                 user.mInitialDownVolumeStream = stream;
                                 user.mInitialDownMusicOnly = musicOnly;
+                                mHandler.sendMessageDelayed(
+                                        mHandler.obtainMessage(
+                                                MessageHandler.MSG_VOLUME_INITIAL_DOWN, userId, 0),
+                                        mLongPressTimeout);
                             }
                             if (keyEvent.getRepeatCount() > 0 || keyEvent.isLongPress()) {
+                                mHandler.removeMessages(MessageHandler.MSG_VOLUME_INITIAL_DOWN);
                                 if (user.mInitialDownVolumeKeyEvent != null) {
                                     dispatchVolumeKeyLongPressLocked(
                                             user.mInitialDownVolumeKeyEvent);
@@ -968,6 +988,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                 dispatchVolumeKeyLongPressLocked(keyEvent);
                             }
                         } else { // if up
+                            mHandler.removeMessages(MessageHandler.MSG_VOLUME_INITIAL_DOWN);
                             if (user.mInitialDownVolumeKeyEvent != null
                                     && user.mInitialDownVolumeKeyEvent.getDownTime()
                                             == keyEvent.getDownTime()) {
@@ -985,16 +1006,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        private void dispatchVolumeKeyLongPressLocked(KeyEvent keyEvent) {
-            // Only consider full user.
-            UserRecord user = mUserRecords.get(mCurrentUserIdList.get(0));
-            try {
-                user.mOnVolumeKeyLongPressListener.onVolumeKeyLongPress(keyEvent);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to send " + keyEvent + " to volume key long-press listener");
             }
         }
 
@@ -1480,12 +1491,23 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     final class MessageHandler extends Handler {
         private static final int MSG_SESSIONS_CHANGED = 1;
+        private static final int MSG_VOLUME_INITIAL_DOWN = 2;
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SESSIONS_CHANGED:
                     pushSessionsChanged(msg.arg1);
+                    break;
+                case MSG_VOLUME_INITIAL_DOWN:
+                    synchronized (mLock) {
+                        UserRecord user = mUserRecords.get((int) msg.arg1);
+                        if (user != null && user.mInitialDownVolumeKeyEvent != null) {
+                            dispatchVolumeKeyLongPressLocked(user.mInitialDownVolumeKeyEvent);
+                            // Mark that the key is already handled.
+                            user.mInitialDownVolumeKeyEvent = null;
+                        }
+                    }
                     break;
             }
         }
