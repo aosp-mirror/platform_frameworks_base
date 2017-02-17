@@ -1724,6 +1724,7 @@ public final class ActivityThread {
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
                             (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
+                    break;
                 case ATTACH_AGENT:
                     handleAttachAgent((String) msg.obj);
                     break;
