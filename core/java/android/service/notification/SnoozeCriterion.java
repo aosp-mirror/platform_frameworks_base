@@ -15,13 +15,18 @@
  */
 package android.service.notification;
 
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * Represents an option to be shown to users for snoozing a notification until a given context
  * instead of for a fixed amount of time.
+ * @hide
  */
+@SystemApi
+@TestApi
 public final class SnoozeCriterion implements Parcelable {
     private final String mId;
     private final CharSequence mExplanation;

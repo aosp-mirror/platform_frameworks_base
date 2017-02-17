@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.TestApi;
 import android.app.NotificationChannel;
 import android.os.Handler;
 import android.os.Looper;
@@ -528,7 +529,10 @@ public abstract class NotificationListenerService extends Service {
      * @param key The key of the notification to snooze
      * @param snoozeCriterionId The{@link SnoozeCriterion#getId()} of a context to snooze the
      *                          notification until.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     public final void snoozeNotification(String key, String snoozeCriterionId) {
         if (!isBound()) return;
         try {
@@ -1257,7 +1261,10 @@ public abstract class NotificationListenerService extends Service {
         /**
          * If the {@link NotificationAssistantService} has added people to this notification, then
          * this will be non-null.
+         * @hide
          */
+        @SystemApi
+        @TestApi
         public List<String> getAdditionalPeople() {
             return mOverridePeople;
         }
@@ -1266,7 +1273,10 @@ public abstract class NotificationListenerService extends Service {
          * Returns snooze criteria provided by the {@link NotificationAssistantService}. If your
          * user interface displays options for snoozing notifications these criteria should be
          * displayed as well.
+         * @hide
          */
+        @SystemApi
+        @TestApi
         public List<SnoozeCriterion> getSnoozeCriteria() {
             return mSnoozeCriteria;
         }
