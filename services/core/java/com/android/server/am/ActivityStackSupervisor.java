@@ -1200,7 +1200,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags) {
         try {
             return AppGlobals.getPackageManager().resolveIntent(intent, resolvedType,
-                    PackageManager.MATCH_DEFAULT_ONLY | flags
+                    PackageManager.MATCH_INSTANT | PackageManager.MATCH_DEFAULT_ONLY | flags
                     | ActivityManagerService.STOCK_PM_FLAGS, userId);
         } catch (RemoteException e) {
         }

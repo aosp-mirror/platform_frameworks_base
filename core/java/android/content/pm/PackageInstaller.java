@@ -1096,9 +1096,11 @@ public class PackageInstaller {
         @SystemApi
         public void setInstallAsInstantApp(boolean isInstantApp) {
             if (isInstantApp) {
-                installFlags |= PackageManager.INSTALL_EPHEMERAL;
+                installFlags |= PackageManager.INSTALL_INSTANT_APP;
+                installFlags &= ~PackageManager.INSTALL_FULL_APP;
             } else {
-                installFlags &= ~PackageManager.INSTALL_EPHEMERAL;
+                installFlags &= ~PackageManager.INSTALL_INSTANT_APP;
+                installFlags |= PackageManager.INSTALL_FULL_APP;
             }
         }
 

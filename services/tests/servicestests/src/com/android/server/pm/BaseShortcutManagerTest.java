@@ -1053,7 +1053,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             ret.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
         if (mEphemeralPackages.contains(PackageWithUser.of(userId, packageName))) {
-            ret.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_EPHEMERAL;
+            ret.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_INSTANT;
         }
         if (mSystemPackages.contains(packageName)) {
             ret.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
