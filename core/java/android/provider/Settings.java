@@ -6716,6 +6716,13 @@ public final class Settings {
                 "camera_double_twist_to_flip_enabled";
 
         /**
+         * Whether the assist gesture should be enabled.
+         *
+         * @hide
+         */
+        public static final String ASSIST_GESTURE_ENABLED = "assist_gesture_enabled";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -6966,7 +6973,8 @@ public final class Settings {
             DOZE_PULSE_ON_PICK_UP,
             DOZE_PULSE_ON_DOUBLE_TAP,
             NFC_PAYMENT_DEFAULT_COMPONENT,
-            AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN
+            AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
+            ASSIST_GESTURE_ENABLED
         };
 
         /**
