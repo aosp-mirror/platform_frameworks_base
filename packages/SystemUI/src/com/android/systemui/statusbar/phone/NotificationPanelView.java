@@ -292,7 +292,7 @@ public class NotificationPanelView extends PanelView implements
         int panelGravity = getResources().getInteger(R.integer.notification_panel_layout_gravity);
         FrameLayout.LayoutParams lp =
                 (FrameLayout.LayoutParams) mQsFrame.getLayoutParams();
-        if (lp.width != panelWidth) {
+        if (lp.width != panelWidth || lp.gravity != panelGravity) {
             lp.width = panelWidth;
             lp.gravity = panelGravity;
             mQsFrame.setLayoutParams(lp);
@@ -300,7 +300,7 @@ public class NotificationPanelView extends PanelView implements
         }
 
         lp = (FrameLayout.LayoutParams) mNotificationStackScroller.getLayoutParams();
-        if (lp.width != panelWidth) {
+        if (lp.width != panelWidth || lp.gravity != panelGravity) {
             lp.width = panelWidth;
             lp.gravity = panelGravity;
             mNotificationStackScroller.setLayoutParams(lp);
