@@ -17,27 +17,37 @@
 package com.android.systemui.keyguard;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
 public class WorkLockActivityController {
     private final Context mContext;
-    final SystemServicesProxy mSsp;
+    private final SystemServicesProxy mSsp;
+    private final IActivityManager mIam;
 
     public WorkLockActivityController(Context context) {
-        mContext = context;
-        mSsp = SystemServicesProxy.getInstance(context);
+        this(context, SystemServicesProxy.getInstance(context), ActivityManager.getService());
+    }
 
-        EventBus.getDefault().register(this);
+    @VisibleForTesting
+    WorkLockActivityController(Context context, SystemServicesProxy ssp, IActivityManager am) {
+        mContext = context;
+        mSsp = ssp;
+        mIam = am;
+
         mSsp.registerTaskStackListener(mLockListener);
     }
 
@@ -52,7 +62,40 @@ public class WorkLockActivityController {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchTaskId(taskId);
         options.setTaskOverlay(true, false /* canResume */);
-        mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
+
+        final int result = startActivityAsUser(intent, options.toBundle(), UserHandle.USER_CURRENT);
+        if (result >= ActivityManager.START_SUCCESS) {
+            // OK
+        } else {
+            // Starting the activity inside the task failed. We can't be sure why, so to be
+            // safe just remove the whole task if it still exists.
+            mSsp.removeTask(taskId);
+        }
+    }
+
+    /**
+     * Version of {@link Context#startActivityAsUser} which keeps the success code from
+     * IActivityManager, so we can read back whether ActivityManager thinks it started properly.
+     */
+    private int startActivityAsUser(Intent intent, Bundle options, int userId) {
+        try {
+            return mIam.startActivityAsUser(
+                    mContext.getIApplicationThread() /*caller*/,
+                    mContext.getBasePackageName() /*callingPackage*/,
+                    intent /*intent*/,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()) /*resolvedType*/,
+                    null /*resultTo*/,
+                    null /*resultWho*/,
+                    0 /*requestCode*/,
+                    Intent.FLAG_ACTIVITY_NEW_TASK /*flags*/,
+                    null /*profilerInfo*/,
+                    options /*options*/,
+                    userId /*user*/);
+        } catch (RemoteException e) {
+            return ActivityManager.START_CANCELED;
+        } catch (Exception e) {
+            return ActivityManager.START_CANCELED;
+        }
     }
 
     private final TaskStackListener mLockListener = new TaskStackListener() {
