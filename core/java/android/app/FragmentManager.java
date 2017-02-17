@@ -1911,7 +1911,12 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             mTmpRecords = new ArrayList<>();
             mTmpIsPop = new ArrayList<>();
         }
-        executePostponedTransaction(null, null);
+        mExecutingActions = true;
+        try {
+            executePostponedTransaction(null, null);
+        } finally {
+            mExecutingActions = false;
+        }
     }
 
     public void execSingleAction(OpGenerator action, boolean allowStateLoss) {
