@@ -52,6 +52,10 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_PLUGIN = 6;
 
+    // Notify the user that instant app is running.
+    // Package: com.android.systemui
+    NOTE_INSTANT_APPS = 7;
+
     // Confirm that the user wants to remove the guest account.
     // Package: com.android.systemui
     NOTE_REMOVE_GUEST = 1010;
