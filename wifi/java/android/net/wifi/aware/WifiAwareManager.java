@@ -253,36 +253,6 @@ public class WifiAwareManager {
     }
 
     /**
-     * Enable the usage of the Aware API. Doesn't actually turn on Aware cluster formation - that
-     * only happens when an attach is attempted. {@link #ACTION_WIFI_AWARE_STATE_CHANGED} broadcast
-     * will be triggered.
-     *
-     * @hide
-     */
-    public void enableUsage() {
-        try {
-            mService.enableUsage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Disable the usage of the Aware API. All attempts to attach() will be rejected. All open
-     * connections and sessions will be terminated. {@link #ACTION_WIFI_AWARE_STATE_CHANGED}
-     * broadcast will be triggered.
-     *
-     * @hide
-     */
-    public void disableUsage() {
-        try {
-            mService.disableUsage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Returns the current status of Aware API: whether or not Aware is available. To track
      * changes in the state of Aware API register for the
      * {@link #ACTION_WIFI_AWARE_STATE_CHANGED} broadcast.
