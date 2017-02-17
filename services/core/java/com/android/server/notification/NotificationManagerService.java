@@ -3044,6 +3044,10 @@ public class NotificationManagerService extends SystemService {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
         }
+
+        // The system can post notifications for any package, let us resolve that.
+        final int notificationUid = resolveNotificationUid(opPkg, callingUid, userId);
+
         // Fix the notification as best we can.
         try {
             final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
@@ -3063,13 +3067,13 @@ public class NotificationManagerService extends SystemService {
             channelId = (new Notification.TvExtender(notification)).getChannel();
         }
         final NotificationChannel channel =  mRankingHelper.getNotificationChannelWithFallback(pkg,
-                callingUid, channelId, false /* includeDeleted */);
+                notificationUid, channelId, false /* includeDeleted */);
         final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, id, tag, callingUid, callingPid, notification,
+                pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
 
-        if (!checkDisqualifyingFeatures(userId, callingUid, id,tag, r)) {
+        if (!checkDisqualifyingFeatures(userId, notificationUid, id,tag, r)) {
             return;
         }
 
@@ -3093,6 +3097,19 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
+    }
+
+    private int resolveNotificationUid(String opPackageName, int callingUid, int userId) {
+        // The system can post notifications on behalf of any package it wants
+        if (isCallerSystem() && opPackageName != null && !"android".equals(opPackageName)) {
+            try {
+                return getContext().getPackageManager()
+                        .getPackageUidAsUser(opPackageName, userId);
+            } catch (NameNotFoundException e) {
+                /* ignore */
+            }
+        }
+        return callingUid;
     }
 
     /**
