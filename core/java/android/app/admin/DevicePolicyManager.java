@@ -4545,12 +4545,22 @@ public class DevicePolicyManager {
     /**
      * Clears the current device owner. The caller must be the device owner. This function should be
      * used cautiously as once it is called it cannot be undone. The device owner can only be set as
-     * a part of device setup before setup completes.
+     * a part of device setup, before it completes.
+     * <p>
+     * While some policies previously set by the device owner will be cleared by this method, it is
+     * a best-effort process and some other policies will still remain in place after the device
+     * owner is cleared.
      *
      * @param packageName The package name of the device owner.
      * @throws SecurityException if the caller is not in {@code packageName} or {@code packageName}
      *             does not own the current device owner component.
+     *
+     * @deprecated This method is expected to be used for testing purposes only. The device owner
+     * will lose control of the device and its data after calling it. In order to protect any
+     * sensitive data that remains on the device, it is advised that the device owner factory resets
+     * the device instead of calling this method. See {@link #wipeData(int)}.
      */
+    @Deprecated
     public void clearDeviceOwnerApp(String packageName) {
         throwIfParentInstance("clearDeviceOwnerApp");
         if (mService != null) {
@@ -4672,15 +4682,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Clears the active profile owner and removes all user restrictions. The caller must be from
-     * the same package as the active profile owner for this user, otherwise a SecurityException
-     * will be thrown.
+     * Clears the active profile owner. The caller must be the profile owner of this user, otherwise
+     * a SecurityException will be thrown. This method is not available to managed profile owners.
      * <p>
-     * This doesn't work for managed profile owners.
+     * While some policies previously set by the profile owner will be cleared by this method, it is
+     * a best-effort process and some other policies will still remain in place after the profile
+     * owner is cleared.
      *
      * @param admin The component to remove as the profile owner.
-     * @throws SecurityException if {@code admin} is not an active profile owner.
+     * @throws SecurityException if {@code admin} is not an active profile owner, or the method is
+     * being called from a managed profile.
+     *
+     * @deprecated This method is expected to be used for testing purposes only. The profile owner
+     * will lose control of the user and its data after calling it. In order to protect any
+     * sensitive data that remains on this user, it is advised that the profile owner deletes it
+     * instead of calling this method. See {@link #wipeData(int)}.
      */
+    @Deprecated
     public void clearProfileOwner(@NonNull ComponentName admin) {
         throwIfParentInstance("clearProfileOwner");
         if (mService != null) {
