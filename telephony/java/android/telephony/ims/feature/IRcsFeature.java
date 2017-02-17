@@ -14,24 +14,13 @@
  * limitations under the License
  */
 
-package android.telephony.ims;
-
-import android.annotation.SystemApi;
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+package android.telephony.ims.feature;
 
 /**
- * Base ImsService Implementation, which is used by the ImsResolver to bind. ImsServices that do not
- * need to provide an ImsService implementation but still wish to be managed by the ImsResolver
- * lifecycle may implement this class directly.
+ * Feature interface that provides access to RCS APIs. Currently empty until RCS support is added
+ * in the framework.
  * @hide
  */
-@SystemApi
-public class ImsServiceBase extends Service {
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+public interface IRcsFeature {
 }
