@@ -88,7 +88,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"कलर ID पूर्वनिर्धारितदेखि प्रतिबन्धित छैन। अर्को कल: प्रतिबन्धित छ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कलर ID पूर्वनिर्धारितको लागि रोकावट छैन। अर्को कल: रोकावट छैन"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवाको व्यवस्था छैन।"</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईँ कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा रोकिएको छ।"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आपतकालीन सेवा रोकिएको छ।"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"भ्वाइस सेवा ब्लक भएको छ।"</string>
@@ -209,9 +209,9 @@
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"तपाईंको TV बन्द हुनेछ।"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"तपाईँको घडी बन्द गरिने छ।"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"तपाईँको फोन बन्द हुने छ।"</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"के तपाईँ बन्द गर्न चाहनुहुन्छ?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"के तपाईं बन्द गर्न चाहनुहुन्छ?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"सुरक्षित मोडमा पुनःबुट गर्नुहोस्"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"सुरक्षित मोडमा तपाईँ पुनःबुट गर्न चाहनु हुन्छ? तपाईँले स्थापना गरेका सबै तेस्रो पक्षका अनुप्रयोगहरूलाई असक्षम गराउने छ।"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"सुरक्षित मोडमा तपाईं पुनःबुट गर्न चाहनु हुन्छ? तपाईंले स्थापना गरेका सबै तेस्रो पक्षका अनुप्रयोगहरूलाई असक्षम गराउने छ।"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"नयाँ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"कुनै नयाँ अनुप्रयोगहरू छैनन्।"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ट्याब्लेट विकल्पहरू"</string>
@@ -317,7 +317,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अनुप्रयोगहरू बन्द गर्नुहोस्"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"अनुप्रयोगलाई अन्य अनुप्रयोगहरूको पृष्ठभूमि प्रक्रियाहरू बन्द गर्न अनुमति दिन्छ। यसले अन्य अनुप्रयोगहरूलाई चल्नबाट रोक्न सक्दछ।"</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"अन्य अनुप्रयोगहरूमा चित्र कोर्नुहोस्"</string>
-    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"अरू अनुप्रयोगहरूमाथि वा प्रयोगकर्ता इन्टरफेसका भागहरूमा चित्र कोर्न अनुप्रयोगलाई अनुमति दिन्छ। तिनीहरूले कुनै अनुप्रयोगमा इन्टरफेको तपाईँको प्रयोगसँग हस्तक्षेप गर्न वा तपाईँ अन्य अनुप्रयोगहरूमा के देखिरहनु भएको छ भन्ने सोच्न हुन्छ भन्ने बदल्न सक्छन्।"</string>
+    <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"अरू अनुप्रयोगहरूमाथि वा प्रयोगकर्ता इन्टरफेसका भागहरूमा चित्र कोर्न अनुप्रयोगलाई अनुमति दिन्छ। तिनीहरूले कुनै अनुप्रयोगमा इन्टरफेको तपाईंको प्रयोगसँग हस्तक्षेप गर्न वा तपाईं अन्य अनुप्रयोगहरूमा के देखिरहनु भएको छ भन्ने सोच्न हुन्छ भन्ने बदल्न सक्छन्।"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"अनुप्रयोगहरू जहिले पनि चल्ने बनाउनुहोस्"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"यसको आफ्नै मेमोरीमा दृढ भएकोको अंश बनाउनको लागि अनुप्रयोगलाई अनुमति दिन्छ। ट्याब्लेटलाई ढिलो गराउँदै गरेका अन्य अनुप्रयोगहरूलाई सीमित मात्रामा यसले मेमोरी उपलब्ध गराउन सक्छ।"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"अनुप्रयोगलाई अनुमति दिन्छ मेमोरीमा आफैंलाई स्थायी भागका रूपमा प्रस्तुत गर्न। यसले अन्य अनुप्रयोगलाई उपलब्ध मेमोरीलाई सीमित गरी TV लाई ढिलो बनाउन सक्छ।"</string>
@@ -363,9 +363,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अनुप्रयोगलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो अनुप्रयोगलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"सटीक स्थान पहुँच गराउनुहोस् (GPS तथा नेटवर्कमा आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"अनुप्रयोगले विश्वव्यापी स्थान प्रणाली (GPS) वा सेल टावरहरू र Wi-Fi जस्ता नेटवर्क स्थान स्रोतहरूको प्रयोग गरेर तपाईँको सही स्थान प्राप्त गर्न अनुमति दिन्छ। यी स्थान सेवाहरू खोल्नु पर्छ र अनुप्रयोगहरूका लागि प्रयोग गर्न तपाईँको उपकरणमा उपलब्ध हुनु पर्छ। अनुप्रयोगहरूले तपाईँ कहाँ हुनु हुन्छ भन्ने निर्धारण गर्न यसलाई प्रयोग गर्न सक्छ र यसले अतिरिक्त ब्याट्री उर्जा खतप गर्न सक्छ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"अनुप्रयोगले विश्वव्यापी स्थान प्रणाली (GPS) वा सेल टावरहरू र Wi-Fi जस्ता नेटवर्क स्थान स्रोतहरूको प्रयोग गरेर तपाईंको सही स्थान प्राप्त गर्न अनुमति दिन्छ। यी स्थान सेवाहरू खोल्नु पर्छ र अनुप्रयोगहरूका लागि प्रयोग गर्न तपाईंको उपकरणमा उपलब्ध हुनु पर्छ। अनुप्रयोगहरूले तपाईं कहाँ हुनु हुन्छ भन्ने निर्धारण गर्न यसलाई प्रयोग गर्न सक्छ र यसले अतिरिक्त ब्याट्री उर्जा खतप गर्न सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित स्थान पहुँच गराउनुहोस् (नेटवर्कमा आधारित)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"अनुप्रयोगलाई तपाईँको अनुमानित स्थान प्राप्त गर्न अनुमति दिन्छ। यो स्थान सेल टावर र वाइ-फाइजस्ता नेटवर्क स्थान स्रोतहरूको प्रोग गरी स्थान सेवाहरूबाट उत्पन्न गरिएको हो। अनुप्रयोगले यी स्थान सेवाहरूको उपयोग गर्नको लागि यी सेवाहरू तपाईँको उपकरणमा चालु र उपलब्ध हुनु आवश्यक छ। अनुप्रयोगहरूले अनुमानित रूपमा तपाईँ कहाँ हुनुहुन्छ भन्ने निर्धारण गर्न यसको प्रयोग गर्न सक्छन्।"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"अनुप्रयोगलाई तपाईंको अनुमानित स्थान प्राप्त गर्न अनुमति दिन्छ। यो स्थान सेल टावर र वाइ-फाइजस्ता नेटवर्क स्थान स्रोतहरूको प्रोग गरी स्थान सेवाहरूबाट उत्पन्न गरिएको हो। अनुप्रयोगले यी स्थान सेवाहरूको उपयोग गर्नको लागि यी सेवाहरू तपाईंको उपकरणमा चालु र उपलब्ध हुनु आवश्यक छ। अनुप्रयोगहरूले अनुमानित रूपमा तपाईं कहाँ हुनुहुन्छ भन्ने निर्धारण गर्न यसको प्रयोग गर्न सक्छन्।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङ्हरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"अडियो रेकर्ड गर्नुहोस्"</string>
@@ -776,7 +776,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"मार्गनिर्देशन पक्का गर्नुहोस्"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"यस पृष्ठलाई छोड्नुहोस्"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"यही पृष्ठमा रहनुहोस्"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईँ यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nके तपाईं यो पेजबाट नेभिगेट गर्न चाहनु हुन्छ भन्ने निश्चत छ?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"निश्चित गर्नुहोस्"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"जुक्ति: जुमलाई ठूलो र सानो पार्न दुई पटक हान्नुहोस्।"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"स्वतः भर्ने"</string>
@@ -809,7 +809,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"भूस्थान अनुमतिहरू ब्राउजर परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउजरको भू-स्थान अनुमतिहरू परिमार्जन गर्न अनुप्रयोगलाई अनुमति दिन्छ। खराब अनुप्रयोगहरूले  स्थान सूचना मनपरी वेब साइटहरूमा पठाउने अनुमतिको लागि यसलाई प्रयोग गर्न सक्छन्।"</string>
-    <string name="save_password_message" msgid="767344687139195790">"के तपाईँ ब्राउजरले यो पासवर्ड सम्झेको चाहनुहुन्छ?"</string>
+    <string name="save_password_message" msgid="767344687139195790">"के तपाईं ब्राउजरले यो पासवर्ड सम्झेको चाहनुहुन्छ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"अहिले होइन"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"सम्झनुहोस्"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कहिल्यै पनि होइन"</string>
@@ -828,8 +828,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"जिज्ञासा पेस गर्नुहोस्"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"भ्वाइस खोजी"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"छोएर अन्वेषण गर्ने सक्षम पार्न चाहनु हुन्छ?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>ले स्पर्षद्वारा अन्वेषण सक्षम गर्न चाहन्छ। स्पर्षद्वारा अन्वेषण सक्षम भएको बेला, तपाईँ आफ्नो औँलाको मुनि भएका विषयवस्तुहरू बारे सुन्न वा विवरण हेर्न सक्नुहुन्छ वा ट्याब्लेटसँग अन्तर्क्रिया गर्न इशारा गर्नुहोस्।"</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>ले स्पर्षद्वारा अन्वेषण सक्षम गर्न चाहन्छ। स्पर्षद्वारा अन्वेषण सक्षम भएको बेला तपाईँ आफ्नो औँलाको मुनि भएका विषयवस्तुहरू बारे सुन्न वा विवरण हेर्न सक्नुहुन्छ वा फोनसँग अन्तर्क्रिया गर्न इशारा गर्नुहोस्।"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>ले स्पर्षद्वारा अन्वेषण सक्षम गर्न चाहन्छ। स्पर्षद्वारा अन्वेषण सक्षम भएको बेला, तपाईं आफ्नो औँलाको मुनि भएका विषयवस्तुहरू बारे सुन्न वा विवरण हेर्न सक्नुहुन्छ वा ट्याब्लेटसँग अन्तर्क्रिया गर्न इशारा गर्नुहोस्।"</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>ले स्पर्षद्वारा अन्वेषण सक्षम गर्न चाहन्छ। स्पर्षद्वारा अन्वेषण सक्षम भएको बेला तपाईं आफ्नो औँलाको मुनि भएका विषयवस्तुहरू बारे सुन्न वा विवरण हेर्न सक्नुहुन्छ वा फोनसँग अन्तर्क्रिया गर्न इशारा गर्नुहोस्।"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"१ महिना अघि"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"१ महिना अघि"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1021,7 +1021,7 @@
     <string name="force_close" msgid="8346072094521265605">"ठीक छ"</string>
     <string name="report" msgid="4060218260984795706">"रिपोर्ट गर्नुहोस्"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा गर्नुहोस्"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ गैर जिम्मेवारी भएको छ।\n\nके तपाईँ यसलाई बन्द गर्न चाहनुहुन्छ?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ गैर जिम्मेवारी भएको छ।\n\nके तपाईं यसलाई बन्द गर्न चाहनुहुन्छ?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"अनुप्रयोग पुनः निर्देशीत"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले चलिरहेको छ।"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> वास्तविक सुरुवात भएको थियो।"</string>
@@ -1122,20 +1122,20 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"जब यो <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सँग जडित हुन्छ, फोन अस्थायी रूपमा वाइ-फाइबाट विच्छेद हुने छ"</string>
     <string name="select_character" msgid="3365550120617701745">"अक्षरहरू प्रवेश गराउनुहोस्"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS सन्देशहरू पठाइँदै"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ले धरै संख्यामा SMS सन्देशहरू पठाउँदैछ। के तपाईँ यस अनुप्रयोगलाई सन्देशहरू पठाउन सुचारु गर्न अनुमति दिन चाहनु हुन्छ?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ले धरै संख्यामा SMS सन्देशहरू पठाउँदैछ। के तपाईं यस अनुप्रयोगलाई सन्देशहरू पठाउन सुचारु गर्न अनुमति दिन चाहनु हुन्छ?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दिनुहोस्"</string>
     <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार गर्नुहोस्"</string>
-    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; के तपाईँ सन्देश पठाउन चाहुनु हुन्छ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
+    <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; के तपाईं सन्देश पठाउन चाहुनु हुन्छ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"यसको "<b>" कारणले तपाईँको मोबाइल खातामा शुल्क"</b>" लाग्नेछ।"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"यसको कारणले तपाईँको मोबाइल खातामा शुल्क लाग्नेछ।"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"पठाउनुहोस्"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रद्द गर्नुहोस्"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरो छनौट याद राख्नुहोस्"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"तपाईँ यसलाई पछि सेटिङहरूमा बदल्न सक्नु हुन्छ &gt; अनुप्रयोगहरू"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"तपाईं यसलाई पछि सेटिङहरूमा बदल्न सक्नु हुन्छ &gt; अनुप्रयोगहरू"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"कहिल्यै अनुमति नदिनुहोस्"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM कार्ड हटाइयो"</string>
-    <string name="sim_removed_message" msgid="5450336489923274918">"तपाईँ मान्य SIM कार्डसँग फेरि सुरु नगरे सम्म सेलुलर सञ्जाल उपलब्ध हुने छ।"</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"तपाईं मान्य SIM कार्डसँग फेरि सुरु नगरे सम्म सेलुलर सञ्जाल उपलब्ध हुने छ।"</string>
     <string name="sim_done_button" msgid="827949989369963775">"भयो"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM कार्ड थप गरियो"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"सेलुलर सञ्जाल पहुँच गर्न तपाईँको उपकरण पुनः सुरु गर्नुहोस्।"</string>
@@ -1233,14 +1233,14 @@
     <string name="dial_number_using" msgid="5789176425167573586">\n"नम्बर डायल गर्नुहोस् <xliff:g id="NUMBER">%s</xliff:g> प्रयोग गरेर"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"सम्पर्क सिर्जना गर्नुहोस्\nयो <xliff:g id="NUMBER">%s</xliff:g> प्रयोग गरेर"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"निम्न एउटा वा धेरै अनुप्रयोगहरूले तपाईँको खातामा पहुँचको लागि अनुमति अहिले र भविष्यमा अनुरोध गर्छन्।"</string>
-    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"के तपाईँ यस अनुरोधलाई अनुमति दिन चाहनुहुन्छ?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"के तपाईं यस अनुरोधलाई अनुमति दिन चाहनुहुन्छ?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"अनुरोध पहुँच गर्नुहोस्"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दिनुहोस्"</string>
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुरोध गरिएको अनुमति"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n"खाता <xliff:g id="ACCOUNT">%s</xliff:g>को लागि अनुरोध गरिएको अनुमति।"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईँ तपाईँको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
-    <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईं तपाईंको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईं आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"सिंक गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
@@ -1290,7 +1290,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"हो"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"होइन"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"सीमा नाघेकाहरू मेट्नुहोस्"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"त्यहाँ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> मेटाइएका आइटमहरू छन् <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>को लागि, खाता <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>। तपाईँ के गर्न चाहनु हुन्छ?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"त्यहाँ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> मेटाइएका आइटमहरू छन् <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>को लागि, खाता <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>। तपाईं के गर्न चाहनु हुन्छ?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"वस्तुहरू मेट्नुहोस्"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"मेटिएकाहरू पूर्ववत बनाउनुहोस्।"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"अहिलेको लागि केही नगर्नुहोस्"</string>
@@ -1581,7 +1581,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"तपाईँको प्रशासकद्वारा स्थापना गरिएको"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईंको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईं तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईंको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"सक्रिय गर्नुहोस्"</string>
@@ -1684,7 +1684,7 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो सुरु गर्दै…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"यन्त्रलाई रिसेट गर्दै…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"यन्त्रलाई रिसेट गर्ने हो?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"तपाईँ सबै परिवर्तनहरू गुमाउनु हुनेछ र <xliff:g id="TIMEOUT">%1$s</xliff:g> सेकेन्डमा डेमो फेरि सुरु हुनेछ…"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"तपाईं सबै परिवर्तनहरू गुमाउनु हुनेछ र <xliff:g id="TIMEOUT">%1$s</xliff:g> सेकेन्डमा डेमो फेरि सुरु हुनेछ…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"रद्द गर्नुहोस्"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"अहिले रिसेट गर्नुहोस्"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"यस यन्त्रलाई सीमितताहरू बिना प्रयोग गर्नका लागि फ्याक्ट्री रिसेट गर्नुहोस्"</string>
