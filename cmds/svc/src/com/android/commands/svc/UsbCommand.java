@@ -36,8 +36,8 @@ public class UsbCommand extends Svc.Command {
     public String longHelp() {
         return shortHelp() + "\n"
                 + "\n"
-                + "usage: svc usb setFunction [function]\n"
-                + "         Set the current usb function.\n\n"
+                + "usage: svc usb setFunction [function] [usbDataUnlocked=false]\n"
+                + "         Set the current usb function and optionally the data lock state.\n\n"
                 + "       svc usb getFunction\n"
                 + "          Gets the list of currently enabled functions\n";
     }
@@ -49,8 +49,12 @@ public class UsbCommand extends Svc.Command {
             if ("setFunction".equals(args[1])) {
                 IUsbManager usbMgr = IUsbManager.Stub.asInterface(ServiceManager.getService(
                         Context.USB_SERVICE));
+                boolean unlockData = false;
+                if (args.length >= 4) {
+                    unlockData = Boolean.valueOf(args[3]);
+                }
                 try {
-                    usbMgr.setCurrentFunction((args.length >=3 ? args[2] : null), false);
+                    usbMgr.setCurrentFunction((args.length >=3 ? args[2] : null), unlockData);
                 } catch (RemoteException e) {
                     System.err.println("Error communicating with UsbManager: " + e);
                 }
