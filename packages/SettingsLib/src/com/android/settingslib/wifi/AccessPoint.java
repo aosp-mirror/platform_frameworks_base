@@ -422,7 +422,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             // This is the active connection on non-passpoint network
             summary.append(getSummary(mContext, getDetailedState(),
                     mInfo != null && mInfo.isEphemeral()));
-        } else if (config != null && config.isPasspoint()) {
+        } else if (config != null && config.isPasspoint()
+                && config.getNetworkSelectionStatus().isNetworkEnabled()) {
             String format = mContext.getString(R.string.available_via_passpoint);
             summary.append(String.format(format, config.providerFriendlyName));
         } else if (config != null && config.hasNoInternetAccess()) {
