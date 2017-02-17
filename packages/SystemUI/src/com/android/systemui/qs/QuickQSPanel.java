@@ -49,6 +49,9 @@ public class QuickQSPanel extends QSPanel {
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
+        if (mFooter != null) {
+            removeView((View) mFooter.getView());
+        }
         if (mTileLayout != null) {
             for (int i = 0; i < mRecords.size(); i++) {
                 mTileLayout.removeTile(mRecords.get(i));
