@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"අනෙක් යෙදුම්වල පසුබිම් ක්‍රියාවලි අවසන් කිරීමට යෙදුමට අවසර දෙන්න. අනෙක් යෙදුම් ධාවනය නැවතීමට මෙය හේතුවක් වේ."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"මෙම යෙදුම වෙනත් යෙදුම්වලට ඉහළින් දිස් විය හැකිය"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"මෙම යෙදුම වෙනත් යෙදුම්වල හෝ තිරයේ වෙනත් කොටස්වලට ඉහළින් දිස් විය හැකිය. මෙය සාමාන්‍ය යෙදුම් භාවිතයට බාධා කළ හැකි අතර වෙනත් යෙදුම් දිස් වන ආකාරය වෙනස් කළ හැකිය."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"යෙදුම සැමවිටම ධාවනය කරන්න"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"මතකයේ පවතින එහි කොටස් නොනැසී පැවතීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම් වලට මතකය සීමා කිරීමෙන් ටැබ්ලටය පමා කිරීම මගින්  මෙමගින් කළ හැක."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"යෙදුමේ කොටසක් මතකය තුළ එයට ස්ථාවර තබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය වෙනත් යෙදුම් වලට තිබෙන මතකය සීමා කරයි සහ රූපවාහිනිය මන්දගාමී කරයි."</string>
@@ -954,8 +962,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ආදාන ක්‍රමය"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"පෙළ ක්‍රියාවන්"</string>
     <string name="email" msgid="4560673117055050403">"ඊ-තැපෑල"</string>
-    <string name="dial" msgid="2275093056198652749">"අමතන්න"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"සිතියම"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>

@@ -326,6 +326,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Leidžiama programai baigti kitų programų fone vykdomus procesus. Dėl to gali būti sustabdytos kitos programos."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Ši programa gali būti rodoma virš kitų programų"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Ši programa gali būti rodoma virš kitų programų arba kitų ekrano sričių. Tai gali trukdyti įprastai naudoti programas ir pakeisti kitų programų rodymo būdą."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"nustatyti, kad programa būtų visada vykdoma"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Leidžiama programai savo dalis įrašyti į atmintį. Dėl to gali būti apribota kitomis programomis pasiekiama atmintis ir sulėtėti planšetinio kompiuterio veikimas."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Programai leidžiama nustatyti, kad tam tikros jos dalys nuolat išliktų atmintyje. Dėl to gali sumažėti kitoms programoms pasiekiamos atminties ir sulėtėti TV."</string>
@@ -992,8 +1000,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Įvesties būdas"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksto veiksmai"</string>
     <string name="email" msgid="4560673117055050403">"Siųsti el. laišką"</string>
-    <string name="dial" msgid="2275093056198652749">"Rinkti numerį"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Žemėlapis"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Mažėja laisvos saugyklos vietos"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kai kurios sistemos funkcijos gali neveikti"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistemos saugykloje nepakanka vietos. Įsitikinkite, kad yra 250 MB laisvos vietos, ir paleiskite iš naujo."</string>

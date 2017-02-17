@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Апп нь бусад апп-н арын процессыг дуусгах боломжтой. Энэ бусад апп-г зогсоох боломжийг олгоно."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Энэ апп бусад аппын дээр харагдана"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Энэ апп бусад аппын дээр эсвэл дэлгэцийн өөр хэсэгт харагдана. Энэ нь энгийн апп хэрэглээ болон бусад аппын харагдах байдлыг өөрчилж болзошгүй."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"апп-г байнга ажиллуулах"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Апп нь өөрийн хэсгийн санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан таблетыг удаашруулах болно."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Апп-д өөрийн бүрэлдэхүүн хэсгийг санах ойд хадгалахыг зөвшөөрдөг. Энэ нь бусад аппликэйшнүүдийн ашиглах санах ойн хэмжээг хязгаарлахаас гадна, телевизийг удаашруулна."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Оруулах арга"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст үйлдэл"</string>
     <string name="email" msgid="4560673117055050403">"Имэйл"</string>
-    <string name="dial" msgid="2275093056198652749">"Залгах"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Газрын зураг"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Зарим систем функц ажиллахгүй байна"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Системд хангалттай сан байхгүй байна. 250MБ чөлөөтэй зай байгаа эсэхийг шалгаад дахин эхлүүлнэ үү."</string>

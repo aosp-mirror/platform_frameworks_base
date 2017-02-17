@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Beste aplikazioen atzeko planoko prozesuak amaitzeko baimena ematen die aplikazioei. Horrela, agian aplikazio batzuk exekutatzeari utziko zaio."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Agertu beste aplikazio batzuen gainean"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Beste aplikazio batzuen edo pantailako beste zati batzuen gainean ager daiteke aplikazioa. Aplikazioaren funtzionamendu normala oztopa dezake eta beste aplikazio batzuen itxura alda dezake."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"Izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Beren zati batzuk memorian modu iraunkorrean aktibo uztea baimentzen die aplikazioei. Horrela, beste aplikazioek memoria gutxiago izan lezakete erabilgarri eta telebistak motelago funtziona lezake."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Idazketa-metodoa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
     <string name="email" msgid="4560673117055050403">"Posta"</string>
-    <string name="dial" msgid="2275093056198652749">"Telefonoa"</string>
+    <string name="dial" msgid="4204975095406423102">"Telefonoa"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="browse" msgid="6079864138582486027">"Arakatu"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>

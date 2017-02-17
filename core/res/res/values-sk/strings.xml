@@ -326,6 +326,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Umožňuje aplikácii ukončiť procesy na pozadí ostatných aplikácií. Môže to zapríčiniť zastavenie ostatných aplikácií."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Táto aplikácia sa môže zobraziť nad ostatnými aplikáciami"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Táto aplikácia sa môže zobraziť nad ostatnými aplikáciami alebo ďalšími časťami obrazovky. Môže tak narušovať normálne používanie aplikácií a zmeniť spôsob zobrazenia ďalších aplikácií."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"nastaviť, aby bola aplikácia neustále spustená"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Umožňuje aplikácii uložiť niektoré svoje časti natrvalo do pamäte. Môže to obmedziť pamäť dostupnú pre ostatné aplikácie a spomaliť tak tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Umožňuje aplikácii natrvalo uložiť svoje časti v pamäti. Môže to obmedziť pamäť dostupnú pre ďalšie aplikácie, čím sa spomaľuje televízor."</string>
@@ -992,8 +1000,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metóda vstupu"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Operácie s textom"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="dial" msgid="2275093056198652749">"Vytočiť"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>

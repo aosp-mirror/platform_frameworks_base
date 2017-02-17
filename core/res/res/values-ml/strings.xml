@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ പശ്ചാത്തല പ്രോസസ്സുകൾ അവസാനിപ്പിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് മറ്റ് അപ്ലിക്കേഷനുകൾ പ്രവർത്തനം നിർത്താനിടയാക്കാം."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"ഈ ആപ്പിന്, മറ്റ് ആപ്‌സിന്റെ മുകളിൽ ദൃശ്യമാകാൻ കഴിയും"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"മറ്റ് ആപ്‌സിന് മുകളിലോ സ്ക്രീനിന്റെ മറ്റ് ഭാഗങ്ങളിലോ ദൃശ്യമാകാൻ ഈ ആപ്പിന് കഴിയും. സാധാരണ ആപ്പ് ഉപയോഗത്തെ ഇത് തടസ്സപ്പെടുത്താം, മറ്റ് ആപ്‌സ് ദൃശ്യമാകുന്ന രീതിയെയും ഇത് മാറ്റാം."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"അപ്ലിക്കേഷൻ എപ്പോഴും പ്രവർത്തിക്കുന്നതാക്കുക"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"മെമ്മറിയിൽ അപ്ലിക്കേഷനുകളുടെ ഭാഗങ്ങൾ നിലനിർത്താൻ സ്വയം അനുവദിക്കുന്നു. ഇത് ടാബ്‌ലെറ്റിനെ മന്ദഗതിയിലാക്കുന്ന വിധത്തിൽ മറ്റ് അപ്ലിക്കേഷനുകൾക്ക് ലഭ്യമായ മെമ്മറി പരിമിതപ്പെടുത്താനിടയുണ്ട്."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"മെമ്മറിയിൽ സ്ഥിരതയുള്ളതാക്കുന്നതിന് അപ്ലിക്കേഷൻ അനുവദിക്കുന്നു. ടിവിയെ സാവധാനത്തിലാക്കുന്ന മറ്റ് അപ്ലിക്കേഷനുകളിലേക്കുള്ള മെമ്മറി ലഭ്യതയെ ഇതിന് പരിമിതമാക്കാനാവും."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
     <string name="email" msgid="4560673117055050403">"ഇമെയിൽ"</string>
-    <string name="dial" msgid="2275093056198652749">"ഡയൽ ചെയ്യുക"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"മാപ്പ്"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -1695,18 +1706,11 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"ഉല്‍‌പ്പാദനക്ഷമത"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ഉപകരണ സ്റ്റോറേജ്"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ഡീബഗ്ഗിംഗ്"</string>
-    <!-- no translation found for time_picker_hour_label (2979075098868106450) -->
-    <skip />
-    <!-- no translation found for time_picker_minute_label (5168864173796598399) -->
-    <skip />
-    <!-- no translation found for time_picker_header_text (143536825321922567) -->
-    <skip />
-    <!-- no translation found for time_picker_input_error (7574999942502513765) -->
-    <skip />
-    <!-- no translation found for time_picker_prompt_label (7588093983899966783) -->
-    <skip />
-    <!-- no translation found for time_picker_text_input_mode_description (4148166758173708199) -->
-    <skip />
-    <!-- no translation found for time_picker_radial_mode_description (4953403779779557198) -->
-    <skip />
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"മണിക്കൂര്‍"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
+    <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയത്തിൽ ടൈപ്പുചെയ്യുക"</string>
+    <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
+    <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
 </resources>

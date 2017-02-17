@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允許應用程式終止其他應用程式的背景處理程序。這項設定可能會導致其他應用程式停止執行。"</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"這個應用程式可顯示在其他應用程式上方"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"這個應用程式可顯示在其他應用程式上方或畫面中的其他位置。你可能會無法照常使用應用程式，且其他應用程式的顯示方式可能會受到影響。"</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"一律執行應用程式"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，並拖慢平板電腦運作速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允許應用程式的部分內容常駐在記憶體中。這項設定可能會限制其他應用程式可用的記憶體，造成電視的運作速度變慢。"</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
     <string name="email" msgid="4560673117055050403">"電子郵件"</string>
-    <string name="dial" msgid="2275093056198652749">"撥號"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"地圖"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定您已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1227,7 +1238,7 @@
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出\n權限要求。"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"您目前並非透過工作設定檔使用這個應用程式"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"您目前並非透過 Work 設定檔使用這個應用程式"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"您目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>

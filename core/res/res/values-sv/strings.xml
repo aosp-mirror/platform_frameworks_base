@@ -183,7 +183,7 @@
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratörsappen för jobbprofilen saknas eller är skadad. Det innebär att jobbprofilen och all relaterad data har raderats. Kontakta administratören om du vill ha hjälp."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Din jobbprofil är inte längre tillgänglig på den här enheten."</string>
     <string name="network_logging_notification_title" msgid="1805392571290161924">"Nätverkstrafiken övervakas"</string>
-    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tryck här om du vill läsa mer"</string>
+    <string name="network_logging_notification_text" msgid="2671761001956320094">"Tryck här för att läsa mer"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten kommer att rensas"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Administratörsappen saknar delar eller är skadad och kan inte användas. Enheten kommer nu att rensas. Kontakta administratören om du behöver hjälp."</string>
     <string name="me" msgid="6545696007631404292">"Jag"</string>
@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tillåter att appen avslutar andra appars bakgrundsprocesser. Detta kan göra så att andra appar avslutas."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Appen kan visas ovanpå andra appar"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Appen kan visas ovanpå andra appar eller andra delar av skärmen. Detta kan störa den vanliga användningen av appar och påverka hur andra appar visas."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör surfplattan långsam."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör TV:n långsammare."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textåtgärder"</string>
     <string name="email" msgid="4560673117055050403">"Skicka e-post"</string>
-    <string name="dial" msgid="2275093056198652749">"Ring"</string>
+    <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="5441053548030107189">"Karta"</string>
+    <string name="browse" msgid="6079864138582486027">"Bläddra"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>
@@ -1316,7 +1325,7 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att svepa."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut mikrofonlurar om du vill att lösenordet ska läsas upp."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut ett headset för att få lösenordet uppläst."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigera uppåt"</string>
@@ -1401,7 +1410,7 @@
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ange PIN-kod för SIM-kortet"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ange PIN-kod"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Ange lösenord"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet är nu inaktiverat. Ange PUK-koden om du vill fortsätta. Kontakta operatören om du vill få mer information."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet är nu inaktiverat. Ange PUK-koden för att fortsätta. Kontakta operatören om du vill ha mer information."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ange önskad PIN-kod"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekräfta önskad PIN-kod"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Låser upp SIM-kort …"</string>

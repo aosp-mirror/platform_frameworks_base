@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Este permiso autoriza a la aplicación a interrumpir procesos en segundo plano de otras aplicaciones y puede hacer, por tanto, que esas aplicaciones dejen de ejecutarse."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Esta aplicación puede aparecer sobre otras aplicaciones"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Esta aplicación puede aparecer sobre otras aplicaciones u otras partes de la pantalla. Esto puede interferir con el uso normal de las aplicaciones y cambiar la forma en la que estas aparecen."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"hacer que la aplicación se ejecute siempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite que la aplicación haga que algunas de sus partes se mantengan en la memoria. Esto puede limitar la cantidad de memoria disponible para otras aplicaciones y ralentizar el tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Permite que la aplicación haga que algunas partes de sí misma queden persistentes en la memoria. Esto puede limitar la memoria disponible para otras aplicaciones, lo que podría ralentizar la TV."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Método de introducción de texto"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
-    <string name="dial" msgid="2275093056198652749">"Marcar"</string>
+    <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <string name="browse" msgid="6079864138582486027">"Explorar"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>

@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த பயன்பாட்டை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான பயன்பாட்டு உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"பயன்பாட்டை எப்போதும் இயங்குமாறு செய்தல்"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, டேப்லெட்டின் வேகத்தைக் குறைக்கலாம்."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"பயன்பாடு தனது உள்ளடக்கத்தை நினைவகத்தில் தொடர்ந்து வைத்திருக்க, அனுமதிக்கிறது. பிற பயன்பாடுகளுக்கென இருக்கும் நினைவகத்தை இது கட்டுப்படுத்தி, டிவியின் செயல்திறனைக் குறைக்கலாம்."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
     <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
-    <string name="dial" msgid="2275093056198652749">"டயல்"</string>
+    <string name="dial" msgid="4204975095406423102">"ஃபோன்"</string>
     <string name="map" msgid="5441053548030107189">"வரைபடம்"</string>
+    <string name="browse" msgid="6079864138582486027">"உலாவு"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>

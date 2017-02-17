@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ఇతర అనువర్తనాల నేపథ్య ప్రాసెస్‌లను ముగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు అమలు కాకుండా ఆపివేయబడవచ్చు."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"ఈ అనువర్తనం ఇతర అనువర్తనాల పైభాగాన కనిపించగలదు"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"ఈ అనువర్తనం ఇతర అనువర్తనాల పైభాగాన లేదా స్క్రీన్ యొక్క ఇతర భాగాలపైన కనిపించగలదు. ఇది సాధారణ అనువర్తన వినియోగానికి అంతరాయం కలిగించవచ్చు మరియు ఆ ఇతర అనువర్తనాలు కనిపించే విధానాన్ని మార్చవచ్చు."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"అనువర్తనాన్ని ఎల్లప్పుడూ అమలు చేయడం"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"అనువర్తనం, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, టాబ్లెట్ నెమ్మదిగా పని చేస్తుంది."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"అనువర్తనం దానిలోని కొన్ని భాగాలను మెమరీలో ఉంచడానికి దాన్ని అనుమతిస్తుంది. ఇది టీవీ నెమ్మదిగా పని చేసేలా చేస్తూ ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని పరిమితం చేయవచ్చు."</string>
@@ -952,8 +960,11 @@
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
     <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
-    <string name="dial" msgid="2275093056198652749">"డయల్ చేయి"</string>
+    <!-- no translation found for dial (4204975095406423102) -->
+    <skip />
     <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
+    <!-- no translation found for browse (6079864138582486027) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>

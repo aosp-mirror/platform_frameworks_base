@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Antaa sovelluksen sulkea muiden sovelluksien taustaprosesseja. Tämä voi sulkea muita sovelluksia."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Tämä sovellus voi näkyä muiden sovellusten päällä"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Tämä sovellus voi näkyä muiden sovellusten tai näytön muiden osien päällä. Tämä voi häiritä sovellusten tavallista käyttöä ja muuttaa tapaa, jolla muut sovellukset näkyvät."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Antaa sovelluksen lisätä omia osiaan pysyvästi muistiin. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa television toimintaa."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Syöttötapa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoiminnot"</string>
     <string name="email" msgid="4560673117055050403">"Sähköposti"</string>
-    <string name="dial" msgid="2275093056198652749">"Puhelu"</string>
+    <string name="dial" msgid="4204975095406423102">"Puhelin"</string>
     <string name="map" msgid="5441053548030107189">"Kartta"</string>
+    <string name="browse" msgid="6079864138582486027">"Selaa"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tallennustila ei riitä. Varmista, että vapaata tilaa on 250 Mt, ja käynnistä uudelleen."</string>

@@ -320,6 +320,14 @@
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Ermöglicht der App, Hintergrundprozesse anderer Apps zu beenden. Das kann dazu führen, dass andere Apps nicht mehr ausgeführt werden."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"App kann über anderen Apps erscheinen"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Diese App kann über anderen Apps oder anderen Teilen des Bildschirms erscheinen. Dies kann sich auf die normale App-Nutzung und die Darstellung anderer Apps auswirken."</string>
+    <!-- no translation found for permlab_runInBackground (7365290743781858803) -->
+    <skip />
+    <!-- no translation found for permdesc_runInBackground (7370142232209999824) -->
+    <skip />
+    <!-- no translation found for permlab_useDataInBackground (8694951340794341809) -->
+    <skip />
+    <!-- no translation found for permdesc_useDataInBackground (6049514223791806027) -->
+    <skip />
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"App permanent ausführen"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ermöglicht der App, Teile der eigenen App dauerhaft im Speicher abzulegen. Dies kann dazu führen, dass anderen Apps weniger Arbeitsspeicher zur Verfügung steht und das Tablet langsamer wird."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ermöglicht der App, Teile der eigenen App dauerhaft im Speicher abzulegen. Dies kann dazu führen, dass anderen Apps weniger Arbeitsspeicher zur Verfügung steht und der Fernseher langsamer wird."</string>
@@ -952,8 +960,9 @@
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="email" msgid="4560673117055050403">"E-Mail"</string>
-    <string name="dial" msgid="2275093056198652749">"Wählen"</string>
+    <string name="dial" msgid="4204975095406423102">"Telefon"</string>
     <string name="map" msgid="5441053548030107189">"Karte"</string>
+    <string name="browse" msgid="6079864138582486027">"Stöbern"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren möglicherweise nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
