@@ -289,6 +289,40 @@ static JNIEnv* getJniEnv() {
     return env;
 }
 
+static jobject translateLocation(JNIEnv* env, const hardware::gnss::V1_0::GnssLocation& location) {
+    JavaObject object(env, "android/location/Location", "gps");
+
+    uint16_t flags = static_cast<uint32_t>(location.gnssLocationFlags);
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) {
+        SET(Latitude, location.latitudeDegrees);
+        SET(Longitude, location.longitudeDegrees);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_ALTITUDE) {
+        SET(Altitude, location.altitudeMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED) {
+        SET(Speed, location.speedMetersPerSec);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING) {
+        SET(Bearing, location.bearingDegrees);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_HORIZONTAL_ACCURACY) {
+        SET(Accuracy, location.horizontalAccuracyMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_VERTICAL_ACCURACY) {
+        SET(VerticalAccuracyMeters, location.verticalAccuracyMeters);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED_ACCURACY) {
+        SET(SpeedAccuracyMetersPerSecond, location.speedAccuracyMetersPerSecond);
+    }
+    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING_ACCURACY) {
+        SET(BearingAccuracyDegrees, location.bearingAccuracyDegrees);
+    }
+    SET(Time, location.timestamp);
+
+    return object.get();
+}
+
 /*
  * GnssCallback class implements the callback methods for IGnss interface.
  */
@@ -321,19 +355,15 @@ size_t GnssCallback::sGnssSvListSize = 0;
 Return<void> GnssCallback::gnssLocationCb(
         const ::android::hardware::gnss::V1_0::GnssLocation& location) {
     JNIEnv* env = getJniEnv();
+
+    jobject jLocation = translateLocation(env, location);
+    bool hasLatLong = (static_cast<uint32_t>(location.gnssLocationFlags) &
+            hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) != 0;
+
     env->CallVoidMethod(mCallbacksObj,
                         method_reportLocation,
-                        location.gnssLocationFlags,
-                        static_cast<jdouble>(location.latitudeDegrees),
-                        static_cast<jdouble>(location.longitudeDegrees),
-                        static_cast<jdouble>(location.altitudeMeters),
-                        static_cast<jfloat>(location.speedMetersPerSec),
-                        static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.horizontalAccuracyMeters),
-                        static_cast<jfloat>(location.verticalAccuracyMeters),
-                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
-                        static_cast<jfloat>(location.bearingAccuracyDegrees),
-                        static_cast<jlong>(location.timestamp));
+                        boolToJbool(hasLatLong),
+                        jLocation);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -463,20 +493,12 @@ Return<void> GnssGeofenceCallback::gnssGeofenceTransitionCb(
         hardware::gnss::V1_0::GnssUtcTime timestamp) {
     JNIEnv* env = getJniEnv();
 
+    jobject jLocation = translateLocation(env, location);
+
     env->CallVoidMethod(mCallbacksObj,
                         method_reportGeofenceTransition,
                         geofenceId,
-                        location.gnssLocationFlags,
-                        static_cast<jdouble>(location.latitudeDegrees),
-                        static_cast<jdouble>(location.longitudeDegrees),
-                        static_cast<jdouble>(location.altitudeMeters),
-                        static_cast<jfloat>(location.speedMetersPerSec),
-                        static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.horizontalAccuracyMeters),
-                        static_cast<jfloat>(location.verticalAccuracyMeters),
-                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
-                        static_cast<jfloat>(location.bearingAccuracyDegrees),
-                        static_cast<jlong>(location.timestamp),
+                        jLocation,
                         transition,
                         timestamp);
 
@@ -488,20 +510,13 @@ Return<void> GnssGeofenceCallback::gnssGeofenceStatusCb(
         GeofenceAvailability status,
         const android::hardware::gnss::V1_0::GnssLocation& location) {
     JNIEnv* env = getJniEnv();
+
+    jobject jLocation = translateLocation(env, location);
+
     env->CallVoidMethod(mCallbacksObj,
                         method_reportGeofenceStatus,
                         status,
-                        location.gnssLocationFlags,
-                        static_cast<jdouble>(location.latitudeDegrees),
-                        static_cast<jdouble>(location.longitudeDegrees),
-                        static_cast<jdouble>(location.altitudeMeters),
-                        static_cast<jfloat>(location.speedMetersPerSec),
-                        static_cast<jfloat>(location.bearingDegrees),
-                        static_cast<jfloat>(location.horizontalAccuracyMeters),
-                        static_cast<jfloat>(location.verticalAccuracyMeters),
-                        static_cast<jfloat>(location.speedAccuracyMetersPerSecond),
-                        static_cast<jfloat>(location.bearingAccuracyDegrees),
-                        static_cast<jlong>(location.timestamp));
+                        jLocation);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -949,9 +964,6 @@ struct GnssBatchingCallback : public IGnssBatchingCallback {
     Return<void> gnssLocationBatchCb(
         const ::android::hardware::hidl_vec<hardware::gnss::V1_0::GnssLocation> & locations)
         override;
- private:
-    jobject translateLocation(
-            JNIEnv* env, const hardware::gnss::V1_0::GnssLocation* location);
 };
 
 Return<void> GnssBatchingCallback::gnssLocationBatchCb(
@@ -962,7 +974,7 @@ Return<void> GnssBatchingCallback::gnssLocationBatchCb(
             env->FindClass("android/location/Location"), nullptr);
 
     for (uint16_t i = 0; i < locations.size(); ++i) {
-        jobject jLocation = translateLocation(env, &locations[i]);
+        jobject jLocation = translateLocation(env, locations[i]);
         env->SetObjectArrayElement(jLocations, i, jLocation);
         env->DeleteLocalRef(jLocation);
     }
@@ -975,45 +987,9 @@ Return<void> GnssBatchingCallback::gnssLocationBatchCb(
     return Void();
 }
 
-// TODO: Use this common code to translate location for Geofencing and regular Location
-jobject GnssBatchingCallback::translateLocation(
-        JNIEnv* env, const hardware::gnss::V1_0::GnssLocation* location) {
-    JavaObject object(env, "android/location/Location", "gps");
-
-    uint16_t flags = static_cast<uint32_t>(location->gnssLocationFlags);
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_LAT_LONG) {
-        SET(Latitude, location->latitudeDegrees);
-        SET(Longitude, location->longitudeDegrees);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_ALTITUDE) {
-        SET(Altitude, location->altitudeMeters);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED) {
-        SET(Speed, location->speedMetersPerSec);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING) {
-        SET(Bearing, location->bearingDegrees);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_HORIZONTAL_ACCURACY) {
-        SET(Accuracy, location->horizontalAccuracyMeters);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_VERTICAL_ACCURACY) {
-        SET(VerticalAccuracyMeters, location->verticalAccuracyMeters);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_SPEED_ACCURACY) {
-        SET(SpeedAccuracyMetersPerSecond, location->speedAccuracyMetersPerSecond);
-    }
-    if (flags & hardware::gnss::V1_0::GnssLocationFlags::HAS_BEARING_ACCURACY) {
-        SET(BearingAccuracyDegrees, location->bearingAccuracyDegrees);
-    }
-    SET(Time, location->timestamp);
-
-    return object.get();
-}
-
-
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
-    method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFFFFJ)V");
+    method_reportLocation = env->GetMethodID(clazz, "reportLocation",
+            "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
@@ -1027,9 +1003,9 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_requestSetID = env->GetMethodID(clazz, "requestSetID", "(I)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
     method_reportGeofenceTransition = env->GetMethodID(clazz, "reportGeofenceTransition",
-            "(IIDDDFFFFFFJIJ)V");
+            "(ILandroid/location/Location;IJ)V");
     method_reportGeofenceStatus = env->GetMethodID(clazz, "reportGeofenceStatus",
-            "(IIDDDFFFFFFJ)V");
+            "(ILandroid/location/Location;)V");
     method_reportGeofenceAddStatus = env->GetMethodID(clazz, "reportGeofenceAddStatus",
             "(II)V");
     method_reportGeofenceRemoveStatus = env->GetMethodID(clazz, "reportGeofenceRemoveStatus",
