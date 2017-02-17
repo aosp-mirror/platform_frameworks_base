@@ -563,8 +563,6 @@ public final class SystemServer {
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
 
-        boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
-
         try {
             Slog.i(TAG, "Reading configuration...");
             SystemConfig.getInstance();
@@ -651,12 +649,7 @@ public final class SystemServer {
             // TODO: Use service dependencies instead.
             mDisplayManagerService.windowManagerAndInputReady();
 
-            // Skip Bluetooth if we have an emulator kernel
-            // TODO: Use a more reliable check to see if this product should
-            // support Bluetooth - see bug 988521
-            if (isEmulator) {
-                Slog.i(TAG, "No Bluetooth Service (emulator)");
-            } else if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else if (!context.getPackageManager().hasSystemFeature
                        (PackageManager.FEATURE_BLUETOOTH)) {
