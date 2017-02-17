@@ -2689,9 +2689,9 @@ public class PackageParser {
         certSha256 = certSha256.replace(":", "").toLowerCase();
         pkg.usesStaticLibraries = ArrayUtils.add(pkg.usesStaticLibraries, lname);
         pkg.usesStaticLibrariesVersions = ArrayUtils.appendInt(
-                pkg.usesStaticLibrariesVersions, version);
+                pkg.usesStaticLibrariesVersions, version, true);
         pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String.class,
-                pkg.usesStaticLibrariesCertDigests, certSha256);
+                pkg.usesStaticLibrariesCertDigests, certSha256, true);
 
         XmlUtils.skipCurrentTag(parser);
 
