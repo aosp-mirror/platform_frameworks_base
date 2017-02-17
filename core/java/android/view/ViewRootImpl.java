@@ -4465,7 +4465,7 @@ public final class ViewRootImpl implements ViewParent,
 
         private boolean performKeyboardGroupNavigation(int direction) {
             final View focused = mView.findFocus();
-            final View cluster = focused != null
+            View cluster = focused != null
                     ? focused.keyboardNavigationClusterSearch(null, direction)
                     : keyboardNavigationClusterSearch(null, direction);
 
@@ -4474,6 +4474,15 @@ public final class ViewRootImpl implements ViewParent,
             int realDirection = direction;
             if (direction == View.FOCUS_FORWARD || direction == View.FOCUS_BACKWARD) {
                 realDirection = View.FOCUS_DOWN;
+            }
+
+            if (cluster != null && cluster.isRootNamespace()) {
+                // the default cluster. Try to find a non-clustered view to focus.
+                if (cluster.restoreFocusNotInCluster()) {
+                    return true;
+                }
+                // otherwise skip to next actual cluster
+                cluster = keyboardNavigationClusterSearch(null, direction);
             }
 
             if (cluster != null && cluster.restoreFocusInCluster(realDirection)) {

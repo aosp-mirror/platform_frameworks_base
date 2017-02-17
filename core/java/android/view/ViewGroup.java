@@ -22,6 +22,7 @@ import android.animation.LayoutTransition;
 import android.annotation.CallSuper;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.ClipData;
 import android.content.Context;
@@ -3166,6 +3167,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
+    @TestApi
     @Override
     public boolean restoreFocusInCluster(@FocusRealDirection int direction) {
         if (mFocusedInCluster != null && !mFocusedInCluster.isKeyboardNavigationCluster()
@@ -3175,6 +3177,40 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return true;
         }
         return super.restoreFocusInCluster(direction);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean restoreFocusNotInCluster() {
+        if (mFocusedInCluster != null) {
+            // since clusters don't nest; we can assume that a non-null mFocusedInCluster
+            // will refer to a view not-in a cluster.
+            return restoreFocusInCluster(View.FOCUS_DOWN);
+        }
+        if (isKeyboardNavigationCluster()) {
+            return false;
+        }
+        int descendentFocusability = getDescendantFocusability();
+        if (descendentFocusability == FOCUS_BLOCK_DESCENDANTS) {
+            return super.requestFocus(FOCUS_DOWN, null);
+        }
+        if (descendentFocusability == FOCUS_BEFORE_DESCENDANTS
+                && super.requestFocus(FOCUS_DOWN, null)) {
+            return true;
+        }
+        for (int i = 0; i < mChildrenCount; ++i) {
+            View child = mChildren[i];
+            if (!child.isKeyboardNavigationCluster()
+                    && child.restoreFocusNotInCluster()) {
+                return true;
+            }
+        }
+        if (descendentFocusability == FOCUS_AFTER_DESCENDANTS) {
+            return super.requestFocus(FOCUS_DOWN, null);
+        }
+        return false;
     }
 
     /**
