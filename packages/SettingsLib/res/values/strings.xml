@@ -57,6 +57,8 @@
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
     <string name="wifi_disabled_network_failure">IP Configuration Failure</string>
+    <!-- Status for networks disabled by the network recommendation provider -->
+    <string name="wifi_disabled_by_recommendation_provider">Not connected due to low quality network</string>
     <!-- Status for networked disabled from a wifi association failure -->
     <string name="wifi_disabled_wifi_failure">WiFi Connection Failure</string>
     <!-- Status for networks disabled from authentication failure (wrong password

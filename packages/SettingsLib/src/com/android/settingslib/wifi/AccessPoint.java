@@ -526,6 +526,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     summary.append(mContext.getString(R.string.wifi_disabled_generic));
                     break;
             }
+        } else if (config != null && config.getNetworkSelectionStatus().isNotRecommended()) {
+            summary.append(mContext.getString(R.string.wifi_disabled_by_recommendation_provider));
         } else if (mRssi == Integer.MAX_VALUE) { // Wifi out of range
             summary.append(mContext.getString(R.string.wifi_not_in_range));
         } else { // In range, not disabled.
