@@ -7405,16 +7405,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This method only needs overloading if the node is marked as having extra data available.
      * </p>
      *
-     * @param info The info to which to add the extra data
+     * @param info The info to which to add the extra data. Never {@code null}.
      * @param extraDataKey A key specifying the type of extra data to add to the info. The
      *                     extra data should be added to the {@link Bundle} returned by
-     *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
-     * @param arguments A {@link Bundle} holding any arguments relevant for this request.
+     *                     the info's {@link AccessibilityNodeInfo#getExtras} method. Never
+     *                     {@code null}.
+     * @param arguments A {@link Bundle} holding any arguments relevant for this request. May be
+     *                  {@code null} if the service provided no arguments.
      *
      * @see AccessibilityNodeInfo#setExtraAvailableData
      */
     public void addExtraDataToAccessibilityNodeInfo(
-            AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+            @NonNull AccessibilityNodeInfo info, @NonNull String extraDataKey,
+            @Nullable Bundle arguments) {
     }
 
     /**
@@ -24544,17 +24547,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * the case where no accessibility delegate is set.
          * </p>
          *
-         * @param host The View hosting the delegate.
-         * @param info The info to which to add the extra data
+         * @param host The View hosting the delegate. Never {@code null}.
+         * @param info The info to which to add the extra data. Never {@code null}.
          * @param extraDataKey A key specifying the type of extra data to add to the info. The
          *                     extra data should be added to the {@link Bundle} returned by
-         *                     the info's {@link AccessibilityNodeInfo#getExtras} method.
+         *                     the info's {@link AccessibilityNodeInfo#getExtras} method.  Never
+         *                     {@code null}.
          * @param arguments A {@link Bundle} holding any arguments relevant for this request.
+         *                  May be {@code null} if the if the service provided no arguments.
          *
          * @see AccessibilityNodeInfo#setExtraAvailableData
          */
-        public void addExtraDataToAccessibilityNodeInfo(
-                View host, AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
+        public void addExtraDataToAccessibilityNodeInfo(@NonNull View host,
+                @NonNull AccessibilityNodeInfo info, @NonNull String extraDataKey,
+                @Nullable Bundle arguments) {
             host.addExtraDataToAccessibilityNodeInfo(info, extraDataKey, arguments);
         }
 
