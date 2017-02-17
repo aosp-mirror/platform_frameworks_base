@@ -107,10 +107,10 @@ public class ViewDebug {
          * these human readable values:
          *
          * <pre>
-         * @ViewDebug.ExportedProperty(mapping = {
-         *     @ViewDebug.IntToString(from = 0, to = "VISIBLE"),
-         *     @ViewDebug.IntToString(from = 4, to = "INVISIBLE"),
-         *     @ViewDebug.IntToString(from = 8, to = "GONE")
+         * {@literal @}ViewDebug.ExportedProperty(mapping = {
+         *     {@literal @}ViewDebug.IntToString(from = 0, to = "VISIBLE"),
+         *     {@literal @}ViewDebug.IntToString(from = 4, to = "INVISIBLE"),
+         *     {@literal @}ViewDebug.IntToString(from = 8, to = "GONE")
          * })
          * public int getVisibility() { ...
          * <pre>
@@ -127,10 +127,10 @@ public class ViewDebug {
          * of an array:
          *
          * <pre>
-         * @ViewDebug.ExportedProperty(indexMapping = {
-         *     @ViewDebug.IntToString(from = 0, to = "INVALID"),
-         *     @ViewDebug.IntToString(from = 1, to = "FIRST"),
-         *     @ViewDebug.IntToString(from = 2, to = "SECOND")
+         * {@literal @}ViewDebug.ExportedProperty(indexMapping = {
+         *     {@literal @}ViewDebug.IntToString(from = 0, to = "INVALID"),
+         *     {@literal @}ViewDebug.IntToString(from = 1, to = "FIRST"),
+         *     {@literal @}ViewDebug.IntToString(from = 2, to = "SECOND")
          * })
          * private int[] mElements;
          * <pre>
@@ -148,9 +148,11 @@ public class ViewDebug {
          * for the flags of an integer:
          *
          * <pre>
-         * @ViewDebug.ExportedProperty(flagMapping = {
-         *     @ViewDebug.FlagToString(mask = ENABLED_MASK, equals = ENABLED, name = "ENABLED"),
-         *     @ViewDebug.FlagToString(mask = ENABLED_MASK, equals = DISABLED, name = "DISABLED"),
+         * {@literal @}ViewDebug.ExportedProperty(flagMapping = {
+         *     {@literal @}ViewDebug.FlagToString(mask = ENABLED_MASK, equals = ENABLED,
+         *             name = "ENABLED"),
+         *     {@literal @}ViewDebug.FlagToString(mask = ENABLED_MASK, equals = DISABLED,
+         *             name = "DISABLED"),
          * })
          * private int mFlags;
          * <pre>
