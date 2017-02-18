@@ -17,7 +17,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
-import android.net.ScoredNetwork;
+import android.net.NetworkBadging;
 import android.os.BatteryManager;
 import android.os.UserManager;
 import android.print.PrintManager;
@@ -304,13 +304,13 @@ public class Utils {
      */
     public static int getWifiBadgeResource(int badge) {
         switch (badge) {
-            case ScoredNetwork.BADGING_NONE:
+            case NetworkBadging.BADGING_NONE:
                 return View.NO_ID;
-            case ScoredNetwork.BADGING_SD:
+            case NetworkBadging.BADGING_SD:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
-            case ScoredNetwork.BADGING_HD:
+            case NetworkBadging.BADGING_HD:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
-            case ScoredNetwork.BADGING_4K:
+            case NetworkBadging.BADGING_4K:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
             default:
                 throw new IllegalArgumentException(

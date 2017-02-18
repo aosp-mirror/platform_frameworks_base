@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,19 +26,29 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.net.ScoredNetwork.Badging;
 import android.net.wifi.WifiManager;
 import android.view.View;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Utility methods for working with network badging.
- *
- * TODO: move ScoredNetwork.Badging and related constants to this class.
  *
  * @hide
  */
 @SystemApi
 public class NetworkBadging {
+
+    @IntDef({BADGING_NONE, BADGING_SD, BADGING_HD, BADGING_4K})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Badging {}
+
+    public static final int BADGING_NONE = 0;
+    public static final int BADGING_SD = 10;
+    public static final int BADGING_HD = 20;
+    public static final int BADGING_4K = 30;
+
     private NetworkBadging() {}
 
     /**
@@ -55,7 +66,7 @@ public class NetworkBadging {
     @NonNull public static Drawable getWifiIcon(
             @IntRange(from=0, to=4) int signalLevel, @Badging int badging, @Nullable Theme theme) {
         Resources resources = Resources.getSystem();
-        if (badging == ScoredNetwork.BADGING_NONE) {
+        if (badging == BADGING_NONE) {
             return resources.getDrawable(getWifiSignalResource(signalLevel), theme);
         }
         Drawable[] layers = new Drawable[] {
@@ -131,19 +142,19 @@ public class NetworkBadging {
      *
      * @param badging {@see ScoredNetwork#Badging} from {@link ScoredNetwork#calculateBadge(int)}.
      * @return the @DrawableRes for the icon or {@link View#NO_ID} for
-     *         {@link ScoredNetwork#BADGING_NONE}
+     *         {@link NetworkBadging#BADGING_NONE}
      * @throws IllegalArgumentException for an invalid badging value.
      * @hide
      */
     @DrawableRes private static int getWifiBadgeResource(@Badging int badging) {
         switch (badging) {
-            case ScoredNetwork.BADGING_NONE:
+            case BADGING_NONE:
                 return View.NO_ID;
-            case ScoredNetwork.BADGING_SD:
+            case BADGING_SD:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
-            case ScoredNetwork.BADGING_HD:
+            case BADGING_HD:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
-            case ScoredNetwork.BADGING_4K:
+            case BADGING_4K:
                 return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
             default:
                 throw new IllegalArgumentException("No resource found for badge: " + badging);

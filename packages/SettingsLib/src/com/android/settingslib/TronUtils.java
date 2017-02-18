@@ -16,7 +16,7 @@
 package com.android.settingslib;
 
 import android.content.Context;
-import android.net.ScoredNetwork;
+import android.net.NetworkBadging;
 
 import com.android.internal.logging.MetricsLogger;
 
@@ -34,7 +34,7 @@ public final class TronUtils {
      *
      * @param context Context
      * @param histogram the Tron histogram name to write to
-     * @param badgeEnum the {@link ScoredNetwork.Badging} badge value
+     * @param badgeEnum the {@link NetworkBadging.Badging} badge value
      * @throws IllegalArgumentException if the given badge enum is not supported
      */
     private static void logNetworkBadgeMetric(
@@ -42,16 +42,16 @@ public final class TronUtils {
             throws IllegalArgumentException {
         int bucket;
         switch (badgeEnum) {
-            case ScoredNetwork.BADGING_NONE:
+            case NetworkBadging.BADGING_NONE:
                 bucket = 0;
                 break;
-            case ScoredNetwork.BADGING_SD:
+            case NetworkBadging.BADGING_SD:
                 bucket = 1;
                 break;
-            case ScoredNetwork.BADGING_HD:
+            case NetworkBadging.BADGING_HD:
                 bucket = 2;
                 break;
-            case ScoredNetwork.BADGING_4K:
+            case NetworkBadging.BADGING_4K:
                 bucket = 3;
                 break;
             default:

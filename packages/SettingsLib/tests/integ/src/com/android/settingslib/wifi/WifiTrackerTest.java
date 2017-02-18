@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.NetworkBadging;
 import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
@@ -80,7 +81,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_1 + '"', BSSID_1));
     private static final int RSSI_1 = -30;
     private static final byte SCORE_1 = 10;
-    private static final int BADGE_1 = ScoredNetwork.BADGING_SD;
+    private static final int BADGE_1 = NetworkBadging.BADGING_SD;
 
     private static final String SSID_2 = "ssid2";
     private static final String BSSID_2 = "AA:AA:AA:AA:AA:AA";
@@ -88,7 +89,7 @@ public class WifiTrackerTest {
             new NetworkKey(new WifiKey('"' + SSID_2 + '"', BSSID_2));
     private static final int RSSI_2 = -30;
     private static final byte SCORE_2 = 15;
-    private static final int BADGE_2 = ScoredNetwork.BADGING_HD;
+    private static final int BADGE_2 = NetworkBadging.BADGING_HD;
 
     @Captor ArgumentCaptor<WifiNetworkScoreCache> mScoreCacheCaptor;
     @Mock private ConnectivityManager mockConnectivityManager;
@@ -460,9 +461,9 @@ public class WifiTrackerTest {
 
         for (AccessPoint ap : aps) {
             if (ap.getSsidStr().equals(SSID_1)) {
-                assertEquals(ScoredNetwork.BADGING_NONE, ap.getBadge());
+                assertEquals(NetworkBadging.BADGING_NONE, ap.getBadge());
             } else if (ap.getSsidStr().equals(SSID_2)) {
-                assertEquals(ScoredNetwork.BADGING_NONE, ap.getBadge());
+                assertEquals(NetworkBadging.BADGING_NONE, ap.getBadge());
             }
         }
     }

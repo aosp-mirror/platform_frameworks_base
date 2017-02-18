@@ -41,7 +41,7 @@ public class ScoredNetwork implements Parcelable {
      * Key used with the {@link #attributes} bundle to define the badging curve.
      *
      * <p>The badging curve is a {@link RssiCurve} used to map different RSSI values to {@link
-     * Badging} enums.
+     * NetworkBadging.Badging} enums.
      */
     public static final String ATTRIBUTES_KEY_BADGING_CURVE =
             "android.net.attributes.key.BADGING_CURVE";
@@ -70,17 +70,31 @@ public class ScoredNetwork implements Parcelable {
     public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET =
             "android.net.attributes.key.RANKING_SCORE_OFFSET";
 
+    /** A {@link NetworkKey} uniquely identifying this network. */
+    public final NetworkKey networkKey;
+
+    // TODO(b/35323372): Delete these once external references are switched.
+    /** @deprecated Use {@link NetworkBadging#Badging} instead. */
+    @Deprecated
     @IntDef({BADGING_NONE, BADGING_SD, BADGING_HD, BADGING_4K})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Badging {}
 
+    /** @deprecated Use {@link NetworkBadging#BADGING_NONE} instead. */
+    @Deprecated
     public static final int BADGING_NONE = 0;
-    public static final int BADGING_SD = 10;
-    public static final int BADGING_HD = 20;
-    public static final int BADGING_4K = 30;
 
-    /** A {@link NetworkKey} uniquely identifying this network. */
-    public final NetworkKey networkKey;
+    /** @deprecated Use {@link NetworkBadging#BADGING_SD} instead. */
+    @Deprecated
+    public static final int BADGING_SD = 10;
+
+    /** @deprecated Use {@link NetworkBadging#BADGING_HD} instead. */
+    @Deprecated
+    public static final int BADGING_HD = 20;
+
+    /** @deprecated Use {@link NetworkBadging#BADGING_4K} instead. */
+    @Deprecated
+    public static final int BADGING_4K = 30;
 
     /**
      * The {@link RssiCurve} representing the scores for this network based on the RSSI.
@@ -276,14 +290,14 @@ public class ScoredNetwork implements Parcelable {
     }
 
     /**
-     * Return the {@link Badging} enum for this network for the given RSSI, derived from the
+     * Return the {@link NetworkBadging.Badging} enum for this network for the given RSSI, derived from the
      * badging curve.
      *
      * <p>If no badging curve is present, {@link #BADGE_NONE} will be returned.
      *
      * @param rssi The rssi level for which the badge should be calculated
      */
-    @Badging
+    @NetworkBadging.Badging
     public int calculateBadge(int rssi) {
         if (attributes != null && attributes.containsKey(ATTRIBUTES_KEY_BADGING_CURVE)) {
             RssiCurve badgingCurve =
@@ -291,7 +305,7 @@ public class ScoredNetwork implements Parcelable {
             return badgingCurve.lookupScore(rssi);
         }
 
-        return BADGING_NONE;
+        return NetworkBadging.BADGING_NONE;
     }
 
     public static final Parcelable.Creator<ScoredNetwork> CREATOR =

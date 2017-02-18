@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Intent;
+import android.net.NetworkBadging;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkKey;
@@ -12,7 +13,6 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -106,7 +106,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setWifiState(true, TEST_SSID, TEST_BSSID);
         mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
 
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) ScoredNetwork.BADGING_SD);
+        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) NetworkBadging.BADGING_SD);
 
         ArgumentCaptor<WifiNetworkScoreCache> scoreCacheCaptor =
                 ArgumentCaptor.forClass(WifiNetworkScoreCache.class);
@@ -129,7 +129,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                 Utils.WIFI_PIE_FOR_BADGING[testLevel],
                 iconState.icon);
         assertEquals("SD Badge is set",
-                Utils.getWifiBadgeResource(ScoredNetwork.BADGING_SD),
+                Utils.getWifiBadgeResource(NetworkBadging.BADGING_SD),
                 iconState.iconOverlay);
 
         settingsOverrider.release();
