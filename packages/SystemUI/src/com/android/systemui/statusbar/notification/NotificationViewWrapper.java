@@ -185,7 +185,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
-    public void setShowingLegacyBackground(boolean showing) {
+    public void setLegacy(boolean legacy) {
     }
 
     public void setContentHeight(int contentHeight, int minHeightHint) {

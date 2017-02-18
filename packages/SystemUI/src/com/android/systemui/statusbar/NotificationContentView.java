@@ -80,7 +80,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mDark;
     private boolean mAnimate;
     private boolean mIsHeadsUp;
-    private boolean mShowingLegacyBackground;
+    private boolean mLegacy;
     private boolean mIsChildInGroup;
     private int mSmallHeight;
     private int mHeadsUpHeight;
@@ -140,7 +140,6 @@ public class NotificationContentView extends FrameLayout {
                 R.dimen.min_notification_layout_height);
         mNotificationContentMarginEnd = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
-        reset();
     }
 
     public void setHeights(int smallHeight, int headsUpMaxHeight, int maxHeight,
@@ -329,41 +328,6 @@ public class NotificationContentView extends FrameLayout {
         updateVisibility();
     }
 
-    public void reset() {
-        mPreviousExpandedRemoteInputIntent = null;
-        if (mExpandedRemoteInput != null) {
-            mExpandedRemoteInput.onNotificationUpdateOrReset();
-            if (mExpandedRemoteInput.isActive()) {
-                mPreviousExpandedRemoteInputIntent = mExpandedRemoteInput.getPendingIntent();
-                mCachedExpandedRemoteInput = mExpandedRemoteInput;
-                mExpandedRemoteInput.dispatchStartTemporaryDetach();
-                ((ViewGroup)mExpandedRemoteInput.getParent()).removeView(mExpandedRemoteInput);
-            }
-        }
-        if (mExpandedChild != null) {
-            mExpandedChild.animate().cancel();
-            removeView(mExpandedChild);
-            mExpandedRemoteInput = null;
-        }
-        mPreviousHeadsUpRemoteInputIntent = null;
-        if (mHeadsUpRemoteInput != null) {
-            mHeadsUpRemoteInput.onNotificationUpdateOrReset();
-            if (mHeadsUpRemoteInput.isActive()) {
-                mPreviousHeadsUpRemoteInputIntent = mHeadsUpRemoteInput.getPendingIntent();
-                mCachedHeadsUpRemoteInput = mHeadsUpRemoteInput;
-                mHeadsUpRemoteInput.dispatchStartTemporaryDetach();
-                ((ViewGroup)mHeadsUpRemoteInput.getParent()).removeView(mHeadsUpRemoteInput);
-            }
-        }
-        if (mHeadsUpChild != null) {
-            mHeadsUpChild.animate().cancel();
-            removeView(mHeadsUpChild);
-            mHeadsUpRemoteInput = null;
-        }
-        mExpandedChild = null;
-        mHeadsUpChild = null;
-    }
-
     public View getContractedChild() {
         return mContractedChild;
     }
@@ -394,8 +358,30 @@ public class NotificationContentView extends FrameLayout {
 
     public void setExpandedChild(View child) {
         if (mExpandedChild != null) {
+            mPreviousExpandedRemoteInputIntent = null;
+            if (mExpandedRemoteInput != null) {
+                mExpandedRemoteInput.onNotificationUpdateOrReset();
+                if (mExpandedRemoteInput.isActive()) {
+                    mPreviousExpandedRemoteInputIntent = mExpandedRemoteInput.getPendingIntent();
+                    mCachedExpandedRemoteInput = mExpandedRemoteInput;
+                    mExpandedRemoteInput.dispatchStartTemporaryDetach();
+                    ((ViewGroup)mExpandedRemoteInput.getParent()).removeView(mExpandedRemoteInput);
+                }
+            }
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
+            mExpandedRemoteInput = null;
+        }
+        if (child == null) {
+            mExpandedChild = null;
+            mExpandedWrapper = null;
+            if (mVisibleType == VISIBLE_TYPE_EXPANDED) {
+                mVisibleType = VISIBLE_TYPE_CONTRACTED;
+            }
+            if (mTransformationStartVisibleType == VISIBLE_TYPE_EXPANDED) {
+                mTransformationStartVisibleType = UNDEFINED;
+            }
+            return;
         }
         addView(child);
         mExpandedChild = child;
@@ -405,8 +391,30 @@ public class NotificationContentView extends FrameLayout {
 
     public void setHeadsUpChild(View child) {
         if (mHeadsUpChild != null) {
+            mPreviousHeadsUpRemoteInputIntent = null;
+            if (mHeadsUpRemoteInput != null) {
+                mHeadsUpRemoteInput.onNotificationUpdateOrReset();
+                if (mHeadsUpRemoteInput.isActive()) {
+                    mPreviousHeadsUpRemoteInputIntent = mHeadsUpRemoteInput.getPendingIntent();
+                    mCachedHeadsUpRemoteInput = mHeadsUpRemoteInput;
+                    mHeadsUpRemoteInput.dispatchStartTemporaryDetach();
+                    ((ViewGroup)mHeadsUpRemoteInput.getParent()).removeView(mHeadsUpRemoteInput);
+                }
+            }
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
+            mHeadsUpRemoteInput = null;
+        }
+        if (child == null) {
+            mHeadsUpChild = null;
+            mHeadsUpWrapper = null;
+            if (mVisibleType == VISIBLE_TYPE_HEADSUP) {
+                mVisibleType = VISIBLE_TYPE_CONTRACTED;
+            }
+            if (mTransformationStartVisibleType == VISIBLE_TYPE_HEADSUP) {
+                mTransformationStartVisibleType = UNDEFINED;
+            }
+            return;
         }
         addView(child);
         mHeadsUpChild = child;
@@ -978,20 +986,20 @@ public class NotificationContentView extends FrameLayout {
         return false;
     }
 
-    public void setShowingLegacyBackground(boolean showing) {
-        mShowingLegacyBackground = showing;
-        updateShowingLegacyBackground();
+    public void setLegacy(boolean legacy) {
+        mLegacy = legacy;
+        updateLegacy();
     }
 
-    private void updateShowingLegacyBackground() {
+    private void updateLegacy() {
         if (mContractedChild != null) {
-            mContractedWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+            mContractedWrapper.setLegacy(mLegacy);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+            mExpandedWrapper.setLegacy(mLegacy);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.setShowingLegacyBackground(mShowingLegacyBackground);
+            mHeadsUpWrapper.setLegacy(mLegacy);
         }
     }
 
@@ -1017,7 +1025,7 @@ public class NotificationContentView extends FrameLayout {
             mAmbientWrapper.notifyContentUpdated(entry.notification, mIsLowPriority);
         }
         applyRemoteInput(entry);
-        updateShowingLegacyBackground();
+        updateLegacy();
         mForceSelectNextLayout = true;
         setDark(mDark, false /* animate */, 0 /* delay */);
         mPreviousExpandedRemoteInputIntent = null;

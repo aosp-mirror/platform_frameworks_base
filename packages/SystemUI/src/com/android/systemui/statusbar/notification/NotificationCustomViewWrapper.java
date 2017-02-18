@@ -19,13 +19,8 @@ package com.android.systemui.statusbar.notification;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.service.notification.StatusBarNotification;
-import android.support.v4.graphics.ColorUtils;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -40,7 +35,7 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     private final ViewInvertHelper mInvertHelper;
     private final Paint mGreyPaint = new Paint();
-    private boolean mShowingLegacyBackground;
+    private boolean mIsLegacy;
     private int mLegacyColor;
 
     protected NotificationCustomViewWrapper(View view, ExpandableNotificationRow row) {
@@ -55,7 +50,7 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
             return;
         }
         super.setDark(dark, fade, delay);
-        if (!mShowingLegacyBackground && mShouldInvertDark) {
+        if (!mIsLegacy && mShouldInvertDark) {
             if (fade) {
                 mInvertHelper.fade(dark, delay);
             } else {
@@ -112,15 +107,14 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     @Override
     public int getCustomBackgroundColor() {
         int customBackgroundColor = super.getCustomBackgroundColor();
-        if (customBackgroundColor == 0 && mShowingLegacyBackground) {
+        if (customBackgroundColor == 0 && mIsLegacy) {
             return mLegacyColor;
         }
         return customBackgroundColor;
     }
 
-    @Override
-    public void setShowingLegacyBackground(boolean showing) {
-        super.setShowingLegacyBackground(showing);
-        mShowingLegacyBackground = showing;
+    public void setLegacy(boolean legacy) {
+        super.setLegacy(legacy);
+        mIsLegacy = legacy;
     }
 }
