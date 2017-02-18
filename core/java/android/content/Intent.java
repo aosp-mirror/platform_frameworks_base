@@ -2873,6 +2873,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @SystemApi
     public static final String ACTION_PRE_BOOT_COMPLETED =
             "android.intent.action.PRE_BOOT_COMPLETED";
 
@@ -3313,6 +3314,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
+     * Broadcast intent sent by the RecoverySystem to inform listeners that a master clear (wipe)
+     * is about to be performed.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MASTER_CLEAR_NOTIFICATION
+            = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
+
+    /**
      * Boolean intent extra to be used with {@link #ACTION_MASTER_CLEAR} in order to force a factory
      * reset even if {@link android.os.UserManager#DISALLOW_FACTORY_RESET} is set.
      *
@@ -3384,6 +3395,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
+
+    /**
+     * Broadcast Action: The sim card state has changed.
+     * For more details see TelephonyIntents.ACTION_SIM_STATE_CHANGED. This is here
+     * because TelephonyIntents is an internal class.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
+
     /**
      * The name of the extra used to define the text to be processed, as a
      * CharSequence. Note that this may be a styled CharSequence, so you must use
