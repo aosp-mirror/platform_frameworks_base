@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -1474,14 +1475,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void getFullScreenBounds(Rect bounds) {
-        // This is currently only used for the pinned stack animation when leaving PiP
-        // (see {@link BoundsAnimationController}), and in that case we need to animate this back
-        // to the full bounds to match the fullscreen stack
-        getDisplayContent().getLogicalDisplayRect(bounds);
     }
 
     public boolean hasMovementAnimations() {

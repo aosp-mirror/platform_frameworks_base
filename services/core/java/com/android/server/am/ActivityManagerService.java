@@ -361,7 +361,6 @@ import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
-import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -7722,7 +7721,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             aspectRatio);
                     mStackSupervisor.moveActivityToPinnedStackLocked(r, "enterPictureInPictureMode",
                             bounds, true /* moveHomeStackToFront */);
-                    final ActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
+                    final PinnedActivityStack stack = mStackSupervisor.getStack(PINNED_STACK_ID);
                     stack.setPictureInPictureAspectRatio(aspectRatio);
                     stack.setPictureInPictureActions(actions);
 
@@ -7776,9 +7775,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Only update the saved args from the args that are set
                 r.pictureInPictureArgs.copyOnlySet(args);
-                final ActivityStack stack = r.getStack();
-                if (stack.getStackId() == PINNED_STACK_ID) {
+                if (r.getStack().getStackId() == PINNED_STACK_ID) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
+                    final PinnedActivityStack stack = r.getStack();
                     stack.setPictureInPictureAspectRatio(r.pictureInPictureArgs.getAspectRatio());
                     stack.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
                 }
@@ -10340,7 +10339,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 if (animate) {
                     if (stackId == PINNED_STACK_ID) {
-                        final ActivityStack pinnedStack =
+                        final PinnedActivityStack pinnedStack =
                                 mStackSupervisor.getStack(PINNED_STACK_ID);
                         pinnedStack.animateResizePinnedStack(bounds, animationDuration);
                     } else {

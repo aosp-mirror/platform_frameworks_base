@@ -84,7 +84,6 @@ import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityController;
-import android.app.RemoteAction;
 import android.app.ResultInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -135,7 +134,8 @@ import java.util.Set;
 /**
  * State and management of a single stack of activities.
  */
-final class ActivityStack extends ConfigurationContainer implements StackWindowListener {
+class ActivityStack<T extends StackWindowController> extends ConfigurationContainer
+        implements StackWindowListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
@@ -247,7 +247,7 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     final ActivityManagerService mService;
     private final WindowManagerService mWindowManager;
-    private StackWindowController mWindowContainerController;
+    T mWindowContainerController;
     private final RecentTasks mRecentTasks;
 
     /**
@@ -462,14 +462,18 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
                 ? new LaunchingTaskPositioner() : null;
         final ActivityStackSupervisor.ActivityDisplay display = mActivityContainer.mActivityDisplay;
         mTmpRect2.setEmpty();
-        mWindowContainerController = new StackWindowController(mStackId, this,
-                display.mDisplayId, onTop, mTmpRect2);
+        mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
+                mTmpRect2);
         activityContainer.mStack = this;
         mStackSupervisor.mActivityContainers.put(mStackId, activityContainer);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
-    StackWindowController getWindowContainerController() {
+    T createStackWindowController(int displayId, boolean onTop, Rect outBounds) {
+        return (T) new StackWindowController(mStackId, this, displayId, onTop, outBounds);
+    }
+
+    T getWindowContainerController() {
         return mWindowContainerController;
     }
 
@@ -538,18 +542,6 @@ final class ActivityStack extends ConfigurationContainer implements StackWindowL
 
     void getDisplaySize(Point out) {
         mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
-    }
-
-    void animateResizePinnedStack(Rect bounds, int animationDuration) {
-        mWindowContainerController.animateResizePinnedStack(bounds, animationDuration);
-    }
-
-    void setPictureInPictureAspectRatio(float aspectRatio) {
-        mWindowContainerController.setPictureInPictureAspectRatio(aspectRatio);
-    }
-
-    void setPictureInPictureActions(List<RemoteAction> actions) {
-        mWindowContainerController.setPictureInPictureActions(actions);
     }
 
     void getStackDockedModeBounds(Rect outBounds, Rect outTempBounds, Rect outTempInsetBounds,

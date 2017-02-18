@@ -7266,10 +7266,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getDisplayContentOrCreate(DEFAULT_DISPLAY);
     }
 
-    private DisplayInfo getDefaultDisplayInfoLocked() {
-        return getDefaultDisplayContentLocked().getDisplayInfo();
-    }
-
     public void onDisplayAdded(int displayId) {
         mH.sendMessage(mH.obtainMessage(H.DO_DISPLAY_ADDED, displayId, 0));
     }

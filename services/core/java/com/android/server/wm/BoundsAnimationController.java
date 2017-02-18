@@ -272,18 +272,10 @@ public class BoundsAnimationController {
         void onAnimationEnd();
 
         void moveToFullscreen();
-
-        void getFullScreenBounds(Rect bounds);
     }
 
-    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to, int animationDuration) {
-        boolean moveToFullscreen = false;
-        if (to == null) {
-            to = new Rect();
-            target.getFullScreenBounds(to);
-            moveToFullscreen = true;
-        }
-
+    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to, int animationDuration,
+            boolean moveToFullscreen) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
 

@@ -230,28 +230,6 @@ class PinnedStackController {
     }
 
     /**
-     * @return the movement bounds for the given {@param stackBounds} and the current state of the
-     *         controller.
-     */
-    private Rect getMovementBounds(Rect stackBounds) {
-        return getMovementBounds(stackBounds, true /* adjustForIme */);
-    }
-
-    /**
-     * @return the movement bounds for the given {@param stackBounds} and the current state of the
-     *         controller.
-     */
-    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
-        final Rect movementBounds = new Rect();
-        getInsetBounds(movementBounds);
-
-        // Apply the movement bounds adjustments based on the current state
-        mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
-        return movementBounds;
-    }
-
-    /**
      * @param preChangeTargetBounds The final bounds of the stack if it is currently animating
      * @return the repositioned PIP bounds given it's pre-change bounds, and the new display
      *         content.
@@ -384,6 +362,28 @@ class PinnedStackController {
         outRect.set(mTmpInsets.left + mScreenEdgeInsets.x, mTmpInsets.top + mScreenEdgeInsets.y,
                 mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
                 mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
+    }
+
+    /**
+     * @return the movement bounds for the given {@param stackBounds} and the current state of the
+     *         controller.
+     */
+    private Rect getMovementBounds(Rect stackBounds) {
+        return getMovementBounds(stackBounds, true /* adjustForIme */);
+    }
+
+    /**
+     * @return the movement bounds for the given {@param stackBounds} and the current state of the
+     *         controller.
+     */
+    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
+        final Rect movementBounds = new Rect();
+        getInsetBounds(movementBounds);
+
+        // Apply the movement bounds adjustments based on the current state
+        mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
+                (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
+        return movementBounds;
     }
 
     /**

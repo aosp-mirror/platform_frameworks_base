@@ -120,7 +120,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -153,7 +152,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Slog;
@@ -2037,19 +2035,20 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 || mService.mSupportsFreeformWindowManagement;
     }
 
-    ActivityStack getStack(int stackId) {
+    protected <T extends ActivityStack> T getStack(int stackId) {
         return getStack(stackId, !CREATE_IF_NEEDED, !ON_TOP);
     }
 
-    ActivityStack getStack(int stackId, boolean createStaticStackIfNeeded, boolean createOnTop) {
+    protected <T extends ActivityStack> T getStack(int stackId, boolean createStaticStackIfNeeded,
+            boolean createOnTop) {
         final ActivityContainer activityContainer = mActivityContainers.get(stackId);
         if (activityContainer != null) {
-            return activityContainer.mStack;
+            return (T) activityContainer.mStack;
         }
         if (!createStaticStackIfNeeded || !StackId.isStaticStack(stackId)) {
             return null;
         }
-        return createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
+        return (T) createStackOnDisplay(stackId, DEFAULT_DISPLAY, createOnTop);
     }
 
     /**
@@ -2854,7 +2853,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         mWindowManager.deferSurfaceLayout();
         // Need to make sure the pinned stack exist so we can resize it below...
-        final ActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+        final PinnedActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
         try {
             final TaskRecord task = r.task;
@@ -2904,7 +2903,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        stack.animateResizePinnedStack(bounds, -1);
+        stack.animateResizePinnedStack(bounds, -1 /* animationDuration */);
         mService.mTaskChangeNotificationController.notifyActivityPinned();
     }
 
@@ -4365,7 +4364,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             synchronized (mService) {
                 mStackId = stackId;
                 mActivityDisplay = activityDisplay;
-                new ActivityStack(this, mRecentTasks, onTop);
+                switch (mStackId) {
+                    case PINNED_STACK_ID:
+                        new PinnedActivityStack(this, mRecentTasks, onTop);
+                        break;
+                    default:
+                        new ActivityStack(this, mRecentTasks, onTop);
+                        break;
+                }
                 mIdString = "ActivtyContainer{" + mStackId + "}";
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "Creating " + this);
             }
