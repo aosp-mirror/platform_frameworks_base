@@ -149,7 +149,7 @@ endif
 
 ifdef HWUI_COMPILE_FOR_PERF
     # TODO: Non-arm?
-    hwui_cflags += -fno-omit-frame-pointer -marm -mapcs
+    hwui_cflags += -fno-omit-frame-pointer -marm
 endif
 
 # This has to be lazy-resolved because it depends on the LOCAL_MODULE_CLASS
