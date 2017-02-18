@@ -16,6 +16,8 @@
 
 package android.service.autofill;
 
+import static android.view.autofill.Helper.DEBUG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentSender;
@@ -23,6 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -41,7 +44,6 @@ import java.util.ArrayList;
  * @see android.service.autofill.FillResponse for examples.
  */
 public final class Dataset implements Parcelable {
-    private static final boolean DEBUG = false;
 
     private final CharSequence mName;
     private final ArrayList<AutoFillId> mFieldIds;

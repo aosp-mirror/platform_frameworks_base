@@ -25,9 +25,9 @@ import java.util.Set;
 /** @hide */
 public final class Helper {
 
-    static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
-    static final boolean VERBOSE = false;
-    static final String REDACTED = "[REDACTED]";
+    public static final boolean DEBUG = true; // TODO(b/33197203): set to false when stable
+    public static final boolean VERBOSE = false;
+    public static final String REDACTED = "[REDACTED]";
 
     static StringBuilder append(StringBuilder builder, Bundle bundle) {
         if (bundle == null) {
