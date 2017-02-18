@@ -2848,6 +2848,9 @@
   <java-symbol type="string" name="capability_title_canCaptureFingerprintGestures" />
   <java-symbol type="string" name="capability_desc_canCaptureFingerprintGestures" />
 
+  <!-- android.service.trust -->
+  <java-symbol type="bool" name="config_allowEscrowTokenForTrustAgent"/>
+  
   <!-- Time picker -->
   <java-symbol type="id" name="toggle_mode"/>
   <java-symbol type="id" name="input_mode"/>
