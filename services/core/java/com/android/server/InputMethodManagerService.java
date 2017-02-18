@@ -2046,7 +2046,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mWindowManagerInternal.updateInputMethodWindowStatus(token,
                 (vis & InputMethodService.IME_VISIBLE) != 0,
-                token != null ? info.mTargetWindow : null);
+                info != null ? info.mTargetWindow : null);
     }
 
     private void updateSystemUi(IBinder token, int vis, int backDisposition) {
