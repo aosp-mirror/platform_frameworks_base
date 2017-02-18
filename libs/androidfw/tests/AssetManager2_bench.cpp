@@ -22,6 +22,7 @@
 #include "androidfw/AssetManager2.h"
 #include "androidfw/ResourceTypes.h"
 
+#include "BenchmarkHelpers.h"
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
@@ -109,34 +110,6 @@ static void GetResourceBenchmark(const std::vector<std::string>& paths,
   while (state.KeepRunning()) {
     assetmanager.GetResource(resid, false /* may_be_bag */, 0u /* density_override */, &value,
                              &selected_config, &flags);
-  }
-}
-
-static void GetResourceBenchmarkOld(const std::vector<std::string>& paths,
-                                    const ResTable_config* config, uint32_t resid,
-                                    benchmark::State& state) {
-  AssetManager assetmanager;
-  for (const std::string& path : paths) {
-    if (!assetmanager.addAssetPath(String8(path.c_str()), nullptr /* cookie */,
-                                   false /* appAsLib */, false /* isSystemAssets */)) {
-      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
-      return;
-    }
-  }
-
-  if (config != nullptr) {
-    assetmanager.setConfiguration(*config);
-  }
-
-  const ResTable& table = assetmanager.getResources(true);
-
-  Res_value value;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  while (state.KeepRunning()) {
-    table.getResource(resid, &value, false /*may_be_bag*/, 0u /*density*/, &flags,
-                      &selected_config);
   }
 }
 

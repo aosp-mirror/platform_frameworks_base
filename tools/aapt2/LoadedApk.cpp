@@ -94,7 +94,9 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
     // The resource table needs to be reserialized since it might have changed.
     if (path == "resources.arsc") {
       BigBuffer buffer = BigBuffer(1024);
-      TableFlattener flattener(&buffer);
+      // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
+      // with sparse entries) b/35389232.
+      TableFlattener flattener({}, &buffer);
       if (!flattener.Consume(context, table_.get())) {
         return false;
       }

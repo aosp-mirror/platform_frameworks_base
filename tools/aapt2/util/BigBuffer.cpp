@@ -76,4 +76,12 @@ void* BigBuffer::NextBlock(size_t* out_size) {
   return blocks_.back().buffer.get();
 }
 
+std::string BigBuffer::to_string() const {
+  std::string result;
+  for (const Block& block : blocks_) {
+    result.append(block.buffer.get(), block.buffer.get() + block.size);
+  }
+  return result;
+}
+
 }  // namespace aapt

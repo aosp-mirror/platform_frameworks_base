@@ -6074,6 +6074,10 @@ bool ResTable::getResourceFlags(uint32_t resID, uint32_t* outFlags) const {
     return true;
 }
 
+static bool keyCompare(const ResTable_sparseTypeEntry& entry , uint16_t entryIdx) {
+  return dtohs(entry.idx) < entryIdx;
+}
+
 status_t ResTable::getEntry(
         const PackageGroup* packageGroup, int typeIndex, int entryIndex,
         const ResTable_config* config,
@@ -6115,6 +6119,9 @@ status_t ResTable::getEntry(
             currentTypeIsOverlay = true;
         }
 
+        // Check that the entry idx is within range of the declared entry count (ResTable_typeSpec).
+        // Particular types (ResTable_type) may be encoded with sparse entries, and so their
+        // entryCount do not need to match.
         if (static_cast<size_t>(realEntryIndex) >= typeSpec->entryCount) {
             ALOGW("For resource 0x%08x, entry index(%d) is beyond type entryCount(%d)",
                     Res_MAKEID(packageGroup->id - 1, typeIndex, entryIndex),
@@ -6169,11 +6176,37 @@ status_t ResTable::getEntry(
                 continue;
             }
 
-            // Check if there is the desired entry in this type.
             const uint32_t* const eindex = reinterpret_cast<const uint32_t*>(
                     reinterpret_cast<const uint8_t*>(thisType) + dtohs(thisType->header.headerSize));
 
-            uint32_t thisOffset = dtohl(eindex[realEntryIndex]);
+            uint32_t thisOffset;
+
+            // Check if there is the desired entry in this type.
+            if (thisType->flags & ResTable_type::FLAG_SPARSE) {
+                // This is encoded as a sparse map, so perform a binary search.
+                const ResTable_sparseTypeEntry* sparseIndices =
+                        reinterpret_cast<const ResTable_sparseTypeEntry*>(eindex);
+                const ResTable_sparseTypeEntry* result = std::lower_bound(
+                        sparseIndices, sparseIndices + dtohl(thisType->entryCount), realEntryIndex,
+                        keyCompare);
+                if (result == sparseIndices + dtohl(thisType->entryCount)
+                        || dtohs(result->idx) != realEntryIndex) {
+                    // No entry found.
+                    continue;
+                }
+
+                // Extract the offset from the entry. Each offset must be a multiple of 4
+                // so we store it as the real offset divided by 4.
+                thisOffset = dtohs(result->offset) * 4u;
+            } else {
+                if (static_cast<uint32_t>(realEntryIndex) >= dtohl(thisType->entryCount)) {
+                    // Entry does not exist.
+                    continue;
+                }
+
+                thisOffset = dtohl(eindex[realEntryIndex]);
+            }
+
             if (thisOffset == ResTable_type::NO_ENTRY) {
                 // There is no entry for this index and configuration.
                 continue;
@@ -6480,12 +6513,6 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 }
 
                 Type* t = typeList.editItemAt(typeList.size() - 1);
-                if (newEntryCount != t->entryCount) {
-                    ALOGE("ResTable_type entry count inconsistent: given %d, previously %d",
-                        (int)newEntryCount, (int)t->entryCount);
-                    return (mError=BAD_TYPE);
-                }
-
                 if (t->package != package) {
                     ALOGE("No TypeSpec for type %d", type->id);
                     return (mError=BAD_TYPE);
@@ -7098,8 +7125,17 @@ void ResTable::print(bool inclValues) const
                 thisConfig.copyFromDtoH(type->config);
 
                 String8 configStr = thisConfig.toString();
-                printf("      config %s:\n", configStr.size() > 0
+                printf("      config %s", configStr.size() > 0
                         ? configStr.string() : "(default)");
+                if (type->flags != 0u) {
+                    printf(" flags=0x%02x", type->flags);
+                    if (type->flags & ResTable_type::FLAG_SPARSE) {
+                        printf(" [sparse]");
+                    }
+                }
+
+                printf(":\n");
+
                 size_t entryCount = dtohl(type->entryCount);
                 uint32_t entriesStart = dtohl(type->entriesStart);
                 if ((entriesStart&0x3) != 0) {
@@ -7111,18 +7147,30 @@ void ResTable::print(bool inclValues) const
                     printf("      NON-INTEGER ResTable_type header.size: 0x%x\n", typeSize);
                     continue;
                 }
-                for (size_t entryIndex=0; entryIndex<entryCount; entryIndex++) {
-                    const uint32_t* const eindex = (const uint32_t*)
-                        (((const uint8_t*)type) + dtohs(type->header.headerSize));
 
-                    uint32_t thisOffset = dtohl(eindex[entryIndex]);
-                    if (thisOffset == ResTable_type::NO_ENTRY) {
-                        continue;
+                const uint32_t* const eindex = (const uint32_t*)
+                        (((const uint8_t*)type) + dtohs(type->header.headerSize));
+                for (size_t entryIndex=0; entryIndex<entryCount; entryIndex++) {
+                    size_t entryId;
+                    uint32_t thisOffset;
+                    if (type->flags & ResTable_type::FLAG_SPARSE) {
+                        const ResTable_sparseTypeEntry* entry =
+                                reinterpret_cast<const ResTable_sparseTypeEntry*>(
+                                        eindex + entryIndex);
+                        entryId = dtohs(entry->idx);
+                        // Offsets are encoded as divided by 4.
+                        thisOffset = static_cast<uint32_t>(dtohs(entry->offset)) * 4u;
+                    } else {
+                        entryId = entryIndex;
+                        thisOffset = dtohl(eindex[entryIndex]);
+                        if (thisOffset == ResTable_type::NO_ENTRY) {
+                            continue;
+                        }
                     }
 
                     uint32_t resID = (0xff000000 & ((packageId)<<24))
                                 | (0x00ff0000 & ((typeIndex+1)<<16))
-                                | (0x0000ffff & (entryIndex));
+                                | (0x0000ffff & (entryId));
                     if (packageId == 0) {
                         pg->dynamicRefTable.lookupResourceId(&resID);
                     }

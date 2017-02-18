@@ -16,23 +16,45 @@
 
 #include <androidfw/TypeWrappers.h>
 
+#include <algorithm>
+
 namespace android {
+
+TypeVariant::TypeVariant(const ResTable_type* data) : data(data), mLength(dtohl(data->entryCount)) {
+    if (data->flags & ResTable_type::FLAG_SPARSE) {
+        const uint32_t entryCount = dtohl(data->entryCount);
+        const uintptr_t containerEnd = reinterpret_cast<uintptr_t>(data) + dtohl(data->header.size);
+        const uint32_t* const entryIndices = reinterpret_cast<const uint32_t*>(
+                reinterpret_cast<uintptr_t>(data) + dtohs(data->header.headerSize));
+        if (reinterpret_cast<uintptr_t>(entryIndices) + (sizeof(uint32_t) * entryCount)
+                > containerEnd) {
+            ALOGE("Type's entry indices extend beyond its boundaries");
+            mLength = 0;
+        } else {
+          mLength = ResTable_sparseTypeEntry{entryIndices[entryCount - 1]}.idx + 1;
+        }
+    }
+}
 
 TypeVariant::iterator& TypeVariant::iterator::operator++() {
     mIndex++;
-    if (mIndex > dtohl(mTypeVariant->data->entryCount)) {
-        mIndex = dtohl(mTypeVariant->data->entryCount);
+    if (mIndex > mTypeVariant->mLength) {
+        mIndex = mTypeVariant->mLength;
     }
     return *this;
 }
 
+static bool keyCompare(uint32_t entry, uint16_t index) {
+  return dtohs(ResTable_sparseTypeEntry{entry}.idx) < index;
+}
+
 const ResTable_entry* TypeVariant::iterator::operator*() const {
     const ResTable_type* type = mTypeVariant->data;
-    const uint32_t entryCount = dtohl(type->entryCount);
-    if (mIndex >= entryCount) {
+    if (mIndex >= mTypeVariant->mLength) {
         return NULL;
     }
 
+    const uint32_t entryCount = dtohl(mTypeVariant->data->entryCount);
     const uintptr_t containerEnd = reinterpret_cast<uintptr_t>(type)
             + dtohl(type->header.size);
     const uint32_t* const entryIndices = reinterpret_cast<const uint32_t*>(
@@ -42,7 +64,19 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
         return NULL;
     }
 
-    const uint32_t entryOffset = dtohl(entryIndices[mIndex]);
+    uint32_t entryOffset;
+    if (type->flags & ResTable_type::FLAG_SPARSE) {
+      auto iter = std::lower_bound(entryIndices, entryIndices + entryCount, mIndex, keyCompare);
+      if (iter == entryIndices + entryCount
+              || dtohs(ResTable_sparseTypeEntry{*iter}.idx) != mIndex) {
+        return NULL;
+      }
+
+      entryOffset = static_cast<uint32_t>(dtohs(ResTable_sparseTypeEntry{*iter}.offset)) * 4u;
+    } else {
+      entryOffset = dtohl(entryIndices[mIndex]);
+    }
+
     if (entryOffset == ResTable_type::NO_ENTRY) {
         return NULL;
     }

@@ -96,6 +96,9 @@ struct LinkOptions {
   // Products to use/filter on.
   std::unordered_set<std::string> products;
 
+  // Flattening options.
+  TableFlattenerOptions table_flattener_options;
+
   // Split APK options.
   TableSplitterOptions table_splitter_options;
   std::vector<SplitConstraints> split_constraints;
@@ -874,7 +877,7 @@ class LinkCommand {
 
   bool FlattenTable(ResourceTable* table, IArchiveWriter* writer) {
     BigBuffer buffer(1024);
-    TableFlattener flattener(&buffer);
+    TableFlattener flattener(options_.table_flattener_options, &buffer);
     if (!flattener.Consume(context_, table)) {
       return false;
     }
@@ -1870,24 +1873,19 @@ int Link(const std::vector<StringPiece>& args) {
           .RequiredFlag("-o", "Output path", &options.output_path)
           .RequiredFlag("--manifest", "Path to the Android manifest to build",
                         &options.manifest_path)
-          .OptionalFlagList("-I", "Adds an Android APK to link against",
-                            &options.include_paths)
-          .OptionalFlagList(
-              "-R",
-              "Compilation unit to link, using `overlay` semantics.\n"
-              "The last conflicting resource given takes precedence.",
-              &overlay_arg_list)
+          .OptionalFlagList("-I", "Adds an Android APK to link against", &options.include_paths)
+          .OptionalFlagList("-R",
+                            "Compilation unit to link, using `overlay` semantics.\n"
+                            "The last conflicting resource given takes precedence.",
+                            &overlay_arg_list)
           .OptionalFlag("--java", "Directory in which to generate R.java",
                         &options.generate_java_class_path)
-          .OptionalFlag("--proguard",
-                        "Output file for generated Proguard rules",
+          .OptionalFlag("--proguard", "Output file for generated Proguard rules",
                         &options.generate_proguard_rules_path)
-          .OptionalFlag(
-              "--proguard-main-dex",
-              "Output file for generated Proguard rules for the main dex",
-              &options.generate_main_dex_proguard_rules_path)
-          .OptionalSwitch("--no-auto-version",
-                          "Disables automatic style and layout SDK versioning",
+          .OptionalFlag("--proguard-main-dex",
+                        "Output file for generated Proguard rules for the main dex",
+                        &options.generate_main_dex_proguard_rules_path)
+          .OptionalSwitch("--no-auto-version", "Disables automatic style and layout SDK versioning",
                           &options.no_auto_version)
           .OptionalSwitch("--no-version-vectors",
                           "Disables automatic versioning of vector drawables. "
@@ -1903,25 +1901,22 @@ int Link(const std::vector<StringPiece>& args) {
                           "Disables automatic deduping of resources with\n"
                           "identical values across compatible configurations.",
                           &options.no_resource_deduping)
-          .OptionalSwitch(
-              "-x",
-              "Legacy flag that specifies to use the package identifier 0x01",
-              &legacy_x_flag)
-          .OptionalSwitch("-z",
-                          "Require localization of strings marked 'suggested'",
+          .OptionalSwitch("--enable-sparse-encoding",
+                          "Enables encoding sparse entries using a binary search tree.\n"
+                          "This decreases APK size at the cost of resource retrieval performance.",
+                          &options.table_flattener_options.use_sparse_entries)
+          .OptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01",
+                          &legacy_x_flag)
+          .OptionalSwitch("-z", "Require localization of strings marked 'suggested'",
                           &require_localization)
-          .OptionalFlag(
-              "-c",
-              "Comma separated list of configurations to include. The default\n"
-              "is all configurations",
-              &configs)
-          .OptionalFlag(
-              "--preferred-density",
-              "Selects the closest matching density and strips out all others.",
-              &preferred_density)
-          .OptionalFlag("--product",
-                        "Comma separated list of product names to keep",
-                        &product_list)
+          .OptionalFlag("-c",
+                        "Comma separated list of configurations to include. The default\n"
+                        "is all configurations",
+                        &configs)
+          .OptionalFlag("--preferred-density",
+                        "Selects the closest matching density and strips out all others.",
+                        &preferred_density)
+          .OptionalFlag("--product", "Comma separated list of product names to keep", &product_list)
           .OptionalSwitch("--output-to-dir",
                           "Outputs the APK contents to a directory specified "
                           "by -o",
@@ -1935,11 +1930,10 @@ int Link(const std::vector<StringPiece>& args) {
                         "Default minimum SDK version to use for "
                         "AndroidManifest.xml",
                         &options.manifest_fixer_options.min_sdk_version_default)
-          .OptionalFlag(
-              "--target-sdk-version",
-              "Default target SDK version to use for "
-              "AndroidManifest.xml",
-              &options.manifest_fixer_options.target_sdk_version_default)
+          .OptionalFlag("--target-sdk-version",
+                        "Default target SDK version to use for "
+                        "AndroidManifest.xml",
+                        &options.manifest_fixer_options.target_sdk_version_default)
           .OptionalFlag("--version-code",
                         "Version code (integer) to inject into the "
                         "AndroidManifest.xml if none is present",
@@ -1948,8 +1942,7 @@ int Link(const std::vector<StringPiece>& args) {
                         "Version name to inject into the AndroidManifest.xml "
                         "if none is present",
                         &options.manifest_fixer_options.version_name_default)
-          .OptionalSwitch("--static-lib", "Generate a static Android library",
-                          &options.static_lib)
+          .OptionalSwitch("--static-lib", "Generate a static Android library", &options.static_lib)
           .OptionalSwitch("--no-static-lib-packages",
                           "Merge all library resources under the app's package",
                           &options.no_static_lib_packages)
@@ -1957,14 +1950,12 @@ int Link(const std::vector<StringPiece>& args) {
                           "Generates R.java without the final modifier.\n"
                           "This is implied when --static-lib is specified.",
                           &options.generate_non_final_ids)
-          .OptionalFlag("--stable-ids",
-                        "File containing a list of name to ID mapping.",
+          .OptionalFlag("--stable-ids", "File containing a list of name to ID mapping.",
                         &stable_id_file_path)
-          .OptionalFlag(
-              "--emit-ids",
-              "Emit a file at the given path with a list of name to ID\n"
-              "mappings, suitable for use with --stable-ids.",
-              &options.resource_id_map_path)
+          .OptionalFlag("--emit-ids",
+                        "Emit a file at the given path with a list of name to ID\n"
+                        "mappings, suitable for use with --stable-ids.",
+                        &options.resource_id_map_path)
           .OptionalFlag("--private-symbols",
                         "Package name to use when generating R.java for "
                         "private symbols.\n"
@@ -1972,8 +1963,7 @@ int Link(const std::vector<StringPiece>& args) {
                         "the application's "
                         "package name",
                         &options.private_symbols)
-          .OptionalFlag("--custom-package",
-                        "Custom Java package under which to generate R.java",
+          .OptionalFlag("--custom-package", "Custom Java package under which to generate R.java",
                         &options.custom_java_package)
           .OptionalFlagList("--extra-packages",
                             "Generate the same R.java but with different "
@@ -1987,23 +1977,19 @@ int Link(const std::vector<StringPiece>& args) {
                           "Allows the addition of new resources in "
                           "overlays without <add-resource> tags",
                           &options.auto_add_overlay)
-          .OptionalFlag("--rename-manifest-package",
-                        "Renames the package in AndroidManifest.xml",
+          .OptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml",
                         &options.manifest_fixer_options.rename_manifest_package)
-          .OptionalFlag(
-              "--rename-instrumentation-target-package",
-              "Changes the name of the target package for instrumentation. "
-              "Most useful "
-              "when used\nin conjunction with --rename-manifest-package",
-              &options.manifest_fixer_options
-                   .rename_instrumentation_target_package)
+          .OptionalFlag("--rename-instrumentation-target-package",
+                        "Changes the name of the target package for instrumentation. "
+                        "Most useful "
+                        "when used\nin conjunction with --rename-manifest-package",
+                        &options.manifest_fixer_options.rename_instrumentation_target_package)
           .OptionalFlagList("-0", "File extensions not to compress",
                             &options.extensions_to_not_compress)
-          .OptionalFlagList(
-              "--split",
-              "Split resources matching a set of configs out to a "
-              "Split APK.\nSyntax: path/to/output.apk:<config>[,<config>[...]]",
-              &split_args)
+          .OptionalFlagList("--split",
+                            "Split resources matching a set of configs out to a "
+                            "Split APK.\nSyntax: path/to/output.apk:<config>[,<config>[...]]",
+                            &split_args)
           .OptionalSwitch("-v", "Enables verbose logging", &verbose);
 
   if (!flags.Parse("aapt2 link", args, &std::cerr)) {

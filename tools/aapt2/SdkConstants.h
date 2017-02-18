@@ -25,7 +25,7 @@
 
 namespace aapt {
 
-enum {
+enum : int {
   SDK_CUPCAKE = 3,
   SDK_DONUT = 4,
   SDK_ECLAIR = 5,
@@ -49,7 +49,7 @@ enum {
   SDK_MARSHMALLOW = 23,
   SDK_NOUGAT = 24,
   SDK_NOUGAT_MR1 = 25,
-  SDK_O = 26, // STOPSHIP Replace with real version
+  SDK_O = 26,  // STOPSHIP Replace with real version
 };
 
 size_t FindAttributeSdkLevel(const ResourceId& id);

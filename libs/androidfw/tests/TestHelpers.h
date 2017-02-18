@@ -19,6 +19,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "androidfw/ResourceTypes.h"
 #include "gtest/gtest.h"
