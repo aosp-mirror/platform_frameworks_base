@@ -7914,12 +7914,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
-            StopwatchTimer t = getSensorTimerLocked(sensor, true);
-            if (t != null) {
-                t.startRunningLocked(elapsedRealtimeMs);
-            }
-            Counter c = getSensorBgCounterLocked(sensor, true);
-            if (c != null && mProcessState >= PROCESS_STATE_BACKGROUND) {
+            StopwatchTimer t = getSensorTimerLocked(sensor, /* create= */ true);
+            t.startRunningLocked(elapsedRealtimeMs);
+
+            Counter c = getSensorBgCounterLocked(sensor, /* create= */ true);
+            if (mProcessState >= PROCESS_STATE_BACKGROUND && t.mNesting == 1) {
                 c.stepAtomic();
             }
         }
@@ -7933,17 +7932,17 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStartGps(long elapsedRealtimeMs) {
-            StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, true);
-            if (t != null) {
-                t.startRunningLocked(elapsedRealtimeMs);
-            }
-            Counter c = getSensorBgCounterLocked(Sensor.GPS, true);
-            if (c != null && mProcessState >= PROCESS_STATE_BACKGROUND) {
+            StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, /* create= */ true);
+            t.startRunningLocked(elapsedRealtimeMs);
+
+            Counter c = getSensorBgCounterLocked(Sensor.GPS, /* create= */ true);
+            if (mProcessState >= PROCESS_STATE_BACKGROUND && t.mNesting == 1) {
                 c.stepAtomic();
             }
         }
 
         public void noteStopGps(long elapsedRealtimeMs) {
+            // Don't create a timer if one doesn't already exist
             StopwatchTimer t = getSensorTimerLocked(Sensor.GPS, false);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
