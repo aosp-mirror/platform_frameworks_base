@@ -721,11 +721,6 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     XMLNode::attribute_entry* existingEntry = node->editAttribute(ns, attr);
     if (existingEntry != NULL) {
         if (replaceExisting) {
-            if (kIsDebug) {
-                printf("Info: AndroidManifest.xml already defines %s (in %s);"
-                        " overwriting existing value from manifest.\n",
-                        String8(attr).string(), String8(ns).string());
-            }
             existingEntry->string = String16(value);
             return true;
         }
@@ -736,10 +731,6 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
                     String8(attr).string(), String8(ns).string(), value);
             return false;
         }
-
-        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s);"
-                        " using existing value in manifest.\n",
-                String8(attr).string(), String8(ns).string());
 
         // don't stop the build.
         return true;
