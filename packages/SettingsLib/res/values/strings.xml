@@ -905,4 +905,12 @@
 
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
     <string name="battery_meter_very_low_overlay_symbol">!</string>
+
+    <!-- Title for settings of active input methods in each IME [CHAR LIMIT=35] -->
+    <string name="active_input_method_subtypes">Active input methods</string>
+    <!-- Title for settings whether or not the framework will select input methods in an IME based
+         on the current system locales. (The user can select multiple system locales)
+         [CHAR LIMIT=35] -->
+    <string name="use_system_language_to_select_input_method_subtypes">Use system languages</string>
+
 </resources>
