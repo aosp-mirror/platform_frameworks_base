@@ -27,6 +27,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
@@ -86,6 +87,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<VpnTile> mVpnTileProvider;
     private final Provider<RebootTile> mRebootTileProvider;
+    private final Provider<AdbOverNetworkTile> mAdbOverNetworkProvider;
 
     private QSTileHost mHost;
 
@@ -113,7 +115,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<UsbTetherTile> usbTetherTileProvider,
             Provider<HeadsUpTile> headsUpTileProvider,
             Provider<VpnTile> vpnTileProvider,
-            Provider<RebootTile> rebootTileProvider) {
+            Provider<RebootTile> rebootTileProvider,
+            Provider<AdbOverNetworkTile> adbOverNetworkProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -138,6 +141,7 @@ public class QSFactoryImpl implements QSFactory {
         mHeadsUpTileProvider = headsUpTileProvider;
         mVpnTileProvider = vpnTileProvider;
         mRebootTileProvider = rebootTileProvider;
+        mAdbOverNetworkProvider = adbOverNetworkProvider;
     }
 
     public void setHost(QSTileHost host) {
@@ -202,6 +206,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mVpnTileProvider.get();
             case "reboot":
                 return mRebootTileProvider.get();
+            case "adb_network":
+                return mAdbOverNetworkProvider.get();
         }
 
         // Intent tiles.

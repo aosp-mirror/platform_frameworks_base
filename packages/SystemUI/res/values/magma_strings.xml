@@ -56,6 +56,12 @@
     <string name="quick_settings_location_secondary_high_accuracy">High Accuracy</string>
     <string name="accessibility_quick_settings_location_high_accuracy">Location reporting: high accuracy mode.</string>
 
+    <!-- ADB over network tile -->
+    <string name="quick_settings_network_adb_enabled_label">Enabled</string>
+    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
+    <string name="quick_settings_network_adb_label">ADB over network</string>
+    <string name="quick_settings_network_adb_toast">USB debugging is not enabled</string>
+
     <!-- Screenrecord stuff -->
     <string name="screenrecord_stopdot_label">Show stop dot</string>
     <string name="screenrecord_low_quality_label">Low quality</string>
