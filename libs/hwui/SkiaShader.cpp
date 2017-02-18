@@ -217,6 +217,7 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
     const float height = outData->bitmapTexture->height();
 
     description->hasBitmap = true;
+    description->hasLinearTexture = outData->bitmapTexture->isLinear();
     description->isShaderBitmapExternal = hwuiBitmap->isHardware();
     // gralloc doesn't support non-clamp modes
     if (hwuiBitmap->isHardware() || (!caches.extensions().hasNPot()
