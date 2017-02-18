@@ -437,7 +437,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param attr attributes of the sound about to start playing
      * @return time in ms
      */
-    protected int getFocusRampTimeMs(int focusGain, AudioAttributes attr) {
+    protected static int getFocusRampTimeMs(int focusGain, AudioAttributes attr) {
         switch (attr.getUsage()) {
             case AudioAttributes.USAGE_MEDIA:
             case AudioAttributes.USAGE_GAME:

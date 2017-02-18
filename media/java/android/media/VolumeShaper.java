@@ -37,8 +37,9 @@ import java.util.Objects;
 public final class VolumeShaper {
     /* member variables */
     private int mId;
-    private final WeakReference<PlayerBase> mPlayerBase;
-    private final WeakReference<PlayerProxy> mPlayerProxy;
+    private final WeakReference<PlayerBase> mWeakPlayerBase;
+    private final WeakReference<PlayerProxy> mWeakPlayerProxy;
+    private PlayerProxy mPlayerProxy;
 
     /**
      * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and an
@@ -64,14 +65,14 @@ public final class VolumeShaper {
 
     /* package */ VolumeShaper(
             @NonNull Configuration configuration, @NonNull PlayerBase playerBase) {
-        mPlayerBase = new WeakReference<PlayerBase>(playerBase);
+        mWeakPlayerBase = new WeakReference<PlayerBase>(playerBase);
         mPlayerProxy = null;
+        mWeakPlayerProxy = null;
         mId = applyPlayer(configuration, new Operation.Builder().defer().build());
     }
 
     /**
      * @hide
-     * TODO SystemApi
      * Constructs a {@code VolumeShaper} from a {@link VolumeShaper.Configuration} and a
      * {@code PlayerProxy} object.  The PlayerProxy object requires that the configuration
      * be set with a system VolumeShaper id (this is a reserved value).
@@ -80,12 +81,20 @@ public final class VolumeShaper {
      * @param playerProxy
      */
     public VolumeShaper(
-            @NonNull Configuration configuration, @NonNull PlayerProxy playerProxy) {
+            @NonNull Configuration configuration,
+            @NonNull PlayerProxy playerProxy,
+            boolean keepReference) {
         if (configuration.getId() < 0) {
             throw new IllegalArgumentException("playerProxy configuration id must be specified");
         }
-        mPlayerProxy = new WeakReference<PlayerProxy>(playerProxy);
-        mPlayerBase = null;
+        if (keepReference) {
+            mPlayerProxy = playerProxy;
+            mWeakPlayerProxy = null;
+        } else {
+            mWeakPlayerProxy = new WeakReference<PlayerProxy>(playerProxy);
+            mPlayerProxy = null;
+        }
+        mWeakPlayerBase = null;
         mId = applyPlayer(configuration, new Operation.Builder().defer().build());
     }
 
@@ -143,12 +152,13 @@ public final class VolumeShaper {
         } catch (IllegalStateException ise) {
             ; // ok
         }
-        if (mPlayerBase != null) {
-            mPlayerBase.clear();
+        if (mWeakPlayerBase != null) {
+            mWeakPlayerBase.clear();
         }
-        if (mPlayerProxy != null) {
-            mPlayerProxy.clear();
+        if (mWeakPlayerProxy != null) {
+            mWeakPlayerProxy.clear();
         }
+        mPlayerProxy = null;
     }
 
     @Override
@@ -167,11 +177,11 @@ public final class VolumeShaper {
             @NonNull VolumeShaper.Configuration configuration,
             @NonNull VolumeShaper.Operation operation) {
         final int id;
-        if (mPlayerProxy != null) {
+        if (mPlayerProxy != null || mWeakPlayerProxy != null) {
             // The PlayerProxy accepts only one way transactions so
             // the Configuration must have an id set to one of the system
             // ids (a positive value less than 16).
-            PlayerProxy player = mPlayerProxy.get();
+            PlayerProxy player = mWeakPlayerProxy != null ? mWeakPlayerProxy.get() : mPlayerProxy;
             if (player == null) {
                 throw new IllegalStateException("player deallocated");
             }
@@ -180,8 +190,8 @@ public final class VolumeShaper {
                 throw new IllegalArgumentException("proxy requires configuration with id");
             }
             player.applyVolumeShaper(configuration, operation);
-        } else if (mPlayerBase != null) {
-            PlayerBase player = mPlayerBase.get();
+        } else if (mWeakPlayerBase != null) {
+            PlayerBase player = mWeakPlayerBase.get();
             if (player == null) {
                 throw new IllegalStateException("player deallocated");
             }
@@ -210,14 +220,10 @@ public final class VolumeShaper {
      */
     private @NonNull VolumeShaper.State getStatePlayer(int id) {
         final VolumeShaper.State state;
-        if (mPlayerProxy != null) {
-            PlayerProxy player = mPlayerProxy.get();
-            if (player == null) {
-                throw new IllegalStateException("player deallocated");
-            }
+        if (mPlayerProxy != null || mWeakPlayerProxy != null) {
             throw new IllegalStateException("getStatePlayer not permitted through proxy");
-        } else if (mPlayerBase != null) {
-            PlayerBase player = mPlayerBase.get();
+        } else if (mWeakPlayerBase != null) {
+            PlayerBase player = mWeakPlayerBase.get();
             if (player == null) {
                 throw new IllegalStateException("player deallocated");
             }
