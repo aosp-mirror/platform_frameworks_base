@@ -6052,16 +6052,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // used when either 1) the calling package is normal and the activity is within
                 // an ephemeral application or 2) the calling package is ephemeral and the
                 // activity is not visible to ephemeral applications.
-                boolean matchEphemeral =
+                final boolean matchInstantApp =
                         (flags & PackageManager.MATCH_INSTANT) != 0;
-                boolean ephemeralVisibleOnly =
+                final boolean matchVisibleToInstantAppOnly =
                         (flags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
-                boolean blockResolution =
-                        (!matchEphemeral && instantAppPkgName == null
-                                && (ai.applicationInfo.privateFlags
-                                        & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0)
-                        || (ephemeralVisibleOnly && instantAppPkgName != null
-                                && (ai.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0);
+                final boolean isCallerInstantApp =
+                        instantAppPkgName != null;
+                final boolean isTargetSameInstantApp =
+                        comp.getPackageName().equals(instantAppPkgName);
+                final boolean isTargetInstantApp =
+                        (ai.applicationInfo.privateFlags
+                                & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
+                final boolean isTargetHiddenFromInstantApp =
+                        (ai.flags & ActivityInfo.FLAG_VISIBLE_TO_EPHEMERAL) == 0;
+                final boolean blockResolution =
+                        !isTargetSameInstantApp
+                        && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
+                                || (matchVisibleToInstantAppOnly && isCallerInstantApp
+                                        && isTargetHiddenFromInstantApp));
                 if (!blockResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.activityInfo = ai;
