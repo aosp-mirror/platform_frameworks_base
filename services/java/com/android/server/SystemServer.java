@@ -682,6 +682,8 @@ public final class SystemServer {
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
 
+        boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
+
         // For debugging RescueParty
         if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.crash_system", false)) {
             throw new RuntimeException();
@@ -808,7 +810,12 @@ public final class SystemServer {
             mDisplayManagerService.windowManagerAndInputReady();
             traceEnd();
 
-            if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            // Skip Bluetooth if we have an emulator kernel
+            // TODO: Use a more reliable check to see if this product should
+            // support Bluetooth - see bug 988521
+            if (isEmulator) {
+                Slog.i(TAG, "No Bluetooth Service (emulator)");
+            } else if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else if (!context.getPackageManager().hasSystemFeature
                        (PackageManager.FEATURE_BLUETOOTH)) {
