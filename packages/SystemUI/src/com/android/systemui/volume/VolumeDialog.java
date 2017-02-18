@@ -622,7 +622,6 @@ public class VolumeDialog implements TunerService.Tunable {
         if (!mShowing) {
             trimObsoleteH();
         }
-        Util.setVisOrGone(mDialogRowsView.findViewById(R.id.spacer), mExpanded);
         // apply changes to all rows
         for (final VolumeRow row : mRows) {
             final boolean isActive = row == activeRow;

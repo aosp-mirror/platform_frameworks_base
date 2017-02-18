@@ -600,8 +600,7 @@
 
     <!-- Volume dialog root view bottom margin, at rest -->
     <dimen name="volume_dialog_margin_bottom">4dp</dimen>
-    <dimen name="volume_dialog_collapsed_padding_top">8dp</dimen>
-    <dimen name="volume_dialog_expanded_spacer">14dp</dimen>
+    <dimen name="volume_dialog_padding_top">8dp</dimen>
     <dimen name="volume_dialog_padding_end">40dp</dimen>
 
     <dimen name="volume_row_padding_bottom">9.4dp</dimen>
