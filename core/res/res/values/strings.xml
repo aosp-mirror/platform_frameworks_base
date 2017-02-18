@@ -3116,6 +3116,21 @@
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
 
+    <!-- Alert windows notification strings -->
+    <skip />
+    <!-- Name of notification channel the system post notification to inform the use about apps
+         that are drawing ui on-top of other apps (alert-windows) [CHAR LIMIT=NONE] -->
+    <string name="alert_windows_notification_channel_name"><xliff:g id="name" example="Google Maps">%s</xliff:g> draw over other apps</string>
+    <!-- Notification title when an application is displaying ui on-top of other apps
+         [CHAR LIMIT=30] -->
+    <string name="alert_windows_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> app displaying on top.</string>
+    <!-- Notification body when an application is displaying ui on-top of other apps
+         [CHAR LIMIT=NONE] -->
+    <string name="alert_windows_notification_message">Parts of this app may remain visible at all times. If this feature isn\'t working correctly, turn it off.</string>
+    <!-- Notification action to turn-off app displaying on-top of other apps. [CHAR LIMIT=20] -->
+    <string name="alert_windows_notification_turn_off_action">TURN OFF</string>
+
+
     <!-- External media notification strings -->
     <skip />
 

@@ -52,6 +52,7 @@ class WindowSurfaceController {
 
     private SurfaceControl mSurfaceControl;
 
+    // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
     private float mSurfaceY = 0;
@@ -79,6 +80,9 @@ class WindowSurfaceController {
 
     private final WindowManagerService mService;
 
+    private final int mWindowType;
+    private final Session mWindowSession;
+
     public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
@@ -89,16 +93,16 @@ class WindowSurfaceController {
         title = name;
 
         mService = animator.mService;
+        final WindowState win = animator.mWin;
+        mWindowType = windowType;
+        mWindowSession = win.mSession;
 
-        // For opaque child windows placed under parent windows,
-        // we use a special SurfaceControl which mirrors commands
-        // to a black-out layer placed one Z-layer below the surface.
+        // For opaque child windows placed under parent windows, we use a special SurfaceControl
+        // which mirrors commands to a black-out layer placed one Z-layer below the surface.
         // This prevents holes to whatever app/wallpaper is underneath.
-        if (animator.mWin.isChildWindow() &&
-                animator.mWin.mSubLayer < 0 &&
-                animator.mWin.mAppToken != null) {
-            mSurfaceControl = new SurfaceControlWithBackground(s,
-                    name, w, h, format, flags, animator.mWin.mAppToken, windowType, ownerUid);
+        if (win.isChildWindow() && win.mSubLayer < 0 && win.mAppToken != null) {
+            mSurfaceControl = new SurfaceControlWithBackground(
+                    s, name, w, h, format, flags, win.mAppToken, windowType, ownerUid);
         } else if (DEBUG_SURFACE_TRACE) {
             mSurfaceControl = new SurfaceTrace(
                     s, name, w, h, format, flags, windowType, ownerUid);
@@ -109,8 +113,7 @@ class WindowSurfaceController {
 
         if (mService.mRoot.mSurfaceTraceEnabled) {
             mSurfaceControl = new RemoteSurfaceTrace(
-                    mService.mRoot.mSurfaceTraceFd.getFileDescriptor(),
-                    mSurfaceControl, animator.mWin);
+                    mService.mRoot.mSurfaceTraceFd.getFileDescriptor(), mSurfaceControl, win);
         }
     }
 
@@ -141,13 +144,14 @@ class WindowSurfaceController {
     }
 
     private void hideSurface() {
-        if (mSurfaceControl != null) {
-            mSurfaceShown = false;
-            try {
-                mSurfaceControl.hide();
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Exception hiding surface in " + this);
-            }
+        if (mSurfaceControl == null) {
+            return;
+        }
+        setShown(false);
+        try {
+            mSurfaceControl.hide();
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Exception hiding surface in " + this);
         }
     }
 
@@ -165,7 +169,7 @@ class WindowSurfaceController {
 
                 mSurfaceControl.setLayer(layer);
                 mSurfaceControl.setAlpha(0);
-                mSurfaceShown = false;
+                setShown(false);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error creating surface in " + this, e);
                 mAnimator.reclaimSomeSurfaceMemory("create-init", true);
@@ -188,7 +192,7 @@ class WindowSurfaceController {
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
         } finally {
-            mSurfaceShown = false;
+            setShown(false);
             mSurfaceControl = null;
         }
     }
@@ -447,7 +451,7 @@ class WindowSurfaceController {
 
     private boolean showSurface() {
         try {
-            mSurfaceShown = true;
+            setShown(true);
             mSurfaceControl.show();
             return true;
         } catch (RuntimeException e) {
@@ -515,6 +519,10 @@ class WindowSurfaceController {
 
     void setShown(boolean surfaceShown) {
         mSurfaceShown = surfaceShown;
+
+        if (mWindowSession != null) {
+            mWindowSession.onWindowSurfaceVisibilityChanged(this, mSurfaceShown, mWindowType);
+        }
     }
 
     float getX() {

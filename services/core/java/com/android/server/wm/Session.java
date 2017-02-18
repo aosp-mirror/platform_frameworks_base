@@ -16,7 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -54,6 +57,8 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class represents an active client session.  There is generally one
@@ -70,9 +75,15 @@ public class Session extends IWindowSession.Stub
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
-    private int mNumOverlayWindow = 0;
+    // Set of visible application overlay window surfaces connected to this session.
+    private final Set<WindowSurfaceController> mAppOverlaySurfaces = new HashSet<>();
+    // Set of visible alert window surfaces connected to this session.
+    private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
+    final boolean mCanAddInternalSystemWindow;
+    private AlertWindowNotification mAlertWindowNotification;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
+    private String mPackageName;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback,
             IInputMethodClient client, IInputContext inputContext) {
@@ -82,6 +93,8 @@ public class Session extends IWindowSession.Stub
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+        mCanAddInternalSystemWindow = service.mContext.checkCallingPermission(
+                INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
@@ -544,7 +557,8 @@ public class Session extends IWindowSession.Stub
         }
     }
 
-    void windowAddedLocked(int type) {
+    void windowAddedLocked(String packageName) {
+        mPackageName = packageName;
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
                 TAG_WM, "First window added to " + this + ", creating SurfaceSession");
@@ -557,24 +571,57 @@ public class Session extends IWindowSession.Stub
             }
         }
         mNumWindow++;
-        if (type == TYPE_APPLICATION_OVERLAY) {
-            mNumOverlayWindow++;
-            setHasOverlayUi(true);
-        }
     }
 
-    void windowRemovedLocked(int type) {
+    void windowRemovedLocked() {
         mNumWindow--;
-        if (type == TYPE_APPLICATION_OVERLAY) {
-            mNumOverlayWindow--;
-            if (mNumOverlayWindow == 0) {
-                setHasOverlayUi(false);
-            } else if (mNumOverlayWindow < 0) {
-                throw new IllegalStateException("mNumOverlayWindow=" + mNumOverlayWindow
-                        + " less than 0 for session=" + this);
+        killSessionLocked();
+    }
+
+
+    void onWindowSurfaceVisibilityChanged(WindowSurfaceController surfaceController,
+            boolean visible, int type) {
+
+        if (!isSystemAlertWindowType(type)) {
+            return;
+        }
+
+        boolean changed;
+
+        if (!mCanAddInternalSystemWindow) {
+            // We want to track non-system signature apps adding alert windows so we can post an
+            // on-going notification for the user to control their visibility.
+            if (visible) {
+                changed = mAlertWindowSurfaces.add(surfaceController);
+            } else {
+                changed = mAlertWindowSurfaces.remove(surfaceController);
+            }
+
+            if (changed) {
+                if (mAlertWindowSurfaces.isEmpty()) {
+                    cancelAlertWindowNotification();
+                } else if (mAlertWindowNotification == null){
+                    mAlertWindowNotification = new AlertWindowNotification(
+                            mService, mPackageName, mUid);
+                }
             }
         }
-        killSessionLocked();
+
+        if (type != TYPE_APPLICATION_OVERLAY) {
+            return;
+        }
+
+        if (visible) {
+            changed = mAppOverlaySurfaces.add(surfaceController);
+        } else {
+            changed = mAppOverlaySurfaces.remove(surfaceController);
+        }
+
+        if (changed) {
+            // Notify activity manager of changes to app overlay windows so it can adjust the
+            // importance score for the process.
+            setHasOverlayUi(!mAppOverlaySurfaces.isEmpty());
+        }
     }
 
     private void killSessionLocked() {
@@ -597,16 +644,28 @@ public class Session extends IWindowSession.Stub
                     + " in session " + this + ": " + e.toString());
         }
         mSurfaceSession = null;
+        mAlertWindowSurfaces.clear();
+        mAppOverlaySurfaces.clear();
         setHasOverlayUi(false);
+        cancelAlertWindowNotification();
     }
 
     private void setHasOverlayUi(boolean hasOverlayUi) {
         mService.mH.obtainMessage(H.SET_HAS_OVERLAY_UI, mPid, hasOverlayUi ? 1 : 0).sendToTarget();
     }
 
+    private void cancelAlertWindowNotification() {
+        if (mAlertWindowNotification == null) {
+            return;
+        }
+        mAlertWindowNotification.cancel();
+        mAlertWindowNotification = null;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
-                pw.print(" mNumOverlayWindow="); pw.print(mNumOverlayWindow);
+                pw.print(" mAppOverlaySurfaces="); pw.print(mAppOverlaySurfaces);
+                pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
     }
