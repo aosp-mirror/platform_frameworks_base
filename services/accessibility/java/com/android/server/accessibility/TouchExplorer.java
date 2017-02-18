@@ -29,6 +29,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -406,6 +407,13 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
         if (mSendTouchInteractionEndDelayed.isPending()) {
             mSendTouchInteractionEndDelayed.forceSendAndRemove();
         }
+
+        // Try to use the standard accessibility API to click
+        if (mAms.performActionOnAccessibilityFocusedItem(
+                AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
+            return true;
+        }
+        Slog.e(LOG_TAG, "ACTION_CLICK failed. Dispatching motion events to simulate click.");
 
         final int pointerIndex = event.getActionIndex();
         final int pointerId = event.getPointerId(pointerIndex);
