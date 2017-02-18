@@ -2893,7 +2893,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void ensureUnknownSourcesRestrictionForProfileOwners() {
         synchronized (this) {
-            for (int userId : mOwners.getProfileOwnerKeys().toArray(new Integer[0])) {
+            for (int userId : mOwners.getProfileOwnerKeys()) {
                 if (!mUserManager.isManagedProfile(userId) ||
                         Settings.Secure.getIntForUser(mContext.getContentResolver(),
                         Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) == 0) {
