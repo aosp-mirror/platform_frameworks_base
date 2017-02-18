@@ -37,7 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.MaskableIconDrawable;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -807,7 +807,7 @@ public class LauncherApps {
                 if (bmp != null) {
                     BitmapDrawable dr = new BitmapDrawable(mContext.getResources(), bmp);
                     if (shortcut.hasMaskableBitmap()) {
-                        return new MaskableIconDrawable(null, dr);
+                        return new AdaptiveIconDrawable(null, dr);
                     } else {
                         return dr;
                     }

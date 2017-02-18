@@ -5855,8 +5855,8 @@
         <attr name="color" />
     </declare-styleable>
 
-    <!-- Drawable used to draw masked icons with foreground and background layers. -->
-    <declare-styleable name="MaskableIconDrawableLayer">
+    <!-- Drawable used to draw adaptive icons with foreground and background layers. -->
+    <declare-styleable name="AdaptiveIconDrawableLayer">
         <!-- The drawable to use for the layer. -->
         <attr name="drawable" />
      </declare-styleable>

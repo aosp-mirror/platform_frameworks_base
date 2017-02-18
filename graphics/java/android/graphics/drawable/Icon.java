@@ -290,7 +290,7 @@ public final class Icon implements Parcelable {
             case TYPE_BITMAP:
                 return new BitmapDrawable(context.getResources(), getBitmap());
             case TYPE_BITMAP_MASKABLE:
-                return new MaskableIconDrawable(null,
+                return new AdaptiveIconDrawable(null,
                     new BitmapDrawable(context.getResources(), getBitmap()));
             case TYPE_RESOURCE:
                 if (getResources() == null) {
@@ -563,7 +563,7 @@ public final class Icon implements Parcelable {
 
     /**
      * Create an Icon pointing to a bitmap in memory that follows the icon design guideline defined
-     * by {@link MaskableIconDrawable}.
+     * by {@link AdaptiveIconDrawable}.
      * @param bits A valid {@link android.graphics.Bitmap} object
      */
     public static Icon createWithMaskableBitmap(Bitmap bits) {

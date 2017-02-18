@@ -29,7 +29,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Outline;
@@ -56,10 +55,10 @@ import java.io.IOException;
  *
  * <p>The layers are clipped when rendering using the mask path defined in the device configuration.
  *
- * <p>This class can also be created via XML inflation using <code>&lt;maskable-icon></code> tag
+ * <p>This class can also be created via XML inflation using <code>&lt;adaptive-icon></code> tag
  * in addition to dynamic creation.
  */
-public class MaskableIconDrawable extends Drawable implements Drawable.Callback {
+public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * Mask path is defined inside device configuration in following dimension: [100 x 100]
@@ -122,7 +121,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
     /**
      * Constructor used for xml inflation.
      */
-    MaskableIconDrawable() {
+    AdaptiveIconDrawable() {
         this((LayerState) null, null);
     }
 
@@ -130,7 +129,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
      * The one constructor to rule them all. This is called by all public
      * constructors to set the state and initialize local properties.
      */
-    MaskableIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
+    AdaptiveIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
         mLayerState = createConstantState(state, res);
 
         if (sMask == null) {
@@ -163,7 +162,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
      * @param foregroundDrawable drawable that should be rendered in the foreground
      * @hide
      */
-    public MaskableIconDrawable(Drawable backgroundDrawable,
+    public AdaptiveIconDrawable(Drawable backgroundDrawable,
             Drawable foregroundDrawable) {
         this((LayerState)null, null);
         if (backgroundDrawable != null) {
@@ -367,7 +366,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
 
             if (layer.mThemeAttrs != null) {
                 final TypedArray a = t.resolveAttributes(
-                    layer.mThemeAttrs, R.styleable.MaskableIconDrawableLayer);
+                    layer.mThemeAttrs, R.styleable.AdaptiveIconDrawableLayer);
                 updateLayerFromTypedArray(layer, a);
                 a.recycle();
             }
@@ -414,7 +413,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
 
             final ChildDrawable layer = new ChildDrawable(state.mDensity);
             final TypedArray a = obtainAttributes(r, theme, attrs,
-                R.styleable.MaskableIconDrawableLayer);
+                R.styleable.AdaptiveIconDrawableLayer);
             updateLayerFromTypedArray(layer, a);
             a.recycle();
 
@@ -450,7 +449,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         // Extract the theme attributes, if any.
         layer.mThemeAttrs = a.extractThemeAttrs();
 
-        Drawable dr = a.getDrawable(R.styleable.MaskableIconDrawableLayer_drawable);
+        Drawable dr = a.getDrawable(R.styleable.AdaptiveIconDrawableLayer_drawable);
         if (dr != null) {
             if (layer.mDrawable != null) {
                 // It's possible that a drawable was already set, in which case
@@ -841,7 +840,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
             mDensity = density;
         }
 
-        ChildDrawable(@NonNull ChildDrawable orig, @NonNull MaskableIconDrawable owner,
+        ChildDrawable(@NonNull ChildDrawable orig, @NonNull AdaptiveIconDrawable owner,
                 @Nullable Resources res) {
 
             final Drawable dr = orig.mDrawable;
@@ -899,7 +898,7 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
         private boolean mIsStateful;
         private boolean mAutoMirrored = false;
 
-        LayerState(@Nullable LayerState orig, @NonNull MaskableIconDrawable owner,
+        LayerState(@Nullable LayerState orig, @NonNull AdaptiveIconDrawable owner,
                 @Nullable Resources res) {
             mDensity = Drawable.resolveDensity(res, orig != null ? orig.mDensity : 0);
             mChildren = new ChildDrawable[N_CHILDREN];
@@ -952,12 +951,12 @@ public class MaskableIconDrawable extends Drawable implements Drawable.Callback 
 
         @Override
         public Drawable newDrawable() {
-            return new MaskableIconDrawable(this, null);
+            return new AdaptiveIconDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(@Nullable Resources res) {
-            return new MaskableIconDrawable(this, res);
+            return new AdaptiveIconDrawable(this, res);
         }
 
         @Override
