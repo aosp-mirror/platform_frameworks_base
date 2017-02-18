@@ -42,6 +42,7 @@ import android.util.SparseBooleanArray;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
@@ -115,7 +116,7 @@ class InstantAppRegistry {
     }
 
     public byte[] getInstantAppCookieLPw(@NonNull String packageName,
-                                         @UserIdInt int userId) {
+            @UserIdInt int userId) {
         byte[] pendingCookie = mCookiePersistence.getPendingPersistCookie(userId, packageName);
         if (pendingCookie != null) {
             return pendingCookie;
@@ -132,7 +133,7 @@ class InstantAppRegistry {
     }
 
     public boolean setInstantAppCookieLPw(@NonNull String packageName,
-                                          @Nullable byte[] cookie, @UserIdInt int userId) {
+            @Nullable byte[] cookie, @UserIdInt int userId) {
         if (cookie != null && cookie.length > 0) {
             final int maxCookieSize = mService.mContext.getPackageManager()
                     .getInstantAppCookieMaxSize();
@@ -143,25 +144,26 @@ class InstantAppRegistry {
             }
         }
 
-        mCookiePersistence.schedulePersist(userId, packageName, cookie);
+        PackageParser.Package pkg = mService.mPackages.get(packageName);
+        if (pkg == null) {
+            return false;
+        }
+
+        File cookieFile = computeInstantCookieFile(pkg, userId);
+
+        mCookiePersistence.schedulePersist(userId, packageName, cookieFile, cookie);
         return true;
     }
 
     private void persistInstantApplicationCookie(@Nullable byte[] cookie,
-            @NonNull String packageName, @UserIdInt int userId) {
+            @NonNull String packageName, @NonNull File cookieFile, @UserIdInt int userId) {
         synchronized (mService.mPackages) {
-            PackageParser.Package pkg = mService.mPackages.get(packageName);
-            if (pkg == null) {
-                return;
-            }
-
             File appDir = getInstantApplicationDir(packageName, userId);
             if (!appDir.exists() && !appDir.mkdirs()) {
                 Slog.e(LOG_TAG, "Cannot create instant app cookie directory");
                 return;
             }
 
-            File cookieFile = computeInstantCookieFile(pkg, userId);
             if (cookieFile.exists() && !cookieFile.delete()) {
                 Slog.e(LOG_TAG, "Cannot delete instant app cookie file");
             }
@@ -889,7 +891,7 @@ class InstantAppRegistry {
         // In case you wonder why we stash the cookies aside, we use
         // the user id for the message id and the package for the payload.
         // Handler allows removing messages by id and tag where the
-        // tag is is compared using ==. So to allow cancelling the
+        // tag is compared using ==. So to allow cancelling the
         // pending persistence for an app under a given user we use
         // the fact that package names are interned in the system
         // process so the == comparison would match and we end up
@@ -902,11 +904,14 @@ class InstantAppRegistry {
             super(looper);
         }
 
-        public void schedulePersist(@UserIdInt int userId,
-                @NonNull String packageName, @NonNull byte[] cookie) {
+        public void schedulePersist(@UserIdInt int userId, @NonNull String packageName,
+                @NonNull File cookieFile, @NonNull byte[] cookie) {
             cancelPendingPersist(userId, packageName);
             addPendingPersistCookie(userId, packageName, cookie);
-            sendMessageDelayed(obtainMessage(userId, packageName),
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            args.arg2 = cookieFile;
+            sendMessageDelayed(obtainMessage(userId, args),
                     PERSIST_COOKIE_DELAY_MILLIS);
         }
 
@@ -951,9 +956,12 @@ class InstantAppRegistry {
         @Override
         public void handleMessage(Message message) {
             int userId = message.what;
-            String packageName = (String) message.obj;
+            SomeArgs args = (SomeArgs) message.obj;
+            String packageName = (String) args.arg1;
+            File cookieFile = (File) args.arg2;
+            args.recycle();
             byte[] cookie = removePendingPersistCookie(userId, packageName);
-            persistInstantApplicationCookie(cookie, packageName, userId);
+            persistInstantApplicationCookie(cookie, packageName, cookieFile, userId);
         }
     }
 }
