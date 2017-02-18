@@ -106,7 +106,9 @@ public final class PlaybackActivityMonitor
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             // FIXME SoundPool not ready for state reporting
-            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+            if (apc != null
+                    && apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL)
+            {
                 return;
             }
             if (checkConfigurationCaller(piid, apc, binderUid)) {
@@ -278,6 +280,9 @@ public final class PlaybackActivityMonitor
             while (piidIterator.hasNext()) {
                 final Integer piid = piidIterator.next();
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                if (apc == null) {
+                    continue;
+                }
                 if (!winner.hasSameUid(apc.getClientUid())
                         && loser.hasSameUid(apc.getClientUid())
                         && apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED)
@@ -363,6 +368,9 @@ public final class PlaybackActivityMonitor
             while (piidIterator.hasNext()) {
                 final Integer piid = piidIterator.next();
                 final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+                if (apc == null) {
+                    continue;
+                }
                 final int playerUsage = apc.getAudioAttributes().getUsage();
                 boolean mute = false;
                 for (int usageToMute : usagesToMute) {
