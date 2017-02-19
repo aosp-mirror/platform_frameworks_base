@@ -451,7 +451,7 @@ final class AutoFillManagerServiceImpl {
              * Called when the fill UI is ready to be shown for this view.
              */
             void onFillReady(ViewState viewState, FillResponse fillResponse, Rect bounds,
-                    @Nullable AutoFillValue value);
+                    AutoFillId focusedId, @Nullable AutoFillValue value);
         }
 
         final AutoFillId mId;
@@ -509,12 +509,14 @@ final class AutoFillManagerServiceImpl {
         }
 
         /**
-         * Calls {@link Listener#onFillReady(ViewState, FillResponse, Rect, AutoFillValue)} if the
+         * Calls {@link
+         * Listener#onFillReady(ViewState, FillResponse, Rect, AutoFillId, AutoFillValue)} if the
          * fill UI is ready to be displayed (i.e. when response and bounds are set).
          */
         void maybeCallOnFillReady() {
-            if (mResponse != null && mBounds != null) {
-                mListener.onFillReady(this, mResponse, mBounds, mAutoFillValue);
+            if (mResponse != null && (mResponse.getAuthentication() != null
+                    || mResponse.getDatasets() != null) && mBounds != null) {
+                mListener.onFillReady(this, mResponse, mBounds, mId, mAutoFillValue);
             }
         }
 
@@ -641,8 +643,14 @@ final class AutoFillManagerServiceImpl {
 
         // FillServiceCallbacks
         @Override
-        public void authenticate(IntentSender intent, Intent fillInIntent) {
-            startAuthentication(intent, fillInIntent);
+        public void authenticate(IntentSender intent) {
+            final Intent fillInIntent;
+            synchronized (mLock) {
+                fillInIntent = createAuthFillInIntent(mStructure);
+            }
+            mHandlerCaller.getHandler().post(() -> {
+                startAuthentication(intent, fillInIntent);
+            });
         }
 
         // FillServiceCallbacks
@@ -675,15 +683,10 @@ final class AutoFillManagerServiceImpl {
                     processResponseLocked(mCurrentResponse);
                 } else if (result instanceof Dataset) {
                     Dataset dataset = (Dataset) result;
-                    final int datasetIndex = Helper.indexOfDataset(
-                            dataset.getName(), mCurrentResponse);
-                    if (datasetIndex <= 0) {
-                        Slog.e(TAG, "Response for a dataset auth has"
-                                + " an invalid dataset result: " + dataset.getName());
-                    }
-                    mCurrentResponse.getDatasets().removeAt(datasetIndex);
+                    mCurrentResponse.getDatasets().remove(mAutoFilledDataset);
                     mCurrentResponse.getDatasets().add(dataset);
-                    autoFill(dataset);
+                    mAutoFilledDataset = dataset;
+                    processResponseLocked(mCurrentResponse);
                 }
             }
         }
@@ -727,6 +730,7 @@ final class AutoFillManagerServiceImpl {
                     return;
                 }
             }
+
             // Nothing changed...
             if (DEBUG) Slog.d(TAG, "showSaveLocked(): with no changes, comes no responsibilities");
         }
@@ -802,8 +806,11 @@ final class AutoFillManagerServiceImpl {
                     }
                 }
 
-                // Just change value, don't update the UI
+                // Change value
                 viewState.mAutoFillValue = value;
+
+                // Update the chooser UI
+                mUi.updateFillUi(value.coerceToString());
                 return;
             }
 
@@ -838,7 +845,7 @@ final class AutoFillManagerServiceImpl {
 
         @Override
         public void onFillReady(ViewState viewState, FillResponse response, Rect bounds,
-                @Nullable AutoFillValue value) {
+                AutoFillId filledId, @Nullable AutoFillValue value) {
             String filterText = "";
             if (value != null) {
                 // TODO(b/33197203): Handle other AutoFillValue types
@@ -848,8 +855,7 @@ final class AutoFillManagerServiceImpl {
                 }
             }
 
-            getUiForShowing().showFillUi(mActivityToken, viewState, response.getDatasets(),
-                    bounds, filterText);
+            getUiForShowing().showFillUi(filledId, response, bounds, filterText);
         }
 
         private void processResponseLocked(FillResponse response) {
@@ -869,18 +875,7 @@ final class AutoFillManagerServiceImpl {
             if (mCurrentResponse.getAuthentication() != null) {
                 // Handle authentication.
                 final Intent fillInIntent = createAuthFillInIntent(mStructure);
-
                 mCurrentViewState.setResponse(mCurrentResponse, fillInIntent);
-                return;
-            }
-
-            final ArraySet<AutoFillId> savableIds = mCurrentResponse.getSavableIds();
-            if (savableIds == null || savableIds.isEmpty()) {
-                // NOTE: it's assuming the response has no datasets, since when a dataset is added
-                // it's view id is automatically added to savable_ids
-                if (DEBUG) Slog.d(TAG, "processResponseLocked(): nothing to do");
-
-                removeSelf();
                 return;
             }
 
@@ -889,6 +884,8 @@ final class AutoFillManagerServiceImpl {
 
         void autoFill(Dataset dataset) {
             synchronized (mLock) {
+                mAutoFilledDataset = dataset;
+
                 // Autofill it directly...
                 if (dataset.getAuthentication() == null) {
                     autoFillApp(dataset);
@@ -948,9 +945,7 @@ final class AutoFillManagerServiceImpl {
             synchronized (mLock) {
                 try {
                     if (DEBUG) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
-
                     mClient.autoFill(dataset.getFieldIds(), dataset.getFieldValues());
-                    mAutoFilledDataset = dataset;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error auto-filling activity: " + e);
                 }
@@ -999,7 +994,6 @@ final class AutoFillManagerServiceImpl {
 
         private void destroyLocked() {
             mRemoteFillService.destroy();
-            mUi.hideAll();
             mUi.setCallbackLocked(null, null);
         }
 

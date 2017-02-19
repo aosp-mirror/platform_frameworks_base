@@ -32,7 +32,6 @@ import android.view.View;
  * {@code sub-type} define its semantics (like a postal address).
  */
 public final class AutoFillValue implements Parcelable {
-
     private final String mText;
     private final int mListIndex;
     private final boolean mToggle;
@@ -98,6 +97,12 @@ public final class AutoFillValue implements Parcelable {
         }
         if (mToggle != other.mToggle) return false;
         return true;
+    }
+
+    /** @hide */
+    public String coerceToString() {
+        // TODO(b/33197203): How can we filter on toggles or list values?
+        return mText;
     }
 
     @Override

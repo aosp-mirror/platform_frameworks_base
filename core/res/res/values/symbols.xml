@@ -2840,6 +2840,7 @@
   <java-symbol type="dimen" name="autofill_fill_item_height" />
   <java-symbol type="dimen" name="autofill_fill_min_margin" />
   <java-symbol type="layout" name="autofill_save"/>
+  <java-symbol type="layout" name="autofill_dataset_picker"/>
   <java-symbol type="id" name="autofill_save_title" />
   <java-symbol type="id" name="autofill_save_no" />
   <java-symbol type="id" name="autofill_save_yes" />

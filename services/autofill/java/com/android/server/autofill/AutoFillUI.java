@@ -18,32 +18,23 @@ package com.android.server.autofill;
 import static com.android.server.autofill.Helper.DEBUG;
 
 import android.annotation.Nullable;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.Rect;
-import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.service.autofill.Dataset;
-import android.util.ArraySet;
-import android.os.Looper;
+import android.service.autofill.FillResponse;
 import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.autofill.AutoFillId;
 import android.widget.Toast;
 
-import com.android.internal.os.HandlerCaller;
 import com.android.server.UiThread;
-import com.android.server.autofill.AutoFillManagerServiceImpl.ViewState;
 
 import java.io.PrintWriter;
 
@@ -53,36 +44,24 @@ import java.io.PrintWriter;
 // TODO(b/33197203): document exactly what once the auto-fill bar is implemented
 final class AutoFillUI {
     private static final String TAG = "AutoFillUI";
-    private static final long SNACK_BAR_LIFETIME_MS = 30 * DateUtils.SECOND_IN_MILLIS;
+
+    private static final long SNACK_BAR_LIFETIME_MS = 5 * DateUtils.SECOND_IN_MILLIS;
+
     private static final int MSG_HIDE_SNACK_BAR = 1;
 
+    private final Handler mHandler = UiThread.getHandler();
+
     private final Context mContext;
+
     private final WindowManager mWm;
 
-    // TODO(b/33197203) Fix locking - some state requires lock and some not - requires refactoring
-    private final Object mLock = new Object();
-
-    // Fill UI variables
     private AnchoredWindow mFillWindow;
-    private View mFillView;
-    private ViewState mViewState;
+
+    private DatasetPicker mDatasetPicker;
 
     private AutoFillUiCallback mCallback;
-    private IBinder mActivityToken;
 
-    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
-        switch (msg.what) {
-            case MSG_HIDE_SNACK_BAR: {
-                hideSnackbarUiThread();
-                return;
-            }
-            default: {
-                Slog.w(TAG, "Invalid message: " + msg);
-            }
-        }
-    };
-    private final HandlerCaller mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(),
-            mHandlerCallback, true);
+    private IBinder mActivityToken;
 
     /**
      * Custom snackbar UI used for saving autofill or other informational messages.
@@ -95,32 +74,32 @@ final class AutoFillUI {
     }
 
     void setCallbackLocked(AutoFillUiCallback callback, IBinder activityToken) {
-        hideAll();
-        mCallback = callback;
-        mActivityToken = activityToken;
+        mHandler.post(() -> {
+            hideAllUiThread();
+            mCallback = callback;
+            mActivityToken = activityToken;
+        });
     }
 
     /**
      * Displays an error message to the user.
      */
     void showError(CharSequence message) {
-        if (!hasCallback()) {
-            return;
-        }
-        hideAll();
         // TODO(b/33197203): proper implementation
-        UiThread.getHandler().runWithScissors(() -> {
+        UiThread.getHandler().post(() -> {
+            if (!hasCallback()) {
+                return;
+            }
+            hideAllUiThread();
             Toast.makeText(mContext, "AutoFill error: " + message, Toast.LENGTH_LONG).show();
-        }, 0);
+        });
     }
 
     /**
      * Hides the fill UI.
      */
     void hideFillUi() {
-        UiThread.getHandler().runWithScissors(() -> {
-            hideFillUiUiThread();
-        }, 0);
+        mHandler.post(() -> hideFillUiUiThread());
     }
 
     @android.annotation.UiThread
@@ -129,111 +108,80 @@ final class AutoFillUI {
             if (DEBUG) Slog.d(TAG, "hideFillUiUiThread(): hide" + mFillWindow);
             mFillWindow.hide();
         }
-
-        mViewState = null;
-        mFillView = null;
         mFillWindow = null;
+        mDatasetPicker = null;
+    }
+
+    void updateFillUi(@Nullable String filterText) {
+        mHandler.post(() -> {
+            if (!hasCallback()) {
+                return;
+            }
+            hideSnackbarUiThread();
+            if (mDatasetPicker != null) {
+                mDatasetPicker.update(filterText);
+            }
+        });
     }
 
     /**
      * Shows the fill UI, removing the previous fill UI if the has changed.
      *
-     * @param appToken the token of the app to be autofilled
-     * @param viewState the view state, compared by reference to know if new UI should be shown
-     * @param datasets the datasets to show, not used if viewState is the same
+     * @param focusedId the currently focused field
+     * @param response the current fill response
      * @param bounds bounds of the view to be filled, used if changed
      * @param filterText text of the view to be filled, used if changed
      */
-    void showFillUi(IBinder appToken, ViewState viewState, @Nullable ArraySet<Dataset> datasets,
-            Rect bounds, String filterText) {
-        if (!hasCallback()) {
-            return;
-        }
-
-        UiThread.getHandler().runWithScissors(() -> {
+    void showFillUi(AutoFillId focusedId, @Nullable FillResponse response, Rect bounds,
+            String filterText) {
+        mHandler.post(() -> {
+            if (!hasCallback()) {
+                return;
+            }
             hideSnackbarUiThread();
-        }, 0);
-
-        if (datasets == null && viewState.mAuthIntent == null) {
-            // TODO(b/33197203): shouldn't be called, but keeping the WTF for a while just to be
-            // safe, otherwise it would crash system server...
-            Slog.wtf(TAG, "showFillUI(): no dataset");
-            return;
-        }
-
-        // TODO(b/33197203): should not display UI after we launched an authentication intent, since
-        // we have no warranty the provider will call onFailure() if the authentication failed or
-        // user dismissed the auth window
-        // because if the service does not handle calling the callback,
-
-
-        UiThread.getHandler().runWithScissors(() -> {
-            // The dataset picker is only shown when authentication is not required...
-            DatasetPicker datasetPicker = null;
-
-            if (mViewState == null || !mViewState.mId.equals(viewState.mId)) {
-                hideFillUiUiThread();
-
-                mViewState = viewState;
-                if (viewState.mAuthIntent != null) {
-                    final CharSequence serviceName = viewState.getServiceName();
-
-                    mFillView = new SignInPrompt(mContext, serviceName, (e) -> {
-                        final IntentSender intentSender = viewState.mResponse.getAuthentication();
-                        final AutoFillUiCallback callback;
-                        final Intent authIntent;
-                        synchronized (mLock) {
-                            callback = mCallback;
-                            authIntent = viewState.mAuthIntent;
-                            // Must reset the authentication intent so UI display the datasets after
-                            // the user authenticated.
-                            viewState.mAuthIntent = null;
+            final View content;
+            if (response.getPresentation() != null) {
+                content = response.getPresentation().apply(mContext, null);
+                content.setOnClickListener((view) -> {
+                    if (mCallback != null) {
+                        mCallback.authenticate(response.getAuthentication());
+                    }
+                    hideFillUiUiThread();
+                });
+            } else {
+                mDatasetPicker = new DatasetPicker(mContext, response.getDatasets(),
+                        focusedId, new DatasetPicker.Listener() {
+                    @Override
+                    public void onDatasetPicked(Dataset dataset) {
+                        if (mCallback != null) {
+                            mCallback.fill(dataset);
                         }
-                        if (callback != null) {
-                            callback.authenticate(intentSender, authIntent);
-                        } else {
-                            // TODO(b/33197203): need to figure out why it's null sometimes
-                            Slog.w(TAG, "no callback on showFillUi().auth for " + viewState.mId);
-                        }
-                    });
+                        hideFillUiUiThread();
+                    }
 
-                } else {
-                    mFillView = datasetPicker = new DatasetPicker(mContext, datasets,
-                            (dataset) -> {
-                                final AutoFillUiCallback callback;
-                                synchronized (mLock) {
-                                    callback = mCallback;
-                                }
-                                if (callback != null) {
-                                    callback.fill(dataset);
-                                } else {
-                                    // TODO(b/33197203): need to figure out why it's null sometimes
-                                    Slog.w(TAG, "no callback on showFillUi() for " + viewState.mId);
-                                }
-                                hideFillUiUiThread();
-                            });
-                }
-                mFillWindow = new AnchoredWindow(mWm, appToken, mFillView);
+                    @Override
+                    public void onCanceled() {
+                        hideFillUiUiThread();
+                    }
+                });
+                mDatasetPicker.update(filterText);
+                content = mDatasetPicker;
+            }
 
-                if (DEBUG) Slog.d(TAG, "showFillUi(): view changed for: " + viewState.mId);
-            }
-            if (datasetPicker != null) {
-                datasetPicker.update(filterText);
-            }
+            mFillWindow = new AnchoredWindow(mWm, mActivityToken, content);
             mFillWindow.show(bounds);
-
-        }, 0);
+        });
     }
 
     /**
      * Shows the UI asking the user to save for auto-fill.
      */
     void showSaveUi() {
-        if (!hasCallback()) {
-            return;
-        }
-        hideAll();
-        UiThread.getHandler().runWithScissors(() -> {
+        mHandler.post(() -> {
+            if (!hasCallback()) {
+                return;
+            }
+            hideAllUiThread();
             showSnackbarUiThread(new SavePrompt(mContext,
                     new SavePrompt.OnSaveListener() {
                 @Override
@@ -249,17 +197,20 @@ final class AutoFillUI {
                     hideSnackbarUiThread();
                 }
             }));
-        }, 0);
+        });
     }
 
     /**
      * Hides all UI affordances.
      */
     void hideAll() {
-        UiThread.getHandler().runWithScissors(() -> {
-            hideSnackbarUiThread();
-            hideFillUiUiThread();
-        }, 0);
+        mHandler.post(() -> hideAllUiThread());
+    }
+
+    @android.annotation.UiThread
+    private void hideAllUiThread() {
+        hideSnackbarUiThread();
+        hideFillUiUiThread();
     }
 
     void dump(PrintWriter pw) {
@@ -267,14 +218,13 @@ final class AutoFillUI {
         final String prefix = "  ";
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mSnackBar: "); pw.println(mSnackbar);
-        pw.print(prefix); pw.print("mViewState: "); pw.println(mViewState);
     }
 
     //similar to a snackbar, but can be a bit custom since it is more than just text. This will
     //allow two buttons for saving or not saving the autofill for instance as well.
+    @android.annotation.UiThread
     private void showSnackbarUiThread(View snackBar) {
         final LayoutParams params = new LayoutParams();
-        params.setTitle("AutoFill Save");
         params.type = LayoutParams.TYPE_PHONE; // TODO(b/33197203) use app window token
         params.flags =
                 LayoutParams.FLAG_NOT_FOCUSABLE // don't receive input events,
@@ -286,20 +236,21 @@ final class AutoFillUI {
         params.width = LayoutParams.MATCH_PARENT;
         params.height = LayoutParams.WRAP_CONTENT;
 
-        UiThread.getHandler().runWithScissors(() -> {
+        mHandler.post(() -> {
             mSnackbar = snackBar;
             mWm.addView(mSnackbar, params);
-        }, 0);
+        });
 
         if (DEBUG) {
             Slog.d(TAG, "showSnackbar(): auto dismissing it in " + SNACK_BAR_LIFETIME_MS + " ms");
         }
-        mHandlerCaller.sendMessageDelayed(mHandlerCaller.obtainMessage(MSG_HIDE_SNACK_BAR),
-                SNACK_BAR_LIFETIME_MS);
+        mHandler.sendMessageDelayed(mHandler
+                        .obtainMessage(MSG_HIDE_SNACK_BAR), SNACK_BAR_LIFETIME_MS);
     }
 
+    @android.annotation.UiThread
     private void hideSnackbarUiThread() {
-        mHandlerCaller.getHandler().removeMessages(MSG_HIDE_SNACK_BAR);
+        mHandler.removeMessages(MSG_HIDE_SNACK_BAR);
         if (mSnackbar != null) {
             mWm.removeView(mSnackbar);
             mSnackbar = null;
@@ -307,13 +258,11 @@ final class AutoFillUI {
     }
 
     private boolean hasCallback() {
-        synchronized (mLock) {
-            return mCallback != null;
-        }
+        return mCallback != null;
     }
 
     interface AutoFillUiCallback {
-        void authenticate(IntentSender intent, Intent fillInIntent);
+        void authenticate(IntentSender intent);
         void fill(Dataset dataset);
         void save();
     }

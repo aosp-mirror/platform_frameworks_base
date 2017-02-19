@@ -26,12 +26,12 @@ import android.os.Parcelable;
 import android.util.ArraySet;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillManager;
+import android.widget.RemoteViews;
 
 /**
  * Response for a {@link
  * AutoFillService#onFillRequest(android.app.assist.AssistStructure,
- * Bundle, android.os.CancellationSignal, FillCallback)} and
- * authentication requests.
+ * Bundle, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>The response typically contains one or more {@link Dataset}s, each representing a set of
  * fields that can be auto-filled together, and the Android system displays a dataset picker UI
@@ -43,7 +43,8 @@ import android.view.autofill.AutoFillManager;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder("homer")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createPresentation())
  *          .setTextFieldValue(id1, "homer")
  *          .setTextFieldValue(id2, "D'OH!")
  *          .build())
@@ -54,11 +55,13 @@ import android.view.autofill.AutoFillManager;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder("Homer's Account")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createFirstPresentation())
  *          .setTextFieldValue(id1, "homer")
  *          .setTextFieldValue(id2, "D'OH!")
  *          .build())
- *      .add(new Dataset.Builder("Bart's Account")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createSecondPresentation())
  *          .setTextFieldValue(id1, "elbarto")
  *          .setTextFieldValue(id2, "cowabonga")
  *          .build())
@@ -82,7 +85,8 @@ import android.view.autofill.AutoFillManager;
  *
  * <pre class="prettyprint">
  *   new FillResponse.Builder()
- *       .add(new Dataset.Builder("Homer")
+ *       .add(new Dataset.Builder(")
+ *          .setPresentation(createPresentation())
  *          .setTextFieldValue(id1, "Homer")                  // first name
  *          .setTextFieldValue(id2, "Simpson")                // last name
  *          .setTextFieldValue(id3, "742 Evergreen Terrace")  // street
@@ -110,27 +114,31 @@ import android.view.autofill.AutoFillManager;
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder("Homer")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createFirstPresentation())
  *          .setTextFieldValue(id1, "Homer")
  *          .setTextFieldValue(id2, "Simpson")
  *          .build())
- *      .add(new Dataset.Builder("Bart")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createSecondPresentation())
  *          .setTextFieldValue(id1, "Bart")
  *          .setTextFieldValue(id2, "Simpson")
  *          .build())
  *      .build();
  * </pre>
  *
- * <p>Then after the user picks the {@code Homer} dataset and taps the {@code Street} field to
+ * <p>Then after the user picks the second dataset and taps the street field to
  * trigger another auto-fill request, the second response could be:
  *
  * <pre class="prettyprint">
  *  new FillResponse.Builder()
- *      .add(new Dataset.Builder("Home")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createThirdPresentation())
  *          .setTextFieldValue(id3, "742 Evergreen Terrace")
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
- *      .add(new Dataset.Builder("Work")
+ *      .add(new Dataset.Builder()
+ *          .setPresentation(createFourthPresentation())
  *          .setTextFieldValue(id3, "Springfield Power Plant")
  *          .setTextFieldValue(id4, "Springfield")
  *          .build())
@@ -141,29 +149,31 @@ import android.view.autofill.AutoFillManager;
  * {@link Dataset} level, prior to auto-filling an activity - see {@link FillResponse.Builder
  * #setAuthentication(IntentSender)} and {@link Dataset.Builder#setAuthentication(IntentSender)}.
  * It is recommended that you encrypt only the sensitive data but leave the labels unencrypted
- * which would allow you to provide the dataset names to the user and if they choose one
- * them challenge the user to onAuthenticate. For example, if the user has a home and a work
- * address the Home and Work labels could be stored unencrypted as they don't have any sensitive
- * data while the address data is in an encrypted storage. If the user chooses Home, then the
- * platform will start your authentication flow. If you encrypt all data and require auth
- * at the response level the user will have to interact with the fill UI to trigger a request
- * for the datasets as they don't see Home and Work options which will trigger your auth
- * flow and after successfully authenticating the user will be presented with the Home and
- * Work options where they can pick one. Hence, you have flexibility how to implement your
- * auth while storing labels non-encrypted and data encrypted provides a better user
- * experience.</p>
+ * which would allow you to provide a dataset presentation views with labels and if the user
+ * chooses one of them challenge the user to authenticate. For example, if the user has a
+ * home and a work address the Home and Work labels could be stored unencrypted as they don't
+ * have any sensitive data while the address data is in an encrypted storage. If the user
+ * chooses Home, then the platform will start your authentication flow. If you encrypt all
+ * data and require auth at the response level the user will have to interact with the fill
+ * UI to trigger a request for the datasets (as they don't see the presentation views for the
+ * possible options) which will start your auth flow and after successfully authenticating
+ * the user will be presented with the Home and Work options to pick one. Hence, you have
+ * flexibility how to implement your auth while storing labels non-encrypted and data
+ * encrypted provides a better user experience.</p>
  */
 public final class FillResponse implements Parcelable {
 
     private final ArraySet<Dataset> mDatasets;
     private final ArraySet<AutoFillId> mSavableIds;
     private final Bundle mExtras;
+    private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = builder.mDatasets;
         mSavableIds = builder.mSavableIds;
         mExtras = builder.mExtras;
+        mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
     }
 
@@ -183,26 +193,42 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    public @Nullable RemoteViews getPresentation() {
+        return mPresentation;
+    }
+
+    /** @hide */
     public @Nullable IntentSender getAuthentication() {
         return mAuthentication;
     }
 
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
-     * one dataset or set an authentication intent.
+     * one dataset or set an authentication intent with a presentation view.
      */
     public static final class Builder {
         private ArraySet<Dataset> mDatasets;
         private ArraySet<AutoFillId> mSavableIds;
         private Bundle mExtras;
+        private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
 
         /**
-         * Creates a new {@link FillResponse} builder.
+         * Sets the presentation used to visualize this response. You should
+         * set this only if you need an authentication as this is the only
+         * case the response needs to be presented to the user.
+         *
+         * @param presentation The presentation view.
+         *
+         * @return This builder.
+         *
+         * @see #setAuthentication(IntentSender)
          */
-        public Builder() {
-
+        public @NonNull
+        FillResponse.Builder setPresentation(@Nullable RemoteViews presentation) {
+            mPresentation = presentation;
+            return this;
         }
 
         /**
@@ -215,14 +241,15 @@ public final class FillResponse implements Parcelable {
          * auth on the data set level leading to a better user experience. Note that if you
          * use sensitive data as a label, for example an email address, then it should also
          * be encrypted. The provided {@link android.app.PendingIntent intent} must be an
-         * activity which implements your authentication flow.</p>
+         * activity which implements your authentication flow. Also if you provide an auth
+         * intent you also need to specify the presentation view to be shown in the fill UI
+         * for the user to trigger your authentication flow.</p>
          *
          * <p>When a user triggers auto-fill, the system launches the provided intent
-         * whose extras will have the {@link
-         * AutoFillManager#EXTRA_ASSIST_STRUCTURE screen
+         * whose extras will have the {@link AutoFillManager#EXTRA_ASSIST_STRUCTURE screen
          * content}. Once you complete your authentication flow you should set the activity
-         * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated {@link
-         * FillResponse response} by setting it to the {@link
+         * result to {@link android.app.Activity#RESULT_OK} and provide the fully populated
+         * {@link FillResponse response} by setting it to the {@link
          * AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra.
          * For example, if you provided an empty {@link FillResponse resppnse} because the
          * user's data was locked and marked that the response needs an authentication then
@@ -235,8 +262,10 @@ public final class FillResponse implements Parcelable {
          * platform needs to fill in the authentication arguments.</p>
          *
          * @param authentication Intent to an activity with your authentication flow.
+         * @return This builder.
          *
          * @see android.app.PendingIntent#getIntentSender()
+         * @see #setPresentation(RemoteViews)
          */
         public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
             throwIfDestroyed();
@@ -245,10 +274,9 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Adds a new {@link Dataset} to this response. Adding a dataset with the
-         * same id updates the existing one.
+         * Adds a new {@link Dataset} to this response.
          *
-         * @throws IllegalArgumentException if a dataset with same {@code name} already exists.
+         * @return This builder.
          */
         public@NonNull Builder addDataset(@Nullable Dataset dataset) {
             throwIfDestroyed();
@@ -258,23 +286,18 @@ public final class FillResponse implements Parcelable {
             if (mDatasets == null) {
                 mDatasets = new ArraySet<>();
             }
-            final int datasetCount = mDatasets.size();
-            for (int i = 0; i < datasetCount; i++) {
-                if (mDatasets.valueAt(i).getName().equals(dataset.getName())) {
-                    throw new IllegalArgumentException("Duplicate dataset name: "
-                            + dataset.getName());
-                }
-            }
             if (!mDatasets.add(dataset)) {
                 return this;
             }
-            final int fieldCount = dataset.getFieldIds().size();
-            for (int i = 0; i < fieldCount; i++) {
-                final AutoFillId id = dataset.getFieldIds().get(i);
-                if (mSavableIds == null) {
-                    mSavableIds = new ArraySet<>();
+            if (dataset.getFieldIds() != null) {
+                final int fieldCount = dataset.getFieldIds().size();
+                for (int i = 0; i < fieldCount; i++) {
+                    final AutoFillId id = dataset.getFieldIds().get(i);
+                    if (mSavableIds == null) {
+                        mSavableIds = new ArraySet<>();
+                    }
+                    mSavableIds.add(id);
                 }
-                mSavableIds.add(id);
             }
             return this;
         }
@@ -285,7 +308,10 @@ public final class FillResponse implements Parcelable {
          * android.app.assist.AssistStructure, Bundle, SaveCallback)})
          * but were not indirectly set through {@link #addDataset(Dataset)}.
          *
-         * <p>See {@link FillResponse} for examples.
+         * @param ids The savable ids.
+         * @return This builder.
+         *
+         * @see FillResponse
          */
         public @NonNull Builder addSavableFields(@Nullable AutoFillId... ids) {
             throwIfDestroyed();
@@ -306,10 +332,11 @@ public final class FillResponse implements Parcelable {
          * manipulate this response. For example, they are passed to subsequent
          * calls to {@link AutoFillService#onFillRequest(
          * android.app.assist.AssistStructure, Bundle, android.os.CancellationSignal,
-         * FillCallback)} and {@link
-         * AutoFillService#onSaveRequest(
-         * android.app.assist.AssistStructure, Bundle,
-         * SaveCallback)}.
+         * FillCallback)} and {@link AutoFillService#onSaveRequest(
+         * android.app.assist.AssistStructure, Bundle, SaveCallback)}.
+         *
+         * @param extras The response extras.
+         * @return This builder.
          */
         public Builder setExtras(Bundle extras) {
             throwIfDestroyed();
@@ -318,10 +345,22 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Builds a new {@link FillResponse} instance.
+         * Builds a new {@link FillResponse} instance. You must provide at least
+         * one dataset or some savable ids or an authentication with a presentation
+         * view.
+         *
+         * @return A built response.
          */
         public FillResponse build() {
             throwIfDestroyed();
+            if (mAuthentication == null ^ mPresentation == null) {
+                throw new IllegalArgumentException("authentication and presentation"
+                        + " must be both non-null or null");
+            }
+            if (mAuthentication == null && mDatasets == null && mSavableIds == null) {
+                throw new IllegalArgumentException("need to provide at least one"
+                        + " data set or savable ids or an authentication with a presentation");
+            }
             mDestroyed = true;
             return new FillResponse(this);
         }
@@ -339,12 +378,13 @@ public final class FillResponse implements Parcelable {
     @Override
     public String toString() {
         if (!DEBUG) return super.toString();
-        final StringBuilder builder = new StringBuilder(
+        return new StringBuilder(
                 "FillResponse: [datasets=").append(mDatasets)
                 .append(", savableIds=").append(mSavableIds)
                 .append(", hasExtras=").append(mExtras != null)
-                .append(", hasAuthentication=").append(mAuthentication != null);
-        return builder.append(']').toString();
+                .append(", hasPresentation=").append(mPresentation != null)
+                .append(", hasAuthentication=").append(mAuthentication != null)
+                .toString();
     }
 
     /////////////////////////////////////
@@ -358,10 +398,11 @@ public final class FillResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedArraySet(mDatasets, 0);
-        parcel.writeTypedArraySet(mSavableIds, 0);
-        parcel.writeParcelable(mExtras, 0);
-        parcel.writeParcelable(mAuthentication, 0);
+        parcel.writeTypedArraySet(mDatasets, flags);
+        parcel.writeTypedArraySet(mSavableIds, flags);
+        parcel.writeParcelable(mExtras, flags);
+        parcel.writeParcelable(mPresentation, flags);
+        parcel.writeParcelable(mAuthentication, flags);
     }
 
     public static final Parcelable.Creator<FillResponse> CREATOR =
@@ -383,6 +424,7 @@ public final class FillResponse implements Parcelable {
                 builder.addSavableFields(fillIds.valueAt(i));
             }
             builder.setExtras(parcel.readParcelable(null));
+            builder.setPresentation(parcel.readParcelable(null));
             builder.setAuthentication(parcel.readParcelable(null));
             return builder.build();
         }
