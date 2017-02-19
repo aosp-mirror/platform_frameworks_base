@@ -52,6 +52,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
+import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
+
 /**
  * Accessibility services should only be used to assist users with disabilities in using
  * Android devices and apps. They run in the background and receive callbacks by the system
@@ -618,7 +620,8 @@ public abstract class AccessibilityService extends Service {
      */
     @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT)
     public final @Nullable FingerprintGestureController getFingerprintGestureController() {
-        if (mFingerprintGestureController == null) {
+        if ((mFingerprintGestureController == null)
+                && getPackageManager().hasSystemFeature(FEATURE_FINGERPRINT)) {
             FingerprintManager fingerprintManager = getSystemService(FingerprintManager.class);
             if ((fingerprintManager != null) && fingerprintManager.isHardwareDetected()) {
                 AccessibilityServiceInfo info = getServiceInfo();

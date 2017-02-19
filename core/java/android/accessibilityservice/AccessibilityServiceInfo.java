@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
+
 /**
  * This class describes an {@link AccessibilityService}. The system notifies an
  * {@link AccessibilityService} for {@link android.view.accessibility.AccessibilityEvent}s
@@ -1042,8 +1044,7 @@ public class AccessibilityServiceInfo implements Parcelable {
                     new CapabilityInfo(CAPABILITY_CAN_PERFORM_GESTURES,
                             R.string.capability_title_canPerformGestures,
                             R.string.capability_desc_canPerformGestures));
-            if ((context == null)
-                    || context.getSystemService(FingerprintManager.class).isHardwareDetected()) {
+            if ((context == null) || fingerprintAvailable(context)) {
                 sAvailableCapabilityInfos.put(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
                         new CapabilityInfo(CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES,
                                 R.string.capability_title_canCaptureFingerprintGestures,
@@ -1053,6 +1054,10 @@ public class AccessibilityServiceInfo implements Parcelable {
         return sAvailableCapabilityInfos;
     }
 
+    private static boolean fingerprintAvailable(Context context) {
+        return context.getPackageManager().hasSystemFeature(FEATURE_FINGERPRINT)
+                && context.getSystemService(FingerprintManager.class).isHardwareDetected();
+    }
     /**
      * @hide
      */
