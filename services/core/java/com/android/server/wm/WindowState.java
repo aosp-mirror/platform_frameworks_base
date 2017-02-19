@@ -3876,7 +3876,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private boolean forAllWindowBottomToTop(ToBooleanFunction<WindowState> callback) {
-        // We want to consumer the negative sublayer children first because they need to appear
+        // We want to consume the negative sublayer children first because they need to appear
         // below the parent, then this window (the parent), and then the positive sublayer children
         // because they need to appear above the parent.
         int i = 0;
@@ -3884,7 +3884,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         WindowState child = mChildren.get(i);
 
         while (i < count && child.mSubLayer < 0) {
-            if (callback.apply(child)) {
+            if (child.applyInOrderWithImeWindows(callback, false /* traverseTopToBottom */)) {
                 return true;
             }
             i++;
@@ -3899,7 +3899,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         while (i < count) {
-            if (callback.apply(child)) {
+            if (child.applyInOrderWithImeWindows(callback, false /* traverseTopToBottom */)) {
                 return true;
             }
             i++;
@@ -3913,14 +3913,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private boolean forAllWindowTopToBottom(ToBooleanFunction<WindowState> callback) {
-        // We want to consumer the positive sublayer children first because they need to appear
+        // We want to consume the positive sublayer children first because they need to appear
         // above the parent, then this window (the parent), and then the negative sublayer children
         // because they need to appear above the parent.
         int i = mChildren.size() - 1;
         WindowState child = mChildren.get(i);
 
         while (i >= 0 && child.mSubLayer >= 0) {
-            if (callback.apply(child)) {
+            if (child.applyInOrderWithImeWindows(callback, true /* traverseTopToBottom */)) {
                 return true;
             }
             --i;
@@ -3935,7 +3935,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         while (i >= 0) {
-            if (callback.apply(child)) {
+            if (child.applyInOrderWithImeWindows(callback, true /* traverseTopToBottom */)) {
                 return true;
             }
             --i;
@@ -3978,10 +3978,43 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     WindowState getWindow(Predicate<WindowState> callback) {
+        if (mChildren.isEmpty()) {
+            return callback.test(this) ? this : null;
+        }
+
+        // We want to consume the positive sublayer children first because they need to appear
+        // above the parent, then this window (the parent), and then the negative sublayer children
+        // because they need to appear above the parent.
+        int i = mChildren.size() - 1;
+        WindowState child = mChildren.get(i);
+
+        while (i >= 0 && child.mSubLayer >= 0) {
+            if (callback.test(child)) {
+                return child;
+            }
+            --i;
+            if (i < 0) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
+
         if (callback.test(this)) {
             return this;
         }
-        return super.getWindow(callback);
+
+        while (i >= 0) {
+            if (callback.test(child)) {
+                return child;
+            }
+            --i;
+            if (i < 0) {
+                break;
+            }
+            child = mChildren.get(i);
+        }
+
+        return null;
     }
 
     boolean isWindowAnimationSet() {
