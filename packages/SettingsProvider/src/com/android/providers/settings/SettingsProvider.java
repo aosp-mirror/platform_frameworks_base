@@ -3174,17 +3174,9 @@ public class SettingsProvider extends ContentProvider {
                     // setting through the UI.
                     final SettingsState secureSetting = getSecureSettingsLocked(userId);
                     if (!mUserManager.hasUserRestriction(
-                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, UserHandle.of(userId))
-                            && secureSetting.getSettingLocked(
-                            Settings.Secure.INSTALL_NON_MARKET_APPS).getValue().equals("0")) {
-
+                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, UserHandle.of(userId))) {
                         secureSetting.insertSettingLocked(Settings.Secure.INSTALL_NON_MARKET_APPS,
                                 "1", null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        // For managed profiles with profile owners, DevicePolicyManagerService
-                        // may want to set the user restriction in this case
-                        secureSetting.insertSettingLocked(
-                                Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, "1", null, true,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 138;
                 }
