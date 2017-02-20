@@ -20,9 +20,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.BatteryManager;
-import android.os.BatteryManagerInternal;
+import android.os.BatteryProperties;
 import android.os.Build;
+import android.os.IBatteryPropertiesListener;
+import android.os.IBatteryPropertiesRegistrar;
 import android.os.RecoverySystem;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -31,10 +34,14 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
+import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utilities to help rescue the system from crash loops. Callers are expected to
@@ -66,24 +73,26 @@ public class RescueParty {
 
     private static boolean isDisabled() {
         // We're disabled on all engineering devices
-        if (Build.IS_ENG) return true;
+        if (Build.IS_ENG) {
+            Slog.v(TAG, "Disabled because of eng build");
+            return true;
+        }
 
         // We're disabled on userdebug devices connected over USB, since that's
         // a decent signal that someone is actively trying to debug the device,
         // or that it's in a lab environment.
-        if (Build.IS_USERDEBUG) {
-            try {
-                if (LocalServices.getService(BatteryManagerInternal.class)
-                        .getPlugType() == BatteryManager.BATTERY_PLUGGED_USB) {
-                    return true;
-                } else {
-                }
-            } catch (Throwable ignored) {
-            }
+        if (Build.IS_USERDEBUG && isUsbActive()) {
+            Slog.v(TAG, "Disabled because of active USB connection");
+            return true;
         }
 
         // One last-ditch check
-        return SystemProperties.getBoolean(PROP_DISABLE_RESCUE, false);
+        if (SystemProperties.getBoolean(PROP_DISABLE_RESCUE, false)) {
+            Slog.v(TAG, "Disabled because of manual property");
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -185,14 +194,14 @@ public class RescueParty {
         final ContentResolver resolver = context.getContentResolver();
         try {
             Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
-        } catch (Exception e) {
-            res = new RuntimeException("Failed to reset global settings", e);
+        } catch (Throwable t) {
+            res = new RuntimeException("Failed to reset global settings", t);
         }
         for (int userId : getAllUserIds(context)) {
             try {
                 Settings.Secure.resetToDefaultsAsUser(resolver, null, mode, userId);
-            } catch (Exception e) {
-                res = new RuntimeException("Failed to reset secure settings for " + userId, e);
+            } catch (Throwable t) {
+                res = new RuntimeException("Failed to reset secure settings for " + userId, t);
             }
         }
         if (res != null) {
@@ -312,6 +321,38 @@ public class RescueParty {
             Slog.w(TAG, "Trouble discovering users", t);
         }
         return userIds;
+    }
+
+    /**
+     * Hacky test to check if the device has an active USB connection, which is
+     * a good proxy for someone doing local development work. It uses a low
+     * level call since we may not have started {@link BatteryManager} yet.
+     */
+    private static boolean isUsbActive() {
+        final MutableBoolean res = new MutableBoolean(false);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final IBatteryPropertiesListener listener = new IBatteryPropertiesListener.Stub() {
+            @Override
+            public void batteryPropertiesChanged(BatteryProperties props) {
+                res.value = props.chargerUsbOnline;
+                latch.countDown();
+            }
+        };
+
+        try {
+            final IBatteryPropertiesRegistrar bpr = IBatteryPropertiesRegistrar.Stub
+                    .asInterface(ServiceManager.getService("batteryproperties"));
+            bpr.registerListener(listener);
+            try {
+                latch.await(5, TimeUnit.SECONDS);
+            } finally {
+                bpr.unregisterListener(listener);
+            }
+            return res.value;
+        } catch (Throwable t) {
+            Slog.w(TAG, "Failed to determine if device was on USB", t);
+            return false;
+        }
     }
 
     private static String levelToString(int level) {
