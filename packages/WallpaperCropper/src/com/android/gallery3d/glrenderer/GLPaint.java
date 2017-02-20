@@ -16,6 +16,8 @@
 
 package com.android.gallery3d.glrenderer;
 
+import com.android.gallery3d.common.Utils;
+
 public class GLPaint {
     private float mLineWidth = 1f;
     private int mColor = 0;
@@ -29,9 +31,7 @@ public class GLPaint {
     }
 
     public void setLineWidth(float width) {
-        if (width < 0) {
-            throw new AssertionError();
-        }
+        Utils.assertTrue(width >= 0);
         mLineWidth = width;
     }
 
