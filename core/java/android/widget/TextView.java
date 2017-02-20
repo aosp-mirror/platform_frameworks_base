@@ -113,6 +113,7 @@ import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.TypedValue;
@@ -706,16 +707,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int DEFAULT_AUTO_SIZE_MAX_TEXT_SIZE_IN_SP = 112;
     // Default value for the step size in pixels.
     private static final int DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX = 1;
+    // Use this to specify that any of the auto-size configuration int values have not been set.
+    private static final int UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE = -1;
     // Auto-size text type.
     private int mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_NONE;
     // Specify if auto-size text is needed.
     private boolean mNeedsAutoSizeText = false;
     // Step size for auto-sizing in pixels.
-    private int mAutoSizeStepGranularityInPx = 0;
+    private int mAutoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
     // Minimum text size for auto-sizing in pixels.
-    private int mAutoSizeMinTextSizeInPx = 0;
+    private int mAutoSizeMinTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
     // Maximum text size for auto-sizing in pixels.
-    private int mAutoSizeMaxTextSizeInPx = 0;
+    private int mAutoSizeMaxTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
     // Contains a (specified or computed) distinct sorted set of text sizes in pixels to pick from
     // when auto-sizing text.
     private int[] mAutoSizeTextSizesInPx = EmptyArray.INT;
@@ -937,6 +940,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         CharSequence text = "";
         CharSequence hint = null;
         boolean password = false;
+        int autoSizeMinTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        int autoSizeMaxTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        int autoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
         int inputType = EditorInfo.TYPE_NULL;
         a = theme.obtainStyledAttributes(
                     attrs, com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
@@ -1304,15 +1310,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeStepGranularity:
-                    mAutoSizeStepGranularityInPx = a.getDimensionPixelSize(attr, 0);
+                    autoSizeStepGranularityInPx = a.getDimensionPixelSize(attr,
+                        UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE);
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeMinTextSize:
-                    mAutoSizeMinTextSizeInPx = a.getDimensionPixelSize(attr, 0);
+                    autoSizeMinTextSizeInPx = a.getDimensionPixelSize(attr,
+                        UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE);
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeMaxTextSize:
-                    mAutoSizeMaxTextSizeInPx = a.getDimensionPixelSize(attr, 0);
+                    autoSizeMaxTextSizeInPx = a.getDimensionPixelSize(attr,
+                        UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE);
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizePresetSizes:
@@ -1320,7 +1329,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (autoSizeStepSizeArrayResId > 0) {
                         final TypedArray autoSizePreDefTextSizes = a.getResources()
                                 .obtainTypedArray(autoSizeStepSizeArrayResId);
-                        setupAutoSizePresetSizes(autoSizePreDefTextSizes);
+                        setupAutoSizeUniformPresetSizes(autoSizePreDefTextSizes);
                         autoSizePreDefTextSizes.recycle();
                     }
                     break;
@@ -1598,12 +1607,47 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
 
-        setupAutoSizeText();
+        if (supportsAutoSizeText()) {
+            if (mAutoSizeTextType == AUTO_SIZE_TEXT_TYPE_UNIFORM) {
+                // If uniform auto-size has been specified but preset values have not been set then
+                // replace the auto-size configuration values that have not been specified with the
+                // defaults.
+                if (!mHasPresetAutoSizeValues) {
+                    final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+                    if (autoSizeMinTextSizeInPx == UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE) {
+                        autoSizeMinTextSizeInPx = (int) TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                DEFAULT_AUTO_SIZE_MIN_TEXT_SIZE_IN_SP,
+                                displayMetrics);
+                    }
+
+                    if (autoSizeMaxTextSizeInPx == UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE) {
+                        autoSizeMaxTextSizeInPx = (int) TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                DEFAULT_AUTO_SIZE_MAX_TEXT_SIZE_IN_SP,
+                                displayMetrics);
+                    }
+
+                    if (autoSizeMinTextSizeInPx == UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE) {
+                        autoSizeStepGranularityInPx = DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX;
+                    }
+
+                    validateAndSetAutoSizeTextTypeUniformConfiguration(autoSizeMinTextSizeInPx,
+                            autoSizeMaxTextSizeInPx,
+                            autoSizeStepGranularityInPx);
+                }
+
+                setupAutoSizeText();
+            }
+        } else {
+            mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_NONE;
+        }
     }
 
     /**
      * Specify whether this widget should automatically scale the text to try to perfectly fit
-     * within the layout bounds by taking into account the auto-size configuration.
+     * within the layout bounds by using the default auto-size configuration.
      *
      * @param autoSizeTextType the type of auto-size. Must be one of
      *        {@link TextView#AUTO_SIZE_TEXT_TYPE_NONE} or
@@ -1613,30 +1657,138 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #getAutoSizeTextType()
      */
-    public void setAutoSizeTextType(@AutoSizeTextType int autoSizeTextType) {
+    public void setAutoSizeTextTypeWithDefaults(@AutoSizeTextType int autoSizeTextType) {
         if (supportsAutoSizeText()) {
             switch (autoSizeTextType) {
                 case AUTO_SIZE_TEXT_TYPE_NONE:
-                    if (mAutoSizeTextType != AUTO_SIZE_TEXT_TYPE_NONE) {
-                        // Clear all auto-size configuration
-                        mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_NONE;
-                        mAutoSizeMinTextSizeInPx = 0;
-                        mAutoSizeMaxTextSizeInPx = 0;
-                        mAutoSizeStepGranularityInPx = 0;
-                        mAutoSizeTextSizesInPx = EmptyArray.INT;
-                        mNeedsAutoSizeText = false;
-                    }
+                    clearAutoSizeConfiguration();
                     break;
                 case AUTO_SIZE_TEXT_TYPE_UNIFORM:
-                    if (mAutoSizeTextType != AUTO_SIZE_TEXT_TYPE_UNIFORM) {
-                        mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_UNIFORM;
-                        setupAutoSizeText();
-                    }
+                    final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                    final int autoSizeMinTextSizeInPx = (int) TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_SP,
+                            DEFAULT_AUTO_SIZE_MIN_TEXT_SIZE_IN_SP,
+                            displayMetrics);
+                    final int autoSizeMaxTextSizeInPx = (int) TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_SP,
+                            DEFAULT_AUTO_SIZE_MAX_TEXT_SIZE_IN_SP,
+                            displayMetrics);
+
+                    validateAndSetAutoSizeTextTypeUniformConfiguration(
+                            autoSizeMinTextSizeInPx,
+                            autoSizeMaxTextSizeInPx,
+                            DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX);
+                    setupAutoSizeText();
                     break;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown auto-size text type: " + autoSizeTextType);
             }
+        }
+    }
+
+    /**
+     * Specify whether this widget should automatically scale the text to try to perfectly fit
+     * within the layout bounds. If all the configuration params are valid the type of auto-size is
+     * set to {@link #AUTO_SIZE_TEXT_TYPE_UNIFORM}.
+     *
+     * @param autoSizeMinTextSize the minimum text size available for auto-size
+     * @param autoSizeMaxTextSize the maximum text size available for auto-size
+     * @param autoSizeStepGranularity the auto-size step granularity. It is used in conjunction with
+     *                                the minimum and maximum text size in order to build the set of
+     *                                text sizes the system uses to choose from when auto-sizing
+     * @param unit the desired dimension unit for all sizes above. See {@link TypedValue} for the
+     *             possible dimension units
+     *
+     * @throws IllegalArgumentException if any of the configuration params are invalid.
+     *
+     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
+     * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
+     * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
+     *
+     * @see #setAutoSizeTextTypeWithDefaults(int)
+     * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
+     * @see #getAutoSizeMinTextSize()
+     * @see #getAutoSizeMaxTextSize()
+     * @see #getAutoSizeStepGranularity()
+     * @see #getAutoSizeTextAvailableSizes()
+     */
+    public void setAutoSizeTextTypeUniformWithConfiguration(
+            int autoSizeMinTextSize,
+            int autoSizeMaxTextSize,
+            int autoSizeStepGranularity,
+            int unit) throws IllegalArgumentException {
+        if (supportsAutoSizeText()) {
+            final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+            final int autoSizeMinTextSizeInPx = (int) TypedValue.applyDimension(
+                    unit, autoSizeMinTextSize, displayMetrics);
+            final int autoSizeMaxTextSizeInPx = (int) TypedValue.applyDimension(
+                    unit, autoSizeMaxTextSize, displayMetrics);
+            final int autoSizeStepGranularityInPx = (int) TypedValue.applyDimension(
+                    unit, autoSizeStepGranularity, displayMetrics);
+
+            validateAndSetAutoSizeTextTypeUniformConfiguration(autoSizeMinTextSizeInPx,
+                    autoSizeMaxTextSizeInPx,
+                    autoSizeStepGranularityInPx);
+            setupAutoSizeText();
+        }
+    }
+
+    /**
+     * Specify whether this widget should automatically scale the text to try to perfectly fit
+     * within the layout bounds. If at least one value from the <code>presetSizes</code> is valid
+     * then the type of auto-size is set to {@link #AUTO_SIZE_TEXT_TYPE_UNIFORM}.
+     *
+     * @param presetSizes an {@code int} array of sizes in pixels
+     * @param unit the desired dimension unit for the preset sizes above. See {@link TypedValue} for
+     *             the possible dimension units
+     *
+     * @throws IllegalArgumentException if all of the <code>presetSizes</code> are invalid.
+     *
+     * @attr ref android.R.styleable#TextView_autoSizeText
+     * @attr ref android.R.styleable#TextView_autoSizePresetSizes
+     *
+     * @see #setAutoSizeTextTypeWithDefaults(int)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
+     * @see #getAutoSizeMinTextSize()
+     * @see #getAutoSizeMaxTextSize()
+     * @see #getAutoSizeTextAvailableSizes()
+     */
+    public void setAutoSizeTextTypeUniformWithPresetSizes(@NonNull int[] presetSizes, int unit)
+            throws IllegalArgumentException {
+        if (supportsAutoSizeText()) {
+            final int presetSizesLength = presetSizes.length;
+            if (presetSizesLength > 0) {
+                int[] presetSizesInPx = new int[presetSizesLength];
+
+                if (unit == TypedValue.COMPLEX_UNIT_PX) {
+                    presetSizesInPx = Arrays.copyOf(presetSizes, presetSizesLength);
+                } else {
+                    final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                    // Convert all to sizes to pixels.
+                    for (int i = 0; i < presetSizesLength; i++) {
+                        presetSizesInPx[i] = (int) TypedValue.applyDimension(unit, presetSizes[i],
+                            displayMetrics);
+                    }
+                }
+
+                mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(presetSizesInPx);
+                final int sizesLength = mAutoSizeTextSizesInPx.length;
+                mHasPresetAutoSizeValues = sizesLength > 0;
+                if (mHasPresetAutoSizeValues) {
+                    mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_UNIFORM;
+                    mAutoSizeMinTextSizeInPx = mAutoSizeTextSizesInPx[0];
+                    mAutoSizeMaxTextSizeInPx = mAutoSizeTextSizesInPx[sizesLength - 1];
+                    mAutoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+                } else {
+                    throw new IllegalArgumentException("None of the preset sizes is valid: "
+                        + Arrays.toString(presetSizes));
+                }
+            } else {
+                mHasPresetAutoSizeValues = false;
+            }
+            setupAutoSizeText();
         }
     }
 
@@ -1649,7 +1801,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_autoSizeText
      *
-     * @see #setAutoSizeTextType(int)
+     * @see #setAutoSizeTextTypeWithDefaults(int)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
+     * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
      */
     @AutoSizeTextType
     public int getAutoSizeTextType() {
@@ -1657,155 +1811,53 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the auto-size step granularity. It is used in conjunction with auto-size minimum
-     * and maximum text size in order to build the set of text sizes the system uses to choose
-     * from when auto-sizing.
-     *
-     * @param unit the desired dimension unit. See {@link TypedValue} for the possible
-     *             dimension units
-     * @param size the desired size in the given units
+     * @return the current auto-size step granularity in pixels.
      *
      * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
      *
-     * @see #getAutoSizeStepGranularity()
-     * @see #setAutoSizeMinTextSize(int, float)
-     * @see #setAutoSizeMaxTextSize(int, float)
-     */
-    public void setAutoSizeStepGranularity(int unit, float size) {
-        if (supportsAutoSizeText()) {
-            mAutoSizeStepGranularityInPx = (int) TypedValue.applyDimension(
-                    unit, size, getResources().getDisplayMetrics());
-            mHasPresetAutoSizeValues = false;
-            setupAutoSizeText();
-        }
-    }
-
-    /**
-     * @return the current auto-size step granularity in pixels.
-     *
-     * @see #setAutoSizeStepGranularity(int, float)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
      */
     public int getAutoSizeStepGranularity() {
         return mAutoSizeStepGranularityInPx;
     }
 
     /**
-     * Sets the minimum text size to be used in conjunction with auto-size maximum text size and
-     * auto-size step granularity in order to build the set of text sizes the system uses to choose
-     * from when auto-sizing.
-     *
-     * @param unit the desired dimension unit. See {@link TypedValue} for the possible
-     *             dimension units
-     * @param size the desired size in the given units
+     * @return the current auto-size minimum text size in pixels (the default is 12sp). Note that
+     *         if auto-size has not been configured this function returns {@code -1}.
      *
      * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
      *
-     * @see #getAutoSizeMinTextSize()
-     * @see #setAutoSizeMaxTextSize(int, float)
-     * @see #setAutoSizeStepGranularity(int, float)
-     */
-    public void setAutoSizeMinTextSize(int unit, float size) {
-        if (supportsAutoSizeText()) {
-            mAutoSizeMinTextSizeInPx = (int) TypedValue.applyDimension(
-                    unit, size, getResources().getDisplayMetrics());
-            mHasPresetAutoSizeValues = false;
-            setupAutoSizeText();
-        }
-    }
-
-    /**
-     * @return the current auto-size minimum text size in pixels (the default is 12sp). Note that
-     *         if auto-size has not been configured this function returns {@code 0}.
-     *
-     * @see #setAutoSizeMinTextSize(int, float)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
+     * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
      */
     public int getAutoSizeMinTextSize() {
         return mAutoSizeMinTextSizeInPx;
     }
 
     /**
-     * Sets the maximum text size to be used in conjunction with auto-size minimum text size and
-     * auto-size step granularity in order to build the set of text sizes the system uses to choose
-     * from when auto-sizing.
-     *
-     * @param unit the desired dimension unit. See {@link TypedValue} for the possible
-     *             dimension units
-     * @param size the desired size in the given units
+     * @return the current auto-size maximum text size in pixels (the default is 112sp). Note that
+     *         if auto-size has not been configured this function returns {@code -1}.
      *
      * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
      *
-     * @see #getAutoSizeMaxTextSize()
-     * @see #setAutoSizeMinTextSize(int, float)
-     * @see #setAutoSizeStepGranularity(int, float)
-     */
-    public void setAutoSizeMaxTextSize(int unit, float size) {
-        if (supportsAutoSizeText()) {
-            mAutoSizeMaxTextSizeInPx = (int) TypedValue.applyDimension(
-                    unit, size, getResources().getDisplayMetrics());
-            mHasPresetAutoSizeValues = false;
-            setupAutoSizeText();
-        }
-    }
-
-    /**
-     * @return the current auto-size maximum text size in pixels (the default is 112sp). Note that
-     *         if auto-size has not been configured this function returns {@code 0}.
-     *
-     * @see #setAutoSizeMaxTextSize(int, float)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
+     * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
      */
     public int getAutoSizeMaxTextSize() {
         return mAutoSizeMaxTextSizeInPx;
     }
 
     /**
-     * Sets a predefined array of sizes to be used when auto-sizing.
-     *
-     * <ul>Note:
-     * <li>when <code>presetSizes</code> is not empty then the auto-size algorithm will use the
-     * values provided here instead of calculating the values based on min, max and step size. Also
-     * the values will be de-duplicated, sorted and negative or zero values will be removed.
-     * <li>when <code>presetSizes</code> is empty then the auto-size algorithm will use the min, max
-     * and step size to build the set of available sizes to choose from. Note that if no values have
-     * been provided for any of min, max or step size then defaults will be used.
-     * </ul>
-     *
-     * @param presetSizes an {@code int} array of sizes in pixels
-     *
-     * @attr ref android.R.styleable#TextView_autoSizePresetSizes
-     *
-     * @see #getAutoSizeTextAvailableSizes()
-     */
-    public void setAutoSizeTextPresetSizes(@NonNull int[] presetSizes) {
-        if (supportsAutoSizeText()) {
-            if (presetSizes.length > 0) {
-                mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(presetSizes);
-                final int sizesLength = mAutoSizeTextSizesInPx.length;
-                mHasPresetAutoSizeValues = sizesLength > 0;
-                if (mHasPresetAutoSizeValues) {
-                    mAutoSizeMinTextSizeInPx = mAutoSizeTextSizesInPx[0];
-                    mAutoSizeMaxTextSizeInPx = mAutoSizeTextSizesInPx[sizesLength - 1];
-                    mAutoSizeStepGranularityInPx = 0;
-                }
-            } else {
-                mHasPresetAutoSizeValues = false;
-            }
-            setupAutoSizeText();
-        }
-    }
-
-    /**
      * @return the current auto-size {@code int} sizes array (in pixels).
      *
-     * @see #setAutoSizeTextPresetSizes(int[])
-     * @see #setAutoSizeMinTextSize(int, float)
-     * @see #setAutoSizeMaxTextSize(int, float)
-     * @see #setAutoSizeStepGranularity(int, float)
+     * @see #setAutoSizeTextTypeUniformWithConfiguration(int, int, int, int)
+     * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
      */
     public int[] getAutoSizeTextAvailableSizes() {
         return mAutoSizeTextSizesInPx;
     }
 
-    private void setupAutoSizePresetSizes(TypedArray textSizes) {
+    private void setupAutoSizeUniformPresetSizes(TypedArray textSizes) {
         final int textSizesLength = textSizes.length();
         final int[] parsedSizes = new int[textSizesLength];
 
@@ -1816,6 +1868,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(parsedSizes);
             mHasPresetAutoSizeValues = mAutoSizeTextSizesInPx.length > 0;
         }
+    }
+
+    /**
+     * If all params are valid then save the auto-size configuration.
+     *
+     * @throws IllegalArgumentException if any of the params are invalid
+     */
+    private void validateAndSetAutoSizeTextTypeUniformConfiguration(
+            int autoSizeMinTextSizeInPx,
+            int autoSizeMaxTextSizeInPx,
+            int autoSizeStepGranularityInPx) throws IllegalArgumentException {
+        // First validate.
+        if (autoSizeMinTextSizeInPx <= 0) {
+            throw new IllegalArgumentException("Minimum auto-size text size ("
+                + autoSizeMinTextSizeInPx  + "px) is less or equal to 0px)");
+        }
+
+        if (autoSizeMaxTextSizeInPx <= autoSizeMinTextSizeInPx) {
+            throw new IllegalArgumentException("Maximum auto-size text size ("
+                + autoSizeMaxTextSizeInPx + "px) is less or equal to minimum auto-size "
+                + "text size (" + autoSizeMinTextSizeInPx + "px)");
+        }
+
+        if (autoSizeStepGranularityInPx <= 0) {
+            throw new IllegalArgumentException("Minimum auto-size text size ("
+                + autoSizeStepGranularityInPx + "px) is less or equal to 0px)");
+        }
+
+        // All good, persist the configuration.
+        mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_UNIFORM;
+        mAutoSizeMinTextSizeInPx = autoSizeMinTextSizeInPx;
+        mAutoSizeMaxTextSizeInPx = autoSizeMaxTextSizeInPx;
+        mAutoSizeStepGranularityInPx = autoSizeStepGranularityInPx;
+        mHasPresetAutoSizeValues = false;
+    }
+
+    private void clearAutoSizeConfiguration() {
+        mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_NONE;
+        mAutoSizeMinTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        mAutoSizeMaxTextSizeInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        mAutoSizeStepGranularityInPx = UNSET_AUTO_SIZE_UNIFORM_CONFIGURATION_VALUE;
+        mAutoSizeTextSizesInPx = EmptyArray.INT;
+        mNeedsAutoSizeText = false;
     }
 
     // Returns distinct sorted positive values.
@@ -1846,33 +1941,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Calculate the sizes set based on minimum size, maximum size and step size if we do
             // not have a predefined set of sizes or if the current sizes array is empty.
             if (!mHasPresetAutoSizeValues || mAutoSizeTextSizesInPx.length == 0) {
-                // Set valid defaults.
-                if (mAutoSizeMinTextSizeInPx <= 0) {
-                    mAutoSizeMinTextSizeInPx = (int) TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_SP,
-                            DEFAULT_AUTO_SIZE_MIN_TEXT_SIZE_IN_SP,
-                            getResources().getDisplayMetrics());
-                }
-
-                if (mAutoSizeMaxTextSizeInPx <= 0) {
-                    mAutoSizeMaxTextSizeInPx = (int) TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_SP,
-                            DEFAULT_AUTO_SIZE_MAX_TEXT_SIZE_IN_SP,
-                            getResources().getDisplayMetrics());
-                }
-
-                if (mAutoSizeStepGranularityInPx <= 0) {
-                    mAutoSizeStepGranularityInPx = DEFAULT_AUTO_SIZE_GRANULARITY_IN_PX;
-                }
-
-                // Validate.
-                if (mAutoSizeMaxTextSizeInPx <= mAutoSizeMinTextSizeInPx) {
-                    throw new IllegalStateException("Maximum auto-size text size ("
-                            + mAutoSizeMaxTextSizeInPx
-                            + "px) is less or equal to minimum auto-size "
-                            + "text size (" + mAutoSizeMinTextSizeInPx + "px)");
-                }
-
                 // Calculate sizes to choose from based on the current auto-size configuration.
                 int autoSizeValuesLength = (int) Math.ceil(
                         (mAutoSizeMaxTextSizeInPx - mAutoSizeMinTextSizeInPx)
@@ -7953,9 +8021,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TEMP_RECTF.setEmpty();
             TEMP_RECTF.right = maxWidth;
             TEMP_RECTF.bottom = maxHeight;
-            final float textSize = findLargestTextSizeWhichFits(TEMP_RECTF);
-            if (textSize != getTextSize()) {
-                setTextSizeInternal(TypedValue.COMPLEX_UNIT_PX, textSize);
+            final float optimalTextSize = findLargestTextSizeWhichFits(TEMP_RECTF);
+            if (optimalTextSize != getTextSize()) {
+                setTextSizeInternal(TypedValue.COMPLEX_UNIT_PX, optimalTextSize);
             }
         }
     }
