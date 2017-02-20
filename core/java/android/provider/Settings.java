@@ -5217,18 +5217,6 @@ public final class Settings {
         public static final String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
 
         /**
-         * A flag to tell {@link com.android.server.devicepolicy.DevicePolicyManagerService} that
-         * the default for {@link #INSTALL_NON_MARKET_APPS} is reversed for this user on OTA. So it
-         * can set the restriction {@link android.os.UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}
-         * on behalf of the profile owner if needed to make the change transparent for profile
-         * owners.
-         *
-         * @hide
-         */
-        public static final String UNKNOWN_SOURCES_DEFAULT_REVERSED =
-                "unknown_sources_default_reversed";
-
-        /**
          * Comma-separated list of location providers that activities may access. Do not rely on
          * this value being present in settings.db or on ContentObserver notifications on the
          * corresponding Uri.
