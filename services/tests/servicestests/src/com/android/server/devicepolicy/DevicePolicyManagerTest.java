@@ -34,7 +34,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
+import android.content.pm.StringParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.IIpConnectivityMetrics;
@@ -56,7 +56,6 @@ import android.util.ArraySet;
 import android.util.Pair;
 
 import com.android.internal.R;
-import com.android.internal.util.ParcelableString;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -1220,8 +1219,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.userContexts.put(user, mContext);
         when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
-        ParceledListSlice<ParcelableString> oneCert = asSlice(new String[] {"1"});
-        ParceledListSlice<ParcelableString> fourCerts = asSlice(new String[] {"1", "2", "3", "4"});
+        StringParceledListSlice oneCert = asSlice(new String[] {"1"});
+        StringParceledListSlice fourCerts = asSlice(new String[] {"1", "2", "3", "4"});
 
         final String TEST_STRING = "Test for exactly 2 certs out of 4";
         doReturn(TEST_STRING).when(mContext.resources).getQuantityText(anyInt(), eq(2));
@@ -1229,7 +1228,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Given that we have exactly one certificate installed,
         when(mContext.keyChainConnection.getService().getUserCaAliases()).thenReturn(oneCert);
         // when that certificate is approved,
-        dpms.approveCaCert(oneCert.getList().get(0).string, userId, true);
+        dpms.approveCaCert(oneCert.getList().get(0), userId, true);
         // a notification should not be shown.
         verify(mContext.notificationManager, timeout(1000))
                 .cancelAsUser(anyString(), anyInt(), eq(user));
@@ -1237,8 +1236,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Given that we have four certificates installed,
         when(mContext.keyChainConnection.getService().getUserCaAliases()).thenReturn(fourCerts);
         // when two of them are approved (one of them approved twice hence no action),
-        dpms.approveCaCert(fourCerts.getList().get(0).string, userId, true);
-        dpms.approveCaCert(fourCerts.getList().get(1).string, userId, true);
+        dpms.approveCaCert(fourCerts.getList().get(0), userId, true);
+        dpms.approveCaCert(fourCerts.getList().get(1), userId, true);
         // a notification should be shown saying that there are two certificates left to approve.
         verify(mContext.notificationManager, timeout(1000))
                 .notifyAsUser(anyString(), anyInt(), argThat(
@@ -3974,18 +3973,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     /**
-     * Convert String[] to ParceledListSlice&lt;ParcelableString&gt;.
-     * <p>
-     * TODO: This shouldn't be necessary. If ParcelableString does need to exist, it also needs
-     * a real constructor.
+     * Convert String[] to StringParceledListSlice.
      */
-    private static ParceledListSlice<ParcelableString> asSlice(String[] s) {
-        List<ParcelableString> list = new ArrayList<>(s.length);
-        for (int i = 0; i < s.length; i++) {
-            ParcelableString item = new ParcelableString();
-            item.string = s[i];
-            list.add(i, item);
-        }
-        return new ParceledListSlice<ParcelableString>(list);
+    private static StringParceledListSlice asSlice(String[] s) {
+        return new StringParceledListSlice(Arrays.asList(s));
     }
 }
