@@ -244,8 +244,10 @@ public abstract class QSTile<TState extends State> {
     }
 
     protected void handleLongClick() {
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_QS_LONG_PRESS, getTileSpec());
-        mHost.startActivityDismissingKeyguard(getLongClickIntent());
+        if (getLongClickIntent() != null) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_QS_LONG_PRESS, getTileSpec());
+            mHost.startActivityDismissingKeyguard(getLongClickIntent());
+        }
     }
 
     public abstract Intent getLongClickIntent();

@@ -74,7 +74,7 @@ public class GoogleVoiceAssistTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
+        return getVoiceAssistIntent();
     }
 
     @Override

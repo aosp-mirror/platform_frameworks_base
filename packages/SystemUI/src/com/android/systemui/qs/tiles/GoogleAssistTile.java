@@ -72,7 +72,7 @@ public class GoogleAssistTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
+        return getAssistIntent();
     }
 
     @Override
