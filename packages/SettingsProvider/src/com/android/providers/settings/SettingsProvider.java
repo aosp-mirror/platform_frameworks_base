@@ -86,6 +86,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -2615,6 +2616,8 @@ public class SettingsProvider extends ContentProvider {
             if (isSecureSettingsKey(key)) {
                 maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                         sSecureCloneToManagedSettings);
+                maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
+                        sSystemCloneFromParentOnDependency.values());
             } else if (isSystemSettingsKey(key)) {
                 maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                         sSystemCloneToManagedSettings);
@@ -2624,7 +2627,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private void maybeNotifyProfiles(int type, int userId, Uri uri, String name,
-                Set<String> keysCloned) {
+                Collection<String> keysCloned) {
             if (keysCloned.contains(name)) {
                 for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
                     // the notification for userId has already been sent.

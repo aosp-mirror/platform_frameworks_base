@@ -4635,7 +4635,7 @@ public final class Settings {
                 return setLocationModeForUser(resolver, Integer.parseInt(value), userHandle);
             }
             if (MOVED_TO_GLOBAL.contains(name)) {
-                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
+                Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global");
                 return Global.putStringForUser(resolver, name, value,
                         tag, makeDefault, userHandle);

@@ -103,10 +103,6 @@ public class RingtoneManager {
      */
     public static final int TYPE_ALL = TYPE_RINGTONE | TYPE_NOTIFICATION | TYPE_ALARM;
 
-    private static final int[] RINGTONE_TYPES = {
-            TYPE_RINGTONE, TYPE_NOTIFICATION, TYPE_ALARM
-    };
-    
     // </attr>
     
     /**
@@ -773,30 +769,17 @@ public class RingtoneManager {
     }
 
     /**
-     * Disables Settings.System.SYNC_PARENT_SOUNDS, copying the parent's ringtones to the current
-     * profile
+     * Disables Settings.System.SYNC_PARENT_SOUNDS.
      *
      * @hide
      */
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     public static void disableSyncFromParent(Context userContext) {
-        // Must disable sync first so that ringtone copy below doesn't get redirected to parent
-        Settings.Secure.putIntForUser(userContext.getContentResolver(),
-                Settings.Secure.SYNC_PARENT_SOUNDS, 0 /* false */, userContext.getUserId());
-
-        // Copy ringtones from parent profile
-        UserManager um = UserManager.get(userContext);
-        UserInfo parentInfo = um.getProfileParent(userContext.getUserId());
-        if (parentInfo != null) {
-            final Context targetContext = createPackageContextAsUser(userContext, parentInfo.id);
-            if (targetContext != null) {
-                for (int ringtoneType : RINGTONE_TYPES) {
-                    Uri ringtoneUri = getActualDefaultRingtoneUri(targetContext, ringtoneType);
-                    // Add user id of parent so that custom ringtones can be read and played
-                    RingtoneManager.setActualDefaultRingtoneUri(userContext, ringtoneType,
-                            maybeAddUserId(ringtoneUri, parentInfo.id));
-                }
-            }
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService audioService = IAudioService.Stub.asInterface(b);
+        try {
+            audioService.disableRingtoneSync(userContext.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to disable ringtone sync.");
         }
     }
 
@@ -851,22 +834,15 @@ public class RingtoneManager {
      * @see #getActualDefaultRingtoneUri(Context, int)
      */
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
-        final ContentResolver resolver = context.getContentResolver();
-
-        if (Settings.Secure.getString(resolver, Settings.Secure.SYNC_PARENT_SOUNDS).equals("1")) {
-            // Sync is enabled, so we need to disable it
-            IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
-            IAudioService audioService = IAudioService.Stub.asInterface(b);
-            try {
-                audioService.disableRingtoneSync();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to disable ringtone sync.");
-                return;
-            }
-        }
-
         String setting = getSettingForType(type);
         if (setting == null) return;
+
+        final ContentResolver resolver = context.getContentResolver();
+        if (Settings.Secure.getIntForUser(resolver, Settings.Secure.SYNC_PARENT_SOUNDS, 0,
+                    context.getUserId()) == 1) {
+            // Parent sound override is enabled. Disable it using the audio service.
+            disableSyncFromParent(context);
+        }
         if(!isInternalRingtoneUri(ringtoneUri)) {
             ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         }

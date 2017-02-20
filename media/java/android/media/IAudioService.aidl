@@ -192,7 +192,7 @@ interface IAudioService {
 
     oneway void releasePlayer(in int piid);
 
-    void disableRingtoneSync();
+    void disableRingtoneSync(in int userId);
 
     int getFocusRampTimeMs(in int focusGain, in AudioAttributes attr);
 
