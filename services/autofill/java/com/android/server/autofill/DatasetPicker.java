@@ -16,73 +16,72 @@
 package com.android.server.autofill;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.service.autofill.Dataset;
-import android.text.TextUtils;
 import android.util.ArraySet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.autofill.AutoFillId;
+import android.view.autofill.AutoFillValue;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Filter.FilterListener;
+import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.RemoteViews;
+import com.android.internal.R;
+import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * View for dataset picker.
- *
- * <p>A fill session starts when a View is clicked and FillResponse is supplied.
- * <p>A fill session ends when 1) the user takes action in the UI, 2) another View is clicked, or
- * 3) the View is detached.
+ * This class manages the dataset selection UI.
  */
-final class DatasetPicker extends ListView implements OnItemClickListener {
+final class DatasetPicker extends FrameLayout implements OnItemClickListener {
     interface Listener {
         void onDatasetPicked(Dataset dataset);
+        void onCanceled();
     }
 
     private final Listener mListener;
 
-    DatasetPicker(Context context, ArraySet<Dataset> datasets, Listener listener) {
+    private final ArrayAdapter<ViewItem> mAdapter;
+
+    DatasetPicker(Context context, ArraySet<Dataset> datasets, AutoFillId filteredViewId,
+            Listener listener) {
         super(context);
         mListener = listener;
 
         final List<ViewItem> items = new ArrayList<>(datasets.size());
         for (Dataset dataset : datasets) {
-            items.add(new ViewItem(dataset));
+            final int index = dataset.getFieldIds().indexOf(filteredViewId);
+            if (index >= 0) {
+                AutoFillValue value = dataset.getFieldValues().get(index);
+                items.add(new ViewItem(dataset, value.coerceToString()));
+            }
         }
 
-        final ArrayAdapter<ViewItem> adapter = new ArrayAdapter<ViewItem>(
-            context,
-            android.R.layout.simple_list_item_1,
-            android.R.id.text1,
-            items) {
+        mAdapter = new ArrayAdapter<ViewItem>(context, 0, items) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                final TextView textView = (TextView) super.getView(position, convertView, parent);
-                textView.setSingleLine();
-                textView.setEllipsize(TextUtils.TruncateAt.END);
-                textView.setMinHeight(
-                        getDimen(com.android.internal.R.dimen.autofill_fill_item_height));
-                return textView;
+                RemoteViews presentation = getItem(position).getDataset().getPresentation();
+                return presentation.apply(context, parent);
             }
         };
-        setAdapter(adapter);
-        setBackgroundColor(Color.WHITE);
-        setDivider(null);
-        setElevation(getDimen(com.android.internal.R.dimen.autofill_fill_elevation));
-        setOnItemClickListener(this);
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        ListView content = (ListView) inflater.inflate(
+                com.android.internal.R.layout.autofill_dataset_picker, this, true)
+                .findViewById(com.android.internal.R.id.list);
+        content.setAdapter(mAdapter);
+        content.setOnItemClickListener(this);
     }
 
     public void update(String prefix) {
-        final ArrayAdapter<ViewItem> adapter = (ArrayAdapter) getAdapter();
-        adapter.getFilter().filter(prefix, new FilterListener() {
-            @Override
-            public void onFilterComplete(int count) {
-                setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        mAdapter.getFilter().filter(prefix, (count) -> {
+            if (count <= 0 && mListener != null) {
+                mListener.onCanceled();
             }
         });
     }
@@ -91,29 +90,27 @@ final class DatasetPicker extends ListView implements OnItemClickListener {
     public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
         if (mListener != null) {
             final ViewItem vi = (ViewItem) adapterView.getItemAtPosition(pos);
-            mListener.onDatasetPicked(vi.getData());
+            mListener.onDatasetPicked(vi.getDataset());
         }
-    }
-
-    private int getDimen(int resId) {
-        return getContext().getResources().getDimensionPixelSize(resId);
     }
 
     private static class ViewItem {
-        private final Dataset mData;
+        private final String mValue;
+        private final Dataset mDataset;
 
-        ViewItem(Dataset data) {
-            mData = data;
+        ViewItem(Dataset dataset, String value) {
+            mDataset = dataset;
+            mValue = value;
         }
 
-        public Dataset getData() {
-            return mData;
+        public Dataset getDataset() {
+            return mDataset;
         }
 
         @Override
         public String toString() {
             // used by ArrayAdapter
-            return mData.getName().toString();
+            return mValue;
         }
     }
 }

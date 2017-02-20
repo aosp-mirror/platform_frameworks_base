@@ -25,7 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutoFillId;
 import android.view.autofill.AutoFillValue;
-
+import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -36,30 +36,25 @@ import java.util.ArrayList;
  * <p>It contains:
  *
  * <ol>
- *   <li>A name used to identify the dataset in the UI.
- *   <li>A list of id/value pairs for the fields that can be auto-filled.
- *   <li>A list of savable ids in addition to the ones with a provided value.
+ *   <li>A list of values for input fields.
+ *   <li>A presentation view to visualize.
+ *   <li>An optional intent to authenticate.
  * </ol>
  *
  * @see android.service.autofill.FillResponse for examples.
  */
 public final class Dataset implements Parcelable {
 
-    private final CharSequence mName;
     private final ArrayList<AutoFillId> mFieldIds;
     private final ArrayList<AutoFillValue> mFieldValues;
+    private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
 
     private Dataset(Builder builder) {
-        mName = builder.mName;
         mFieldIds = builder.mFieldIds;
         mFieldValues = builder.mFieldValues;
+        mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
-    }
-
-    /** @hide */
-    public @NonNull CharSequence getName() {
-        return mName;
     }
 
     /** @hide */
@@ -70,6 +65,11 @@ public final class Dataset implements Parcelable {
     /** @hide */
     public @Nullable ArrayList<AutoFillValue> getFieldValues() {
         return mFieldValues;
+    }
+
+    /** @hide */
+    public @Nullable RemoteViews getPresentation() {
+        return mPresentation;
     }
 
     /** @hide */
@@ -86,11 +86,12 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!DEBUG) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("Dataset [name=").append(mName)
+        return new StringBuilder("Dataset [")
                 .append(", fieldIds=").append(mFieldIds)
                 .append(", fieldValues=").append(mFieldValues)
-                .append(", hasAuthentication=").append(mAuthentication != null);
-        return builder.append(']').toString();
+                .append(", hasPresentation=").append(mPresentation != null)
+                .append(", hasAuthentication=").append(mAuthentication != null)
+                .append(']').toString();
     }
 
     /**
@@ -98,21 +99,22 @@ public final class Dataset implements Parcelable {
      * one value for a field or set an authentication intent.
      */
     public static final class Builder {
-        private CharSequence mName;
         private ArrayList<AutoFillId> mFieldIds;
         private ArrayList<AutoFillValue> mFieldValues;
+        private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
 
         /**
-         * Creates a new builder.
+         * Sets the presentation used to visualize this dataset.
          *
-         * @param name Name used to identify the dataset in the UI. Typically it's the same value as
-         * the first field in the dataset (like username or email address) or a user-provided name
-         * (like "My Work Address").
+         * @param presentation The presentation view.
+         *
+         * @return This builder.
          */
-        public Builder(@NonNull CharSequence name) {
-            mName = Preconditions.checkStringNotEmpty(name, "name cannot be empty or null");
+        public @NonNull Builder setPresentation(@Nullable RemoteViews presentation) {
+            mPresentation = presentation;
+            return this;
         }
 
         /**
@@ -121,7 +123,7 @@ public final class Dataset implements Parcelable {
          * <p>This method is called when you need to provide an authentication
          * UI for the data set. For example, when a data set contains credit card information
          * (such as number, expiration date, and verification code), you can display UI
-         * asking for the verification code to before filing in the data). Even if the
+         * asking for the verification code before filing in the data. Even if the
          * data set is completely populated the system will launch the specified authentication
          * intent and will need your approval to fill it in. Since the data set is "locked"
          * until the user authenticates it, typically this data set name is masked
@@ -138,7 +140,7 @@ public final class Dataset implements Parcelable {
          * android.app.Activity#RESULT_OK} and provide the fully populated {@link Dataset
          * dataset} by setting it to the {@link
          * android.view.autofill.AutoFillManager#EXTRA_AUTHENTICATION_RESULT} extra. For example,
-         * if you provided an credit card information without the CVV for the data set in the
+         * if you provided credit card information without the CVV for the data set in the
          * {@link FillResponse response} then the returned data set should contain the
          * CVV entry.</p>
          *
@@ -147,6 +149,7 @@ public final class Dataset implements Parcelable {
          * platform needs to fill in the authentication arguments.</p>
          *
          * @param authentication Intent to an activity with your authentication flow.
+         * @return This builder.
          *
          * @see android.app.PendingIntent
          */
@@ -162,6 +165,7 @@ public final class Dataset implements Parcelable {
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutoFillId()}.
          * @param value value to be auto filled.
+         * @return This builder.
          */
         public @NonNull Builder setValue(@NonNull AutoFillId id, @NonNull AutoFillValue value) {
             throwIfDestroyed();
@@ -184,14 +188,21 @@ public final class Dataset implements Parcelable {
 
         /**
          * Creates a new {@link Dataset} instance. You should not interact
-         * with this builder once this method is called.
+         * with this builder once this method is called. It is required
+         * that you specified at least one field. Also it is mandatory to
+         * provide a presentation view to visualize the data set in the UI.
+         *
+         * @return The built dataset.
          */
         public @NonNull Dataset build() {
             throwIfDestroyed();
             mDestroyed = true;
-            if (mFieldIds == null && mAuthentication == null) {
+            if (mFieldIds == null) {
                 throw new IllegalArgumentException(
-                        "at least one value or an authentication must be set");
+                        "at least one value must be set");
+            }
+            if (mPresentation == null) {
+                throw new IllegalArgumentException("presentation must be set");
             }
             return new Dataset(this);
         }
@@ -214,9 +225,9 @@ public final class Dataset implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeCharSequence(mName);
-        parcel.writeTypedArrayList(mFieldIds, 0);
-        parcel.writeTypedArrayList(mFieldValues, 0);
+        parcel.writeTypedArrayList(mFieldIds, flags);
+        parcel.writeTypedArrayList(mFieldValues, flags);
+        parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelable(mAuthentication, flags);
     }
 
@@ -226,7 +237,7 @@ public final class Dataset implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final Builder builder = new Builder(parcel.readCharSequence());
+            final Builder builder = new Builder();
             final ArrayList<AutoFillId> ids = parcel.readTypedArrayList(null);
             final ArrayList<AutoFillValue> values = parcel.readTypedArrayList(null);
             final int idCount = (ids != null) ? ids.size() : 0;
@@ -236,6 +247,7 @@ public final class Dataset implements Parcelable {
                 AutoFillValue value = (valueCount > i) ? values.get(i) : null;
                 builder.setValue(id, value);
             }
+            builder.setPresentation(parcel.readParcelable(null));
             builder.setAuthentication(parcel.readParcelable(null));
             return builder.build();
         }

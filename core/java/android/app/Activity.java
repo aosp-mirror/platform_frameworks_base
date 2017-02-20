@@ -7039,7 +7039,8 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
-            getSystemService(AutoFillManager.class).onAuthenticationResult(data);
+            Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
+            getSystemService(AutoFillManager.class).onAuthenticationResult(resultData);
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {

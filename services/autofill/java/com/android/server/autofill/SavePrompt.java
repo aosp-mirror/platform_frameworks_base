@@ -17,9 +17,7 @@
 package com.android.server.autofill;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +53,5 @@ final class SavePrompt extends RelativeLayout {
             mListener.onSaveClick();
         });
 
-        //addView(view);
     }
 }
