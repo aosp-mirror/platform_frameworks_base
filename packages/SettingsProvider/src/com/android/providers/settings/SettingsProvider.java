@@ -1037,7 +1037,7 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
         // Ensure the caller can access the setting.
-        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, callingUserId);
+        enforceSettingReadable(name, SETTINGS_TYPE_SECURE, UserHandle.getCallingUserId());
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
@@ -1233,7 +1233,7 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
 
         // Ensure the caller can access the setting.
-        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, callingUserId);
+        enforceSettingReadable(name, SETTINGS_TYPE_SYSTEM, UserHandle.getCallingUserId());
 
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
