@@ -65,6 +65,7 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
@@ -381,6 +382,18 @@ public class BridgeContext extends Context {
             return true;
         }
 
+        String stringValue = value.getValue();
+        if (!stringValue.isEmpty()) {
+            if (stringValue.charAt(0) == '#') {
+                outValue.type = TypedValue.TYPE_INT_COLOR_ARGB8;
+                outValue.data = Color.parseColor(value.getValue());
+            }
+            else if (stringValue.charAt(0) == '@') {
+                outValue.type = TypedValue.TYPE_REFERENCE;
+            }
+
+        }
+
         int a;
         // if this is a framework value.
         if (value.isFramework()) {
@@ -399,7 +412,7 @@ public class BridgeContext extends Context {
         }
 
         // If the value is not a valid reference, fallback to pass the value as a string.
-        outValue.string = value.getValue();
+        outValue.string = stringValue;
         return true;
     }
 
