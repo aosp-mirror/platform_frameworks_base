@@ -68,7 +68,6 @@ public interface IMMTelFeature {
      * Checks if the IMS service has successfully registered to the IMS network with the specified
      * service & call type.
      *
-     * @param sessionId a session id which is obtained from {@link #startSession}
      * @param callServiceType a service type that is specified in {@link ImsCallProfile}
      *        {@link ImsCallProfile#SERVICE_TYPE_NORMAL}
      *        {@link ImsCallProfile#SERVICE_TYPE_EMERGENCY}
@@ -80,31 +79,28 @@ public interface IMMTelFeature {
      * @return true if the specified service id is connected to the IMS network; false otherwise
      * @throws RemoteException
      */
-    boolean isConnected(int sessionId, int callServiceType, int callType) throws RemoteException;
+    boolean isConnected(int callServiceType, int callType) throws RemoteException;
 
     /**
      * Checks if the specified IMS service is opened.
      *
-     * @param sessionId a service id which is obtained from {@link #startSession}
      * @return true if the specified service id is opened; false otherwise
      */
-    boolean isOpened(int sessionId) throws RemoteException;
+    boolean isOpened() throws RemoteException;
 
     /**
      * Add a new registration listener for the client associated with the session Id.
-     * @param sessionId a session id which is obtained from {@link #startSession}
      * @param listener An implementation of IImsRegistrationListener.
      */
-    void addRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    void addRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException;
 
     /**
      * Remove a previously registered listener using {@link #addRegistrationListener} for the client
      * associated with the session Id.
-     * @param sessionId a session id which is obtained from {@link #startSession}
      * @param listener A previously registered IImsRegistrationListener
      */
-    void removeRegistrationListener(int sessionId, IImsRegistrationListener listener)
+    void removeRegistrationListener(IImsRegistrationListener listener)
             throws RemoteException;
 
     /**
@@ -152,41 +148,40 @@ public interface IMMTelFeature {
     /**
      * @return The Ut interface for the supplementary service configuration.
      */
-    IImsUt getUtInterface(int sessionId) throws RemoteException;
+    IImsUt getUtInterface() throws RemoteException;
 
     /**
      * @return The config interface for IMS Configuration
      */
-    IImsConfig getConfigInterface(int sessionId) throws RemoteException;
+    IImsConfig getConfigInterface() throws RemoteException;
 
     /**
      * Signal the MMTelFeature to turn on IMS when it has been turned off using {@link #turnOffIms}
      * @param sessionId a session id which is obtained from {@link #startSession}
      */
-    void turnOnIms(int sessionId) throws RemoteException;
+    void turnOnIms() throws RemoteException;
 
     /**
      * Signal the MMTelFeature to turn off IMS when it has been turned on using {@link #turnOnIms}
      * @param sessionId a session id which is obtained from {@link #startSession}
      */
-    void turnOffIms(int sessionId) throws RemoteException;
+    void turnOffIms() throws RemoteException;
 
     /**
      * @return The Emergency call-back mode interface for emergency VoLTE calls that support it.
      */
-    IImsEcbm getEcbmInterface(int sessionId) throws RemoteException;
+    IImsEcbm getEcbmInterface() throws RemoteException;
 
     /**
      * Sets the current UI TTY mode for the MMTelFeature.
-     * @param sessionId a session id which is obtained from {@link #startSession}
      * @param uiTtyMode An integer containing the new UI TTY Mode.
      * @param onComplete A {@link Message} to be used when the mode has been set.
      * @throws RemoteException
      */
-    void setUiTTYMode(int sessionId, int uiTtyMode, Message onComplete) throws RemoteException;
+    void setUiTTYMode(int uiTtyMode, Message onComplete) throws RemoteException;
 
     /**
      * @return MultiEndpoint interface for DEP notifications
      */
-    IImsMultiEndpoint getMultiEndpointInterface(int sessionId) throws RemoteException;
+    IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException;
 }
