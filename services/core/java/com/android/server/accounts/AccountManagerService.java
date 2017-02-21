@@ -182,7 +182,8 @@ public class AccountManagerService
 
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
-        ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
     }
 
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
