@@ -3821,7 +3821,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    void freeStorage(String volumeUuid, long freeStorageSize) throws IOException {
+    public void freeStorage(String volumeUuid, long freeStorageSize, int storageFlags)
+            throws IOException {
         synchronized (mInstallLock) {
             try {
                 mInstaller.freeCache(volumeUuid, freeStorageSize, 0);

@@ -46,6 +46,15 @@ public class StorageStatsManager {
         mService = Preconditions.checkNotNull(service);
     }
 
+    /** {@hide} */
+    public boolean isQuotaSupported(String volumeUuid) {
+        try {
+            return mService.isQuotaSupported(volumeUuid, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Return the total space on the requested storage volume.
      * <p>

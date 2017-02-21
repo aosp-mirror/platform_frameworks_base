@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import static android.net.TrafficStats.GB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 
 import android.annotation.IntDef;
@@ -675,6 +676,36 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @Nullable String findUuidForPath(File path) {
+        Preconditions.checkNotNull(path);
+        final String pathString = path.getAbsolutePath();
+        if (FileUtils.contains(Environment.getDataDirectory().getAbsolutePath(), pathString)) {
+            return StorageManager.UUID_PRIVATE_INTERNAL;
+        }
+        try {
+            for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
+                if (vol.path != null && FileUtils.contains(vol.path, pathString)) {
+                    // TODO: verify that emulated adopted devices have UUID of
+                    // underlying volume
+                    return vol.fsUuid;
+                }
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        throw new IllegalStateException("Failed to find a storage device for " + path);
+    }
+
+    /** {@hide} */
+    public @Nullable File findPathForUuid(String volumeUuid) {
+        final VolumeInfo vol = findVolumeByQualifiedUuid(volumeUuid);
+        if (vol != null) {
+            return vol.getPath();
+        }
+        throw new IllegalStateException("Failed to find a storage device for " + volumeUuid);
+    }
+
+    /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
         try {
             return Arrays.asList(mStorageManager.getVolumes(0));
@@ -1069,9 +1100,12 @@ public class StorageManager {
         throw new IllegalStateException("Missing primary storage");
     }
 
-    /** {@hide} */
-    private static final int DEFAULT_THRESHOLD_PERCENTAGE = 10;
+    private static final int DEFAULT_THRESHOLD_PERCENTAGE = 5;
     private static final long DEFAULT_THRESHOLD_MAX_BYTES = 500 * MB_IN_BYTES;
+
+    private static final int DEFAULT_CACHE_PERCENTAGE = 10;
+    private static final long DEFAULT_CACHE_MAX_BYTES = 5 * GB_IN_BYTES;
+
     private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;
 
     /**
@@ -1099,6 +1133,23 @@ public class StorageManager {
                 Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES, DEFAULT_THRESHOLD_MAX_BYTES);
 
         return Math.min(lowBytes, maxLowBytes);
+    }
+
+    /**
+     * Return the minimum number of bytes of storage on the device that should
+     * be reserved for cached data.
+     *
+     * @hide
+     */
+    public long getStorageCacheBytes(File path) {
+        final long cachePercent = Settings.Global.getInt(mResolver,
+                Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE, DEFAULT_CACHE_PERCENTAGE);
+        final long cacheBytes = (path.getTotalSpace() * cachePercent) / 100;
+
+        final long maxCacheBytes = Settings.Global.getLong(mResolver,
+                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES, DEFAULT_CACHE_MAX_BYTES);
+
+        return Math.min(cacheBytes, maxCacheBytes);
     }
 
     /**
@@ -1409,40 +1460,37 @@ public class StorageManager {
     }
 
     /**
-     * Return quota size in bytes for cached data belonging to the calling app.
+     * Return quota size in bytes for all cached data belonging to the calling
+     * app on the filesystem that hosts the given path.
      * <p>
      * If your app goes above this quota, your cached files will be some of the
      * first to be deleted when additional disk space is needed. Conversely, if
      * your app stays under this quota, your cached files will be some of the
      * last to be deleted when additional disk space is needed.
      * <p>
-     * This quota may change over time depending on how frequently the user
+     * This quota will change over time depending on how frequently the user
      * interacts with your app, and depending on how much disk space is used.
-     * <p>
-     * Cached data tracked by this method always includes
-     * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
-     * it also includes {@link Context#getExternalCacheDir()} if the primary
-     * shared/external storage is hosted on the same storage device as your
-     * private data.
      * <p class="note">
      * Note: if your app uses the {@code android:sharedUserId} manifest feature,
      * then cached data for all packages in your shared UID is tracked together
      * as a single unit.
      * </p>
      *
-     * @see #getCacheSizeBytes()
+     * @see #getCacheSizeBytes(File)
      */
-    public long getCacheQuotaBytes() {
+    public long getCacheQuotaBytes(File path) {
         try {
+            final String volumeUuid = findUuidForPath(path);
             final ApplicationInfo app = mContext.getApplicationInfo();
-            return mStorageManager.getCacheQuotaBytes(app.volumeUuid, app.uid);
+            return mStorageManager.getCacheQuotaBytes(volumeUuid, app.uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Return total size in bytes of cached data belonging to the calling app.
+     * Return total size in bytes of all cached data belonging to the calling
+     * app on the filesystem that hosts the given path.
      * <p>
      * Cached data tracked by this method always includes
      * {@link Context#getCacheDir()} and {@link Context#getCodeCacheDir()}, and
@@ -1457,67 +1505,38 @@ public class StorageManager {
      *
      * @see #getCacheQuotaBytes()
      */
-    public long getCacheSizeBytes() {
+    public long getCacheSizeBytes(File path) {
         try {
+            final String volumeUuid = findUuidForPath(path);
             final ApplicationInfo app = mContext.getApplicationInfo();
-            return mStorageManager.getCacheSizeBytes(app.volumeUuid, app.uid);
+            return mStorageManager.getCacheSizeBytes(volumeUuid, app.uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    /**
-     * Return quota size in bytes for cached data on primary shared/external
-     * storage belonging to the calling app.
-     * <p>
-     * If primary shared/external storage is hosted on the same storage device
-     * as your private data, this method will return -1, since all data stored
-     * under {@link Context#getExternalCacheDir()} will be counted under
-     * {@link #getCacheQuotaBytes()}.
-     * <p class="note">
-     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
-     * then cached data for all packages in your shared UID is tracked together
-     * as a single unit.
-     * </p>
-     */
+    /** @removed */
+    @Deprecated
+    public long getCacheQuotaBytes() {
+        return getCacheQuotaBytes(mContext.getCacheDir());
+    }
+
+    /** @removed */
+    @Deprecated
+    public long getCacheSizeBytes() {
+        return getCacheSizeBytes(mContext.getCacheDir());
+    }
+
+    /** @removed */
+    @Deprecated
     public long getExternalCacheQuotaBytes() {
-        final ApplicationInfo app = mContext.getApplicationInfo();
-        final String primaryUuid = getPrimaryStorageUuid();
-        if (Objects.equals(app.volumeUuid, primaryUuid)) {
-            return -1;
-        }
-        try {
-            return mStorageManager.getCacheQuotaBytes(primaryUuid, app.uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getCacheQuotaBytes(mContext.getExternalCacheDir());
     }
 
-    /**
-     * Return total size in bytes of cached data on primary shared/external
-     * storage belonging to the calling app.
-     * <p>
-     * If primary shared/external storage is hosted on the same storage device
-     * as your private data, this method will return -1, since all data stored
-     * under {@link Context#getExternalCacheDir()} will be counted under
-     * {@link #getCacheQuotaBytes()}.
-     * <p class="note">
-     * Note: if your app uses the {@code android:sharedUserId} manifest feature,
-     * then cached data for all packages in your shared UID is tracked together
-     * as a single unit.
-     * </p>
-     */
+    /** @removed */
+    @Deprecated
     public long getExternalCacheSizeBytes() {
-        final ApplicationInfo app = mContext.getApplicationInfo();
-        final String primaryUuid = getPrimaryStorageUuid();
-        if (Objects.equals(app.volumeUuid, primaryUuid)) {
-            return -1;
-        }
-        try {
-            return mStorageManager.getCacheSizeBytes(primaryUuid, app.uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getCacheSizeBytes(mContext.getExternalCacheDir());
     }
 
     /**
@@ -1551,28 +1570,30 @@ public class StorageManager {
      * Return the maximum number of new bytes that your app can allocate for
      * itself using {@link #allocateBytes(File, long, int)} at the given path.
      * This value is typically larger than {@link File#getUsableSpace()}, since
-     * the system may automatically delete cached files to satisfy your request.
+     * the system may be willing to delete cached files to satisfy an allocation
+     * request.
      * <p>
      * This method is best used as a pre-flight check, such as deciding if there
      * is enough space to store an entire music album before you allocate space
      * for each audio file in the album. Attempts to allocate disk space beyond
-     * this value will fail.
+     * the returned value will fail.
      * <p class="note">
      * Note: if your app uses the {@code android:sharedUserId} manifest feature,
      * then allocatable space for all packages in your shared UID is tracked
      * together as a single unit.
      * </p>
      *
-     * @param file the directory where you're considering allocating disk space,
+     * @param path the path where you're considering allocating disk space,
      *            since allocatable space can vary widely depending on the
      *            underlying storage device.
      * @param flags to apply to the request.
      * @return the maximum number of new bytes that the calling app can allocate
      *         using {@link #allocateBytes(File, long, int)}.
      */
-    public long getAllocatableBytes(File file, @AllocateFlags int flags) throws IOException {
+    public long getAllocatableBytes(File path, @AllocateFlags int flags) throws IOException {
         try {
-            return mStorageManager.getAllocatableBytes(file.getAbsolutePath(), flags);
+            final String volumeUuid = findUuidForPath(path);
+            return mStorageManager.getAllocatableBytes(volumeUuid, flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -1594,14 +1615,15 @@ public class StorageManager {
      * {@link #allocateBytes(FileDescriptor, long, int)} which will guarantee
      * that bytes are allocated to an opened file.
      *
-     * @param file the directory where you'd like to allocate disk space.
+     * @param path the path where you'd like to allocate disk space.
      * @param bytes the number of bytes to allocate.
      * @param flags to apply to the request.
      * @see #getAllocatableBytes(File, int)
      */
-    public void allocateBytes(File file, long bytes, @AllocateFlags int flags) throws IOException {
+    public void allocateBytes(File path, long bytes, @AllocateFlags int flags) throws IOException {
         try {
-            mStorageManager.allocateBytes(file.getAbsolutePath(), bytes, flags);
+            final String volumeUuid = findUuidForPath(path);
+            mStorageManager.allocateBytes(volumeUuid, bytes, flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
         } catch (RemoteException e) {
@@ -1610,37 +1632,39 @@ public class StorageManager {
     }
 
     /**
-     * Allocate the requested number of bytes for your application to use at the
-     * given path. This will cause the system to delete any cached files
+     * Allocate the requested number of bytes for your application to use in the
+     * given open file. This will cause the system to delete any cached files
      * necessary to satisfy your request.
      * <p>
      * Attempts to allocate disk space beyond the value returned by
      * {@link #getAllocatableBytes(File, int)} will fail.
      * <p>
-     * This method guarantees that bytes are allocated to the opened file,
-     * otherwise it will throw if fast allocation not possible. Fast allocation
-     * is typically only supported in private app data directories, and on
-     * shared/external storage devices which are emulated.
+     * This method guarantees that bytes have been allocated to the opened file,
+     * otherwise it will throw if fast allocation is not possible. Fast
+     * allocation is typically only supported in private app data directories,
+     * and on shared/external storage devices which are emulated.
      *
-     * @param fd the directory where you'd like to allocate disk space.
-     * @param bytes the number of bytes to allocate.
+     * @param fd the open file that you'd like to allocate disk space for.
+     * @param bytes the number of bytes to allocate. This is the desired final
+     *            size of the open file.
      * @param flags to apply to the request.
      * @see #getAllocatableBytes(File, int)
      * @see Environment#isExternalStorageEmulated(File)
      */
     public void allocateBytes(FileDescriptor fd, long bytes, @AllocateFlags int flags)
             throws IOException {
-        final File file;
-        try {
-            file = new File(Os.readlink("/proc/self/fd/" + fd.getInt$()));
-        } catch (ErrnoException e) {
-            throw e.rethrowAsIOException();
-        }
+        final File file = ParcelFileDescriptor.getFile(fd);
         for (int i = 0; i < 3; i++) {
-            allocateBytes(file, bytes, flags);
-
             try {
+                final long haveBytes = Os.fstat(fd).st_blocks * 512;
+                final long needBytes = bytes - haveBytes;
+
+                if (needBytes > 0) {
+                    allocateBytes(file, needBytes, flags);
+                }
+
                 Os.posix_fallocate(fd, 0, bytes);
+                return;
             } catch (ErrnoException e) {
                 if (e.errno == OsConstants.ENOSPC) {
                     Log.w(TAG, "Odd, not enough space; let's try again?");

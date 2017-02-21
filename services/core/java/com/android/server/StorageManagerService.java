@@ -70,13 +70,13 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.DiskInfo;
-import android.os.storage.IStorageEventListener;
-import android.os.storage.IStorageShutdownObserver;
 import android.os.storage.IObbActionListener;
+import android.os.storage.IStorageEventListener;
 import android.os.storage.IStorageManager;
-import android.os.storage.StorageManagerInternal;
+import android.os.storage.IStorageShutdownObserver;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
@@ -109,6 +109,7 @@ import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.storage.AppFuseBridge;
+
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -3293,14 +3294,69 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public long getAllocatableBytes(String path, int flags) {
-        return new File(path).getUsableSpace();
+    public long getAllocatableBytes(String volumeUuid, int flags) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
+
+        final boolean aggressive = (flags & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
+        if (aggressive) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ALLOCATE_AGGRESSIVE, TAG);
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // In general, apps can allocate as much space as they want, except
+            // we never let them eat into either the minimum cache space or into
+            // the low disk warning space.
+            final File path = storage.findPathForUuid(volumeUuid);
+            if (stats.isQuotaSupported(volumeUuid)) {
+                if (aggressive) {
+                    return Math.max(0,
+                            stats.getFreeBytes(volumeUuid) - storage.getStorageFullBytes(path));
+                } else {
+                    return Math.max(0,
+                            stats.getFreeBytes(volumeUuid) - storage.getStorageLowBytes(path)
+                                    - storage.getStorageCacheBytes(path));
+                }
+            } else {
+                // When we don't have fast quota information, we ignore cached
+                // data and only consider unused bytes.
+                if (aggressive) {
+                    return Math.max(0, path.getUsableSpace() - storage.getStorageFullBytes(path));
+                } else {
+                    return Math.max(0, path.getUsableSpace() - storage.getStorageLowBytes(path));
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
-    public void allocateBytes(String path, long bytes, int flags) {
-        if (bytes > new File(path).getUsableSpace()) {
-            throw new ParcelableException(new IOException("Not enough usable space"));
+    public void allocateBytes(String volumeUuid, long bytes, int flags) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+
+        // This method call will enforce FLAG_ALLOCATE_AGGRESSIVE permissions so
+        // we don't have to enforce them locally
+        final long allocatableBytes = getAllocatableBytes(volumeUuid, flags);
+        if (bytes > allocatableBytes) {
+            throw new ParcelableException(new IOException("Failed to allocate " + bytes
+                    + " because only " + allocatableBytes + " allocatable"));
+        }
+
+        // Free up enough disk space to satisfy both the requested allocation
+        // and our low disk warning space.
+        final File path = storage.findPathForUuid(volumeUuid);
+        bytes += storage.getStorageLowBytes(path);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mPms.freeStorage(volumeUuid, bytes, flags);
+        } catch (IOException e) {
+            throw new ParcelableException(e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

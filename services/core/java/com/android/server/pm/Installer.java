@@ -465,6 +465,15 @@ public class Installer extends SystemService {
         }
     }
 
+    public boolean isQuotaSupported(String volumeUuid) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.isQuotaSupported(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
     private static void assertValidInstructionSet(String instructionSet)
             throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {

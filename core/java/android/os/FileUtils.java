@@ -432,14 +432,13 @@ public class FileUtils {
      */
     public static boolean contains(File dir, File file) {
         if (dir == null || file == null) return false;
+        return contains(dir.getAbsolutePath(), file.getAbsolutePath());
+    }
 
-        String dirPath = dir.getAbsolutePath();
-        String filePath = file.getAbsolutePath();
-
+    public static boolean contains(String dirPath, String filePath) {
         if (dirPath.equals(filePath)) {
             return true;
         }
-
         if (!dirPath.endsWith("/")) {
             dirPath += "/";
         }

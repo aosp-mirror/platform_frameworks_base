@@ -8578,6 +8578,24 @@ public final class Settings {
                 SYS_STORAGE_FULL_THRESHOLD_BYTES = "sys_storage_full_threshold_bytes";
 
         /**
+         * Minimum percentage of storage on the device that is reserved for
+         * cached data.
+         *
+         * @hide
+         */
+        public static final String
+                SYS_STORAGE_CACHE_PERCENTAGE = "sys_storage_cache_percentage";
+
+        /**
+         * Maximum bytes of storage on the device that is reserved for cached
+         * data.
+         *
+         * @hide
+         */
+        public static final String
+                SYS_STORAGE_CACHE_MAX_BYTES = "sys_storage_cache_max_bytes";
+
+        /**
          * The maximum reconnect delay for short network outages or when the
          * network is suspended due to phone use.
          *
