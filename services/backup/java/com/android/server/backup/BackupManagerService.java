@@ -16,6 +16,9 @@
 
 package com.android.server.backup;
 
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OLD_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
 
 import android.app.ActivityManager;
@@ -2340,7 +2343,7 @@ public class BackupManagerService {
             Slog.e(TAG, "No packages named for backup request");
             sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             monitor = monitorEvent(monitor, BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
-                    null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT);
+                    null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             throw new IllegalArgumentException("No packages are provided for backup");
         }
 
@@ -3459,6 +3462,9 @@ public class BackupManagerService {
                 // fail repeatedly (i.e. have proved themselves to be buggy).
                 Slog.e(TAG, "Cancel backing up " + mCurrentPackage.packageName);
                 EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, mCurrentPackage.packageName);
+                mMonitor = monitorEvent(mMonitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_TIMEOUT,
+                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
                 addBackupTrace(
                         "cancel of " + mCurrentPackage.packageName + ", cancelAll=" + cancelAll);
                 errorCleanup();
@@ -4555,6 +4561,11 @@ public class BackupManagerService {
                     mPackages.add(info);
                 } catch (NameNotFoundException e) {
                     Slog.i(TAG, "Requested package " + pkg + " not found; ignoring");
+                    monitor = monitorEvent(monitor,
+                            BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_FOUND,
+                            mCurrentPackage,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                            null);
                 }
             }
         }
@@ -4638,6 +4649,10 @@ public class BackupManagerService {
                 if (mTransport == null) {
                     Slog.w(TAG, "Transport not present; full data backup not performed");
                     backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
+                    mMonitor = monitorEvent(mMonitor,
+                            BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_TRANSPORT_NOT_PRESENT,
+                            mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                            null);
                     return;
                 }
 
@@ -5148,7 +5163,7 @@ public class BackupManagerService {
 
                 mMonitor = monitorEvent(mMonitor,
                         BackupManagerMonitor.LOG_EVENT_ID_FULL_BACKUP_TIMEOUT,
-                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
+                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
                 mIsCancelled = true;
                 // Cancel tasks spun off by this task.
                 BackupManagerService.this.handleCancel(mEphemeralToken, cancelAll);
@@ -5525,6 +5540,8 @@ public class BackupManagerService {
         // Dedicated observer, if any
         IFullBackupRestoreObserver mObserver;
 
+        IBackupManagerMonitor mMonitor;
+
         // Where we're delivering the file data as we go
         IBackupAgent mAgent;
 
@@ -5606,11 +5623,12 @@ public class BackupManagerService {
         }
 
         public FullRestoreEngine(BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
-                PackageInfo onlyPackage, boolean allowApks, boolean allowObbs,
-                int ephemeralOpToken) {
+                IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
+                boolean allowObbs, int ephemeralOpToken) {
             mEphemeralOpToken = ephemeralOpToken;
             mMonitorTask = monitorTask;
             mObserver = observer;
+            mMonitor = monitor;
             mOnlyPackage = onlyPackage;
             mAllowApks = allowApks;
             mAllowObbs = allowObbs;
@@ -6326,6 +6344,16 @@ public class BackupManagerService {
                                                 } else {
                                                     Slog.i(TAG, "Data requires newer version "
                                                             + version + "; ignoring");
+                                                    ArrayList<Pair<String, String>> list =
+                                                            new ArrayList<>();
+                                                    list.add(new Pair<String, String>(
+                                                            EXTRA_LOG_OLD_VERSION,
+                                                            Integer.toString(version)));
+                                                    mMonitor = monitorEvent(mMonitor,
+                                                            LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER,
+                                                            pkgInfo,
+                                                            LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                                            list);
                                                     policy = RestorePolicy.IGNORE;
                                                 }
                                             }
@@ -8461,6 +8489,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 RestoreDescription desc = mTransport.nextRestorePackage();
                 if (desc == null) {
                     Slog.e(TAG, "No restore metadata available; halting");
+                    mMonitor = monitorEvent(mMonitor,
+                            BackupManagerMonitor.LOG_EVENT_ID_NO_RESTORE_METADATA_AVAILABLE,
+                            mCurrentPackage,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
                     mStatus = BackupTransport.TRANSPORT_ERROR;
                     executeNextState(UnifiedRestoreState.FINAL);
                     return;
@@ -8562,6 +8594,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // Whoops, we thought we could restore this package but it
                     // turns out not to be present.  Skip it.
                     Slog.e(TAG, "Package not present: " + pkgName);
+                    mMonitor = monitorEvent(mMonitor,
+                            BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_PRESENT,
+                            mCurrentPackage,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                            null);
                     EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName,
                             "Package missing on device");
                     nextState = UnifiedRestoreState.RUNNING_QUEUE;
@@ -8631,6 +8668,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     Slog.i(TAG, "Data exists for package " + packageName
                             + " but app has no agent; skipping");
                 }
+                mMonitor = monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_APP_HAS_NO_AGENT, mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                         "Package has no agent");
                 executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
@@ -8652,6 +8692,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
             if (mAgent == null) {
                 Slog.w(TAG, "Can't find backup agent for " + packageName);
+                mMonitor = monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_CANT_FIND_AGENT, mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                         "Restore agent missing");
                 executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
@@ -8857,7 +8900,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 EventLog.writeEvent(EventLogTags.FULL_RESTORE_PACKAGE,
                         mCurrentPackage.packageName);
 
-                mEngine = new FullRestoreEngine(this, null, mCurrentPackage, false, false, mEphemeralOpToken);
+                mEngine = new FullRestoreEngine(this, null, mMonitor, mCurrentPackage, false, false, mEphemeralOpToken);
                 mEngineThread = new EngineThread(mEngine, mEnginePipes[0]);
 
                 ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
@@ -9001,8 +9044,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 if (DEBUG) {
                     Slog.w(TAG, "Full-data restore target timed out; shutting down");
                 }
-                mMonitor = monitorEvent(mMonitor, BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT,
-                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
+
+                mMonitor = monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT,
+                        mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
                 mEngineThread.handleTimeout();
 
                 IoUtils.closeQuietly(mEnginePipes[1]);
@@ -9245,8 +9290,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         public void handleCancel(boolean cancelAll) {
             removeOperation(mEphemeralOpToken);
             Slog.e(TAG, "Timeout restoring application " + mCurrentPackage.packageName);
-            mMonitor = monitorEvent(mMonitor, BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT,
-                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT);
+            mMonitor = monitorEvent(mMonitor,
+                    BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT,
+                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                     mCurrentPackage.packageName, "restore timeout");
             // Handle like an agent that threw on invocation: wipe it and go on to the next
@@ -10913,7 +10959,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     }
 
     private static IBackupManagerMonitor monitorEvent(IBackupManagerMonitor monitor, int id,
-            PackageInfo pkg, int category) {
+            PackageInfo pkg, int category, ArrayList<Pair<String, String>> extras) {
         if (monitor != null) {
             try {
                 Bundle bundle = new Bundle();
@@ -10924,6 +10970,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             pkg.packageName);
                     bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
                             pkg.versionCode);
+                }
+                if (extras != null) {
+                    for (Pair<String,String> pair : extras) {
+                        bundle.putString(pair.first, pair.second);
+                    }
                 }
                 monitor.onEvent(bundle);
                 return monitor;
