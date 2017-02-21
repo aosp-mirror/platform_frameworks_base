@@ -183,11 +183,31 @@ public class UpstreamNetworkMonitor {
             case CALLBACK_LISTEN_ALL:
                 break;
             case CALLBACK_TRACK_DEFAULT:
+                if (mDefaultNetworkCallback == null) {
+                    // The callback was unregistered in the interval between
+                    // ConnectivityService calling onAvailable() and our
+                    // handling of it here on the mTarget.getHandler() thread.
+                    // Clean-up of this network entry is deferred to the
+                    // handling of onLost() by other callbacks.
+                    // TODO: change to Log.wtf() after oag/331764 is merged.
+                    return;
+                }
+
                 cm().requestNetworkCapabilities(mDefaultNetworkCallback);
                 cm().requestLinkProperties(mDefaultNetworkCallback);
                 mCurrentDefault = network;
                 break;
             case CALLBACK_MOBILE_REQUEST:
+                if (mMobileNetworkCallback == null) {
+                    // The callback was unregistered in the interval between
+                    // ConnectivityService calling onAvailable() and our
+                    // handling of it here on the mTarget.getHandler() thread.
+                    // Clean-up of this network entry is deferred to the
+                    // handling of onLost() by other callbacks.
+                    // TODO: change to Log.wtf() after oag/331764 is merged.
+                    return;
+                }
+
                 cm().requestNetworkCapabilities(mMobileNetworkCallback);
                 cm().requestLinkProperties(mMobileNetworkCallback);
                 break;
