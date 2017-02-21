@@ -852,6 +852,18 @@ class TextLine {
         return runIsRtl ? -ret : ret;
     }
 
+    private int adjustHyphenEdit(int start, int limit, int hyphenEdit) {
+        int result = hyphenEdit;
+        // Only draw hyphens on first or last run in line. Disable them otherwise.
+        if (start > 0) { // not the first run
+            result &= ~Paint.HYPHENEDIT_MASK_START_OF_LINE;
+        }
+        if (limit < mLen) { // not the last run
+            result &= ~Paint.HYPHENEDIT_MASK_END_OF_LINE;
+        }
+        return result;
+    }
+
     /**
      * Utility function for handling a unidirectional run.  The run must not
      * contain tabs but can contain styles.
@@ -893,9 +905,9 @@ class TextLine {
         if (mSpanned == null) {
             TextPaint wp = mWorkPaint;
             wp.set(mPaint);
-            final int mlimit = measureLimit;
+            wp.setHyphenEdit(adjustHyphenEdit(start, limit, wp.getHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, x, top,
-                    y, bottom, fmi, needWidth || mlimit < measureLimit, mlimit);
+                    y, bottom, fmi, needWidth, measureLimit);
         }
 
         mMetricAffectingSpanSpanSet.init(mSpanned, mStart + start, mStart + limit);
@@ -953,10 +965,8 @@ class TextLine {
                     span.updateDrawState(wp);
                 }
 
-                // Only draw hyphen on last run in line
-                if (jnext < mLen) {
-                    wp.setHyphenEdit(0);
-                }
+                wp.setHyphenEdit(adjustHyphenEdit(j, jnext, wp.getHyphenEdit()));
+
                 x += handleText(wp, j, jnext, i, inext, runIsRtl, c, x,
                         top, y, bottom, fmi, needWidth || jnext < measureLimit, offset);
             }

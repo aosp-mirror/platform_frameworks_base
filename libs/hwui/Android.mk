@@ -187,6 +187,7 @@ hwui_c_includes += \
     external/skia/src/effects \
     external/skia/src/image \
     external/skia/src/utils \
+    external/icu/icu4c/source/common \
     external/harfbuzz_ng/src \
     external/freetype/include
 
