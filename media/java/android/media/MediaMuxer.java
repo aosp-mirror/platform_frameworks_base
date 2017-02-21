@@ -68,44 +68,46 @@ import java.util.Map;
 
  <h4>Metadata Track</h4>
  <p>
-  Metadata is usefule in carrying extra information that correlated with video or audio to
-  facilate offline processing, e.g. gyro signals from the sensor. Meatadata track is only
-  supported in MP4 format. When adding a metadata track, track's mime format must start with
-  prefix "application/", e.g. "applicaton/gyro". Metadata's format/layout will be defined by
-  the application. The generated MP4 file uses TextMetaDataSampleEntry defined in section 12.3.3.2
-  of the ISOBMFF to signal the metadata's mime format. When using {@link android.media.MediaExtractor}
-  to extract the file with metadata track, the mime format of the metadata will be extracted into
-  {@link android.media.MediaFormat}.
+  Per-frame metadata is useful in carrying extra information that correlated with video or audio to
+  facilitate offline processing, e.g. gyro signals from the sensor could help video stabilization when
+  doing offline processing. Metaadata track is only supported in MP4 container. When adding a new
+  metadata track, track's mime format must start with prefix "application/", e.g. "applicaton/gyro".
+  Metadata's format/layout will be defined by the application. Writing metadata is nearly the same as
+  writing video/audio data except that the data will not be from mediacodec. Application just needs
+  to pass the bytebuffer that contains the metadata and also the associated timestamp to the
+  {@link #writeSampleData} api. The timestamp must be in the same time base as video and audio. The
+  generated MP4 file uses TextMetaDataSampleEntry defined in section 12.3.3.2 of the ISOBMFF to signal
+  the metadata's mime format. When using{@link android.media.MediaExtractor} to extract the file with
+  metadata track, the mime format of the metadata will be extracted into {@link android.media.MediaFormat}.
 
  <pre class=prettyprint>
    MediaMuxer muxer = new MediaMuxer("temp.mp4", OutputFormat.MUXER_OUTPUT_MPEG_4);
-   // More often, the MediaFormat will be retrieved from MediaCodec.getOutputFormat()
-   // or MediaExtractor.getTrackFormat().
+   // SetUp Video/Audio Tracks.
    MediaFormat audioFormat = new MediaFormat(...);
    MediaFormat videoFormat = new MediaFormat(...);
+   int audioTrackIndex = muxer.addTrack(audioFormat);
+   int videoTrackIndex = muxer.addTrack(videoFormat);
 
    // Setup Metadata Track
    MediaFormat metadataFormat = new MediaFormat(...);
    metadataFormat.setString(KEY_MIME, "application/gyro");
-
-   int audioTrackIndex = muxer.addTrack(audioFormat);
-   int videoTrackIndex = muxer.addTrack(videoFormat);
    int metadataTrackIndex = muxer.addTrack(metadataFormat);
-   ByteBuffer inputBuffer = ByteBuffer.allocate(bufferSize);
-   boolean finished = false;
-   BufferInfo bufferInfo = new BufferInfo();
 
    muxer.start();
-   while(!finished) {
-     // getInputBuffer() will fill the inputBuffer with one frame of encoded
-     // sample from either MediaCodec or MediaExtractor, set isAudioSample to
-     // true when the sample is audio data, set up all the fields of bufferInfo,
-     // and return true if there are no more samples.
-     finished = getInputBuffer(inputBuffer, sampleType, bufferInfo);
-     if (!finished) {
-       int currentTrackIndex = getTrackIndex(sampleType);
-       muxer.writeSampleData(currentTrackIndex, inputBuffer, bufferInfo);
-     }
+   while(..) {
+       // Allocate bytebuffer and write gyro data(x,y,z) into it.
+       ByteBuffer metaData = ByteBuffer.allocate(bufferSize);
+       metaData.putFloat(x);
+       metaData.putFloat(y);
+       metaData.putFloat(z);
+       BufferInfo metaInfo = new BufferInfo();
+       // Associate this metadata with the video frame by setting
+       // the same timestamp as the video frame.
+       metaInfo.presentationTimeUs = currentVideoTrackTimeUs;
+       metaInfo.offset = 0;
+       metaInfo.flags = 0;
+       metaInfo.size = bufferSize;
+       muxer.writeSampleData(metadataTrackIndex, metaData, metaInfo);
    };
    muxer.stop();
    muxer.release();
