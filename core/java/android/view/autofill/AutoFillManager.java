@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
@@ -131,7 +132,7 @@ public final class AutoFillManager {
         if (!mHasSession) {
             if (gainFocus) {
                 // Starts new session.
-                startSession(id, bounds, value);
+                startSession(id, view.getWindowToken(), bounds, value);
             }
         } else {
             // Update focus on existing session.
@@ -159,7 +160,7 @@ public final class AutoFillManager {
         if (!mHasSession) {
             if (gainFocus) {
                 // Starts new session.
-                startSession(id, bounds, null);
+                startSession(id, parent.getWindowToken(), bounds, null);
             }
         } else {
             // Update focus on existing session.
@@ -251,13 +252,14 @@ public final class AutoFillManager {
         return new AutoFillId(parent.getAccessibilityViewId(), childId);
     }
 
-    private void startSession(AutoFillId id, Rect bounds, AutoFillValue value) {
+    private void startSession(AutoFillId id, IBinder windowToken,
+            Rect bounds, AutoFillValue value) {
         if (DEBUG) {
             Log.v(TAG, "startSession(): id=" + id + ", bounds=" + bounds + ", value=" + value);
         }
         try {
-            mService.startSession(mContext.getActivityToken(), mServiceClient.asBinder(),
-                    id, bounds, value, mContext.getUserId());
+            mService.startSession(mContext.getActivityToken(), windowToken,
+                    mServiceClient.asBinder(), id, bounds, value, mContext.getUserId());
             AutoFillClient client = getClient();
             if (client != null) {
                 client.resetableStateAvailable();
