@@ -403,11 +403,4 @@ public class SurfaceTexture {
     private native int nativeGetQueuedCount();
     private native void nativeRelease();
     private native boolean nativeIsReleased();
-
-    /*
-     * We use a class initializer to allow the native code to cache some
-     * field offsets.
-     */
-    private static native void nativeClassInit();
-    static { nativeClassInit(); }
 }
