@@ -1353,6 +1353,7 @@ class WindowStateAnimator {
             // expose the whole window in buffer space, and not risk extending
             // past where the system would have cropped us
             clipRect = null;
+            finalClipRect = null;
 
             // Various surfaces in the scaled stack may resize at different times.
             // We need to ensure for each surface, that we disable transformation matrix
