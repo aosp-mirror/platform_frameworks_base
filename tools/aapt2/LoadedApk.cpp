@@ -58,7 +58,8 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(IAaptContext* context,
   return util::make_unique<LoadedApk>(source, std::move(apk), std::move(table));
 }
 
-bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
+bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
+                               IArchiveWriter* writer) {
   std::set<std::string> referenced_resources;
   // List the files being referenced in the resource table.
   for (auto& pkg : table_->packages) {
@@ -96,7 +97,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, IArchiveWriter* writer) {
       BigBuffer buffer = BigBuffer(1024);
       // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
       // with sparse entries) b/35389232.
-      TableFlattener flattener({}, &buffer);
+      TableFlattener flattener(options, &buffer);
       if (!flattener.Consume(context, table_.get())) {
         return false;
       }

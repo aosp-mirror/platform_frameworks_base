@@ -21,6 +21,7 @@
 
 #include "ResourceTable.h"
 #include "flatten/Archive.h"
+#include "flatten/TableFlattener.h"
 #include "io/ZipArchive.h"
 #include "unflatten/BinaryResourceParser.h"
 
@@ -45,7 +46,8 @@ class LoadedApk {
    * Writes the APK on disk at the given path, while also removing the resource
    * files that are not referenced in the resource table.
    */
-  bool WriteToArchive(IAaptContext* context, IArchiveWriter* writer);
+  bool WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
+                      IArchiveWriter* writer);
 
   static std::unique_ptr<LoadedApk> LoadApkFromPath(IAaptContext* context,
                                                     const android::StringPiece& path);

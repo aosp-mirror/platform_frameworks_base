@@ -58,29 +58,6 @@ class AutoVersioner : public IResourceTableConsumer {
   DISALLOW_COPY_AND_ASSIGN(AutoVersioner);
 };
 
-class VersionCollapser : public IResourceTableConsumer {
- public:
-  VersionCollapser() = default;
-
-  bool Consume(IAaptContext* context, ResourceTable* table) override;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(VersionCollapser);
-};
-
-/**
- * Removes duplicated key-value entries from dominated resources.
- */
-class ResourceDeduper : public IResourceTableConsumer {
- public:
-  ResourceDeduper() = default;
-
-  bool Consume(IAaptContext* context, ResourceTable* table) override;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ResourceDeduper);
-};
-
 /**
  * If any attribute resource values are defined as public, this consumer will
  * move all private

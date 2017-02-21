@@ -46,6 +46,8 @@
 #include "link/ManifestFixer.h"
 #include "link/ReferenceLinker.h"
 #include "link/TableMerger.h"
+#include "optimize/ResourceDeduper.h"
+#include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "proto/ProtoSerialize.h"

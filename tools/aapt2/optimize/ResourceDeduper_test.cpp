@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "link/Linkers.h"
+#include "optimize/ResourceDeduper.h"
 
 #include "ResourceTable.h"
 #include "test/Test.h"
