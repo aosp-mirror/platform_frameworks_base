@@ -40,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FORMAT_CHANGED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
@@ -56,6 +57,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManagerPolicy.TRANSIT_ENTER;
 import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
@@ -538,6 +543,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     private static final Region sEmptyRegion = new Region();
+
+    /**
+     * Surface insets from the previous call to relayout(), used to track
+     * if we are changing the Surface insets.
+     */
+    final Rect mLastSurfaceInsets = new Rect();
 
     /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
@@ -1581,7 +1592,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Anyway we don't need to synchronize position and content updates for these
             // windows since they aren't at the base layer and could be moved around anyway.
             if (!computeDragResizing() && mAttrs.type == TYPE_BASE_APPLICATION &&
-                    !getTask().mStack.getBoundsAnimating() && !isGoneForLayoutLw() &&
+                    !mWinAnimator.isForceScaled() && !isGoneForLayoutLw() &&
                     !getTask().inPinnedWorkspace()) {
                 setResizedWhileNotDragResizing(true);
             }
@@ -4296,6 +4307,78 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 -mAttrs.surfaceInsets.top,
                 -mAttrs.surfaceInsets.right,
                 -mAttrs.surfaceInsets.bottom);
+    }
+
+    boolean surfaceInsetsChanging() {
+        return !mLastSurfaceInsets.equals(mAttrs.surfaceInsets);
+    }
+
+    int relayoutVisibleWindow(Configuration outConfig, int result,
+            int attrChanges, int oldVisibility) {
+        result |= !isVisibleLw() ? RELAYOUT_RES_FIRST_TIME : 0;
+        if (mAnimatingExit) {
+            Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
+                    + mRemoveOnExit + ", mDestroying=" + mDestroying);
+
+            mWinAnimator.cancelExitAnimationForNextAnimationLocked();
+            mAnimatingExit = false;
+        }
+        if (mDestroying) {
+            mDestroying = false;
+            mService.mDestroySurface.remove(this);
+        }
+        if (oldVisibility == View.GONE) {
+            mWinAnimator.mEnterAnimationPending = true;
+        }
+
+        mLastVisibleLayoutRotation = mService.mRotation;
+
+        mWinAnimator.mEnteringAnimation = true;
+        if ((result & RELAYOUT_RES_FIRST_TIME) != 0) {
+            prepareWindowToDisplayDuringRelayout(outConfig);
+        }
+        if ((attrChanges & FORMAT_CHANGED) != 0) {
+            // If the format can't be changed in place, preserve the old surface until the app draws
+            // on the new one. This prevents blinking when we change elevation of freeform and
+            // pinned windows.
+            if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
+                mWinAnimator.preserveSurfaceLocked();
+                result |= RELAYOUT_RES_SURFACE_CHANGED
+                        | RELAYOUT_RES_FIRST_TIME;
+            }
+        }
+
+        // When we change the Surface size, in scenarios which may require changing
+        // the surface position in sync with the resize, we use a preserved surface
+        // so we can freeze it while waiting for the client to report draw on the newly
+        // sized surface.
+        if (isDragResizeChanged() || isResizedWhileNotDragResizing()
+                || surfaceInsetsChanging()) {
+            mLastSurfaceInsets.set(mAttrs.surfaceInsets);
+
+            setDragResizing();
+            setResizedWhileNotDragResizing(false);
+            // We can only change top level windows to the full-screen surface when
+            // resizing (as we only have one full-screen surface). So there is no need
+            // to preserve and destroy windows which are attached to another, they
+            // will keep their surface and its size may change over time.
+            if (mHasSurface && !isChildWindow()) {
+                mWinAnimator.preserveSurfaceLocked();
+                result |= RELAYOUT_RES_FIRST_TIME;
+            }
+        }
+        final boolean freeformResizing = isDragResizing()
+                && getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;
+        final boolean dockedResizing = isDragResizing()
+                && getResizeMode() == DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+        result |= freeformResizing ? RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
+        result |= dockedResizing ? RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
+        if (isAnimatingWithSavedSurface()) {
+            // If we're animating with a saved surface now, request client to report draw.
+            // We still need to know when the real thing is drawn.
+            result |= RELAYOUT_RES_FIRST_TIME;
+        }
+        return result;
     }
 
     // TODO: Hack to work around the number of states AppWindowToken needs to access without having

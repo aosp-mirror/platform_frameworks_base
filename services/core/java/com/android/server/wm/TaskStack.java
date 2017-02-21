@@ -125,6 +125,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
     // would otherwise apply while resizing, while resizing in the bounds animating mode.
     private boolean mBoundsAnimating = false;
+    private boolean mBoundsAnimatingToFullscreen = false;
     private Rect mBoundsAnimationTarget = new Rect();
 
     // Temporary storage for the new bounds that should be used after the configuration change.
@@ -1443,9 +1444,10 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     }
 
     @Override  // AnimatesBounds
-    public void onAnimationStart() {
+    public void onAnimationStart(boolean toFullscreen) {
         synchronized (mService.mWindowMap) {
             mBoundsAnimating = true;
+            mBoundsAnimatingToFullscreen = toFullscreen;
         }
     }
 
@@ -1486,12 +1488,16 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         return StackId.hasMovementAnimations(mStackId);
     }
 
-    public boolean getForceScaleToStack() {
+    public boolean isForceScaled() {
         return mBoundsAnimating;
     }
 
     public boolean getBoundsAnimating() {
         return mBoundsAnimating;
+    }
+
+    public boolean isBoundsAnimatingToFullscreen() {
+        return mBoundsAnimating && mBoundsAnimatingToFullscreen;
     }
 
     /** Returns true if a removal action is still being deferred. */

@@ -1318,7 +1318,7 @@ class WindowStateAnimator {
         float surfaceWidth = mSurfaceController.getWidth();
         float surfaceHeight = mSurfaceController.getHeight();
 
-        if ((task != null && task.mStack.getForceScaleToStack()) || mForceScaleUntilResize) {
+        if (isForceScaled()) {
             int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
             int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
             if (!mForceScaleUntilResize) {
@@ -1952,5 +1952,17 @@ class WindowStateAnimator {
                 Slog.e(TAG, "Disable surface trace for " + this + " but its not enabled");
             }
         }
+    }
+
+    /** The force-scaled state for a given window can persist past
+     * the state for it's stack as the windows complete resizing
+     * independently of one another.
+     */
+    boolean isForceScaled() {
+        final Task task = mWin.getTask();
+        if (task != null && task.mStack.isForceScaled()) {
+            return true;
+        }
+        return mForceScaleUntilResize;
     }
 }
