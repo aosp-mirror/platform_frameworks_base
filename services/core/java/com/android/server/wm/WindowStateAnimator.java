@@ -1328,8 +1328,8 @@ class WindowStateAnimator {
             task.mStack.getDimBounds(mTmpStackBounds);
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
-            mExtraHScale = (mTmpStackBounds.width() - hInsets) / (float)(surfaceWidth - hInsets);
-            mExtraVScale = (mTmpStackBounds.height() - vInsets) / (float)(surfaceHeight - vInsets);
+            mExtraHScale = mTmpStackBounds.width() / (float)(surfaceWidth - hInsets);
+            mExtraVScale = mTmpStackBounds.height() / (float)(surfaceHeight - vInsets);
 
             // In the case of ForceScaleToStack we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
