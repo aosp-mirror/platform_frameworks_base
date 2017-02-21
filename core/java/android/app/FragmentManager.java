@@ -2807,40 +2807,56 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     
     public void dispatchCreate() {
         mStateSaved = false;
+        mExecutingActions = true;
         moveToState(Fragment.CREATED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchActivityCreated() {
         mStateSaved = false;
+        mExecutingActions = true;
         moveToState(Fragment.ACTIVITY_CREATED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchStart() {
         mStateSaved = false;
+        mExecutingActions = true;
         moveToState(Fragment.STARTED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchResume() {
         mStateSaved = false;
+        mExecutingActions = true;
         moveToState(Fragment.RESUMED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchPause() {
+        mExecutingActions = true;
         moveToState(Fragment.STARTED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchStop() {
+        mExecutingActions = true;
         moveToState(Fragment.STOPPED, false);
+        mExecutingActions = false;
     }
     
     public void dispatchDestroyView() {
+        mExecutingActions = true;
         moveToState(Fragment.CREATED, false);
+        mExecutingActions = false;
     }
 
     public void dispatchDestroy() {
         mDestroyed = true;
         execPendingActions();
+        mExecutingActions = true;
         moveToState(Fragment.INITIALIZING, false);
+        mExecutingActions = false;
         mHost = null;
         mContainer = null;
         mParent = null;
