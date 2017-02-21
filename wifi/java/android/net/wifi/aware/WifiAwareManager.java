@@ -130,26 +130,26 @@ public class WifiAwareManager {
      */
 
     /**
-     * TYPE: in band, specific peer: role, client_id, session_id, peer_id, pmk optional
+     * TYPE: in band, specific peer: role, client_id, session_id, peer_id, pmk/passphrase optional
      * @hide
      */
     public static final int NETWORK_SPECIFIER_TYPE_IB = 0;
 
     /**
-     * TYPE: in band, any peer: role, client_id, session_id, pmk optional
+     * TYPE: in band, any peer: role, client_id, session_id, pmk/passphrase optional
      * [only permitted for RESPONDER]
      * @hide
      */
     public static final int NETWORK_SPECIFIER_TYPE_IB_ANY_PEER = 1;
 
     /**
-     * TYPE: out-of-band: role, client_id, peer_mac, pmk optional
+     * TYPE: out-of-band: role, client_id, peer_mac, pmk/passphrase optional
      * @hide
      */
     public static final int NETWORK_SPECIFIER_TYPE_OOB = 2;
 
     /**
-     * TYPE: out-of-band, any peer: role, client_id, pmk optional
+     * TYPE: out-of-band, any peer: role, client_id, pmk/passphrase optional
      * [only permitted for RESPONDER]
      * @hide
      */
@@ -179,6 +179,9 @@ public class WifiAwareManager {
 
     /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_PMK = "pmk";
+
+    /** @hide */
+    public static final String NETWORK_SPECIFIER_KEY_PASSPHRASE = "passphrase";
 
     /**
      * Broadcast intent action to indicate that the state of Wi-Fi Aware availability has changed.
@@ -473,11 +476,12 @@ public class WifiAwareManager {
 
     /** @hide */
     public String createNetworkSpecifier(int clientId, int role, int sessionId,
-            PeerHandle peerHandle, @Nullable byte[] pmk) {
+            PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
                     + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
-                    + ", pmk=" + ((pmk == null) ? "null" : "non-null"));
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null")
+                    + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
         }
 
         int type = (peerHandle == null) ? NETWORK_SPECIFIER_TYPE_IB_ANY_PEER
@@ -512,6 +516,11 @@ public class WifiAwareManager {
             }
             json.put(NETWORK_SPECIFIER_KEY_PMK,
                     Base64.encodeToString(pmk, 0, pmk.length, Base64.DEFAULT));
+            if (passphrase == null) {
+                passphrase = new String();
+            }
+            json.put(NETWORK_SPECIFIER_KEY_PASSPHRASE, passphrase);
+
         } catch (JSONException e) {
             return "";
         }
@@ -521,10 +530,11 @@ public class WifiAwareManager {
 
     /** @hide */
     public String createNetworkSpecifier(int clientId, @DataPathRole int role,
-            @Nullable byte[] peer, @Nullable byte[] pmk) {
+            @Nullable byte[] peer, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role
-                    + ", pmk=" + ((pmk == null) ? "null" : "non-null"));
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null")
+                    + ", passphrase=" + ((passphrase == null) ? "null" : "non-null"));
         }
 
         int type = (peer == null) ?
@@ -560,6 +570,10 @@ public class WifiAwareManager {
             }
             json.put(NETWORK_SPECIFIER_KEY_PMK,
                     Base64.encodeToString(pmk, 0, pmk.length, Base64.DEFAULT));
+            if (passphrase == null) {
+                passphrase = new String();
+            }
+            json.put(NETWORK_SPECIFIER_KEY_PASSPHRASE, passphrase);
         } catch (JSONException e) {
             return "";
         }
