@@ -176,7 +176,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         cluster.onDarkChanged(new Rect(0, 0, 0, 0), intensity, colorForeground);
 
         BatteryMeterView battery = (BatteryMeterView) findViewById(R.id.battery);
-        battery.forceShowPercent();
+        battery.setForceShowPercent(true);
         int colorSecondary = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary);
         battery.setRawColors(colorForeground, colorSecondary);
 

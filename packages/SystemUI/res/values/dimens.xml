@@ -445,8 +445,8 @@
     <!-- Amount the date/time move when emergency calls only is present -->
     <dimen name="qs_date_time_translation">8dp</dimen>
 
-    <!-- Battery level text padding end when in expanded QS and on Keyguard -->
-    <dimen name="battery_level_padding_end">2dp</dimen>
+    <!-- Padding before battery level text in status bar, QS, and Keyguard -->
+    <dimen name="battery_level_padding_start">4dp</dimen>
 
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
