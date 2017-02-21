@@ -38,6 +38,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
 import android.provider.FontsContract;
 import android.text.FontConfig;
+import android.util.Base64;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
@@ -196,10 +197,22 @@ public class Typeface {
                 if (typeface != null) {
                     return typeface;
                 }
+                List<List<String>> givenCerts = providerEntry.getCerts();
+                List<List<byte[]>> certs = new ArrayList<>();
+                if (givenCerts != null) {
+                    for (int i = 0; i < givenCerts.size(); i++) {
+                        List<String> certSet = givenCerts.get(i);
+                        List<byte[]> byteArraySet = new ArrayList<>();
+                        for (int j = 0; j < certSet.size(); j++) {
+                            byteArraySet.add(Base64.decode(certSet.get(j), Base64.DEFAULT));
+                        }
+                        certs.add(byteArraySet);
+                    }
+                }
                 // Downloaded font and it wasn't cached, request it again and return a
                 // default font instead (nothing we can do now).
                 create(new FontRequest(providerEntry.getAuthority(), providerEntry.getPackage(),
-                        providerEntry.getQuery()), NO_OP_REQUEST_CALLBACK);
+                        providerEntry.getQuery(), certs), NO_OP_REQUEST_CALLBACK);
                 return DEFAULT;
             }
 

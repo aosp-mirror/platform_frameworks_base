@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -44,12 +45,14 @@ public class FontResourcesParser {
         private final @NonNull String mProviderAuthority;
         private final @NonNull String mProviderPackage;
         private final @NonNull String mQuery;
+        private final @Nullable List<List<String>> mCerts;
 
         public ProviderResourceEntry(@NonNull String authority, @NonNull String pkg,
-                @NonNull String query) {
+                @NonNull String query, @Nullable List<List<String>> certs) {
             mProviderAuthority = authority;
             mProviderPackage = pkg;
             mQuery = query;
+            mCerts = certs;
         }
 
         public @NonNull String getAuthority() {
@@ -62,6 +65,10 @@ public class FontResourcesParser {
 
         public @NonNull String getQuery() {
             return mQuery;
+        }
+
+        public @Nullable List<List<String>> getCerts() {
+            return mCerts;
         }
     }
 
@@ -144,12 +151,33 @@ public class FontResourcesParser {
         String authority = array.getString(R.styleable.FontFamily_fontProviderAuthority);
         String providerPackage = array.getString(R.styleable.FontFamily_fontProviderPackage);
         String query = array.getString(R.styleable.FontFamily_fontProviderQuery);
+        int certsId = array.getResourceId(R.styleable.FontFamily_fontProviderCerts, 0);
         array.recycle();
         if (authority != null && providerPackage != null && query != null) {
             while (parser.next() != XmlPullParser.END_TAG) {
                 skip(parser);
             }
-            return new ProviderResourceEntry(authority, providerPackage, query);
+            List<List<String>> certs = null;
+            if (certsId != 0) {
+                TypedArray typedArray = resources.obtainTypedArray(certsId);
+                if (typedArray.length() > 0) {
+                    certs = new ArrayList<>();
+                    boolean isArrayOfArrays = typedArray.getResourceId(0, 0) != 0;
+                    if (isArrayOfArrays) {
+                        for (int i = 0; i < typedArray.length(); i++) {
+                            int certId = typedArray.getResourceId(i, 0);
+                            String[] certsArray = resources.getStringArray(certId);
+                            List<String> certsList = Arrays.asList(certsArray);
+                            certs.add(certsList);
+                        }
+                    } else {
+                        String[] certsArray = resources.getStringArray(certsId);
+                        List<String> certsList = Arrays.asList(certsArray);
+                        certs.add(certsList);
+                    }
+                }
+            }
+            return new ProviderResourceEntry(authority, providerPackage, query, certs);
         }
         List<FontFileResourceEntry> fonts = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {

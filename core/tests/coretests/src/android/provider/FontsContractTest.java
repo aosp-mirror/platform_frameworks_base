@@ -51,6 +51,11 @@ import java.util.List;
 public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
     private static final byte[] BYTE_ARRAY =
             Base64.decode("e04fd020ea3a6910a2d808002b30", Base64.DEFAULT);
+    // Use a different instance to test byte array comparison
+    private static final byte[] BYTE_ARRAY_COPY =
+            Base64.decode("e04fd020ea3a6910a2d808002b30", Base64.DEFAULT);
+    private static final byte[] BYTE_ARRAY_2 =
+            Base64.decode("e04fd020ea3a6910a2d808002b32", Base64.DEFAULT);
     private static final String PACKAGE_NAME = "com.my.font.provider.package";
 
     private final FontRequest request = new FontRequest(
@@ -268,6 +273,34 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         assertNull(result);
     }
 
+    public void testGetProvider_providerIsNonSystemAppDuplicateCerts()
+            throws PackageManager.NameNotFoundException {
+        ProviderInfo info = new ProviderInfo();
+        info.packageName = PACKAGE_NAME;
+        info.applicationInfo = new ApplicationInfo();
+        when(mPackageManager.resolveContentProvider(anyString(), anyInt())).thenReturn(info);
+        PackageInfo packageInfo = new PackageInfo();
+        Signature signature = mock(Signature.class);
+        when(signature.toByteArray()).thenReturn(BYTE_ARRAY_COPY);
+        Signature signature2 = mock(Signature.class);
+        when(signature2.toByteArray()).thenReturn(BYTE_ARRAY_COPY);
+        packageInfo.packageName = PACKAGE_NAME;
+        packageInfo.signatures = new Signature[] { signature, signature2 };
+        when(mPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(packageInfo);
+
+        // The provider has {BYTE_ARRAY_COPY, BYTE_ARRAY_COPY}, the request has
+        // {BYTE_ARRAY_2, BYTE_ARRAY_COPY}.
+        List<byte[]> certList = Arrays.asList(BYTE_ARRAY_2, BYTE_ARRAY_COPY);
+        FontRequest requestRightCerts = new FontRequest(
+                TestFontsProvider.AUTHORITY, PACKAGE_NAME, "query", Arrays.asList(certList));
+        ProviderInfo result = mContract.getProvider(requestRightCerts, mResultReceiver);
+
+        // The given list includes an extra cert and doesn't have a second copy of the cert like
+        // the provider does, so it should have failed.
+        verify(mResultReceiver).send(FontsContract.RESULT_CODE_WRONG_CERTIFICATES, null);
+        assertNull(result);
+    }
+
     public void testGetProvider_providerIsNonSystemAppCorrectCertsSeveralSets()
             throws PackageManager.NameNotFoundException {
         ProviderInfo info = setupPackageManager();
@@ -306,7 +339,7 @@ public class FontsContractTest extends ProviderTestCase2<TestFontsProvider> {
         when(mPackageManager.resolveContentProvider(anyString(), anyInt())).thenReturn(info);
         PackageInfo packageInfo = new PackageInfo();
         Signature signature = mock(Signature.class);
-        when(signature.toByteArray()).thenReturn(BYTE_ARRAY);
+        when(signature.toByteArray()).thenReturn(BYTE_ARRAY_COPY);
         packageInfo.packageName = PACKAGE_NAME;
         packageInfo.signatures = new Signature[] { signature };
         when(mPackageManager.getPackageInfo(anyString(), anyInt())).thenReturn(packageInfo);

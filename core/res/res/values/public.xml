@@ -2809,6 +2809,7 @@
         <public name="isStatic" />
         <public name="isFeatureSplit" />
         <public name="singleLineTitle" />
+        <public name="fontProviderCerts" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
