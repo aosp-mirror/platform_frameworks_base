@@ -509,7 +509,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 if (!hasNotif(notifs, pkg, info.userId)) {
                     // TODO: Optimize by not always needing to get application info.
                     // Maybe cache non-ephemeral packages?
-                    ApplicationInfo appInfo = pm.getApplicationInfo(pkg, 0, info.userId);
+                    ApplicationInfo appInfo = pm.getApplicationInfo(pkg,
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES, info.userId);
                     if (appInfo.isInstantApp()) {
                         postEphemeralNotif(pkg, info.userId, appInfo, noMan);
                     }
