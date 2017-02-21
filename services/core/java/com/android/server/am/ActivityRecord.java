@@ -977,25 +977,26 @@ final class ActivityRecord implements AppWindowContainerListener {
         boolean hasPinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID) != null;
         // Don't return early if !isNotLocked, since we want to throw an exception if the activity
         // is in an incorrect state
-        boolean isNotLocked = !isKeyguardLocked && !isCurrentAppLocked;
+        boolean isNotLockedOrOnKeyguard = !isKeyguardLocked && !isCurrentAppLocked;
         switch (state) {
             case RESUMED:
-                // When visible, allow entering PiP if not on the lockscreen and if the task is not
-                // locked
-                return isNotLocked;
+                // When visible, allow entering PiP if the app is not locked.  If it is over the
+                // keyguard, then we will prompt to unlock in the caller before entering PiP.
+                return !isCurrentAppLocked;
             case PAUSING:
             case PAUSED:
                 // When pausing, then only allow enter PiP as in the resume state, and in addition,
                 // require that there is not an existing PiP activity and that the current system
                 // state supports entering PiP
-                return isNotLocked && !hasPinnedStack && supportsPictureInPictureWhilePausing
+                return isNotLockedOrOnKeyguard && !hasPinnedStack
+                        && supportsPictureInPictureWhilePausing
                         && checkEnterPictureInPictureOnHideAppOpsState();
             case STOPPING:
                 // When stopping in a valid state, then only allow enter PiP as in the pause state.
                 // Otherwise, fall through to throw an exception if the caller is trying to enter
                 // PiP in an invalid stopping state.
                 if (supportsPictureInPictureWhilePausing) {
-                    return isNotLocked && !hasPinnedStack
+                    return isNotLockedOrOnKeyguard && !hasPinnedStack
                             && checkEnterPictureInPictureOnHideAppOpsState();
                 }
             default:
