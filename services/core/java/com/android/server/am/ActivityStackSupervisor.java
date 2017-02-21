@@ -4922,7 +4922,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     List<IBinder> getTopVisibleActivities() {
         final ArrayList<IBinder> topActivityTokens = new ArrayList<>();
         // Traverse all displays.
-        for (int i = mActivityDisplays.size(); i >= 0; i--) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
             final ActivityDisplay display = mActivityDisplays.valueAt(i);
             // Traverse all stacks on a display.
             for (int j = display.mStacks.size() - 1; j >= 0; j--) {
