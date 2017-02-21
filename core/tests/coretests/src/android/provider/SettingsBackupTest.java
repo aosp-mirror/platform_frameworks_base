@@ -305,6 +305,8 @@ public class SettingsBackupTest {
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
+                    Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
+                    Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
                     Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
