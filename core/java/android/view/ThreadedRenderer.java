@@ -25,9 +25,9 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.util.Log;
@@ -260,10 +260,10 @@ public final class ThreadedRenderer {
      *
      * @return A threaded renderer backed by OpenGL.
      */
-    public static ThreadedRenderer create(Context context, boolean translucent) {
+    public static ThreadedRenderer create(Context context, boolean translucent, String name) {
         ThreadedRenderer renderer = null;
         if (isAvailable()) {
-            renderer = new ThreadedRenderer(context, translucent);
+            renderer = new ThreadedRenderer(context, translucent, name);
         }
         return renderer;
     }
@@ -285,10 +285,6 @@ public final class ThreadedRenderer {
             throw new IllegalArgumentException("name and value must be non-null");
         }
         nOverrideProperty(name, value);
-    }
-
-    public static void dumpProfileData(byte[] data, FileDescriptor fd) {
-        nDumpProfileData(data, fd);
     }
 
     // Keep in sync with DrawFrameTask.h SYNC_* flags
@@ -346,7 +342,7 @@ public final class ThreadedRenderer {
     private boolean mEnabled;
     private boolean mRequested = true;
 
-    ThreadedRenderer(Context context, boolean translucent) {
+    ThreadedRenderer(Context context, boolean translucent, String name) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
         mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
@@ -360,6 +356,7 @@ public final class ThreadedRenderer {
         mRootNode = RenderNode.adopt(rootNodePtr);
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
+        nSetName(mNativeProxy, name);
 
         ProcessInitializer.sInstance.init(context, mNativeProxy);
 
@@ -827,15 +824,6 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Optional, sets the name of the renderer. Useful for debugging purposes.
-     *
-     * @param name The name of this renderer, can be null
-     */
-    void setName(String name) {
-        nSetName(mNativeProxy, name);
-    }
-
-    /**
      * Blocks until all previously queued work has completed.
      */
     void fence() {
@@ -896,20 +884,29 @@ public final class ThreadedRenderer {
 
     private static class ProcessInitializer {
         static ProcessInitializer sInstance = new ProcessInitializer();
-        private static IBinder sProcToken;
 
         private boolean mInitialized = false;
+
+        private Context mAppContext;
+        private IGraphicsStats mGraphicsStatsService;
+        private IGraphicsStatsCallback mGraphicsStatsCallback = new IGraphicsStatsCallback.Stub() {
+            @Override
+            public void onRotateGraphicsStatsBuffer() throws RemoteException {
+                rotateBuffer();
+            }
+        };
 
         private ProcessInitializer() {}
 
         synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
             mInitialized = true;
+            mAppContext = context.getApplicationContext();
             initSched(context, renderProxy);
-            initGraphicsStats(context, renderProxy);
+            initGraphicsStats();
         }
 
-        private static void initSched(Context context, long renderProxy) {
+        private void initSched(Context context, long renderProxy) {
             try {
                 int tid = nGetRenderThreadTid(renderProxy);
                 ActivityManager.getService().setRenderThread(tid);
@@ -918,17 +915,28 @@ public final class ThreadedRenderer {
             }
         }
 
-        private static void initGraphicsStats(Context context, long renderProxy) {
+        private void initGraphicsStats() {
             try {
                 IBinder binder = ServiceManager.getService("graphicsstats");
                 if (binder == null) return;
-                IGraphicsStats graphicsStatsService = IGraphicsStats.Stub
-                        .asInterface(binder);
-                sProcToken = new Binder();
-                final String pkg = context.getApplicationInfo().packageName;
-                ParcelFileDescriptor pfd = graphicsStatsService.
-                        requestBufferForProcess(pkg, sProcToken);
-                nSetProcessStatsBuffer(renderProxy, pfd.getFd());
+                mGraphicsStatsService = IGraphicsStats.Stub.asInterface(binder);
+                requestBuffer();
+            } catch (Throwable t) {
+                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
+            }
+        }
+
+        private void rotateBuffer() {
+            nRotateProcessStatsBuffer();
+            requestBuffer();
+        }
+
+        private void requestBuffer() {
+            try {
+                final String pkg = mAppContext.getApplicationInfo().packageName;
+                ParcelFileDescriptor pfd = mGraphicsStatsService
+                        .requestBufferForProcess(pkg, mGraphicsStatsCallback);
+                nSetProcessStatsBuffer(pfd.getFd());
                 pfd.close();
             } catch (Throwable t) {
                 Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
@@ -948,7 +956,8 @@ public final class ThreadedRenderer {
 
     static native void setupShadersDiskCache(String cacheFile);
 
-    private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
+    private static native void nRotateProcessStatsBuffer();
+    private static native void nSetProcessStatsBuffer(int fd);
     private static native int nGetRenderThreadTid(long nativeProxy);
 
     private static native long nCreateRootRenderNode();
@@ -993,7 +1002,6 @@ public final class ThreadedRenderer {
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);
-    private static native void nDumpProfileData(byte[] data, FileDescriptor fd);
 
     private static native void nAddRenderNode(long nativeProxy, long rootRenderNode,
              boolean placeFront);

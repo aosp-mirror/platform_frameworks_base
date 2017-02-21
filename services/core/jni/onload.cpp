@@ -46,6 +46,7 @@ int register_android_server_PersistentDataBlockService(JNIEnv* env);
 int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
+int register_android_server_GraphicsStatsService(JNIEnv* env);
 };
 
 using namespace android;
@@ -87,6 +88,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_HardwarePropertiesManagerService(env);
     register_android_server_storage_AppFuse(env);
     register_android_server_SyntheticPasswordManager(env);
+    register_android_server_GraphicsStatsService(env);
 
     return JNI_VERSION_1_4;
 }

@@ -74,6 +74,7 @@ protected:
 };
 
 class ANDROID_API RenderThread : public Thread {
+    PREVENT_COPY_AND_ASSIGN(RenderThread);
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run

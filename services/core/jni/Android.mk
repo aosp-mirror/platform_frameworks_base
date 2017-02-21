@@ -30,6 +30,7 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_UsbHostManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_VibratorService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_PersistentDataBlockService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_GraphicsStatsService.cpp \
     $(LOCAL_REL_DIR)/onload.cpp
 
 LOCAL_C_INCLUDES += \
@@ -37,7 +38,6 @@ LOCAL_C_INCLUDES += \
     external/scrypt/lib/crypto \
     frameworks/base/services \
     frameworks/base/libs \
-    frameworks/base/libs/hwui \
     frameworks/base/core/jni \
     frameworks/native/services \
     system/core/libappfuse/include \
@@ -76,6 +76,7 @@ LOCAL_SHARED_LIBRARIES += \
     libhidltransport \
     libhwbinder \
     libutils \
+    libhwui \
     android.hardware.audio.common@2.0 \
     android.hardware.contexthub@1.0 \
     android.hardware.gnss@1.0 \

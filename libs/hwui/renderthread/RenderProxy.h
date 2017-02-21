@@ -113,7 +113,8 @@ public:
     uint32_t frameTimePercentile(int p);
     ANDROID_API static void dumpGraphicsMemory(int fd);
 
-    ANDROID_API void setProcessStatsBuffer(int fd);
+    ANDROID_API static void rotateProcessStatsBuffer();
+    ANDROID_API static void setProcessStatsBuffer(int fd);
     ANDROID_API int getRenderThreadTid();
 
     ANDROID_API void serializeDisplayListTree();
