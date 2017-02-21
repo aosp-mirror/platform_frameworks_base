@@ -130,55 +130,34 @@ public class WifiAwareManager {
      */
 
     /**
-     * TYPE_1A: role, client_id, session_id, peer_id, token
+     * TYPE: in band, specific peer: role, client_id, session_id, peer_id, pmk optional
      * @hide
      */
-    public static final int NETWORK_SPECIFIER_TYPE_1A = 0;
+    public static final int NETWORK_SPECIFIER_TYPE_IB = 0;
 
     /**
-     * TYPE_1B: role, client_id, session_id, peer_id [only permitted for RESPONDER]
+     * TYPE: in band, any peer: role, client_id, session_id, pmk optional
+     * [only permitted for RESPONDER]
      * @hide
      */
-    public static final int NETWORK_SPECIFIER_TYPE_1B = 1;
+    public static final int NETWORK_SPECIFIER_TYPE_IB_ANY_PEER = 1;
 
     /**
-     * TYPE_1C: role, client_id, session_id, token [only permitted for RESPONDER]
+     * TYPE: out-of-band: role, client_id, peer_mac, pmk optional
      * @hide
      */
-    public static final int NETWORK_SPECIFIER_TYPE_1C = 2;
+    public static final int NETWORK_SPECIFIER_TYPE_OOB = 2;
 
     /**
-     * TYPE_1C: role, client_id, session_id [only permitted for RESPONDER]
+     * TYPE: out-of-band, any peer: role, client_id, pmk optional
+     * [only permitted for RESPONDER]
      * @hide
      */
-    public static final int NETWORK_SPECIFIER_TYPE_1D = 3;
+    public static final int NETWORK_SPECIFIER_TYPE_OOB_ANY_PEER = 3;
 
-    /**
-     * TYPE_2A: role, client_id, peer_mac, token
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2A = 4;
-
-    /**
-     * TYPE_2B: role, client_id, peer_mac [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2B = 5;
-
-    /**
-     * TYPE_2C: role, client_id, token [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2C = 6;
-
-    /**
-     * TYPE_2D: role, client_id [only permitted for RESPONDER]
-     * @hide
-     */
-    public static final int NETWORK_SPECIFIER_TYPE_2D = 7;
 
     /** @hide */
-    public static final int NETWORK_SPECIFIER_TYPE_MAX_VALID = NETWORK_SPECIFIER_TYPE_2D;
+    public static final int NETWORK_SPECIFIER_TYPE_MAX_VALID = NETWORK_SPECIFIER_TYPE_OOB_ANY_PEER;
 
     /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_TYPE = "type";
@@ -199,7 +178,7 @@ public class WifiAwareManager {
     public static final String NETWORK_SPECIFIER_KEY_PEER_MAC = "peer_mac";
 
     /** @hide */
-    public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
+    public static final String NETWORK_SPECIFIER_KEY_PMK = "pmk";
 
     /**
      * Broadcast intent action to indicate that the state of Wi-Fi Aware availability has changed.
@@ -494,23 +473,15 @@ public class WifiAwareManager {
 
     /** @hide */
     public String createNetworkSpecifier(int clientId, int role, int sessionId,
-            PeerHandle peerHandle, byte[] token) {
+            PeerHandle peerHandle, @Nullable byte[] pmk) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
                     + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
-                    + ", token=" + token);
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null"));
         }
 
-        int type;
-        if (token != null && peerHandle != null) {
-            type = NETWORK_SPECIFIER_TYPE_1A;
-        } else if (token == null && peerHandle != null) {
-            type = NETWORK_SPECIFIER_TYPE_1B;
-        } else if (token != null && peerHandle == null) {
-            type = NETWORK_SPECIFIER_TYPE_1C;
-        } else {
-            type = NETWORK_SPECIFIER_TYPE_1D;
-        }
+        int type = (peerHandle == null) ? NETWORK_SPECIFIER_TYPE_IB_ANY_PEER
+                : NETWORK_SPECIFIER_TYPE_IB;
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                 && role != WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
@@ -519,10 +490,6 @@ public class WifiAwareManager {
                             + "specifier");
         }
         if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
-            if (token == null) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
-            }
             if (peerHandle == null) {
                 throw new IllegalArgumentException(
                         "createNetworkSpecifier: Invalid peer handle (value of null) - not "
@@ -540,10 +507,11 @@ public class WifiAwareManager {
             if (peerHandle != null) {
                 json.put(NETWORK_SPECIFIER_KEY_PEER_ID, peerHandle.peerId);
             }
-            if (token != null) {
-                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
+            if (pmk == null) {
+                pmk = new byte[0];
             }
+            json.put(NETWORK_SPECIFIER_KEY_PMK,
+                    Base64.encodeToString(pmk, 0, pmk.length, Base64.DEFAULT));
         } catch (JSONException e) {
             return "";
         }
@@ -553,21 +521,14 @@ public class WifiAwareManager {
 
     /** @hide */
     public String createNetworkSpecifier(int clientId, @DataPathRole int role,
-            @Nullable byte[] peer, @Nullable byte[] token) {
+            @Nullable byte[] peer, @Nullable byte[] pmk) {
         if (VDBG) {
-            Log.v(TAG, "createNetworkSpecifier: role=" + role + ", token=" + token);
+            Log.v(TAG, "createNetworkSpecifier: role=" + role
+                    + ", pmk=" + ((pmk == null) ? "null" : "non-null"));
         }
 
-        int type;
-        if (token != null && peer != null) {
-            type = NETWORK_SPECIFIER_TYPE_2A;
-        } else if (token == null && peer != null) {
-            type = NETWORK_SPECIFIER_TYPE_2B;
-        } else if (token != null && peer == null) {
-            type = NETWORK_SPECIFIER_TYPE_2C;
-        } else { // both are null
-            type = NETWORK_SPECIFIER_TYPE_2D;
-        }
+        int type = (peer == null) ?
+                NETWORK_SPECIFIER_TYPE_OOB_ANY_PEER : NETWORK_SPECIFIER_TYPE_OOB;
 
         if (role != WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                 && role != WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
@@ -576,19 +537,13 @@ public class WifiAwareManager {
                             + "specifier");
         }
         if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
-            if (peer == null || peer.length != 6) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer MAC address");
+            if (peer == null) {
+                throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC "
+                        + "address - null not permitted on INITIATOR");
             }
-            if (token == null) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
-            }
-        } else {
-            if (peer != null && peer.length != 6) {
-                throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer MAC address");
-            }
+        }
+        if (peer != null && peer.length != 6) {
+            throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC address");
         }
 
         JSONObject json;
@@ -600,10 +555,11 @@ public class WifiAwareManager {
             if (peer != null) {
                 json.put(NETWORK_SPECIFIER_KEY_PEER_MAC, new String(HexEncoding.encode(peer)));
             }
-            if (token != null) {
-                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
+            if (pmk == null) {
+                pmk = new byte[0];
             }
+            json.put(NETWORK_SPECIFIER_KEY_PMK,
+                    Base64.encodeToString(pmk, 0, pmk.length, Base64.DEFAULT));
         } catch (JSONException e) {
             return "";
         }
