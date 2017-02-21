@@ -1,0 +1,443 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package clearcut.connectivity;
+
+option java_package = "com.android.server.wifi";
+option java_outer_classname = "WifiMetricsProto";
+
+// The information about the Wifi events.
+message WifiLog {
+
+  // Session information that gets logged for every Wifi connection.
+  repeated ConnectionEvent connection_event = 1;
+
+  // Number of saved networks in the user profile.
+  optional int32 num_saved_networks = 2;
+
+  // Number of open networks in the saved networks.
+  optional int32 num_open_networks = 3;
+
+  // Number of personal networks.
+  optional int32 num_personal_networks = 4;
+
+  // Number of enterprise networks.
+  optional int32 num_enterprise_networks = 5;
+
+  // Does the user have location setting enabled.
+  optional bool is_location_enabled = 6;
+
+  // Does the user have scanning enabled.
+  optional bool is_scanning_always_enabled = 7;
+
+  // Number of times user toggled wifi using the settings menu.
+  optional int32 num_wifi_toggled_via_settings = 8;
+
+  // Number of times user toggled wifi using the airplane menu.
+  optional int32 num_wifi_toggled_via_airplane = 9;
+
+  // Number of networks added by the user.
+  optional int32 num_networks_added_by_user = 10;
+
+  // Number of networks added by applications.
+  optional int32 num_networks_added_by_apps = 11;
+
+  // Number scans that returned empty results.
+  optional int32 num_empty_scan_results = 12;
+
+  // Number scans that returned at least one result.
+  optional int32 num_non_empty_scan_results = 13;
+
+  // Number of scans that were one time.
+  optional int32 num_oneshot_scans = 14;
+
+  // Number of repeated background scans that were scheduled to the chip.
+  optional int32 num_background_scans = 15;
+
+  // Error codes that a scan can result in.
+  enum ScanReturnCode {
+
+    // Return Code is unknown.
+    SCAN_UNKNOWN = 0;
+
+    // Scan was successful.
+    SCAN_SUCCESS = 1;
+
+    // Scan was successfully started, but was interrupted.
+    SCAN_FAILURE_INTERRUPTED = 2;
+
+    //  Scan failed to start because of invalid configuration
+    //  (bad channel, etc).
+    SCAN_FAILURE_INVALID_CONFIGURATION = 3;
+
+    // Could not start a scan because wifi is disabled.
+    FAILURE_WIFI_DISABLED = 4;
+
+  }
+
+  // Mapping of error codes to the number of times that scans resulted
+  // in that error.
+  repeated ScanReturnEntry scan_return_entries = 16;
+
+  message ScanReturnEntry {
+
+     // Return code of the scan.
+     optional ScanReturnCode scan_return_code = 1;
+
+     // Number of entries that were found in the scan.
+     optional int32 scan_results_count = 2;
+  }
+
+  // State of the Wifi.
+  enum WifiState {
+
+    // State is unknown.
+    WIFI_UNKNOWN = 0;
+
+    // Wifi is disabled.
+    WIFI_DISABLED = 1;
+
+    // Wifi is enabled.
+    WIFI_DISCONNECTED = 2;
+
+    // Wifi is enabled and associated with an AP.
+    WIFI_ASSOCIATED = 3;
+  }
+
+  // Mapping of system state to the number of times that scans were requested in
+  // that state
+  repeated WifiSystemStateEntry wifi_system_state_entries = 17;
+
+  message WifiSystemStateEntry {
+
+     // Current WiFi state.
+     optional WifiState wifi_state = 1;
+
+     // Count of scans in state.
+     optional int32 wifi_state_count = 2;
+
+     // Is screen on.
+     optional bool is_screen_on = 3;
+  }
+
+  // Mapping of Error/Success codes to the number of background scans that resulted in it
+  repeated ScanReturnEntry background_scan_return_entries = 18;
+
+  // Mapping of system state to the number of times that Background scans were requested in that
+  // state
+  repeated WifiSystemStateEntry background_scan_request_state = 19;
+
+  // Total number of times the Watchdog of Last Resort triggered, resetting the wifi stack
+  optional int32 num_last_resort_watchdog_triggers = 20;
+
+  // Total number of networks over bad association threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_association_networks_total = 21;
+
+  // Total number of networks over bad authentication threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_authentication_networks_total = 22;
+
+  // Total number of networks over bad dhcp threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_dhcp_networks_total = 23;
+
+  // Total number of networks over bad other threshold when watchdog triggered
+  optional int32 num_last_resort_watchdog_bad_other_networks_total = 24;
+
+  // Total count of networks seen when watchdog triggered
+  optional int32 num_last_resort_watchdog_available_networks_total = 25;
+
+  // Total count of triggers with atleast one bad association network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_association = 26;
+
+  // Total count of triggers with atleast one bad authentication network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_authentication = 27;
+
+  // Total count of triggers with atleast one bad dhcp network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_dhcp = 28;
+
+  // Total count of triggers with atleast one bad other network
+  optional int32 num_last_resort_watchdog_triggers_with_bad_other = 29;
+
+  // Count of times connectivity watchdog confirmed pno is working
+  optional int32 num_connectivity_watchdog_pno_good = 30;
+
+  // Count of times connectivity watchdog found pno not working
+  optional int32 num_connectivity_watchdog_pno_bad = 31;
+
+  // Count of times connectivity watchdog confirmed background scan is working
+  optional int32 num_connectivity_watchdog_background_good = 32;
+
+  // Count of times connectivity watchdog found background scan not working
+  optional int32 num_connectivity_watchdog_background_bad = 33;
+
+  // The time duration represented by this wifi log, from start to end of capture
+  optional int32 record_duration_sec = 34;
+
+  // Counts the occurrences of each individual RSSI poll level
+  repeated RssiPollCount rssi_poll_rssi_count = 35;
+
+  // Total number of times WiFi connected immediately after a Last Resort Watchdog trigger,
+  // without new networks becoming available.
+  optional int32 num_last_resort_watchdog_successes = 36;
+
+  // Total number of saved hidden networks
+  optional int32 num_hidden_networks = 37;
+
+  // Total number of saved passpoint / hotspot 2.0 networks
+  optional int32 num_passpoint_networks = 38;
+
+  // Total number of scan results
+  optional int32 num_total_scan_results = 39;
+
+  // Total number of scan results for open networks
+  optional int32 num_open_network_scan_results = 40;
+
+  // Total number of scan results for personal networks
+  optional int32 num_personal_network_scan_results = 41;
+
+  // Total number of scan results for enterprise networks
+  optional int32 num_enterprise_network_scan_results = 42;
+
+  // Total number of scan results for hidden networks
+  optional int32 num_hidden_network_scan_results = 43;
+
+  // Total number of scan results for hotspot 2.0 r1 networks
+  optional int32 num_hotspot2_r1_network_scan_results = 44;
+
+  // Total number of scan results for hotspot 2.0 r2 networks
+  optional int32 num_hotspot2_r2_network_scan_results = 45;
+
+  // Total number of scans handled by framework (oneshot or otherwise)
+  optional int32 num_scans = 46;
+
+  // Counts the occurrences of each alert reason.
+  repeated AlertReasonCount alert_reason_count = 47;
+
+  // Counts the occurrences of each Wifi score
+  repeated WifiScoreCount wifi_score_count = 48;
+
+  // Histogram of Soft AP Durations
+  repeated SoftApDurationBucket soft_ap_duration = 49;
+
+  // Histogram of Soft AP ReturnCode
+  repeated SoftApReturnCodeCount soft_ap_return_code = 50;
+
+  // Histogram of the delta between scan result RSSI and RSSI polls
+  repeated RssiPollCount rssi_poll_delta_count = 51;
+}
+
+// Information that gets logged for every WiFi connection.
+message RouterFingerPrint {
+
+  enum RoamType {
+
+    // Type is unknown.
+    ROAM_TYPE_UNKNOWN = 0;
+
+    // No roaming - usually happens on a single band (2.4 GHz) router.
+    ROAM_TYPE_NONE = 1;
+
+    // Enterprise router.
+    ROAM_TYPE_ENTERPRISE = 2;
+
+    // DBDC => Dual Band Dual Concurrent essentially a router that
+    // supports both 2.4 GHz and 5 GHz bands.
+    ROAM_TYPE_DBDC = 3;
+  }
+
+  enum Auth {
+
+    // Auth is unknown.
+    AUTH_UNKNOWN = 0;
+
+    // No authentication.
+    AUTH_OPEN = 1;
+
+    // If the router uses a personal authentication.
+    AUTH_PERSONAL = 2;
+
+    // If the router is setup for enterprise authentication.
+    AUTH_ENTERPRISE = 3;
+  }
+
+  enum RouterTechnology {
+
+    // Router is unknown.
+    ROUTER_TECH_UNKNOWN = 0;
+
+    // Router Channel A.
+    ROUTER_TECH_A = 1;
+
+    // Router Channel B.
+    ROUTER_TECH_B = 2;
+
+    // Router Channel G.
+    ROUTER_TECH_G = 3;
+
+    // Router Channel N.
+    ROUTER_TECH_N = 4;
+
+    // Router Channel AC.
+    ROUTER_TECH_AC = 5;
+
+    // When the channel is not one of the above.
+    ROUTER_TECH_OTHER = 6;
+  }
+
+  optional RoamType roam_type = 1;
+
+  // Channel on which the connection takes place.
+  optional int32 channel_info = 2;
+
+  // DTIM setting of the router.
+  optional int32 dtim = 3;
+
+  // Authentication scheme of the router.
+  optional Auth authentication = 4;
+
+  // If the router is hidden.
+  optional bool hidden = 5;
+
+  // Channel information.
+  optional RouterTechnology router_technology = 6;
+
+  // whether ipv6 is supported.
+  optional bool supports_ipv6 = 7;
+
+  // If the router is a passpoint / hotspot 2.0 network
+  optional bool passpoint = 8;
+}
+
+message ConnectionEvent {
+
+  // Roam Type.
+  enum RoamType {
+
+    // Type is unknown.
+    ROAM_UNKNOWN = 0;
+
+    // No roaming.
+    ROAM_NONE  = 1;
+
+    // DBDC roaming.
+    ROAM_DBDC = 2;
+
+    // Enterprise roaming.
+    ROAM_ENTERPRISE = 3;
+
+    // User selected roaming.
+    ROAM_USER_SELECTED = 4;
+
+    // Unrelated.
+    ROAM_UNRELATED = 5;
+  }
+
+  // Connectivity Level Failure.
+  enum ConnectivityLevelFailure {
+
+    // Failure is unknown.
+    HLF_UNKNOWN = 0;
+
+    // No failure.
+    HLF_NONE = 1;
+
+    // DHCP failure.
+    HLF_DHCP = 2;
+
+    // No internet connection.
+    HLF_NO_INTERNET = 3;
+
+    // No internet connection.
+    HLF_UNWANTED = 4;
+  }
+
+  // Start time of the connection.
+  optional int64 start_time_millis = 1;// [(datapol.semantic_type) = ST_TIMESTAMP];
+
+  // Duration to connect.
+  optional int32 duration_taken_to_connect_millis = 2;
+
+  // Router information.
+  optional RouterFingerPrint router_fingerprint = 3;
+
+  // RSSI at the start of the connection.
+  optional int32 signal_strength = 4;
+
+  // Roam Type.
+  optional RoamType roam_type = 5;
+
+  // Result of the connection.
+  optional int32 connection_result = 6;
+
+  // Reasons for level 2 failure (needs to be coordinated with wpa-supplicant).
+  optional int32 level_2_failure_code = 7;
+
+  // Failures that happen at the connectivity layer.
+  optional ConnectivityLevelFailure connectivity_level_failure_code = 8;
+
+  // Has bug report been taken.
+  optional bool automatic_bug_report_taken = 9;
+}
+
+// Number of occurrences of a specific RSSI poll rssi value
+message RssiPollCount {
+  // RSSI
+  optional int32 rssi = 1;
+
+  // Number of RSSI polls with 'rssi'
+  optional int32 count = 2;
+}
+
+// Number of occurrences of a specific alert reason value
+message AlertReasonCount {
+  // Alert reason
+  optional int32 reason = 1;
+
+  // Number of alerts with |reason|.
+  optional int32 count = 2;
+}
+
+// Counts the number of instances of a specific Wifi Score calculated by WifiScoreReport
+message WifiScoreCount {
+  // Wifi Score
+  optional int32 score = 1;
+
+  // Number of Wifi score reports with this score
+  optional int32 count = 2;
+}
+
+// Number of occurrences of Soft AP session durations
+message SoftApDurationBucket {
+  // Bucket covers duration : [duration_sec, duration_sec + bucket_size_sec)
+  // The (inclusive) lower bound of Soft AP session duration represented by this bucket
+  optional int32 duration_sec = 1;
+
+  // The size of this bucket
+  optional int32 bucket_size_sec = 2;
+
+  // Number of soft AP session durations that fit into this bucket
+  optional int32 count = 3;
+}
+
+// Number of occurrences of a soft AP session return code
+message SoftApReturnCodeCount {
+  // Return code of the soft AP session
+  optional int32 return_code = 1;
+
+  // Occurences of this soft AP return code
+  optional int32 count = 2;
+}
