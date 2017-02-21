@@ -375,6 +375,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         MutableBoolean isHomeStackVisible = new MutableBoolean(true);
         if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
             ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
+            if (runningTask == null) {
+                return;
+            }
+
             RecentsTaskLoader loader = Recents.getTaskLoader();
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
             sInstanceLoadPlan.preloadRawTasks(!isHomeStackVisible.value);
