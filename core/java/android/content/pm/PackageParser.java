@@ -2745,15 +2745,15 @@ public class PackageParser {
         String cls = clsSeq.toString();
         char c = cls.charAt(0);
         if (c == '.') {
-            return (pkg + cls).intern();
+            return pkg + cls;
         }
         if (cls.indexOf('.') < 0) {
             StringBuilder b = new StringBuilder(pkg);
             b.append('.');
             b.append(cls);
-            return b.toString().intern();
+            return b.toString();
         }
-        return cls.intern();
+        return cls;
     }
 
     private static String buildCompoundName(String pkg,
@@ -2773,7 +2773,7 @@ public class PackageParser {
                         + pkg + ": " + nameError;
                 return null;
             }
-            return (pkg + proc).intern();
+            return pkg + proc;
         }
         String nameError = validateName(proc, true, false);
         if (nameError != null && !"system".equals(proc)) {
@@ -2781,7 +2781,7 @@ public class PackageParser {
                     + pkg + ": " + nameError;
             return null;
         }
-        return proc.intern();
+        return proc;
     }
 
     private static String buildProcessName(String pkg, String defProc,
@@ -5083,7 +5083,7 @@ public class PackageParser {
             if (v != null) {
                 if (v.type == TypedValue.TYPE_STRING) {
                     CharSequence cs = v.coerceToString();
-                    data.putString(name, cs != null ? cs.toString().intern() : null);
+                    data.putString(name, cs != null ? cs.toString() : null);
                 } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
                     data.putBoolean(name, v.data != 0);
                 } else if (v.type >= TypedValue.TYPE_FIRST_INT
@@ -5866,7 +5866,7 @@ public class PackageParser {
             // We use the boot classloader for all classes that we load.
             final ClassLoader boot = Object.class.getClassLoader();
 
-            packageName = dest.readString();
+            packageName = dest.readString().intern();
             manifestPackageName = dest.readString();
             splitNames = dest.readStringArray();
             volumeUuid = dest.readString();
@@ -5879,6 +5879,9 @@ public class PackageParser {
             splitPrivateFlags = dest.createIntArray();
             baseHardwareAccelerated = (dest.readInt() == 1);
             applicationInfo = dest.readParcelable(boot);
+            if (applicationInfo.permission != null) {
+                applicationInfo.permission = applicationInfo.permission.intern();
+            }
 
             // We don't serialize the "owner" package and the application info object for each of
             // these components, in order to save space and to avoid circular dependencies while
@@ -5899,7 +5902,10 @@ public class PackageParser {
             fixupOwner(instrumentation);
 
             dest.readStringList(requestedPermissions);
+            internStringArrayList(requestedPermissions);
             protectedBroadcasts = dest.createStringArrayList();
+            internStringArrayList(protectedBroadcasts);
+
             parentPackage = dest.readParcelable(boot);
 
             childPackages = new ArrayList<>();
@@ -5909,16 +5915,23 @@ public class PackageParser {
             }
 
             staticSharedLibName = dest.readString();
+            if (staticSharedLibName != null) {
+                staticSharedLibName = staticSharedLibName.intern();
+            }
             staticSharedLibVersion = dest.readInt();
             libraryNames = dest.createStringArrayList();
+            internStringArrayList(libraryNames);
             usesLibraries = dest.createStringArrayList();
+            internStringArrayList(usesLibraries);
             usesOptionalLibraries = dest.createStringArrayList();
+            internStringArrayList(usesOptionalLibraries);
             usesLibraryFiles = dest.readStringArray();
 
             final int libCount = dest.readInt();
             if (libCount > 0) {
                 usesStaticLibraries = new ArrayList<>(libCount);
                 dest.readStringList(usesStaticLibraries);
+                internStringArrayList(usesStaticLibraries);
                 usesStaticLibrariesVersions = new int[libCount];
                 dest.readIntArray(usesStaticLibrariesVersions);
                 usesStaticLibrariesCertDigests = new String[libCount];
@@ -5937,7 +5950,13 @@ public class PackageParser {
             mAppMetaData = dest.readBundle();
             mVersionCode = dest.readInt();
             mVersionName = dest.readString();
+            if (mVersionName != null) {
+                mVersionName = mVersionName.intern();
+            }
             mSharedUserId = dest.readString();
+            if (mSharedUserId != null) {
+                mSharedUserId = mSharedUserId.intern();
+            }
             mSharedUserLabel = dest.readInt();
 
             mSignatures = (Signature[]) dest.readParcelableArray(boot, Signature.class);
@@ -5986,6 +6005,15 @@ public class PackageParser {
             cpuAbiOverride = dest.readString();
             use32bitAbi = (dest.readInt() == 1);
             restrictUpdateHash = dest.createByteArray();
+        }
+
+        private static void internStringArrayList(List<String> list) {
+            if (list != null) {
+                final int N = list.size();
+                for (int i = 0; i < N; ++i) {
+                    list.set(i, list.get(i).intern());
+                }
+            }
         }
 
         /**
@@ -6375,6 +6403,10 @@ public class PackageParser {
             super(in);
             final ClassLoader boot = Object.class.getClassLoader();
             info = in.readParcelable(boot);
+            if (info.group != null) {
+                info.group = info.group.intern();
+            }
+
             tree = (in.readInt() == 1);
             group = in.readParcelable(boot);
         }
@@ -6651,6 +6683,10 @@ public class PackageParser {
             for (ActivityIntentInfo aii : intents) {
                 aii.activity = this;
             }
+
+            if (info.permission != null) {
+                info.permission = info.permission.intern();
+            }
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Activity>() {
@@ -6735,6 +6771,10 @@ public class PackageParser {
             for (ServiceIntentInfo aii : intents) {
                 aii.service = this;
             }
+
+            if (info.permission != null) {
+                info.permission = info.permission.intern();
+            }
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Service>() {
@@ -6816,6 +6856,18 @@ public class PackageParser {
             for (ProviderIntentInfo aii : intents) {
                 aii.provider = this;
             }
+
+            if (info.readPermission != null) {
+                info.readPermission = info.readPermission.intern();
+            }
+
+            if (info.writePermission != null) {
+                info.writePermission = info.writePermission.intern();
+            }
+
+            if (info.authority != null) {
+                info.authority = info.authority.intern();
+            }
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Provider>() {
@@ -6888,6 +6940,14 @@ public class PackageParser {
         private Instrumentation(Parcel in) {
             super(in);
             info = in.readParcelable(Object.class.getClassLoader());
+
+            if (info.targetPackage != null) {
+                info.targetPackage = info.targetPackage.intern();
+            }
+
+            if (info.targetProcess != null) {
+                info.targetProcess = info.targetProcess.intern();
+            }
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Instrumentation>() {
