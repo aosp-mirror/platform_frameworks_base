@@ -54,12 +54,28 @@ public class BackupManagerMonitor {
   public static final String EXTRA_LOG_EVENT_CATEGORY =
           "android.app.backup.extra.LOG_EVENT_CATEGORY";
 
+  /**
+   * string: when we have event of id LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER we send the version
+   * of the backup.
+   */
+  public static final String EXTRA_LOG_OLD_VERSION =
+          "android.app.backup.extra.LOG_OLD_VERSION";
+
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_TIMEOUT = 4;
+  public static final int LOG_EVENT_ID_PACKAGE_NOT_FOUND = 12;
+  public static final int LOG_EVENT_ID_PACKAGE_TRANSPORT_NOT_PRESENT = 15;
   public static final int LOG_EVENT_ID_KEY_VALUE_BACKUP_TIMEOUT = 21;
+  public static final int LOG_EVENT_ID_NO_RESTORE_METADATA_AVAILABLE = 22;
+  public static final int LOG_EVENT_ID_PACKAGE_NOT_PRESENT = 26;
+  public static final int LOG_EVENT_ID_APP_HAS_NO_AGENT = 28;
+  public static final int LOG_EVENT_ID_CANT_FIND_AGENT = 30;
   public static final int LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT = 31;
+  public static final int LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER = 36;
   public static final int LOG_EVENT_ID_FULL_RESTORE_TIMEOUT = 45;
   public static final int LOG_EVENT_ID_NO_PACKAGES = 49;
+
+
 
 
 
