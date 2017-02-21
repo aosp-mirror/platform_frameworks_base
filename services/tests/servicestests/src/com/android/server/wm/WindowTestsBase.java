@@ -44,6 +44,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -60,6 +61,7 @@ import static org.mockito.Mockito.mock;
 import com.android.server.AttributeCache;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  * Common base class for window manager unit test classes.
@@ -120,6 +122,7 @@ class WindowTestsBase {
         sCommonWindows = new HashSet();
         sWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
         sImeWindow = createCommonWindow(null, TYPE_INPUT_METHOD, "sImeWindow");
+        sWm.mInputMethodWindow = sImeWindow;
         sImeDialogWindow = createCommonWindow(null, TYPE_INPUT_METHOD_DIALOG, "sImeDialogWindow");
         sStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "sStatusBarWindow");
         sNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "sNavBarWindow");
@@ -133,16 +136,25 @@ class WindowTestsBase {
 
     @After
     public void tearDown() throws Exception {
+        final LinkedList<WindowState> nonCommonWindows = new LinkedList();
         sWm.mRoot.forAllWindows(w -> {
             if (!sCommonWindows.contains(w)) {
-                w.removeImmediately();
+                nonCommonWindows.addLast(w);
             }
         }, true /* traverseTopToBottom */);
+
+        while (!nonCommonWindows.isEmpty()) {
+            nonCommonWindows.pollLast().removeImmediately();
+        }
+
+        sWm.mInputMethodTarget = null;
     }
 
     private static WindowState createCommonWindow(WindowState parent, int type, String name) {
         final WindowState win = createWindow(parent, type, name);
         sCommonWindows.add(win);
+        // Prevent common windows from been IMe targets
+        win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         return win;
     }
 

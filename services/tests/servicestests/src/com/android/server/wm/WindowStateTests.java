@@ -23,10 +23,17 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import java.util.LinkedList;
+
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -166,5 +173,35 @@ public class WindowStateTests extends WindowTestsBase {
         // Invisible window can't be IME targets even if they have the right flags.
         assertFalse(appWindow.canBeImeTarget());
         assertFalse(imeWindow.canBeImeTarget());
+    }
+
+    @Test
+    public void testGetWindow() throws Exception {
+        final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
+        final WindowState mediaChild = createWindow(root, TYPE_APPLICATION_MEDIA, "mediaChild");
+        final WindowState mediaOverlayChild = createWindow(root,
+                TYPE_APPLICATION_MEDIA_OVERLAY, "mediaOverlayChild");
+        final WindowState attachedDialogChild = createWindow(root,
+                TYPE_APPLICATION_ATTACHED_DIALOG, "attachedDialogChild");
+        final WindowState subPanelChild = createWindow(root,
+                TYPE_APPLICATION_SUB_PANEL, "subPanelChild");
+        final WindowState aboveSubPanelChild = createWindow(root,
+                TYPE_APPLICATION_ABOVE_SUB_PANEL, "aboveSubPanelChild");
+
+        final LinkedList<WindowState> windows = new LinkedList();
+
+        root.getWindow(w -> {
+            windows.addLast(w);
+            return false;
+        });
+
+        // getWindow should have returned candidate windows in z-order.
+        assertEquals(aboveSubPanelChild, windows.pollFirst());
+        assertEquals(subPanelChild, windows.pollFirst());
+        assertEquals(attachedDialogChild, windows.pollFirst());
+        assertEquals(root, windows.pollFirst());
+        assertEquals(mediaOverlayChild, windows.pollFirst());
+        assertEquals(mediaChild, windows.pollFirst());
+        assertTrue(windows.isEmpty());
     }
 }
