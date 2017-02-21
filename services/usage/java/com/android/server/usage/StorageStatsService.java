@@ -20,6 +20,7 @@ import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -28,24 +29,34 @@ import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.StatFs;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.text.format.DateUtils;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.storage.CacheQuotaStrategy;
 
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
 
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
+
+    private static final long DELAY_IN_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
 
     public static class Lifecycle extends SystemService {
         private StorageStatsService mService;
@@ -68,6 +79,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private final StorageManager mStorage;
 
     private final Installer mInstaller;
+    private final H mHandler;
 
     public StorageStatsService(Context context) {
         mContext = Preconditions.checkNotNull(context);
@@ -79,6 +91,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         mInstaller = new Installer(context);
         mInstaller.onStart();
         invalidateMounts();
+
+        mHandler = new H(IoThread.get().getLooper());
+        mHandler.sendEmptyMessageDelayed(H.MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
 
         mStorage.registerListener(new StorageEventListener() {
             @Override
@@ -273,5 +288,64 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
         return res;
+    }
+
+    private class H extends Handler {
+        private static final int MSG_CHECK_STORAGE_DELTA = 100;
+        /**
+         * By only triggering a re-calculation after the storage has changed sizes, we can avoid
+         * recalculating quotas too often. Minimum change delta defines the percentage of change
+         * we need to see before we recalculate.
+         */
+        private static final double MINIMUM_CHANGE_DELTA = 0.05;
+        private static final boolean DEBUG = false;
+
+        private final StatFs mStats;
+        private long mPreviousBytes;
+        private double mMinimumThresholdBytes;
+
+        public H(Looper looper) {
+            super(looper);
+            // TODO: Handle all private volumes.
+            mStats = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+            mPreviousBytes = mStats.getFreeBytes();
+            mMinimumThresholdBytes = mStats.getTotalBytes() * MINIMUM_CHANGE_DELTA;
+            // TODO: Load cache quotas from a file to avoid re-doing work.
+        }
+
+        public void handleMessage(Message msg) {
+            if (DEBUG) {
+                Slog.v(TAG, ">>> handling " + msg.what);
+            }
+            switch (msg.what) {
+                case MSG_CHECK_STORAGE_DELTA: {
+                    long bytesDelta = Math.abs(mPreviousBytes - mStats.getFreeBytes());
+                    if (bytesDelta > mMinimumThresholdBytes) {
+                        mPreviousBytes = mStats.getFreeBytes();
+                        recalculateQuotas();
+                    }
+                    sendEmptyMessageDelayed(MSG_CHECK_STORAGE_DELTA, DELAY_IN_MILLIS);
+                    break;
+                }
+                default:
+                    if (DEBUG) {
+                        Slog.v(TAG, ">>> default message case ");
+                    }
+                    return;
+            }
+        }
+
+        private void recalculateQuotas() {
+            if (DEBUG) {
+                Slog.v(TAG, ">>> recalculating quotas ");
+            }
+
+            UsageStatsManagerInternal usageStatsManager =
+                    LocalServices.getService(UsageStatsManagerInternal.class);
+            CacheQuotaStrategy strategy = new CacheQuotaStrategy(
+                    mContext, usageStatsManager, mInstaller);
+            // TODO: Save cache quotas to an XML file.
+            strategy.recalculateQuotas();
+        }
     }
 }

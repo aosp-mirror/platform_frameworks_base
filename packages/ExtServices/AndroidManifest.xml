@@ -25,6 +25,13 @@
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
 
+        <service android:name=".storage.CacheQuotaServiceImpl"
+             android:permission="android.permission.BIND_CACHE_QUOTA_SERVICE">
+            <intent-filter>
+                <action android:name="android.app.usage.CacheQuotaService" />
+            </intent-filter>
+        </service>
+
         <library android:name="android.ext.services"/>
     </application>
 
