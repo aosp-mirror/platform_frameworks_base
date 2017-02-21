@@ -261,7 +261,6 @@ final class LogicalDisplay {
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;
-            mOverrideDisplayInfo = null;
         }
     }
 

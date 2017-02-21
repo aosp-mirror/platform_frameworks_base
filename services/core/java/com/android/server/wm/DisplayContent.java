@@ -919,10 +919,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
-
-        // Check if display metrics changed and update base values if needed.
-        updateBaseDisplayMetricsIfNeeded();
-
         for (int i = mTaskStackContainers.size() - 1; i >= 0; --i) {
             mTaskStackContainers.get(i).updateDisplayInfo(null);
         }
@@ -938,8 +934,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        updateBaseDisplayMetrics(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight,
-                mDisplayInfo.logicalDensityDpi);
+        mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
+        mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
+        mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+        mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
     }
 
     void getLogicalDisplayRect(Rect out) {
@@ -967,30 +965,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpMatrix.mapRect(mTmpRectF);
             mTmpRectF.round(out);
         }
-    }
-
-    /** If display metrics changed and it's not just a rotation - update base values. */
-    private void updateBaseDisplayMetricsIfNeeded() {
-        final int orientation = mDisplayInfo.rotation;
-        final boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
-        final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
-        final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
-
-        boolean displayMetricsChanged
-                = mBaseDisplayWidth != newWidth || mBaseDisplayHeight != newHeight;
-        displayMetricsChanged |= mBaseDisplayDensity != mDisplayInfo.logicalDensityDpi;
-
-        if (displayMetricsChanged) {
-            updateBaseDisplayMetrics(newWidth, newHeight, mDisplayInfo.logicalDensityDpi);
-            mService.reconfigureDisplayLocked(this);
-        }
-    }
-
-    void updateBaseDisplayMetrics(int baseWidth, int baseHeight, int baseDensity) {
-        mBaseDisplayWidth = mInitialDisplayWidth = baseWidth;
-        mBaseDisplayHeight = mInitialDisplayHeight = baseHeight;
-        mBaseDisplayDensity = mInitialDisplayDensity = baseDensity;
-        mBaseDisplayRect.set(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
     }
 
     void getContentRect(Rect out) {
